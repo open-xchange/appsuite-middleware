@@ -1,6 +1,7 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -71,7 +72,10 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchFSUidUsers(String)'
      */
     public void testSearchFSUidUsers() {
-        fail("Unimplemented");
+        Map users = ugh.searchFSUidUsers("*");
+        assertEquals(3, users.size());
+        assertTrue(users.containsKey(LdapTests.p.getProperty("username")));
+        assertTrue(users.containsKey(LdapTests.p.getProperty("otheruser")));
     }
 
     /*
