@@ -82,7 +82,8 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchFullName(String)'
      */
     public void testSearchFullName() {
-        
+        Map users = ugh.searchFullName("*");
+        assertEquals(3, users.size());
     }
 
     /*
@@ -164,7 +165,10 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.existsUser(String)'
      */
     public void testExistsUser() {
-        fail("Unimplemented");
+        String username = LdapTests.p.getProperty("username");
+        String nonexistentuser = LdapTests.p.getProperty("nonexistentuser");
+        assertTrue(ugh.existsUser(username));
+        assertFalse(ugh.existsUser(nonexistentuser));
     }
 
     /*
