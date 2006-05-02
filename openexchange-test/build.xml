@@ -1,1 +1,63 @@
-<project name="Open-Xchange Test" />
+<project name="openexchange-test" default="jar" basedir=".">
+
+  <property name="src" value="src"/>
+  <property name="build" value="bin"/>
+  <property name="lib" value="lib"/>
+  <property name="build.compiler" value="modern"/>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes">
+	<classpath>
+		<pathelement location="lib/junit.jar"/>
+		<pathelement location="lib/httpclient.jar"/>
+		<pathelement location="lib/logging.jar"/>
+		<pathelement location="lib/jsdk.jar"/>
+		<pathelement location="lib/activation.jar"/>
+		<pathelement location="lib/mail.jar"/>
+		<pathelement location="lib/jdom.jar"/>
+		<pathelement location="lib/comfiretools.jar"/>
+		<pathelement location="lib/nas.jar"/>
+		<pathelement location="lib/intranet.jar"/>
+	</classpath>
+    </javac>
+  </target>
+  
+  <target name="junit" depends="jar">
+	<junit printsummary="on" showoutput="on" failureproperty="on">
+	  <formatter type="plain" usefile="off"/>
+	  <test name="com.openexchange.groupware.ldap.OffspringTest"/>
+	  <!--test name="com.openexchange.groupware.ldap.UserGroupHandleTest"/>
+	  <test name="com.openexchange.groupware.ldap.ResourcesHandleTest"/-->
+	  <classpath>
+		<pathelement location="lib/junit.jar"/>
+		<pathelement location="lib/httpclient.jar"/>
+		<pathelement location="lib/logging.jar"/>
+		<pathelement location="lib/jsdk.jar"/>
+		<pathelement location="lib/comfiretools.jar"/>
+		<pathelement location="lib/nas.jar"/>
+		<pathelement location="lib/intranet.jar"/>
+		<pathelement location="openexchange-test.jar"/>
+      </classpath>
+	</junit> 
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="openexchange-test.jar" basedir="${build}" includes="**"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+    <delete file="openexchange-test.jar"/>
+  </target>
+
+</project>
+
+
