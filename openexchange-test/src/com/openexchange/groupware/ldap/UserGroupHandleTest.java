@@ -82,14 +82,17 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchFullName(String)'
      */
     public void testSearchFullName() {
-        fail("Unimplemented");
+        
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchUsers(String)'
      */
     public void testSearchUsersString() {
-        fail("Unimplemented");
+        Set users = ugh.searchUsers("*");
+        assertEquals(3, users.size());
+        assertTrue(users.contains(LdapTests.p.getProperty("username")));
+        assertTrue(users.contains(LdapTests.p.getProperty("otheruser")));
     }
 
     /*
