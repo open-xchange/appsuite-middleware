@@ -16,7 +16,7 @@ public class ResourcesHandleTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         if (null == LdapTests.p) {
-            throw new Exception("Can only be run in a test suite.");
+            LdapTests.init();
         }
         rh = Factory.newResourcesHandle(new TestContextImpl(), null);
     }
