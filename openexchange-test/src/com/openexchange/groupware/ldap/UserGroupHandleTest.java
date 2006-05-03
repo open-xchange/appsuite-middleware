@@ -24,8 +24,7 @@ public class UserGroupHandleTest extends TestCase {
         super.setUp();
         if (null == LdapTests.p) {
 			LdapTests.init();
-		}
-		
+        }
         ugh = Factory.newUserGroupHandle(new TestContextImpl(), null);
     }
 
@@ -39,13 +38,13 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getGroupsForUser(String)'
      */
     public void testGetGroupsForUser() {
-        String username = LdapTests.p.getProperty("username");
-        String otheruser = LdapTests.p.getProperty("otheruser");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
         String group1 = LdapTests.p.getProperty("group1");
-        Set groups = ugh.getGroupsForUser(username);
+        Set groups = ugh.getGroupsForUser(user1);
         assertEquals(1, groups.size());
         assertTrue(groups.contains(group1));
-        groups = ugh.getGroupsForUser(otheruser);
+        groups = ugh.getGroupsForUser(user2);
         assertEquals(1, groups.size());
         assertTrue(groups.contains(group1));
     }
@@ -54,12 +53,12 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getForeSureName(String)'
      */
     public void testGetForeSureName() {
-        String username = LdapTests.p.getProperty("username");
-        String otheruser = LdapTests.p.getProperty("otheruser");
-        String[] fsname = ugh.getForeSureName(username);
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        String[] fsname = ugh.getForeSureName(user1);
         assertEquals(fsname[0], "Marcus");
         assertEquals(fsname[1], "Klein");
-        fsname = ugh.getForeSureName(otheruser);
+        fsname = ugh.getForeSureName(user2);
         assertEquals(fsname[0], "Martin");
         assertEquals(fsname[1], "Kauss");
     }
@@ -79,8 +78,8 @@ public class UserGroupHandleTest extends TestCase {
     public void testSearchFSUidUsers() {
         Map users = ugh.searchFSUidUsers("*");
         assertEquals(3, users.size());
-        assertTrue(users.containsKey(LdapTests.p.getProperty("username")));
-        assertTrue(users.containsKey(LdapTests.p.getProperty("otheruser")));
+        assertTrue(users.containsKey(LdapTests.p.getProperty("user1")));
+        assertTrue(users.containsKey(LdapTests.p.getProperty("user2")));
     }
 
     /*
@@ -97,8 +96,8 @@ public class UserGroupHandleTest extends TestCase {
     public void testSearchUsersString() {
         Set users = ugh.searchUsers("*");
         assertEquals(3, users.size());
-        assertTrue(users.contains(LdapTests.p.getProperty("username")));
-        assertTrue(users.contains(LdapTests.p.getProperty("otheruser")));
+        assertTrue(users.contains(LdapTests.p.getProperty("user1")));
+        assertTrue(users.contains(LdapTests.p.getProperty("user2")));
     }
 
     /*
@@ -157,7 +156,7 @@ public class UserGroupHandleTest extends TestCase {
 		Set s = ugh.getUsersInGroup("Users");
 		assertNotNull(s);
 		assertTrue(s.size() > 0);
-	}
+    }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String, String[])'
@@ -180,9 +179,9 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.existsUser(String)'
      */
     public void testExistsUser() {
-        String username = LdapTests.p.getProperty("username");
+        String user1 = LdapTests.p.getProperty("user1");
         String nonexistentuser = LdapTests.p.getProperty("nonexistentuser");
-        assertTrue(ugh.existsUser(username));
+        assertTrue(ugh.existsUser(user1));
         assertFalse(ugh.existsUser(nonexistentuser));
     }
 
@@ -190,7 +189,10 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getMail(String)'
      */
     public void testGetMail() {
-        fail("Unimplemented");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user1");
+        assertNotNull(ugh.getMail(user1));
+        assertNotNull(ugh.getMail(user2));
     }
 
     /*
