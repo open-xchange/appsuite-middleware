@@ -13,7 +13,10 @@ public class MailSupportTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         if (null == LdapTests.p) {
-            throw new Exception("Can only be run in a test suite.");
+            LdapTests.init();
+            if (null == LdapTests.p) {
+                throw new Exception("Problem reading properties.");
+            }
         }
         ms = Factory.newMailSupport(new TestContextImpl(), null);
     }

@@ -17,6 +17,9 @@ public class ResourcesHandleTest extends TestCase {
         super.setUp();
         if (null == LdapTests.p) {
             LdapTests.init();
+            if (null == LdapTests.p) {
+                throw new Exception("Problem reading properties.");
+            }
         }
         rh = Factory.newResourcesHandle(new TestContextImpl(), null);
     }

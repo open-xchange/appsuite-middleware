@@ -24,6 +24,9 @@ public class UserGroupHandleTest extends TestCase {
         super.setUp();
         if (null == LdapTests.p) {
 			LdapTests.init();
+            if (null == LdapTests.p) {
+                throw new Exception("Problem reading properties.");
+            }
         }
         ugh = Factory.newUserGroupHandle(new TestContextImpl(), null);
     }
@@ -268,8 +271,18 @@ public class UserGroupHandleTest extends TestCase {
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUserAttributes(String, String[])'
      */
-    public void testGetUserAttributes() {
-        fail("Unimplemented");
+    public void testGetUserAttributes() throws Throwable {
+        String user1 = LdapTests.p.getProperty("user1");
+        String modifyTimestamp = ugh.getAttributeName(Names
+            .USER_ATTRIBUTE_MODIFYTIMESTAMP);
+        Map test = ugh.getUserAttributes(user1, new String[]{ modifyTimestamp });
+        assertTrue(test.containsKey(modifyTimestamp));
+        assertNotNull(test.get(modifyTimestamp));
+        String alias = ugh.getAttributeName(Names.USER_ATTRIBUTE_ALIAS);
+        test = ugh.getUserAttributes(user1, new String[] { alias });
+        assertTrue(test.containsKey(alias));
+        String[] aliases = (String[]) test.get(alias);
+        assertNotNull(aliases);
     }
 
     /*
