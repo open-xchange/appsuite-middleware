@@ -106,7 +106,7 @@ public class ResourcesHandleTest extends TestCase {
     	String resGrp02Id = LdapTests.p.getProperty("resourceGroup2"); // Notebooks
     	Set searchResult = rh.searchGroups(pattern01);
     	if (searchResult.size() != 1) {
-    		fail("Unexpected result size!");
+    		fail("Unexpected result size! Resource Group \"Autos\" not found?");
     	}
     	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
 			String result = (String) iter.next();
@@ -114,7 +114,7 @@ public class ResourcesHandleTest extends TestCase {
 		}
     	searchResult = rh.searchGroups(pattern02);
     	if (searchResult.size() != 1) {
-    		fail("Unexpected result size!");
+    		fail("Unexpected result size! Resource Group \"Notebooks\" not found?");
     	}
     	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
 			String result = (String) iter.next();
@@ -122,7 +122,7 @@ public class ResourcesHandleTest extends TestCase {
 		}
     	searchResult = rh.searchGroups(pattern03);
     	if (searchResult.size() != 2) {
-    		fail("Unexpected result size!");
+    		fail("Unexpected result size! Resource Groups which contain character 'o' not found?");
     	}
     	String[] resArr = { resGrp01Id, resGrp02Id };
     	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
