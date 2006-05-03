@@ -23,8 +23,9 @@ public class UserGroupHandleTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         if (null == LdapTests.p) {
-            throw new Exception("Can only be run in a test suite.");
-        }
+			LdapTests.init();
+		}
+		
         ugh = Factory.newUserGroupHandle(new TestContextImpl(), null);
     }
 
@@ -153,8 +154,10 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String)'
      */
     public void testGetUsersInGroupString() {
-        fail("Unimplemented");
-    }
+		Set s = ugh.getUsersInGroup("Users");
+		assertNotNull(s);
+		assertTrue(s.size() > 0);
+	}
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String, String[])'
@@ -167,7 +170,10 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.existsGroup(String)'
      */
     public void testExistsGroup() {
-        fail("Unimplemented");
+        String group1 = "Users";
+        assertTrue(ugh.existsGroup(group1));
+        String nonExistentGroup = "nonExistentGroup";
+        assertFalse(ugh.existsGroup(nonExistentGroup));
     }
 
     /*
