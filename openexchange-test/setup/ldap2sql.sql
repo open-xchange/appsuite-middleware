@@ -1,9 +1,9 @@
 INSERT INTO groups (cid, id, identifier, displayName) VALUES (1, select_serial_id(), 'users', 'Users');
 
-INSERT INTO users (cid, id, uid, userPassword, mailEnabled, imapServer, smtpServer, mailDomain, shadowLastChange, mail, alias, givenName, sureName, displayName) VALUES
-(1, select_serial_id(), 'bishoph', NULL, NULL, NULL, NULL, NULL, 0, 'bishoph@example.org', 'martin.kauss@example.org,kaussbauss@example.org,m.kauss@example.org,b00n@example.org', 'Martin', 'Kauss', 'Martin Kauss'),
-(1, select_serial_id(), 'mailadmin', NULL, NULL, 'redhat.netline.de', 'redhat.netline.de', 'example.org', 0, 'mailadmin@example.org', 'postmaster@example.org,root@example.org', 'Admin', 'Admin', 'Admin Admin'),
-(1, select_serial_id(), 'marcus', 'yzOTz1k6gXQSvQFxExlaVUqtskU=', 'OK', NULL, NULL, NULL, 13258, 'marcus@example.org', 'marcus@example.org', 'Marcus', 'Klein', 'Marcus Klein');
+INSERT INTO users (cid, id, uid, userPassword, mailEnabled, imapServer, smtpServer, mailDomain, shadowLastChange, mail, alias, givenName, sureName, displayName, modifyTimestamp) VALUES
+(1, select_serial_id(), 'bishoph', NULL, NULL, NULL, NULL, NULL, 0, 'bishoph@example.org', 'martin.kauss@example.org,kaussbauss@example.org,m.kauss@example.org,b00n@example.org', 'Martin', 'Kauss', 'Martin Kauss', '2006-05-02 10:45'),
+(1, select_serial_id(), 'mailadmin', NULL, NULL, 'redhat.netline.de', 'redhat.netline.de', 'example.org', 0, 'mailadmin@example.org', 'postmaster@example.org,root@example.org', 'Admin', 'Admin', 'Admin Admin', '2006-05-02 10:45'),
+(1, select_serial_id(), 'marcus', 'yzOTz1k6gXQSvQFxExlaVUqtskU=', 'OK', NULL, NULL, NULL, 13258, 'marcus@example.org', 'marcus@example.org', 'Marcus', 'Klein', 'Marcus Klein', '2006-05-03 10:45');
 
 INSERT INTO groups_members (cid, id, member) VALUES
 (1, (SELECT id FROM groups WHERE cid = 1 AND identifier LIKE 'users'), (SELECT id FROM users WHERE cid = 1 AND uid = 'marcus')),

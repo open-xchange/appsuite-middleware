@@ -1,9 +1,13 @@
 package com.openexchange.groupware.ldap;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import com.openexchange.groupware.contexts.TestContextImpl;
 import com.openexchange.groupware.ldap.Factory;
@@ -99,8 +103,13 @@ public class UserGroupHandleTest extends TestCase {
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchUsers(String, long)'
      */
-    public void testSearchUsersStringLong() {
-        fail("Unimplemented");
+    public void testSearchUsersStringLong() throws Throwable {
+        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String usermodifiedsince = LdapTests.p.getProperty("usermodifiedsince");
+        Date d = df.parse(usermodifiedsince);
+        Set users = ugh.searchUsers("*", d.getTime());
+        assertEquals(1, users.size());
     }
 
     /*
