@@ -71,7 +71,8 @@ public class UserGroupHandleTest extends TestCase {
      */
     public void testSearchGroups() {
         Set groups = ugh.searchGroups("*");
-        assertEquals(1, groups.size());
+        assertNotNull(groups);
+        assertTrue(groups.size() > 0);
         assertTrue(groups.contains("users"));
     }
 
@@ -80,7 +81,8 @@ public class UserGroupHandleTest extends TestCase {
      */
     public void testSearchFSUidUsers() {
         Map users = ugh.searchFSUidUsers("*");
-        assertEquals(3, users.size());
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
         assertTrue(users.containsKey(LdapTests.p.getProperty("user1")));
         assertTrue(users.containsKey(LdapTests.p.getProperty("user2")));
     }
@@ -90,7 +92,8 @@ public class UserGroupHandleTest extends TestCase {
      */
     public void testSearchFullName() {
         Map users = ugh.searchFullName("*");
-        assertEquals(3, users.size());
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
     }
 
     /*
@@ -98,7 +101,8 @@ public class UserGroupHandleTest extends TestCase {
      */
     public void testSearchUsersString() {
         Set users = ugh.searchUsers("*");
-        assertEquals(3, users.size());
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
         assertTrue(users.contains(LdapTests.p.getProperty("user1")));
         assertTrue(users.contains(LdapTests.p.getProperty("user2")));
     }
@@ -112,7 +116,7 @@ public class UserGroupHandleTest extends TestCase {
         String usermodifiedsince = LdapTests.p.getProperty("usermodifiedsince");
         Date d = df.parse(usermodifiedsince);
         Set users = ugh.searchUsers("*", d.getTime());
-        assertEquals(1, users.size());
+        assertTrue(users.size() > 0);
     }
 
     /*
@@ -142,30 +146,60 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getFSUsersInGroup(String)'
      */
     public void testGetFSUsersInGroup() {
-        fail("Unimplemented");
+        String group2 = LdapTests.p.getProperty("group2");
+        Map users = ugh.getFSUsersInGroup(group2);
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getGroups()'
      */
     public void testGetGroups() {
-        fail("Unimplemented");
+        Set groups = ugh.getGroups();
+        assertNotNull(groups);
+        assertTrue(groups.size() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String)'
      */
     public void testGetUsersInGroupString() {
-		Set s = ugh.getUsersInGroup("Users");
+        String group = LdapTests.p.getProperty("group1");
+		Set s = ugh.getUsersInGroup(group);
 		assertNotNull(s);
 		assertTrue(s.size() > 0);
+        group = LdapTests.p.getProperty("group2");
+        s = ugh.getUsersInGroup(group);
+        assertNotNull(s);
+        assertTrue(s.size() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String, String[])'
      */
     public void testGetUsersInGroupStringStringArray() {
-        fail("Unimplemented");
+        String group1 = LdapTests.p.getProperty("group1");
+        String group2 = LdapTests.p.getProperty("group2");
+        String[] attributes =  new String[] { UserStorage.MODIFYTIMESTAMP,
+            UserStorage.DISPLAYNAME, UserStorage.ALIAS,
+            UserStorage.IMAPSERVER };
+        Set users = ugh.getUsersInGroup(group1, attributes);
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
+        Iterator iter = users.iterator();
+        while (iter.hasNext()) {
+            String[] values = (String[]) iter.next();
+            assertEquals(attributes.length, values.length);
+        }
+        users = ugh.getUsersInGroup(group2, attributes);
+        assertNotNull(users);
+        assertTrue(users.size() > 0);
+        iter = users.iterator();
+        while (iter.hasNext()) {
+            String[] values = (String[]) iter.next();
+            assertEquals(attributes.length, values.length);
+        }
     }
 
     /*
@@ -202,43 +236,72 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getQualifiedMailDomain()'
      */
     public void testGetQualifiedMailDomain() {
-        fail("Unimplemented");
+        String domain = ugh.getQualifiedMailDomain();
+        assertNotNull(domain);
+        assertTrue(domain.length() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getMailServer()'
      */
     public void testGetMailServer() {
-        fail("Unimplemented");
+        String[] server = ugh.getMailServer();
+        assertNotNull(server);
+        assertTrue(server.length == 2);
+        assertNotNull(server[0]);
+        assertNotNull(server[1]);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getTimeZone(String)'
      */
     public void testGetTimeZone() {
-        fail("Unimplemented");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        String timezone = ugh.getTimeZone(user1);
+        assertNotNull(timezone);
+        assertTrue(timezone.length() > 0);
+        timezone = ugh.getTimeZone(user2);
+        assertNotNull(timezone);
+        assertTrue(timezone.length() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getAppointmentDays(String)'
      */
     public void testGetAppointmentDays() {
-        fail("Unimplemented");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        int days = ugh.getAppointmentDays(user1);
+        assertTrue(days > 0);
+        days = ugh.getAppointmentDays(user2);
+        assertTrue(days > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getTaskDays(String)'
      */
     public void testGetTaskDays() {
-        fail("Unimplemented");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        int days = ugh.getTaskDays(user1);
+        assertTrue(days > 0);
+        days = ugh.getTaskDays(user2);
+        assertTrue(days > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getPreferedLanguage(String)'
      */
     public void testGetPreferedLanguage() {
-        fail("Unimplemented");
-    }
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        String language = ugh.getPreferedLanguage(user1);
+        assertNotNull(language);
+        assertTrue(language.length() > 0);
+        language = ugh.getPreferedLanguage(user2);
+        assertNotNull(language);
+        assertTrue(language.length() > 0);    }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getCountry(String)'
