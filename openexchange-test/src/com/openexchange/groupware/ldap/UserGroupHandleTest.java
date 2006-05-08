@@ -134,6 +134,7 @@ public class UserGroupHandleTest extends TestCase {
                  ugh.getAttributeName(Names.USER_ATTRIBUTE_MAIL)},
               new String[] {
                  ugh.getAttributeName(Names.USER_ATTRIBUTE_UID)});
+           assertTrue(found.size() > 0);
            Iterator iter = found.iterator();
            while (iter.hasNext()) {
               String[] attributes = (String[]) iter.next();
@@ -330,13 +331,6 @@ public class UserGroupHandleTest extends TestCase {
         aliases = ugh.getAliases(user2);
         assertNotNull(aliases);
         assertTrue(aliases.size() > 0);
-    }
-
-    /*
-     * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getVAddresses(String)'
-     */
-    public void testGetVAddresses() {
-        fail("Unimplemented");
     }
 
     /*
