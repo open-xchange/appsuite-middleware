@@ -301,20 +301,35 @@ public class UserGroupHandleTest extends TestCase {
         assertTrue(language.length() > 0);
         language = ugh.getPreferedLanguage(user2);
         assertNotNull(language);
-        assertTrue(language.length() > 0);    }
+        assertTrue(language.length() > 0);
+    }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getCountry(String)'
      */
     public void testGetCountry() {
-        fail("Unimplemented");
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        String country = ugh.getCountry(user1);
+        assertNotNull(country);
+        assertTrue(country.length() > 0);
+        country = ugh.getCountry(user2);
+        assertNotNull(country);
+        assertTrue(country.length() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getAliases(String)'
      */
-    public void testGetAliases() {
-        fail("Unimplemented");
+    public void testGetAliases() throws Throwable {
+        String user1 = LdapTests.p.getProperty("user1");
+        String user2 = LdapTests.p.getProperty("user2");
+        Set aliases = ugh.getAliases(user1);
+        assertNotNull(aliases);
+        assertTrue(aliases.size() > 0);
+        aliases = ugh.getAliases(user2);
+        assertNotNull(aliases);
+        assertTrue(aliases.size() > 0);
     }
 
     /*

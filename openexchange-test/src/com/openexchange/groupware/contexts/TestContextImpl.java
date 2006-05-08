@@ -19,7 +19,7 @@ public class TestContextImpl implements Context {
     /**
      * {@inheritDoc}
      */
-    public int getContextId() {
+    public long getContextId() {
         return contextId;
     }
 
