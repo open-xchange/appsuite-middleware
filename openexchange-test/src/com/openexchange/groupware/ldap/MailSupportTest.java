@@ -1,6 +1,7 @@
 package com.openexchange.groupware.ldap;
 
-import com.openexchange.groupware.contexts.TestContextImpl;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextSearch;
 import com.openexchange.groupware.ldap.Factory;
 import com.openexchange.groupware.ldap.MailSupport;
 
@@ -18,7 +19,8 @@ public class MailSupportTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        ms = Factory.newMailSupport(new TestContextImpl(), null);
+        Context context = new ContextSearch().getContextByName("defaultcontext");
+        ms = Factory.newMailSupport(context, null);
     }
 
     protected void tearDown() throws Exception {

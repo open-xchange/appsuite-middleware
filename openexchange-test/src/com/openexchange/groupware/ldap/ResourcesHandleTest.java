@@ -3,7 +3,8 @@ package com.openexchange.groupware.ldap;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.openexchange.groupware.contexts.TestContextImpl;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextSearch;
 import com.openexchange.groupware.ldap.Factory;
 import com.openexchange.groupware.ldap.ResourcesHandle;
 
@@ -21,7 +22,8 @@ public class ResourcesHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        rh = Factory.newResourcesHandle(new TestContextImpl(), null);
+        Context context = new ContextSearch().getContextByName("defaultcontext");
+        rh = Factory.newResourcesHandle(context, null);
     }
 
     protected void tearDown() throws Exception {

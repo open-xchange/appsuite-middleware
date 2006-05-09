@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import com.openexchange.groupware.contexts.TestContextImpl;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextSearch;
 import com.openexchange.groupware.ldap.Factory;
 import com.openexchange.groupware.ldap.Names;
 import com.openexchange.groupware.ldap.UserGroupHandle;
@@ -28,7 +29,8 @@ public class UserGroupHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        ugh = Factory.newUserGroupHandle(new TestContextImpl(), null);
+        Context context = new ContextSearch().getContextByName("defaultcontext");
+        ugh = Factory.newUserGroupHandle(context, null);
     }
 
     protected void tearDown() throws Exception {
@@ -207,9 +209,11 @@ public class UserGroupHandleTest extends TestCase {
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.existsGroup(String)'
      */
     public void testExistsGroup() {
-        String group1 = "Users";
+        String group1 = LdapTests.p.getProperty("group1");
         assertTrue(ugh.existsGroup(group1));
-        String nonExistentGroup = "nonExistentGroup";
+        String group2 = LdapTests.p.getProperty("group2");
+        assertTrue(ugh.existsGroup(group2));
+        String nonExistentGroup = LdapTests.p.getProperty("nonexistentgroup");
         assertFalse(ugh.existsGroup(nonExistentGroup));
     }
 

@@ -93,6 +93,7 @@ public class LdapTests {
 	private static void initDB() {
 		ComfireConfig.properties = new Properties();
 		ComfireConfig.properties.put("LDAPPROPERTIES", p.get("ldap.properties.file"));
+        ComfireConfig.properties.put("SERVER_NAME", p.get("system.server_name"));
 		String path = p.getProperty("ldap.config.path");
 		new ComfireConfig().loadServerConf(path + File.separator + "server.conf");
 		new DBPool(0, 0);
