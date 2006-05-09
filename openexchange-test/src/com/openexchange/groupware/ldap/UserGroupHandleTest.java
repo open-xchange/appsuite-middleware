@@ -334,13 +334,6 @@ public class UserGroupHandleTest extends TestCase {
     }
 
     /*
-     * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchForeSureNameUsers(String)'
-     */
-    public void testSearchForeSureNameUsers() {
-        fail("Unimplemented");
-    }
-
-    /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUserAttributes(String, String[])'
      */
     public void testGetUserAttributes() throws Throwable {
