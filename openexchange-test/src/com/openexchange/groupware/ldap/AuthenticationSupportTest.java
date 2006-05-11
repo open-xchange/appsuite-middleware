@@ -1,7 +1,7 @@
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextSearch;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.AuthenticationSupport;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.Factory;
@@ -20,7 +20,7 @@ public class AuthenticationSupportTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = new ContextSearch().getContextByName("defaultcontext");
+        Context context = ContextStorage.getInstance().getContext("defaultcontext");
         as = Factory.newAuthenticationSupport(context);
     }
 

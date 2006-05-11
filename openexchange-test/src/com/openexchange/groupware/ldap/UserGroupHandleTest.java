@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextSearch;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.Factory;
 import com.openexchange.groupware.ldap.Names;
 import com.openexchange.groupware.ldap.UserGroupHandle;
@@ -29,7 +29,7 @@ public class UserGroupHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = new ContextSearch().getContextByName("defaultcontext");
+        Context context = ContextStorage.getInstance().getContext("defaultcontext");
         ugh = Factory.newUserGroupHandle(context, null);
     }
 
