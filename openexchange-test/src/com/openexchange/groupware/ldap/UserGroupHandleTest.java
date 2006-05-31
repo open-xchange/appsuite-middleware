@@ -21,6 +21,8 @@ public class UserGroupHandleTest extends TestCase {
 
     private UserGroupHandle ugh;
 
+    private Context ctx;
+
     protected void setUp() throws Exception {
         super.setUp();
         if (null == LdapTests.p) {
@@ -29,8 +31,8 @@ public class UserGroupHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = ContextStorage.getInstance().getContext("defaultcontext");
-        ugh = Factory.newUserGroupHandle(context, null);
+        ctx = ContextStorage.getInstance().getContext("defaultcontext");
+        ugh = Factory.newUserGroupHandle(ctx, null);
     }
 
     protected void tearDown() throws Exception {
@@ -42,29 +44,29 @@ public class UserGroupHandleTest extends TestCase {
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getGroupsForUser(String)'
      */
-    public void testGetGroupsForUser() {
+    public void testGetGroupsForUser() throws Throwable {
         String user1 = LdapTests.p.getProperty("user1");
         String user2 = LdapTests.p.getProperty("user2");
         String group1 = LdapTests.p.getProperty("group1");
-        Set groups = ugh.getGroupsForUser(user1);
-        assertEquals(1, groups.size());
-        assertTrue(groups.contains(group1));
-        groups = ugh.getGroupsForUser(user2);
-        assertEquals(1, groups.size());
-        assertTrue(groups.contains(group1));
+        UserStorage users = UserStorage.getInstance(ctx);
+        Set groups = ugh.getGroupsForUser(users.getUserId(user1));
+        assertTrue(groups.size() > 0);
+        groups = ugh.getGroupsForUser(users.getUserId(user2));
+        assertTrue(groups.size() > 0);
     }
 
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getForeSureName(String)'
      */
-    public void testGetForeSureName() {
+    public void testGetForeSureName() throws Throwable {
         String user1 = LdapTests.p.getProperty("user1");
         String user2 = LdapTests.p.getProperty("user2");
-        String[] fsname = ugh.getForeSureName(user1);
+        UserStorage users = UserStorage.getInstance(ctx);
+        String[] fsname = ugh.getForeSureName(users.getUserId(user1));
         assertEquals(fsname[0], "Marcus");
         assertEquals(fsname[1], "Klein");
-        fsname = ugh.getForeSureName(user2);
-        assertEquals(fsname[0], "Martin");
+        fsname = ugh.getForeSureName(users.getUserId(user2));
+        assertEquals(fsname[0], "Sebastian");
         assertEquals(fsname[1], "Kauss");
     }
 
@@ -181,7 +183,7 @@ public class UserGroupHandleTest extends TestCase {
     /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getUsersInGroup(String, String[])'
      */
-    public void testGetUsersInGroupStringStringArray() {
+    public void testGetUsersInGroupStringStringArray() throws Throwable {
         String group1 = LdapTests.p.getProperty("group1");
         String group2 = LdapTests.p.getProperty("group2");
         String[] attributes =  new String[] { UserStorage.MODIFYTIMESTAMP,
@@ -342,13 +344,15 @@ public class UserGroupHandleTest extends TestCase {
      */
     public void testGetUserAttributes() throws Throwable {
         String user1 = LdapTests.p.getProperty("user1");
+        UserStorage users = UserStorage.getInstance(ctx);
         String modifyTimestamp = ugh.getAttributeName(Names
             .USER_ATTRIBUTE_MODIFYTIMESTAMP);
-        Map test = ugh.getUserAttributes(user1, new String[]{ modifyTimestamp });
+        String userId = users.getUserId(user1);
+        Map test = ugh.getUserAttributes(userId, new String[]{ modifyTimestamp });
         assertTrue(test.containsKey(modifyTimestamp));
         assertNotNull(test.get(modifyTimestamp));
         String alias = ugh.getAttributeName(Names.USER_ATTRIBUTE_ALIAS);
-        test = ugh.getUserAttributes(user1, new String[] { alias });
+        test = ugh.getUserAttributes(userId, new String[] { alias });
         assertTrue(test.containsKey(alias));
         String[] aliases = (String[]) test.get(alias);
         assertNotNull(aliases);
