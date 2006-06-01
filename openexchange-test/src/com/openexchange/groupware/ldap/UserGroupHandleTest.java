@@ -312,21 +312,6 @@ public class UserGroupHandleTest extends TestCase {
     }
 
     /*
-     * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getCountry(String)'
-     */
-    public void testGetCountry() throws Throwable {
-        String user1 = LdapTests.p.getProperty("user1");
-        String user2 = LdapTests.p.getProperty("user2");
-        UserStorage users = UserStorage.getInstance(ctx);
-        String country = ugh.getCountry(users.getUserId(user1));
-        assertNotNull(country);
-        assertTrue(country.length() > 0);
-        country = ugh.getCountry(users.getUserId(user2));
-        assertNotNull(country);
-        assertTrue(country.length() > 0);
-    }
-
-    /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.getAliases(String)'
      */
     public void testGetAliases() throws Throwable {
