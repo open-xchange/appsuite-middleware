@@ -49,9 +49,9 @@ public class UserGroupHandleTest extends TestCase {
         String user2 = LdapTests.p.getProperty("user2");
         String group1 = LdapTests.p.getProperty("group1");
         UserStorage users = UserStorage.getInstance(ctx);
-        Set groups = ugh.getGroupsForUser(users.getUserId(user1));
+        Set groups = ugh.getGroupsForUser(String.valueOf(users.getUserId(user1)));
         assertTrue(groups.size() > 0);
-        groups = ugh.getGroupsForUser(users.getUserId(user2));
+        groups = ugh.getGroupsForUser(String.valueOf(users.getUserId(user2)));
         assertTrue(groups.size() > 0);
     }
 
@@ -62,10 +62,10 @@ public class UserGroupHandleTest extends TestCase {
         String user1 = LdapTests.p.getProperty("user1");
         String user2 = LdapTests.p.getProperty("user2");
         UserStorage users = UserStorage.getInstance(ctx);
-        String[] fsname = ugh.getForeSureName(users.getUserId(user1));
+        String[] fsname = ugh.getForeSureName(String.valueOf(users.getUserId(user1)));
         assertEquals(fsname[0], "Marcus");
         assertEquals(fsname[1], "Klein");
-        fsname = ugh.getForeSureName(users.getUserId(user2));
+        fsname = ugh.getForeSureName(String.valueOf(users.getUserId(user2)));
         assertEquals(fsname[0], "Sebastian");
         assertEquals(fsname[1], "Kauss");
     }
@@ -333,12 +333,12 @@ public class UserGroupHandleTest extends TestCase {
         UserStorage users = UserStorage.getInstance(ctx);
         String modifyTimestamp = ugh.getAttributeName(Names
             .USER_ATTRIBUTE_MODIFYTIMESTAMP);
-        String userId = users.getUserId(user1);
-        Map test = ugh.getUserAttributes(userId, new String[]{ modifyTimestamp });
+        int userId = users.getUserId(user1);
+        Map test = ugh.getUserAttributes(String.valueOf(userId), new String[]{ modifyTimestamp });
         assertTrue(test.containsKey(modifyTimestamp));
         assertNotNull(test.get(modifyTimestamp));
         String alias = ugh.getAttributeName(Names.USER_ATTRIBUTE_ALIAS);
-        test = ugh.getUserAttributes(userId, new String[] { alias });
+        test = ugh.getUserAttributes(String.valueOf(userId), new String[] { alias });
         assertTrue(test.containsKey(alias));
         String[] aliases = (String[]) test.get(alias);
         assertNotNull(aliases);
