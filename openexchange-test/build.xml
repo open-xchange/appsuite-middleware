@@ -26,6 +26,13 @@
 		<pathelement location="lib/comfiretools.jar"/>
 		<pathelement location="lib/nas.jar"/>
 		<pathelement location="lib/intranet.jar"/>
+		<pathelement location="lib/httpunit.jar"/>
+		<pathelement location="lib/js.jar"/>
+		<pathelement location="lib/servlet.jar"/>
+		<pathelement location="lib/Tidy.jar"/>
+		<pathelement location="lib/xercesImpl.jar"/>
+		<pathelement location="lib/xmlParserAPIs.jar"/>
+		<pathelement location="lib/nekohtml.jar"/>
 	</classpath>
     </javac>
   </target>
@@ -45,6 +52,13 @@
 		<pathelement location="lib/nas.jar"/>
 		<pathelement location="lib/intranet.jar"/>
 		<pathelement location="openexchange-test.jar"/>
+	  	<pathelement location="lib/httpunit.jar"/>
+	  	<pathelement location="lib/js.jar"/>
+	  	<pathelement location="lib/servlet.jar"/>
+		<pathelement location="lib/Tidy.jar"/>
+		<pathelement location="lib/xercesImpl.jar"/>
+		<pathelement location="lib/xmlParserAPIs.jar"/>
+		<pathelement location="lib/nekohtml.jar"/>
       </classpath>
 	</junit> 
   </target>
