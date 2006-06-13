@@ -3,6 +3,7 @@ package com.openexchange.ajax;
 import java.util.Properties;
 import java.util.Random;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -34,17 +35,37 @@ public class ConfigMenuTest extends TestCase {
 
     public void testStoreExampleSetting() throws Throwable {
         Random rand = new Random(System.currentTimeMillis());
+        String[] path = new String[10];
+        String[] value = new String[10];
         for (int i = 0; i < 10; i++) {
-            String path = "";
+            path[i] = "";
             int pathLength = rand.nextInt(10) + 1;
             for (int j = 0; j < pathLength; j++) {
-                path += RandomString.generateLetter(rand.nextInt(10) + 1) + "/";
+                path[i] += RandomString.generateLetter(rand.nextInt(10) + 1) + "/";
             }
-            path = path.substring(0, path.length() - 1);
-            testStoreSetting(path, RandomString.generateLetter(rand.nextInt(10) + 1));
+            path[i] = path[i].substring(0, path[i].length() - 1);
+            value[i] = RandomString.generateLetter(rand.nextInt(10) + 1);
+        }
+        for (int i = 0; i < 10; i++) {
+            testStoreSetting(path[i], value[i]);
+        }
+        for (int i = 0; i < 10; i++) {
+            testReadSetting(path[i], value[i]);
         }
     }
     
+    private void testReadSetting(final String path, final String value)
+        throws Throwable {
+        WebRequest req = new GetMethodWebRequest("http://" + ajaxProps
+            .getProperty("hostname") + "/ajax/config/" + path);
+        req.setParameter("session", sessionId);
+        req.setHeaderField("Content-Type", "");
+        WebResponse resp = wc.getResponse(req);
+        assertEquals(200, resp.getResponseCode());
+        String readValue = resp.getText();
+        assertEquals(value, readValue);
+    }
+
     private void testStoreSetting(final String path, final String value)
         throws Throwable {
         WebRequest req = new PostMethodWebRequest("http://" + ajaxProps

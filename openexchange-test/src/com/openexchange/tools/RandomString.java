@@ -68,9 +68,8 @@ public class RandomString {
         for (char i = 'a'; i <= 'z'; i++) {
             letter[i - 'a'] = i;
         }
-        char offset = 'A' + ('z' - 'a' + 1);
         for (char i = 'A'; i <= 'Z'; i++) {
-            letter[i - offset] = i;
+            letter[i - 'A' + 'z' - 'a' + 1] = i;
         }
     }
 }
