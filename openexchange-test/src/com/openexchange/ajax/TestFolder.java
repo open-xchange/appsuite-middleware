@@ -44,8 +44,10 @@ public class TestFolder extends TestCase {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId);
 		String errorPrefix = "{\"error\":";
 		try {
+			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
-			System.out.println(resp.getText());
+			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
+					+ "msec");
 			assertFalse(resp.getText().startsWith(errorPrefix));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -57,8 +59,10 @@ public class TestFolder extends TestCase {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&gparent=127");
 		String errorPrefix = "{\"error\":";
 		try {
+			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
-			System.out.println(resp.getText());
+			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
+					+ "msec");
 			assertFalse(resp.getText().startsWith(errorPrefix));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,8 +74,10 @@ public class TestFolder extends TestCase {
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&id=290");
 		String errorPrefix = "{\"error\":";
 		try {
+			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
-			System.out.println(resp.getText());
+			System.out.println("Response:\n" + resp.getText() + "\tDuration: " + (System.currentTimeMillis() - start)
+					+ "msec");
 			assertFalse(resp.getText().startsWith(errorPrefix));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -143,7 +149,7 @@ public class TestFolder extends TestCase {
 			System.out.println("Starting Post-Request...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
-			System.out.println("Response:\n>" + resp.getText() + "<\tDuration: " + (System.currentTimeMillis() - start) + "msec");
+			System.out.println("Response:\n" + resp.getText() + "\t\tDuration: " + (System.currentTimeMillis() - start) + "msec");
 			assertTrue(resp.getText().startsWith(expectedDeletePrefix));
 		}  catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
