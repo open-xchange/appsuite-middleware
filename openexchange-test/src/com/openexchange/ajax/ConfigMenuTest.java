@@ -47,26 +47,24 @@ public class ConfigMenuTest extends TestCase {
             value[i] = RandomString.generateLetter(rand.nextInt(10) + 1);
         }
         for (int i = 0; i < 10; i++) {
-            testStoreSetting(path[i], value[i]);
+            storeSetting(path[i], value[i]);
         }
         for (int i = 0; i < 10; i++) {
-            testReadSetting(path[i], value[i]);
+            assertEquals(value[i], readSetting(path[i]));
         }
     }
     
-    private void testReadSetting(final String path, final String value)
-        throws Throwable {
+    private String readSetting(final String path) throws Throwable {
         WebRequest req = new GetMethodWebRequest("http://" + ajaxProps
             .getProperty("hostname") + "/ajax/config/" + path);
         req.setParameter("session", sessionId);
         req.setHeaderField("Content-Type", "");
         WebResponse resp = wc.getResponse(req);
         assertEquals(200, resp.getResponseCode());
-        String readValue = resp.getText();
-        assertEquals(value, readValue);
+        return resp.getText();
     }
 
-    private void testStoreSetting(final String path, final String value)
+    private void storeSetting(final String path, final String value)
         throws Throwable {
         WebRequest req = new PostMethodWebRequest("http://" + ajaxProps
             .getProperty("hostname") + "/ajax/config/" + path);
