@@ -40,12 +40,14 @@ public class AppointmentTest extends TestCase {
 	
 	private static String url = null;
 	
+	private static String proto = "http://";
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		Properties prop = Init.getAJAXProperties();
 		login = prop.get("login").toString();
 		password = prop.get("password").toString();
-		host = prop.get("host").toString();
+		host = prop.get("hostname").toString();
 		url = prop.get("appointment_url").toString();
 		
 		wc = new WebConversation();
@@ -157,7 +159,7 @@ public class AppointmentTest extends TestCase {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=new");
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -166,10 +168,12 @@ public class AppointmentTest extends TestCase {
 		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
 		appointmentwriter.writeAppointment(appointmentobject);
 		
+		pw.flush();
+		
 		byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PutMethodWebRequest(host + url + parameter.toString(), bais, "text/javascript");
+		req = new PutMethodWebRequest(proto + host + url + parameter.toString(), bais, "text/javascript");
 		resp = wc.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -193,7 +197,7 @@ public class AppointmentTest extends TestCase {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=update");
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -205,7 +209,7 @@ public class AppointmentTest extends TestCase {
 		byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PutMethodWebRequest(host + url + parameter.toString(), bais, "text/javascript");
+		req = new PutMethodWebRequest(proto + host + url + parameter.toString(), bais, "text/javascript");
 		resp = wc.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -219,13 +223,13 @@ public class AppointmentTest extends TestCase {
 	protected void deleteAppointment(AppointmentObject appointmentobject) throws Exception{
 		long begins = System.currentTimeMillis();
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=delete");
 		parameter.append("&object_id=" + appointmentobject.getObjectID());
 		parameter.append("&folder_id=" + appointmentobject.getParentFolderID());
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new PostMethodWebRequest(host + url + parameter.toString(), bais, "text/javascript");
+		req = new PostMethodWebRequest(proto + host + url + parameter.toString(), bais, "text/javascript");
 		resp = wc.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -238,13 +242,13 @@ public class AppointmentTest extends TestCase {
 	
 	protected void confirmAppointment(int object_id, int folder_id, int confirm) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=confirm");
 		parameter.append("&object_id=" + object_id);
 		parameter.append("&folder_id=" + folder_id);
 		parameter.append("confirm=" + confirm);
 		
-		req = new PostMethodWebRequest(host + url + parameter.toString());
+		req = new PostMethodWebRequest(proto + host + url + parameter.toString());
 		resp = wc.getResponse(req);
 		System.out.println(resp.getText());
 		
@@ -253,10 +257,10 @@ public class AppointmentTest extends TestCase {
 	
 	protected void listAppointment(int folder_id, Date from, Date to) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=list");
 		
-		req = new GetMethodWebRequest(host + url + parameter.toString());
+		req = new GetMethodWebRequest(proto + host + url + parameter.toString());
 		resp = wc.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
@@ -264,12 +268,12 @@ public class AppointmentTest extends TestCase {
 	
 	protected AppointmentObject getAppointment(int object_id, int folder_id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("session=" + sessionId);
+		parameter.append("?session=" + sessionId);
 		parameter.append("&action=get");
 		parameter.append("&object_id=" + object_id);
 		parameter.append("&folder_id=" + folder_id);
 		
-		req = new GetMethodWebRequest(host + url + parameter.toString());
+		req = new GetMethodWebRequest(proto + host + url + parameter.toString());
 		resp = wc.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
