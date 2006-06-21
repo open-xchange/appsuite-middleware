@@ -1,37 +1,14 @@
 package com.openexchange.ajax;
 
-import java.util.Properties;
 import java.util.Random;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.Init;
 import com.openexchange.tools.RandomString;
 
-import junit.framework.TestCase;
-
-public class ConfigMenuTest extends TestCase {
-
-    private WebConversation wc = null;
-
-    private String sessionId = null;
-
-    private Properties ajaxProps = null;
-
-    protected void setUp() throws Exception {
-        super.setUp();
-        ajaxProps = Init.getAJAXProperties();
-        wc = new WebConversation();
-        sessionId = LoginTest.getLogin(wc, ajaxProps.getProperty("hostname"),
-            ajaxProps.getProperty("login"), ajaxProps.getProperty("password"));
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+public class ConfigMenuTest extends AbstractAJAXTest {
 
     public void testStoreExampleSetting() throws Throwable {
         Random rand = new Random(System.currentTimeMillis());
@@ -55,22 +32,22 @@ public class ConfigMenuTest extends TestCase {
     }
     
     private String readSetting(final String path) throws Throwable {
-        WebRequest req = new GetMethodWebRequest("http://" + ajaxProps
-            .getProperty("hostname") + "/ajax/config/" + path);
-        req.setParameter("session", sessionId);
+        WebRequest req = new GetMethodWebRequest("http://" +
+            getAJAXProperty("hostname") + "/ajax/config/" + path);
+        req.setParameter("session", getSessionId());
         req.setHeaderField("Content-Type", "");
-        WebResponse resp = wc.getResponse(req);
+        WebResponse resp = getWebConversation().getResponse(req);
         assertEquals(200, resp.getResponseCode());
         return resp.getText();
     }
 
     private void storeSetting(final String path, final String value)
         throws Throwable {
-        WebRequest req = new PostMethodWebRequest("http://" + ajaxProps
-            .getProperty("hostname") + "/ajax/config/" + path);
-        req.setParameter("session", sessionId);
+        WebRequest req = new PostMethodWebRequest("http://" +
+            getAJAXProperty("hostname") + "/ajax/config/" + path);
+        req.setParameter("session", getSessionId());
         req.setParameter("value", value);
-        WebResponse resp = wc.getResponse(req);
+        WebResponse resp = getWebConversation().getResponse(req);
         assertEquals(200, resp.getResponseCode());
         assertEquals(0, resp.getContentLength());
     }
