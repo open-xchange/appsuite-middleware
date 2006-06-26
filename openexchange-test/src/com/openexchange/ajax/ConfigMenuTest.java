@@ -33,7 +33,7 @@ public class ConfigMenuTest extends AbstractAJAXTest {
     
     private String readSetting(final String path) throws Throwable {
         WebRequest req = new GetMethodWebRequest("http://" +
-            getAJAXProperty("hostname") + "/ajax/config/" + path);
+            hostName + "/ajax/config/" + path);
         req.setParameter("session", getSessionId());
         req.setHeaderField("Content-Type", "");
         WebResponse resp = getWebConversation().getResponse(req);
@@ -44,7 +44,7 @@ public class ConfigMenuTest extends AbstractAJAXTest {
     private void storeSetting(final String path, final String value)
         throws Throwable {
         WebRequest req = new PostMethodWebRequest("http://" +
-            getAJAXProperty("hostname") + "/ajax/config/" + path);
+            hostName + "/ajax/config/" + path);
         req.setParameter("session", getSessionId());
         req.setParameter("value", value);
         WebResponse resp = getWebConversation().getResponse(req);

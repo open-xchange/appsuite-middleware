@@ -13,10 +13,12 @@ import junit.framework.TestCase;
  */
 public abstract class AbstractAJAXTest extends TestCase {
 
+    private static final String HOSTNAME = "hostname";
+
     public static final String PROTOCOL = "http://";
 
     protected String sessionId = null;
-	
+
 	protected String hostName = null;
 
     protected WebConversation webConversation = null;
@@ -30,10 +32,10 @@ public abstract class AbstractAJAXTest extends TestCase {
         super.setUp();
         ajaxProps = Init.getAJAXProperties();
         webConversation = new WebConversation();
-		hostName = ajaxProps.getProperty("hostname");
-        sessionId = LoginTest.getLogin(webConversation, hostName
-            , ajaxProps.getProperty("login"), ajaxProps
-            .getProperty("password"));
+		hostName = ajaxProps.getProperty(HOSTNAME);
+        sessionId = LoginTest.getLogin(webConversation, hostName,
+            ajaxProps.getProperty("login"), ajaxProps.getProperty("password"));
+        assertNotNull("Can't get session id.", sessionId);
     }
 
     protected String getAJAXProperty(final String key) {
