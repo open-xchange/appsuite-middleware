@@ -15,9 +15,11 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     public static final String PROTOCOL = "http://";
 
-    private String sessionId = null;
+    protected String sessionId = null;
+	
+	protected String hostName = null;
 
-    private WebConversation webConversation = null;
+    protected WebConversation webConversation = null;
 
     private Properties ajaxProps = null;
 
@@ -28,8 +30,9 @@ public abstract class AbstractAJAXTest extends TestCase {
         super.setUp();
         ajaxProps = Init.getAJAXProperties();
         webConversation = new WebConversation();
-        sessionId = LoginTest.getLogin(webConversation, ajaxProps
-            .getProperty("hostname"), ajaxProps.getProperty("login"), ajaxProps
+		hostName = ajaxProps.getProperty("hostname");
+        sessionId = LoginTest.getLogin(webConversation, hostName
+            , ajaxProps.getProperty("login"), ajaxProps
             .getProperty("password"));
     }
 
