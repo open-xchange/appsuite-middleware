@@ -3,7 +3,8 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -13,9 +14,15 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.URLParameter;
 
+/**
+ * This class tests the AJAX interface of the tasks.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public class TasksTest extends AbstractAJAXTest {
 
     private static final String TASKS_URL = "/ajax/tasks";
@@ -27,7 +34,15 @@ public class TasksTest extends AbstractAJAXTest {
         final Task task = new Task();
         task.setTitle("Test task");
         task.setParentFolderID(62);
-        assertTrue(insertTask(getWebConversation(), hostName, getSessionId(),
+        // TODO read user from user interface
+        User u = new User();
+        u.setId(139);
+        UserParticipant participant = new UserParticipant(u);
+        List participants = new ArrayList();
+        participants.add(participant);
+        task.setParticipants(participants);
+        assertTrue("No unique identifier of the new task was returned.",
+            insertTask(getWebConversation(), hostName, getSessionId(),
             task) > 0);
     }
 
