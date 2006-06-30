@@ -6,6 +6,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -15,7 +17,6 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.URLParameter;
 
@@ -25,6 +26,8 @@ import com.openexchange.tools.URLParameter;
  */
 public class TasksTest extends AbstractAJAXTest {
 
+    private static Log log = LogFactory.getLog(TasksTest.class);
+    
     private static final String TASKS_URL = "/ajax/tasks";
     
     /**
@@ -33,13 +36,11 @@ public class TasksTest extends AbstractAJAXTest {
     public void testInsertTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Test task");
-        task.setParentFolderID(62);
         // TODO read user from user interface
-        User u = new User();
-        u.setId(139);
-        UserParticipant participant = new UserParticipant(u);
-        List participants = new ArrayList();
-        participants.add(participant);
+        final UserParticipant user = new UserParticipant();
+        user.setIdentifier(139);
+        final List participants = new ArrayList();
+        participants.add(user);
         task.setParticipants(participants);
         assertTrue("No unique identifier of the new task was returned.",
             insertTask(getWebConversation(), hostName, getSessionId(),
@@ -63,8 +64,8 @@ public class TasksTest extends AbstractAJAXTest {
         final TaskWriter tw = new TaskWriter(pw);
         tw.writeTask(task);
         pw.flush();
-        String object = sw.toString();
-        System.out.println(object);
+        final String object = sw.toString();
+        log.trace(object);
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
             .getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
@@ -75,8 +76,8 @@ public class TasksTest extends AbstractAJAXTest {
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = wc.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
-        String text = resp.getText();
-        System.out.println("!" + text + "!");
+        final String text = resp.getText();
+        log.trace("!" + text + "!");
         final JSONObject jsonId = new JSONObject(text);
         if (jsonId.has("error")) {
             fail(jsonId.getString("error"));
