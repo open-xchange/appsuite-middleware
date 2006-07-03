@@ -12,6 +12,10 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPool;
 
@@ -19,14 +23,19 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class LdapTests {
-	
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(LdapTests.class);
+
 	private static boolean init = false;
 	
 	public static Properties p;
 	
 	public static void main(String[] args) throws Exception {
 		if (args.length != 1) {
-			System.out.println("Usage: LdapTest properties");
+			LOG.fatal("Usage: LdapTest properties");
 			System.exit(1);
 		}
 		
@@ -81,7 +90,7 @@ public class LdapTests {
 		DirContext ctx = new InitialDirContext(env);
 		String protocol = ssl ? "ldaps://" : "ldap://";
 		Attributes attrs = ctx.getAttributes(protocol+host, new String[]{"supportedSASLMechanisms"});
-		System.out.println(attrs);
+		LOG.info(attrs);
 		
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, protocol+host+"/"+baseDN);

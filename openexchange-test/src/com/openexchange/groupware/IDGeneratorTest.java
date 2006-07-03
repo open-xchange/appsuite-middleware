@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.DBPool;
@@ -13,6 +16,11 @@ import com.openexchange.server.DBPoolingException;
 import junit.framework.TestCase;
 
 public class IDGeneratorTest extends TestCase {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
 
     private Context context;
     
@@ -52,8 +60,8 @@ public class IDGeneratorTest extends TestCase {
             for (int i = 0; i < tester.length; i++) {
                 threads[i].join();
             }
-            System.out.println("Inserted "
-                + IDGenerator.getId(context, Types.FOLDER) + " rows.");
+            LOG.info("Inserted " + IDGenerator.getId(context, Types.FOLDER)
+                + " rows.");
             stmt = con.createStatement();
             try {
                 stmt.execute("DROP TABLE id_generator_test");
