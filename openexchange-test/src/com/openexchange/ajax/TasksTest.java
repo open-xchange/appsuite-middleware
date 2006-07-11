@@ -41,7 +41,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,7 +86,6 @@ public class TasksTest extends AbstractAJAXTest {
         final int number = countTasks(getWebConversation(), hostName,
             getSessionId(), folderId);
         LOG.info(number);
-        assertTrue(true);
     }
 
     /**
