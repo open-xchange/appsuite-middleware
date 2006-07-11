@@ -88,6 +88,15 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.info(number);
     }
 
+    public void testCountPublicFolder() throws Throwable {
+        // TODO read folder id from folder interface
+        final int folderId = 853;
+
+        final int number = countTasks(getWebConversation(), hostName,
+            getSessionId(), folderId);
+        LOG.info(number);
+    }
+
     /**
      * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
      * HttpServletResponse)'
