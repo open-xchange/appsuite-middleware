@@ -57,7 +57,9 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.writer.TaskWriter;
+import com.openexchange.api.OXException;
 import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -132,8 +134,12 @@ public class TasksTest extends AbstractAJAXTest {
 
         task.setParentFolderID(folderId);
         task.setCreatedBy(139);
-        assertTrue("Problem while inserting private task.", insertTask(
-            getWebConversation(), hostName, getSessionId(), task) > 0);
+        final int taskId = insertTask(getWebConversation(), hostName,
+            getSessionId(), task);
+        assertTrue("Problem while inserting private task.", taskId > 0);
+        final Task reload = getTask(getWebConversation(), hostName,
+            getSessionId(), folderId, taskId);
+        LOG.info(reload);
     }
 
     /**
@@ -228,6 +234,23 @@ public class TasksTest extends AbstractAJAXTest {
         final int identifier = jsonId.getInt(OXObject.OBJECT_ID);
         assertTrue("Unique identifier of task is zero.", identifier > 0);
         return identifier;
+    }
+    
+    public static Task getTask(final WebConversation conversation,
+        final String hostname, final String sessionId, final int folderId,
+        final int taskId) throws MalformedURLException, IOException,
+        SAXException, JSONException, OXException {
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname
+            + TASKS_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
+            String.valueOf(folderId));
+        req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
+        final WebResponse resp = conversation.getResponse(req);
+        final JSONObject json = new JSONObject(resp.getText());
+        final Task task = new Task();
+        new TaskParser().parse(task, json);
+        return task;
     }
     
     public static int countTasks(final WebConversation conversation,
