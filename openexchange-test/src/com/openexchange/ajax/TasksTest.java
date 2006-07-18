@@ -111,7 +111,7 @@ public class TasksTest extends AbstractAJAXTest {
     public void testInsertPrivateTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Private delegated task");
-        task.setPrivateFlag(CommonObject.PRIVATE_FLAG_FALSE);
+        task.setPrivateFlag(false);
         final Date lastModified = new Date();
         task.setCreationDate(new Date());
         task.setLastModified(lastModified);
@@ -158,7 +158,7 @@ public class TasksTest extends AbstractAJAXTest {
     public void testInsertDelegatedPrivateTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Private delegated task");
-        task.setPrivateFlag(CommonObject.PRIVATE_FLAG_FALSE);
+        task.setPrivateFlag(false);
         task.setCreationDate(new Date());
         final Date lastModified = new Date();
         task.setLastModified(lastModified);
