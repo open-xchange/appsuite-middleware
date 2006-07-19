@@ -23,7 +23,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     protected WebConversation webConversation = null;
 
-    private Properties ajaxProps = null;
+    protected Properties ajaxProps = null;
 
     /**
      * {@inheritDoc}
@@ -55,4 +55,13 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation getWebConversation() {
         return webConversation;
     }
+
+    /**
+     * 
+     * @return Returns the hostname.
+     */
+	public String getHostName() {
+		return hostName;
+	}
+    
 }
