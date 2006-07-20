@@ -92,15 +92,6 @@ public class UserGroupHandleTest extends TestCase {
     }
 
     /*
-     * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchFullName(String)'
-     */
-    public void testSearchFullName() {
-        Map users = ugh.searchFullName("*");
-        assertNotNull(users);
-        assertTrue(users.size() > 0);
-    }
-
-    /*
      * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchUsers(String)'
      */
     public void testSearchUsersString() {
@@ -109,18 +100,6 @@ public class UserGroupHandleTest extends TestCase {
         assertTrue(users.size() > 0);
         assertTrue(users.contains(LdapTests.p.getProperty("user1")));
         assertTrue(users.contains(LdapTests.p.getProperty("user2")));
-    }
-
-    /*
-     * Test method for 'com.openexchange.groupware.ldap.UserGroupHandle.searchUsers(String, long)'
-     */
-    public void testSearchUsersStringLong() throws Throwable {
-        DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss'Z'");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String usermodifiedsince = LdapTests.p.getProperty("usermodifiedsince");
-        Date d = df.parse(usermodifiedsince);
-        Set users = ugh.searchUsers("*", d.getTime());
-        assertTrue(users.size() > 0);
     }
 
     /*
