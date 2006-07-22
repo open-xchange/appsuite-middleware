@@ -3,19 +3,25 @@ package com.openexchange.groupware;
 
 
 import com.openexchange.groupware.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.contexts.RdbContextWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.api.OXCalendar;
-import java.sql.Connection;
+import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.calendar.RecurringResult;
 
+import java.sql.Connection;
 import java.util.Date;
 import java.util.Map;
 import junit.framework.TestCase;
 
 public class CalendarTest extends TestCase {
+    
+    
+    private final static int TEST_PASS = 50000;
     
     protected void setUp() throws Exception {        
         super.setUp();
@@ -57,13 +63,16 @@ public class CalendarTest extends TestCase {
         cdao.setRecurrence(testrecurrence);
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
-        CalendarRecurringCollection.fillDAO(cdao);
+        for (int a = 0; a < TEST_PASS; a++) {
+            CalendarRecurringCollection.fillDAO(cdao);
+        }
         String check = CalendarRecurringCollection.createDSString(cdao);        
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
-        Map m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 5, m.size());
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
+        
     }
     
     
@@ -76,16 +85,18 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u_test));
+    cdao.setUntil(new Date(u_test));
         cdao.setTitle("Daily Appointment Test only with DAO");
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(OXCalendar.DAILY);
         cdao.setInterval(1);
-        CalendarRecurringCollection.fillDAO(cdao);
+        for (int a = 0; a < TEST_PASS; a++) {
+            CalendarRecurringCollection.fillDAO(cdao);
+        }
         String check = CalendarRecurringCollection.createDSString(cdao);        
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
-        Map m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 5, m.size());
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
@@ -108,7 +119,14 @@ public class CalendarTest extends TestCase {
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
     }
     
-    
-    
+    /*
+    public void testCalendarLog() throws Throwable {
+        CalendarCommonCollection.logInfo("Test logging Info ...");
+        CalendarCommonCollection.logDebug("Test logging Debug ...");
+        CalendarCommonCollection.logWarn("Test logging Warn ...");
+        CalendarCommonCollection.logError("Test logging Error ...");
+        CalendarCommonCollection.logFatal("Test logging Fatal ...");
+    }
+    */
     
 }
