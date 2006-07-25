@@ -25,7 +25,7 @@ public class IDGeneratorTest extends TestCase {
 
     private static final int TYPE = Types.DOCUMENT;
 
-    private static final int THREADS = 10;
+    private static final int THREADS = 1;
 
     private static final int TIME = 20;
     
@@ -123,9 +123,9 @@ public class IDGeneratorTest extends TestCase {
                     insert.setInt(1, context.getContextId());
                     insert.setInt(2, ident);
                     insert.executeUpdate();
+                    con.commit();
                 }
                 insert.close();
-                con.commit();
             } catch (SQLException e) {
                 try {
                     con.rollback();
