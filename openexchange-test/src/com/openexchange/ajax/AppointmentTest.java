@@ -1,5 +1,6 @@
 package com.openexchange.ajax;
 
+import com.openexchange.ajax.*;
 import com.openexchange.groupware.container.UserParticipant;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -17,83 +18,89 @@ import org.json.JSONObject;
 public class AppointmentTest extends CommonTest {
 	
 	private String url = "/ajax/appointment";
+
+	private int appointmentFolderId = 955;
 	
-	public void testInsertAppointment() throws Exception {
+	private long startTime = 1153850400000L;
+	
+	private long endTime = 1153850400000L;
+	
+	public void testNew() throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle("Test Termin!");
-		appointmentobject.setStartDate(new Date());
-		appointmentobject.setEndDate(new Date());
+		appointmentobject.setStartDate(new Date(startTime));
+		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
 		appointmentobject.setShownAs(AppointmentObject.ABSEND);
-		appointmentobject.setParentFolderID(-1);
+		appointmentobject.setParentFolderID(appointmentFolderId);
 		
-		int object_id = insertAppointment(appointmentobject);
+		int object_id = actionNew(appointmentobject);
 		
-		compareAppointmentObjects(appointmentobject, getAppointment(object_id, -1));
+		compareAppointmentObjects(appointmentobject, getAppointment(object_id));
 	}
 	
-	public void testUpdateAppointment() throws Exception {
+	public void testUpdate() throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle("Test Termin!");
-		appointmentobject.setStartDate(new Date());
-		appointmentobject.setEndDate(new Date());
+		appointmentobject.setStartDate(new Date(startTime));
+		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
 		appointmentobject.setShownAs(AppointmentObject.ABSEND);
-		appointmentobject.setParentFolderID(-1);
+		appointmentobject.setParentFolderID(appointmentFolderId);
 		
-		int object_id = insertAppointment(appointmentobject);
+		int object_id = actionNew(appointmentobject);
 		
 		appointmentobject.setShownAs(AppointmentObject.RESERVED);
 		appointmentobject.setFullTime(true);
 		appointmentobject.setLocation(null);
 		
-		updateAppointment(appointmentobject);
+		actionUpdate(appointmentobject);
 		
-		compareAppointmentObjects(appointmentobject, getAppointment(object_id, -1));
+		compareAppointmentObjects(appointmentobject, getAppointment(object_id));
 	}
 	
-	public void testListAppointmentsInFolderBetween() throws Exception {
-		listAppointment(-1, new Date(), new Date());
+	public void testAll() throws Exception {
+		actionAll(-1, new Date(), new Date());
 	}
 	
-	public void testSetConfirm() throws Exception {
+	public void testConfirm() throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle("Test Termin!");
-		appointmentobject.setStartDate(new Date());
-		appointmentobject.setEndDate(new Date());
+		appointmentobject.setStartDate(new Date(startTime));
+		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
 		appointmentobject.setShownAs(AppointmentObject.ABSEND);
-		appointmentobject.setParentFolderID(-1);
+		appointmentobject.setParentFolderID(appointmentFolderId);
 		
 		UserParticipant p = new UserParticipant(new User());
 		p.setIdentifier(12);
 		p.setConfirm(AppointmentObject.DECLINE);
 		
-		int object_id = insertAppointment(appointmentobject);
+		int object_id = actionNew(appointmentobject);
 		
-		confirmAppointment(object_id, -1, AppointmentObject.ACCEPT);
+		actionConfirm(object_id, AppointmentObject.ACCEPT);
 		
-		compareAppointmentObjects(appointmentobject, getAppointment(object_id, -1));
+		compareAppointmentObjects(appointmentobject, getAppointment(object_id));
 	}
 	
 	
-	public void testDeleteAppointment() throws Exception {
+	public void testDelete() throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle("Test Termin!");
-		appointmentobject.setStartDate(new Date());
-		appointmentobject.setEndDate(new Date());
+		appointmentobject.setStartDate(new Date(startTime));
+		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
 		appointmentobject.setShownAs(AppointmentObject.ABSEND);
-		appointmentobject.setParentFolderID(-1);
+		appointmentobject.setParentFolderID(appointmentFolderId);
 		
-		int object_id = insertAppointment(appointmentobject);
+		int object_id = actionNew(appointmentobject);
 		
 		appointmentobject.setObjectID(object_id);
 		
-		deleteAppointment(appointmentobject);
+		actionDelete(appointmentobject);
 	}
 	
-	protected int insertAppointment(AppointmentObject appointmentobject) throws Exception {
+	protected int actionNew(AppointmentObject appointmentobject) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
@@ -107,27 +114,29 @@ public class AppointmentTest extends CommonTest {
 		return insert(b);
 	}
 	
-	protected void updateAppointment(AppointmentObject appointmentobject) throws Exception {
+	protected void actionUpdate(AppointmentObject appointmentobject) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
 		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
 		appointmentwriter.writeAppointment(appointmentobject);
 		
+		pw.flush();
+		
 		byte b[] = baos.toByteArray();
+		update(b);
 	}
 	
-	protected void deleteAppointment(AppointmentObject appointmentobject) throws Exception{
+	protected void actionDelete(AppointmentObject appointmentobject) throws Exception{
 		delete(appointmentobject);
 	}
 	
-	protected void confirmAppointment(int object_id, int folder_id, int confirm) throws Exception {
+	protected void actionConfirm(int object_id, int confirm) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=confirm");
 		parameter.append("&object_id=" + object_id);
-		parameter.append("&folder_id=" + folder_id);
-		parameter.append("confirm=" + confirm);
+		parameter.append("&confirm=" + confirm);
 		
 		req = new PostMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
 		resp = webConversation.getResponse(req);
@@ -136,11 +145,11 @@ public class AppointmentTest extends CommonTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void listAppointment(int folder_id, Date from, Date to) throws Exception {
+	protected void actionAll(int folderId, Date from, Date to) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=list");
-		parameter.append("&folder_id=" + folder_id);
+		parameter.append("&folder_id=" + folderId);
 		parameter.append("&from=" + from.getTime());;
 		parameter.append("&to=" + to.getTime());
 		
@@ -149,30 +158,42 @@ public class AppointmentTest extends CommonTest {
 		
 		assertEquals(200, resp.getResponseCode());
 	}
-	
-	protected AppointmentObject getAppointment(int object_id, int folder_id) throws Exception {
-		WebResponse resp = getObject(object_id, folder_id);
+	protected AppointmentObject getAppointment(int object_id) throws Exception {
+		WebResponse resp = getObject(object_id);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
-		AppointmentParser appointmentparser = new AppointmentParser(null);
+		if (jsonobject.has(jsonTagData)) {
+			JSONObject data = jsonobject.getJSONObject(jsonTagData);
+			
+			AppointmentParser appointmentparser = new AppointmentParser(null);		
+			AppointmentObject appointmentobject = new AppointmentObject();
+			appointmentparser.parse(appointmentobject, data);
 		
-		AppointmentObject appointmentobject = new AppointmentObject();
-		appointmentparser.parse(appointmentobject, jsonobject);
+			return appointmentobject;
+		} else {
+			fail("missing data in json object");
+		}
 		
-		return appointmentobject;
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + jsonobject.get(jsonTagError));
+		}
+		
+		throw new Exception("something went wrong here");
 	}
-	
+
 	protected void compareAppointmentObjects(AppointmentObject a1, AppointmentObject a2) throws Exception {
+		assertTrue(a1.containsTitle() == a2.containsTitle());
 		assertEquals("compare title", a1.getTitle(), a2.getTitle());
-		assertEquals("compare start_date", a1.getStartDate(), a2.getStartDate());
-		assertEquals("compare end_date", a1.getEndDate(), a2.getEndDate());
+		assertEquals("compare start_date", a1.getStartDate().getTime(), a2.getStartDate().getTime());
+		assertEquals("compare end_date", a1.getEndDate().getTime(), a2.getEndDate().getTime());
 		assertEquals("compare shown_as", a1.getShownAs(), a2.getShownAs());
 		assertEquals("compare location", a1.getLocation(), a2.getLocation());
 		assertEquals("compare full_time", a1.getFullTime(), a2.getFullTime());
+		assertEquals("compare folder_id", a1.getParentFolderID(), a2.getParentFolderID());
 	}
 	
 	protected String getURL() {
 		return url;
-	}
+	}	
 }
 

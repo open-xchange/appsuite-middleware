@@ -24,6 +24,12 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected WebConversation webConversation = null;
 
     protected Properties ajaxProps = null;
+	
+	protected String jsonTagData = "data";
+
+	protected String jsonTagTimestamp = "timestamp";
+	
+	protected String jsonTagError = "error";
 
     /**
      * {@inheritDoc}

@@ -41,7 +41,7 @@ public class ContactTest extends CommonTest {
 		int object_id = insertContact(contactobject);
 		
 		contactobject.setGivenName("Hans");
-		contactobject.setSurName("Müller");
+		contactobject.setSurName("Meier");
 		
 		updateContact(contactobject);
 		
@@ -82,6 +82,8 @@ public class ContactTest extends CommonTest {
 		ContactWriter contactwriter = new ContactWriter(pw);
 		contactwriter.writeContact(contactobject);
 		
+		pw.flush();
+		
 		byte b[] = baos.toByteArray();
 		
 		update(b);
@@ -96,7 +98,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected ContactObject getContact(int object_id, int folder_id) throws Exception {
-		WebResponse resp = getObject(object_id, folder_id);
+		WebResponse resp = getObject(object_id);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		ContactParser contactparser = new ContactParser(null);
