@@ -22,6 +22,8 @@ public class IDGeneratorTest extends TestCase {
      */
     private static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
 
+    private static final int type = Types.DOCUMENT;
+    
     private Context context;
     
     protected void setUp() throws Exception {
@@ -46,7 +48,7 @@ public class IDGeneratorTest extends TestCase {
             } catch (SQLException e) {
             }
             stmt.close();
-            Inserter[] tester = new Inserter[5];
+            Inserter[] tester = new Inserter[10];
             Thread[] threads = new Thread[tester.length];
             for (int i = 0; i < tester.length; i++) {
                 tester[i] = new Inserter();
@@ -60,8 +62,7 @@ public class IDGeneratorTest extends TestCase {
             for (int i = 0; i < tester.length; i++) {
                 threads[i].join();
             }
-            LOG.info("Inserted " + IDGenerator.getId(context, Types.FOLDER)
-                + " rows.");
+            LOG.info("Inserted " + IDGenerator.getId(context, type) + " rows.");
             stmt = con.createStatement();
             try {
                 stmt.execute("DROP TABLE id_generator_test");
@@ -88,7 +89,7 @@ public class IDGeneratorTest extends TestCase {
             try {
                 PreparedStatement ps = con.prepareStatement("INSERT INTO id_generator_test (cid, id) VALUES (?, ?)");
                 while (run) {
-                    int id = IDGenerator.getId(context, Types.FOLDER);
+                    int id = IDGenerator.getId(context, type);
                     ps.setInt(1, context.getContextId());
                     ps.setInt(2, id);
                     ps.executeUpdate();
