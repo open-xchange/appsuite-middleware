@@ -62,7 +62,7 @@ public class AppointmentTest extends CommonTest {
 		int id1 = actionNew(appointmentObj);
 		int id2 = actionNew(appointmentObj);
 		
-		actionDelete(new int[]{id1, id2});
+		actionDelete(new int[]{id1, id2, 1});
 	}
 	
 	public void testGet() throws Exception {
@@ -167,6 +167,8 @@ public class AppointmentTest extends CommonTest {
 			AppointmentParser appointmentparser = new AppointmentParser(null);
 			AppointmentObject appointmentobject = new AppointmentObject();
 			appointmentparser.parse(appointmentobject, data);
+
+			assertEquals("same folder id:", appointmentFolderId, appointmentobject.getParentFolderID());
 		} else {
 			fail("missing data in json object");
 		}
