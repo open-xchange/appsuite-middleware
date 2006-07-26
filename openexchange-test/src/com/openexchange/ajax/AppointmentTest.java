@@ -1,32 +1,45 @@
 package com.openexchange.ajax;
 
-import com.openexchange.groupware.container.UserParticipant;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.ldap.User;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class AppointmentTest extends CommonTest {
 	
-	private String url = "/ajax/appointment";
+	private static String url = "/ajax/appointment";
 	
-	private int appointmentFolderId = 955;
+	private static int appointmentFolderId = -1;
 	
-	private long startTime = 1153850400000L;
+	private static long startTime = 0;
 	
-	private long endTime = 1153850400000L;
+	private static long endTime = 0;
 	
-	private long d7 = 604800000;
+	private static final long d7 = 604800000;
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		
+		url = ajaxProps.getProperty("appointment_url");
+		appointmentFolderId = Integer.parseInt(ajaxProps.getProperty("appointment_folder"));
+		
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, 12);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		
+		startTime = c.getTimeInMillis();
+		endTime = startTime + 3600000;
+	}
 	
 	public void testNew() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject();
@@ -167,7 +180,7 @@ public class AppointmentTest extends CommonTest {
 			AppointmentParser appointmentparser = new AppointmentParser(null);
 			AppointmentObject appointmentobject = new AppointmentObject();
 			appointmentparser.parse(appointmentobject, data);
-
+			
 			assertEquals("same folder id:", appointmentFolderId, appointmentobject.getParentFolderID());
 		} else {
 			fail("missing data in json object");

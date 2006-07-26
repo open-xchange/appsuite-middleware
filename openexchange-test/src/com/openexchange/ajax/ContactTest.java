@@ -1,120 +1,166 @@
 package com.openexchange.ajax;
 
-import com.meterware.httpunit.PutMethodWebRequest;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.api.OXObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.ContactObject;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ContactTest extends CommonTest {
 	
-	private String url = "/ajax/contact";
+	private static String url = "/ajax/contact";
 	
-	public void testInsertContact() throws Exception {
-		ContactObject contactobject = new ContactObject();
-		contactobject.setGivenName("Herbert");
-		contactobject.setSurName("Meier");
-		contactobject.setParentFolderID(-1);
+	private static int contactFolderId = -1;
+
+	protected void setUp() throws Exception {
+		super.setUp();
 		
-		int object_id = insertContact(contactobject);
-		
-		compareContactObjects(contactobject, getContact(object_id, -1));
+		url = ajaxProps.getProperty("contact_url");
+		contactFolderId = Integer.parseInt(ajaxProps.getProperty("contact_folder"));
 	}
 	
-	public void testUpdateContact() throws Exception {
-		ContactObject contactobject = new ContactObject();
-		contactobject.setGivenName("Herbert");
-		contactobject.setSurName("Mustermeier");
-		contactobject.setParentFolderID(-1);
-		
-		int object_id = insertContact(contactobject);
-		
-		contactobject.setGivenName("Hans");
-		contactobject.setSurName("Meier");
-		
-		updateContact(contactobject);
-		
-		compareContactObjects(contactobject, getContact(object_id, -1));
+	public void testNew() throws Exception {
+		ContactObject contactObj = createContactObject();
+		int objectId = actionNew(contactObj);
 	}
 	
-	public void testListContactsInFolderBetween() throws Exception {
-		listContact(-1, 0, 10);
+	public void testUpdate() throws Exception {
+		ContactObject contactObj = createContactObject();
+		int objectId = actionNew(contactObj);
+		
+		contactObj.setTelephoneBusiness1("+49009988776655");
+		contactObj.setStateBusiness(null);
+		
+		actionUpdate(contactObj);
 	}
 	
-	public void testDeleteContact() throws Exception {
-		ContactObject contactobject = new ContactObject();
-		int object_id = insertContact(contactobject);
-		
-		contactobject.setObjectID(object_id);
-		
-		deleteContact(contactobject);
+	public void testAll() throws Exception {
+		actionAll(contactFolderId);
 	}
 	
-	protected int insertContact(ContactObject contactobject) throws Exception {
+	
+	public void testDelete() throws Exception {
+		ContactObject contactObj = createContactObject();
+		int id1 = actionNew(contactObj);
+		int id2 = actionNew(contactObj);
+		
+		actionDelete(new int[]{id1, id2, 1});
+	}
+	
+	public void testGet() throws Exception {
+		ContactObject contactObj = createContactObject();
+		int objectId = actionNew(contactObj);
+		
+		actionGet(objectId);
+	}
+	
+	protected int actionNew(ContactObject contactObj) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		ContactWriter contactwriter = new ContactWriter(pw);
-		contactwriter.writeContact(contactobject);
+		ContactWriter contactWriter = new ContactWriter(pw);
+		contactWriter.writeContact(contactObj);
 		
 		pw.flush();
 		
 		byte b[] = baos.toByteArray();
-
+		
 		return insert(b);
 	}
 	
-	protected void updateContact(ContactObject contactobject) throws Exception {
+	protected void actionUpdate(ContactObject contactObj) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		ContactWriter contactwriter = new ContactWriter(pw);
-		contactwriter.writeContact(contactobject);
+		ContactWriter contactWriter = new ContactWriter(pw);
+		contactWriter.writeContact(contactObj);
 		
 		pw.flush();
 		
 		byte b[] = baos.toByteArray();
+		update(b, contactObj.getObjectID());
+	}
+	
+	protected void actionDelete(int[] id) throws Exception{
+		delete(id);
+	}
 		
-		update(b, contactobject.getObjectID());
-	}
-	
-	protected void deleteContact(ContactObject contactobject) throws Exception{
-		delete(contactobject);
-	}
-	
-	protected void listContact(int folder_id, int from, int to) throws Exception {
-		list(folder_id, from, to);
-	}
-	
-	protected ContactObject getContact(int object_id, int folder_id) throws Exception {
-		WebResponse resp = getObject(object_id);
+	protected void actionAll(int folderId) throws Exception {
+		StringBuffer parameter = new StringBuffer();
+		parameter.append("?session=" + sessionId);
+		parameter.append("&action=all");
+		parameter.append("&folder=" + folderId);
+		parameter.append("&columns=1%2C500");
+		
+		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
+		resp = webConversation.getResponse(req);
+		
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
-		ContactParser contactparser = new ContactParser(null);
+		if (jsonobject.has("error")) {
+			fail("server error: " + (String)jsonobject.get("error"));
+		}
 		
-		ContactObject contactobject = new ContactObject();
-		contactparser.parse(contactobject, jsonobject);
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+		} else {
+			fail("no data in JSON object!");
+		}
 		
-		return contactobject;
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + jsonobject.get(jsonTagError));
+		}
+		
+		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void compareContactObjects(ContactObject c1, ContactObject c2) throws Exception {
-		assertEquals("compare given name", c1.getGivenName(), c2.getGivenName());
-		assertEquals("compare sur name", c1.getSurName(), c2.getSurName());
+	protected void actionGet(int objectId) throws Exception {
+		WebResponse resp = getObject(objectId);
+		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagData)) {
+			JSONObject data = jsonobject.getJSONObject(jsonTagData);
+			
+			ContactParser contactParser = new ContactParser(null);
+			ContactObject contactObj = new ContactObject();
+			contactParser.parse(contactObj, data);
+			
+			assertTrue("contains object id:", contactObj.containsObjectID());
+			assertEquals("same folder id:", contactFolderId, contactObj.getParentFolderID());
+		} else {
+			fail("missing data in json object");
+		}
+		
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + jsonobject.get(jsonTagError));
+		}
+		
+		assertEquals(200, resp.getResponseCode());
 	}
 	
 	protected String getURL() {
 		return url;
 	}
+	
+	private ContactObject createContactObject() {
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("Müller");
+		contactObj.setGivenName("Herbert");
+		contactObj.setStreetBusiness("Franz-Meier Weg 17");
+		contactObj.setCityBusiness("Test Stadt");
+		contactObj.setStateBusiness("NRW");
+		contactObj.setCountryBusiness("Deutschland");
+		contactObj.setTelephoneBusiness1("+49112233445566");
+		contactObj.setCompany("Internal Test AG");
+		contactObj.setParentFolderID(contactFolderId);
+
+		return contactObj;
+	}
 }
+
