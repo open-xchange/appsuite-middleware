@@ -88,7 +88,7 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id);
+		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.LAST_MODIFIED, AppointmentObject.TITLE } );
 	}
 	
 	public void testGet() throws Exception {

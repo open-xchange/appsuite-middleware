@@ -108,11 +108,19 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void list(int[] id) throws Exception {
+	protected void list(int[] id, int[] cols) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=" + AJAXServlet.ACTION_LIST);
-		parameter.append("&columns=1%2C500");
+		parameter.append("&columns=");
+		
+		for (int a = 0; a  < cols.length; a++) {
+			if (a == 0) {
+				parameter.append(cols[a]);
+			} else {
+				parameter.append("%2C" + cols[a]);
+			}
+		}
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -129,15 +137,15 @@ public abstract class CommonTest extends AbstractAJAXTest {
 			fail("server error: " + jsonobject.getString("error"));
 		}
 		
-		if (!jsonobject.has(jsonTagTimestamp)) {
-			fail("no timestamp tag found!");
-		}
-		
 		if (jsonobject.has(jsonTagData)) {
 			JSONArray data = jsonobject.getJSONArray(jsonTagData);
 			assertTrue("array length is 3", data.length() == 3);
 		} else {
 			fail("no data in JSON object!");
+		}
+		
+		if (!jsonobject.has(jsonTagTimestamp)) {
+		 	fail("no timestamp tag found!");
 		}
 		
 		assertEquals(200, resp.getResponseCode());
