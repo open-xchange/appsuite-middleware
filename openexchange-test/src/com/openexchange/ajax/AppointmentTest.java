@@ -62,6 +62,15 @@ public class AppointmentTest extends CommonTest {
 		actionAll(appointmentFolderId, new Date(System.currentTimeMillis()-d7), new Date(System.currentTimeMillis()+d7));
 	}
 	
+	public void testList() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject();
+		int id1 = actionNew(appointmentObj);
+		int id2 = actionNew(appointmentObj);
+		int id3 = actionNew(appointmentObj);
+		
+		actionList(new int[]{id1, id2, id3});
+	} 
+	
 	public void testConfirm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject();
 		int objectId = actionNew(appointmentObj);
@@ -76,6 +85,10 @@ public class AppointmentTest extends CommonTest {
 		int id2 = actionNew(appointmentObj);
 		
 		actionDelete(new int[]{id1, id2, 1});
+	}
+	
+	protected void actionList(int[] id) throws Exception{
+		list(id);
 	}
 	
 	public void testGet() throws Exception {
