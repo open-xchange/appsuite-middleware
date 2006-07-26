@@ -34,6 +34,8 @@ public class ContactTest extends CommonTest {
 		ContactObject contactObj = createContactObject();
 		int objectId = actionNew(contactObj);
 		
+		contactObj.setObjectID(objectId);
+		
 		contactObj.setTelephoneBusiness1("+49009988776655");
 		contactObj.setStateBusiness(null);
 		
@@ -130,8 +132,7 @@ public class ContactTest extends CommonTest {
 			ContactParser contactParser = new ContactParser(null);
 			ContactObject contactObj = new ContactObject();
 			contactParser.parse(contactObj, data);
-			
-			assertTrue("contains object id:", contactObj.containsObjectID());
+
 			assertEquals("same folder id:", contactFolderId, contactObj.getParentFolderID());
 		} else {
 			fail("missing data in json object");
