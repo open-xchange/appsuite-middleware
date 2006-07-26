@@ -17,7 +17,7 @@ public class ContactTest extends CommonTest {
 	private static String url = "/ajax/contact";
 	
 	private static int contactFolderId = -1;
-
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -46,6 +46,15 @@ public class ContactTest extends CommonTest {
 		actionAll(contactFolderId);
 	}
 	
+	
+	public void testList() throws Exception {
+		ContactObject contactObj = createContactObject();
+		int id1 = actionNew(contactObj);
+		int id2 = actionNew(contactObj);
+		int id3 = actionNew(contactObj);
+		
+		actionList(new int[]{id1, id2, id3});
+	}
 	
 	public void testDelete() throws Exception {
 		ContactObject contactObj = createContactObject();
@@ -92,7 +101,11 @@ public class ContactTest extends CommonTest {
 	protected void actionDelete(int[] id) throws Exception{
 		delete(id);
 	}
-		
+	
+	protected void actionList(int[] id) throws Exception{
+		list(id);
+	}
+	
 	protected void actionAll(int folderId) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
@@ -132,7 +145,7 @@ public class ContactTest extends CommonTest {
 			ContactParser contactParser = new ContactParser(null);
 			ContactObject contactObj = new ContactObject();
 			contactParser.parse(contactObj, data);
-
+			
 			assertEquals("same folder id:", contactFolderId, contactObj.getParentFolderID());
 		} else {
 			fail("missing data in json object");
@@ -160,7 +173,7 @@ public class ContactTest extends CommonTest {
 		contactObj.setTelephoneBusiness1("+49112233445566");
 		contactObj.setCompany("Internal Test AG");
 		contactObj.setParentFolderID(contactFolderId);
-
+		
 		return contactObj;
 	}
 }
