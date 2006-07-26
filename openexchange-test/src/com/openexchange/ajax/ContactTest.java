@@ -111,7 +111,10 @@ public class ContactTest extends CommonTest {
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=all");
 		parameter.append("&folder=" + folderId);
-		parameter.append("&columns=1%2C500");
+		parameter.append("&columns=");
+		parameter.append(ContactObject.OBJECT_ID + "%2C");
+		parameter.append(ContactObject.LAST_MODIFIED + "%2C");
+		parameter.append(ContactObject.SUR_NAME);
 		
 		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
 		resp = webConversation.getResponse(req);
