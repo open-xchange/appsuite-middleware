@@ -112,16 +112,37 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void list(int folder_id, int from, int to) throws Exception {
+	protected void list(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=list");
-		parameter.append("&folder_id=" + folder_id);
-		parameter.append("&from=" + from);;
-		parameter.append("&to=" + to);
+		parameter.append("&columns=1%2C500");
 		
-		req = new GetMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString());
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < id.length; a++) {
+			jsonArray.put(id[a]);
+		} 
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
 		resp = webConversation.getResponse(req);
+		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+			assertTrue("array length is 3", data.length() == 3);
+		} else {
+			fail("no data in JSON object!");
+		}
+		
+		if (!jsonobject.has(jsonTagTimestamp)) {
+			fail("no timestamp tag found!");
+		}
+		
+		if (jsonobject.has(jsonTagError)) {
+			fail("server error: " + jsonobject.getString("error"));
+		}
 		
 		assertEquals(200, resp.getResponseCode());
 	}
