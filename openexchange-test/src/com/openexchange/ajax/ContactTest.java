@@ -118,8 +118,8 @@ public class ContactTest extends CommonTest {
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
-		if (jsonobject.has("error")) {
-			fail("server error: " + (String)jsonobject.get("error"));
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + (String)jsonobject.get(jsonTagError));
 		}
 		
 		if (jsonobject.has(jsonTagData)) {
@@ -128,16 +128,16 @@ public class ContactTest extends CommonTest {
 			fail("no data in JSON object!");
 		}
 		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + jsonobject.get(jsonTagError));
-		}
-		
 		assertEquals(200, resp.getResponseCode());
 	}
 	
 	protected void actionGet(int objectId) throws Exception {
 		WebResponse resp = getObject(objectId);
 		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + jsonobject.get(jsonTagError));
+		}
 		
 		if (jsonobject.has(jsonTagData)) {
 			JSONObject data = jsonobject.getJSONObject(jsonTagData);
@@ -149,10 +149,6 @@ public class ContactTest extends CommonTest {
 			assertEquals("same folder id:", contactFolderId, contactObj.getParentFolderID());
 		} else {
 			fail("missing data in json object");
-		}
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + jsonobject.get(jsonTagError));
 		}
 		
 		assertEquals(200, resp.getResponseCode());

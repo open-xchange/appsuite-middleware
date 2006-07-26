@@ -34,8 +34,8 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		resp = webConversation.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
-		if (jsonobject.has("error")) {
-			fail("server error: " + (String)jsonobject.get("error"));
+		if (jsonobject.has(jsonTagError)) {
+			fail("json error: " + jsonobject.get(jsonTagError));
 		}
 		
 		if (jsonobject.has(jsonTagData)) {
@@ -48,10 +48,6 @@ public abstract class CommonTest extends AbstractAJAXTest {
 			}
 		} else {
 			fail("no data in JSON object!");
-		}
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + jsonobject.get(jsonTagError));
 		}
 		
 		assertEquals(200, resp.getResponseCode());
@@ -97,6 +93,10 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		resp = webConversation.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
+		if (jsonobject.has(jsonTagError)) {
+			fail("server error: " + jsonobject.getString(jsonTagError));
+		}
+		
 		if (jsonobject.has(jsonTagData)) {
 			JSONArray data = jsonobject.getJSONArray(jsonTagData);
 			assertTrue("array length is 1", data.length() == 1);
@@ -105,17 +105,13 @@ public abstract class CommonTest extends AbstractAJAXTest {
 			fail("no data in JSON object!");
 		}
 		
-		if (jsonobject.has("error")) {
-			fail("server error: " + jsonobject.getString("error"));
-		}
-		
 		assertEquals(200, resp.getResponseCode());
 	}
 	
 	protected void list(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
-		parameter.append("&action=list");
+		parameter.append("&action=" + AJAXServlet.ACTION_LIST);
 		parameter.append("&columns=1%2C500");
 		
 		JSONArray jsonArray = new JSONArray();
@@ -128,20 +124,20 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
 		resp = webConversation.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagData)) {
-			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-			assertTrue("array length is 3", data.length() == 3);
-		} else {
-			fail("no data in JSON object!");
+
+		if (jsonobject.has(jsonTagError)) {
+			fail("server error: " + jsonobject.getString("error"));
 		}
 		
 		if (!jsonobject.has(jsonTagTimestamp)) {
 			fail("no timestamp tag found!");
 		}
 		
-		if (jsonobject.has(jsonTagError)) {
-			fail("server error: " + jsonobject.getString("error"));
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+			assertTrue("array length is 3", data.length() == 3);
+		} else {
+			fail("no data in JSON object!");
 		}
 		
 		assertEquals(200, resp.getResponseCode());
