@@ -99,8 +99,8 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		
 		if (jsonobject.has(jsonTagData)) {
 			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-			assertTrue("array length is 1", data.length() != 1);
-			assertEquals("first entry in array is 1", 1, data.getInt(1));
+			assertTrue("array length is 1", data.length() == 1);
+			assertEquals("first entry in array is 1", 1, data.getInt(0));
 		} else {
 			fail("no data in JSON object!");
 		}
