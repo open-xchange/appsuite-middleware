@@ -25,7 +25,7 @@ public class IDGeneratorTest extends TestCase {
 
     private static final int TYPE = Types.DOCUMENT;
 
-    private static final int THREADS = 1;
+    private static final int THREADS = 10;
 
     private static final int TIME = 20;
     
