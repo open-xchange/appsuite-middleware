@@ -86,7 +86,7 @@ public class ContactTest extends CommonTest {
 		
 		byte b[] = baos.toByteArray();
 		
-		update(b);
+		update(b, contactobject.getObjectID());
 	}
 	
 	protected void deleteContact(ContactObject contactobject) throws Exception{

@@ -8,6 +8,8 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.container.CommonObject;
 import java.io.ByteArrayInputStream;
+import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -64,6 +66,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=update");
 		parameter.append("&id=" + id);
+		parameter.append("&timestamp=" + new Date().getTime());
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
@@ -77,16 +80,21 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void delete(CommonObject commonObject) throws Exception {
+	protected void delete(int[] id) throws Exception {
 		long begins = System.currentTimeMillis();
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=delete");
-		parameter.append("&object_id=" + commonObject.getObjectID());
-		parameter.append("&folder_id=" + commonObject.getParentFolderID());
+		parameter.append("&timestamp=" + new Date().getTime());
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new PostMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < id.length; a++) {
+			jsonArray.put(id[a]);
+		} 
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
 		resp = webConversation.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
