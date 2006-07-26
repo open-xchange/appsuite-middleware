@@ -159,7 +159,12 @@ public class AppointmentTest extends CommonTest {
 		parameter.append("&folder=" + folderId);
 		parameter.append("&start=" + start.getTime());;
 		parameter.append("&end=" + end.getTime());
-		parameter.append("&columns=1%2C200%2C201%2C202%2C203%2C220");
+		parameter.append("&columns=");
+		parameter.append(AppointmentObject.OBJECT_ID + "%2C");
+		parameter.append(AppointmentObject.LAST_MODIFIED + "%2C");
+		parameter.append(AppointmentObject.TITLE + "%2C");
+		parameter.append(AppointmentObject.START_DATE + "%2C");
+		parameter.append(AppointmentObject.END_DATE);
 		
 		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
 		resp = webConversation.getResponse(req);
