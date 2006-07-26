@@ -81,7 +81,6 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	}
 	
 	protected void delete(int[] id) throws Exception {
-		long begins = System.currentTimeMillis();
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=delete");
@@ -97,6 +96,14 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
 		resp = webConversation.getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+			assertTrue("array length is 1", data.length() != 1);
+			assertEquals("first entry in array is 1", 1, data.getInt(1));
+		} else {
+			fail("no data in JSON object!");
+		}
 		
 		if (jsonobject.has("error")) {
 			fail("server error: " + jsonobject.getString("error"));
