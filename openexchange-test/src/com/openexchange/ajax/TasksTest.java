@@ -134,9 +134,11 @@ public class TasksTest extends AbstractAJAXTest {
 
         // TODO read folder id from folder interface
         final int folderId = 62;
+        // TODO get user id from somewhere.
+        final int userId = 139;
 
         task.setParentFolderID(folderId);
-        task.setCreatedBy(139);
+        task.setCreatedBy(userId);
         final int taskId = insertTask(getWebConversation(), hostName,
             getSessionId(), task);
         LOG.info("Created private task: " + taskId);
