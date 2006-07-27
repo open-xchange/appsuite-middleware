@@ -16,23 +16,23 @@
     <mkdir dir="${lib}"/>
     <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes">
 	<classpath>
-		<pathelement location="lib/junit.jar"/>
-		<pathelement location="lib/httpclient.jar"/>
-		<pathelement location="lib/logging.jar"/>
-		<pathelement location="lib/jsdk.jar"/>
-		<pathelement location="lib/activation.jar"/>
-		<pathelement location="lib/mail.jar"/>
-		<pathelement location="lib/jdom.jar"/>
-		<pathelement location="lib/comfiretools.jar"/>
-		<pathelement location="lib/nas.jar"/>
-		<pathelement location="lib/intranet.jar"/>
-		<pathelement location="lib/httpunit.jar"/>
-		<pathelement location="lib/js.jar"/>
-		<pathelement location="lib/servlet.jar"/>
-		<pathelement location="lib/Tidy.jar"/>
-		<pathelement location="lib/xercesImpl.jar"/>
-		<pathelement location="lib/xmlParserAPIs.jar"/>
-		<pathelement location="lib/nekohtml.jar"/>
+		<pathelement location="${lib}/junit.jar"/>
+		<pathelement location="${lib}/httpclient.jar"/>
+		<pathelement location="${lib}/logging.jar"/>
+		<pathelement location="${lib}/jsdk.jar"/>
+		<pathelement location="${lib}/activation.jar"/>
+		<pathelement location="${lib}/mail.jar"/>
+		<pathelement location="${lib}/jdom.jar"/>
+		<pathelement location="${lib}/comfiretools.jar"/>
+		<pathelement location="${lib}/nas.jar"/>
+		<pathelement location="${lib}/intranet.jar"/>
+		<pathelement location="${lib}/httpunit.jar"/>
+		<pathelement location="${lib}/js.jar"/>
+		<pathelement location="${lib}/servlet.jar"/>
+		<pathelement location="${lib}/Tidy.jar"/>
+		<pathelement location="${lib}/xercesImpl.jar"/>
+		<pathelement location="${lib}/xmlParserAPIs.jar"/>
+		<pathelement location="${lib}/nekohtml.jar"/>
 	</classpath>
     </javac>
   </target>
@@ -44,21 +44,21 @@
 	  <!--test name="com.openexchange.groupware.ldap.UserGroupHandleTest"/>
 	  <test name="com.openexchange.groupware.ldap.ResourcesHandleTest"/-->
 	  <classpath>
-		<pathelement location="lib/junit.jar"/>
-		<pathelement location="lib/httpclient.jar"/>
-		<pathelement location="lib/logging.jar"/>
-		<pathelement location="lib/jsdk.jar"/>
-		<pathelement location="lib/comfiretools.jar"/>
-		<pathelement location="lib/nas.jar"/>
-		<pathelement location="lib/intranet.jar"/>
+		<pathelement location="${lib}/junit.jar"/>
+		<pathelement location="${lib}/httpclient.jar"/>
+		<pathelement location="${lib}/logging.jar"/>
+		<pathelement location="${lib}/jsdk.jar"/>
+		<pathelement location="${lib}/comfiretools.jar"/>
+		<pathelement location="${lib}/nas.jar"/>
+		<pathelement location="${lib}/intranet.jar"/>
 		<pathelement location="openexchange-test.jar"/>
-	  	<pathelement location="lib/httpunit.jar"/>
-	  	<pathelement location="lib/js.jar"/>
-	  	<pathelement location="lib/servlet.jar"/>
-		<pathelement location="lib/Tidy.jar"/>
-		<pathelement location="lib/xercesImpl.jar"/>
-		<pathelement location="lib/xmlParserAPIs.jar"/>
-		<pathelement location="lib/nekohtml.jar"/>
+	  	<pathelement location="${lib}/httpunit.jar"/>
+	  	<pathelement location="${lib}/js.jar"/>
+	  	<pathelement location="${lib}/servlet.jar"/>
+		<pathelement location="${lib}/Tidy.jar"/>
+		<pathelement location="${lib}/xercesImpl.jar"/>
+		<pathelement location="${lib}/xmlParserAPIs.jar"/>
+		<pathelement location="${lib}/nekohtml.jar"/>
       </classpath>
 	</junit> 
   </target>
