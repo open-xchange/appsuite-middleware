@@ -34,7 +34,7 @@ public class ParticipantTest extends CommonTest {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?session=" + sessionId);
 		parameter.append("&action=" + AJAXServlet.ACTION_GETMEMBERS);
-		parameter.append("&group=1");
+		parameter.append("&group=" + groupId);
 		
 		action(parameter.toString());
 	}
