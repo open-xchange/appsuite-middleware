@@ -4,18 +4,8 @@
   <property name="build" value="bin"/>
   <property name="lib" value="lib"/>
   <property name="build.compiler" value="modern"/>
-
-  <target name="init">
-    <tstamp/>
-    <mkdir dir="${build}"/>
-    <mkdir dir="${lib}"/>
-  </target>
-
-  <target name="compile" depends="init">
-    <mkdir dir="${build}"/>
-    <mkdir dir="${lib}"/>
-    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes">
-	<classpath>
+  
+  <path id="project.classpath"> 
 		<pathelement location="${lib}/junit.jar"/>
 		<pathelement location="${lib}/httpclient.jar"/>
 		<pathelement location="${lib}/logging.jar"/>
@@ -33,8 +23,21 @@
 		<pathelement location="${lib}/xercesImpl.jar"/>
 		<pathelement location="${lib}/xmlParserAPIs.jar"/>
 		<pathelement location="${lib}/nekohtml.jar"/>
-	</classpath>
-    </javac>
+		<pathelement location="${lib}/commons-logging.jar"/>
+	</path>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes">
+		<classpath refid="project.classpath" />
+	</javac>
   </target>
   
   <target name="junit" depends="jar">
@@ -44,21 +47,8 @@
 	  <!--test name="com.openexchange.groupware.ldap.UserGroupHandleTest"/>
 	  <test name="com.openexchange.groupware.ldap.ResourcesHandleTest"/-->
 	  <classpath>
-		<pathelement location="${lib}/junit.jar"/>
-		<pathelement location="${lib}/httpclient.jar"/>
-		<pathelement location="${lib}/logging.jar"/>
-		<pathelement location="${lib}/jsdk.jar"/>
-		<pathelement location="${lib}/comfiretools.jar"/>
-		<pathelement location="${lib}/nas.jar"/>
-		<pathelement location="${lib}/intranet.jar"/>
+		<path refid="project.classpath" />
 		<pathelement location="openexchange-test.jar"/>
-	  	<pathelement location="${lib}/httpunit.jar"/>
-	  	<pathelement location="${lib}/js.jar"/>
-	  	<pathelement location="${lib}/servlet.jar"/>
-		<pathelement location="${lib}/Tidy.jar"/>
-		<pathelement location="${lib}/xercesImpl.jar"/>
-		<pathelement location="${lib}/xmlParserAPIs.jar"/>
-		<pathelement location="${lib}/nekohtml.jar"/>
       </classpath>
 	</junit> 
   </target>
