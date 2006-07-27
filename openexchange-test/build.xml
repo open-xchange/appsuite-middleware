@@ -24,6 +24,9 @@
 		<pathelement location="${lib}/xmlParserAPIs.jar"/>
 		<pathelement location="${lib}/nekohtml.jar"/>
 		<pathelement location="${lib}/commons-logging.jar"/>
+		<pathelement location="${lib.dir}/json.jar"/>
+		<pathelement location="${lib.dir}/commons-fileupload.jar"/>
+		<pathelement location="${lib.dir}/commons-io.jar"/>
 	</path>
 
   <target name="init">
@@ -35,7 +38,7 @@
   <target name="compile" depends="init">
     <mkdir dir="${build}"/>
     <mkdir dir="${lib}"/>
-    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes">
+    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes" encoding="ISO-8859-1">
 		<classpath refid="project.classpath" />
 	</javac>
   </target>
