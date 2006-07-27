@@ -20,6 +20,12 @@ public abstract class AbstractAJAXTest extends TestCase {
     protected String sessionId = null;
 
 	protected String hostName = null;
+	
+	protected String login = null;
+	
+	protected String seconduser = null;
+	
+	protected String password = null;
 
     protected WebConversation webConversation = null;
 
@@ -39,9 +45,11 @@ public abstract class AbstractAJAXTest extends TestCase {
         ajaxProps = Init.getAJAXProperties();
         webConversation = new WebConversation();
 		hostName = ajaxProps.getProperty(HOSTNAME);
-        sessionId = LoginTest.getLogin(webConversation, hostName,
-            ajaxProps.getProperty("login"), ajaxProps.getProperty("password"));
-        assertNotNull("Can't get session id.", sessionId);
+		login = ajaxProps.getProperty("login");
+		seconduser = ajaxProps.getProperty("seconduser");
+		password = ajaxProps.getProperty("password");
+        sessionId = LoginTest.getLogin(webConversation, hostName, login, password);
+		assertNotNull("Can't get session id.", sessionId);
     }
 
     protected String getAJAXProperty(final String key) {
@@ -68,6 +76,18 @@ public abstract class AbstractAJAXTest extends TestCase {
      */
 	public String getHostName() {
 		return hostName;
+	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getSeconduser() {
+		return seconduser;
 	}
     
 }
