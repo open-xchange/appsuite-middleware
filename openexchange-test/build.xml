@@ -14,6 +14,7 @@
 		<pathelement location="${lib}/mail.jar"/>
 		<pathelement location="${lib}/jdom.jar"/>
 		<pathelement location="${lib}/comfiretools.jar"/>
+		<pathelement location="${lib}/ajax.jar"/>
 		<pathelement location="${lib}/nas.jar"/>
 		<pathelement location="${lib}/intranet.jar"/>
 		<pathelement location="${lib}/httpunit.jar"/>
@@ -24,9 +25,9 @@
 		<pathelement location="${lib}/xmlParserAPIs.jar"/>
 		<pathelement location="${lib}/nekohtml.jar"/>
 		<pathelement location="${lib}/commons-logging.jar"/>
-		<pathelement location="${lib.dir}/json.jar"/>
-		<pathelement location="${lib.dir}/commons-fileupload.jar"/>
-		<pathelement location="${lib.dir}/commons-io.jar"/>
+		<pathelement location="${lib}/json.jar"/>
+		<pathelement location="${lib}/commons-fileupload.jar"/>
+		<pathelement location="${lib}/commons-io.jar"/>
 	</path>
 
   <target name="init">
