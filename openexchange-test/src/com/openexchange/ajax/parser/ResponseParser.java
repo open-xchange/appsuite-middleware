@@ -50,6 +50,11 @@ import com.openexchange.ajax.types.Response;
  */
 public class ResponseParser {
 
+    private static final String ERROR_PARAMS = "error_params";
+    private static final String ERROR = "error";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String DATA = "data";
+
     /**
      * Prevent instanciation.
      */
@@ -60,28 +65,17 @@ public class ResponseParser {
     public static Response parse(final String body) throws JSONException {
         Response retval = new Response();
         final JSONObject response = new JSONObject(body);
-        if (response.has("data")) {
-            do {
-                try {
-                    retval.setDataObject(response.getJSONObject("data"));
-                    break;
-                } catch (JSONException e) {
-                }
-                try {
-                    retval.setDataArray(response.getJSONArray("data"));
-                    break;
-                } catch (JSONException e) {
-                }
-            } while (false);
+        if (response.has(DATA)) {
+            retval.setData(response.get(DATA));
         }
-        if (response.has("timestamp")) {
-            retval.setTimestamp(new Date(response.getLong("timestamp")));
+        if (response.has(TIMESTAMP)) {
+            retval.setTimestamp(new Date(response.getLong(TIMESTAMP)));
         }
-        if (response.has("error")) {
-            retval.setErrorMessage(response.getString("error"));
+        if (response.has(ERROR)) {
+            retval.setErrorMessage(response.getString(ERROR));
         }
-        if (response.has("error_params")) {
-            retval.setErrorParams(response.getJSONArray("error_params"));
+        if (response.has(ERROR_PARAMS)) {
+            retval.setErrorParams(response.getJSONArray(ERROR_PARAMS));
         }
         return retval;
     }

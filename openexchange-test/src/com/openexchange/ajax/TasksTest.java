@@ -62,7 +62,10 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.ajax.types.Response;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXException;
 import com.openexchange.api.OXObject;
@@ -86,7 +89,7 @@ public class TasksTest extends AbstractAJAXTest {
     
     private static final String TASKS_URL = "/ajax/tasks";
 
-    public void testCountPrivateFolder() throws Throwable {
+    public void notestCountPrivateFolder() throws Throwable {
         // TODO read folder id from folder interface
         final int folderId = 62;
 
@@ -110,7 +113,7 @@ public class TasksTest extends AbstractAJAXTest {
      */
     public void testInsertPrivateTask() throws Throwable {
         final Task task = new Task();
-        task.setTitle("Private delegated task");
+        task.setTitle("Private task");
         task.setPrivateFlag(false);
         final Date lastModified = new Date();
         task.setCreationDate(new Date());
@@ -133,7 +136,7 @@ public class TasksTest extends AbstractAJAXTest {
         task.setCompanies("companies");
 
         // TODO read folder id from folder interface
-        final int folderId = 62;
+        final int folderId = 2030;
         // TODO get user id from somewhere.
         final int userId = 139;
 
@@ -141,12 +144,10 @@ public class TasksTest extends AbstractAJAXTest {
         task.setCreatedBy(userId);
         final int taskId = insertTask(getWebConversation(), hostName,
             getSessionId(), task);
-        LOG.info("Created private task: " + taskId);
         assertTrue("Problem while inserting private task.", taskId > 0);
 
-        final Task reload = getTask(getWebConversation(), hostName,
-            getSessionId(), folderId, taskId);
-        LOG.info(reload);
+        getTask(getWebConversation(), hostName, getSessionId(), folderId,
+            taskId);
 
         final int[] notDeleted = deleteTask(getWebConversation(), hostName,
             getSessionId(), lastModified, new int[] { taskId });
@@ -157,7 +158,7 @@ public class TasksTest extends AbstractAJAXTest {
      * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
      * HttpServletResponse)'
      */
-    public void testInsertDelegatedPrivateTask() throws Throwable {
+    public void notestInsertDelegatedPrivateTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Private delegated task");
         task.setPrivateFlag(false);
@@ -246,11 +247,15 @@ public class TasksTest extends AbstractAJAXTest {
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
-        final JSONObject jsonId = new JSONObject(resp.getText());
-        if (jsonId.has("error")) {
-            fail(jsonId.getString("error"));
+        final Response response = ResponseParser.parse(resp.getText());
+        if (response.hasError()) {
+            fail(response.getErrorMessage());
         }
-        final int identifier = jsonId.getInt(OXObject.OBJECT_ID);
+        final JSONObject data = (JSONObject) response.getData();
+        if (!data.has(TaskFields.ID)) {
+            fail(response.getErrorMessage());
+        }
+        final int identifier = data.getInt(TaskFields.ID);
         return identifier;
     }
     
@@ -266,9 +271,13 @@ public class TasksTest extends AbstractAJAXTest {
             String.valueOf(folderId));
         req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
         final WebResponse resp = conversation.getResponse(req);
-        final JSONObject json = new JSONObject(resp.getText());
+        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        final Response response = ResponseParser.parse(resp.getText());
+        if (response.hasError()) {
+            fail(response.getErrorMessage());
+        }
         final Task task = new Task();
-        new TaskParser().parse(task, json);
+        new TaskParser().parse(task, (JSONObject) response.getData());
         return task;
     }
 
@@ -280,7 +289,6 @@ public class TasksTest extends AbstractAJAXTest {
         for (int i = 0; i < taskIds.length; i++) {
             json.put(taskIds[i]);
         }
-        LOG.info("Request Body: \"" + json.toString() + "\"");
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
@@ -294,17 +302,11 @@ public class TasksTest extends AbstractAJAXTest {
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.info("Response: \"" + body + "\"");
-        try {
-            final JSONObject jsonId = new JSONObject(body);
-            if (jsonId.has("error")) {
-                fail(jsonId.getString("error"));
-            }
-        } catch (JSONException e) {
-            // Nothing to do.
+        final Response response = ResponseParser.parse(resp.getText());
+        if (response.hasError()) {
+            fail(response.getErrorMessage());
         }
-        final JSONArray array = new JSONArray(body);
+        final JSONArray array = (JSONArray) response.getData();
         final int[] retval = new int[array.length()];
         for (int i = 0; i < array.length(); i++) {
             retval[i] = array.getInt(i);

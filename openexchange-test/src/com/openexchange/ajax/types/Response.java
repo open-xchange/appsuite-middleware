@@ -48,9 +48,7 @@ import org.json.JSONObject;
  */
 public class Response {
 
-    private JSONObject dataObject = null;
-
-    private JSONArray dataArray = null;
+    private Object data = null;
 
     private Date timestamp = null;
 
@@ -65,8 +63,8 @@ public class Response {
     /**
      * @return Returns the data.
      */
-    public JSONObject getDataObject() {
-        return dataObject;
+    public Object getData() {
+        return data;
     }
 
     /**
@@ -93,8 +91,8 @@ public class Response {
     /**
      * @param data The data to set.
      */
-    public void setDataObject(final JSONObject dataObject) {
-        this.dataObject = dataObject;
+    public void setData(final Object data) {
+        this.data = data;
     }
 
     /**
@@ -121,19 +119,4 @@ public class Response {
     public boolean hasError() {
         return errorMessage != null;
     }
-
-    /**
-     * @return Returns the dataArray.
-     */
-    public JSONArray getDataArray() {
-        return dataArray;
-    }
-
-    /**
-     * @param dataArray The dataArray to set.
-     */
-    public void setDataArray(final JSONArray dataArray) {
-        this.dataArray = dataArray;
-    }
-
 }
