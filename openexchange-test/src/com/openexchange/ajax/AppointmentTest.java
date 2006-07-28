@@ -187,7 +187,7 @@ public class AppointmentTest extends CommonTest {
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userParticipantId1);
+		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId3);
 		participants[2] = new UserParticipant();
