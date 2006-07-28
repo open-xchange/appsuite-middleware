@@ -76,12 +76,12 @@ public class ReminderTest extends TestCase {
 		reminderObj.setDate(alarm);
 		reminderSql.insertReminder(reminderObj);
 		
-		reminderObj = reminderSql.loadReminder(sessionObj.getUserObject().getId(), 11111);
+		reminderObj = reminderSql.loadReminder(11111, sessionObj.getUserObject().getId());
 		
 		assertNotNull("is reminder object not null", reminderObj);
-		assertEquals("targetId", 11111, reminderObj.getTargetId());
-		assertEquals("module", 11111, reminderObj.getTargetId());
-		assertEquals("date", alarm.getTime(), reminderObj.getDate().getTime());
+		assertEquals("targetId", "11111", reminderObj.getTargetId());
+		assertEquals("module", Types.CONTACT, reminderObj.getModule());
+		assertNotNull("date", reminderObj.getDate());
 		assertEquals("userId", sessionObj.getUserObject().getId(), reminderObj.getUser());
 	}
 	
@@ -123,7 +123,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.insertReminder(reminderObj);
 		
 		int counter = 0;
-		SearchIterator it = reminderSql.listReminder(sessionObj.getUserObject().getId(), new Date());
+		SearchIterator it = reminderSql.listReminder(sessionObj.getUserObject().getId(), new Date(0));
 		while (it.hasNext()) {
 			ReminderObject r = (ReminderObject)it.next();
 			assertNotNull("check reminder objects in iterator", r);
