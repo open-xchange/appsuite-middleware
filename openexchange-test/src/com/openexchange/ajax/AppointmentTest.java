@@ -32,13 +32,11 @@ public class AppointmentTest extends CommonTest {
 	
 	private static final long d7 = 604800000;
 	
-	private static int userParticipantId1 = 232;
+	private static int userParticipantId2 = -1;
 	
-	private static int userParticipantId2 = 263;
+	private static int userParticipantId3 = -1;
 	
-	private static int userParticipantId3 = 263;
-	
-	private static int groupParticipantId1 = 13;
+	private static int groupParticipantId1 = -1;
 	
 	private static int resourceParticipantId1 = -1;
 	
@@ -67,11 +65,9 @@ public class AppointmentTest extends CommonTest {
 		url = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_url", url);
 		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		
-		String userParticipant1 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant1", "");
 		String userParticipant2 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant2", "");
 		String userParticipant3 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant3", "");
 		
-		userParticipantId1 = sc.addSession(userParticipant1, password, "localhost").getUserObject().getId();
 		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
 		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
 		
