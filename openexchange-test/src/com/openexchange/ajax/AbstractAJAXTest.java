@@ -26,6 +26,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 	protected String seconduser = null;
 	
 	protected String password = null;
+	
+	protected int userId = -1;
 
     protected WebConversation webConversation = null;
 
