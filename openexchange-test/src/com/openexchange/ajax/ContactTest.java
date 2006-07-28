@@ -44,6 +44,7 @@ public class ContactTest extends CommonTest {
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
 		entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		entry[2].setEntryID(contactId);
 		
 		contactObj.setDistributionList(entry);
 		
