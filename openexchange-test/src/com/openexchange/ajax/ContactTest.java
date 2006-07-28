@@ -5,10 +5,14 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.SessiondConnector;
+import com.openexchange.tools.OXFolderTools;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import org.json.JSONArray;
@@ -20,11 +24,31 @@ public class ContactTest extends CommonTest {
 	
 	private static int contactFolderId = -1;
 	
+	private static boolean isInit = false;
+	
 	protected void setUp() throws Exception {
 		super.setUp();
+		init();
+	} 
+	
+	public void init() throws Exception {
+		if (isInit) {
+			return ;
+		}
 		
-		url = ajaxProps.getProperty("contact_url");
-		contactFolderId = Integer.parseInt(ajaxProps.getProperty("contact_folder"));
+		Init.loadSystemProperties();
+		Init.loadServerConf();
+		Init.initDB();
+		Init.initSessiond();
+		
+		url = AbstractConfigWrapper.parseProperty(ajaxProps, "contact_url", url);
+		
+		SessiondConnector sc = SessiondConnector.getInstance();
+		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		
+		contactFolderId = OXFolderTools.getContactStandardFolder(sessionObj.getUserObject().getId(), sessionObj.getContext());
+		
+		isInit = true;
 	}
 	
 	public void testNew() throws Exception {
