@@ -41,16 +41,7 @@ public class SessiondTest extends TestCase {
 		Init.loadSystemProperties();
 		Init.loadServerConf();
 		Init.initDB();
-		
-		String propfile = ComfireConfig.properties.getProperty("SESSIONDPROPERTIES");
-		
-		if (propfile == null) {
-			throw new Exception("no sessiond propfile given!");
-		}
-		
-		SessiondConfigWrapper config = new SessiondConfigWrapper(propfile);
-		SessiondConnector.setConfig(config);
-		new Sessiond(config);
+		Init.initSessiond();
 		
 		Properties p = new Properties();
 		p.load(new FileInputStream("conf/sessiond.properties"));
