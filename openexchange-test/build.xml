@@ -20,6 +20,7 @@
 		<pathelement location="${lib}/nas.jar"/>
 		<pathelement location="${lib}/intranet.jar"/>
 		<pathelement location="${lib}/sessiond.jar"/>
+		<pathelement location="${lib}/webdav.jar"/>
 		<pathelement location="${lib}/httpunit.jar"/>
 		<pathelement location="${lib}/js.jar"/>
 		<pathelement location="${lib}/servlet.jar"/>
