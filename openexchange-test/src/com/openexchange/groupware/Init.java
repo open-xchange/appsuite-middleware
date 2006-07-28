@@ -65,6 +65,13 @@ public final class Init {
 		return ajaxProps;
 	}
 	
+	public static Properties getTestProperties() {
+		if (!testPropertiesLoaded) {
+			loadTestProperties();
+		}
+		return testProps;		
+	}
+	
 	public static void loadSystemProperties() {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
