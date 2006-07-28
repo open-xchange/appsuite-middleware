@@ -61,9 +61,11 @@ public class AppointmentTest extends CommonTest {
 		
 		SessiondConnector sc = SessiondConnector.getInstance();
 		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		
+		userId = sessionObj.getUserObject().getId();
 				
 		url = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_url", url);
-		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(sessionObj.getUserObject().getId(), sessionObj.getContext());
+		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		
 		String userParticipant1 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant1", "");
 		String userParticipant2 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant2", "");
@@ -97,7 +99,7 @@ public class AppointmentTest extends CommonTest {
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userParticipantId1);
+		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId2);
 		participants[2] = new UserParticipant();
@@ -131,9 +133,9 @@ public class AppointmentTest extends CommonTest {
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userParticipantId1);
+		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId3);
+		participants[1].setIdentifier(userParticipantId2);
 		participants[2] = new UserParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
 		participants[3] = new UserParticipant();
