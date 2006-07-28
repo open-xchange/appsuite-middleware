@@ -71,6 +71,7 @@
 	<junit errorProperty="test.failed" failureProperty="test.failed"> 
 		<classpath>
 			<path refid="project.classpath" />
+			<pathelement location="${lib}/mysql.jar" />
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
 		<test name="com.openexchange.sessiond.SessiondTest"/>
