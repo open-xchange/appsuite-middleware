@@ -7,6 +7,8 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.LinkEntryObject;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import org.json.JSONArray;
@@ -26,12 +28,52 @@ public class ContactTest extends CommonTest {
 	}
 	
 	public void testNew() throws Exception {
-		ContactObject contactObj = createContactObject();
+		ContactObject contactObj = createContactObject("testNew");
+		int objectId = actionNew(contactObj);
+	}
+	
+	public void testNewWithDistributionList() throws Exception {
+		ContactObject contactEntry = createContactObject("testWithDistributionList");
+		contactEntry.setEmail1("internalcontact@x.de");
+		int contactId = actionNew(contactEntry);
+		
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testWithDistributionList");
+		
+		DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
+		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
+		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
+		entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		
+		contactObj.setDistributionList(entry);
+		
+		int objectId = actionNew(contactObj);
+	}
+	
+	public void testNewWithLinks() throws Exception {
+		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
+		int linkId1 = actionNew(link1);
+		int linkId2 = actionNew(link2);
+		
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testWithLinks");
+		
+		LinkEntryObject[] links = new LinkEntryObject[2];
+		links[0] = new LinkEntryObject();
+		links[0].setLinkID(linkId1);
+		links[0].setLinkDisplayname(link1.getDisplayName());
+		links[1] = new LinkEntryObject();
+		links[1].setLinkID(linkId2);
+		links[1].setLinkDisplayname(link2.getDisplayName());
+		
+		contactObj.setLinks(links);
+		
 		int objectId = actionNew(contactObj);
 	}
 	
 	public void testUpdate() throws Exception {
-		ContactObject contactObj = createContactObject();
+		ContactObject contactObj = createContactObject("testUpdate");
 		int objectId = actionNew(contactObj);
 		
 		contactObj.setObjectID(objectId);
@@ -42,13 +84,41 @@ public class ContactTest extends CommonTest {
 		actionUpdate(contactObj);
 	}
 	
+	public void testUpdateWithDistributionList() throws Exception {
+		ContactObject contactObj = createContactObject("testUpdateWithDistributionList");
+		
+		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
+		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
+		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
+		
+		contactObj.setDistributionList(entry);
+		
+		int objectId = actionNew(contactObj);
+	}
+	
+	public void testUpdateWithLinks() throws Exception {
+		ContactObject link1 = createContactObject("link1");
+		int linkId1 = actionNew(link1);
+		
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testUpdateWithLinks");
+		
+		LinkEntryObject[] links = new LinkEntryObject[2];
+		links[0] = new LinkEntryObject();
+		links[0].setLinkID(linkId1);
+		links[0].setLinkDisplayname(link1.getDisplayName());
+		
+		contactObj.setLinks(links);
+		
+		int objectId = actionNew(contactObj);
+	}
+	
 	public void testAll() throws Exception {
 		actionAll(contactFolderId);
 	}
 	
-	
 	public void testList() throws Exception {
-		ContactObject contactObj = createContactObject();
+		ContactObject contactObj = createContactObject("testList");
 		int id1 = actionNew(contactObj);
 		int id2 = actionNew(contactObj);
 		int id3 = actionNew(contactObj);
@@ -57,7 +127,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	public void testDelete() throws Exception {
-		ContactObject contactObj = createContactObject();
+		ContactObject contactObj = createContactObject("testDelete");
 		int id1 = actionNew(contactObj);
 		int id2 = actionNew(contactObj);
 		
@@ -65,7 +135,51 @@ public class ContactTest extends CommonTest {
 	}
 	
 	public void testGet() throws Exception {
-		ContactObject contactObj = createContactObject();
+		ContactObject contactObj = createContactObject("testGet");
+		int objectId = actionNew(contactObj);
+		
+		actionGet(objectId);
+	}
+	
+	public void testGetWithDistributionList() throws Exception {
+		ContactObject contactEntry = createContactObject("testGetWithDistributionList");
+		contactEntry.setEmail1("internalcontact@x.de");
+		int contactId = actionNew(contactEntry);
+		
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testGetWithDistributionList");
+		
+		DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
+		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
+		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
+		entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		
+		contactObj.setDistributionList(entry);
+		
+		int objectId = actionNew(contactObj);
+		
+		actionGet(objectId);
+	}
+	
+	public void testGetWithLinks() throws Exception {
+		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
+		int linkId1 = actionNew(link1);
+		int linkId2 = actionNew(link2);
+		
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testGetWithLinks");
+		
+		LinkEntryObject[] links = new LinkEntryObject[2];
+		links[0] = new LinkEntryObject();
+		links[0].setLinkID(linkId1);
+		links[0].setLinkDisplayname(link1.getDisplayName());
+		links[1] = new LinkEntryObject();
+		links[1].setLinkID(linkId2);
+		links[1].setLinkDisplayname(link2.getDisplayName());
+		
+		contactObj.setLinks(links);
+		
 		int objectId = actionNew(contactObj);
 		
 		actionGet(objectId);
@@ -103,7 +217,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id, new int[]{ ContactObject.OBJECT_ID, ContactObject.LAST_MODIFIED, ContactObject.SUR_NAME } );
+		list(id, new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME } );
 	}
 	
 	protected void actionAll(int folderId) throws Exception {
@@ -113,7 +227,6 @@ public class ContactTest extends CommonTest {
 		parameter.append("&folder=" + folderId);
 		parameter.append("&columns=");
 		parameter.append(ContactObject.OBJECT_ID + "%2C");
-		parameter.append(ContactObject.LAST_MODIFIED + "%2C");
 		parameter.append(ContactObject.SUR_NAME);
 		
 		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
@@ -161,10 +274,11 @@ public class ContactTest extends CommonTest {
 		return url;
 	}
 	
-	private ContactObject createContactObject() {
+	private ContactObject createContactObject(String displayname) {
 		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("Müller");
+		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
+		contactObj.setDisplayName(displayname);
 		contactObj.setStreetBusiness("Franz-Meier Weg 17");
 		contactObj.setCityBusiness("Test Stadt");
 		contactObj.setStateBusiness("NRW");
