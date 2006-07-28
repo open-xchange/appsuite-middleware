@@ -5,9 +5,13 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.SessiondConnector;
+import com.openexchange.tools.OXFolderTools;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -38,18 +42,39 @@ public class AppointmentTest extends CommonTest {
 	
 	private static int resourceParticipantId1 = -1;
 	
+	private boolean isInit = false;
+	
 	protected void setUp() throws Exception {
 		super.setUp();
+		init();
+	}
+	
+	public void init() throws Exception {
+		if (isInit) {
+			return ;
+		}
 		
+		Init.loadSystemProperties();
+		Init.loadServerConf();
+		Init.initDB();
+		Init.initSessiond();
+		
+		SessiondConnector sc = SessiondConnector.getInstance();
+		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+				
 		url = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_url", url);
-		appointmentFolderId = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_folder", appointmentFolderId);
+		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(sessionObj.getUserObject().getId(), sessionObj.getContext());
 		
-		userParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id1", userParticipantId1);
-		userParticipantId2 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id2", userParticipantId2);
-		userParticipantId3 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id3", userParticipantId3);
+		String userParticipant1 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant1", "");
+		String userParticipant2 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant2", "");
+		String userParticipant3 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant3", "");
 		
-		groupParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "groupparticipant_id1", groupParticipantId1);
-		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "resourceparticipant_id1", resourceParticipantId1);
+		userParticipantId1 = sc.addSession(userParticipant1, password, "localhost").getUserObject().getId();
+		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
+		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
+		
+		groupParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "group_participant_id", groupParticipantId1);
+		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "resource_participant_id", resourceParticipantId1);
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
@@ -58,6 +83,8 @@ public class AppointmentTest extends CommonTest {
 		
 		startTime = c.getTimeInMillis();
 		endTime = startTime + 3600000;
+		
+		isInit = true;
 	}
 	
 	public void testNewAppointment() throws Exception {
