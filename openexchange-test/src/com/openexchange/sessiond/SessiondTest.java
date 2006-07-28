@@ -11,6 +11,8 @@ import junit.framework.TestCase;
 
 public class SessiondTest extends TestCase {
 	
+	protected static final String sessiondPropertiesFile = "sessiondPropertiesFile";
+	
 	protected static String testUser1 = "test01";
 	
 	protected static String testUser2 = "test02";
@@ -43,8 +45,17 @@ public class SessiondTest extends TestCase {
 		Init.initDB();
 		Init.initSessiond();
 		
+		Properties prop = Init.getTestProperties();
+		
+		String propfile = prop.getProperty(sessiondPropertiesFile);
+		
+		if (propfile == null) {
+			throw new Exception("no sessiond propfile given!");
+		}
+		
 		Properties p = new Properties();
-		p.load(new FileInputStream("conf/sessiond.properties"));
+		
+		p.load(new FileInputStream(propfile));
 		
 		testUser1 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser1", testUser1);
 		testUser2 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser2", testUser2);
