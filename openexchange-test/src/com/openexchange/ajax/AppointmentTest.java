@@ -1,18 +1,20 @@
 package com.openexchange.ajax;
 
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.UserParticipant;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 
 public class AppointmentTest extends CommonTest {
 	
@@ -26,11 +28,28 @@ public class AppointmentTest extends CommonTest {
 	
 	private static final long d7 = 604800000;
 	
+	private static int userParticipantId1 = 232;
+	
+	private static int userParticipantId2 = 263;
+	
+	private static int userParticipantId3 = 263;
+	
+	private static int groupParticipantId1 = 13;
+	
+	private static int resourceParticipantId1 = -1;
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		url = ajaxProps.getProperty("appointment_url");
-		appointmentFolderId = Integer.parseInt(ajaxProps.getProperty("appointment_folder"));
+		url = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_url", url);
+		appointmentFolderId = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_folder", appointmentFolderId);
+		
+		userParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id1", userParticipantId1);
+		userParticipantId2 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id2", userParticipantId2);
+		userParticipantId3 = AbstractConfigWrapper.parseProperty(ajaxProps, "userparticipant_id3", userParticipantId3);
+		
+		groupParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "groupparticipant_id1", groupParticipantId1);
+		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "resourceparticipant_id1", resourceParticipantId1);
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
@@ -41,13 +60,29 @@ public class AppointmentTest extends CommonTest {
 		endTime = startTime + 3600000;
 	}
 	
-	public void testNew() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+	public void testNewAppointment() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		int objectId = actionNew(appointmentObj);
 	}
 	
-	public void testUpdate() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+	public void testNewAppointmentWithParticipants() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userParticipantId1);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId2);
+		participants[2] = new UserParticipant();
+		participants[2].setIdentifier(groupParticipantId1);
+		
+		appointmentObj.setParticipants(participants);
+		
+		int objectId = actionNew(appointmentObj);
+	}
+	
+	public void testUpdateAppointment() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
 		int objectId = actionNew(appointmentObj);
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
@@ -58,21 +93,45 @@ public class AppointmentTest extends CommonTest {
 		actionUpdate(appointmentObj);
 	}
 	
+	public void testUpdateAppointmentWithParticipant() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+		int objectId = actionNew(appointmentObj);
+		
+		appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setFullTime(true);
+		appointmentObj.setLocation(null);
+		appointmentObj.setObjectID(objectId);
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userParticipantId1);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId3);
+		participants[2] = new UserParticipant();
+		participants[2].setIdentifier(groupParticipantId1);
+		participants[3] = new UserParticipant();
+		participants[3].setIdentifier(resourceParticipantId1);
+		
+		appointmentObj.setParticipants(participants);
+		
+		actionUpdate(appointmentObj);
+	}
+	
 	public void testAll() throws Exception {
 		actionAll(appointmentFolderId, new Date(System.currentTimeMillis()-d7), new Date(System.currentTimeMillis()+d7));
 	}
 	
 	public void testList() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+		AppointmentObject appointmentObj = createAppointmentObject("testList");
 		int id1 = actionNew(appointmentObj);
 		int id2 = actionNew(appointmentObj);
 		int id3 = actionNew(appointmentObj);
 		
 		actionList(new int[]{id1, id2, id3});
-	} 
+	}
 	
 	public void testConfirm() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+		AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
 		int objectId = actionNew(appointmentObj);
 		
 		actionConfirm(objectId, AppointmentObject.ACCEPT);
@@ -80,7 +139,7 @@ public class AppointmentTest extends CommonTest {
 	
 	
 	public void testDelete() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		int id1 = actionNew(appointmentObj);
 		int id2 = actionNew(appointmentObj);
 		
@@ -88,11 +147,31 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.LAST_MODIFIED, AppointmentObject.TITLE } );
+		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE } );
 	}
 	
 	public void testGet() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject();
+		AppointmentObject appointmentObj = createAppointmentObject("testGet");
+		int objectId = actionNew(appointmentObj);
+		
+		actionGet(objectId);
+	}
+	
+	public void testGetWithParticipants() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testGetWithParticipants");
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userParticipantId1);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId3);
+		participants[2] = new UserParticipant();
+		participants[2].setIdentifier(groupParticipantId1);
+		participants[3] = new UserParticipant();
+		participants[3].setIdentifier(resourceParticipantId1);
+		
+		appointmentObj.setParticipants(participants);
+		
 		int objectId = actionNew(appointmentObj);
 		
 		actionGet(objectId);
@@ -160,11 +239,7 @@ public class AppointmentTest extends CommonTest {
 		parameter.append("&start=" + start.getTime());;
 		parameter.append("&end=" + end.getTime());
 		parameter.append("&columns=");
-		parameter.append(AppointmentObject.OBJECT_ID + "%2C");
-		parameter.append(AppointmentObject.LAST_MODIFIED + "%2C");
-		parameter.append(AppointmentObject.TITLE + "%2C");
-		parameter.append(AppointmentObject.START_DATE + "%2C");
-		parameter.append(AppointmentObject.END_DATE);
+		parameter.append(AppointmentObject.OBJECT_ID);
 		
 		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
 		resp = webConversation.getResponse(req);
@@ -211,9 +286,9 @@ public class AppointmentTest extends CommonTest {
 		return url;
 	}
 	
-	private AppointmentObject createAppointmentObject() {
+	private AppointmentObject createAppointmentObject(String title) {
 		AppointmentObject appointmentobject = new AppointmentObject();
-		appointmentobject.setTitle("Test Termin!");
+		appointmentobject.setTitle(title);
 		appointmentobject.setStartDate(new Date(startTime));
 		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
