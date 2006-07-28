@@ -42,7 +42,7 @@ public class AppointmentTest extends CommonTest {
 	
 	private static int resourceParticipantId1 = -1;
 	
-	private boolean isInit = false;
+	private static boolean isInit = false;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
