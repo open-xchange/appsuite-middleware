@@ -41,10 +41,10 @@ public class ContactTest extends CommonTest {
 		Init.initDB();
 		Init.initSessiond();
 		
-		url = AbstractConfigWrapper.parseProperty(ajaxProps, "contact_url", url);
+		url = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contact_url", url);
 		
 		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		SessionObject sessionObj = sc.addSession(getLogin(), getPassword(), "localhost");
 		
 		contactFolderId = OXFolderTools.getContactStandardFolder(sessionObj.getUserObject().getId(), sessionObj.getContext());
 		
@@ -191,15 +191,15 @@ public class ContactTest extends CommonTest {
 	
 	protected void actionAll(int folderId) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=all");
 		parameter.append("&folder=" + folderId);
 		parameter.append("&columns=");
 		parameter.append(ContactObject.OBJECT_ID + "%2C");
 		parameter.append(ContactObject.SUR_NAME);
 		
-		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		

@@ -31,7 +31,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	public void testUpdates() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_UPDATES);
 		parameter.append("&timestamp=" + end.getTime());
 		
@@ -40,7 +40,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	public void testRange() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_RANGE);
 		parameter.append("&start=" + start.getTime());
 		parameter.append("&end=" + end.getTime());
@@ -50,8 +50,8 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	protected void actionRange(String parameter) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (!jsonobject.has(jsonTagData)) {
@@ -67,8 +67,8 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	protected void actionUpdates(String parameter) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (!jsonobject.has(jsonTagData)) {
@@ -84,7 +84,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	protected void actionDelete(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=delete");
 		parameter.append("&timestamp=" + new Date(0).getTime());
 		
@@ -95,8 +95,8 @@ public class ReminderTest extends AbstractAJAXTest {
 		}
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + hostName + url + parameter.toString(), bais, "text/javascript");
-		resp = webConversation.getResponse(req);
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has(jsonTagData)) {

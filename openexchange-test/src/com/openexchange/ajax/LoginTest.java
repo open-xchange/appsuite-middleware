@@ -3,6 +3,8 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -15,6 +17,11 @@ import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 
 public class LoginTest extends TestCase {
+    
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(LoginTest.class);
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -27,6 +34,7 @@ public class LoginTest extends TestCase {
     public static String getLogin(final WebConversation wc,
         final String hostname, final String login, final String password)
         throws MalformedURLException, IOException, SAXException, JSONException {
+        LOG.trace("Logging in.");
         WebRequest req = new GetMethodWebRequest("http://" + hostname
             + "/ajax/login");
         req.setParameter("name", login);

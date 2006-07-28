@@ -17,21 +17,21 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     public static final String PROTOCOL = "http://";
 
-    protected String sessionId = null;
+    private String sessionId = null;
 
-	protected String hostName = null;
+	private String hostName = null;
 	
-	protected String login = null;
+	private String login = null;
 	
-	protected String seconduser = null;
+	private String seconduser = null;
 	
-	protected String password = null;
-	
+	private String password = null;
+
 	protected int userId = -1;
 
-    protected WebConversation webConversation = null;
+    private WebConversation webConversation = null;
 
-    protected Properties ajaxProps = null;
+    private Properties ajaxProps = null;
 	
 	protected String jsonTagData = "data";
 
@@ -39,29 +39,27 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected String jsonTagError = "error";
 
-    /**
-     * {@inheritDoc}
-     */
-    protected void setUp() throws Exception {
-        super.setUp();
-        ajaxProps = Init.getAJAXProperties();
-        webConversation = new WebConversation();
-		hostName = ajaxProps.getProperty(HOSTNAME);
-		login = ajaxProps.getProperty("login");
-		seconduser = ajaxProps.getProperty("seconduser");
-		password = ajaxProps.getProperty("password");
-        sessionId = LoginTest.getLogin(webConversation, hostName, login, password);
-		assertNotNull("Can't get session id.", sessionId);
-    }
-
     protected String getAJAXProperty(final String key) {
-        return ajaxProps.getProperty(key);
+        return getAJAXProperties().getProperty(key);
     }
 
+    protected Properties getAJAXProperties() {
+        if (null == ajaxProps) {
+            ajaxProps = Init.getAJAXProperties();
+        }
+        return ajaxProps;
+    }
+    
     /**
      * @return Returns the sessionId.
+     * @throws Exception if an error occurs while authenticating.
      */
-    protected String getSessionId() {
+    protected String getSessionId() throws Exception {
+        if (null == sessionId) {
+            sessionId = LoginTest.getLogin(getWebConversation(), getHostName(),
+                getLogin(), getPassword());
+            assertNotNull("Can't get session id.", sessionId);
+        }
         return sessionId;
     }
 
@@ -69,26 +67,40 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @return Returns the webConversation.
      */
     protected WebConversation getWebConversation() {
+        if (null == webConversation) {
+            webConversation = new WebConversation();
+        }
         return webConversation;
     }
 
     /**
-     * 
      * @return Returns the hostname.
      */
 	public String getHostName() {
+        if (null == hostName) {
+            hostName = getAJAXProperty(HOSTNAME);
+        }
 		return hostName;
 	}
 
 	public String getLogin() {
+        if (null == login) {
+            login = getAJAXProperty("login");
+        }
 		return login;
 	}
 
 	public String getPassword() {
+        if (null == password) {
+            password = getAJAXProperty("password");
+        }
 		return password;
 	}
 
 	public String getSeconduser() {
+        if (null == seconduser) {
+            seconduser = getAJAXProperty("seconduser");
+        }
 		return seconduser;
 	}
     

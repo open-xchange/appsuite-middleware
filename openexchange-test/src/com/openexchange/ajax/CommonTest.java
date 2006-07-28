@@ -26,12 +26,12 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=new");
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
-		resp = webConversation.getResponse(req);
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has(jsonTagError)) {
@@ -59,14 +59,14 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=update");
 		parameter.append("&id=" + id);
 		parameter.append("&timestamp=" + new Date().getTime());
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
-		resp = webConversation.getResponse(req);
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has("error")) {
@@ -78,7 +78,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	
 	protected void delete(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=delete");
 		parameter.append("&timestamp=" + new Date().getTime());
 		
@@ -89,8 +89,8 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		} 
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
-		resp = webConversation.getResponse(req);
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has(jsonTagError)) {
@@ -110,7 +110,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	
 	protected void list(int[] id, int[] cols) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_LIST);
 		parameter.append("&columns=");
 		
@@ -129,8 +129,8 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		} 
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString(), bais, "text/javascript");
-		resp = webConversation.getResponse(req);
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 
 		if (jsonobject.has(jsonTagError)) {
@@ -153,12 +153,12 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	
 	protected WebResponse getObject(int object_id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=get");
 		parameter.append("&id=" + object_id);
 		
-		req = new GetMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		

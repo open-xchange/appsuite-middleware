@@ -41,12 +41,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -68,9 +64,8 @@ import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.types.Response;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXException;
-import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
@@ -90,21 +85,22 @@ public class TasksTest extends AbstractAJAXTest {
     private static final String TASKS_URL = "/ajax/tasks";
 
     public void notestCountPrivateFolder() throws Throwable {
-        // TODO read folder id from folder interface
-        final int folderId = 62;
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            getWebConversation(), getHostName(), getSessionId());
+        final int folderId = myTasks.getObjectID();
 
-        final int number = countTasks(getWebConversation(), hostName,
+        final int number = countTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId);
-        LOG.info(number);
+        LOG.trace(number);
     }
 
     public void notestCountPublicFolder() throws Throwable {
         // TODO read folder id from folder interface
         final int folderId = 853;
 
-        final int number = countTasks(getWebConversation(), hostName,
+        final int number = countTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId);
-        LOG.info(number);
+        LOG.trace(number);
     }
 
     /**
@@ -135,25 +131,49 @@ public class TasksTest extends AbstractAJAXTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        // TODO read folder id from folder interface
-        final int folderId = 2030;
-        // TODO get user id from somewhere.
-        final int userId = 139;
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            getWebConversation(), getHostName(), getSessionId());
+        final int folderId = myTasks.getObjectID();
 
         task.setParentFolderID(folderId);
-        task.setCreatedBy(userId);
-        final int taskId = insertTask(getWebConversation(), hostName,
+        final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
         assertTrue("Problem while inserting private task.", taskId > 0);
 
-        getTask(getWebConversation(), hostName, getSessionId(), folderId,
+        getTask(getWebConversation(), getHostName(), getSessionId(), folderId,
             taskId);
 
-        final int[] notDeleted = deleteTask(getWebConversation(), hostName,
+        final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
             getSessionId(), lastModified, new int[] { taskId });
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
+    public void testCharset() throws Throwable {
+        final Task task = new Task();
+        task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
+        task.setNote("\uC11C\uC601\uC9C4");
+
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            getWebConversation(), getHostName(), getSessionId());
+        final int folderId = myTasks.getObjectID();
+
+        task.setParentFolderID(folderId);
+        final int taskId = insertTask(getWebConversation(), getHostName(),
+            getSessionId(), task);
+        assertTrue("Problem while inserting private task.", taskId > 0);
+
+        final Response response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        final Task reload = (Task) response.getData();
+        assertEquals("Title differs.", task.getTitle(), reload.getTitle());
+        assertEquals("Description differs.", task.getNote(), reload.getNote());
+        final Date lastModified = response.getTimestamp();
+
+        final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
+            getSessionId(), lastModified, new int[] { taskId });
+        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+    }
+    
     /**
      * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
      * HttpServletResponse)'
@@ -187,26 +207,27 @@ public class TasksTest extends AbstractAJAXTest {
         user1.setIdentifier(232); // offspring
         final UserParticipant user2 = new UserParticipant();
         user2.setIdentifier(227); // viktor
-        // TODO read folder id from folder interface
-        final int folderId = 62;
+
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            getWebConversation(), getHostName(), getSessionId());
+        final int folderId = myTasks.getObjectID();
 
         final List<Participant> participants = new ArrayList<Participant>();
         participants.add(user1);
         participants.add(user2);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
-        task.setCreatedBy(139);
 
-        final int taskId = insertTask(getWebConversation(), hostName,
+        final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
-        LOG.info("Created delegated task: " + taskId);
+        LOG.trace("Created delegated task: " + taskId);
         assertTrue("Problem while inserting task", taskId > 0);
 
-        final Task reload = getTask(getWebConversation(), hostName,
+        final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
-        LOG.info(reload);
+        final Task reload = (Task) response.getData();
 
-        final int[] notDeleted = deleteTask(getWebConversation(), hostName,
+        final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
             getSessionId(), lastModified, new int[] { taskId });
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
@@ -214,7 +235,7 @@ public class TasksTest extends AbstractAJAXTest {
     /**
      * This method implements storing of a task through the AJAX interface.
      * @param conversation WebConversation.
-     * @param hostname Host name of the server.
+     * @param getHostName() Host name of the server.
      * @param sessionId Session identifier of the user.
      * @param task Task to store.
      * @return the unique identifer of the task.
@@ -225,8 +246,9 @@ public class TasksTest extends AbstractAJAXTest {
      * @throws Exception if an error occurs while storing the task.
      */
     public static int insertTask(final WebConversation conversation,
-        final String hostname, final String sessionId, final Task task)
+        final String hostName, final String sessionId, final Task task)
         throws JSONException, MalformedURLException, IOException, SAXException {
+        LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
         final TaskWriter taskW = new TaskWriter(printW);
@@ -242,7 +264,7 @@ public class TasksTest extends AbstractAJAXTest {
             AJAXServlet.ACTION_NEW);
         parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(task.getParentFolderID()));
-        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
@@ -255,15 +277,15 @@ public class TasksTest extends AbstractAJAXTest {
         if (!data.has(TaskFields.ID)) {
             fail(response.getErrorMessage());
         }
-        final int identifier = data.getInt(TaskFields.ID);
-        return identifier;
+        return data.getInt(TaskFields.ID);
     }
     
-    public static Task getTask(final WebConversation conversation,
-        final String hostname, final String sessionId, final int folderId,
+    public static Response getTask(final WebConversation conversation,
+        final String hostName, final String sessionId, final int folderId,
         final int taskId) throws MalformedURLException, IOException,
         SAXException, JSONException, OXException {
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname
+        LOG.trace("Getting task.");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
         req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
@@ -272,19 +294,23 @@ public class TasksTest extends AbstractAJAXTest {
         req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
-        final Response response = ResponseParser.parse(resp.getText());
+        final String body = resp.getText();
+        LOG.trace("Body: \"" + body + "\"");
+        final Response response = ResponseParser.parse(body);
         if (response.hasError()) {
             fail(response.getErrorMessage());
         }
         final Task task = new Task();
         new TaskParser().parse(task, (JSONObject) response.getData());
-        return task;
+        response.setData(task);
+        return response;
     }
 
     public static int[] deleteTask(final WebConversation conversation,
-        final String hostname, final String sessionId, final Date lastUpdate,
+        final String hostName, final String sessionId, final Date lastUpdate,
         final int[] taskIds) throws MalformedURLException, IOException,
         SAXException, JSONException {
+        LOG.trace("Deleting task.");
         final JSONArray json = new JSONArray();
         for (int i = 0; i < taskIds.length; i++) {
             json.put(taskIds[i]);
@@ -297,7 +323,7 @@ public class TasksTest extends AbstractAJAXTest {
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
             String.valueOf(lastUpdate.getTime()));
-        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
             +TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
@@ -315,9 +341,9 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     public static int countTasks(final WebConversation conversation,
-        final String hostname, final String sessionId, final int folderId)
+        final String hostName, final String sessionId, final int folderId)
         throws MalformedURLException, IOException, SAXException {
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_ACTION,

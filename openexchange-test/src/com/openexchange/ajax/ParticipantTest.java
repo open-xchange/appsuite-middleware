@@ -16,13 +16,13 @@ public class ParticipantTest extends CommonTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		url = ajaxProps.getProperty("participant_url");
-		groupId = Integer.parseInt(ajaxProps.getProperty("group_id"));
+		url = getAJAXProperties().getProperty("participant_url");
+		groupId = Integer.parseInt(getAJAXProperties().getProperty("group_id"));
 	}
 	
 	public void testSearchUser() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_SEARCHUSER);
 		parameter.append("&searchpattern=*");
 		parameter.append("&folder=" + FolderObject.INTERNALUSERS);
@@ -32,7 +32,7 @@ public class ParticipantTest extends CommonTest {
 	
 	public void testGetMembers() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_GETMEMBERS);
 		parameter.append("&group=" + groupId);
 		
@@ -41,7 +41,7 @@ public class ParticipantTest extends CommonTest {
 	
 	public void testSearchResource() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_SEARCHRESOURCE);
 		parameter.append("&searchpattern=*");
 		
@@ -50,7 +50,7 @@ public class ParticipantTest extends CommonTest {
 	
 	public void testGetGroups() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_GETGROUPS);
 		
 		action(parameter.toString());
@@ -58,7 +58,7 @@ public class ParticipantTest extends CommonTest {
 	
 	public void testGetResourceGroups() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=" + AJAXServlet.ACTION_GETRESOURCEGROUPS);
 		
 		action(parameter.toString());
@@ -70,8 +70,8 @@ public class ParticipantTest extends CommonTest {
 	
 	protected void action(String parameter) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new GetMethodWebRequest(PROTOCOL + hostName + getURL() + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (!jsonobject.has(jsonTagData)) {

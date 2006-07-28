@@ -40,7 +40,6 @@ package com.openexchange.ajax.types;
 import java.util.Date;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * Response data object.

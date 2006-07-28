@@ -39,7 +39,7 @@ public class AppointmentTest extends CommonTest {
 	private static int groupParticipantId1 = -1;
 	
 	private static int resourceParticipantId1 = -1;
-	
+    
 	private static boolean isInit = false;
 	
 	protected void setUp() throws Exception {
@@ -58,21 +58,21 @@ public class AppointmentTest extends CommonTest {
 		Init.initSessiond();
 		
 		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		SessionObject sessionObj = sc.addSession(getLogin(), getPassword(), "localhost");
 		
 		userId = sessionObj.getUserObject().getId();
 				
-		url = AbstractConfigWrapper.parseProperty(ajaxProps, "appointment_url", url);
+		url = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "appointment_url", url);
 		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		
-		String userParticipant2 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant2", "");
-		String userParticipant3 = AbstractConfigWrapper.parseProperty(ajaxProps, "user_participant3", "");
+		String userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+		String userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
 		
-		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
-		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
+		userParticipantId2 = sc.addSession(userParticipant2, getPassword(), "localhost").getUserObject().getId();
+		userParticipantId3 = sc.addSession(userParticipant3, getPassword(), "localhost").getUserObject().getId();
 		
-		groupParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "group_participant_id", groupParticipantId1);
-		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(ajaxProps, "resource_participant_id", resourceParticipantId1);
+		groupParticipantId1 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant_id", groupParticipantId1);
+		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant_id", resourceParticipantId1);
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
@@ -235,13 +235,13 @@ public class AppointmentTest extends CommonTest {
 	
 	protected void actionConfirm(int object_id, int confirm) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=confirm");
 		parameter.append("&id=" + object_id);
 		parameter.append("&confirm=" + confirm);
 		
-		req = new PostMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new PostMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -258,7 +258,7 @@ public class AppointmentTest extends CommonTest {
 	
 	protected void actionAll(int folderId, Date start, Date end) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + sessionId);
+		parameter.append("?session=" + getSessionId());
 		parameter.append("&action=all");
 		parameter.append("&folder=" + folderId);
 		parameter.append("&start=" + start.getTime());;
@@ -266,8 +266,8 @@ public class AppointmentTest extends CommonTest {
 		parameter.append("&columns=");
 		parameter.append(AppointmentObject.OBJECT_ID);
 		
-		req = new GetMethodWebRequest(PROTOCOL + hostName + url + parameter.toString());
-		resp = webConversation.getResponse(req);
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
