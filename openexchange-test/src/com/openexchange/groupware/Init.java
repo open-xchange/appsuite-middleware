@@ -39,8 +39,7 @@ public final class Init {
 			try {
 				testProps.load(new FileInputStream(System.getProperty("test.propfile")));
 			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
+				throw new RuntimeException(e);
 			}
 			testPropertiesLoaded = true;
 		}
@@ -52,8 +51,7 @@ public final class Init {
 		try {
 			ajaxProps.load(new FileInputStream(testProps.getProperty("ajaxPropertiesFile")));
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+			throw new RuntimeException(e);
 		}
 		ajaxPropertiesLoaded = true;
 	}
