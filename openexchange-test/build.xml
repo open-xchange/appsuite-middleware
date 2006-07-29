@@ -79,6 +79,8 @@
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
 		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
+		
 		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
 		
 		<formatter type="brief" usefile="false" /> 
