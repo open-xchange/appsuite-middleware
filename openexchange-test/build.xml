@@ -92,7 +92,7 @@
 		<!--test name="com.openexchange.ajax.AppointmentTest" todir="${test.xml.dir}" /-->
 		
 		<!-- Webdav Interface -->
-		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
+		<!-- test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" /-->
 		
 		
 		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
