@@ -78,8 +78,22 @@
 			<pathelement location="${lib}/mysql.jar" />
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
+		
+		<!-- Server Internals -->
 		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
+		
+		<!-- AJAX Interface -->
+		<!-- test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.TasksTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.ReminderTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.ParticipantTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.ContactTest" todir="${test.xml.dir}" /-->
+		<test name="com.openexchange.ajax.ConfigMenuTest" todir="${test.xml.dir}" />
+		<!--test name="com.openexchange.ajax.AppointmentTest" todir="${test.xml.dir}" /-->
+		
+		<!-- Webdav Interface -->
+		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
+		
 		
 		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
 		
