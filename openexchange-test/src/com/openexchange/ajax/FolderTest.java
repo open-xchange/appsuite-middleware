@@ -352,6 +352,7 @@ public class FolderTest extends AbstractAJAXTest {
 	}
 	
 	public void testInsertRenameFolder() {
+		assertTrue(false); // Test for CruiseControl
 		int fuid = -1;
 		int[] failedIds = null;
 		boolean updated = false;
