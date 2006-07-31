@@ -11,6 +11,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
+import com.openexchange.tools.OXFolderTools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -67,6 +68,34 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected WebConversation webCon = null;
 	
+	protected static int appointmentFolderId = -1;
+
+	protected static int taskFolderId = -1;
+	
+	protected static int contactFolderId = -1;
+	
+	protected static long startTime = 0;
+	
+	protected static long endTime = 0;
+	
+	protected static int userParticipantId2 = -1;
+	
+	protected static int userParticipantId3 = -1;
+	
+	protected static int groupParticipantId1 = 13;
+	
+	protected static int resourceParticipantId1 = -1;
+	
+	protected static String appointmentUrl = "/servlet/webdav.calendar";
+
+	protected static String taskUrl = "/servlet/webdav.tasks";
+	
+	protected static String contactUrl = "/servlet/webdav.contacts";
+	
+	protected static String folderUrl = "/servlet/webdav.folders";
+
+	protected static String attachmentUrl = "/servlet/webdav.attachments";
+	
 	private static boolean isInit = false;
 	
 	/**
@@ -103,7 +132,28 @@ public abstract class AbstractWebdavTest extends TestCase {
 		password = AbstractConfigWrapper.parseProperty(webdavProps, propertyPassword, password);
 		
 		SessiondConnector sc = SessiondConnector.getInstance();
-		sessionObj = sc.addSession(login, password, "localhost");
+		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		
+		userId = sessionObj.getUserObject().getId();
+		
+		String userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
+		String userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
+		
+		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
+		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
+		
+		groupParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant_id", groupParticipantId1);
+		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant_id", resourceParticipantId1);
+		
+		appointmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "appointment_url", appointmentUrl);
+		taskUrl = AbstractConfigWrapper.parseProperty(webdavProps, "task_url", taskUrl);
+		contactUrl = AbstractConfigWrapper.parseProperty(webdavProps, "contact_url", contactUrl);
+		folderUrl = AbstractConfigWrapper.parseProperty(webdavProps, "folder_url", contactUrl);
+		attachmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "attachment_url", contactUrl);
+		
+		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
+		contactFolderId = OXFolderTools.getContactStandardFolder(userId, sessionObj.getContext());
+		taskFolderId = OXFolderTools.getTaskStandardFolder(userId, sessionObj.getContext());
 		
 		if (password == null) {
 			password = "";
