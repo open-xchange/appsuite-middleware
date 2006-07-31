@@ -2,17 +2,16 @@ package com.openexchange.webdav.xml;
 
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.OXFolderTools;
-import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import java.util.Date;
-import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
-public class AppointmentTest extends AbstractWebdavTest {
+public class AppointmentTest extends CalendarTest {
 	
 	private static String url = "/servlet/calendar";
 	
@@ -82,7 +81,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId2);
-		participants[2] = new UserParticipant();
+		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
 		
 		appointmentObj.setParticipants(participants);
@@ -112,9 +111,9 @@ public class AppointmentTest extends AbstractWebdavTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId2);
-		participants[2] = new UserParticipant();
+		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
-		participants[3] = new UserParticipant();
+		participants[3] = new ResourceParticipant();
 		participants[3].setIdentifier(resourceParticipantId1);
 		
 		appointmentObj.setParticipants(participants);
@@ -128,17 +127,22 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		appointmentObj = new AppointmentObject();
 		appointmentObj.setObjectID(objectId);
-		deleteAppointment(appointmentObj);
+		deleteObject(appointmentObj);
 	}
 	
 	public void testPropFind() throws Exception {
-		byte[] b = listAppointments(appointmentFolderId, new Date(0), false);
-		sendPropFind(b);
+		listObjects(appointmentFolderId, new Date(0), false);
 	}
 
 	public void testPropFindWithDelete() throws Exception {
-		byte[] b = listAppointments(appointmentFolderId, new Date(0), false);
-		sendPropFind(b);
+		listObjects(appointmentFolderId, new Date(0), false);
+	}
+	
+	public void testPropFindWithObjectId() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithObjectId");
+		int objectId = saveAppointment(appointmentObj);
+		
+		loadObject(objectId);
 	}
 	
 	public void testConfirm() throws Exception {
@@ -155,68 +159,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentWriter.addContent2PropElement(e_prop, appointmentObj, false);
 		byte[] b = writeRequest(e_prop);
 		return sendPut(b);
-	}
-	
-	protected void deleteAppointment(AppointmentObject appointmentObj) throws Exception {
-		Element e_prop = new Element("prop", webdav);
-		
-		Element e_objectId = new Element("object_id", XmlServlet.NS);
-		e_objectId.addContent(String.valueOf(appointmentObj.getObjectID()));
-		e_prop.addContent(e_objectId);
-		
-		Element e_method = new Element("method", XmlServlet.NS);
-		e_method.addContent("DELETE");
-		e_prop.addContent(e_method);
-		
-		byte[] b = writeRequest(e_prop);
-		sendPut(b, true);
-	}
-	
-	protected byte[] listAppointments(int folderId, Date lastSync, boolean delete) throws Exception {
-		Element e_propfind = new Element("propfind", webdav);
-		Element e_prop = new Element("prop", webdav);
-		
-		Element e_folderId = new Element("folder_id", XmlServlet.NS);
-		Element e_lastSync = new Element("lastsync", XmlServlet.NS);
-		Element e_objectmode = new Element("objectmode", XmlServlet.NS);
-		
-		e_folderId.addContent(String.valueOf(folderId));
-		e_lastSync.addContent(String.valueOf(lastSync.getTime()));
-		
-		e_propfind.addContent(e_prop);
-		e_prop.addContent(e_folderId);
-		e_prop.addContent(e_lastSync);
-		
-		if (delete) {
-			e_objectmode.addContent("NEW_AND_MODIFIED,DELETED");
-			e_prop.addContent(e_objectmode);
-		} 
-		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
-		Document doc = new Document(e_propfind);
-		
-		XMLOutputter xo = new XMLOutputter();
-		xo.output(doc, baos);
-		
-		baos.flush();
-		
-		return baos.toByteArray();
-	} 
-	
-	protected void confirmAppointment(int objectId) throws Exception {
-		Element e_prop = new Element("prop", webdav);
-		
-		Element e_objectId = new Element("object_id", XmlServlet.NS);
-		e_objectId.addContent(String.valueOf(objectId));
-		e_prop.addContent(e_objectId);
-		
-		Element e_method = new Element("method", XmlServlet.NS);
-		e_method.addContent("CONFIRM");
-		e_prop.addContent(e_method);
-		
-		byte[] b = writeRequest(e_prop);
-		sendPut(b);
 	}
 	
 	private AppointmentObject createAppointmentObject(String title) throws Exception {
