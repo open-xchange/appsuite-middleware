@@ -17,27 +17,27 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     public static final String PROTOCOL = "http://";
 
-    private String sessionId = null;
+    private static String sessionId = null;
 
-	private String hostName = null;
+	private static String hostName = null;
 	
-	private String login = null;
+	private static String login = null;
 	
 	private String seconduser = null;
 	
-	private String password = null;
+	private static String password = null;
 
-	protected int userId = -1;
+	protected static int userId = -1;
 
     private WebConversation webConversation = null;
 
     private Properties ajaxProps = null;
 	
-	protected String jsonTagData = "data";
+	protected static final String jsonTagData = "data";
 
-	protected String jsonTagTimestamp = "timestamp";
+	protected static final String jsonTagTimestamp = "timestamp";
 	
-	protected String jsonTagError = "error";
+	protected static final String jsonTagError = "error";
 
     protected String getAJAXProperty(final String key) {
         return getAJAXProperties().getProperty(key);

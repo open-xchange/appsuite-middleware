@@ -8,6 +8,8 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
@@ -98,7 +100,7 @@ public class AppointmentTest extends CommonTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId2);
-		participants[2] = new UserParticipant();
+		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
 		
 		appointmentObj.setParticipants(participants);
@@ -132,9 +134,9 @@ public class AppointmentTest extends CommonTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId2);
-		participants[2] = new UserParticipant();
+		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
-		participants[3] = new UserParticipant();
+		participants[3] = new ResourceParticipant();
 		participants[3].setIdentifier(resourceParticipantId1);
 		
 		appointmentObj.setParticipants(participants);
