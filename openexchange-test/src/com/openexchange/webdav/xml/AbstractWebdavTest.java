@@ -1,5 +1,6 @@
 package com.openexchange.webdav.xml;
 
+import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -12,10 +13,12 @@ import com.openexchange.sessiond.SessiondConnector;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -40,25 +43,27 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 	
-	protected String sessionId = null;
+	protected static String sessionId = null;
 	
-	protected String hostName = null;
+	protected static String hostName = "localhost";
 	
-	protected String login = null;
+	protected static String login = null;
 	
-	protected String password = null;
+	protected static String password = null;
 	
-	protected int userId = -1;
+	protected static int userId = -1;
 	
 	protected static Properties webdavProps = null;
+	
+	protected static SessionObject sessionObj = null;
+	
+	protected static String authData = null;
 	
 	protected WebRequest req = null;
 	
 	protected WebResponse resp = null;
 	
 	protected WebConversation webCon = null;
-	
-	protected SessionObject sessionObj = null;
 	
 	private static boolean isInit = false;
 	
@@ -98,32 +103,40 @@ public abstract class AbstractWebdavTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		sessionObj = sc.addSession(login, password, "localhost");
 		
+		if (password == null) {
+			password = "";
+		}
+		
+		authData = new String(Base64.encode(login + ":" + password));
+		
 		isInit = true;
 	}
 	
-	protected int parseResponse(Document response) throws Exception {
-		return parseRootElement(response.getRootElement());
+	protected int parseResponse(Document response, boolean delete) throws Exception {
+		return parseRootElement(response.getRootElement(), delete);
 	}
 	
-	protected int parseRootElement(Element e) throws Exception {
+	protected int parseRootElement(Element e, boolean delete) throws Exception {
 		assertNotNull("root element (null)", e);
 		assertEquals("root element", "multistatus", e.getName());
 		
-		return parseResponseElement(e.getChild("response", webdav));
+		return parseResponseElement(e.getChild("response", webdav), delete);
 	}
 	
-	protected int parseResponseElement(Element e) throws Exception {
+	protected int parseResponseElement(Element e, boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "response", e.getName());
 		
-		parseHrefElement(e.getChild("href", webdav));
+		parseHrefElement(e.getChild("href", webdav), delete);
 		return parsePropstatElement(e.getChild("propstat", webdav));
 	}
 	
-	protected void parseHrefElement(Element e) throws Exception {
+	protected void parseHrefElement(Element e, boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "href", e.getName());
-		assertTrue("href value > 0", (Integer.parseInt(e.getValue()) > 0));
+		if (!delete) {
+			assertTrue("href value > 0", (Integer.parseInt(e.getValue()) > 0));
+		}
 	}
 	
 	protected int parsePropstatElement(Element e) throws Exception {
@@ -190,39 +203,60 @@ public abstract class AbstractWebdavTest extends TestCase {
 	}
 	
 	protected int sendPut(byte b[]) throws Exception {
-		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
-		req.setHeaderField("Authorization", "Basic b2Zmc3ByaW5nOm5ldGxpbmU=");
-		resp = webCon.getResponse(req);
-		
-		bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
-		
-		Document doc = new SAXBuilder().build(bais);
-		return parseResponse(doc);
+		return sendPut(b, false);
 	}
 	
-	protected int sendPropFind(byte b[]) throws Exception {
+	protected int sendPut(byte b[], boolean delete) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		req = new PropFindMethodWebResponse(PROTOCOL + hostName + getURL(), bais, "text/javascript");
+		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
+		req.setHeaderField("Authorization", "Basic " + authData);
 		resp = webCon.getResponse(req);
 		
 		bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
 		
 		Document doc = new SAXBuilder().build(bais);
-		return parseResponse(doc);
+		return parseResponse(doc, delete);
+	}
+	
+	protected void sendPropFind(byte requestByte[]) throws Exception {
+		HttpClient httpclient = new HttpClient();
+		
+		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
+		propFindMethod.setDoAuthentication( true );
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(requestByte);
+		propFindMethod.setRequestBody(bais);
+		
+		int status = httpclient.executeMethod(propFindMethod);
+		
+		assertEquals("check propfind response", 207, status);
+		
+		byte responseByte[] = propFindMethod.getResponseBody();
+		
+		bais = new ByteArrayInputStream(responseByte);
+		
+		Document doc = new SAXBuilder().build(bais);
+
+		parseResponse(doc, false);
 	}
 	
 	protected abstract String getURL();
 	
-	private class PropFindMethodWebResponse extends PutMethodWebRequest {
+	private class PropFindMethod extends EntityEnclosingMethod {
 		
-		public PropFindMethodWebResponse(String url, InputStream is, String contentType) {
-			super(url, is, contentType);
+		public PropFindMethod() {
+			super();
 		}
 		
-		public String getMethod() {
+		public PropFindMethod(String url) {
+			super(url);
+		}
+		
+		public String getName() {
 			return "PROPFIND";
 		}
+		
 	}
 	
 }

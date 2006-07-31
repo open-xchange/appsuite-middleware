@@ -123,7 +123,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 	}
 
 	public void testDelete() throws Exception {
-		AppointmentObject appointmentObj = new AppointmentObject();
+		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		int objectId = saveAppointment(appointmentObj);
 		
 		appointmentObj = new AppointmentObject();
@@ -132,17 +132,21 @@ public class AppointmentTest extends AbstractWebdavTest {
 	}
 	
 	public void testPropFind() throws Exception {
-		byte[] b = listAppointments(-1, new Date(0), false);
+		byte[] b = listAppointments(appointmentFolderId, new Date(0), false);
 		sendPropFind(b);
 	}
 
 	public void testPropFindWithDelete() throws Exception {
-		byte[] b = listAppointments(-1, new Date(0), false);
+		byte[] b = listAppointments(appointmentFolderId, new Date(0), false);
 		sendPropFind(b);
 	}
 	
 	public void testConfirm() throws Exception {
-		fail("not supported yet!");
+		AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
+				
+		int objectId = saveAppointment(appointmentObj);
+		
+		confirmAppointment(objectId);
 	}
 	
 	protected int saveAppointment(AppointmentObject appointmentObj) throws Exception {
@@ -154,7 +158,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 	}
 	
 	protected void deleteAppointment(AppointmentObject appointmentObj) throws Exception {
-		AppointmentWriter appointmentWriter = new AppointmentWriter(sessionObj);
 		Element e_prop = new Element("prop", webdav);
 		
 		Element e_objectId = new Element("object_id", XmlServlet.NS);
@@ -162,12 +165,11 @@ public class AppointmentTest extends AbstractWebdavTest {
 		e_prop.addContent(e_objectId);
 		
 		Element e_method = new Element("method", XmlServlet.NS);
-		e_objectId.addContent("DELETE");
+		e_method.addContent("DELETE");
 		e_prop.addContent(e_method);
 		
-		appointmentWriter.addContent2PropElement(e_prop, appointmentObj, false);
 		byte[] b = writeRequest(e_prop);
-		sendPut(b);
+		sendPut(b, true);
 	}
 	
 	protected byte[] listAppointments(int folderId, Date lastSync, boolean delete) throws Exception {
@@ -201,6 +203,21 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		return baos.toByteArray();
 	} 
+	
+	protected void confirmAppointment(int objectId) throws Exception {
+		Element e_prop = new Element("prop", webdav);
+		
+		Element e_objectId = new Element("object_id", XmlServlet.NS);
+		e_objectId.addContent(String.valueOf(objectId));
+		e_prop.addContent(e_objectId);
+		
+		Element e_method = new Element("method", XmlServlet.NS);
+		e_method.addContent("CONFIRM");
+		e_prop.addContent(e_method);
+		
+		byte[] b = writeRequest(e_prop);
+		sendPut(b);
+	}
 	
 	private AppointmentObject createAppointmentObject(String title) throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
