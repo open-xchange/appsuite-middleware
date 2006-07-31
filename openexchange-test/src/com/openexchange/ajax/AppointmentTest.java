@@ -174,7 +174,7 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.PARTICIPANTS } );
+		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS } );
 	}
 	
 	public void testGet() throws Exception {
