@@ -13,59 +13,8 @@ import org.jdom.Element;
 
 public class AppointmentTest extends CalendarTest {
 	
-	private static String url = "/servlet/calendar";
-	
-	private static int appointmentFolderId = -1;
-	
-	private static long startTime = 0;
-	
-	private static long endTime = 0;
-	
-	private static final long d7 = 604800000;
-	
-	private static int userParticipantId2 = -1;
-	
-	private static int userParticipantId3 = -1;
-	
-	private static int groupParticipantId1 = 13;
-	
-	private static int resourceParticipantId1 = -1;
-	
-	private static boolean isInit = false;
-	
 	protected void setUp() throws Exception {
 		super.setUp();
-		appointmentInit();
-	}
-	
-	public void appointmentInit() throws Exception {
-		if (isInit) {
-			return ;
-		}
-		
-		SessiondConnector sc = SessiondConnector.getInstance();
-		
-		url = AbstractConfigWrapper.parseProperty(webdavProps, "appointment_url", url);
-		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
-		
-		String userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
-		String userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
-		
-		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
-		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
-		
-		groupParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant_id", groupParticipantId1);
-		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant_id", resourceParticipantId1);
-		
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.HOUR_OF_DAY, 12);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		
-		startTime = c.getTimeInMillis();
-		endTime = startTime + 3600000;
-		
-		isInit = true;
 	}
 	
 	public void testNewAppointment() throws Exception {
@@ -150,7 +99,7 @@ public class AppointmentTest extends CalendarTest {
 				
 		int objectId = saveAppointment(appointmentObj);
 		
-		confirmAppointment(objectId);
+		confirmObject(objectId);
 	}
 	
 	protected int saveAppointment(AppointmentObject appointmentObj) throws Exception {
@@ -174,7 +123,7 @@ public class AppointmentTest extends CalendarTest {
 	}
 
 	protected String getURL() {
-		return url;
+		return appointmentUrl;
 	}
 }
 
