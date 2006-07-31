@@ -306,7 +306,7 @@ public class FolderTest extends AbstractAJAXTest {
 		List<FolderObject> l = getRootFolders(conversation, hostname, sessionId, false);
 		for (Iterator iter = l.iterator(); iter.hasNext();) {
 			FolderObject rf = (FolderObject) iter.next();
-			if (rf.getModule() == FolderObject.INFOSTORE) {
+			if (rf.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 				infostore = rf;
 				break;
 			}
