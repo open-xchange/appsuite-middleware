@@ -45,6 +45,17 @@ public final class Init {
 		}
 	}
 	
+    public static Properties getTestProperties() {
+        if (!testPropertiesLoaded) {
+            loadTestProperties();
+        }
+        return testProps;       
+    }
+    
+    public static String getTestProperty(final String key) {
+        return getTestProperties().getProperty(key);
+    }
+
 	private static void loadAJAXProperties() {
 		loadTestProperties();
 		ajaxProps  = new Properties();
@@ -62,15 +73,12 @@ public final class Init {
 		}
 		return ajaxProps;
 	}
-	
-	public static Properties getTestProperties() {
-		if (!testPropertiesLoaded) {
-			loadTestProperties();
-		}
-		return testProps;		
-	}
-	
-	public static void loadSystemProperties() {
+
+    public static String getAJAXProperty(final String key) {
+        return getAJAXProperties().getProperty(key);
+    }
+
+    public static void loadSystemProperties() {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
 			GlobalConfig.loadConf(testProps.getProperty("openexchange.propfile"));
@@ -106,4 +114,5 @@ public final class Init {
 			sessiondInit = true;
 		}
 	}
+
 }

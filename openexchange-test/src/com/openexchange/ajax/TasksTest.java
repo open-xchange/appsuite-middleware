@@ -85,9 +85,8 @@ public class TasksTest extends AbstractAJAXTest {
     private static final String TASKS_URL = "/ajax/tasks";
 
     public void notestCountPrivateFolder() throws Throwable {
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            getWebConversation(), getHostName(), getSessionId());
-        final int folderId = myTasks.getObjectID();
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
 
         final int number = countTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId);
@@ -107,7 +106,7 @@ public class TasksTest extends AbstractAJAXTest {
      * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
      * HttpServletResponse)'
      */
-    public void testInsertPrivateTask() throws Throwable {
+    public void notestInsertPrivateTask() throws Throwable {
         final Task task = new Task();
         task.setTitle("Private task");
         task.setPrivateFlag(false);
@@ -131,9 +130,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            getWebConversation(), getHostName(), getSessionId());
-        final int folderId = myTasks.getObjectID();
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
@@ -153,9 +151,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
         task.setNote("\uC11C\uC601\uC9C4");
 
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            getWebConversation(), getHostName(), getSessionId());
-        final int folderId = myTasks.getObjectID();
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
@@ -208,9 +205,8 @@ public class TasksTest extends AbstractAJAXTest {
         final UserParticipant user2 = new UserParticipant();
         user2.setIdentifier(227); // viktor
 
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            getWebConversation(), getHostName(), getSessionId());
-        final int folderId = myTasks.getObjectID();
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
 
         final List<Participant> participants = new ArrayList<Participant>();
         participants.add(user1);
@@ -230,6 +226,58 @@ public class TasksTest extends AbstractAJAXTest {
         final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
             getSessionId(), lastModified, new int[] { taskId });
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
+    }
+
+    public void notestAll() throws Throwable {
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
+        final Task task = new Task();
+        task.setParentFolderID(folderId);
+        int[] tasks = new int[10];
+        for (int i = 0; i < tasks.length; i++) {
+            task.setTitle("Task " + (i + 1));
+            tasks[i] = insertTask(getWebConversation(), getHostName(),
+                getSessionId(), task);
+        }
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
+            Task.LAST_MODIFIED };
+        final Response response = getAllTasksInFolder(getWebConversation(),
+            getHostName(), getSessionId(), folderId, columns, 0, null);
+        final JSONArray array = (JSONArray) response.getData();
+        // TODO parse JSON array
+        Date timestamp = response.getTimestamp();
+        if (null == timestamp) {
+            // TODO This has to be fixed.
+            timestamp = new Date();
+        }
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            timestamp, tasks);
+    }
+
+    public void notestTaskList() throws Throwable {
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
+        final Task task = new Task();
+        task.setParentFolderID(folderId);
+        int[] tasks = new int[10];
+        for (int i = 0; i < tasks.length; i++) {
+            task.setTitle("Task " + (i + 1));
+            tasks[i] = insertTask(getWebConversation(), getHostName(),
+                getSessionId(), task);
+        }
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
+            Task.LAST_MODIFIED };
+        final Response response = getTaskList(getWebConversation(),
+            getHostName(), getSessionId(), tasks, columns);
+        final JSONArray array = (JSONArray) response.getData();
+        // TODO parse JSON array
+        Date timestamp = response.getTimestamp();
+        if (null == timestamp) {
+            // TODO This has to be fixed.
+            timestamp = new Date();
+        }
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            timestamp, tasks);
     }
     
     /**
@@ -353,5 +401,85 @@ public class TasksTest extends AbstractAJAXTest {
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         return Integer.parseInt(resp.getText());
+    }
+
+    public static Response getAllTasksInFolder(
+        final WebConversation conversation, final String hostName,
+        final String sessionId, final int folderId, final int[] columns,
+        final int sort, final String order) throws MalformedURLException,
+        IOException, SAXException, JSONException {
+        LOG.trace("Getting all task in a folder.");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
+            + TASKS_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION,
+            AJAXServlet.ACTION_ALL);
+        req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
+            String.valueOf(folderId));
+        StringBuilder sb = new StringBuilder();
+        for (int i : columns) {
+            sb.append(i);
+            sb.append(',');
+        }
+        sb.delete(sb.length() - 1, sb.length());
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
+        if (null != order) {
+            req.setParameter(AJAXServlet.PARAMETER_SORT, String.valueOf(sort));
+            req.setParameter(AJAXServlet.PARAMETER_ORDER, order);
+        }
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: " + body);
+        final Response response = ResponseParser.parse(body);
+        if (response.hasError()) {
+            fail(response.getErrorMessage());
+        }
+        return response;
+    }
+
+    public static Response getTaskList(final WebConversation conversation,
+        final String hostName, final String sessionId, final int[] taskIds,
+        final int[] columns) throws MalformedURLException, IOException,
+        SAXException, JSONException {
+        LOG.trace("Get a list of tasks.");
+        final JSONArray json = new JSONArray();
+        for (int i = 0; i < taskIds.length; i++) {
+            json.put(taskIds[i]);
+        }
+        final ByteArrayInputStream bais = new ByteArrayInputStream(json
+            .toString().getBytes("UTF-8"));
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
+            AJAXServlet.ACTION_LIST);
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        final StringBuilder sb = new StringBuilder();
+        for (int i : columns) {
+            sb.append(i);
+            sb.append(',');
+        }
+        sb.delete(sb.length() - 1, sb.length());
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
+            +TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
+            .CONTENTTYPE_JAVASCRIPT);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: " + body);
+        final Response response = ResponseParser.parse(body);
+        if (response.hasError()) {
+            fail(response.getErrorMessage());
+        }
+        return response;
+    }
+
+    public static int getPrivateTaskFolder(final WebConversation conversation,
+        final String hostName, final String sessionId)
+        throws MalformedURLException, IOException, SAXException, JSONException,
+        OXException {
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            conversation, hostName, sessionId);
+        return myTasks.getObjectID();
     }
 }
