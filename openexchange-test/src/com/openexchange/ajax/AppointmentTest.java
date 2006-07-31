@@ -192,9 +192,9 @@ public class AppointmentTest extends CommonTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId3);
-		participants[2] = new UserParticipant();
+		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId1);
-		participants[3] = new UserParticipant();
+		participants[3] = new ResourceParticipant();
 		participants[3].setIdentifier(resourceParticipantId1);
 		
 		appointmentObj.setParticipants(participants);
