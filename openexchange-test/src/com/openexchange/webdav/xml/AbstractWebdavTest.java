@@ -132,7 +132,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		password = AbstractConfigWrapper.parseProperty(webdavProps, propertyPassword, password);
 		
 		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(login, password, "localhost");
+		sessionObj = sc.addSession(login, password, "localhost");
 		
 		userId = sessionObj.getUserObject().getId();
 		
@@ -309,7 +309,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		byte[] b = writeRequest(e_prop);
 		sendPut(b, true);
 	}
-	
+		
 	protected void listObjects(int folderId, Date lastSync, boolean delete) throws Exception {
 		Element e_propfind = new Element("propfind", webdav);
 		Element e_prop = new Element("prop", webdav);
