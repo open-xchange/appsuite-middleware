@@ -8,11 +8,13 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXObject;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.util.Date;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -234,11 +236,83 @@ public abstract class AbstractWebdavTest extends TestCase {
 		
 		byte responseByte[] = propFindMethod.getResponseBody();
 		
+		assertTrue("check body size", responseByte.length > 0);
+		
 		bais = new ByteArrayInputStream(responseByte);
 		
 		Document doc = new SAXBuilder().build(bais);
 
 		parseResponse(doc, false);
+	}
+	
+	protected void deleteObject(FolderChildObject folderChildObj) throws Exception {
+		Element e_prop = new Element("prop", webdav);
+		
+		Element e_objectId = new Element("object_id", XmlServlet.NS);
+		e_objectId.addContent(String.valueOf(folderChildObj.getObjectID()));
+		e_prop.addContent(e_objectId);
+		
+		Element e_method = new Element("method", XmlServlet.NS);
+		e_method.addContent("DELETE");
+		e_prop.addContent(e_method);
+		
+		byte[] b = writeRequest(e_prop);
+		sendPut(b, true);
+	}
+	
+	protected void listObjects(int folderId, Date lastSync, boolean delete) throws Exception {
+		Element e_propfind = new Element("propfind", webdav);
+		Element e_prop = new Element("prop", webdav);
+		
+		Element e_folderId = new Element("folder_id", XmlServlet.NS);
+		Element e_lastSync = new Element("lastsync", XmlServlet.NS);
+		Element e_objectmode = new Element("objectmode", XmlServlet.NS);
+		
+		e_folderId.addContent(String.valueOf(folderId));
+		e_lastSync.addContent(String.valueOf(lastSync.getTime()));
+		
+		e_propfind.addContent(e_prop);
+		e_prop.addContent(e_folderId);
+		e_prop.addContent(e_lastSync);
+		
+		if (delete) {
+			e_objectmode.addContent("NEW_AND_MODIFIED,DELETED");
+			e_prop.addContent(e_objectmode);
+		} 
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		Document doc = new Document(e_propfind);
+		
+		XMLOutputter xo = new XMLOutputter();
+		xo.output(doc, baos);
+		
+		baos.flush();
+		
+		sendPropFind(baos.toByteArray());
+	} 
+	
+	protected void loadObject(int objectId) throws Exception {
+		Element e_propfind = new Element("propfind", webdav);
+		Element e_prop = new Element("prop", webdav);
+		
+		Element eObjectId = new Element("object_id", XmlServlet.NS);
+		
+		eObjectId.addContent(String.valueOf(objectId));
+		
+		e_propfind.addContent(e_prop);
+		e_prop.addContent(eObjectId);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		Document doc = new Document(e_propfind);
+		
+		XMLOutputter xo = new XMLOutputter();
+		xo.output(doc, baos);
+		
+		baos.flush();
+		
+		sendPropFind(baos.toByteArray());
 	}
 	
 	protected abstract String getURL();
