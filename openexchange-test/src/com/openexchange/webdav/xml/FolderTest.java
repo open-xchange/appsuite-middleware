@@ -163,6 +163,10 @@ public class FolderTest extends AbstractWebdavTest {
 			int module = folderobject.getModule();
 			
 			addElement("title", folderobject.getFolderName(), e_prop);
+
+			if (folderobject.containsObjectID()) {
+				addElement("object_id", folderobject.getObjectID(), e_prop);
+			}
 			
 			if (folderobject.containsParentFolderID()) {
 				addElement("folder_id", folderobject.getParentFolderID(), e_prop);
