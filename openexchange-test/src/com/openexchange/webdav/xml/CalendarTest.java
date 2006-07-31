@@ -4,7 +4,7 @@ import org.jdom.Element;
 
 public abstract class CalendarTest extends AbstractWebdavTest {
 
-	protected void confirmAppointment(int objectId) throws Exception {
+	protected void confirmObject(int objectId) throws Exception {
 		Element e_prop = new Element("prop", webdav);
 		
 		Element e_objectId = new Element("object_id", XmlServlet.NS);
