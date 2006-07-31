@@ -134,7 +134,7 @@ public class FolderTest extends AbstractAJAXTest {
 	
 	public static int insertFolder(final WebConversation conversation, final String hostname, final String sessionId,
 			final String entity, final boolean isGroup, final int parentFolderId, final String folderName,
-			final String moduleStr, final int type, final boolean printOutput) throws JSONException, MalformedURLException, IOException,
+			final String moduleStr, final int type, final String sharedForUser, final boolean printOutput) throws JSONException, MalformedURLException, IOException,
 			SAXException, OXException {
 		JSONObject jsonFolder = new JSONObject();
 		jsonFolder.put("title", folderName);
@@ -144,6 +144,13 @@ public class FolderTest extends AbstractAJAXTest {
 		jsonPermission.put("group", isGroup);
 		jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
 		perms.put(jsonPermission);
+		if (sharedForUser != null && sharedForUser.length() > 0) {
+			jsonPermission = new JSONObject();
+			jsonPermission.put("entity", sharedForUser);
+			jsonPermission.put("group", false);
+			jsonPermission.put("bits", createPermissionBits(8, 4, 0, 0, false));
+			perms.put(jsonPermission);
+		}
 		jsonFolder.put("permissions", perms);
 		jsonFolder.put("module", moduleStr);
 		jsonFolder.put("type", type);
@@ -358,7 +365,7 @@ public class FolderTest extends AbstractAJAXTest {
 		try {
 			printTestStart("testInsertRenameFolder");
 			fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "NewPrivateFolder", "calendar", FolderObject.PRIVATE, true);
+					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "NewPrivateFolder", "calendar", FolderObject.PRIVATE, null, true);
 			assertFalse(fuid == -1);
 			Calendar cal = GregorianCalendar.getInstance();
 			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, true);
@@ -368,14 +375,14 @@ public class FolderTest extends AbstractAJAXTest {
 			failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
 			assertFalse((failedIds != null && failedIds.length > 0));
 			fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "NewPublicFolder", "calendar", FolderObject.PRIVATE, true);
+					FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "NewPublicFolder", "calendar", FolderObject.PRIVATE, null, true);
 			assertFalse(fuid == -1);
 			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, true);
 			failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
 			assertFalse((failedIds != null && failedIds.length > 0));
 			FolderObject myInfostore = getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
 			fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, true);
+					myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, null, true);
 			assertFalse(fuid == -1);
 			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, true);
 			updated = renameFolder(getWebConversation(), getHostName(), getSessionId(), fuid, "ChangedInfostoreFolderName", "infostore", FolderObject.PUBLIC, cal.getTimeInMillis(), true);
@@ -401,7 +408,7 @@ public class FolderTest extends AbstractAJAXTest {
 		try {
 			printTestStart("testInsertUpdateFolder");
 			fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "ChangeMyPermissions", "calendar", FolderObject.PRIVATE, true);
+					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "ChangeMyPermissions", "calendar", FolderObject.PRIVATE, null, true);
 			assertFalse(fuid == -1);
 			Calendar cal = GregorianCalendar.getInstance();
 			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, true);
@@ -421,6 +428,76 @@ public class FolderTest extends AbstractAJAXTest {
 		}
 	}
 	
+	public void testSharedFolder() {
+		int fuid01 = -1;
+		int fuid02 = -1;
+		try {
+			printTestStart("testSharedFolder");
+			/*
+			 * Create a shared folder with login
+			 */
+			fuid01 = insertFolder(getWebConversation(), getHostName(), getSessionId(), getSeconduser(), false,
+					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder01", "calendar", FolderObject.PRIVATE,
+					getLogin(), true);
+			assertFalse(fuid01 == -1);
+			fuid02 = insertFolder(getWebConversation(), getHostName(), getSessionId(), getSeconduser(), false,
+					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder02", "calendar", FolderObject.PRIVATE,
+					getLogin(), true);
+			assertFalse(fuid02 == -1);
+			/*
+			 * Connect with another user and verify that folder is visible
+			 */
+			String anotherSessionId = LoginTest.getLogin(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+			boolean found01 = false;
+			boolean found02 = false;
+			List<FolderObject> l = getSubfolders(getWebConversation(), getHostName(), anotherSessionId, ""+FolderObject.SYSTEM_SHARED_FOLDER_ID, true);
+			assertFalse(l == null || l.size() == 0);
+			Next: for (Iterator iter = l.iterator(); iter.hasNext();) {
+				FolderObject virtualFO = (FolderObject) iter.next();
+				List<FolderObject> subList = getSubfolders(getWebConversation(), getHostName(), anotherSessionId, virtualFO.getFullName(), true);
+				for (Iterator iterator = subList.iterator(); iterator.hasNext();) {
+					FolderObject sharedFolder = (FolderObject) iterator.next();
+					if (sharedFolder.getObjectID() == fuid01) {
+						found01 = true;
+						if (found01 && found02)
+							break Next;
+					}
+					if (sharedFolder.getObjectID() == fuid02) {
+						found02 = true;
+						if (found01 && found02)
+							break Next;
+					}
+				}
+			}
+			assertTrue(found01);
+			printTestEnd("testSharedFolder");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} finally {
+			try {
+				if (fuid01 > -1) {
+					Calendar cal = GregorianCalendar.getInstance();
+					/*
+					 * Call getFolder to receive a valid timestamp for deletion
+					 */
+					getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid01, cal, false);
+					deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid01 }, cal.getTimeInMillis(), false);
+				}
+				if (fuid02 > -1) {
+					Calendar cal = GregorianCalendar.getInstance();
+					/*
+					 * Call getFolder to receive a valid timestamp for deletion
+					 */
+					getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid02, cal, false);
+					deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid02 }, cal.getTimeInMillis(), false);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void testGetSubfolder() {
 		int fuid = -1;
 		int[] subfuids = null;
@@ -430,12 +507,12 @@ public class FolderTest extends AbstractAJAXTest {
 			 * Create a temp folder with subfolders
 			 */
 			fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "NewPrivateFolder", "calendar", FolderObject.PRIVATE, true);
+					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "NewPrivateFolder", "calendar", FolderObject.PRIVATE, null, true);
 			DecimalFormat df = new DecimalFormat("00");
 			subfuids = new int[3];
 			for (int i = 0; i < subfuids.length; i++) {
 				subfuids[i] = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-						fuid, "NewPrivateSubFolder" + df.format((i + 1)), "calendar", FolderObject.PRIVATE, true);
+						fuid, "NewPrivateSubFolder" + df.format((i + 1)), "calendar", FolderObject.PRIVATE, null, true);
 			}
 			/*
 			 * Get subfolder list
