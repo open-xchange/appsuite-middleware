@@ -4,25 +4,36 @@ package com.openexchange.groupware.reminder;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.iterator.SearchIterator;
+import java.io.FileInputStream;
 import java.util.Date;
+import java.util.Properties;
 import junit.framework.TestCase;
 
 public class ReminderTest extends TestCase {
 
-	protected static String userName = "offspring";
+	protected static final String reminderPropertiesFile = "reminderPropertiesFile";
 	
-	protected static String password = "netline";
+	protected static final String propertyLogin = "com.openexchange.groupware.reminder.login";
 	
-	private static boolean isInit = false;
+	protected static final String propertyPassword = "com.openexchange.groupware.reminder.password";
+
+	protected static String login = null;
+	
+	protected static String password = null;
 	
 	private SessiondConnector sc = null;
 	
 	private ReminderSQLInterface reminderSql = null;
 	
 	private SessionObject sessionObj = null;
+	
+	protected Properties reminderProps = null;
+	
+	private static boolean isInit = false;
 	
 	public void init() throws Exception {
 		if (isInit) {
@@ -34,6 +45,18 @@ public class ReminderTest extends TestCase {
 		Init.initDB();
 		Init.initSessiond();
 		
+		String propfile = Init.getTestProperties().getProperty(reminderPropertiesFile);
+		
+		if (propfile == null) {
+			throw new Exception("no webdav propfile given!");
+		}
+		
+		reminderProps = new Properties();
+		reminderProps.load(new FileInputStream(propfile));
+		
+		login = AbstractConfigWrapper.parseProperty(reminderProps, propertyLogin, login);
+		password = AbstractConfigWrapper.parseProperty(reminderProps, propertyPassword, password);
+		
 		isInit = true;
 	}
 	
@@ -42,7 +65,7 @@ public class ReminderTest extends TestCase {
 		init();
 		
 		sc = SessiondConnector.getInstance();
-		sessionObj = sc.addSession(userName, password, "localhost");
+		sessionObj = sc.addSession(login, password, "localhost");
 		reminderSql = new ReminderHandler(sessionObj);
 	}
 	
