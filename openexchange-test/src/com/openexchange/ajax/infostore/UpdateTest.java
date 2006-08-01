@@ -4,7 +4,6 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.types.Response;
-import com.openexchange.groupware.infostore.ajax.ResponseWithTimestamp;
 
 
 public class UpdateTest extends InfostoreAJAXTest {

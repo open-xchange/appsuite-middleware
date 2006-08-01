@@ -7,7 +7,6 @@ import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.types.Response;
-import com.openexchange.groupware.infostore.ajax.ResponseWithTimestamp;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class UpdatesTest extends InfostoreAJAXTest{

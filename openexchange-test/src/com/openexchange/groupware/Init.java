@@ -78,6 +78,10 @@ public final class Init {
 		return testProps;		
 	}
 	
+	public static String getTestProperty(final String key) {
+		return getTestProperties().getProperty(key);
+	}
+	
 	public static void loadSystemProperties() {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
