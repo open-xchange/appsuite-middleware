@@ -149,7 +149,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		taskUrl = AbstractConfigWrapper.parseProperty(webdavProps, "task_url", taskUrl);
 		contactUrl = AbstractConfigWrapper.parseProperty(webdavProps, "contact_url", contactUrl);
 		folderUrl = AbstractConfigWrapper.parseProperty(webdavProps, "folder_url", contactUrl);
-		attachmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "attachment_url", contactUrl);
+		attachmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "attachment_url", attachmentUrl);
 		
 		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		contactFolderId = OXFolderTools.getContactStandardFolder(userId, sessionObj.getContext());
