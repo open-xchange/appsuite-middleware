@@ -24,25 +24,36 @@ public class AttachmentTest extends AbstractWebdavTest {
 	}
 	
 	public void testInsertAttachment() throws Exception {
-		insertAttachment(System.currentTimeMillis() + "test.txt", Types.APPOINTMENT, 12345);
+		insertAttachment(System.currentTimeMillis() + "test.txt", Types.APPOINTMENT, 12345, false);
 	}
 
 	public void testLoadAttachment() throws Exception {
-		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, 112233);
-		loadAttachment(objectId, Types.CONTACT, 112233);
+		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, 112233, false);
+		loadAttachment(objectId, Types.CONTACT, 112233, false);
 	}
+	
+	public void testLoadAttachmentWithRtf() throws Exception {
+		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, 112233, true);
+		loadAttachment(objectId, Types.CONTACT, 112233, true);
+	}
+	
 	public void testDeleteAttachment() throws Exception {
-		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.TASK, 22334455);
+		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.TASK, 22334455, false);
 		deleteAttachment(objectId, Types.TASK, 22334455);
 	}
 	
-	protected int insertAttachment(String filename, int module, int targetId) throws Exception {
+	protected int insertAttachment(String filename, int module, int targetId, boolean rtf) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.toString().getBytes());
 		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
 		req.setHeaderField("Authorization", "Basic " + authData);
 		req.setHeaderField("filename", filename);
 		req.setHeaderField("module", String.valueOf(module));
 		req.setHeaderField("target_id", String.valueOf(targetId));
+		
+		if (rtf) {
+			req.setHeaderField("rtf_flag", "true");
+		}
+		
 		resp = webCon.getResponse(req);
 		
 		bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
@@ -51,7 +62,7 @@ public class AttachmentTest extends AbstractWebdavTest {
 		return parseResponse(doc, false);
 	}
 	
-	protected void loadAttachment(int objectId, int module, int targetId) throws Exception {
+	protected void loadAttachment(int objectId, int module, int targetId, boolean rtf) throws Exception {
 		WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + getURL());
 		WebResponse resp = webCon.getResponse(req);
 		req.setHeaderField("module", String.valueOf(module));
@@ -59,6 +70,11 @@ public class AttachmentTest extends AbstractWebdavTest {
 		req.setHeaderField("object_id", String.valueOf(objectId));
 		
 		assertEquals(200, resp.getResponseCode());
+		
+		if (rtf) {
+			assertEquals("check rtf flag", "true", resp.getHeaderField("rtf_flag"));
+		} 
+		
 		assertEquals("check response body size", data.length(), resp.getText().length());
 		assertEquals("check response body", data.toString(), resp.getText());
 	}
@@ -74,8 +90,6 @@ public class AttachmentTest extends AbstractWebdavTest {
 		deleteMethod.setRequestHeader("object_id", String.valueOf(objectId));
 		
 		assertEquals(200, resp.getResponseCode());
-		assertEquals("check response body size", data.length(), resp.getText().length());
-		assertEquals("check response body", data.toString(), resp.getText());
 	}
 	
 
