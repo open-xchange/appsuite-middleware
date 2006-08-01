@@ -1,0 +1,28 @@
+package com.openexchange.ajax.infostore;
+
+import org.json.JSONObject;
+
+import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.types.Response;
+
+
+public class GetTest extends InfostoreAJAXTest {
+
+	public GetTest() {
+		super();
+	}
+	
+	public void testBasic() throws Exception{
+		
+		Response res = this.get(sessionId, clean.get(0));
+		
+		assertNoError(res);
+		
+		JSONObject obj = (JSONObject) res.getData();
+		
+		assertEquals("test knowledge",obj.getString("title"));
+		assertEquals("test knowledge description",obj.getString("description"));
+		
+	}
+
+}
