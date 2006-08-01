@@ -20,6 +20,8 @@ public final class Init {
 	private static boolean testPropertiesLoaded = false;
 	
 	private static boolean ajaxPropertiesLoaded = false;
+
+	private static boolean infostorePropertiesLoaded = false;
 	
 	private static boolean systemPropertiesLoaded = false;
 	
@@ -33,6 +35,8 @@ public final class Init {
 	
 	private static Properties ajaxProps = null;
 	
+	private static Properties infostoreProps = null;
+	
 	public static void loadTestProperties() {
 		if (!testPropertiesLoaded) {
 			testProps = new Properties();
@@ -45,17 +49,6 @@ public final class Init {
 		}
 	}
 	
-    public static Properties getTestProperties() {
-        if (!testPropertiesLoaded) {
-            loadTestProperties();
-        }
-        return testProps;       
-    }
-    
-    public static String getTestProperty(final String key) {
-        return getTestProperties().getProperty(key);
-    }
-
 	private static void loadAJAXProperties() {
 		loadTestProperties();
 		ajaxProps  = new Properties();
@@ -73,12 +66,19 @@ public final class Init {
 		}
 		return ajaxProps;
 	}
-
-    public static String getAJAXProperty(final String key) {
+	
+	public static String getAJAXProperty(final String key) {
         return getAJAXProperties().getProperty(key);
     }
-
-    public static void loadSystemProperties() {
+	
+	public static Properties getTestProperties() {
+		if (!testPropertiesLoaded) {
+			loadTestProperties();
+		}
+		return testProps;		
+	}
+	
+	public static void loadSystemProperties() {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
 			GlobalConfig.loadConf(testProps.getProperty("openexchange.propfile"));
@@ -114,5 +114,25 @@ public final class Init {
 			sessiondInit = true;
 		}
 	}
+	
+	private static void loadInfostoreProperties() {
+		if(infostorePropertiesLoaded)
+			return;
+		loadTestProperties();
+		infostoreProps  = new Properties();
+		try {
+			infostoreProps.load(new FileInputStream(testProps.getProperty("infostorePropertiesFile")));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		infostorePropertiesLoaded = true;
+	}
 
+	public static Properties getInfostoreProperties() {
+		loadTestProperties();
+		if (!infostorePropertiesLoaded) {
+			loadInfostoreProperties();
+		}
+		return infostoreProps;
+	}
 }
