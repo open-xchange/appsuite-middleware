@@ -9,6 +9,10 @@ import com.openexchange.api.OXObject;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.GroupStorage;
+import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.OXFolderTools;
@@ -82,7 +86,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected static int userParticipantId3 = -1;
 	
-	protected static int groupParticipantId1 = 13;
+	protected static int groupParticipantId1 = -1;
 	
 	protected static int resourceParticipantId1 = -1;
 	
@@ -134,6 +138,9 @@ public abstract class AbstractWebdavTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		sessionObj = sc.addSession(login, password, "localhost");
 		
+		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+		ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+		
 		userId = sessionObj.getUserObject().getId();
 		
 		String userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
@@ -142,8 +149,17 @@ public abstract class AbstractWebdavTest extends TestCase {
 		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
 		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
 		
-		groupParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant_id", groupParticipantId1);
-		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant_id", resourceParticipantId1);
+		String groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
+		
+		Group group = groupStorage.searchGroups(groupParticipant, new String[] { GroupStorage.DISPLAYNAME } )[0];
+		
+		groupParticipantId1 = group.getIdentifier();
+		
+		String resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
+		
+		Resource resource = resourceStorage.searchResources(resourceParticipant)[0];
+		
+		resourceParticipantId1 = resource.getIdentifier();
 		
 		appointmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "appointment_url", appointmentUrl);
 		taskUrl = AbstractConfigWrapper.parseProperty(webdavProps, "task_url", taskUrl);

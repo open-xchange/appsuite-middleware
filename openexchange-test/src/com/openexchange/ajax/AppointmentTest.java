@@ -11,6 +11,10 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.GroupStorage;
+import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.OXFolderTools;
@@ -62,10 +66,10 @@ public class AppointmentTest extends CommonTest {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		SessionObject sessionObj = sc.addSession(getLogin(), getPassword(), "localhost");
 		
+		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+		ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+		
 		userId = sessionObj.getUserObject().getId();
-				
-		url = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "appointment_url", url);
-		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		
 		String userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
 		String userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
@@ -73,8 +77,19 @@ public class AppointmentTest extends CommonTest {
 		userParticipantId2 = sc.addSession(userParticipant2, getPassword(), "localhost").getUserObject().getId();
 		userParticipantId3 = sc.addSession(userParticipant3, getPassword(), "localhost").getUserObject().getId();
 		
-		groupParticipantId1 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant_id", groupParticipantId1);
-		resourceParticipantId1 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant_id", resourceParticipantId1);
+		String groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
+		
+		Group group = groupStorage.searchGroups(groupParticipant, new String[] { GroupStorage.DISPLAYNAME } )[0];
+		
+		groupParticipantId1 = group.getIdentifier();
+		
+		String resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
+		
+		Resource resource = resourceStorage.searchResources(resourceParticipant)[0];
+		
+		resourceParticipantId1 = resource.getIdentifier();
+		
+		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
