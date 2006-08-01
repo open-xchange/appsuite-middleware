@@ -90,6 +90,7 @@
 		<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.TasksTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.ReminderTest" todir="${test.xml.dir}" />
+		<!-- test name="com.openexchange.ajax.infostore.InfostoreAjaxSuite" /-->
 		<!--test name="com.openexchange.ajax.ParticipantTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.ContactTest" todir="${test.xml.dir}" /-->
 		<test name="com.openexchange.ajax.ConfigMenuTest" todir="${test.xml.dir}" />
