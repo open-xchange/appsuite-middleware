@@ -1,8 +1,24 @@
 package com.openexchange.ajax;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.Properties;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HttpUnitOptions;
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.ajax.types.Response;
 import com.openexchange.groupware.Init;
 
 import junit.framework.TestCase;
@@ -67,6 +83,7 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @return Returns the webConversation.
      */
     protected WebConversation getWebConversation() {
+    	HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         if (null == webConversation) {
             webConversation = new WebConversation();
         }
@@ -102,6 +119,78 @@ public abstract class AbstractAJAXTest extends TestCase {
             seconduser = getAJAXProperty("seconduser");
         }
 		return seconduser;
+	}
+	
+	// Query methods
+	
+	protected String putS(String url, String body) throws MalformedURLException, IOException, SAXException {
+		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes()), "text/javascript");
+		WebResponse resp = getWebConversation().getResponse(m);
+		return resp.getText();
+	}
+	
+	protected JSONObject put(String url, String body) throws MalformedURLException, JSONException, IOException, SAXException {
+		JSONObject o = new JSONObject(putS(url,body));
+		return o;
+	}
+	
+	protected void putN(String url, String body) throws MalformedURLException, IOException, SAXException  {
+		putS(url,body);
+	}
+	
+	protected JSONArray putA(String url, String body) throws MalformedURLException, JSONException, IOException, SAXException  {
+		JSONArray a = new JSONArray(putS(url,body));
+		return a;
+	}
+	
+	protected String gS(String url) throws MalformedURLException, IOException, SAXException {
+		GetMethodWebRequest m = new GetMethodWebRequest(url);
+		WebResponse resp = getWebConversation().getResponse(m);
+		return resp.getText();
+	}
+	
+	protected JSONObject g(String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		JSONObject o = new JSONObject(gS(url));
+		return o;
+	}
+	
+	protected JSONArray gA(String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		JSONArray a = new JSONArray(gS(url));
+		return a;
+	}
+	
+	protected String pS(String url, Map<String,String> data) throws MalformedURLException, IOException, SAXException {
+		PostMethodWebRequest m = new PostMethodWebRequest(url);
+		for(String key : data.keySet()) {
+			m.setParameter(key,data.get(key));
+		}
+		WebResponse resp = getWebConversation().getResponse(m);
+		return resp.getText();
+	}
+	
+	protected JSONObject p(String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+		JSONObject o = new JSONObject(pS(url,data));
+		return o;
+	}
+	
+	protected JSONArray pA(String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+		return new JSONArray(pS(url,data));
+	}
+	
+	protected Response gT(String url) throws MalformedURLException, JSONException, IOException, SAXException {
+		return ResponseParser.parse(gS(url));
+	}
+	
+	protected Response pT(String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
+		return ResponseParser.parse(pS(url,data));
+	}
+	
+	protected Response putT(String url, String data) throws MalformedURLException, JSONException, IOException, SAXException  {
+		return ResponseParser.parse(putS(url,data));
+	}
+	
+	public static void assertNoError(Response res) {
+		assertFalse(res.getErrorMessage(),res.hasError());
 	}
     
 }
