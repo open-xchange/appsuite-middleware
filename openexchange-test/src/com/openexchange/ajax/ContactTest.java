@@ -20,7 +20,7 @@ import org.json.JSONObject;
 
 public class ContactTest extends CommonTest {
 	
-	private static String url = "/ajax/contact";
+	private static String url = "/ajax/contacts";
 	
 	private static int contactFolderId = -1;
 	
