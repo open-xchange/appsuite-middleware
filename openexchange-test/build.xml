@@ -107,7 +107,6 @@
 		<formatter type="xml" /> 
 		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" /> 
 	</junit> 
-	<fail message="Tests failed! Check test reports." if="test.failed" /> 
 	</target> 
   
 
