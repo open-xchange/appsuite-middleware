@@ -58,7 +58,7 @@ public class ParticipantTest extends CommonTest {
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("type", com.openexchange.groupware.container.Participant.USER);
 		jsonObj.put(FolderChildFields.FOLDER_ID, FolderObject.INTERNALUSERS);
-		jsonObj.put("searchpattern", "*");
+		jsonObj.put("pattern", "*");
 		
 		actionPut(parameter.toString(), jsonObj.toString().getBytes());
 	}
@@ -70,7 +70,7 @@ public class ParticipantTest extends CommonTest {
 		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("type", com.openexchange.groupware.container.Participant.RESOURCE);
-		jsonObj.put("searchpattern", "*");
+		jsonObj.put("pattern", "*");
 		
 		actionPut(parameter.toString(), jsonObj.toString().getBytes());
 	}
