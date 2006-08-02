@@ -272,7 +272,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
-    public void notestAll() throws Throwable {
+    public void testAll() throws Throwable {
         final int folderId = getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
