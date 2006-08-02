@@ -5,7 +5,6 @@
   <property name="lib" value="lib"/>
   <property name="test.xml.dir" location="test-results" />
   <property name="conf.dir" location="conf" />
-  <property name="test.fail-on-error" value="true" />
   
   <property name="build.compiler" value="modern"/>
   <path id="project.classpath"> 
@@ -110,18 +109,10 @@
 		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" /> 
 	</junit> 
 	
-	<condition property="test.mustfail">
-		<and>
-			<istrue value="${test.failed}" />
-			<istrue value="${test.fail-on-error}" />
-		</and>
-	</condition>
-	
-	<antcall target="fail" />
+	<fail message="Tests failed!" if="${test.failed}" />
 	
 	</target>
 	
-	<target name="fail" if="test.mustfail" />
   
 
   <target name="clean">
