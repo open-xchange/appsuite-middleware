@@ -79,6 +79,10 @@
 			<pathelement location="${lib}/mysql.jar" />
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
+    	
+    	<!-- Failling Test -->
+    	
+    	<test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/>
 		
 		<!-- Server Internals -->
 		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
