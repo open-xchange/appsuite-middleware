@@ -113,7 +113,7 @@
 		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" /> 
 	</junit> 
 	
-	<fail message="Tests failed!" if="${test.failed}" />
+	<fail message="Tests failed!" if="test.failed" />
 	
 	</target>
 	
