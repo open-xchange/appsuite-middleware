@@ -2,7 +2,9 @@ package com.openexchange.ajax;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.Init;
@@ -18,6 +20,7 @@ import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.OXFolderTools;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -247,7 +250,37 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionDelete(int[] id) throws Exception{
-		delete(id);
+		StringBuffer parameter = new StringBuffer();
+		parameter.append("?session=" + getSessionId());
+		parameter.append("&action=delete");
+		parameter.append("&timestamp=" + new Date(0).getTime());
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < id.length; a++) {
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put(DataFields.ID, id[a]);
+			jsonArray.put(jsonObj);
+		} 
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
+		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagError)) {
+			fail("server error: " + jsonobject.getString(jsonTagError));
+		}
+		
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+			assertTrue("array length is 1", data.length() == 1);
+			assertEquals("first entry in array is 1", 1, data.getInt(0));
+		} else {
+			fail("no data in JSON object!");
+		}
+		
+		assertEquals(200, resp.getResponseCode());
 	}
 	
 	protected void actionConfirm(int object_id, int confirm) throws Exception {
