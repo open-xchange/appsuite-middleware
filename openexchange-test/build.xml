@@ -82,7 +82,7 @@
     	
     	<!-- Failling Test -->
     	
-    	<!-- test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/-->
+    	<test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/>
 		
 		<!-- Server Internals -->
 		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
