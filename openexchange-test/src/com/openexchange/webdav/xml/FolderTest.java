@@ -60,7 +60,7 @@ public class FolderTest extends AbstractWebdavTest {
 		
 		folderObj = new FolderObject();
 		folderObj.setObjectID(objectId);
-		deleteObject(folderObj);
+		deleteObject(folderObj, -1);
 	}
 	
 	public void testPropFind() throws Exception {

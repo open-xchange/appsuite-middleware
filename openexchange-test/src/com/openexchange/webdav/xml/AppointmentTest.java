@@ -76,7 +76,7 @@ public class AppointmentTest extends CalendarTest {
 		
 		appointmentObj = new AppointmentObject();
 		appointmentObj.setObjectID(objectId);
-		deleteObject(appointmentObj);
+		deleteObject(appointmentObj, appointmentFolderId);
 	}
 	
 	public void testPropFind() throws Exception {

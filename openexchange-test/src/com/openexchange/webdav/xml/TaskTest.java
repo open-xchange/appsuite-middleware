@@ -67,7 +67,7 @@ public class TaskTest extends CalendarTest {
 		
 		taskObj = new Task();
 		taskObj.setObjectID(objectId);
-		deleteObject(taskObj);
+		deleteObject(taskObj, taskFolderId);
 	}
 	
 	public void testPropFind() throws Exception {

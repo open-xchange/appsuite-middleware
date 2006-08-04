@@ -84,7 +84,7 @@ public class ContactTest extends CalendarTest {
 		
 		contactObj = new ContactObject();
 		contactObj.setObjectID(objectId);
-		deleteObject(contactObj);
+		deleteObject(contactObj, contactFolderId);
 	}
 	
 	public void testPropFind() throws Exception {
