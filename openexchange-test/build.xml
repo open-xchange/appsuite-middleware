@@ -84,13 +84,6 @@
     	
     	<!-- test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/-->
 		
-		<!-- Server Internals -->
-		<!--test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" /-->
-		<!-- test name="com.openexchange.groupware.reminder.ReminderTest" todir="${test.xml.dir}" /-->
-		
-		
 		<!-- AJAX Interface -->
 		<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.TasksTest" todir="${test.xml.dir}" />
@@ -104,7 +97,12 @@
 		<!-- Webdav Interface -->
 		<!-- test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" /-->
 		
-		
+		<!-- Server Internals -->
+		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
+		<!-- test name="com.openexchange.groupware.reminder.ReminderTest" todir="${test.xml.dir}" /-->
+				
 		
 		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
 		
