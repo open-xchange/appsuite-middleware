@@ -51,8 +51,6 @@ public class ParticipantTest extends AbstractAJAXTest {
 		
 		groupId = g[0].getIdentifier();
 		
-		System.out.println("GROUPID: " + groupId);
-		
 		JSONObject jsonObj = listMembers(getWebConversation(), PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.GROUP, groupId);
 		
 		if (!jsonObj.has(jsonTagData)) {
