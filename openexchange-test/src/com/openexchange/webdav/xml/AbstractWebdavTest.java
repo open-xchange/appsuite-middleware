@@ -389,7 +389,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected abstract String getURL();
 	
-	private class PropFindMethod extends EntityEnclosingMethod {
+	protected class PropFindMethod extends EntityEnclosingMethod {
 		
 		public PropFindMethod() {
 			super();
