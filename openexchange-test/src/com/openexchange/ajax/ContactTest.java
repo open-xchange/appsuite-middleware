@@ -2,19 +2,19 @@ package com.openexchange.ajax;
 
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -173,7 +173,38 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected void actionDelete(int[] id) throws Exception{
-		delete(id);
+		StringBuffer parameter = new StringBuffer();
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_DELETE);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < id.length; a++) {
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put(DataFields.ID, id[a]);
+			jsonObj.put(AJAXServlet.PARAMETER_FOLDERID, contactFolderId);
+			jsonArray.put(jsonObj);
+		} 
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
+		JSONObject jsonobject = new JSONObject(resp.getText());
+		
+		if (jsonobject.has(jsonTagError)) {
+			fail("server error: " + jsonobject.getString(jsonTagError));
+		}
+		
+		if (jsonobject.has(jsonTagData)) {
+			JSONArray data = jsonobject.getJSONArray(jsonTagData);
+			assertTrue("array length is 1", data.length() == 1);
+			assertEquals("first entry in array is 1", 1, data.getInt(0));
+		} else {
+			fail("no data in JSON object!");
+		}
+		
+		assertEquals(200, resp.getResponseCode());
 	}
 	
 	protected void actionList(int[] id) throws Exception{
