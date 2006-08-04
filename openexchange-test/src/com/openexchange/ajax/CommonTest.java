@@ -6,6 +6,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.CommonObject;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -26,8 +27,8 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=new");
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_NEW);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
@@ -55,14 +56,15 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		return object_id;
 	}
 	
-	protected void update(byte b[], int id) throws Exception {
+	protected void update(byte b[], int id, int inFolder) throws Exception {
 		int object_id = 0;
 		
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=update");
-		parameter.append("&id=" + id);
-		parameter.append("&timestamp=" + new Date().getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_UPDATE);
+		parameter.append("&" + DataFields.ID + "=" + id);
+		parameter.append("&" + FolderChildFields.FOLDER_ID + "=" + inFolder);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date().getTime());
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
@@ -70,7 +72,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has("error")) {
-			fail("server error: " + jsonobject.getString("error"));
+			fail("server error: " + jsonobject.getString(jsonTagError));
 		}
 		
 		assertEquals(200, resp.getResponseCode());
@@ -78,9 +80,9 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	
 	protected void delete(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=delete");
-		parameter.append("&timestamp=" + new Date().getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_DELETE);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date().getTime());
 		
 		JSONArray jsonArray = new JSONArray();
 		
@@ -110,9 +112,9 @@ public abstract class CommonTest extends AbstractAJAXTest {
 	
 	protected void list(int[] id, int[] cols) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=" + AJAXServlet.ACTION_LIST);
-		parameter.append("&columns=");
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_LIST);
+		parameter.append("&" + AJAXServlet.PARAMETER_COLUMNS + "=");
 		
 		for (int a = 0; a  < cols.length; a++) {
 			if (a == 0) {
@@ -134,7 +136,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		JSONObject jsonobject = new JSONObject(resp.getText());
 
 		if (jsonobject.has(jsonTagError)) {
-			fail("server error: " + jsonobject.getString("error"));
+			fail("server error: " + jsonobject.getString(jsonTagError));
 		}
 		
 		if (jsonobject.has(jsonTagData)) {
@@ -151,11 +153,12 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected WebResponse getObject(int object_id) throws Exception {
+	protected WebResponse getObject(int object_id, int inFolder) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=get");
-		parameter.append("&id=" + object_id);
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_GET);
+		parameter.append("&" + DataFields.ID + "=" + object_id);
+		parameter.append("&" + FolderChildFields.FOLDER_ID + "=" + inFolder);
 		
 		req = new GetMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString());
 		resp = getWebConversation().getResponse(req);
