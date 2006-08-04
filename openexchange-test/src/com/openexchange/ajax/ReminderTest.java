@@ -5,6 +5,7 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.DataFields;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import org.json.JSONArray;
@@ -12,7 +13,7 @@ import org.json.JSONObject;
 
 public class ReminderTest extends AbstractAJAXTest {
 	
-	private static String url = "/ajax/reminder";
+	private static final String REMINDER_URL = "/ajax/reminder";
 	
 	private static final long d7 = 604800000;
 	
@@ -31,26 +32,26 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	public void testUpdates() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=" + AJAXServlet.ACTION_UPDATES);
-		parameter.append("&timestamp=" + end.getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_UPDATES);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + end.getTime());
 		
 		actionUpdates(parameter.toString());
 	}
 	
 	public void testRange() throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=" + AJAXServlet.ACTION_RANGE);
-		parameter.append("&start=" + start.getTime());
-		parameter.append("&end=" + end.getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_RANGE);
+		parameter.append("&" + AJAXServlet.PARAMETER_START + "=" + start.getTime());
+		parameter.append("&" + AJAXServlet.PARAMETER_END + "=" + end.getTime());
 		
 		actionRange(parameter.toString());
 	}
 	
 	protected void actionRange(String parameter) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + REMINDER_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -67,7 +68,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	protected void actionUpdates(String parameter) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
-		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + REMINDER_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
@@ -84,18 +85,20 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	protected void actionDelete(int[] id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=delete");
-		parameter.append("&timestamp=" + new Date(0).getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_DELETE);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
 		
 		JSONArray jsonArray = new JSONArray();
 		
 		for (int a = 0; a < id.length; a++) {
-			jsonArray.put(id[a]);
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put(DataFields.ID, id[a]);
+			jsonArray.put(jsonObj);
 		}
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString(), bais, "text/javascript");
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + REMINDER_URL + parameter.toString(), bais, "text/javascript");
 		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
