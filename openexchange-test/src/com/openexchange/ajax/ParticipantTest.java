@@ -97,7 +97,7 @@ public class ParticipantTest extends AbstractAJAXTest {
 		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("type", type);
-		jsonObj.put("pattern", "*");
+		jsonObj.put("pattern", searchpattern);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
 		WebRequest req = new PutMethodWebRequest(host + PARTICIPANT_URL + parameter.getURLParameters(), bais, "text/javascript");
