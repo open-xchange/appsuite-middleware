@@ -318,9 +318,11 @@ public abstract class AbstractWebdavTest extends TestCase {
 		e_objectId.addContent(String.valueOf(folderChildObj.getObjectID()));
 		e_prop.addContent(e_objectId);
 
-		Element eFolderId = new Element("folder_id", XmlServlet.NS);
-		eFolderId.addContent(String.valueOf(inFolder));
-		e_prop.addContent(eFolderId);
+		if (inFolder != -1) {
+			Element eFolderId = new Element("folder_id", XmlServlet.NS);
+			eFolderId.addContent(String.valueOf(inFolder));
+			e_prop.addContent(eFolderId);
+		} 
 		
 		Element e_method = new Element("method", XmlServlet.NS);
 		e_method.addContent("DELETE");
