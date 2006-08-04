@@ -33,26 +33,6 @@ public class ResourcesHandleTest extends TestCase {
     }
 
     /*
-     * Test method for 'com.openexchange.groupware.ldap.RdbResourcesHandle.existsGroup(String)'
-     */
-    public void testExistsGroup() throws Throwable {
-        String resourceGroup1 = LdapTests.p.getProperty("resourceGroup1");
-        assertTrue(rh.existsGroup(resourceGroup1));
-        String nonExistentGroup = LdapTests.p.getProperty("nonExistentResourceGroup");
-        assertFalse(rh.existsGroup(nonExistentGroup));
-    }
-
-    /*
-     * Test method for 'com.openexchange.groupware.ldap.RdbResourcesHandle.existsResource(String)'
-     */
-    public void testExistsResource() {
-        String resource1 = LdapTests.p.getProperty("resource1");
-        assertTrue(rh.existsResource(resource1));
-        String nonExistentResource = LdapTests.p.getProperty("nonExistentResource");
-        assertFalse(rh.existsResource(nonExistentResource));
-    }
-
-    /*
      * Test method for 'com.openexchange.groupware.ldap.RdbResourcesHandle.getGroups()'
      */
     public void testGetResourceGroups() {
@@ -89,57 +69,6 @@ public class ResourcesHandleTest extends TestCase {
 			String element = (String) iter.next();
 			assertTrue("Checking " + element, element.equals(resInGrp));
 		}
-    }
-
-    /*
-     * Test method for 'com.openexchange.groupware.ldap.RdbResourcesHandle.isResGroupNotAvailable(String)'
-     */
-    public void testIsResGroupNotAvailable() {
-    	String resGrp01Id = LdapTests.p.getProperty("resourceGroup1");
-    	boolean notAvailable = rh.isResGroupNotAvailable(resGrp01Id);
-    	assertFalse(notAvailable);
-    }
-
-    /*
-     * Test method for 'com.openexchange.groupware.ldap.RdbResourcesHandle.searchGroups(String)'
-     */
-    public void testSearchGroups() {
-    	String pattern01 = "Aut*";
-    	String pattern02 = "*otebo*";
-    	String pattern03 = "*o*";
-    	String resGrp01Id = LdapTests.p.getProperty("resourceGroup1"); // Autos
-    	String resGrp02Id = LdapTests.p.getProperty("resourceGroup2"); // Notebooks
-    	Set searchResult = rh.searchGroups(pattern01);
-    	if (searchResult.size() != 1) {
-    		fail("Unexpected result size! Resource Group \"Autos\" not found?");
-    	}
-    	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
-			String result = (String) iter.next();
-			assertTrue(result.equals(resGrp01Id));
-		}
-    	searchResult = rh.searchGroups(pattern02);
-    	if (searchResult.size() != 1) {
-    		fail("Unexpected result size! Resource Group \"Notebooks\" not found?");
-    	}
-    	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
-			String result = (String) iter.next();
-			assertTrue(result.equals(resGrp02Id));
-		}
-    	searchResult = rh.searchGroups(pattern03);
-    	if (searchResult.size() != 2) {
-    		fail("Unexpected result size! Resource Groups which contain character 'o' not found?");
-    	}
-    	String[] resArr = { resGrp01Id, resGrp02Id };
-    	for (Iterator iter = searchResult.iterator(); iter.hasNext();) {
-			String result = (String) iter.next();
-			for (int i = 0; i < resArr.length; i++) {
-				if (resArr[i].equals(result)) {
-					iter.remove();
-					resArr = removeElementAt(i, resArr);
-				}
-			}
-		}
-    	assertTrue(searchResult.isEmpty() && resArr.length == 0);
     }
 
     /*
