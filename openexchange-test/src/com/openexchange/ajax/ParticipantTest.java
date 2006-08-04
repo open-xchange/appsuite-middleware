@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 public class ParticipantTest extends CommonTest {
 	
-	private static final String PARTICIPANT_URL = "/ajax/participants";
+	private static final String PARTICIPANT_URL = "/ajax/participant";
 	
 	public void testUserSearch() throws Exception {
 		StringBuffer parameter = new StringBuffer();
