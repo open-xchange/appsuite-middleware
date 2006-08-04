@@ -300,6 +300,30 @@ public class FolderTest extends AbstractAJAXTest {
 		throw new OXException("No Standard Task Folder found!");
 	}
 	
+	public static FolderObject getStandardCalendarFolder(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+		List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""+FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false);
+		for (Iterator iter = subfolders.iterator(); iter.hasNext();) {
+			FolderObject subfolder = (FolderObject) iter.next();
+			if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
+				return subfolder;
+			}
+		}
+		throw new OXException("No Standard Task Folder found!");
+	}
+	
+	public static FolderObject getStandardContactFolder(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+		List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""+FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false);
+		for (Iterator iter = subfolders.iterator(); iter.hasNext();) {
+			FolderObject subfolder = (FolderObject) iter.next();
+			if (subfolder.getModule() == FolderObject.CONTACT && subfolder.isDefaultFolder()) {
+				return subfolder;
+			}
+		}
+		throw new OXException("No Standard Task Folder found!");
+	}
+	
 	public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname,
 			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
 		FolderObject infostore = null;
