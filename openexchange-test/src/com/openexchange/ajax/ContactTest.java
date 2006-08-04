@@ -208,7 +208,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id, new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME } );
+		list(id, contactFolderId, new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME } );
 	}
 	
 	protected void actionAll(int folderId) throws Exception {

@@ -173,7 +173,7 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionList(int[] id) throws Exception{
-		list(id, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS } );
+		list(id, appointmentFolderId, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS } );
 	}
 	
 	public void testGet() throws Exception {
@@ -241,7 +241,7 @@ public class AppointmentTest extends CommonTest {
 		for (int a = 0; a < id.length; a++) {
 			JSONObject jsonObj = new JSONObject();
 			jsonObj.put(DataFields.ID, id[a]);
-			jsonObj.put(FolderChildFields.FOLDER_ID, id[a]);
+			jsonObj.put(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
 			jsonArray.put(jsonObj);
 		} 
 		
@@ -270,7 +270,7 @@ public class AppointmentTest extends CommonTest {
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_CONFIRM);
 		parameter.append("&" + DataFields.ID + "=" + object_id);
-		parameter.append("&" + CalendarFields.CONFIRM +"=" + confirm);
+		parameter.append("&" + AJAXServlet.PARAMETER_CONFIRM +"=" + confirm);
 		
 		req = new PostMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);

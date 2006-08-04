@@ -63,7 +63,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_UPDATE);
 		parameter.append("&" + DataFields.ID + "=" + id);
-		parameter.append("&" + FolderChildFields.FOLDER_ID + "=" + inFolder);
+		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + inFolder);
 		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date().getTime());
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -110,7 +110,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void list(int[] id, int[] cols) throws Exception {
+	protected void list(int[] id, int inFolder, int[] cols) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_LIST);
@@ -127,7 +127,10 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		JSONArray jsonArray = new JSONArray();
 		
 		for (int a = 0; a < id.length; a++) {
-			jsonArray.put(id[a]);
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put(DataFields.ID, id[a]);
+			jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+			jsonArray.put(jsonObj);
 		} 
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
@@ -141,7 +144,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		
 		if (jsonobject.has(jsonTagData)) {
 			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-			assertTrue("array length is 3", data.length() == 3);
+			assertTrue("array length is >= 3", data.length() >= 3);
 		} else {
 			fail("no data in JSON object!");
 		}
@@ -158,7 +161,7 @@ public abstract class CommonTest extends AbstractAJAXTest {
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_GET);
 		parameter.append("&" + DataFields.ID + "=" + object_id);
-		parameter.append("&" + FolderChildFields.FOLDER_ID + "=" + inFolder);
+		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + inFolder);
 		
 		req = new GetMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString());
 		resp = getWebConversation().getResponse(req);
