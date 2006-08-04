@@ -4,22 +4,17 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
-import com.openexchange.groupware.ldap.Resource;
-import com.openexchange.groupware.ldap.ResourceStorage;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
-import com.openexchange.tools.OXFolderTools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -31,7 +26,7 @@ import org.json.JSONObject;
 
 public class AppointmentTest extends CommonTest {
 	
-	private static String url = "/ajax/appointment";
+	private static final String APPOINTMENT_URL = "/ajax/appointment";
 	
 	private static int appointmentFolderId = -1;
 	
@@ -60,39 +55,25 @@ public class AppointmentTest extends CommonTest {
 		if (isInit) {
 			return ;
 		}
-		
-		Init.loadSystemProperties();
-		Init.loadServerConf();
-		Init.initDB();
-		Init.initSessiond();
-		
-		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(getLogin(), getPassword(), "localhost");
-		
-		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
-		ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
-		
-		userId = sessionObj.getUserObject().getId();
+
+		userId = ParticipantTest.searchUser(getWebConversation(), getLogin(), PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
 		
 		String userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
 		String userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
 		
-		userParticipantId2 = sc.addSession(userParticipant2, getPassword(), "localhost").getUserObject().getId();
-		userParticipantId3 = sc.addSession(userParticipant3, getPassword(), "localhost").getUserObject().getId();
+		userParticipantId2 = ParticipantTest.searchUser(getWebConversation(), userParticipant2, PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
+		userParticipantId3 = ParticipantTest.searchUser(getWebConversation(), userParticipant3, PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
 		
 		String groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
 		
-		Group group = groupStorage.searchGroups(groupParticipant, new String[] { GroupStorage.DISPLAYNAME } )[0];
-		
-		groupParticipantId1 = group.getIdentifier();
+		groupParticipantId1 = ParticipantTest.listGroup(getWebConversation(), PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		String resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
 		
-		Resource resource = resourceStorage.searchResources(resourceParticipant)[0];
+		resourceParticipantId1 = ParticipantTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		resourceParticipantId1 = resource.getIdentifier();
-		
-		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
+        FolderObject appointmentFolder = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
+        appointmentFolderId = appointmentFolder.getObjectID();
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
@@ -246,20 +227,21 @@ public class AppointmentTest extends CommonTest {
 		pw.flush();
 		
 		byte b[] = baos.toByteArray();
-		update(b, appointmentobject.getObjectID());
+		update(b, appointmentobject.getObjectID(), appointmentFolderId);
 	}
 	
 	protected void actionDelete(int[] id) throws Exception{
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=delete");
-		parameter.append("&timestamp=" + new Date(0).getTime());
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_DELETE);
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
 		
 		JSONArray jsonArray = new JSONArray();
 		
 		for (int a = 0; a < id.length; a++) {
 			JSONObject jsonObj = new JSONObject();
 			jsonObj.put(DataFields.ID, id[a]);
+			jsonObj.put(FolderChildFields.FOLDER_ID, id[a]);
 			jsonArray.put(jsonObj);
 		} 
 		
@@ -285,12 +267,12 @@ public class AppointmentTest extends CommonTest {
 	
 	protected void actionConfirm(int object_id, int confirm) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=confirm");
-		parameter.append("&id=" + object_id);
-		parameter.append("&confirm=" + confirm);
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_CONFIRM);
+		parameter.append("&" + DataFields.ID + "=" + object_id);
+		parameter.append("&" + CalendarFields.CONFIRM +"=" + confirm);
 		
-		req = new PostMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		req = new PostMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
@@ -308,15 +290,15 @@ public class AppointmentTest extends CommonTest {
 	
 	protected void actionAll(int folderId, Date start, Date end) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=all");
-		parameter.append("&folder=" + folderId);
-		parameter.append("&start=" + start.getTime());;
-		parameter.append("&end=" + end.getTime());
-		parameter.append("&columns=");
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_CONFIRM);
+		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + folderId);
+		parameter.append("&" + AJAXServlet.PARAMETER_START + "=" + start.getTime());;
+		parameter.append("&" + AJAXServlet.PARAMETER_END + "=" + end.getTime());
+		parameter.append("&" + AJAXServlet.PARAMETER_COLUMNS + "=");
 		parameter.append(AppointmentObject.OBJECT_ID);
 		
-		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
@@ -335,7 +317,7 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected void actionGet(int objectId) throws Exception {
-		WebResponse resp = getObject(objectId);
+		WebResponse resp = getObject(objectId, appointmentFolderId);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has(jsonTagError)) {
@@ -358,7 +340,7 @@ public class AppointmentTest extends CommonTest {
 	}
 	
 	protected String getURL() {
-		return url;
+		return APPOINTMENT_URL;
 	}
 	
 	private AppointmentObject createAppointmentObject(String title) {
