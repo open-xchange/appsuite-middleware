@@ -268,7 +268,7 @@ public class AppointmentTest extends CommonTest {
 	protected void actionConfirm(int object_id, int confirm) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
-		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_CONFIRM);
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_CONFIRM);
 		parameter.append("&" + DataFields.ID + "=" + object_id);
 		parameter.append("&" + AJAXServlet.PARAMETER_CONFIRM +"=" + confirm);
 		
@@ -291,7 +291,7 @@ public class AppointmentTest extends CommonTest {
 	protected void actionAll(int folderId, Date start, Date end) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
-		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_CONFIRM);
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_ALL);
 		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + folderId);
 		parameter.append("&" + AJAXServlet.PARAMETER_START + "=" + start.getTime());;
 		parameter.append("&" + AJAXServlet.PARAMETER_END + "=" + end.getTime());
