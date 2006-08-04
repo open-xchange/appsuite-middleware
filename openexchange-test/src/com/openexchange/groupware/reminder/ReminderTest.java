@@ -15,21 +15,11 @@ import junit.framework.TestCase;
 
 public class ReminderTest extends TestCase {
 
-	protected static final String reminderPropertiesFile = "reminderPropertiesFile";
-	
-	protected static final String propertyLogin = "com.openexchange.groupware.reminder.login";
-	
-	protected static final String propertyPassword = "com.openexchange.groupware.reminder.password";
-
-	protected static String login = null;
-	
-	protected static String password = null;
-	
-	private SessiondConnector sc = null;
-	
 	private ReminderSQLInterface reminderSql = null;
 	
-	private SessionObject sessionObj = null;
+	private static SessiondConnector sc = null;
+	
+	private static SessionObject sessionObj = null;
 	
 	protected Properties reminderProps = null;
 	
@@ -45,18 +35,9 @@ public class ReminderTest extends TestCase {
 		Init.initDB();
 		Init.initSessiond();
 		
-		String propfile = Init.getTestProperties().getProperty(reminderPropertiesFile);
-		
-		if (propfile == null) {
-			throw new Exception("no webdav propfile given!");
-		}
-		
-		reminderProps = new Properties();
-		reminderProps.load(new FileInputStream(propfile));
-		
-		login = AbstractConfigWrapper.parseProperty(reminderProps, propertyLogin, login);
-		password = AbstractConfigWrapper.parseProperty(reminderProps, propertyPassword, password);
-		
+		sc = SessiondConnector.getInstance();
+		sessionObj = sc.addSession(Init.getAJAXProperty("login"), Init.getAJAXProperty("password"), "localhost");
+
 		isInit = true;
 	}
 	
@@ -64,8 +45,6 @@ public class ReminderTest extends TestCase {
 		super.setUp();
 		init();
 		
-		sc = SessiondConnector.getInstance();
-		sessionObj = sc.addSession(login, password, "localhost");
 		reminderSql = new ReminderHandler(sessionObj);
 	}
 	
