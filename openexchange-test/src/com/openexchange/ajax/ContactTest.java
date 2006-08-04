@@ -9,10 +9,10 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
-import com.openexchange.tools.OXFolderTools;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import org.json.JSONArray;
@@ -20,7 +20,7 @@ import org.json.JSONObject;
 
 public class ContactTest extends CommonTest {
 	
-	private static String url = "/ajax/contacts";
+	private static final String CONTACT_URL = "/ajax/contacts";
 	
 	private static int contactFolderId = -1;
 	
@@ -35,18 +35,9 @@ public class ContactTest extends CommonTest {
 		if (isInit) {
 			return ;
 		}
-		
-		Init.loadSystemProperties();
-		Init.loadServerConf();
-		Init.initDB();
-		Init.initSessiond();
-		
-		url = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contact_url", url);
-		
-		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(getLogin(), getPassword(), "localhost");
-		
-		contactFolderId = OXFolderTools.getContactStandardFolder(sessionObj.getUserObject().getId(), sessionObj.getContext());
+			
+        FolderObject contactFolder = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
+        contactFolderId = contactFolder.getObjectID();
 		
 		isInit = true;
 	}
@@ -178,7 +169,7 @@ public class ContactTest extends CommonTest {
 		pw.flush();
 		
 		byte b[] = baos.toByteArray();
-		update(b, contactObj.getObjectID());
+		update(b, contactObj.getObjectID(), contactFolderId);
 	}
 	
 	protected void actionDelete(int[] id) throws Exception{
@@ -191,14 +182,14 @@ public class ContactTest extends CommonTest {
 	
 	protected void actionAll(int folderId) throws Exception {
 		StringBuffer parameter = new StringBuffer();
-		parameter.append("?session=" + getSessionId());
-		parameter.append("&action=all");
-		parameter.append("&folder=" + folderId);
-		parameter.append("&columns=");
+		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
+		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_ALL);
+		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + folderId);
+		parameter.append("&" + AJAXServlet.PARAMETER_COLUMNS + "=");
 		parameter.append(ContactObject.OBJECT_ID + "%2C");
 		parameter.append(ContactObject.SUR_NAME);
 		
-		req = new GetMethodWebRequest(PROTOCOL + getHostName() + url + parameter.toString());
+		req = new GetMethodWebRequest(PROTOCOL + getHostName() + CONTACT_URL + parameter.toString());
 		resp = getWebConversation().getResponse(req);
 		
 		JSONObject jsonobject = new JSONObject(resp.getText());
@@ -217,7 +208,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected void actionGet(int objectId) throws Exception {
-		WebResponse resp = getObject(objectId);
+		WebResponse resp = getObject(objectId, contactFolderId);
 		JSONObject jsonobject = new JSONObject(resp.getText());
 		
 		if (jsonobject.has(jsonTagError)) {
@@ -240,7 +231,7 @@ public class ContactTest extends CommonTest {
 	}
 	
 	protected String getURL() {
-		return url;
+		return CONTACT_URL;
 	}
 	
 	protected int createContactWithDistributionList(String title) throws Exception {
