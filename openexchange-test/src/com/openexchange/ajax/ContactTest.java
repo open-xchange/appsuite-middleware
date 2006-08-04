@@ -176,7 +176,7 @@ public class ContactTest extends CommonTest {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_DELETE);
-		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date().getTime());
 		
 		JSONArray jsonArray = new JSONArray();
 		
