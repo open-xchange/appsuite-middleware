@@ -4,13 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.PutMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,14 +60,15 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 	
 	public void tearDown() throws Exception {
-		int[] toDelete = new int[clean.size()];
+		int[][] toDelete = new int[clean.size()][2];
 		
 		for(int i = 0; i < toDelete.length; i++) {
-			toDelete[i] = clean.get(i);
+			toDelete[i][0] = -1; // FIXME: Put a correct folderId here
+			toDelete[i][1] = clean.get(i);
 		}
 		
 		
-		if(delete(sessionId,System.currentTimeMillis(),(int[])toDelete).length != 0)
+		if(delete(sessionId,System.currentTimeMillis(),(int[][])toDelete).length != 0)
 			throw new IllegalStateException("Someone modified the objects!");
 	}
 	
@@ -106,7 +104,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(url.toString());
 	}
 	
-	public Response list(String sessionId, int[] columns, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response list(String sessionId, int[] columns, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"list");
 		url.append("&columns=");
 		for(int col : columns) {
@@ -117,9 +115,12 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		StringBuffer data = new StringBuffer("[");
 		if(ids.length > 0) {
-			for(int id : ids) {
-				data.append(id);
-				data.append(",");
+			for(int[] tuple : ids) {
+				data.append("{folder : ");
+				data.append(tuple[0]);
+				data.append(", id : ");
+				data.append(tuple[1]);
+				data.append("},");
 			}
 			data.deleteCharAt(data.length()-1);
 		}
@@ -242,7 +243,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return new Integer(resp.getText());
 	}
 	
-	public int[] delete(String sessionId, long timestamp, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+	public int[] delete(String sessionId, long timestamp, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"delete");
 		url.append("&timestamp=");
 		url.append(timestamp);
@@ -251,9 +252,12 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		StringBuffer data = new StringBuffer("[");
 		
 		if(ids.length > 0) {
-			for(int id : ids) {
-				data.append("\""+id+"\"");
-				data.append(",");
+			for(int[] tuple : ids) {
+				data.append("{folder : ");
+				data.append(tuple[0]);
+				data.append(", id : ");
+				data.append(tuple[1]);
+				data.append("},");
 			}
 			data.deleteCharAt(data.length()-1);
 		}

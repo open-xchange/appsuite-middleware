@@ -17,9 +17,13 @@ public class ListTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception {
-		int[] bothEntries = new int[2];
-		bothEntries[0] = clean.get(0);
-		bothEntries[1] = clean.get(1);
+		int[][] bothEntries = new int[2][2];
+		bothEntries[0][1] = clean.get(0);
+		bothEntries[1][1] = clean.get(1);
+		
+		bothEntries[0][0] = folderId;
+		bothEntries[1][0] = folderId;
+		
 		
 		Response res = list(sessionId, new int[]{Metadata.ID,Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL},bothEntries);
 		
