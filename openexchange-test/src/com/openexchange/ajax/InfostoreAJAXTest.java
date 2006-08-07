@@ -39,7 +39,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId).getObjectID();
 		
 		Map<String,String> create = m(
-			"folder" 		,	((Integer)folderId).toString(),
+			"folder_id" 		,	((Integer)folderId).toString(),
 			"title"  		,  	"test knowledge",
 			"description" 	, 	"test knowledge description"
 		);
@@ -49,7 +49,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		clean.add(c);
 		
 		create = m(
-				"folder" 		, 	((Integer)folderId).toString(),
+				"folder_id" 		, 	((Integer)folderId).toString(),
 				"title"  		,  	"test url",
 				"description" 	, 	"test url description",
 				"url" 			, 	"http://www.open-xchange.com"
@@ -240,8 +240,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public int createNew(String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
 		StringBuffer url = getUrl(sessionId,"new");
-		url.append("&folder=");
-		url.append(fields.get("folder"));
 		JSONObject obj = new JSONObject();
 		for(String attr : fields.keySet()) {
 			obj.put(attr, fields.get(attr));
