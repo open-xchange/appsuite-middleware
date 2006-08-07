@@ -44,7 +44,10 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -254,18 +257,11 @@ public class TasksTest extends AbstractAJAXTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        // TODO read user from user interface
-        final UserParticipant user1 = new UserParticipant();
-        user1.setIdentifier(232); // offspring
-        final UserParticipant user2 = new UserParticipant();
-        user2.setIdentifier(227); // viktor
-
         final int folderId = getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
-        final List<Participant> participants = new ArrayList<Participant>();
-        participants.add(user1);
-        participants.add(user2);
+        final List<Participant> participants = getParticipants(
+            getWebConversation(), getHostName(), getSessionId(), 2);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
@@ -277,6 +273,17 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Task reload = (Task) response.getData();
+        for (Participant p1 : reload.getParticipants()) {
+            boolean found = false;
+            for (Participant p2 : participants) {
+                if (p1.getIdentifier() == p2.getIdentifier()) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fail("Storing participant in delegated task failed.");
+            }
+        }
 
         final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
             getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
@@ -645,5 +652,30 @@ public class TasksTest extends AbstractAJAXTest {
         final FolderObject myTasks = FolderTest.getStandardTaskFolder(
             conversation, hostName, sessionId);
         return myTasks.getObjectID();
+    }
+
+    public static List<Participant> getParticipants(
+        final WebConversation conversation, final String hostName,
+        final String sessionId, final int count) throws Exception {
+        final JSONObject json = ParticipantTest.searchAction(conversation, "*",
+            hostName, sessionId, Participant.USER);
+        final Response response = ResponseParser.parse(json.toString());
+        final JSONArray jsonParticipants = (JSONArray) response.getData();
+        final Random rand = new Random(System.currentTimeMillis());
+        final List<Participant> participants = new ArrayList<Participant>();
+        final Set<Integer> added = new HashSet<Integer>();
+        do {
+            final JSONObject jsonParticipant = jsonParticipants.getJSONObject(
+                rand.nextInt(jsonParticipants.length()));
+            final int userIdentifier = jsonParticipant.getInt("id");
+            if (!added.contains(userIdentifier)) {
+                final UserParticipant user = new UserParticipant();
+                user.setIdentifier(userIdentifier);
+                participants.add(user);
+                added.add(userIdentifier);
+            }
+        } while (participants.size() < count
+            && participants.size() < jsonParticipants.length());
+        return participants;
     }
 }
