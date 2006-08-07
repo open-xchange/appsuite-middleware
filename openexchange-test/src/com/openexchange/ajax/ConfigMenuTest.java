@@ -75,7 +75,7 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      * random length and depth.
      * @throws Throwable if an error occurs.
      */
-    public void testStoreExampleSetting() throws Throwable {
+    public void notestStoreExampleSetting() throws Throwable {
         final Random rand = new Random(System.currentTimeMillis());
         String[] path = new String[NUMBER_OF_SETTINGS];
         String[] value = new String[path.length];
