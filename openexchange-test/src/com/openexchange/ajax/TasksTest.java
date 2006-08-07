@@ -181,10 +181,47 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
-    
+
+    /**
+     * Tests if floats can be stored correctly.
+     * @throws Throwable if an error occurs.
+     */
+    public void testFloats() throws Throwable {
+        final Task task = new Task();
+        task.setActualDuration(1f);
+        task.setTargetDuration(1f);
+        task.setActualCosts(1f);
+        task.setTargetCosts(1f);
+
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
+
+        task.setParentFolderID(folderId);
+        final int taskId = insertTask(getWebConversation(), getHostName(),
+            getSessionId(), task);
+        assertTrue("Problem while inserting private task.", taskId > 0);
+
+        final Response response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        final Task reload = (Task) response.getData();
+        assertEquals("Actual duration differs.", task.getActualDuration(),
+            reload.getActualDuration());
+        assertEquals("Target duration differs.", task.getTargetDuration(),
+            reload.getTargetDuration());
+        assertEquals("Actual costs differs.", task.getActualCosts(),
+            reload.getActualCosts());
+        assertEquals("Target costs differs.", task.getTargetCosts(),
+            reload.getTargetCosts());
+        final Date lastModified = response.getTimestamp();
+
+        final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
+            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+    }
+
     /**
      * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
-     * HttpServletResponse)'
+     * HttpServletResponse)'.
      */
     public void testInsertDelegatedPrivateTask() throws Throwable {
         final Task task = new Task();
