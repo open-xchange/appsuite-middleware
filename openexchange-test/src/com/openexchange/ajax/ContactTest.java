@@ -62,6 +62,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		contactObj.setTelephoneBusiness1("+49009988776655");
 		contactObj.setStateBusiness(null);
+		contactObj.removeParentFolderID();
 		
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
@@ -79,6 +80,8 @@ public class ContactTest extends AbstractAJAXTest {
 		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
 		
 		contactObj.setDistributionList(entry);
+		
+		contactObj.removeParentFolderID();
 		
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
@@ -100,6 +103,8 @@ public class ContactTest extends AbstractAJAXTest {
 		links[0].setLinkDisplayname(link1.getDisplayName());
 		
 		contactObj.setLinks(links);
+		
+		contactObj.removeParentFolderID();
 		
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
