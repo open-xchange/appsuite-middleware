@@ -71,7 +71,8 @@ public class URLParameter {
 			if (a == 0) {
 				sb.append(cols[a]);
 			} else {
-				sb.append("%2C" + cols[a]);
+				// sb.append("%2C" + cols[a]);
+				sb.append("," + cols[a]);
 			}
 		}
 		
