@@ -143,7 +143,9 @@ public class AppointmentTest extends CommonTest {
 		Date start = new Date(System.currentTimeMillis()-d7);
 		Date end = new Date(System.currentTimeMillis()+d7);
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, start, end, PROTOCOL + getHostName(), getSessionId());
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testList() throws Exception {
@@ -152,9 +154,11 @@ public class AppointmentTest extends CommonTest {
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		int id3 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
+		final int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getSessionId());
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, appointmentArray.length);
 	}
@@ -180,7 +184,7 @@ public class AppointmentTest extends CommonTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testGet");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGetWithParticipants() throws Exception {
@@ -204,7 +208,7 @@ public class AppointmentTest extends CommonTest {
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	protected String getURL() {
@@ -347,9 +351,7 @@ public class AppointmentTest extends CommonTest {
 		}
 	}
 	
-	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, Date start, Date end, String host, String session) throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
-		
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
@@ -376,9 +378,7 @@ public class AppointmentTest extends CommonTest {
 		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static AppointmentObject[] listAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String session) throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
-		
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int[][] objectIdAndFolderId, int[] cols, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -510,15 +510,15 @@ public class AppointmentTest extends CommonTest {
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			appointmentArray[a] = new AppointmentObject();
-			parseCols(a, cols, jsonArray, appointmentArray[a]);
+			parseCols(cols, jsonArray.getJSONArray(a), appointmentArray[a]);
 		}
 		
 		return appointmentArray;
 	}
 	
-	private static void parseCols(int pos, int[] cols, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
+	private static void parseCols(int[] cols, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
 		for (int a = 0; a < cols.length; a++) {
-			parse(pos, cols[a], jsonArray, appointmentObj);
+			parse(a, cols[a], jsonArray, appointmentObj);
 		}
 	}
 	
