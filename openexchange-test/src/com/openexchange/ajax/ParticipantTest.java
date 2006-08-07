@@ -129,7 +129,7 @@ public class ParticipantTest extends AbstractAJAXTest {
 		
 	}
 	
-	public static User[] searchUser(WebConversation webCon, String searchpattern, String host, String session, int type) throws Exception {
+	public static User[] searchUser(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
 		JSONObject jsonObj = searchAction(webCon, searchpattern, host, session, com.openexchange.groupware.container.Participant.USER);
 		JSONArray jsonArray = jsonObj.getJSONArray(jsonTagData);
 		User[] u = new User[jsonArray.length()];
