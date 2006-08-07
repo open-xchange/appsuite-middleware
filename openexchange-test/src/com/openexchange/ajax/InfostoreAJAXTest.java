@@ -39,7 +39,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId).getObjectID();
 		
 		Map<String,String> create = m(
-			"folder_id" 		,	((Integer)folderId).toString(),
+			"folder" 		,	((Integer)folderId).toString(),
 			"title"  		,  	"test knowledge",
 			"description" 	, 	"test knowledge description"
 		);
@@ -49,7 +49,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		clean.add(c);
 		
 		create = m(
-				"folder_id" 		, 	((Integer)folderId).toString(),
+				"folder" 		, 	((Integer)folderId).toString(),
 				"title"  		,  	"test url",
 				"description" 	, 	"test url description",
 				"url" 			, 	"http://www.open-xchange.com"
