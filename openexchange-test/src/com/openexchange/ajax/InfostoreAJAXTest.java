@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +68,20 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 			toDelete[i][1] = clean.get(i);
 		}
 		
-		
-		if(delete(sessionId,System.currentTimeMillis(),(int[][])toDelete).length != 0)
-			throw new IllegalStateException("Someone modified the objects!");
+		int[] notDeleted = delete(sessionId,System.currentTimeMillis(),toDelete);
+		assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
 	}
 	
+	
+	private String j(int[] ids) {
+		StringBuffer b = new StringBuffer("[ ");
+		for(int i : ids) {
+			b.append(i);
+			b.append(" ");
+		}
+		b.append("]");
+		return b.toString();
+	}
 	
 	// Methods from the specification
 	
@@ -220,7 +230,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		url.append("&timestamp=");
 		url.append(timestamp);
-		
 		JSONObject obj = new JSONObject();
 		for(String attr : modified.keySet()) {
 			obj.put(attr, modified.get(attr));
@@ -231,11 +240,13 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public int createNew(String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
 		StringBuffer url = getUrl(sessionId,"new");
+		url.append("&folder=");
+		url.append(fields.get("folder"));
 		JSONObject obj = new JSONObject();
 		for(String attr : fields.keySet()) {
 			obj.put(attr, fields.get(attr));
 		}
-	
+		
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		
 		WebResponse resp = getWebConversation().getResponse(m);
