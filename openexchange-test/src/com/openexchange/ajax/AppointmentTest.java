@@ -3,11 +3,13 @@ package com.openexchange.ajax;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.ajax.types.Response;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -15,11 +17,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,44 +41,20 @@ public class AppointmentTest extends CommonTest {
 	
 	private static final long d7 = 604800000;
 	
-	private static int userParticipantId2 = -1;
+	private String userParticipant2 = null;
 	
-	private static int userParticipantId3 = -1;
+	private String userParticipant3 = null;
 	
-	private static int groupParticipantId1 = -1;
+	private String groupParticipant = null;
 	
-	private static int resourceParticipantId1 = -1;
-    
-	private static boolean isInit = false;
+	private String resourceParticipant = null;
+	
+	private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		init();
-	}
-	
-	public void init() throws Exception {
-		if (isInit) {
-			return ;
-		}
-
-		userId = ParticipantTest.searchUser(getWebConversation(), getLogin(), PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
 		
-		String userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
-		String userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
-		
-		userParticipantId2 = ParticipantTest.searchUser(getWebConversation(), userParticipant2, PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
-		userParticipantId3 = ParticipantTest.searchUser(getWebConversation(), userParticipant3, PROTOCOL + getHostName(), getSessionId(), com.openexchange.groupware.container.Participant.USER)[0].getId();
-		
-		String groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
-		
-		groupParticipantId1 = ParticipantTest.listGroup(getWebConversation(), PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		
-		String resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
-		
-		resourceParticipantId1 = ParticipantTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		
-        FolderObject appointmentFolder = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-        appointmentFolderId = appointmentFolder.getObjectID();
+		userId = ParticipantTest.searchUser(getWebConversation(), getLogin(), PROTOCOL + getHostName(), getSessionId())[0].getId();
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 12);
@@ -83,260 +64,147 @@ public class AppointmentTest extends CommonTest {
 		startTime = c.getTimeInMillis();
 		endTime = startTime + 3600000;
 		
-		isInit = true;
+		userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+		userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+		
+		groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
+		
+		resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
+		
+		final FolderObject folderObj = FolderTest.getStandardTaskFolder(getWebConversation(), getHostName(), getSessionId());
+		appointmentFolderId = folderObj.getObjectID();
 	}
 	
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 		
+		int userParticipantId = ParticipantTest.searchUser(getWebConversation(), userParticipant2, PROTOCOL + getHostName(), getSessionId())[0].getId();
+		int groupParticipantId = ParticipantTest.listGroup(getWebConversation(), PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId2);
+		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId1);
+		participants[2].setIdentifier(groupParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testUpdateAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLocation(null);
 		appointmentObj.setObjectID(objectId);
 		
-		actionUpdate(appointmentObj);
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testUpdateAppointmentWithParticipant() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLocation(null);
 		appointmentObj.setObjectID(objectId);
+		
+		int userParticipantId = ParticipantTest.searchUser(getWebConversation(), userParticipant3, PROTOCOL + getHostName(), getSessionId())[0].getId();
+		int groupParticipantId = ParticipantTest.listGroup(getWebConversation(), PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ParticipantTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId2);
+		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId1);
+		participants[2].setIdentifier(groupParticipantId);
 		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId1);
+		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
-		actionUpdate(appointmentObj);
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testAll() throws Exception {
-		actionAll(appointmentFolderId, new Date(System.currentTimeMillis()-d7), new Date(System.currentTimeMillis()+d7));
+		Date start = new Date(System.currentTimeMillis()-d7);
+		Date end = new Date(System.currentTimeMillis()+d7);
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, start, end, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testList() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
-		int id1 = actionNew(appointmentObj);
-		int id2 = actionNew(appointmentObj);
-		int id3 = actionNew(appointmentObj);
+		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int id3 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		actionList(new int[]{id1, id2, id3});
+		int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check response array", 3, appointmentArray.length);
 	}
 	
 	public void testConfirm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		actionConfirm(objectId, AppointmentObject.ACCEPT);
+		confirmAppointment(getWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSessionId());
 	}
-	
 	
 	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
-		int id1 = actionNew(appointmentObj);
-		int id2 = actionNew(appointmentObj);
+		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		actionDelete(new int[]{id1, id2, 1});
-	}
-	
-	protected void actionList(int[] id) throws Exception{
-		list(id, appointmentFolderId, new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS } );
+		int[] i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {1, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check first element in array", 1, i[0]);
 	}
 	
 	public void testGet() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testGet");
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		actionGet(objectId);
+		loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
 	public void testGetWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testGetWithParticipants");
 		
+		int userParticipantId = ParticipantTest.searchUser(getWebConversation(), userParticipant3, PROTOCOL + getHostName(), getSessionId())[0].getId();
+		int groupParticipantId = ParticipantTest.listGroup(getWebConversation(), PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ParticipantTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId3);
+		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId1);
+		participants[2].setIdentifier(groupParticipantId);
 		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId1);
+		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = actionNew(appointmentObj);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		actionGet(objectId);
-	}
-	
-	protected int actionNew(AppointmentObject appointmentobject) throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
-		appointmentwriter.writeAppointment(appointmentobject);
-		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
-		
-		return insert(b);
-	}
-	
-	protected void actionUpdate(AppointmentObject appointmentobject) throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
-		appointmentwriter.writeAppointment(appointmentobject);
-		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
-		update(b, appointmentobject.getObjectID(), appointmentFolderId);
-	}
-	
-	protected void actionDelete(int[] id) throws Exception{
-		StringBuffer parameter = new StringBuffer();
-		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
-		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.PARAMETER_DELETE);
-		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
-		
-		JSONArray jsonArray = new JSONArray();
-		
-		for (int a = 0; a < id.length; a++) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put(DataFields.ID, id[a]);
-			jsonObj.put(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
-			jsonArray.put(jsonObj);
-		} 
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + getHostName() + getURL() + parameter.toString(), bais, "text/javascript");
-		resp = getWebConversation().getResponse(req);
-		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("server error: " + jsonobject.getString(jsonTagError));
-		}
-		
-		if (jsonobject.has(jsonTagData)) {
-			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-			assertTrue("array length is 1", data.length() == 1);
-			assertEquals("first entry in array is 1", 1, data.getInt(0));
-		} else {
-			fail("no data in JSON object!");
-		}
-		
-		assertEquals(200, resp.getResponseCode());
-	}
-	
-	protected void actionConfirm(int object_id, int confirm) throws Exception {
-		StringBuffer parameter = new StringBuffer();
-		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
-		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_CONFIRM);
-		parameter.append("&" + DataFields.ID + "=" + object_id);
-		parameter.append("&" + AJAXServlet.PARAMETER_CONFIRM +"=" + confirm);
-		
-		req = new PostMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.toString());
-		resp = getWebConversation().getResponse(req);
-		
-		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + jsonobject.get(jsonTagError));
-		}
-		
-		if (!jsonobject.has(jsonTagData)) {
-			fail("no data in JSON object!");
-		}
-		
-		assertEquals(200, resp.getResponseCode());
-	}
-	
-	protected void actionAll(int folderId, Date start, Date end) throws Exception {
-		StringBuffer parameter = new StringBuffer();
-		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
-		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_ALL);
-		parameter.append("&" + AJAXServlet.PARAMETER_INFOLDER + "=" + folderId);
-		parameter.append("&" + AJAXServlet.PARAMETER_START + "=" + start.getTime());;
-		parameter.append("&" + AJAXServlet.PARAMETER_END + "=" + end.getTime());
-		parameter.append("&" + AJAXServlet.PARAMETER_COLUMNS + "=");
-		parameter.append(AppointmentObject.OBJECT_ID);
-		
-		req = new GetMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.toString());
-		resp = getWebConversation().getResponse(req);
-		
-		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + (String)jsonobject.get(jsonTagError));
-		}
-		
-		if (jsonobject.has(jsonTagData)) {
-			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-		} else {
-			fail("no data in JSON object!");
-		}
-		
-		assertEquals(200, resp.getResponseCode());
-	}
-	
-	protected void actionGet(int objectId) throws Exception {
-		WebResponse resp = getObject(objectId, appointmentFolderId);
-		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagError)) {
-			fail("json error: " + jsonobject.get(jsonTagError));
-		}
-		
-		if (jsonobject.has(jsonTagData)) {
-			JSONObject data = jsonobject.getJSONObject(jsonTagData);
-			
-			AppointmentParser appointmentparser = new AppointmentParser(null);
-			AppointmentObject appointmentobject = new AppointmentObject();
-			appointmentparser.parse(appointmentobject, data);
-			
-			assertEquals("same folder id:", appointmentFolderId, appointmentobject.getParentFolderID());
-		} else {
-			fail("missing data in json object");
-		}
-		
-		assertEquals(200, resp.getResponseCode());
+		loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
 	protected String getURL() {
@@ -353,6 +221,340 @@ public class AppointmentTest extends CommonTest {
 		appointmentobject.setParentFolderID(appointmentFolderId);
 		
 		return appointmentobject;
+	}
+	
+	public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, String host, String session) throws Exception {
+		int objectId = 0;
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter pw = new PrintWriter(baos);
+		
+		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
+		appointmentwriter.writeAppointment(appointmentObj);
+		
+		pw.flush();
+		
+		byte b[] = baos.toByteArray();
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		JSONObject data = (JSONObject)response.getData();
+		if (data.has(DataFields.ID)) {
+			objectId = data.getInt(DataFields.ID);
+		}
+		
+		return objectId;
+	}
+	
+	public static void updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String session) throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter pw = new PrintWriter(baos);
+		
+		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
+		appointmentwriter.writeAppointment(appointmentObj);
+		
+		pw.flush();
+		
+		byte b[] = baos.toByteArray();
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
+		parameter.setParameter(DataFields.ID, String.valueOf(objectId));
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(inFolder));
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+	}
+	
+	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < objectIdAndFolderId.length; a++) {
+			int[] i = objectIdAndFolderId[a];
+			JSONObject jObj = new JSONObject();
+			jObj.put(DataFields.ID, i[0]);
+			jObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
+			jsonArray.put(jObj);
+		}
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		JSONArray data = (JSONArray)response.getData();
+		int i[] = new int[data.length()];
+		for (int a = 0; a < i.length; a++) {
+			i[a] = data.getInt(a);
+		}
+		
+		return i;
+	}
+	
+	public static void confirmAppointment(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM);
+		parameter.setParameter(DataFields.ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_CONFIRM, confirm);
+		
+		WebRequest req = new PostMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+	}
+	
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, Date start, Date end, String host, String session) throws Exception {
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
+		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+		
+		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
+	}
+	
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String session) throws Exception {
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String( cols ));
+		
+		JSONArray jsonArray = new JSONArray();
+		
+		for (int a = 0; a < objectIdAndFolderId.length; a++) {
+			int i[] = objectIdAndFolderId[a];
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put(DataFields.ID, i[0]);
+			jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
+			jsonArray.put(jsonObj);
+		}
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
+	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
+		parameter.setParameter(DataFields.ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		
+		AppointmentParser appointmentParser = new AppointmentParser(null);
+		appointmentParser.parse(appointmentObj, (JSONObject)response.getData());
+		
+		return appointmentObj;
+	}
+	
+	public static AppointmentObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
+		
+		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2AppointmentArray((JSONArray)response.getData());
+	}
+	
+	public static AppointmentObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "updated");
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
+		
+		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = ResponseParser.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2AppointmentArray((JSONArray)response.getData());
+	}
+	
+	private static AppointmentObject[] jsonArray2AppointmentArray(JSONArray jsonArray) throws Exception {
+		AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
+		
+		AppointmentParser appointmentParser = new AppointmentParser();
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			appointmentArray[a] = new AppointmentObject();
+			JSONObject jObj = jsonArray.getJSONObject(a);
+			
+			appointmentParser.parse(appointmentArray[a], jObj);
+		}
+		
+		return appointmentArray;
+	}
+	
+	private static AppointmentObject[] jsonArray2AppointmentArray(JSONArray jsonArray, int[] cols) throws Exception {
+		AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			appointmentArray[a] = new AppointmentObject();
+			parseCols(a, cols, jsonArray, appointmentArray[a]);
+		}
+		
+		return appointmentArray;
+	}
+	
+	private static void parseCols(int pos, int[] cols, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
+		for (int a = 0; a < cols.length; a++) {
+			parse(pos, cols[a], jsonArray, appointmentObj);
+		}
+	}
+	
+	private static void parse(int pos, int field, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
+		switch (field) {
+			case AppointmentObject.OBJECT_ID:
+				appointmentObj.setObjectID(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.FOLDER_ID:
+				appointmentObj.setParentFolderID(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.TITLE:
+				appointmentObj.setTitle(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.START_DATE:
+				appointmentObj.setStartDate(new Date(jsonArray.getLong(pos)));
+				break;
+			case AppointmentObject.END_DATE:
+				appointmentObj.setEndDate(new Date(jsonArray.getLong(pos)));
+				break;
+			case AppointmentObject.SHOWN_AS:
+				appointmentObj.setShownAs(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.LOCATION:
+				appointmentObj.setLocation(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.CATEGORIES:
+				appointmentObj.setCategories(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.COLOR_LABEL:
+				appointmentObj.setLabel(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.NOTE:
+				appointmentObj.setNote(jsonArray.getString(pos));
+				break;
+		}
 	}
 }
 
