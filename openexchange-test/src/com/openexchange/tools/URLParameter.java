@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.openexchange.tools.encoding.URLCoder;
+import java.util.Date;
 
 /**
  * This class provides methods to generate URL parameters.
@@ -32,6 +33,19 @@ public class URLParameter {
     public void setParameter(final String name, final String value) {
         parameters.put(name, value);
     }
+	
+    public void setParameter(final String name, final int value) {
+        parameters.put(name, String.valueOf(value));
+    }
+	
+    public void setParameter(final String name, final long value) {
+        parameters.put(name, String.valueOf(value));
+    }
+	
+    public void setParameter(final String name, final Date value) {
+        parameters.put(name, String.valueOf(value.getTime()));
+    }
+
 
     public String getURLParameters() throws UnsupportedEncodingException {
         final StringBuffer sb = new StringBuffer();
@@ -50,4 +64,17 @@ public class URLParameter {
         }
         return sb.toString();
     }
+	
+	public static String colsArray2String(int cols[]) {
+		StringBuffer sb = new StringBuffer();
+		for (int a = 0; a  < cols.length; a++) {
+			if (a == 0) {
+				sb.append(cols[a]);
+			} else {
+				sb.append("%2C" + cols[a]);
+			}
+		}
+		
+		return sb.toString();
+	}
 }
