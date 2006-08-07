@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class ContactTest extends CommonTest {
+public class ContactTest extends AbstractAJAXTest {
 	
 	private static final String CONTACT_URL = "/ajax/contacts";
 	

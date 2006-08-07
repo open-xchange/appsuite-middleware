@@ -29,7 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-public class AppointmentTest extends CommonTest {
+public class AppointmentTest extends AbstractAJAXTest {
 	
 	private static final String APPOINTMENT_URL = "/ajax/appointment";
 	
@@ -209,10 +209,6 @@ public class AppointmentTest extends CommonTest {
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	protected String getURL() {
-		return APPOINTMENT_URL;
 	}
 	
 	private AppointmentObject createAppointmentObject(String title) {
