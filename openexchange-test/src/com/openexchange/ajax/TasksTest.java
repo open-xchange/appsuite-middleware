@@ -658,7 +658,7 @@ public class TasksTest extends AbstractAJAXTest {
         final WebConversation conversation, final String hostName,
         final String sessionId, final int count) throws Exception {
         final JSONObject json = ParticipantTest.searchAction(conversation, "*",
-            hostName, sessionId, Participant.USER);
+            PROTOCOL + hostName, sessionId, Participant.USER);
         final Response response = ResponseParser.parse(json.toString());
         final JSONArray jsonParticipants = (JSONArray) response.getData();
         final Random rand = new Random(System.currentTimeMillis());
