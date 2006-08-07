@@ -71,7 +71,7 @@ public class AppointmentTest extends CommonTest {
 		
 		resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
 		
-		final FolderObject folderObj = FolderTest.getStandardTaskFolder(getWebConversation(), getHostName(), getSessionId());
+		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		appointmentFolderId = folderObj.getObjectID();
 	}
 	
