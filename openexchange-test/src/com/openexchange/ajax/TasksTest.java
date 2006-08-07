@@ -287,7 +287,7 @@ public class TasksTest extends AbstractAJAXTest {
             tasks[i][0] = folderId;
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED };
+            Task.LAST_MODIFIED, Task.FOLDER_ID };
         final Response response = getAllTasksInFolder(getWebConversation(),
             getHostName(), getSessionId(), folderId, columns, 0, null);
         final JSONArray array = (JSONArray) response.getData();
