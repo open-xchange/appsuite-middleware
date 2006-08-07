@@ -83,7 +83,10 @@ public class TasksTest extends AbstractAJAXTest {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(TasksTest.class);
-    
+
+    /**
+     * URL of the tasks AJAX interface.
+     */
     private static final String TASKS_URL = "/ajax/tasks";
 
     public void testCountPrivateFolder() throws Throwable {
@@ -113,8 +116,8 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
-     * HttpServletResponse)'
+     * Tests inserting a private task.
+     * @throws Throwable if an error occurs.
      */
     public void testInsertPrivateTask() throws Throwable {
         final Task task = new Task();
@@ -157,6 +160,10 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
+    /**
+     * Tests if the charset handling is correct.
+     * @throws Throwable if an error occurs.
+     */
     public void testCharset() throws Throwable {
         final Task task = new Task();
         task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
@@ -220,8 +227,8 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * Test method for 'com.openexchange.ajax.Tasks.doPut(HttpServletRequest,
-     * HttpServletResponse)'.
+     * Tests inserting a delegated task.
+     * @throws Throwable if an error occurs.
      */
     public void testInsertDelegatedPrivateTask() throws Throwable {
         final Task task = new Task();
@@ -327,6 +334,37 @@ public class TasksTest extends AbstractAJAXTest {
             Task.LAST_MODIFIED, Task.FOLDER_ID };
         final Response response = getAllTasksInFolder(getWebConversation(),
             getHostName(), getSessionId(), folderId, columns, 0, null);
+        final JSONArray array = (JSONArray) response.getData();
+        // TODO parse JSON array
+        Date timestamp = response.getTimestamp();
+        if (null == timestamp) {
+            // TODO This has to be fixed.
+            timestamp = new Date();
+        }
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            timestamp, tasks);
+    }
+
+    /**
+     * Tests a full list of tasks in a folder with ordering.
+     * @throws Throwable if an error occurs.
+     */
+    public void testAllWithOrder() throws Throwable {
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
+        final Task task = new Task();
+        task.setParentFolderID(folderId);
+        int[][] tasks = new int[10][2];
+        for (int i = 0; i < tasks.length; i++) {
+            task.setTitle("Task " + (i + 1));
+            tasks[i][1] = insertTask(getWebConversation(), getHostName(),
+                getSessionId(), task);
+            tasks[i][0] = folderId;
+        }
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
+            Task.LAST_MODIFIED, Task.FOLDER_ID };
+        final Response response = getAllTasksInFolder(getWebConversation(),
+            getHostName(), getSessionId(), folderId, columns, 200, "asc");
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
         Date timestamp = response.getTimestamp();
