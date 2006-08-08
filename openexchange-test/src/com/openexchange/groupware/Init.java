@@ -21,6 +21,8 @@ public final class Init {
 	
 	private static boolean ajaxPropertiesLoaded = false;
 
+	private static boolean webdavPropertiesLoaded = false;
+
 	private static boolean infostorePropertiesLoaded = false;
 	
 	private static boolean systemPropertiesLoaded = false;
@@ -34,6 +36,8 @@ public final class Init {
 	private static Properties testProps = null;
 	
 	private static Properties ajaxProps = null;
+	
+	private static Properties webdavProps = null;
 	
 	private static Properties infostoreProps = null;
 	
@@ -65,6 +69,24 @@ public final class Init {
 			loadAJAXProperties();
 		}
 		return ajaxProps;
+	}
+	
+	private static void loadWebdavProperties() {
+		loadTestProperties();
+		webdavProps  = new Properties();
+		try {
+			webdavProps.load(new FileInputStream(testProps.getProperty("webdavPropertiesFile")));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		webdavPropertiesLoaded = true;
+	}
+	
+	public static Properties getWebdavProperties() {
+		if (!webdavPropertiesLoaded) {
+			loadWebdavProperties();
+		}
+		return webdavProps;
 	}
 	
 	public static String getAJAXProperty(final String key) {
