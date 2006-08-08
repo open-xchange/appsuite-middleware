@@ -5,6 +5,7 @@
   <property name="lib" value="lib"/>
   <property name="test.xml.dir" location="test-results" />
   <property name="conf.dir" location="conf" />
+  <property name="logging.propFile" value="/opt/openexchange/etc/groupware/logging.properties" />
   
   <property name="build.compiler" value="modern"/>
   <path id="project.classpath"> 
@@ -108,7 +109,8 @@
 		
 		<formatter type="brief" usefile="false" /> 
 		<formatter type="xml" /> 
-		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" /> 
+		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+		<sysproperty key="java.util.logging.config.file" value="${logging.propFile}" />
 	</junit> 
 	
 	<fail message="Tests failed!" if="test.failed" />
