@@ -187,7 +187,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testGet");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		assertEquals("check objectId", objectId, loadAppointment.getObjectID());
 	}
 	
 	public void testGetWithParticipants() throws Exception {
