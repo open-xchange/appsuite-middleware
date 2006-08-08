@@ -107,6 +107,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLocation(null);
 		appointmentObj.setObjectID(objectId);
+		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
@@ -135,6 +136,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
+		
+		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
