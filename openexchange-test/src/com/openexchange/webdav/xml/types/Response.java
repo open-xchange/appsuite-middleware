@@ -45,7 +45,7 @@ import com.openexchange.groupware.container.DataObject;
  */
 public class Response {
 
-    private DataObject dataObject = null;
+    private Object object = null;
 	
 	private int status = 0;
 	
@@ -58,8 +58,8 @@ public class Response {
     /**
      * @return Returns the dataObject
      */
-    public DataObject getDataObject() {
-        return dataObject;
+    public Object getDataObject() {
+        return object;
     }
 
     /**
@@ -79,8 +79,8 @@ public class Response {
     /**
      * @param data The data to set.
      */
-    public void setDataObject(final DataObject dataObject) {
-        this.dataObject = dataObject;
+    public void setDataObject(final Object object) {
+        this.object = object;
     }
 
     /**
