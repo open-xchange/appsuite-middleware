@@ -12,6 +12,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -110,6 +111,19 @@ public class InfostoreWriterTest extends TestCase {
 		assertEquals("cat2",categories.get(1));
 		assertEquals("cat3",categories.get(2));
 		
+		results = new StringWriter();
+		w = new InfostoreWriter(new PrintWriter(results));
+		w.write(m);
+		
+		
+		JSONObject o = new JSONObject(results.toString());
+		categories = o.getJSONArray("categories");
+		
+		assertEquals("cat1",categories.get(0));
+		assertEquals("cat2",categories.get(1));
+		assertEquals("cat3",categories.get(2));
+		
+		
 		m.setCategories(null);
 		
 		results = new StringWriter();
@@ -121,5 +135,42 @@ public class InfostoreWriterTest extends TestCase {
 		categories = metadata1.getJSONArray(0);
 		
 		assertEquals(0,categories.length());
+		
+		results = new StringWriter();
+		w = new InfostoreWriter(new PrintWriter(results));
+		w.write(m);
+		
+		o = new JSONObject(results.toString());
+		categories = o.getJSONArray("categories");
+		assertEquals(0,categories.length());
+		
+		
+	}
+	
+	public void testWriteObject() throws Exception{
+		DocumentMetadataImpl dm = new DocumentMetadataImpl();
+		dm.setFolderId(22);
+		dm.setModifiedBy(1);
+		
+		dm = new DocumentMetadataImpl(dm);
+		dm.setCreationDate(now);
+		dm.setCreatedBy(1);
+		dm.setDescription("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+		dm.setLastModified(now);
+		dm.setTitle("Google");
+		dm.setURL("http://www.google.de");
+		dm.setVersion(0);
+		dm.setId(1);
+		
+		StringWriter result = new StringWriter();
+		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		
+		w.write(dm);
+		
+		JSONObject o = new JSONObject(result.toString());
+		
+		assertEquals(dm.getDescription(), o.getString("description"));
+		assertEquals(dm.getTitle(), o.getString("title"));
+		assertEquals(dm.getURL(), o.getString("url"));
 	}
 }
