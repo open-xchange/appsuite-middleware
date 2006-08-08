@@ -322,7 +322,7 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), folderId, taskId);
         Date lastModified = response.getTimestamp();
         Task reload = (Task) response.getData();
-        assertEquals("Number of tasks differ", firstParticipants.size(),
+        assertEquals("Number of participants differ", firstParticipants.size(),
             reload.getParticipants().length);
         for (Participant p1 : firstParticipants) {
             boolean found = false;
@@ -349,7 +349,7 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), folderId, taskId);
         lastModified = response.getTimestamp();
         reload = (Task) response.getData();
-        assertEquals("Number of tasks differ", secondParticipants.size(),
+        assertEquals("Number of participants differ", secondParticipants.size(),
             reload.getParticipants().length);
         for (Participant p1 : secondParticipants) {
             boolean found = false;
