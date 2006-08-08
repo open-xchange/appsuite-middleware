@@ -262,7 +262,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         // TODO resolve myself through AJAX interface
         final List<Participant> participants = getParticipants(
-            getWebConversation(), getHostName(), getSessionId(), 2, true, 139);
+            getWebConversation(), getHostName(), getSessionId(), 2, true,
+            getMyId(getWebConversation(), getHostName(), getSessionId()));
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
@@ -294,7 +295,8 @@ public class TasksTest extends AbstractAJAXTest {
     public void testUpdateDelegatedTask() throws Throwable {
         // TODO resolve myself through AJAX interface
         final List<Participant> participants = getParticipants(
-            getWebConversation(), getHostName(), getSessionId(), 4, true, 139);
+            getWebConversation(), getHostName(), getSessionId(), 4, true,
+            getMyId(getWebConversation(), getHostName(), getSessionId()));
         final List<Participant> firstParticipants =
             new ArrayList<Participant>();
         firstParticipants.addAll(participants.subList(0, 2));
@@ -847,5 +849,29 @@ public class TasksTest extends AbstractAJAXTest {
         } while (participants.size() < count
             && participants.size() < jsonParticipants.length());
         return participants;
+    }
+
+    public static int getMyId(final WebConversation conversation,
+        final String hostName, final String sessionId)
+        throws MalformedURLException, IOException, SAXException, JSONException,
+        OXException {
+        final int folderId = getPrivateTaskFolder(conversation,
+            hostName, sessionId);
+
+        Task task = new Task();
+        task.setParentFolderID(folderId);
+        final int taskId = insertTask(conversation, hostName, sessionId, task);
+        assertTrue("Problem while inserting private task.", taskId > 0);
+
+        final Response response = getTask(conversation, hostName, sessionId,
+            folderId, taskId);
+        final Task reload = (Task) response.getData();
+        final int retval = reload.getCreatedBy();
+        final Date lastModified = response.getTimestamp();
+
+        final int[] notDeleted = deleteTasks(conversation, hostName, sessionId,
+            lastModified, new int[][] {{ folderId, taskId }});
+        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        return retval;
     }
 }
