@@ -13,6 +13,8 @@ import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
 
 public class AttachmentTest extends AbstractWebdavTest {
+	
+	public static final String ATTACHMENT_URL = "/servlet/webdav.attachments";
 
 	protected StringBuffer data = new StringBuffer();	
 
@@ -90,11 +92,6 @@ public class AttachmentTest extends AbstractWebdavTest {
 		deleteMethod.setRequestHeader("object_id", String.valueOf(objectId));
 		
 		assertEquals(200, resp.getResponseCode());
-	}
-	
-
-	protected String getURL() {
-		return attachmentUrl;
 	}
 }
 

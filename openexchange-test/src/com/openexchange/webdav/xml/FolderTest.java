@@ -1,16 +1,35 @@
 package com.openexchange.webdav.xml;
 
+import com.meterware.httpunit.WebConversation;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.webdav.xml.parser.ResponseParser;
+import com.openexchange.webdav.xml.request.PropFindMethod;
+import com.openexchange.webdav.xml.types.Response;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 public class FolderTest extends AbstractWebdavTest {
+	
+	public static final String FOLDER_URL = "/servlet/webdav.folders";
+	
+	protected int userParticipantId1 = -1;
+
+	protected int userParticipantId2 = -1;
+	
+	protected int userParticipantId3 = -1;
+	
+	protected int groupParticipantId1 = -1;
 	
 	public void testNewPrivateFolder() throws Exception {
 		FolderObject folderObj = createFolderObject("testNewPrivateFolder", FolderObject.CALENDAR, false);
@@ -79,10 +98,10 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	
 	protected int saveFolder(FolderObject folderObj, boolean isUpdate) throws Exception {
-		InternalFolderWriter folderWriter = new InternalFolderWriter(sessionObj);
+		InternalFolderWriter folderWriter = new InternalFolderWriter(null);
 		Element e_prop = new Element("prop", webdav);
 		folderWriter.addContent2PropElement(e_prop, folderObj, isUpdate);
-		byte[] b = writeRequest(e_prop);
+		byte[] b = null; // writeRequest(e_prop);
 		return sendPut(b);
 	}
 	
@@ -146,8 +165,99 @@ public class FolderTest extends AbstractWebdavTest {
 		return oclp;
 	}
 	
-	protected String getURL() {
-		return folderUrl;
+	public static FolderObject[] listFolder(WebConversation webCon, Date modified, String objectMode, String host, String login, String password) throws Exception {
+		Element ePropfind = new Element("propfind", webdav);
+		Element eProp = new Element("prop", webdav);
+		
+		Element eLastSync = new Element("lastsync", XmlServlet.NS);
+		Element eObjectmode = new Element("objectmode", XmlServlet.NS);
+		
+		eLastSync.addContent(String.valueOf(modified.getTime()));
+		
+		if (objectMode != null) {
+			eObjectmode.addContent(objectMode);
+			eProp.addContent(eObjectmode);
+		} 
+		
+		ePropfind.addContent(eProp);
+		eProp.addContent(eLastSync);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		Document doc = new Document(ePropfind);
+		
+		XMLOutputter xo = new XMLOutputter();
+		xo.output(doc, baos);
+		
+		baos.flush();
+		
+		HttpClient httpclient = new HttpClient();
+		
+		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		PropFindMethod propFindMethod = new PropFindMethod(host + FOLDER_URL);
+		propFindMethod.setDoAuthentication( true );
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		propFindMethod.setRequestBody(bais);
+		
+		int status = httpclient.executeMethod(propFindMethod);
+		
+		assertEquals("check propfind response", 207, status);
+		
+		byte responseByte[] = propFindMethod.getResponseBody();
+		
+		bais = new ByteArrayInputStream(responseByte);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
+		
+		FolderObject[] folderArray = new FolderObject[response.length];
+		for (int a = 0; a < folderArray.length; a++) {
+			if (response[a].hasError()) {
+				fail("xml error: " + response[a].getErrorMessage());
+			}
+			
+			folderArray[a] = (FolderObject)response[a].getDataObject();
+		}
+		
+		return folderArray;
+	}
+	
+	public static FolderObject getAppointmentDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		
+		for (int a = 0; a < folderArray.length; a++) {
+			FolderObject folderObj = folderArray[a];
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CALENDAR) {
+				return folderObj;
+			}
+		}
+		
+		throw new OXConflictException("no appointment default folder found!");
+	}
+	
+	public static FolderObject getContactDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		
+		for (int a = 0; a < folderArray.length; a++) {
+			FolderObject folderObj = folderArray[a];
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CONTACT) {
+				return folderObj;
+			}
+		}
+		
+		throw new OXConflictException("no contact default folder found!");
+	}
+	
+	public static FolderObject getTaskDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		
+		for (int a = 0; a < folderArray.length; a++) {
+			FolderObject folderObj = folderArray[a];
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.TASK) {
+				return folderObj;
+			}
+		}
+		
+		throw new OXConflictException("no task default folder found!");
 	}
 	
 	private class InternalFolderWriter extends FolderWriter {

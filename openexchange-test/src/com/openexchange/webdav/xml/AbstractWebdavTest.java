@@ -9,23 +9,16 @@ import com.openexchange.api.OXObject;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
-import com.openexchange.groupware.ldap.Resource;
-import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
-import com.openexchange.tools.OXFolderTools;
+import com.openexchange.webdav.xml.request.PropFindMethod;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.util.Date;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -50,21 +43,17 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 	
-	protected static String sessionId = null;
+	protected String hostName = "localhost";
 	
-	protected static String hostName = "localhost";
+	protected String login = null;
 	
-	protected static String login = null;
+	protected String password = null;
 	
-	protected static String password = null;
+	protected int userId = -1;
 	
-	protected static int userId = -1;
+	protected Properties webdavProps = null;
 	
-	protected static Properties webdavProps = null;
-	
-	protected static SessionObject sessionObj = null;
-	
-	protected static String authData = null;
+	protected String authData = null;
 	
 	protected WebRequest req = null;
 	
@@ -72,112 +61,23 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected WebConversation webCon = null;
 	
-	protected static int appointmentFolderId = -1;
-
-	protected static int taskFolderId = -1;
-	
-	protected static int contactFolderId = -1;
-	
-	protected static long startTime = 0;
-	
-	protected static long endTime = 0;
-	
-	protected static int userParticipantId2 = -1;
-	
-	protected static int userParticipantId3 = -1;
-	
-	protected static int groupParticipantId1 = -1;
-	
-	protected static int resourceParticipantId1 = -1;
-	
-	protected static String appointmentUrl = "/servlet/webdav.calendar";
-
-	protected static String taskUrl = "/servlet/webdav.tasks";
-	
-	protected static String contactUrl = "/servlet/webdav.contacts";
-	
-	protected static String folderUrl = "/servlet/webdav.folders";
-
-	protected static String attachmentUrl = "/servlet/webdav.attachments";
-	
-	private static boolean isInit = false;
+	public static final String AUTHORIZATION = "authorization";
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		init();
-		
 		webCon = new WebConversation();
-	}
-	
-	public void init() throws Exception {
-		if (isInit) {
-			return ;
-		}
 		
-		Init.loadSystemProperties();
-		Init.loadServerConf();
-		Init.initDB();
-		Init.initSessiond();
+		webdavProps = Init.getWebdavProperties();
 		
-		String propfile = Init.getTestProperties().getProperty(webdavPropertiesFile);
+		login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
+		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
 		
-		if (propfile == null) {
-			throw new Exception("no webdav propfile given!");
-		}
+		userId = GroupUserTest.searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		
-		webdavProps = new Properties();
-		webdavProps.load(new FileInputStream(propfile));
-		
-		hostName = AbstractConfigWrapper.parseProperty(webdavProps, propertyHost, hostName);
-		login = AbstractConfigWrapper.parseProperty(webdavProps, propertyLogin, login);
-		password = AbstractConfigWrapper.parseProperty(webdavProps, propertyPassword, password);
-		
-		SessiondConnector sc = SessiondConnector.getInstance();
-		sessionObj = sc.addSession(login, password, "localhost");
-		
-		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
-		ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
-		
-		userId = sessionObj.getUserObject().getId();
-		
-		String userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
-		String userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
-		
-		userParticipantId2 = sc.addSession(userParticipant2, password, "localhost").getUserObject().getId();
-		userParticipantId3 = sc.addSession(userParticipant3, password, "localhost").getUserObject().getId();
-		
-		String groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
-		
-		Group group = groupStorage.searchGroups(groupParticipant, new String[] { GroupStorage.DISPLAYNAME } )[0];
-		
-		groupParticipantId1 = group.getIdentifier();
-		
-		String resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
-		
-		Resource resource = resourceStorage.searchResources(resourceParticipant)[0];
-		
-		resourceParticipantId1 = resource.getIdentifier();
-		
-		appointmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "appointment_url", appointmentUrl);
-		taskUrl = AbstractConfigWrapper.parseProperty(webdavProps, "task_url", taskUrl);
-		contactUrl = AbstractConfigWrapper.parseProperty(webdavProps, "contact_url", contactUrl);
-		folderUrl = AbstractConfigWrapper.parseProperty(webdavProps, "folder_url", contactUrl);
-		attachmentUrl = AbstractConfigWrapper.parseProperty(webdavProps, "attachment_url", attachmentUrl);
-		
-		appointmentFolderId = OXFolderTools.getCalendarStandardFolder(userId, sessionObj.getContext());
-		contactFolderId = OXFolderTools.getContactStandardFolder(userId, sessionObj.getContext());
-		taskFolderId = OXFolderTools.getTaskStandardFolder(userId, sessionObj.getContext());
-		
-		if (password == null) {
-			password = "";
-		}
-		
-		authData = new String(Base64.encode(login + ":" + password));
-		
-		isInit = true;
+		authData = getAuthData(login, password);		
 	}
 	
 	protected int parseResponse(Document response, boolean delete) throws Exception {
@@ -249,25 +149,28 @@ public abstract class AbstractWebdavTest extends TestCase {
 		return objectId;
 	}
 	
-	protected byte[] writeRequest(Element e_prop) throws Exception {
-		Element e_root = new Element("propertyupdate", webdav);
-		e_root.addNamespaceDeclaration(XmlServlet.NS);
+	protected static Element addProp2PropertyUpdate(Element eProp) throws Exception {
+		Element rootElement = new Element("propertyupdate", webdav);
+		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
-		Element e_set = new Element("set", webdav);
-		e_set.addContent(e_prop);
+		Element eSet = new Element("set", webdav);
+		eSet.addContent(eProp);
 		
-		e_root.addContent(e_set);
+		rootElement.addContent(eSet);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		return rootElement;
+	}
+	
+	protected static Document addProp2Document(Element eProp) throws Exception {
+		Element rootElement = new Element("propertyupdate", webdav);
+		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
-		Document doc = new Document(e_root);
+		Element eSet = new Element("set", webdav);
+		eSet.addContent(eProp);
 		
-		XMLOutputter xo = new XMLOutputter();
-		xo.output(doc, baos);
+		rootElement.addContent(eSet);
 		
-		baos.flush();
-		
-		return baos.toByteArray();
+		return new Document(rootElement);
 	}
 	
 	protected int sendPut(byte b[]) throws Exception {
@@ -328,7 +231,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		e_method.addContent("DELETE");
 		e_prop.addContent(e_method);
 		
-		byte[] b = writeRequest(e_prop);
+		byte[] b = null; // writeRequest(e_prop);
 		sendPut(b, true);
 	}
 		
@@ -387,22 +290,15 @@ public abstract class AbstractWebdavTest extends TestCase {
 		sendPropFind(baos.toByteArray());
 	}
 	
-	protected abstract String getURL();
-	
-	protected class PropFindMethod extends EntityEnclosingMethod {
-		
-		public PropFindMethod() {
-			super();
-		}
-		
-		public PropFindMethod(String url) {
-			super(url);
-		}
-		
-		public String getName() {
-			return "PROPFIND";
-		}
-		
+	protected String getURL() {
+		return "no/url";
 	}
 	
+	protected static String getAuthData(String login, String password) throws Exception {
+		if (password == null) {
+			password = "";
+		}
+		
+		return new String(Base64.encode(login + ":" + password));
+	}
 }

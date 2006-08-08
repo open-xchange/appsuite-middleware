@@ -9,8 +9,13 @@ import com.openexchange.groupware.container.UserParticipant;
 import java.util.Date;
 import org.jdom.Element;
 
-public class ContactTest extends CalendarTest {
+public class ContactTest extends AbstractWebdavTest {
 	
+	public static final String CONTACT_URL = "/servlet/webdav.contacts";
+	
+	protected int contactFolderId = -1;
+	
+	/*
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -106,7 +111,7 @@ public class ContactTest extends CalendarTest {
 		ContactWriter contactWriter = new ContactWriter(sessionObj);
 		Element e_prop = new Element("prop", webdav);
 		contactWriter.addContent2PropElement(e_prop, contactObj, false);
-		byte[] b = writeRequest(e_prop);
+		byte[] b = null; //  writeRequest(e_prop);
 		return sendPut(b);
 	}
 	
@@ -167,9 +172,6 @@ public class ContactTest extends CalendarTest {
 		
 		return contactObj;
 	}
-
-	protected String getURL() {
-		return contactUrl;
-	}
+	 */
 }
 
