@@ -260,8 +260,9 @@ public class TasksTest extends AbstractAJAXTest {
         final int folderId = getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
+        // TODO resolve myself through AJAX interface
         final List<Participant> participants = getParticipants(
-            getWebConversation(), getHostName(), getSessionId(), 2);
+            getWebConversation(), getHostName(), getSessionId(), 2, true, 139);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
@@ -282,6 +283,72 @@ public class TasksTest extends AbstractAJAXTest {
             }
             if (!found) {
                 fail("Storing participant in delegated task failed.");
+            }
+        }
+
+        final int[] notDeleted = deleteTask(getWebConversation(), getHostName(),
+            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+    }
+
+    public void testUpdateDelegatedTask() throws Throwable {
+        // TODO resolve myself through AJAX interface
+        final List<Participant> participants = getParticipants(
+            getWebConversation(), getHostName(), getSessionId(), 4, true, 139);
+        final List<Participant> firstParticipants =
+            new ArrayList<Participant>();
+        firstParticipants.addAll(participants.subList(0, 2));
+        final List<Participant> secondParticipants =
+            new ArrayList<Participant>();
+        secondParticipants.addAll(participants.subList(2, 4));
+        secondParticipants.add(participants.get(0));
+
+        final Task task = new Task();
+        task.setTitle("Private delegated task");
+        final int folderId = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), getSessionId());
+        task.setParentFolderID(folderId);
+        task.setParticipants(firstParticipants);
+
+        final int taskId = insertTask(getWebConversation(), getHostName(),
+            getSessionId(), task);
+        LOG.trace("Created delegated task: " + taskId);
+        assertTrue("Problem while inserting task", taskId > 0);
+        Response response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        Date lastModified = response.getTimestamp();
+        Task reload = (Task) response.getData();
+        for (Participant p1 : reload.getParticipants()) {
+            boolean found = false;
+            for (Participant p2 : firstParticipants) {
+                if (p1.getIdentifier() == p2.getIdentifier()) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fail("Storing participant in delegated task failed.");
+            }
+        }
+
+        final Task updatedTask = new Task();
+        updatedTask.setTitle("Updated delegated task");
+        updatedTask.setObjectID(taskId);
+        updatedTask.setParticipants(secondParticipants);
+        updateTask(getWebConversation(), getHostName(), getSessionId(),
+            folderId, updatedTask, lastModified);
+        response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        lastModified = response.getTimestamp();
+        reload = (Task) response.getData();
+        for (Participant p1 : reload.getParticipants()) {
+            boolean found = false;
+            for (Participant p2 : secondParticipants) {
+                if (p1.getIdentifier() == p2.getIdentifier()) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                fail("Updating participant in delegated task failed.");
             }
         }
 
@@ -455,7 +522,7 @@ public class TasksTest extends AbstractAJAXTest {
         }
         return data.getInt(TaskFields.ID);
     }
-    
+
     public static void updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
@@ -471,9 +538,9 @@ public class TasksTest extends AbstractAJAXTest {
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
             .getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_UPDATE);
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER,
             String.valueOf(folderId));
         parameter.setParameter(AJAXServlet.PARAMETER_ID,
@@ -656,13 +723,21 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static List<Participant> getParticipants(
         final WebConversation conversation, final String hostName,
-        final String sessionId, final int count) throws Exception {
+        final String sessionId, final int count, final boolean noCreator,
+        final int creatorId) throws Exception {
         final JSONObject json = ParticipantTest.searchAction(conversation, "*",
             PROTOCOL + hostName, sessionId, Participant.USER);
         final Response response = ResponseParser.parse(json.toString());
         final JSONArray jsonParticipants = (JSONArray) response.getData();
         final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> participants = new ArrayList<Participant>();
+        if (noCreator) {
+            for (Participant participant : participants) {
+                if (participant.getIdentifier() == creatorId) {
+                    participants.remove(participant);
+                }
+            }
+        }
         final Set<Integer> added = new HashSet<Integer>();
         do {
             final JSONObject jsonParticipant = jsonParticipants.getJSONObject(
