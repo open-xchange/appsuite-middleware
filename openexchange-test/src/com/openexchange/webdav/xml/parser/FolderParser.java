@@ -68,32 +68,44 @@ public class FolderParser extends FolderChildParser {
 	}
 	
 	public void parse(FolderObject folderObj, Element eProp) throws Exception {
-		folderObj.setFolderName(getValue(eProp.getChild(OXFolder.TITLE, XmlServlet.NS)));
-		
-		String type = getValue(eProp.getChild(OXFolder.TYPE, XmlServlet.NS));
-		if (type.equals("private")) {
-			folderObj.setType(OXFolder.PRIVATE);
-		} else if (type.equals("public")) {
-			folderObj.setType(OXFolder.PUBLIC);
-		} else {
-			throw new OXConflictException("unknown value in " + OXFolder.TYPE + ": " + type);
+		if (hasElement(eProp.getChild(OXFolder.TITLE, XmlServlet.NS))) {
+			folderObj.setFolderName(getValue(eProp.getChild(OXFolder.TITLE, XmlServlet.NS)));
 		}
 		
-		String module = eProp.getChild(OXFolder.MODULE, XmlServlet.NS).getValue();
-		if (module.equals("calendar")) {
-			folderObj.setModule(OXFolder.CALENDAR);
-		} else if (module.equals("contact")) {
-			folderObj.setModule(OXFolder.CONTACT);
-		} else if (module.equals("task")) {
-			folderObj.setModule(OXFolder.TASK);
-		} else if (module.equals("unbound")) {
-			folderObj.setModule(OXFolder.UNBOUND);
-		} else {
-			throw new OXConflictException("unknown value in " + OXFolder.MODULE + ": " + module);
+		if (hasElement(eProp.getChild(OXFolder.TYPE, XmlServlet.NS))) {
+			String type = getValue(eProp.getChild(OXFolder.TYPE, XmlServlet.NS));
+			if (type.equals("private")) {
+				folderObj.setType(OXFolder.PRIVATE);
+			} else if (type.equals("public")) {
+				folderObj.setType(OXFolder.PUBLIC);
+			} else {
+				throw new OXConflictException("unknown value in " + OXFolder.TYPE + ": " + type);
+			}
 		}
 		
-		parseElementPermissions(folderObj, eProp.getChild(OXFolder.PERMISSIONS, XmlServlet.NS));
+		if (hasElement(eProp.getChild(OXFolder.MODULE, XmlServlet.NS))) {
+			String module = eProp.getChild(OXFolder.MODULE, XmlServlet.NS).getValue();
+			if (module.equals("calendar")) {
+				folderObj.setModule(OXFolder.CALENDAR);
+			} else if (module.equals("contact")) {
+				folderObj.setModule(OXFolder.CONTACT);
+			} else if (module.equals("task")) {
+				folderObj.setModule(OXFolder.TASK);
+			} else if (module.equals("unbound")) {
+				folderObj.setModule(OXFolder.UNBOUND);
+			} else {
+				throw new OXConflictException("unknown value in " + OXFolder.MODULE + ": " + module);
+			}
+		}
 		
+		if (hasElement(eProp.getChild("defaultfolder", XmlServlet.NS))) {
+			folderObj.setDefaultFolder(getValueAsBoolean(eProp.getChild("defaultfolder", XmlServlet.NS)));
+		}
+		
+		if (hasElement(eProp.getChild(OXFolder.PERMISSIONS, XmlServlet.NS))) {
+			parseElementPermissions(folderObj, eProp.getChild(OXFolder.PERMISSIONS, XmlServlet.NS));
+		}
+
 		parseElementFolderChildObject(folderObj, eProp);
 	}
 	
@@ -112,7 +124,7 @@ public class FolderParser extends FolderChildParser {
 				if (!e.getNamespace().equals(XmlServlet.NS)) {
 					continue;
 				}
-
+				
 				if (e.getName().equals("admin_user")) {
 					parseElementPermissionAttributes(oclp, e);
 					parseEntity(oclp, e);
@@ -155,7 +167,7 @@ public class FolderParser extends FolderChildParser {
 	}
 	
 	protected int getPermissionAttributeValue(Element e, String name) throws Exception {
-		return Integer.parseInt(e.getAttributeValue(XmlServlet.NAMESPACE, "folderpermission"));
+		return Integer.parseInt(e.getAttributeValue("folderpermission", XmlServlet.NS));
 	}
 }
 

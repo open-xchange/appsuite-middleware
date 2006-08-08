@@ -40,93 +40,43 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *
- 
  */
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXObject;
-import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.ldap.Group;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.io.IOException;
-import java.util.Date;
+import java.util.List;
 import org.jdom.Element;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * DataParser
+ * ResourceParser
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public abstract class DataParser {
+public class GroupParser extends DataParser {
 	
-	protected void parseElement(DataObject dataobject, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS))) {
-			dataobject.setObjectID(getValueAsInt(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS)));
-		} 
+	public GroupParser() {
+		
 	}
 	
-	public int getValueAsInt(Element e) throws XmlPullParserException, IOException {
-		String s = null;
+	public void parse(Group groupObj, Element eProp) throws Exception {
+		groupObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Integer.parseInt(s);
-		} else {
-			return 0;
+		parseMembers(groupObj, eProp.getChild("members", XmlServlet.NS));
+	}
+	
+	public void parseMembers(Group groupObj, Element eMembers) throws Exception {
+		List memberList = eMembers.getChildren("memberuid", XmlServlet.NS);
+		
+		int[] member = new int[memberList.size()];
+		
+		for (int a = 0; a < memberList.size(); a++) {
+			member[a] = Integer.parseInt(((Element)memberList.get(a)).getValue());
 		}
-	}
-	
-	public float getValueAsFloat(Element e) throws Exception {
-		String s = null;
 		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Float.parseFloat(s);
-		} else {
-			return 0;
-		}
-	}
-	
-	public long getValueAsLong(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Long.parseLong(s);
-		} else {
-			return 0;
-		}
-	}
-	
-	public Date getValueAsDate(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return new Date(Long.parseLong(s));
-		} else {
-			return null;
-		}
-	}
-	
-	public boolean getValueAsBoolean(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.equalsIgnoreCase("true")) {
-			return true;
-		}
-		return false;
-	}
-	
-	public String getValue(Element e) throws Exception {
-		String s = e.getValue();
-		
-		if (s != null && s.length() == 0) {
-			return null;
-		} 
-		return s;
-	}
-	
-	public boolean hasElement(Element e) throws Exception {
-		return (e != null);
+		groupObj.setMember(member);
 	}
 }
 

@@ -64,17 +64,41 @@ public class TaskParser extends CalendarParser {
 	}
 	
 	protected void parse(Task taskObj, Element eProp) throws Exception {
-		taskObj.setStatus(getValueAsInt(eProp.getChild(OXTask.STATUS, XmlServlet.NS)));
-		taskObj.setPercentComplete(getValueAsInt(eProp.getChild(OXTask.PERCENT_COMPLETE, XmlServlet.NS)));
-		taskObj.setPriority(getValueAsInt(eProp.getChild(OXTask.PRIORITY, XmlServlet.NS)));
-		taskObj.setTargetDuration(getValueAsInt(eProp.getChild(OXTask.TARGET_DURATION, XmlServlet.NS)));
-		taskObj.setTargetCosts(getValueAsInt(eProp.getChild(OXTask.TARGET_COSTS, XmlServlet.NS)));
-		taskObj.setActualDuration(getValueAsInt(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS)));
-		taskObj.setActualCosts(getValueAsInt(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS)));
-		taskObj.setDateCompleted(getValueAsDate(eProp.getChild(OXTask.DATE_COMPLETED, XmlServlet.NS)));
-		taskObj.setAlarm(getValueAsDate(eProp.getChild(OXTask.ALARM, XmlServlet.NS)));
-		taskObj.setStatus(getValueAsInt(eProp.getChild(OXTask.STATUS, XmlServlet.NS)));
-		taskObj.setStatus(getValueAsInt(eProp.getChild(OXTask.STATUS, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(OXTask.STATUS, XmlServlet.NS))) {
+			taskObj.setStatus(getValueAsInt(eProp.getChild(OXTask.STATUS, XmlServlet.NS)));
+		} 
+	
+		if (hasElement(eProp.getChild(OXTask.PERCENT_COMPLETE, XmlServlet.NS))) {
+			taskObj.setPercentComplete(getValueAsInt(eProp.getChild(OXTask.PERCENT_COMPLETE, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.PRIORITY, XmlServlet.NS))) {
+			taskObj.setPriority(getValueAsInt(eProp.getChild(OXTask.PRIORITY, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.TARGET_DURATION, XmlServlet.NS))) {
+			taskObj.setTargetDuration(getValueAsInt(eProp.getChild(OXTask.TARGET_DURATION, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.TARGET_COSTS, XmlServlet.NS))) {
+			taskObj.setTargetCosts(getValueAsInt(eProp.getChild(OXTask.TARGET_COSTS, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS))) {
+			taskObj.setActualDuration(getValueAsInt(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS))) {
+			taskObj.setActualCosts(getValueAsInt(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.DATE_COMPLETED, XmlServlet.NS))) {
+			taskObj.setDateCompleted(getValueAsDate(eProp.getChild(OXTask.DATE_COMPLETED, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXTask.ALARM, XmlServlet.NS))) {
+			taskObj.setAlarm(getValueAsDate(eProp.getChild(OXTask.ALARM, XmlServlet.NS)));
+		} 
 
 		parseElementCalendar(taskObj, eProp);
 	}

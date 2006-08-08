@@ -50,8 +50,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 import org.jdom.Element;
 
 /**
- * XmlTaskParser
- *
+ * CommonParser
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
@@ -59,8 +58,14 @@ import org.jdom.Element;
 public abstract class CommonParser extends FolderChildParser {
 		
 	protected void parseElementCommon(CommonObject commonobject, Element eProp) throws Exception {
-		commonobject.setCategories(getValue(eProp.getChild(OXCommon.CATEGORIES, XmlServlet.NS)));
-		commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild("private_flag", XmlServlet.NS)));
+		if (hasElement(eProp.getChild(OXCommon.CATEGORIES, XmlServlet.NS))) {
+			commonobject.setCategories(getValue(eProp.getChild(OXCommon.CATEGORIES, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild("private_flag", XmlServlet.NS))) {
+			commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild("private_flag", XmlServlet.NS)));
+		} 
+
 		parseElementFolderChildObject(commonobject, eProp);
 	}
 }

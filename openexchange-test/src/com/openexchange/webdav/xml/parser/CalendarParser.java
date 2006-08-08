@@ -69,22 +69,59 @@ import org.jdom.Element;
 public abstract class CalendarParser extends CommonParser {
 	
 	protected void parseElementCalendar(CalendarObject calendarobject, Element eProp) throws Exception {
-		calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(OXCalendar.RECURRENCE_ID, XmlServlet.NS)));
-		calendarobject.setRecurrencePosition(getValueAsInt(eProp.getChild(OXCalendar.RECURRENCE_POSITION, XmlServlet.NS)));
-		calendarobject.setRecurrenceDatePosition(getValueAsDate(eProp.getChild(OXCalendar.RECURRENCE_DATE_POSITION, XmlServlet.NS)));
-		calendarobject.setMonth(getValueAsInt(eProp.getChild(OXCalendar.MONTH, XmlServlet.NS)));
-		calendarobject.setDayInMonth(getValueAsInt(eProp.getChild(OXCalendar.DAY_IN_MONTH, XmlServlet.NS)));
-		calendarobject.setDays(getValueAsInt(eProp.getChild(OXCalendar.DAYS, XmlServlet.NS)));
-		calendarobject.setInterval(getValueAsInt(eProp.getChild(OXCalendar.INTERVAL, XmlServlet.NS)));
-		calendarobject.setUntil(getValueAsDate(eProp.getChild(OXCalendar.UNTIL, XmlServlet.NS)));
-		calendarobject.setStartDate(getValueAsDate(eProp.getChild(OXCalendar.START_DATE, XmlServlet.NS)));
-		calendarobject.setEndDate(getValueAsDate(eProp.getChild(OXCalendar.END_DATE, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(OXCalendar.RECURRENCE_ID, XmlServlet.NS))) {
+			calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(OXCalendar.RECURRENCE_ID, XmlServlet.NS)));
+		} 
 		
-		int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(OXCalendar.RECURRENCE_TYPE, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(OXCalendar.RECURRENCE_POSITION, XmlServlet.NS))) {
+			calendarobject.setRecurrencePosition(getValueAsInt(eProp.getChild(OXCalendar.RECURRENCE_POSITION, XmlServlet.NS)));
+		} 
 		
-		calendarobject.setRecurrenceType(recurrenceType);
-		calendarobject.setNotification(getValueAsBoolean(eProp.getChild(OXCalendar.NOTIFICATION, XmlServlet.NS)));
-		calendarobject.setTitle(getValue(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(OXCalendar.RECURRENCE_DATE_POSITION, XmlServlet.NS))) {
+			calendarobject.setRecurrenceDatePosition(getValueAsDate(eProp.getChild(OXCalendar.RECURRENCE_DATE_POSITION, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.MONTH, XmlServlet.NS))) {
+			calendarobject.setMonth(getValueAsInt(eProp.getChild(OXCalendar.MONTH, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.DAY_IN_MONTH, XmlServlet.NS))) {
+			calendarobject.setDayInMonth(getValueAsInt(eProp.getChild(OXCalendar.DAY_IN_MONTH, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.DAYS, XmlServlet.NS))) {
+			calendarobject.setDays(getValueAsInt(eProp.getChild(OXCalendar.DAYS, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.INTERVAL, XmlServlet.NS))) {
+			calendarobject.setInterval(getValueAsInt(eProp.getChild(OXCalendar.INTERVAL, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.UNTIL, XmlServlet.NS))) {
+			calendarobject.setUntil(getValueAsDate(eProp.getChild(OXCalendar.UNTIL, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.START_DATE, XmlServlet.NS))) {
+			calendarobject.setStartDate(getValueAsDate(eProp.getChild(OXCalendar.START_DATE, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.END_DATE, XmlServlet.NS))) {
+			calendarobject.setEndDate(getValueAsDate(eProp.getChild(OXCalendar.END_DATE, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.RECURRENCE_TYPE, XmlServlet.NS))) {
+			int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(OXCalendar.RECURRENCE_TYPE, XmlServlet.NS)));
+		
+			calendarobject.setRecurrenceType(recurrenceType);
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.NOTIFICATION, XmlServlet.NS))) {
+			calendarobject.setNotification(getValueAsBoolean(eProp.getChild(OXCalendar.NOTIFICATION, XmlServlet.NS)));
+		} 
+		
+		if (hasElement(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS))) {
+			calendarobject.setTitle(getValue(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS)));
+		} 
 		
 		parseElementParticipants(calendarobject, eProp);
 		

@@ -62,27 +62,40 @@ public class AppointmentParser extends CalendarParser {
 	}
 	
 	protected void parse(AppointmentObject appointmentObj, Element eProp) throws Exception {
-		appointmentObj.setShownAs(getValueAsInt(eProp.getChild(OXAppointment.SHOWN_AS, XmlServlet.NS)));
-		appointmentObj.setFullTime(getValueAsBoolean(eProp.getChild(OXAppointment.FULL_TIME, XmlServlet.NS)));
-		appointmentObj.setLocation(getValue(eProp.getChild(OXAppointment.LOCATION, XmlServlet.NS)));
-		appointmentObj.setAlarm(getValueAsInt(eProp.getChild(OXAppointment.ALARM, XmlServlet.NS)));
-		
-		String[] tmp = getValue(eProp.getChild(OXAppointment.DELETE_EXCEPTIONS)).split(",");
-		java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
-		
-		int counter = 0;
-		long l = 0;
-		
-		for (int a = 0; a < delete_exceptions.length; a++) {
-			delete_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
+		if (hasElement(eProp.getChild(OXAppointment.SHOWN_AS, XmlServlet.NS))) {
+			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(OXAppointment.SHOWN_AS, XmlServlet.NS)));
 		}
 		
-		appointmentObj.setDeleteExceptions(delete_exceptions);
+		if (hasElement(eProp.getChild(OXAppointment.FULL_TIME, XmlServlet.NS))) {
+			appointmentObj.setFullTime(getValueAsBoolean(eProp.getChild(OXAppointment.FULL_TIME, XmlServlet.NS)));
+		}
+		
+		if (hasElement(eProp.getChild(OXAppointment.LOCATION, XmlServlet.NS))) {
+			appointmentObj.setLocation(getValue(eProp.getChild(OXAppointment.LOCATION, XmlServlet.NS)));
+		}
+		
+		if (hasElement(eProp.getChild(OXAppointment.ALARM, XmlServlet.NS))) {
+			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(OXAppointment.ALARM, XmlServlet.NS)));
+		}
+		
+		if (hasElement(eProp.getChild(OXAppointment.DELETE_EXCEPTIONS, XmlServlet.NS))) {
+			String[] tmp = getValue(eProp.getChild(OXAppointment.DELETE_EXCEPTIONS)).split(",");
+			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
+			
+			int counter = 0;
+			long l = 0;
+			
+			for (int a = 0; a < delete_exceptions.length; a++) {
+				delete_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
+			}
+			
+			appointmentObj.setDeleteExceptions(delete_exceptions);
+		}
 		
 		parseElementCalendar(appointmentObj, eProp);
 	}
-} 
-	
-	
-	
-	
+}
+
+
+
+

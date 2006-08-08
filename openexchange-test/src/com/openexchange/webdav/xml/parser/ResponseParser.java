@@ -42,8 +42,13 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.groupware.ldap.ResourceGroup;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.types.Response;
+import java.util.ArrayList;
 import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -57,18 +62,28 @@ import org.jdom.Namespace;
 public class ResponseParser {
 	
 	public static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
-	
+
 	public static Response[] parse(final Document doc, int module) throws Exception {
 		Element rootElement = doc.getRootElement();
 		List responseElements = rootElement.getChildren("response", webdav);
 		
-		Response[] response = new Response[responseElements.size()];
+		Response[] response = null;
 		
-		for (int a = 0; a < response.length; a++) {
-			response[a] = parseResponse((Element)responseElements.get(a), module);
-		}
+		if (module == Types.GROUPUSER) {
+			if (responseElements.size() == 1) {
+				response = parseGroupUserResponse((Element)responseElements.get(0));
+			} else {
+				throw new OXException("invalid number of response elements in response!");
+			}
+		} else {
+			response = new Response[responseElements.size()];
+			
+			for (int a = 0; a < response.length; a++) {
+				response[a] = parseResponse((Element)responseElements.get(a), module);
+			}
+		} 
 		
-		return null;
+		return response;
 	}
 	
 	protected static Response parseResponse(Element eResponse, int module) throws Exception {
@@ -107,31 +122,132 @@ public class ResponseParser {
 		return response;
 	}
 	
+	protected static Response[] parseGroupUserResponse(Element eResponse) throws Exception {
+		Element ePropstat = eResponse.getChild("propstat", webdav);
+		Element eProp = ePropstat.getChild("prop", webdav);
+		Element eUsers = eProp.getChild("users", XmlServlet.NS);
+		Element eGroups = eProp.getChild("groups", XmlServlet.NS);
+		Element eResources = eProp.getChild("resources", XmlServlet.NS);
+		Element eResourcegroups = eProp.getChild("resourcegroups", XmlServlet.NS);
+		
+		List userList = null;
+		
+		if (eUsers != null) {
+			userList = eUsers.getChildren("user", XmlServlet.NS);
+		} else {
+			userList = new ArrayList();
+		}
+		
+		
+		List groupList = null;
+		
+		if (eGroups != null) {
+			groupList = eGroups.getChildren("group", XmlServlet.NS);
+		} else {
+			groupList = new ArrayList();
+		}
+		
+		List resourceList = null;
+		
+		if (resourceList != null) {
+			resourceList = eResources.getChildren("resource", XmlServlet.NS);
+		} else {
+			resourceList = new ArrayList();
+		}
+		
+		List resourcegroupList = null;
+		if (resourcegroupList != null) {
+			resourcegroupList = eResourcegroups.getChildren("resourcegroup", XmlServlet.NS);
+		} else {
+			resourcegroupList = new ArrayList();
+		}
+		
+		Response[] response = new Response[userList.size() + groupList.size() + resourceList.size() + resourcegroupList.size()];		
+		
+		int counter = 0;
+		
+		for (int a = 0; a < userList.size(); a++) {
+			response[counter] = new Response();
+			response[counter].setDataObject(parseContactResponse((Element)userList.get(a)));
+			response[counter].setStatus(200);
+			
+			counter++;
+		}
+
+		for (int a = 0; a < groupList.size(); a++) {
+			response[counter] = new Response();
+			response[counter].setDataObject(parseGroupResponse((Element)groupList.get(a)));
+			response[counter].setStatus(200);
+			
+			counter++;
+		}
+		
+		for (int a = 0; a < resourceList.size(); a++) {
+			response[counter] = new Response();
+			response[counter].setDataObject(parseResourceResponse((Element)resourceList.get(a)));
+			response[counter].setStatus(200);
+			
+			counter++;
+		}
+		
+		for (int a = 0; a < resourcegroupList.size(); a++) {
+			response[counter] = new Response();
+			response[counter].setDataObject(parseResourceGroupResponse((Element)resourcegroupList.get(a)));
+			response[counter].setStatus(200);
+			
+			counter++;
+		}
+
+		
+		return response;
+	}
+	
 	protected static AppointmentObject parseAppointmentResponse(Element eProp) throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		AppointmentParser appointmentParser = new AppointmentParser();
-		appointmentParser.parseElement(appointmentObj, eProp);
+		appointmentParser.parse(appointmentObj, eProp);
 		return appointmentObj;
 	}
 	
 	protected static ContactObject parseContactResponse(Element eProp) throws Exception {
 		ContactObject contactObj = new ContactObject();
 		ContactParser contactParser = new ContactParser();
-		contactParser.parseElement(contactObj, eProp);
+		contactParser.parse(contactObj, eProp);
 		return contactObj;
 	}
 	
 	protected static FolderObject parseFolderResponse(Element eProp) throws Exception {
 		FolderObject folderObj = new FolderObject();
 		FolderParser folderParser = new FolderParser();
-		folderParser.parseElement(folderObj, eProp);
+		folderParser.parse(folderObj, eProp);
 		return folderObj;
 	}
 	
 	protected static Task parseTaskResponse(Element eProp) throws Exception {
 		Task taskObj = new Task();
 		TaskParser taskParser = new TaskParser();
-		taskParser.parseElement(taskObj, eProp);
+		taskParser.parse(taskObj, eProp);
 		return taskObj;
+	}
+
+	protected static Group parseGroupResponse(Element eProp) throws Exception {
+		Group groupObj = new Group();
+		GroupParser groupParser = new GroupParser();
+		groupParser.parse(groupObj, eProp);
+		return groupObj;
+	}
+
+	protected static Resource parseResourceResponse(Element eProp) throws Exception {
+		Resource resourceObj = new Resource();
+		ResourceParser resourceParser = new ResourceParser();
+		resourceParser.parse(resourceObj, eProp);
+		return resourceObj;
+	}
+
+	protected static ResourceGroup parseResourceGroupResponse(Element eProp) throws Exception {
+		ResourceGroup resourcegroupObj = new ResourceGroup();
+		ResourceGroupParser resourcegroupParser = new ResourceGroupParser();
+		resourcegroupParser.parse(resourcegroupObj, eProp);
+		return resourcegroupObj;
 	}
 }

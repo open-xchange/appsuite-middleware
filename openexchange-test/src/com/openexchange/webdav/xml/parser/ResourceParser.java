@@ -40,93 +40,28 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *
- 
  */
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXObject;
-import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.io.IOException;
-import java.util.Date;
 import org.jdom.Element;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * DataParser
+ * ResourceParser
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public abstract class DataParser {
+public class ResourceParser extends DataParser {
 	
-	protected void parseElement(DataObject dataobject, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS))) {
-			dataobject.setObjectID(getValueAsInt(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS)));
-		} 
-	}
-	
-	public int getValueAsInt(Element e) throws XmlPullParserException, IOException {
-		String s = null;
+	public ResourceParser() {
 		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Integer.parseInt(s);
-		} else {
-			return 0;
-		}
 	}
 	
-	public float getValueAsFloat(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Float.parseFloat(s);
-		} else {
-			return 0;
-		}
-	}
-	
-	public long getValueAsLong(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Long.parseLong(s);
-		} else {
-			return 0;
-		}
-	}
-	
-	public Date getValueAsDate(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return new Date(Long.parseLong(s));
-		} else {
-			return null;
-		}
-	}
-	
-	public boolean getValueAsBoolean(Element e) throws Exception {
-		String s = null;
-		
-		if ((s = e.getValue()) != null && s.equalsIgnoreCase("true")) {
-			return true;
-		}
-		return false;
-	}
-	
-	public String getValue(Element e) throws Exception {
-		String s = e.getValue();
-		
-		if (s != null && s.length() == 0) {
-			return null;
-		} 
-		return s;
-	}
-	
-	public boolean hasElement(Element e) throws Exception {
-		return (e != null);
+	public void parse(Resource resourceObj, Element eProp) throws Exception {
+		resourceObj.setIdentifier(getValueAsInt(eProp.getChild("resource", XmlServlet.NS)));
 	}
 }
 
