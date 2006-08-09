@@ -666,7 +666,7 @@ public class TasksTest extends AbstractAJAXTest {
         for (int[] folderAndTask : folderAndTaskIds) {
             final JSONObject json2 = new JSONObject();
             json2.put(DataFields.ID, folderAndTask[1]);
-            json2.put(FolderChildFields.FOLDER_ID, folderAndTask[0]);
+            json2.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
             json.put(json2);
         }
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
@@ -788,7 +788,7 @@ public class TasksTest extends AbstractAJAXTest {
         for (int[] folderAndTask : folderAndTaskIds) {
             final JSONObject json2 = new JSONObject();
             json2.put(DataFields.ID, folderAndTask[1]);
-            json2.put(FolderChildFields.FOLDER_ID, folderAndTask[0]);
+            json2.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
             json.put(json2);
         }
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
@@ -838,6 +838,8 @@ public class TasksTest extends AbstractAJAXTest {
         if (noCreator) {
             for (Participant participant : participants) {
                 if (participant.getIdentifier() == creatorId) {
+                    LOG.trace("Removing " + participant.getIdentifier()
+                        + " from participants");
                     participants.remove(participant);
                 }
             }
@@ -862,6 +864,7 @@ public class TasksTest extends AbstractAJAXTest {
         final String hostName, final String sessionId)
         throws MalformedURLException, IOException, SAXException, JSONException,
         OXException {
+        LOG.trace("Getting my user identifier through inserting task.");
         final int folderId = getPrivateTaskFolder(conversation,
             hostName, sessionId);
 
@@ -879,6 +882,7 @@ public class TasksTest extends AbstractAJAXTest {
         final int[] notDeleted = deleteTasks(conversation, hostName, sessionId,
             lastModified, new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        LOG.trace("My identifier is " + retval);
         return retval;
     }
 }
