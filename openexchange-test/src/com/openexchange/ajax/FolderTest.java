@@ -69,7 +69,7 @@ public class FolderTest extends AbstractAJAXTest {
 		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
 		req.setParameter("parent", parentIdentifier);
-		String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + "," + FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER;
+		String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME + "," + FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER + "," + FolderObject.CREATED_BY;
 		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
 		
 		if (ignoreMailfolder) {
@@ -101,6 +101,7 @@ public class FolderTest extends AbstractAJAXTest {
 			subfolder.setFolderName(arr.getString(2));
 			subfolder.setSubfolderFlag(arr.getBoolean(3));
 			subfolder.setDefaultFolder(arr.getBoolean(4));
+            subfolder.setCreatedBy(arr.getInt(5));
 			folders.add(subfolder);
 		}
 		return folders;
