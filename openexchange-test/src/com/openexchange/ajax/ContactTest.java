@@ -12,8 +12,11 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.types.Response;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.URLParameter;
@@ -27,6 +30,110 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ContactTest extends AbstractAJAXTest {
+	
+	protected final static int[] CONTACT_FIELDS = {
+		DataObject.OBJECT_ID,
+		DataObject.CREATED_BY,
+		DataObject.CREATION_DATE,
+		DataObject.LAST_MODIFIED,
+		DataObject.MODIFIED_BY,
+		FolderChildObject.FOLDER_ID,
+		CommonObject.CATEGORIES,
+		ContactObject.GIVEN_NAME,
+		ContactObject.SUR_NAME,
+		ContactObject.ANNIVERSARY,
+		ContactObject.ASSISTANT_NAME,
+		ContactObject.BIRTHDAY,
+		ContactObject.BRANCHES,
+		ContactObject.BUSINESS_CATEGORY,
+		ContactObject.CELLULAR_TELEPHONE1,
+		ContactObject.CELLULAR_TELEPHONE2,
+		ContactObject.CITY_BUSINESS,
+		ContactObject.CITY_HOME,
+		ContactObject.CITY_OTHER,
+		ContactObject.COMMERCIAL_REGISTER,
+		ContactObject.COMPANY,
+		ContactObject.COUNTRY_BUSINESS,
+		ContactObject.COUNTRY_HOME,
+		ContactObject.COUNTRY_OTHER,
+		ContactObject.DEPARTMENT,
+		ContactObject.DISPLAY_NAME,
+		ContactObject.DISTRIBUTIONLIST,
+		ContactObject.EMAIL1,
+		ContactObject.EMAIL2,
+		ContactObject.EMAIL3,
+		ContactObject.EMPLOYEE_TYPE,
+		ContactObject.FAX_BUSINESS,
+		ContactObject.FAX_HOME,
+		ContactObject.FAX_OTHER,
+		ContactObject.IMAGE1,
+		ContactObject.INFO,
+		ContactObject.INSTANT_MESSENGER1,
+		ContactObject.INSTANT_MESSENGER2,
+		ContactObject.LINKS,
+		ContactObject.MANAGER_NAME,
+		ContactObject.MARITAL_STATUS,
+		ContactObject.MIDDLE_NAME,
+		ContactObject.NICKNAME,
+		ContactObject.NOTE,
+		ContactObject.NUMBER_OF_CHILDREN,
+		ContactObject.NUMBER_OF_EMPLOYEE,
+		ContactObject.POSITION,
+		ContactObject.POSTAL_CODE_BUSINESS,
+		ContactObject.POSTAL_CODE_HOME,
+		ContactObject.POSTAL_CODE_OTHER,
+		ContactObject.PRIVATE_FLAG,
+		ContactObject.PROFESSION,
+		ContactObject.ROOM_NUMBER,
+		ContactObject.SALES_VOLUME,
+		ContactObject.SPOUSE_NAME,
+		ContactObject.STATE_BUSINESS,
+		ContactObject.STATE_HOME,
+		ContactObject.STATE_OTHER,
+		ContactObject.STREET_BUSINESS,
+		ContactObject.STREET_HOME,
+		ContactObject.STREET_OTHER,
+		ContactObject.SUFFIX,
+		ContactObject.TAX_ID,
+		ContactObject.TELEPHONE_ASSISTANT,
+		ContactObject.TELEPHONE_BUSINESS1,
+		ContactObject.TELEPHONE_BUSINESS2,
+		ContactObject.TELEPHONE_CALLBACK,
+		ContactObject.TELEPHONE_CAR,
+		ContactObject.TELEPHONE_COMPANY,
+		ContactObject.TELEPHONE_HOME1,
+		ContactObject.TELEPHONE_HOME2,
+		ContactObject.TELEPHONE_IP,
+		ContactObject.TELEPHONE_ISDN,
+		ContactObject.TELEPHONE_OTHER,
+		ContactObject.TELEPHONE_PAGER,
+		ContactObject.TELEPHONE_PRIMARY,
+		ContactObject.TELEPHONE_RADIO,
+		ContactObject.TELEPHONE_TELEX,
+		ContactObject.TELEPHONE_TTYTDD,
+		ContactObject.TITLE,
+		ContactObject.URL,
+		ContactObject.USERFIELD01,
+		ContactObject.USERFIELD02,
+		ContactObject.USERFIELD03,
+		ContactObject.USERFIELD04,
+		ContactObject.USERFIELD05,
+		ContactObject.USERFIELD06,
+		ContactObject.USERFIELD07,
+		ContactObject.USERFIELD08,
+		ContactObject.USERFIELD09,
+		ContactObject.USERFIELD10,
+		ContactObject.USERFIELD11,
+		ContactObject.USERFIELD12,
+		ContactObject.USERFIELD13,
+		ContactObject.USERFIELD14,
+		ContactObject.USERFIELD15,
+		ContactObject.USERFIELD16,
+		ContactObject.USERFIELD17,
+		ContactObject.USERFIELD18,
+		ContactObject.USERFIELD19,
+		ContactObject.USERFIELD20
+	};
 	
 	private static final String CONTACT_URL = "/ajax/contacts";
 	
@@ -160,6 +267,32 @@ public class ContactTest extends AbstractAJAXTest {
 		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
+	public void testGetWithAllFields() throws Exception {
+		ContactObject contactObject = createCompleteContactObject();
+
+		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		compareObject(contactObject, loadContact);	
+	}
+	
+	public void testListWithAllFields() throws Exception {
+		ContactObject contactObject = createCompleteContactObject();
+
+		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+		
+		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
+		
+		ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, CONTACT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check response array", 1, contactArray.length);
+		
+		ContactObject loadContact = contactArray[0];
+		
+		compareObject(contactObject, loadContact);		
+	}
+	
 	protected String getURL() {
 		return CONTACT_URL;
 	}
@@ -207,6 +340,109 @@ public class ContactTest extends AbstractAJAXTest {
 		return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
+	private void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
+		assertEquals("id", contactObj1.getObjectID(), contactObj2.getObjectID());
+		assertEquals("created by", userId, contactObj1.getCreatedBy());
+		assertNotNull("creation date is null", contactObj1.getCreationDate());
+		assertTrue("creation date > 0", contactObj1.getCreationDate().getTime() > 0);
+		assertNull("last modified", contactObj1.getLastModified());
+		assertEquals("modified by is not 0", 0, contactObj1.getModifiedBy());
+		assertEquals("folder id", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
+		assertEquals("private flag", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
+		assertEqualsAndNotNull("categories", contactObj1.getCategories(), contactObj2.getSurName());
+		assertEqualsAndNotNull("given name", contactObj1.getGivenName(), contactObj2.getGivenName());
+		assertEqualsAndNotNull("surname", contactObj1.getSurName(), contactObj2.getSurName());
+		assertEqualsAndNotNull("anniversary", contactObj1.getAnniversary(), contactObj2.getAnniversary());
+		assertEqualsAndNotNull("assistant name", contactObj1.getAssistantName(), contactObj2.getAssistantName());
+		assertEqualsAndNotNull("birthday", contactObj1.getBirthday(), contactObj2.getBirthday());
+		assertEqualsAndNotNull("branches", contactObj1.getBranches(), contactObj2.getBranches());
+		assertEqualsAndNotNull("business categorie", contactObj1.getBusinessCategory(), contactObj2.getBusinessCategory());
+		assertEqualsAndNotNull("cellular telephone1", contactObj1.getCellularTelephone1(), contactObj2.getCellularTelephone1());
+		assertEqualsAndNotNull("cellular telehpone2", contactObj1.getCellularTelephone2(), contactObj2.getCellularTelephone2());
+		assertEqualsAndNotNull("city business", contactObj1.getCityBusiness(), contactObj2.getCityBusiness());
+		assertEqualsAndNotNull("city home", contactObj1.getCityHome(), contactObj2.getCityHome());
+		assertEqualsAndNotNull("city other", contactObj1.getCityOther(), contactObj2.getCityOther());
+		assertEqualsAndNotNull("commercial register", contactObj1.getCommercialRegister(), contactObj2.getCommercialRegister());
+		assertEqualsAndNotNull("company", contactObj1.getCompany(), contactObj2.getCompany());
+		assertEqualsAndNotNull("country business", contactObj1.getCountryBusiness(), contactObj2.getCountryBusiness());
+		assertEqualsAndNotNull("country home", contactObj1.getCountryHome(), contactObj2.getCountryHome());
+		assertEqualsAndNotNull("country other", contactObj1.getCountryOther(), contactObj2.getCountryOther());
+		assertEqualsAndNotNull("department", contactObj1.getDepartment(), contactObj2.getDepartment());
+		assertEqualsAndNotNull("display name", contactObj1.getDisplayName(), contactObj2.getDisplayName());
+		assertEqualsAndNotNull("email1", contactObj1.getEmail1(), contactObj2.getEmail1());
+		assertEqualsAndNotNull("email2", contactObj1.getEmail2(), contactObj2.getEmail2());
+		assertEqualsAndNotNull("email3", contactObj1.getEmail3(), contactObj2.getEmail3());
+		assertEqualsAndNotNull("employee type", contactObj1.getEmployeeType(), contactObj2.getEmployeeType());
+		assertEqualsAndNotNull("fax business", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
+		assertEqualsAndNotNull("fax home", contactObj1.getFaxHome(), contactObj2.getFaxHome());
+		assertEqualsAndNotNull("fax other", contactObj1.getFaxOther(), contactObj2.getFaxOther());
+		assertEqualsAndNotNull("image1", contactObj1.getImage1(), contactObj2.getImage1());
+		assertEqualsAndNotNull("info", contactObj1.getInfo(), contactObj2.getInfo());
+		assertEqualsAndNotNull("instant messenger1", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
+		assertEqualsAndNotNull("instant messenger2", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
+		assertEqualsAndNotNull("manager name", contactObj1.getManagerName(), contactObj2.getManagerName());
+		assertEqualsAndNotNull("marital status", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
+		assertEqualsAndNotNull("middle name", contactObj1.getMiddleName(), contactObj2.getMiddleName());
+		assertEqualsAndNotNull("nickname", contactObj1.getNickname(), contactObj2.getNickname());
+		assertEqualsAndNotNull("note", contactObj1.getNote(), contactObj2.getNote());
+		assertEqualsAndNotNull("number of children", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfAttachments());
+		assertEqualsAndNotNull("number of employee", contactObj1.getNumberOfEmployee(), contactObj2.getNumberOfEmployee());
+		assertEqualsAndNotNull("position", contactObj1.getPosition(), contactObj2.getPosition());
+		assertEqualsAndNotNull("postal code business", contactObj1.getPostalCodeBusiness(), contactObj2.getPostalCodeBusiness());
+		assertEqualsAndNotNull("postal code home", contactObj1.getPostalCodeHome(), contactObj2.getPostalCodeHome());
+		assertEqualsAndNotNull("postal code other", contactObj1.getPostalCodeOther(), contactObj2.getPostalCodeOther());
+		assertEqualsAndNotNull("profession", contactObj1.getProfession(), contactObj2.getProfession());
+		assertEqualsAndNotNull("room number", contactObj1.getRoomNumber(), contactObj2.getRoomNumber());
+		assertEqualsAndNotNull("sales volume", contactObj1.getSalesVolume(), contactObj2.getSalesVolume());
+		assertEqualsAndNotNull("spouse name", contactObj1.getSpouseName(), contactObj2.getSpouseName());
+		assertEqualsAndNotNull("state business", contactObj1.getStreetBusiness(), contactObj2.getStateBusiness());
+		assertEqualsAndNotNull("state home", contactObj1.getStateHome(), contactObj2.getStateHome());
+		assertEqualsAndNotNull("state other", contactObj1.getStateOther(), contactObj2.getStreetOther());
+		assertEqualsAndNotNull("street business", contactObj1.getStreetBusiness(), contactObj2.getStreetBusiness());
+		assertEqualsAndNotNull("street home", contactObj1.getStreetHome(), contactObj2.getStateHome());
+		assertEqualsAndNotNull("street other", contactObj1.getStateOther(), contactObj2.getStateOther());
+		assertEqualsAndNotNull("suffix", contactObj1.getSuffix(), contactObj2.getSuffix());
+		assertEqualsAndNotNull("tax id", contactObj1.getTaxID(), contactObj2.getTaxID());
+		assertEqualsAndNotNull("telephone assistant", contactObj1.getTelephoneAssistant(), contactObj2.getTelephoneAssistant());
+		assertEqualsAndNotNull("telephone business1", contactObj1.getTelephoneBusiness1(), contactObj2.getTelephoneBusiness1());
+		assertEqualsAndNotNull("telephone business2", contactObj1.getTelephoneBusiness2(), contactObj2.getTelephoneBusiness2());
+		assertEqualsAndNotNull("telephone callback", contactObj1.getTelephoneCallback(), contactObj2.getTelephoneCallback());
+		assertEqualsAndNotNull("telephone car", contactObj1.getTelephoneCar(), contactObj2.getTelephoneCar());
+		assertEqualsAndNotNull("telehpone company ", contactObj1.getTelephoneCompany(), contactObj2.getTelephoneCompany());
+		assertEqualsAndNotNull("telephone home1", contactObj1.getTelephoneHome1(), contactObj2.getTelephoneHome1());
+		assertEqualsAndNotNull("telephone home2", contactObj1.getTelephoneHome2(), contactObj2.getTelephoneHome2());
+		assertEqualsAndNotNull("telehpone ip", contactObj1.getTelephoneIP(), contactObj2.getTelephoneIP());
+		assertEqualsAndNotNull("telehpone isdn", contactObj1.getTelephoneISDN(), contactObj2.getTelephoneISDN());
+		assertEqualsAndNotNull("telephone other", contactObj1.getTelephoneOther(), contactObj2.getTelephoneOther());
+		assertEqualsAndNotNull("telephone pager", contactObj1.getTelephonePager(), contactObj2.getTelephonePager());
+		assertEqualsAndNotNull("telephone primary", contactObj1.getTelephonePrimary(), contactObj2.getTelephonePrimary());
+		assertEqualsAndNotNull("telephone radio", contactObj1.getTelephoneRadio(), contactObj2.getTelephoneRadio());
+		assertEqualsAndNotNull("telephone telex", contactObj1.getTelephoneTelex(), contactObj2.getTelephoneTelex());
+		assertEqualsAndNotNull("telephone ttytdd", contactObj1.getTelephoneTTYTTD(), contactObj2.getTelephoneTTYTTD());
+		assertEqualsAndNotNull("title", contactObj1.getTitle(), contactObj2.getTitle());
+		assertEqualsAndNotNull("url", contactObj1.getURL(), contactObj2.getURL());
+		assertEqualsAndNotNull("userfield01", contactObj1.getUserField01(), contactObj2.getUserField01());
+		assertEqualsAndNotNull("userfield02", contactObj1.getUserField02(), contactObj2.getUserField02());
+		assertEqualsAndNotNull("userfield03", contactObj1.getUserField03(), contactObj2.getUserField03());
+		assertEqualsAndNotNull("userfield04", contactObj1.getUserField04(), contactObj2.getUserField04());
+		assertEqualsAndNotNull("userfield05", contactObj1.getUserField05(), contactObj2.getUserField05());
+		assertEqualsAndNotNull("userfield06", contactObj1.getUserField06(), contactObj2.getUserField06());
+		assertEqualsAndNotNull("userfield07", contactObj1.getUserField07(), contactObj2.getUserField07());
+		assertEqualsAndNotNull("userfield08", contactObj1.getUserField08(), contactObj2.getUserField08());
+		assertEqualsAndNotNull("userfield09", contactObj1.getUserField09(), contactObj2.getUserField09());
+		assertEqualsAndNotNull("userfield10", contactObj1.getUserField10(), contactObj2.getUserField10());
+		assertEqualsAndNotNull("userfield11", contactObj1.getUserField11(), contactObj2.getUserField11());
+		assertEqualsAndNotNull("userfield12", contactObj1.getUserField12(), contactObj2.getUserField12());
+		assertEqualsAndNotNull("userfield13", contactObj1.getUserField13(), contactObj2.getUserField13());
+		assertEqualsAndNotNull("userfield14", contactObj1.getUserField14(), contactObj2.getUserField14());
+		assertEqualsAndNotNull("userfield15", contactObj1.getUserField15(), contactObj2.getUserField15());
+		assertEqualsAndNotNull("userfield16", contactObj1.getUserField16(), contactObj2.getUserField16());
+		assertEqualsAndNotNull("userfield17", contactObj1.getUserField17(), contactObj2.getUserField17());
+		assertEqualsAndNotNull("userfield18", contactObj1.getUserField18(), contactObj2.getUserField18());
+		assertEqualsAndNotNull("userfield19", contactObj1.getUserField19(), contactObj2.getUserField19());
+		assertEqualsAndNotNull("userfield20", contactObj1.getUserField20(), contactObj2.getUserField20());
+	}
+	
 	private ContactObject createContactObject(String displayname) {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("Meier");
@@ -218,6 +454,107 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setCountryBusiness("Deutschland");
 		contactObj.setTelephoneBusiness1("+49112233445566");
 		contactObj.setCompany("Internal Test AG");
+		contactObj.setParentFolderID(contactFolderId);
+		
+		return contactObj;
+	}
+	
+	private ContactObject createCompleteContactObject() {
+		ContactObject contactObj = new ContactObject();
+		contactObj.setPrivateFlag(true);
+		contactObj.setCategories("categories");
+		contactObj.setGivenName("given name");
+		contactObj.setSurName("surname");
+		contactObj.setAnniversary(new Date());
+		contactObj.setAssistantName("assistant name");
+		contactObj.setBirthday(new Date());
+		contactObj.setBranches("branches");
+		contactObj.setBusinessCategory("business categorie");
+		contactObj.setCellularTelephone1("cellular telephone1");
+		contactObj.setCellularTelephone2("cellular telehpone2");
+		contactObj.setCityBusiness("city business");
+		contactObj.setCityHome("city home");
+		contactObj.setCityOther("city other");
+		contactObj.setCommercialRegister("commercial register");
+		contactObj.setCompany("company");
+		contactObj.setCountryBusiness("country business");
+		contactObj.setCountryHome("country home");
+		contactObj.setCountryOther("country other");
+		contactObj.setDepartment("department");
+		contactObj.setDisplayName("display name");
+		contactObj.setEmail1("email1@test.de");
+		contactObj.setEmail2("email2@test.de");
+		contactObj.setEmail3("email3@test.de");
+		contactObj.setEmployeeType("employee type");
+		contactObj.setFaxBusiness("fax business");
+		contactObj.setFaxHome("fax home");
+		contactObj.setFaxOther("fax other");
+		contactObj.setImage1("image1");
+		contactObj.setInfo("info");
+		contactObj.setInstantMessenger1("instant messenger1");
+		contactObj.setInstantMessenger2("instant messenger2");
+		contactObj.setManagerName("manager name");
+		contactObj.setMaritalStatus("marital status");
+		contactObj.setMiddleName("middle name");
+		contactObj.setNickname("nickname");
+		contactObj.setNote("note");
+		contactObj.setNumberOfChildren("number of children");
+		contactObj.setNumberOfEmployee("number of employee");
+		contactObj.setPosition("position");
+		contactObj.setPostalCodeBusiness("postal code business");
+		contactObj.setPostalCodeHome("postal code home");
+		contactObj.setPostalCodeOther("postal code other");
+		contactObj.setProfession("profession");
+		contactObj.setRoomNumber("room number");
+		contactObj.setRoomNumber("sales volume");
+		contactObj.setSpouseName("spouse name");
+		contactObj.setStateBusiness("state business");
+		contactObj.setStateHome("state home");
+		contactObj.setStateOther("state other");
+		contactObj.setStreetBusiness("street business");
+		contactObj.setStreetHome("street home");
+		contactObj.setStreetOther("street other");
+		contactObj.setSuffix("suffix");
+		contactObj.setTaxID("tax id");
+		contactObj.setTelephoneAssistant("telephone assistant");
+		contactObj.setTelephoneBusiness1("telephone business1");
+		contactObj.setTelephoneBusiness2("telephone business2");
+		contactObj.setTelephoneCallback("telephone callback");
+		contactObj.setTelephoneCar("telephone car");
+		contactObj.setTelephoneCompany("telehpone company");
+		contactObj.setTelephoneHome1("telephone home1");
+		contactObj.setTelephoneHome2("telephone home2");
+		contactObj.setTelephoneIP("telehpone ip");
+		contactObj.setTelephoneISDN("telehpone isdn");
+		contactObj.setTelephoneOther("telephone other");
+		contactObj.setTelephonePager("telephone pager");
+		contactObj.setTelephonePrimary("telephone primary");
+		contactObj.setTelephoneRadio("telephone radio");
+		contactObj.setTelephoneTelex("telephone telex");
+		contactObj.setTelephoneTTYTTD("telephone ttytdd");
+		contactObj.setTitle("title");
+		contactObj.setURL("url");
+		contactObj.setUserField01("userfield01");
+		contactObj.setUserField02("userfield02");
+		contactObj.setUserField03("userfield03");
+		contactObj.setUserField04("userfield04");
+		contactObj.setUserField05("userfield05");
+		contactObj.setUserField06("userfield06");
+		contactObj.setUserField07("userfield07");
+		contactObj.setUserField08("userfield08");
+		contactObj.setUserField09("userfield09");
+		contactObj.setUserField10("userfield10");
+		contactObj.setUserField11("userfield11");
+		contactObj.setUserField12("userfield12");
+		contactObj.setUserField13("userfield13");
+		contactObj.setUserField14("userfield14");
+		contactObj.setUserField15("userfield15");
+		contactObj.setUserField16("userfield16");
+		contactObj.setUserField17("userfield17");
+		contactObj.setUserField18("userfield18");
+		contactObj.setUserField19("userfield19");
+		contactObj.setUserField20("userfield20");
+		
 		contactObj.setParentFolderID(contactFolderId);
 		
 		return contactObj;
@@ -492,6 +829,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	private static void parseCols(int[] cols, JSONArray jsonArray, ContactObject contactObj) throws Exception {
+		assertEquals("compare array size with cols size", cols.length, jsonArray.length());
+		
 		for (int a = 0; a < cols.length; a++) {
 			parse(a, cols[a], jsonArray, contactObj);
 		}
