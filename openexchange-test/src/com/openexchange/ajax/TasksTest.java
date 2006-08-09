@@ -489,12 +489,18 @@ public class TasksTest extends AbstractAJAXTest {
             timestamp = new Date();
         }
         // Now update 5
-        for (int i = 0; i < tasks.length; i = i + 2) {
+        for (int i = 0; i < tasks.length / 2; i++) {
             task.setTitle("UpdatedTask " + (i + 1));
             task.setObjectID(tasks[i][1]);
             updateTask(getWebConversation(), getHostName(), getSessionId(),
                 folderId, task, timestamp);
         }
+        // And delete 2
+        int[][] deltasks = new int[2][2];
+        System.arraycopy(tasks, 8, deltasks, 0, 2);
+        int[] notdeleted = deleteTasks(getWebConversation(), getHostName(),
+            getSessionId(), timestamp, deltasks);
+        assertEquals("Number of deleted tasks is wrong.", 0, notdeleted.length);
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
@@ -502,12 +508,13 @@ public class TasksTest extends AbstractAJAXTest {
         response = getUpdatedTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId, columns, 0, null, timestamp);
         array = (JSONArray) response.getData();
-        assertTrue("Can't find " + (tasks.length / 2) + " updated tasks.",
-            array.length() >= tasks.length / 2);
+        assertTrue("Can't find " + (tasks.length / 2 + 2) + " updated tasks.",
+            array.length() >= tasks.length / 2 + 2);
         // Clean up
         timestamp = response.getTimestamp();
-        deleteTasks(getWebConversation(), getHostName(), getSessionId(),
-            timestamp, tasks);
+        notdeleted = deleteTasks(getWebConversation(), getHostName(),
+            getSessionId(), timestamp, tasks);
+        assertEquals("Number of deleted tasks is wrong.", 2, notdeleted.length);
     }
 
     public void testTaskList() throws Throwable {
