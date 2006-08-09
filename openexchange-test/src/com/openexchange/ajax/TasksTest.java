@@ -64,9 +64,8 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.parser.TaskParser;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXException;
 import com.openexchange.groupware.container.CalendarObject;
@@ -583,7 +582,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONObject data = (JSONObject) response.getData();
         if (!data.has(TaskFields.ID)) {
@@ -623,7 +622,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
@@ -643,7 +642,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Body: \"" + body + "\"");
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         final Task task = new Task();
         new TaskParser().parse(task, (JSONObject) response.getData());
@@ -682,7 +681,7 @@ public class TasksTest extends AbstractAJAXTest {
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
-        final Response response = ResponseParser.parse(resp.getText());
+        final Response response = Response.parse(resp.getText());
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONArray array = (JSONArray) response.getData();
         final int[] retval = new int[array.length()];
@@ -707,7 +706,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         return (Integer) response.getData();
     }
 
@@ -739,7 +738,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
     }
@@ -774,7 +773,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
     }
@@ -811,7 +810,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", 200, resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = ResponseParser.parse(body);
+        final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
     }
@@ -831,7 +830,7 @@ public class TasksTest extends AbstractAJAXTest {
         final int creatorId) throws Exception {
         final JSONObject json = ParticipantTest.searchAction(conversation, "*",
             PROTOCOL + hostName, sessionId, Participant.USER);
-        final Response response = ResponseParser.parse(json.toString());
+        final Response response = Response.parse(json.toString());
         final JSONArray jsonParticipants = (JSONArray) response.getData();
         final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> participants = new ArrayList<Participant>();

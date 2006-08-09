@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 
 
 

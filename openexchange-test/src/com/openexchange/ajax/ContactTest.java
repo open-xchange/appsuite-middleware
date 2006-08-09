@@ -8,8 +8,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -586,7 +585,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -624,7 +623,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -653,7 +652,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -680,7 +679,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -712,7 +711,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
 		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -737,7 +736,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -765,7 +764,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -792,7 +791,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = ResponseParser.parse(resp.getText());
+		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -1140,7 +1139,7 @@ public class ContactTest extends AbstractAJAXTest {
 				break;
 			default:
 				throw new Exception("missing field in mapping: " + field);
-				
+
 		}
 	}
 }

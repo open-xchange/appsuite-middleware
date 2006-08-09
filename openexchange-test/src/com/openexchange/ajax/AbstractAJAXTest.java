@@ -17,8 +17,7 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
 
 import junit.framework.TestCase;
@@ -178,15 +177,15 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 	
 	protected Response gT(String url) throws MalformedURLException, JSONException, IOException, SAXException {
-		return ResponseParser.parse(gS(url));
+		return Response.parse(gS(url));
 	}
 	
 	protected Response pT(String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-		return ResponseParser.parse(pS(url,data));
+		return Response.parse(pS(url,data));
 	}
 	
 	protected Response putT(String url, String data) throws MalformedURLException, JSONException, IOException, SAXException  {
-		return ResponseParser.parse(putS(url,data));
+		return Response.parse(putS(url,data));
 	}
 	
 	public static void assertNoError(Response res) {

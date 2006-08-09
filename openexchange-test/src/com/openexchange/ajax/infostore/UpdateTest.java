@@ -3,7 +3,7 @@ package com.openexchange.ajax.infostore;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 
 
 public class UpdateTest extends InfostoreAJAXTest {

@@ -7,7 +7,7 @@ import java.util.Set;
 import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.types.Response;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class ListTest extends InfostoreAJAXTest {
