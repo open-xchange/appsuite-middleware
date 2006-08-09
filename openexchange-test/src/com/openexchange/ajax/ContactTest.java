@@ -51,6 +51,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.CITY_BUSINESS,
 		ContactObject.CITY_HOME,
 		ContactObject.CITY_OTHER,
+		ContactObject.COLOR_LABEL,
 		ContactObject.COMMERCIAL_REGISTER,
 		ContactObject.COMPANY,
 		ContactObject.COUNTRY_BUSINESS,
@@ -1137,7 +1138,9 @@ public class ContactTest extends AbstractAJAXTest {
 			case ContactObject.USERFIELD20:
 				contactObj.setUserField20(jsonArray.getString(pos));
 				break;
-
+			default:
+				throw new Exception("missing field in mapping: " + field);
+				
 		}
 	}
 }
