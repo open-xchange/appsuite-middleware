@@ -192,5 +192,11 @@ public abstract class AbstractAJAXTest extends TestCase {
 	public static void assertNoError(Response res) {
 		assertFalse(res.getErrorMessage(),res.hasError());
 	}
-    
+	
+	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message, expect, value);
+		} 
+	}    
 }
