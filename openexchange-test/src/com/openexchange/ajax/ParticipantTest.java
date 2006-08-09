@@ -137,7 +137,9 @@ public class ParticipantTest extends AbstractAJAXTest {
 			JSONObject jObj = jsonArray.getJSONObject(a);
 			u[a] = new User();
 			u[a].setId(jObj.getInt(ParticipantsFields.ID));
-			u[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
+				u[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+			} 
 		}
 		
 		return u;			
@@ -151,7 +153,9 @@ public class ParticipantTest extends AbstractAJAXTest {
 			JSONObject jObj = jsonArray.getJSONObject(a);
 			g[a] = new Group();
 			g[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
-			g[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
+				g[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+			} 
 		}
 		
 		return g;
