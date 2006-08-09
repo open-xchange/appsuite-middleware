@@ -274,6 +274,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
+		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);	
 	}
 	
@@ -290,6 +291,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		ContactObject loadContact = contactArray[0];
 		
+		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);		
 	}
 	

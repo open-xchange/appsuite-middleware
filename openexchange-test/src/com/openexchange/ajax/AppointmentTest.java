@@ -283,6 +283,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
 		
+		appointmentObj.setObjectID(objectId);		
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
@@ -320,10 +321,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
 		
+		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
+		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
 		assertEquals("start", newStartTime, appointmentObj2.getStartDate().getTime());
 		assertEquals("end", newEndTime, appointmentObj2.getEndDate().getTime());
