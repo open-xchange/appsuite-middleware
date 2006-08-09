@@ -11,8 +11,13 @@ import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.types.Response;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.api.OXException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -20,16 +25,42 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 
 public class AppointmentTest extends AbstractAJAXTest {
+	
+	public static final int[] APPOINTMENT_FIELDS = {
+		DataObject.OBJECT_ID,
+		DataObject.CREATED_BY,
+		DataObject.CREATION_DATE,
+		DataObject.LAST_MODIFIED,
+		DataObject.MODIFIED_BY,
+		FolderChildObject.FOLDER_ID,
+		CommonObject.PRIVATE_FLAG,
+		CommonObject.CATEGORIES,
+		CalendarObject.TITLE,
+		CalendarObject.START_DATE,
+		CalendarObject.END_DATE,
+		AppointmentObject.LOCATION,
+		CalendarObject.NOTE,
+		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.PARTICIPANTS,
+		CalendarObject.USERS,
+		AppointmentObject.SHOWN_AS,
+		AppointmentObject.FULL_TIME,
+	};
 	
 	private static final String APPOINTMENT_URL = "/ajax/appointment";
 	
@@ -53,26 +84,34 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		userId = ParticipantTest.searchUser(getWebConversation(), getLogin(), PROTOCOL + getHostName(), getSessionId())[0].getId();
-		
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.HOUR_OF_DAY, 12);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		
-		startTime = c.getTimeInMillis();
-		endTime = startTime + 3600000;
-		
-		userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
-		userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
-		
-		groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
-		
-		resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
-		
-		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-		appointmentFolderId = folderObj.getObjectID();
+		try {
+			
+			userId = ParticipantTest.searchUser(getWebConversation(), getLogin(), PROTOCOL + getHostName(), getSessionId())[0].getId();
+			
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.HOUR_OF_DAY, 8);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MILLISECOND, 0);
+			c.setTimeZone(TimeZone.getTimeZone("GMT"));
+			
+			startTime = c.getTimeInMillis();
+			endTime = startTime + 3600000;
+			
+			userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+			userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+			
+			groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
+			
+			resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
+			
+			final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
+			appointmentFolderId = folderObj.getObjectID();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			
+			throw new Exception(ex);
+		}
 	}
 	
 	public void testNewAppointment() throws Exception {
@@ -188,7 +227,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-		assertEquals("check objectId", objectId, loadAppointment.getObjectID());
+		
+		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 	}
 	
 	public void testGetWithParticipants() throws Exception {
@@ -213,6 +253,89 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void testGetWithAllFields() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testGetWithAllFields");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setLocation("Location");
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setPrivateFlag(true);
+		appointmentObj.setFullTime(true);
+		appointmentObj.setLabel(2);
+		appointmentObj.setNote("note");
+		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		c.setTimeZone(TimeZone.getTimeZone("GMT"));
+		
+		long newStartTime = c.getTimeInMillis();
+		long newEndTime = newStartTime + 86400000;
+		
+		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+	}
+	
+	public void testListWithAllFields() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testGetWithAllFields");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setLocation("Location");
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setPrivateFlag(true);
+		appointmentObj.setFullTime(true);
+		appointmentObj.setLabel(2);
+		appointmentObj.setNote("note");
+		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check response array", 1, appointmentArray.length);
+		
+		AppointmentObject loadAppointment = appointmentArray[0];
+		
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		c.setTimeZone(TimeZone.getTimeZone("GMT"));
+		
+		long newStartTime = c.getTimeInMillis();
+		long newEndTime = newStartTime + 86400000;
+		
+		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+	}
+	
+	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
+		assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
+		assertEquals("start", newStartTime, appointmentObj2.getStartDate().getTime());
+		assertEquals("end", newEndTime, appointmentObj2.getEndDate().getTime());
+		assertEqualsAndNotNull("location", appointmentObj1.getLocation(), appointmentObj2.getLocation());
+		assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
+		assertEquals("folder id", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
+		assertEquals("private flag", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
+		assertEquals("full time", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+		assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
+		assertEqualsAndNotNull("note", appointmentObj1.getNote(), appointmentObj2.getNote());
+		assertEqualsAndNotNull("categories", appointmentObj1.getCategories(), appointmentObj2.getCategories());
+		
 	}
 	
 	private AppointmentObject createAppointmentObject(String title) {
@@ -428,6 +551,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
+		assertNotNull("timestamp", response.getTimestamp());
+		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		
 		AppointmentParser appointmentParser = new AppointmentParser(null);
@@ -468,7 +593,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "updated");
+		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "changed");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
 		
@@ -517,6 +642,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	private static void parseCols(int[] cols, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
+		assertEquals("compare array size with cols size", cols.length, jsonArray.length());
+		
 		for (int a = 0; a < cols.length; a++) {
 			parse(a, cols[a], jsonArray, appointmentObj);
 		}
