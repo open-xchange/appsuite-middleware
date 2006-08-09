@@ -19,6 +19,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -197,5 +198,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect, value);
 		} 
-	}    
+	}
+	
+	public static void assertDateEqualsAndNotNull(String message, Date expect, Date value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message, expect.getTime(), value.getTime());
+		} 
+	} 
 }
