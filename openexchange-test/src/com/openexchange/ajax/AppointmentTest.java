@@ -59,6 +59,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,
 		AppointmentObject.FULL_TIME,
+		AppointmentObject.COLOR_LABEL
 	};
 	
 	private static final String APPOINTMENT_URL = "/ajax/appointment";
@@ -211,7 +212,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		confirmAppointment(getWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void notestDelete() throws Exception {
+	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
@@ -255,7 +256,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void notestGetWithAllFields() throws Exception {
+	public void testGetWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -287,7 +288,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
-	public void notestListWithAllFields() throws Exception {
+	public void testListWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -674,6 +675,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.LOCATION:
 				appointmentObj.setLocation(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.FULL_TIME:
+				appointmentObj.setFullTime(jsonArray.getBoolean(pos));
+				break;
+			case AppointmentObject.PRIVATE_FLAG:
+				appointmentObj.setPrivateFlag(jsonArray.getBoolean(pos));
 				break;
 			case AppointmentObject.CATEGORIES:
 				appointmentObj.setCategories(jsonArray.getString(pos));

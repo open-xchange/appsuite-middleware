@@ -388,7 +388,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax home", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other", contactObj1.getFaxOther(), contactObj2.getFaxOther());
 		assertEqualsAndNotNull("image1", contactObj1.getImage1(), contactObj2.getImage1());
-		// assertEqualsAndNotNull("info", contactObj1.getInfo(), contactObj2.getInfo());
+		assertEqualsAndNotNull("info", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
 		assertEqualsAndNotNull("manager name", contactObj1.getManagerName(), contactObj2.getManagerName());
@@ -396,7 +396,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("middle name", contactObj1.getMiddleName(), contactObj2.getMiddleName());
 		assertEqualsAndNotNull("nickname", contactObj1.getNickname(), contactObj2.getNickname());
 		assertEqualsAndNotNull("note", contactObj1.getNote(), contactObj2.getNote());
-		assertEqualsAndNotNull("number of children", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfAttachments());
+		assertEqualsAndNotNull("number of children", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfChildren());
 		assertEqualsAndNotNull("number of employee", contactObj1.getNumberOfEmployee(), contactObj2.getNumberOfEmployee());
 		assertEqualsAndNotNull("position", contactObj1.getPosition(), contactObj2.getPosition());
 		assertEqualsAndNotNull("postal code business", contactObj1.getPostalCodeBusiness(), contactObj2.getPostalCodeBusiness());
@@ -408,7 +408,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("spouse name", contactObj1.getSpouseName(), contactObj2.getSpouseName());
 		assertEqualsAndNotNull("state business", contactObj1.getStreetBusiness(), contactObj2.getStateBusiness());
 		assertEqualsAndNotNull("state home", contactObj1.getStateHome(), contactObj2.getStateHome());
-		assertEqualsAndNotNull("state other", contactObj1.getStateOther(), contactObj2.getStreetOther());
+		assertEqualsAndNotNull("state other", contactObj1.getStateOther(), contactObj2.getStateOther());
 		assertEqualsAndNotNull("street business", contactObj1.getStreetBusiness(), contactObj2.getStreetBusiness());
 		assertEqualsAndNotNull("street home", contactObj1.getStreetHome(), contactObj2.getStateHome());
 		assertEqualsAndNotNull("street other", contactObj1.getStateOther(), contactObj2.getStateOther());
