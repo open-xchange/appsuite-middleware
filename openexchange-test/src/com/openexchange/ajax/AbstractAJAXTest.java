@@ -19,7 +19,6 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
-import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -124,7 +123,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	// Query methods
 	
 	protected String putS(String url, String body) throws MalformedURLException, IOException, SAXException {
-		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes()), "text/javascript");
+		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript");
 		WebResponse resp = getWebConversation().getResponse(m);
 		return resp.getText();
 	}
@@ -178,15 +177,26 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 	
 	protected Response gT(String url) throws MalformedURLException, JSONException, IOException, SAXException {
-		return Response.parse(gS(url));
+		String res = gS(url);
+		if("".equals(res.trim()))
+			return null;
+		return Response.parse(res);
+		
 	}
 	
 	protected Response pT(String url, Map<String,String> data) throws MalformedURLException, JSONException, IOException, SAXException {
-		return Response.parse(pS(url,data));
+		String res = pS(url,data);
+		if("".equals(res.trim()))
+			return null;
+		return Response.parse(res);
+			
 	}
 	
 	protected Response putT(String url, String data) throws MalformedURLException, JSONException, IOException, SAXException  {
-		return Response.parse(putS(url,data));
+		String res = putS(url,data);
+		if("".equals(res.trim()))
+			return null;
+		return Response.parse(res);
 	}
 	
 	public static void assertNoError(Response res) {
@@ -198,12 +208,5 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect, value);
 		} 
-	}
-	
-	public static void assertDateEqualsAndNotNull(String message, Date expect, Date value) throws Exception {
-		if (expect != null) {
-			assertNotNull(message + " is null", value);
-			assertEquals(message, expect.getTime(), value.getTime());
-		} 
-	} 
+	}    
 }
