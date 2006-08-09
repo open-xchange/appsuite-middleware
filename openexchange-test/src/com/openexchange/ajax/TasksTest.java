@@ -834,28 +834,22 @@ public class TasksTest extends AbstractAJAXTest {
         final JSONArray jsonParticipants = (JSONArray) response.getData();
         final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> participants = new ArrayList<Participant>();
-        if (noCreator) {
-            for (Participant participant : participants) {
-                if (participant.getIdentifier() == creatorId) {
-                    LOG.trace("Removing " + participant.getIdentifier()
-                        + " from participants");
-                    participants.remove(participant);
-                }
-            }
-        }
         final Set<Integer> added = new HashSet<Integer>();
         do {
             final JSONObject jsonParticipant = jsonParticipants.getJSONObject(
                 rand.nextInt(jsonParticipants.length()));
             final int userIdentifier = jsonParticipant.getInt("id");
+            if (noCreator && creatorId == userIdentifier) {
+                continue;
+            }
             if (!added.contains(userIdentifier)) {
                 final UserParticipant user = new UserParticipant();
                 user.setIdentifier(userIdentifier);
                 participants.add(user);
                 added.add(userIdentifier);
             }
-        } while (participants.size() < count
-            && participants.size() < jsonParticipants.length());
+        } while (participants.size() < count && participants.size()
+            < (jsonParticipants.length() - (noCreator ? 1 : 0)));
         return participants;
     }
 
@@ -863,24 +857,11 @@ public class TasksTest extends AbstractAJAXTest {
         final String hostName, final String sessionId)
         throws MalformedURLException, IOException, SAXException, JSONException,
         OXException {
-        LOG.trace("Getting my user identifier through inserting task.");
-        final int folderId = getPrivateTaskFolder(conversation,
-            hostName, sessionId);
-
-        Task task = new Task();
-        task.setParentFolderID(folderId);
-        final int taskId = insertTask(conversation, hostName, sessionId, task);
-        assertTrue("Problem while inserting private task.", taskId > 0);
-
-        final Response response = getTask(conversation, hostName, sessionId,
-            folderId, taskId);
-        final Task reload = (Task) response.getData();
-        final int retval = reload.getCreatedBy();
-        final Date lastModified = response.getTimestamp();
-
-        final int[] notDeleted = deleteTasks(conversation, hostName, sessionId,
-            lastModified, new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        LOG.trace("Getting my user identifier through my standard task "
+            + "folder.");
+        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
+            conversation, hostName, sessionId);
+        final int retval = myTasks.getCreatedBy();
         LOG.trace("My identifier is " + retval);
         return retval;
     }
