@@ -218,7 +218,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		int[] i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {1, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
-		
+
+		assertEquals("check response", 1, i.length);
 		assertEquals("check first element in array", 1, i[0]);
 	}
 	
