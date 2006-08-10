@@ -17,7 +17,7 @@ import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 
 public class LoginTest extends TestCase {
-    
+   	
     /**
      * Logger.
      */
@@ -45,5 +45,21 @@ public class LoginTest extends TestCase {
         String sessionId = jslogin.getString("session");
         return sessionId;
     }
+	
+	public static String[] getLoginWithUserId(final WebConversation wc,
+        final String hostname, final String login, final String password)
+        throws MalformedURLException, IOException, SAXException, JSONException {
+        LOG.trace("Logging in.");
+        WebRequest req = new GetMethodWebRequest("http://" + hostname
+            + "/ajax/login");
+        req.setParameter("name", login);
+        req.setParameter("password", password);
+        req.setHeaderField("Content-Type", "");
+        WebResponse resp = wc.getResponse(req);
+        JSONObject jslogin = new JSONObject(resp.getText());
+        String sessionId = jslogin.getString("session");
+		String userId = jslogin.getString("id");
+        return new String[] { sessionId, userId };
+	} 
     
 }
