@@ -169,11 +169,23 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public void testNewWithDistributionList() throws Exception {
-		int objectId = createContactWithDistributionList("testNewWithDistributionList");
+		ContactObject contactEntry = createContactObject("internal contact");
+		contactEntry.setEmail1("internalcontact@x.de");
+		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
+		contactEntry.setObjectID(contactId);
+		
+		int objectId = createContactWithDistributionList("testNewWithDistributionList", contactEntry);
 	}
 	
 	public void testNewWithLinks() throws Exception {
-		int objectId = createContactWithLinks("testNewWithLinks");
+		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
+		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+		link1.setObjectID(linkId1);
+		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+		link2.setObjectID(linkId2);
+		
+		int objectId = createContactWithLinks("testNewWithLinks", link1, link2);
 	}
 	
 	public void testUpdate() throws Exception {
@@ -190,7 +202,12 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public void testUpdateWithDistributionList() throws Exception {
-		int objectId = createContactWithDistributionList("testUpdateWithDistributionList");
+		ContactObject contactEntry = createContactObject("internal contact");
+		contactEntry.setEmail1("internalcontact@x.de");
+		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
+		contactEntry.setObjectID(contactId);
+		
+		int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
 		
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testUpdateWithDistributionList");
@@ -209,10 +226,17 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public void testUpdateWithLinks() throws Exception {
-		int objectId = createContactWithLinks("testUpdateWithLinks");
-		
 		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
 		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+		link1.setObjectID(linkId1);
+		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+		link2.setObjectID(linkId2);
+		
+		int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
+		
+		ContactObject link3 = createContactObject("link3");
+		int linkId3 = insertContact(getWebConversation(), link3, PROTOCOL + getHostName(), getSessionId());
 		
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testUpdateWithLinks");
@@ -221,8 +245,8 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		LinkEntryObject[] links = new LinkEntryObject[1];
 		links[0] = new LinkEntryObject();
-		links[0].setLinkID(linkId1);
-		links[0].setLinkDisplayname(link1.getDisplayName());
+		links[0].setLinkID(linkId3);
+		links[0].setLinkDisplayname(link3.getDisplayName());
 		
 		contactObj.setLinks(links);
 		
@@ -270,15 +294,68 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public void testGetWithDistributionList() throws Exception {
-		int objectId = createContactWithDistributionList("testGetWithDistributionList");
+		ContactObject contactEntry = createContactObject("internal contact");
+		contactEntry.setEmail1("internalcontact@x.de");
+		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
+		contactEntry.setObjectID(contactId);
+				
+		int objectId = createContactWithDistributionList("testGetWithDistributionList", contactEntry);
 		
-		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		boolean foundEntry1 = false;
+		boolean foundEntry2 = false;
+		boolean foundEntry3 = false;
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		DistributionListEntryObject entries[] = loadContact.getDistributionList();
+		assertNotNull("check distribution list" , entries);
+		for (int a = 0; a < entries.length; a++) {
+			if (entries[a].getEntryID() == contactId) {
+				assertEqualsAndNotNull("check email in first distribution list entry" , contactEntry.getEmail1(), entries[a].getEmailaddress());
+				foundEntry1 = true;
+			} else if (entries[a].getDisplayname().equals("displayname a")) {
+				assertEqualsAndNotNull("check email in second distribution list entry", "a@a.de", entries[a].getEmailaddress());
+				foundEntry2 = true;
+			} else if (entries[a].getDisplayname().equals("displayname b")) {
+				assertEqualsAndNotNull("check email in third distribution list entry", "b@b.de", entries[a].getEmailaddress());
+				foundEntry3 = true;
+			}
+		}
+		
+		assertTrue("check link entry1", foundEntry1);
+		assertTrue("check link entry2", foundEntry2);
+		assertTrue("check link entry2", foundEntry3);
 	}
 	
 	public void testGetWithLinks() throws Exception {
-		int objectId = createContactWithLinks("testGetWithLinks");
+		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
+		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+		link1.setObjectID(linkId1);
+		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+		link2.setObjectID(linkId2);
 		
-		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		int objectId = createContactWithLinks("testGetWithLinks", link1, link2);
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+				
+		assertEquals("check id", objectId, loadContact.getObjectID());
+		
+		boolean foundEntry1 = false;
+		boolean foundEntry2 = false;
+		
+		LinkEntryObject links[] = loadContact.getLinks();
+		assertNotNull("check links" , links);
+		for (int a = 0; a < links.length; a++) {
+			if (links[a].getContactID() == linkId1) {
+				foundEntry1 = true;
+			} else if (links[a].getContactID() == linkId2) {
+				foundEntry2 = true;
+			}
+		}
+		
+		assertTrue("check link entry1", foundEntry1);
+		assertTrue("check link entry2", foundEntry2);
 	}
 	
 	public void testGetWithAllFields() throws Exception {
@@ -313,11 +390,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return CONTACT_URL;
 	}
 	
-	protected int createContactWithDistributionList(String title) throws Exception {
-		ContactObject contactEntry = createContactObject(title);
-		contactEntry.setEmail1("internalcontact@x.de");
-		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
-		
+	protected int createContactWithDistributionList(String title, ContactObject contactEntry) throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName(title);
 		contactObj.setParentFolderID(contactFolderId);
@@ -326,29 +399,23 @@ public class ContactTest extends AbstractAJAXTest {
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
 		entry[2] = new DistributionListEntryObject(contactEntry.getDisplayName(), contactEntry.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
-		entry[2].setEntryID(contactId);
+		entry[2].setEntryID(contactEntry.getObjectID());
 		
 		contactObj.setDistributionList(entry);
 		return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
 	}
 	
-	protected int createContactWithLinks(String title) throws Exception {
-		ContactObject link1 = createContactObject("link1");
-		ContactObject link2 = createContactObject("link2");
-		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
-		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
-		
+	protected int createContactWithLinks(String title, ContactObject link1, ContactObject link2) throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName(title);
 		contactObj.setParentFolderID(contactFolderId);
 		
 		LinkEntryObject[] links = new LinkEntryObject[2];
 		links[0] = new LinkEntryObject();
-		links[0].setLinkID(linkId1);
+		links[0].setLinkID(link1.getObjectID());
 		links[0].setLinkDisplayname(link1.getDisplayName());
 		links[1] = new LinkEntryObject();
-		links[1].setLinkID(linkId2);
+		links[1].setLinkID(link2.getObjectID());
 		links[1].setLinkDisplayname(link2.getDisplayName());
 		
 		contactObj.setLinks(links);
