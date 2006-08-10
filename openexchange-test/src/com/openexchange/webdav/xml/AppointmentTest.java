@@ -87,7 +87,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 	}
 	
 	public void testNewAppointmentWithParticipants() throws Exception {
-		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
+		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 
 		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		int groupParticipantId = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
@@ -101,6 +101,19 @@ public class AppointmentTest extends AbstractWebdavTest {
 		participants[2].setIdentifier(groupParticipantId);
 		
 		appointmentObj.setParticipants(participants);
+		
+		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+	}
+	
+	public void testNewAppointmentWithUsers() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithUsers");
+
+		UserParticipant[] users = new UserParticipant[1];
+		users[0] = new UserParticipant();
+		users[0].setIdentifier(userId);
+		users[0].setConfirm(CalendarObject.ACCEPT);
+		
+		appointmentObj.setUsers(users);
 		
 		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 	}
