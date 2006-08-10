@@ -62,7 +62,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject.COLOR_LABEL
 	};
 	
-	private static final String APPOINTMENT_URL = "/ajax/appointment";
+	private static final String APPOINTMENT_URL = "/ajax/calendar";
 	
 	private static int appointmentFolderId = -1;
 	
