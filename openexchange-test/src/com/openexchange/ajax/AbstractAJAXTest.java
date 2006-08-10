@@ -32,7 +32,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     public static final String PROTOCOL = "http://";
 
-    private static String sessionId = null;
+    protected static String sessionId = null;
 
 	private static String hostName = null;
 	
