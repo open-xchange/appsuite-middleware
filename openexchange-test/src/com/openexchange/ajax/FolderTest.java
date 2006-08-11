@@ -136,7 +136,9 @@ public class FolderTest extends AbstractAJAXTest {
 		if(!jsonFolder.isNull("creation_date"))
 			fo.setCreationDate(new Date(jsonFolder.getLong("creation_date")));
 		fo.setFolderName(jsonFolder.getString("title"));
-		fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
+		
+		if(!jsonFolder.isNull("module"))
+			fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
 		if (fo.getModule() != FolderObject.MAIL && (!respObj.has("timestamp") || respObj.isNull("timestamp"))) {
 			throw new OXException("Error occured: Missing key \"timestamp\"");
 		}
