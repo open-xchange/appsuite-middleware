@@ -44,6 +44,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -942,9 +943,10 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static void removeParticipant(List<Participant> participants,
         final int creatorId) {
-        for (Participant participant : participants) {
-            if (participant.getIdentifier() == creatorId) {
-                participants.remove(participant);
+        Iterator<Participant> iter = participants.iterator();
+        while (iter.hasNext()) {
+            if (iter.next().getIdentifier() == creatorId) {
+                iter.remove();
             }
         }
     }
