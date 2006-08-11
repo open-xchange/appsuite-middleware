@@ -1060,6 +1060,9 @@ public class ContactTest extends AbstractAJAXTest {
 			case ContactObject.INSTANT_MESSENGER2:
 				contactObj.setInstantMessenger2(jsonArray.getString(pos));
 				break;
+			case ContactObject.INTERNAL_USERID:
+				contactObj.setInternalUserId(jsonArray.getInt(pos));
+				break;
 			case ContactObject.COLOR_LABEL:
 				contactObj.setLabel(jsonArray.getInt(pos));
 				break;
