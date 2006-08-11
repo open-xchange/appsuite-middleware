@@ -323,6 +323,28 @@ public class AppointmentTest extends AbstractAJAXTest {
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
+	public void testHasAppointment() throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter.setParameter(AJAXServlet.PARAMETER_START, new Date(System.currentTimeMillis()-d7));
+		parameter.setParameter(AJAXServlet.PARAMETER_END, new Date(System.currentTimeMillis()()+d7));
+		
+		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		
+		
+		assertEquals(200, resp.getResponseCode());
+	}
+	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
 		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
@@ -336,8 +358,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
 		assertEqualsAndNotNull("note", appointmentObj1.getNote(), appointmentObj2.getNote());
 		assertEqualsAndNotNull("categories", appointmentObj1.getCategories(), appointmentObj2.getCategories());
-		
 	}
+	
 	
 	private AppointmentObject createAppointmentObject(String title) {
 		AppointmentObject appointmentobject = new AppointmentObject();
