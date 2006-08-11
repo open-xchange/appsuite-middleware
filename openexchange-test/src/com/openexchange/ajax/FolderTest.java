@@ -101,7 +101,8 @@ public class FolderTest extends AbstractAJAXTest {
 			subfolder.setFolderName(arr.getString(2));
 			subfolder.setSubfolderFlag(arr.getBoolean(3));
 			subfolder.setDefaultFolder(arr.getBoolean(4));
-            subfolder.setCreatedBy(arr.getInt(5));
+			if (!arr.isNull(5))
+				subfolder.setCreatedBy(arr.getInt(5));
 			folders.add(subfolder);
 		}
 		return folders;
