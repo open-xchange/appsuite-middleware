@@ -86,6 +86,7 @@
     	<!-- test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/-->
 		
 		<!-- AJAX Interface -->
+	    <test name="com.openexchange.ajax.LoginTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.TasksTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.ReminderTest" todir="${test.xml.dir}" />
