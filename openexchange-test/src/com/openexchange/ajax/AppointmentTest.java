@@ -326,11 +326,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public void testHasAppointment() throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, "has");
 		parameter.setParameter(AJAXServlet.PARAMETER_START, new Date(System.currentTimeMillis()-d7));
-		parameter.setParameter(AJAXServlet.PARAMETER_END, new Date(System.currentTimeMillis()()+d7));
+		parameter.setParameter(AJAXServlet.PARAMETER_END, new Date(System.currentTimeMillis()+d7));
 		
-		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
-		WebResponse resp = webCon.getResponse(req);
+		WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -340,9 +341,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		
-		
-		assertEquals(200, resp.getResponseCode());
+		boolean isArray = response.getData() instanceof JSONArray;
+		assertFalse("response object is not an array", isArray);
 	}
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
