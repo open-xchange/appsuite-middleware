@@ -130,7 +130,8 @@ public class FolderTest extends AbstractAJAXTest {
 			fo.removeObjectID();
 			fo.setFullName(jsonFolder.getString("id"));
 		}
-		fo.setCreatedBy(jsonFolder.getInt("created_by"));
+		if(!jsonFolder.isNull("created_by"))
+			fo.setCreatedBy(jsonFolder.getInt("created_by"));
 		fo.setCreationDate(new Date(jsonFolder.getLong("creation_date")));
 		fo.setFolderName(jsonFolder.getString("title"));
 		fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
