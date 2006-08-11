@@ -118,7 +118,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.INTERNALUSERS, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
@@ -156,7 +156,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setLocation(null);
 		appointmentObj.setObjectID(objectId);
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.INTERNALUSERS, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
@@ -214,7 +214,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		int[] i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {1, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
-
+		
 		assertEquals("check response", 1, i.length);
 		assertEquals("check first element in array", 1, i[0]);
 	}
@@ -232,10 +232,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public void testGetWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testGetWithParticipants");
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.INTERNALUSERS, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-
+		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
@@ -281,7 +281,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
 		
-		appointmentObj.setObjectID(objectId);		
+		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
