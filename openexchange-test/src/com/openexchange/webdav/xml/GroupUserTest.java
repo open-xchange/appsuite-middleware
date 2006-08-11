@@ -31,6 +31,12 @@ public class GroupUserTest extends AbstractWebdavTest {
 		searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
 	
+	public void testSearchLoginUser() throws Exception {
+		ContactObject[] contactArray = searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("contact array size is 0", contactArray.length > 0);
+		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
+	}
+	
 	public void testSearchGroup() throws Exception {
 		searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
