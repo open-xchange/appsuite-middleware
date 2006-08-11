@@ -67,6 +67,10 @@ public class ContactParser extends CommonParser {
 	}
 	
 	protected void parse(ContactObject contactObj, Element eProp) throws Exception {
+		if (hasElement(eProp.getChild("uid", XmlServlet.NS))) {
+			contactObj.setInternalUserId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+		}
+
 		if (hasElement(eProp.getChild(OXContact.LAST_NAME, XmlServlet.NS))) {
 			contactObj.setSurName(getValue(eProp.getChild(OXContact.LAST_NAME, XmlServlet.NS)));
 		}
@@ -185,6 +189,10 @@ public class ContactParser extends CommonParser {
 		
 		if (hasElement(eProp.getChild(OXContact.INSTANT_MESSENGER2, XmlServlet.NS))) {
 			contactObj.setInstantMessenger2(getValue(eProp.getChild(OXContact.INSTANT_MESSENGER2, XmlServlet.NS)));
+		}
+
+		if (hasElement(eProp.getChild("uid", XmlServlet.NS))) {
+			contactObj.setInternalUserId(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.MANAGERS_NAME, XmlServlet.NS))) {
