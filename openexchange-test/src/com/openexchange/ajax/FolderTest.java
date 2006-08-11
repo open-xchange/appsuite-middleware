@@ -30,7 +30,7 @@ import com.openexchange.tools.URLParameter;
 
 public class FolderTest extends AbstractAJAXTest {
 	
-	private static final String FOLDER_URL = "/ajax/folder";
+	private static final String FOLDER_URL = "/ajax/folders";
 	
 	public static List<FolderObject> getRootFolders(final WebConversation conversation, final String hostname,
 		final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException,

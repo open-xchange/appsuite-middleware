@@ -42,7 +42,7 @@ public class TestFolder extends TestCase {
 	}
 	
 	public void testGetRootFolders() {
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId);
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId);
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -56,7 +56,7 @@ public class TestFolder extends TestCase {
 	}
 	
 	public void testGetSubfolders() {
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&gparent=127");
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=127");
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -67,7 +67,7 @@ public class TestFolder extends TestCase {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&gparent=INBOX");
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&gparent=INBOX");
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -81,7 +81,7 @@ public class TestFolder extends TestCase {
 	}
 	
 	public void testGetFolder() {
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&id=290");
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=290");
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -92,7 +92,7 @@ public class TestFolder extends TestCase {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&id=INBOX");
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=INBOX");
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -120,7 +120,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = newOXFolderObj.getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&folder=65", bais, "text/javascript; charset=UTF-8");
+			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=65", bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Put-Request to insert a OX folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -149,7 +149,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = newMailFolderObj.getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&folder=INBOX", bais, "text/javascript; charset=UTF-8");
+			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=INBOX", bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Put-Request to insert a IMAP folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -180,7 +180,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = updateOXFolderObj.getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&id=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
+			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Put-Request to update a OX folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -205,7 +205,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = updateMailFolderObj.getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&id=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
+			req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Put-Request to update a IMAP folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -231,7 +231,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = "".getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&delete=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
+			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Post-Request to delete a OX folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -257,7 +257,7 @@ public class TestFolder extends TestCase {
 		try {
 			bytes = "".getBytes("UTF-8");
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folder?session=" + sessionId + "&delete=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
+			req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
 			System.out.println("Starting Post-Request to delete a IMAP folder...");
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
