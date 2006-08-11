@@ -341,8 +341,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 			fail("json error: " + response.getErrorMessage());
 		}
 		
-		boolean isArray = response.getData() instanceof JSONArray;
-		assertFalse("response object is not an array", isArray);
+		boolean isArray = ((JSONArray)response.getData()) instanceof JSONArray;
+		assertTrue("response object is not an array", isArray);
 	}
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
