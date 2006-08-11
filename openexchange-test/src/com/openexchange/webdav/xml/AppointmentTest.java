@@ -9,10 +9,13 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -89,9 +92,13 @@ public class AppointmentTest extends AbstractWebdavTest {
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 
-		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-		int groupParticipantId = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
-		
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("contact array size is 0", contactArray.length > 0);
+		int userParticipantId = contactArray[0].getInternalUserId();
+		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("group array size is 0", groupArray.length > 0);
+		int groupParticipantId = groupArray[0].getIdentifier();
+			
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
@@ -135,10 +142,16 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		appointmentObj = createAppointmentObject("testUpdateAppointment");
 		
-		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-		int groupParticipantId = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
-		int resourceParticipantId = GroupUserTest.searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
-
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("contact array size is 0", contactArray.length > 0);
+		int userParticipantId = contactArray[0].getInternalUserId();
+		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("group array size is 0", groupArray.length > 0);
+		int groupParticipantId = groupArray[0].getIdentifier();
+		Resource[] resourceArray = GroupUserTest.searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("resource array size is 0", resourceArray.length > 0);
+		int resourceParticipantId = resourceArray[0].getIdentifier();
+		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
