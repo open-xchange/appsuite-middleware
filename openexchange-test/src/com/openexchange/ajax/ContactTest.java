@@ -148,7 +148,7 @@ public class ContactTest extends AbstractAJAXTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		String values[] = LoginTest.getLoginWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
 		sessionId = values[0];
 		userId = Integer.parseInt(values[1]);
 		

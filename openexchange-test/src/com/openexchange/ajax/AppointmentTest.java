@@ -80,7 +80,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		try {
-			String values[] = LoginTest.getLoginWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+			String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
 			sessionId = values[0];
 			userId = Integer.parseInt(values[1]);
 			

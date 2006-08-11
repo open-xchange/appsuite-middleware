@@ -44,10 +44,8 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,6 +57,7 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -163,7 +162,6 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
-        assertTrue("Problem while inserting private task.", taskId > 0);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -189,7 +187,6 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
-        assertTrue("Problem while inserting private task.", taskId > 0);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -220,7 +217,6 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
-        assertTrue("Problem while inserting private task.", taskId > 0);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -271,7 +267,6 @@ public class TasksTest extends AbstractAJAXTest {
         final int folderId = getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
-        // TODO resolve myself through AJAX interface
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 2, true,
             getMyId(getWebConversation(), getHostName(), getSessionId()));
@@ -281,7 +276,6 @@ public class TasksTest extends AbstractAJAXTest {
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
         LOG.trace("Created delegated task: " + taskId);
-        assertTrue("Problem while inserting task", taskId > 0);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -304,7 +298,6 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     public void testUpdateDelegatedTask() throws Throwable {
-        // TODO resolve myself through AJAX interface
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 4, true,
             getMyId(getWebConversation(), getHostName(), getSessionId()));
@@ -328,7 +321,6 @@ public class TasksTest extends AbstractAJAXTest {
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
         LOG.trace("Created delegated task: " + taskId);
-        assertTrue("Problem while inserting task", taskId > 0);
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         Date lastModified = response.getTimestamp();
@@ -392,7 +384,6 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParentFolderID(folderId);
         final int taskId = insertTask(getWebConversation(), getHostName(),
             getSessionId(), task);
-        assertTrue("Problem while inserting private task.", taskId > 0);
 
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -555,6 +546,59 @@ public class TasksTest extends AbstractAJAXTest {
             timestamp, tasks);
     }
 
+    public void notestConfirmation() throws Throwable {
+        final int folderId = getPrivateTaskFolder();
+
+        final Task task = new Task();
+        task.setTitle("Task to test confirmation");
+
+        final String[] tmp = LoginTest.getSessionIdWithUserId(
+            getWebConversation(), getHostName(), getSeconduser(),
+            getPassword());
+        final String sessionId2 = tmp[0];
+        final int userId2 = Integer.parseInt(tmp[1]);
+
+        final List<UserParticipant> participants =
+            new ArrayList<UserParticipant>();
+        final UserParticipant participant = new UserParticipant();
+        participant.setIdentifier(userId2);
+        participants.add(participant);
+        task.setParticipants(participants);
+        task.setParentFolderID(folderId);
+
+        final int taskId = insertTask(getWebConversation(), getHostName(),
+            getSessionId(), task);
+        LOG.trace("Created delegated task for confirmation: " + taskId);
+
+        confirmTask(getWebConversation(), getHostName(), sessionId2, taskId,
+            CalendarObject.ACCEPT, "Testconfirmation.");
+        LOG.trace("Confirmed task.");
+
+        final Response response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        final Date lastModified = response.getTimestamp();
+        final Task reload = (Task) response.getData();
+        for (UserParticipant p1 : reload.getUsers()) {
+            boolean found = false;
+            for (UserParticipant p2 : participants) {
+                if (p1.getIdentifier() == p2.getIdentifier()) {
+                    found = true;
+                    assertTrue("Can't read accept of participant.",
+                        p1.getConfirm() == CalendarObject.ACCEPT);
+                }
+            }
+            if (!found) {
+                fail("Storing participant in delegated task failed.");
+            }
+        }
+
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
+        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+
+    }
+
     /**
      * This method implements storing of a task through the AJAX interface.
      * @param conversation WebConversation.
@@ -599,7 +643,9 @@ public class TasksTest extends AbstractAJAXTest {
         if (!data.has(TaskFields.ID)) {
             fail(response.getErrorMessage());
         }
-        return data.getInt(TaskFields.ID);
+        final int taskId = data.getInt(TaskFields.ID);
+        assertTrue("Problem while inserting task", taskId > 0);
+        return taskId;
     }
 
     public static void updateTask(final WebConversation conversation,
@@ -824,7 +870,7 @@ public class TasksTest extends AbstractAJAXTest {
         sb.delete(sb.length() - 1, sb.length());
         parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
         final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
-            +TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
+            + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
@@ -834,6 +880,39 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
+    }
+
+    public static void confirmTask(final WebConversation conversation,
+        final String hostName, final String sessionId, final int taskId,
+        final int confirm, final String confirmMessage) throws IOException,
+        SAXException, JSONException {
+        final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostName
+            + TASKS_URL);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION,
+            AJAXServlet.ACTION_CONFIRM);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
+        req.setParameter(AJAXServlet.PARAMETER_CONFIRM,
+            String.valueOf(confirm));
+        req.setParameter(AJAXServlet.PARAMETER_CONFIRM_MESSAGE, confirmMessage);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: " + body);
+        final Response response = Response.parse(body);
+        assertFalse(response.getErrorMessage(), response.hasError());
+    }
+
+    private int privateTaskFolder = 0;
+
+    public int getPrivateTaskFolder() throws IOException, SAXException,
+        JSONException, OXException, Exception {
+        if (0 == privateTaskFolder) {
+            privateTaskFolder = getPrivateTaskFolder(getWebConversation(),
+                getHostName(), getSessionId());
+        }
+        return privateTaskFolder;
     }
 
     public static int getPrivateTaskFolder(final WebConversation conversation,
@@ -847,30 +926,53 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static List<Participant> getParticipants(
         final WebConversation conversation, final String hostName,
-        final String sessionId, final int count, final boolean noCreator,
-        final int creatorId) throws Exception {
+        final String sessionId) throws Exception {
         final ContactObject[] userContacts = ContactTest.searchContact(
             conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID,
             new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + hostName,
             sessionId);
-        final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> participants = new ArrayList<Participant>();
-        final Set<Integer> added = new HashSet<Integer>();
+        for (ContactObject userContact : userContacts) {
+            final UserParticipant user = new UserParticipant();
+            user.setIdentifier(userContact.getInternalUserId());
+            participants.add(user);
+        }
+        return participants;
+    }
+
+    public static void removeParticipant(List<Participant> participants,
+        final int creatorId) {
+        for (Participant participant : participants) {
+            if (participant.getIdentifier() == creatorId) {
+                participants.remove(participant);
+            }
+        }
+    }
+
+    public static List<Participant> extractByRandom(
+        final List<Participant> participants, final int count) {
+        final Random rand = new Random(System.currentTimeMillis());
+        final List<Participant> retval = new ArrayList<Participant>();
         do {
-            final ContactObject userContact = userContacts[rand.nextInt(
-                userContacts.length)];
-            final int userIdentifier = userContact.getInternalUserId();
-            if (noCreator && creatorId == userIdentifier) {
-                continue;
+            Participant participant = participants.get(rand.nextInt(participants
+                .size()));
+            if (!retval.contains(participant)) {
+                retval.add(participant);
             }
-            if (!added.contains(userIdentifier)) {
-                final UserParticipant user = new UserParticipant();
-                user.setIdentifier(userIdentifier);
-                participants.add(user);
-                added.add(userIdentifier);
-            }
-        } while (participants.size() < count && participants.size()
-            < (userContacts.length - (noCreator ? 1 : 0)));
+        } while (retval.size() < count && retval.size() < participants.size());
+        return retval;
+    }
+
+    public static List<Participant> getParticipants(
+        final WebConversation conversation, final String hostName,
+        final String sessionId, final int count, final boolean noCreator,
+        final int creatorId) throws Exception {
+        List<Participant> participants = getParticipants(conversation, hostName,
+            sessionId);
+        if (noCreator) {
+            removeParticipant(participants, creatorId);
+        }
+        participants = extractByRandom(participants, count);
         return participants;
     }
 
