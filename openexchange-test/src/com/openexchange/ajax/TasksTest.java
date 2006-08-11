@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -62,13 +64,13 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api.OXException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -91,6 +93,10 @@ public class TasksTest extends AbstractAJAXTest {
      */
     private static final String TASKS_URL = "/ajax/tasks";
 
+    /**
+     * Tests counting of tasks in the private folder.
+     * @throws Throwable if an error occurs.
+     */
     public void testCountPrivateFolder() throws Throwable {
         final int folderId = getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
@@ -98,10 +104,15 @@ public class TasksTest extends AbstractAJAXTest {
         final int number = countTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId);
         LOG.trace(number);
+        assertTrue("Number of tasks is not okay.", number >= 0);
     }
 
+    /**
+     * Tests counting of tasks in a public folder.
+     * @throws Throwable if an error occurs.
+     */
     public void notestCountPublicFolder() throws Throwable {
-        List<FolderObject> folders = FolderTest.getSubfolders(
+        final List<FolderObject> folders = FolderTest.getSubfolders(
             getWebConversation(), getHostName(), getSessionId(), "2", false);
         int folderId = -1;
         for (FolderObject folder : folders) {
@@ -115,6 +126,7 @@ public class TasksTest extends AbstractAJAXTest {
         final int number = countTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId);
         LOG.trace(number);
+        assertTrue("Number of tasks is not okay.", number >= 0);
     }
 
     /**
@@ -449,7 +461,7 @@ public class TasksTest extends AbstractAJAXTest {
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.LAST_MODIFIED, Task.FOLDER_ID };
         final Response response = getAllTasksInFolder(getWebConversation(),
-            getHostName(), getSessionId(), folderId, columns, 200, "asc");
+            getHostName(), getSessionId(), folderId, columns, HttpServletResponse.SC_OK, "asc");
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
         Date timestamp = response.getTimestamp();
@@ -542,23 +554,21 @@ public class TasksTest extends AbstractAJAXTest {
         deleteTasks(getWebConversation(), getHostName(), getSessionId(),
             timestamp, tasks);
     }
-    
+
     /**
      * This method implements storing of a task through the AJAX interface.
      * @param conversation WebConversation.
-     * @param getHostName() Host name of the server.
+     * @param hostName Host name of the server.
      * @param sessionId Session identifier of the user.
      * @param task Task to store.
      * @return the unique identifer of the task.
-     * @throws JSONException 
-     * @throws SAXException 
-     * @throws IOException 
-     * @throws MalformedURLException 
-     * @throws Exception if an error occurs while storing the task.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws IOException if the communication with the server fails.
      */
     public static int insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
-        throws JSONException, MalformedURLException, IOException, SAXException {
+        throws JSONException, IOException, SAXException {
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
@@ -579,7 +589,8 @@ public class TasksTest extends AbstractAJAXTest {
             + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -594,7 +605,7 @@ public class TasksTest extends AbstractAJAXTest {
     public static void updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
-        MalformedURLException, IOException, SAXException {
+        IOException, SAXException {
         LOG.trace("Updating task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
@@ -619,7 +630,8 @@ public class TasksTest extends AbstractAJAXTest {
             + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -628,8 +640,8 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
-        final int taskId) throws MalformedURLException, IOException,
-        SAXException, JSONException, OXException {
+        final int taskId) throws IOException, SAXException, JSONException,
+        OXException {
         LOG.trace("Getting task.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
@@ -639,7 +651,8 @@ public class TasksTest extends AbstractAJAXTest {
             String.valueOf(folderId));
         req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Body: \"" + body + "\"");
         final Response response = Response.parse(body);
@@ -654,12 +667,15 @@ public class TasksTest extends AbstractAJAXTest {
      * @param folderAndTaskIds the first dimension contains several folder and
      * task identifier that should be deleted. The second dimension contains the
      * folder identifier with the index <code>0</code> and the task identifier
-     * with the index <code>1</code>. 
+     * with the index <code>1</code>.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws IOException if the communication with the server fails.
      */
     public static int[] deleteTasks(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
-        final int[][] folderAndTaskIds) throws MalformedURLException,
-        IOException, SAXException, JSONException {
+        final int[][] folderAndTaskIds) throws IOException, SAXException,
+        JSONException {
         LOG.trace("Deleting tasks.");
         final JSONArray json = new JSONArray();
         for (int[] folderAndTask : folderAndTaskIds) {
@@ -680,7 +696,8 @@ public class TasksTest extends AbstractAJAXTest {
             +TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final Response response = Response.parse(resp.getText());
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONArray array = (JSONArray) response.getData();
@@ -693,7 +710,7 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static int countTasks(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId)
-        throws MalformedURLException, IOException, SAXException, JSONException {
+        throws IOException, SAXException, JSONException {
         LOG.trace("Counting tasks.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
@@ -703,7 +720,8 @@ public class TasksTest extends AbstractAJAXTest {
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -713,8 +731,8 @@ public class TasksTest extends AbstractAJAXTest {
     public static Response getAllTasksInFolder(
         final WebConversation conversation, final String hostName,
         final String sessionId, final int folderId, final int[] columns,
-        final int sort, final String order) throws MalformedURLException,
-        IOException, SAXException, JSONException {
+        final int sort, final String order) throws IOException, SAXException,
+        JSONException {
         LOG.trace("Getting all task in a folder.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
@@ -735,7 +753,8 @@ public class TasksTest extends AbstractAJAXTest {
             req.setParameter(AJAXServlet.PARAMETER_ORDER, order);
         }
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -746,8 +765,8 @@ public class TasksTest extends AbstractAJAXTest {
     public static Response getUpdatedTasks(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int[] columns, final int sort, final String order,
-        final Date lastModified) throws MalformedURLException, IOException,
-        SAXException, JSONException {
+        final Date lastModified) throws IOException, SAXException,
+        JSONException {
         LOG.trace("Getting updated tasks in a folder.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL);
@@ -770,7 +789,8 @@ public class TasksTest extends AbstractAJAXTest {
         req.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
             String.valueOf(lastModified.getTime()));
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -781,7 +801,7 @@ public class TasksTest extends AbstractAJAXTest {
     public static Response getTaskList(final WebConversation conversation,
         final String hostName, final String sessionId,
         final int[][] folderAndTaskIds, final int[] columns)
-        throws MalformedURLException, IOException, SAXException, JSONException {
+        throws IOException, SAXException, JSONException {
         LOG.trace("Get a list of tasks.");
         final JSONArray json = new JSONArray();
         for (int[] folderAndTask : folderAndTaskIds) {
@@ -807,7 +827,8 @@ public class TasksTest extends AbstractAJAXTest {
             +TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", 200, resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
@@ -817,7 +838,7 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
-        throws MalformedURLException, IOException, SAXException, JSONException,
+        throws IOException, SAXException, JSONException,
         OXException {
         final FolderObject myTasks = FolderTest.getStandardTaskFolder(
             conversation, hostName, sessionId);
@@ -828,17 +849,17 @@ public class TasksTest extends AbstractAJAXTest {
         final WebConversation conversation, final String hostName,
         final String sessionId, final int count, final boolean noCreator,
         final int creatorId) throws Exception {
-        final JSONObject json = ParticipantTest.searchAction(conversation, "*",
-            PROTOCOL + hostName, sessionId, Participant.USER);
-        final Response response = Response.parse(json.toString());
-        final JSONArray jsonParticipants = (JSONArray) response.getData();
+        final ContactObject[] userContacts = ContactTest.searchContact(
+            conversation, "*", FolderObject.SYSTEM_LDAP_FOLDER_ID,
+            new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + hostName,
+            sessionId);
         final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> participants = new ArrayList<Participant>();
         final Set<Integer> added = new HashSet<Integer>();
         do {
-            final JSONObject jsonParticipant = jsonParticipants.getJSONObject(
-                rand.nextInt(jsonParticipants.length()));
-            final int userIdentifier = jsonParticipant.getInt("id");
+            final ContactObject userContact = userContacts[rand.nextInt(
+                userContacts.length)];
+            final int userIdentifier = userContact.getInternalUserId();
             if (noCreator && creatorId == userIdentifier) {
                 continue;
             }
@@ -849,7 +870,7 @@ public class TasksTest extends AbstractAJAXTest {
                 added.add(userIdentifier);
             }
         } while (participants.size() < count && participants.size()
-            < (jsonParticipants.length() - (noCreator ? 1 : 0)));
+            < (userContacts.length - (noCreator ? 1 : 0)));
         return participants;
     }
 
