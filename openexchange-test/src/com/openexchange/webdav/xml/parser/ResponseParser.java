@@ -149,14 +149,14 @@ public class ResponseParser {
 		
 		List resourceList = null;
 		
-		if (resourceList != null) {
+		if (eResources != null) {
 			resourceList = eResources.getChildren("resource", XmlServlet.NS);
 		} else {
 			resourceList = new ArrayList();
 		}
 		
 		List resourcegroupList = null;
-		if (resourcegroupList != null) {
+		if (eResourcegroups != null) {
 			resourcegroupList = eResourcegroups.getChildren("resourcegroup", XmlServlet.NS);
 		} else {
 			resourcegroupList = new ArrayList();
