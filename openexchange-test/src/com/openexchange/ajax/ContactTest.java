@@ -388,6 +388,12 @@ public class ContactTest extends AbstractAJAXTest {
 		compareObject(contactObject, loadContact);
 	}
 	
+	public void testSearchLoginUser() throws Exception {
+		ContactObject[] contactArray = searchContact(getWebConversation(), getLogin(), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
+		assertTrue("contact array size is 0", contactArray.length > 0);
+		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
+	}
+	
 	protected String getURL() {
 		return CONTACT_URL;
 	}
