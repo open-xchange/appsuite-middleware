@@ -102,7 +102,7 @@ public class FolderTest extends AbstractAJAXTest {
 			subfolder.setSubfolderFlag(arr.getBoolean(3));
 			subfolder.setDefaultFolder(arr.getBoolean(4));
 			if (!arr.isNull(5))
-				subfolder.setCreatedBy(arr.getInt(5));
+            subfolder.setCreatedBy(arr.getInt(5));
 			folders.add(subfolder);
 		}
 		return folders;
@@ -131,14 +131,14 @@ public class FolderTest extends AbstractAJAXTest {
 			fo.setFullName(jsonFolder.getString("id"));
 		}
 		if(!jsonFolder.isNull("created_by"))
-			fo.setCreatedBy(jsonFolder.getInt("created_by"));
+		fo.setCreatedBy(jsonFolder.getInt("created_by"));
 		
 		if(!jsonFolder.isNull("creation_date"))
-			fo.setCreationDate(new Date(jsonFolder.getLong("creation_date")));
+		fo.setCreationDate(new Date(jsonFolder.getLong("creation_date")));
 		fo.setFolderName(jsonFolder.getString("title"));
 		
 		if(!jsonFolder.isNull("module"))
-			fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
+		fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
 		if (fo.getModule() != FolderObject.MAIL && (!respObj.has("timestamp") || respObj.isNull("timestamp"))) {
 			throw new OXException("Error occured: Missing key \"timestamp\"");
 		}
@@ -464,18 +464,18 @@ public class FolderTest extends AbstractAJAXTest {
 			fail(e.getMessage());
 		} finally {
 			try {
-				if (fuid != -1) {
+			if (fuid != -1) {
 					Calendar cal = GregorianCalendar.getInstance();
 					/*
 					 * Call getFolder to receive a valid timestamp for deletion
 					 */
 					getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, false);
 					deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), false);
-				}
+			}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
 		}
+	}
 	}
 	
 	public void testInsertUpdateFolder() {
@@ -501,18 +501,18 @@ public class FolderTest extends AbstractAJAXTest {
 			fail(e.getMessage());
 		} finally {
 			try {
-				if (fuid != -1) {
+			if (fuid != -1) {
 					Calendar cal = GregorianCalendar.getInstance();
 					/*
 					 * Call getFolder to receive a valid timestamp for deletion
 					 */
 					getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, false);
 					deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), false);
-				}
+			}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
 		}
+	}
 	}
 	
 	public void testSharedFolder() {
@@ -525,17 +525,17 @@ public class FolderTest extends AbstractAJAXTest {
 			 * Create a shared folder with login as creator and define share right for second user
 			 */
 			fuid01 = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder01", "calendar", FolderObject.PRIVATE,
+				FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder01", "calendar", FolderObject.PRIVATE,
 					getSeconduser(), true);
 			assertFalse(fuid01 == -1);
 			fuid02 = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-					FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder02", "calendar", FolderObject.PRIVATE,
+				FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "SharedFolder02", "calendar", FolderObject.PRIVATE,
 					getSeconduser(), true);
 			assertFalse(fuid02 == -1);
 			/*
 			 * Connect with second user and verify that folder is visible beneath system shared folder
 			 */
-			anotherSessionId = LoginTest.getLogin(getWebConversation(), getHostName(), getSeconduser(), getPassword());
+			anotherSessionId = LoginTest.getSessionId(getWebConversation(), getHostName(), getSeconduser(), getPassword());
 			boolean found01 = false;
 			boolean found02 = false;
 			List<FolderObject> l = getSubfolders(getWebConversation(), getHostName(), anotherSessionId, ""+FolderObject.SYSTEM_SHARED_FOLDER_ID, true);

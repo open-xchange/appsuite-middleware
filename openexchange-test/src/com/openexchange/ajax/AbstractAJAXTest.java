@@ -71,7 +71,7 @@ public abstract class AbstractAJAXTest extends TestCase {
      */
     protected String getSessionId() throws Exception {
         if (null == sessionId) {
-            sessionId = LoginTest.getLogin(getWebConversation(), getHostName(),
+            sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
                 getLogin(), getPassword());
             assertNotNull("Can't get session id.", sessionId);
         }

@@ -1,7 +1,43 @@
+/*
+ * OPEN-XCHANGE - "the communication and information enviroment"
+ *
+ * All intellectual property rights in the Software are protected by
+ * international copyright laws.
+ *
+ * OPEN-XCHANGE is a trademark of Netline Internet Service GmbH and all other
+ * brand and product names are or may be trademarks of, and are used to identify
+ * products or services of, their respective owners.
+ *
+ * Please make sure that third-party modules and libraries are used according to
+ * their respective licenses.
+ *
+ * Any modifications to this package must retain all copyright notices of the
+ * original copyright holder(s) for the original code used.
+ *
+ * After any such modifications, the original code will still remain copyrighted
+ * by the copyright holder(s) or original author(s).
+ *
+ * Copyright (C) 1998 - 2005 Netline Internet Service GmbH
+ * mail:                    info@netline-is.de
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA
+ */
+
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,52 +50,87 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 
-import junit.framework.TestCase;
+/**
+ * This class contains the login test. It also contains static methods to made
+ * logins from other places.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class LoginTest extends AbstractAJAXTest {
 
-public class LoginTest extends TestCase {
-   	
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(LoginTest.class);
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * URL of the login AJAX servlet.
+     */
+    private static final String LOGIN_URL = "/ajax/login";
+
+    /**
+     * Tests the login.
+     * @throws Throwable if an error occurs.
+     */
+    public void testLogin() throws Throwable {
+        final String sessionId = getSessionId(getWebConversation(),
+            getHostName(), getLogin(), getPassword());
+        assertNotNull("Got no sessionId", sessionId);
+        assertTrue("Length of session identifier is zero.",
+            sessionId.length() > 0);
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public static String getLogin(final WebConversation wc,
+    /**
+     * This method mades a login and returns the sessionId if the login is
+     * successful.
+     * @param conversation WebConversation.
+     * @param hostname hostname of the server running the server.
+     * @param login Login of the user.
+     * @param password Password of the user.
+     * @return the session identifier if the login is successful.
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
+    public static String getSessionId(final WebConversation conversation,
         final String hostname, final String login, final String password)
-        throws MalformedURLException, IOException, SAXException, JSONException {
+        throws IOException, SAXException, JSONException {
         LOG.trace("Logging in.");
-        WebRequest req = new GetMethodWebRequest("http://" + hostname
-            + "/ajax/login");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL
+            + hostname + LOGIN_URL);
         req.setParameter("name", login);
         req.setParameter("password", password);
         req.setHeaderField("Content-Type", "");
-        WebResponse resp = wc.getResponse(req);
-        JSONObject jslogin = new JSONObject(resp.getText());
-        String sessionId = jslogin.getString("session");
-        return sessionId;
+        final WebResponse resp = conversation.getResponse(req);
+        final JSONObject jslogin = new JSONObject(resp.getText());
+        return jslogin.getString("session");
     }
-	
-	public static String[] getLoginWithUserId(final WebConversation wc,
-        final String hostname, final String login, final String password)
-        throws MalformedURLException, IOException, SAXException, JSONException {
+
+    /**
+     * This method mades a login and returns the sessionId if the login is
+     * successful.
+     * @param conversation WebConversation.
+     * @param hostname hostname of the server running the server.
+     * @param login Login of the user.
+     * @param password Password of the user.
+     * @return the session identifier if the login is successful.
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
+    public static String[] getLoginWithUserId(
+        final WebConversation conversation, final String hostname,
+        final String login, final String password) throws IOException,
+        SAXException, JSONException {
         LOG.trace("Logging in.");
-        WebRequest req = new GetMethodWebRequest("http://" + hostname
-            + "/ajax/login");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL
+            + hostname + LOGIN_URL);
         req.setParameter("name", login);
         req.setParameter("password", password);
         req.setHeaderField("Content-Type", "");
-        WebResponse resp = wc.getResponse(req);
-        JSONObject jslogin = new JSONObject(resp.getText());
-        String sessionId = jslogin.getString("session");
-		String userId = jslogin.getString("id");
+        final WebResponse resp = conversation.getResponse(req);
+        final JSONObject jslogin = new JSONObject(resp.getText());
+        final String sessionId = jslogin.getString("session");
+        final String userId = jslogin.getString("id");
         return new String[] { sessionId, userId };
-	} 
-    
+	}
 }
