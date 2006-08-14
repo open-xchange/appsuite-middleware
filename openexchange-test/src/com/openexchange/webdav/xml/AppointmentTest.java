@@ -46,13 +46,13 @@ public class AppointmentTest extends AbstractWebdavTest {
 	protected int appointmentFolderId = -1;
 	
 	protected String userParticipant2 = null;
-
+	
 	protected String userParticipant3 = null;
 	
 	protected String groupParticipant = null;
 	
 	protected String resourceParticipant = null;
-		
+	
 	protected Date startTime = null;
 	
 	protected Date endTime = null;
@@ -61,30 +61,25 @@ public class AppointmentTest extends AbstractWebdavTest {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		try {
-				
-			Calendar c = Calendar.getInstance();
-			c.set(Calendar.HOUR_OF_DAY, 12);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MILLISECOND, 0);
-			
-			startTime = new Date(c.getTimeInMillis());
-			endTime = new Date(startTime.getTime() + 3600000);
-			
-			userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
-			userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
-			
-			groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
-			
-			resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
-
-			final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-			appointmentFolderId = folderObj.getObjectID();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new Exception("AppointmentTest.setUp", ex);
-		}
+		
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, 12);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		startTime = new Date(c.getTimeInMillis());
+		endTime = new Date(startTime.getTime() + 3600000);
+		
+		userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
+		userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
+		
+		groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
+		
+		resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
+		
+		final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		appointmentFolderId = folderObj.getObjectID();
 	}
 	
 	public void testNewAppointment() throws Exception {
@@ -94,14 +89,14 @@ public class AppointmentTest extends AbstractWebdavTest {
 	
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
-
+		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("contact array size is not > 0", contactArray.length > 0);
 		int userParticipantId = contactArray[0].getInternalUserId();
 		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
-			
+		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
@@ -117,7 +112,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 	
 	public void testNewAppointmentWithUsers() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithUsers");
-
+		
 		UserParticipant[] users = new UserParticipant[1];
 		users[0] = new UserParticipant();
 		users[0].setIdentifier(userId);
@@ -179,7 +174,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 	}
-
+	
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
@@ -191,7 +186,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		assertTrue("check response", appointmentArray.length >= 2);
 	}
-
+	
 	public void testPropFindWithDelete() throws Exception {
 		Date modified = new Date();
 		
@@ -207,13 +202,13 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 2);
 	}
-	 
+	
 	public void testPropFindWithObjectId() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithObjectId");
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
-	 
+		
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
-	 }
+	}
 	
 	public void testListWithAllFields() throws Exception {
 		Date modified = new Date();
@@ -249,7 +244,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		confirmAppointment(webCon, objectId, CalendarObject.DECLINE, null, PROTOCOL + hostName, login, password);
 	}
-
+	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2) throws Exception {
 		assertEquals("id is not equals", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title is not equals", appointmentObj1.getTitle(), appointmentObj2.getTitle());
@@ -267,7 +262,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		assertEqualsAndNotNull("participants are not equals" , participants2String(appointmentObj1.getParticipants()), participants2String(appointmentObj2.getParticipants()));
 		assertEqualsAndNotNull("users are not equals" , users2String(appointmentObj1.getUsers()), users2String(appointmentObj2.getUsers()));
 	}
-		
+	
 	private AppointmentObject createAppointmentObject(String title) throws Exception {
 		AppointmentObject appointmentobject = new AppointmentObject();
 		appointmentobject.setTitle(title);
@@ -474,7 +469,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		if (objectMode != null) {
 			eObjectmode.addContent(objectMode);
 			eProp.addContent(eObjectmode);
-		} 
+		}
 		
 		ePropfind.addContent(eProp);
 		eProp.addContent(eFolderId);
@@ -532,7 +527,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		ePropfind.addContent(eProp);
 		eProp.addContent(eFolderId);
 		eProp.addContent(eObjectId);
-
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Document doc = new Document(ePropfind);
