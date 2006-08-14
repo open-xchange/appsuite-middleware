@@ -12,6 +12,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.Group;
@@ -24,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
@@ -65,6 +67,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 			c.set(Calendar.HOUR_OF_DAY, 12);
 			c.set(Calendar.MINUTE, 0);
 			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MILLISECOND, 0);
 			
 			startTime = new Date(c.getTimeInMillis());
 			endTime = new Date(startTime.getTime() + 3600000);
@@ -93,10 +96,10 @@ public class AppointmentTest extends AbstractWebdavTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is 0", contactArray.length > 0);
+		assertTrue("contact array size is not > 0", contactArray.length > 0);
 		int userParticipantId = contactArray[0].getInternalUserId();
 		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("group array size is 0", groupArray.length > 0);
+		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 			
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
@@ -143,13 +146,13 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentObj = createAppointmentObject("testUpdateAppointment");
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is 0", contactArray.length > 0);
+		assertTrue("contact array size is not > 0", contactArray.length > 0);
 		int userParticipantId = contactArray[0].getInternalUserId();
 		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("group array size is 0", groupArray.length > 0);
+		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 		Resource[] resourceArray = GroupUserTest.searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("resource array size is 0", resourceArray.length > 0);
+		assertTrue("resource array size is not > 0", resourceArray.length > 0);
 		int resourceParticipantId = resourceArray[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
@@ -202,7 +205,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "DELETED", PROTOCOL + hostName, login, password);
 		
-		assertTrue("check response", appointmentArray.length >= 2);
+		assertTrue("wrong response array length", appointmentArray.length >= 2);
 	}
 	 
 	public void testPropFindWithObjectId() throws Exception {
@@ -210,12 +213,59 @@ public class AppointmentTest extends AbstractWebdavTest {
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 	 
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+	 }
+	
+	public void testListWithAllFields() throws Exception {
+		Date modified = new Date();
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testGetWithAllFields");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setLocation("Location");
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setPrivateFlag(true);
+		appointmentObj.setLabel(2);
+		appointmentObj.setNote("note");
+		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		
+		assertEquals("wrong response array length", 1, appointmentArray.length);
+		
+		AppointmentObject loadAppointment = appointmentArray[0];
+		
+		appointmentObj.setObjectID(objectId);
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		compareObject(appointmentObj, loadAppointment);
 	}
 	
 	public void testConfirm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		confirmAppointment(webCon, objectId, CalendarObject.DECLINE, null, PROTOCOL + hostName, login, password);
+	}
+
+	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2) throws Exception {
+		assertEquals("id is not equals", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
+		assertEqualsAndNotNull("title is not equals", appointmentObj1.getTitle(), appointmentObj2.getTitle());
+		assertEqualsAndNotNull("start is not equals", appointmentObj1.getStartDate(), appointmentObj2.getStartDate());
+		assertEqualsAndNotNull("end is not equals", appointmentObj1.getEndDate(), appointmentObj2.getEndDate());
+		assertEqualsAndNotNull("location is not equals", appointmentObj1.getLocation(), appointmentObj2.getLocation());
+		assertEquals("shown_as is not equals", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
+		assertEquals("folder id is not equals", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
+		assertEquals("private flag is not equals", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
+		assertEquals("full time is not equals", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+		assertEquals("label is not equals", appointmentObj1.getLabel(), appointmentObj2.getLabel());
+		assertEqualsAndNotNull("note is not equals", appointmentObj1.getNote(), appointmentObj2.getNote());
+		assertEqualsAndNotNull("categories is not equals", appointmentObj1.getCategories(), appointmentObj2.getCategories());
+		
+		assertEqualsAndNotNull("participants are not equals" , participants2String(appointmentObj1.getParticipants()), participants2String(appointmentObj2.getParticipants()));
+		assertEqualsAndNotNull("users are not equals" , users2String(appointmentObj1.getUsers()), users2String(appointmentObj2.getUsers()));
 	}
 		
 	private AppointmentObject createAppointmentObject(String title) throws Exception {
@@ -519,6 +569,50 @@ public class AppointmentTest extends AbstractWebdavTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 		
 		return (AppointmentObject)response[0].getDataObject();
+	}
+	
+	private HashSet participants2String(Participant[] participant) throws Exception {
+		if (participant == null) {
+			return null;
+		}
+		
+		HashSet hs = new HashSet();
+		
+		for (int a = 0; a < participant.length; a++) {
+			hs.add(participant2String(participant[a]));
+		}
+		
+		return hs;
+	}
+	
+	private String participant2String(Participant p) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("T" + p.getType());
+		sb.append("ID" + p.getIdentifier());
+		
+		return sb.toString();
+	}
+	
+	private HashSet users2String(UserParticipant[] users) throws Exception {
+		if (users == null) {
+			return null;
+		}
+		
+		HashSet hs = new HashSet();
+		
+		for (int a = 0; a < users.length; a++) {
+			hs.add(user2String(users[a]));
+		}
+		
+		return hs;
+	}
+	
+	private String user2String(UserParticipant user) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("ID" + user.getIdentifier());
+		sb.append("C" + user.getConfirm());
+		
+		return sb.toString();
 	}
 }
 
