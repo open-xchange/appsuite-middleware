@@ -145,6 +145,10 @@ public abstract class CalendarParser extends CommonParser {
 	}
 	
 	protected void parseElementParticipants(CalendarObject calendarObj, Element eParticipant) throws Exception {
+		if (eParticipant == null) {
+			return ;
+		}
+		
 		Participants participants = new Participants();
 		
 		boolean hasParticipants = false;
