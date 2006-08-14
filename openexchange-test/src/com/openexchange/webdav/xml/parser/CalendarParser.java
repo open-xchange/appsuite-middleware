@@ -123,7 +123,7 @@ public abstract class CalendarParser extends CommonParser {
 			calendarobject.setTitle(getValue(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS)));
 		} 
 		
-		parseElementParticipants(calendarobject, eProp);
+		parseElementParticipants(calendarobject, eProp.getChild("participants"));
 		
 		parseElementCommon(calendarobject, eProp);
 	}
@@ -189,6 +189,8 @@ public abstract class CalendarParser extends CommonParser {
 				userparticipant.setConfirm(CalendarObject.ACCEPT);
 			} else if (confirm.equals("decline")) {
 				userparticipant.setConfirm(CalendarObject.DECLINE);
+			} else if (confirm.equals("tentative")) {
+				userparticipant.setConfirm(CalendarObject.TENTATIVE);
 			} else if (confirm.equals("none")) {
 				userparticipant.setConfirm(CalendarObject.NONE);
 			} else {
@@ -205,17 +207,6 @@ public abstract class CalendarParser extends CommonParser {
 		 
 		Participant p = new GroupParticipant();
 		p.setIdentifier(id);
-		/*
-		GroupStorage groupstorage = GroupStorage.getInstance(sessionObj.getContext());;
-		Group g = groupstorage.getGroup(id);
-		int members[] = g.getMember();
-		 
-		for (int a = 0; a < members.length; a++) {
-			UserParticipant member = new UserParticipant();
-			member.setIdentifier(members[a]);
-			participants.add(member);
-		}
-		 */
 		 
 		participants.add(p);
 	}
