@@ -19,6 +19,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.URLParameter;
@@ -27,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,8 +159,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setObjectID(objectId);
 		
 		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
@@ -208,7 +210,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		confirmAppointment(getWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestDelete() throws Exception {
+	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
@@ -233,8 +235,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testGetWithParticipants");
 		
 		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
-		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
 		participants[0] = new UserParticipant();
@@ -267,6 +269,22 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
 		
+		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userId);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId);
+		participants[2] = new GroupParticipant();
+		participants[2].setIdentifier(groupParticipantId);
+		participants[3] = new ResourceParticipant();
+		participants[3].setIdentifier(resourceParticipantId);
+		
+		appointmentObj.setParticipants(participants);
+		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
@@ -285,7 +303,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
-	public void testListWithAllFields() throws Exception {
+	public void notestListWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -358,8 +376,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
 		assertEqualsAndNotNull("note", appointmentObj1.getNote(), appointmentObj2.getNote());
 		assertEqualsAndNotNull("categories", appointmentObj1.getCategories(), appointmentObj2.getCategories());
+		
+		assertEqualsAndNotNull("participants are not equals" , participants2String(appointmentObj1.getParticipants()), participants2String(appointmentObj2.getParticipants()));
 	}
-	
 	
 	private AppointmentObject createAppointmentObject(String title) {
 		AppointmentObject appointmentobject = new AppointmentObject();
@@ -711,6 +730,28 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj.setNote(jsonArray.getString(pos));
 				break;
 		}
+	}
+
+	private HashSet participants2String(Participant[] participant) throws Exception {
+		if (participant == null) {
+			return null;
+		}
+		
+		HashSet hs = new HashSet();
+		
+		for (int a = 0; a < participant.length; a++) {
+			hs.add(participant2String(participant[a]));
+		}
+		
+		return hs;
+	}
+	
+	private String participant2String(Participant p) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("T" + p.getType());
+		sb.append("ID" + p.getIdentifier());
+		
+		return sb.toString();
 	}
 }
 
