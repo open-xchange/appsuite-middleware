@@ -111,9 +111,9 @@ public class ContactTest extends AbstractWebdavTest {
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		Date modified = new Date();
-		
 		ContactObject contactObj = createCompleteContactObject();
+		
+		Date modified = new Date();
 		
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
