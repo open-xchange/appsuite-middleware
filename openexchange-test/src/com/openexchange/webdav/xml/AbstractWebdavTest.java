@@ -301,4 +301,11 @@ public abstract class AbstractWebdavTest extends TestCase {
 		
 		return new String(Base64.encode(login + ":" + password));
 	}
+	
+	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message, expect, value);
+		} 
+	}   
 }
