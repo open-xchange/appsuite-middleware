@@ -136,7 +136,7 @@ public class FolderTest extends AbstractWebdavTest {
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 		
-		OCLPermission oclp[] = new OCLPermission[2];
+		OCLPermission oclp[] = new OCLPermission[3];
 		oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 		oclp[1] = createPermission( userParticipantId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 		oclp[2] = createPermission( groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -169,7 +169,7 @@ public class FolderTest extends AbstractWebdavTest {
 		FolderObject[] folderArray = listFolder(webCon, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
 	 
 		assertTrue("check response", folderArray.length == 2);
-	}
+	 }
 	 
 	public void testPropFindWithDeleted() throws Exception {
 		Date modified = new Date();
