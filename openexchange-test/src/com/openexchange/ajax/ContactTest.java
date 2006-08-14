@@ -527,7 +527,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setPostalCodeOther("postal code other");
 		contactObj.setProfession("profession");
 		contactObj.setRoomNumber("room number");
-		contactObj.setRoomNumber("sales volume");
+		contactObj.setSalesVolume("sales volume");
 		contactObj.setSpouseName("spouse name");
 		contactObj.setStateBusiness("state business");
 		contactObj.setStateHome("state home");
