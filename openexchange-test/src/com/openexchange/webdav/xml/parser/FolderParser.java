@@ -113,8 +113,6 @@ public class FolderParser extends FolderChildParser {
 		ArrayList permissions = new ArrayList();
 		
 		try {
-			OCLPermission oclp = new OCLPermission();
-			
 			int entity = 0;
 			
 			List elementPermissions = ePermissions.getChildren();
@@ -124,6 +122,8 @@ public class FolderParser extends FolderChildParser {
 				if (!e.getNamespace().equals(XmlServlet.NS)) {
 					continue;
 				}
+				
+				OCLPermission oclp = new OCLPermission();
 				
 				if (e.getName().equals("admin_user")) {
 					parseElementPermissionAttributes(oclp, e);
