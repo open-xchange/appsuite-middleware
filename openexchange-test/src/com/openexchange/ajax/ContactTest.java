@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -164,7 +165,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		dateTime = c.getTimeInMillis();
 	}
-	
+
 	public void testNew() throws Exception {
 		ContactObject contactObj = createContactObject("testNew");
 		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -295,71 +296,6 @@ public class ContactTest extends AbstractAJAXTest {
 		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void testGetWithDistributionList() throws Exception {
-		ContactObject contactEntry = createContactObject("internal contact");
-		contactEntry.setEmail1("internalcontact@x.de");
-		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
-		contactEntry.setObjectID(contactId);
-		
-		int objectId = createContactWithDistributionList("testGetWithDistributionList", contactEntry);
-		
-		boolean foundEntry1 = false;
-		boolean foundEntry2 = false;
-		boolean foundEntry3 = false;
-		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		DistributionListEntryObject entries[] = loadContact.getDistributionList();
-		assertNotNull("check distribution list" , entries);
-		for (int a = 0; a < entries.length; a++) {
-			if (entries[a].getEntryID() == contactId) {
-				assertEqualsAndNotNull("check email in first distribution list entry" , contactEntry.getEmail1(), entries[a].getEmailaddress());
-				foundEntry1 = true;
-			} else if (entries[a].getDisplayname().equals("displayname a")) {
-				assertEqualsAndNotNull("check email in second distribution list entry", "a@a.de", entries[a].getEmailaddress());
-				foundEntry2 = true;
-			} else if (entries[a].getDisplayname().equals("displayname b")) {
-				assertEqualsAndNotNull("check email in third distribution list entry", "b@b.de", entries[a].getEmailaddress());
-				foundEntry3 = true;
-			}
-		}
-		
-		assertTrue("check link entry1", foundEntry1);
-		assertTrue("check link entry2", foundEntry2);
-		assertTrue("check link entry2", foundEntry3);
-	}
-	
-	public void testGetWithLinks() throws Exception {
-		ContactObject link1 = createContactObject("link1");
-		ContactObject link2 = createContactObject("link2");
-		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
-		link1.setObjectID(linkId1);
-		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
-		link2.setObjectID(linkId2);
-		
-		int objectId = createContactWithLinks("testGetWithLinks", link1, link2);
-		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEquals("check id", objectId, loadContact.getObjectID());
-		
-		boolean foundEntry1 = false;
-		boolean foundEntry2 = false;
-		
-		LinkEntryObject links[] = loadContact.getLinks();
-		assertNotNull("check links" , links);
-		for (int a = 0; a < links.length; a++) {
-			if (links[a].getContactID() == linkId1) {
-				foundEntry1 = true;
-			} else if (links[a].getContactID() == linkId2) {
-				foundEntry2 = true;
-			}
-		}
-		
-		assertTrue("check link entry1", foundEntry1);
-		assertTrue("check link entry2", foundEntry2);
-	}
-	
 	public void testGetWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
 		
@@ -370,7 +306,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
-	
+
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
 		
@@ -432,101 +368,104 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	private void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
-		assertEquals("id", contactObj1.getObjectID(), contactObj2.getObjectID());
-		assertEquals("folder id", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
-		assertEquals("private flag", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
-		assertEqualsAndNotNull("categories", contactObj1.getCategories(), contactObj2.getCategories());
-		assertEqualsAndNotNull("given name", contactObj1.getGivenName(), contactObj2.getGivenName());
-		assertEqualsAndNotNull("surname", contactObj1.getSurName(), contactObj2.getSurName());
-		// assertDateEqualsAndNotNull("anniversary", contactObj1.getAnniversary(), contactObj2.getAnniversary());
-		assertEqualsAndNotNull("assistant name", contactObj1.getAssistantName(), contactObj2.getAssistantName());
-		// assertDateEqualsAndNotNull("birthday", contactObj1.getBirthday(), contactObj2.getBirthday());
-		assertEqualsAndNotNull("branches", contactObj1.getBranches(), contactObj2.getBranches());
-		assertEqualsAndNotNull("business categorie", contactObj1.getBusinessCategory(), contactObj2.getBusinessCategory());
-		assertEqualsAndNotNull("cellular telephone1", contactObj1.getCellularTelephone1(), contactObj2.getCellularTelephone1());
-		assertEqualsAndNotNull("cellular telephone2", contactObj1.getCellularTelephone2(), contactObj2.getCellularTelephone2());
-		assertEqualsAndNotNull("city business", contactObj1.getCityBusiness(), contactObj2.getCityBusiness());
-		assertEqualsAndNotNull("city home", contactObj1.getCityHome(), contactObj2.getCityHome());
-		assertEqualsAndNotNull("city other", contactObj1.getCityOther(), contactObj2.getCityOther());
-		assertEqualsAndNotNull("commercial register", contactObj1.getCommercialRegister(), contactObj2.getCommercialRegister());
-		assertEqualsAndNotNull("company", contactObj1.getCompany(), contactObj2.getCompany());
-		assertEqualsAndNotNull("country business", contactObj1.getCountryBusiness(), contactObj2.getCountryBusiness());
-		assertEqualsAndNotNull("country home", contactObj1.getCountryHome(), contactObj2.getCountryHome());
-		assertEqualsAndNotNull("country other", contactObj1.getCountryOther(), contactObj2.getCountryOther());
-		assertEqualsAndNotNull("department", contactObj1.getDepartment(), contactObj2.getDepartment());
-		assertEqualsAndNotNull("display name", contactObj1.getDisplayName(), contactObj2.getDisplayName());
-		assertEqualsAndNotNull("email1", contactObj1.getEmail1(), contactObj2.getEmail1());
-		assertEqualsAndNotNull("email2", contactObj1.getEmail2(), contactObj2.getEmail2());
-		assertEqualsAndNotNull("email3", contactObj1.getEmail3(), contactObj2.getEmail3());
-		assertEqualsAndNotNull("employee type", contactObj1.getEmployeeType(), contactObj2.getEmployeeType());
-		assertEqualsAndNotNull("fax business", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
-		assertEqualsAndNotNull("fax home", contactObj1.getFaxHome(), contactObj2.getFaxHome());
-		assertEqualsAndNotNull("fax other", contactObj1.getFaxOther(), contactObj2.getFaxOther());
-		assertEqualsAndNotNull("image1", contactObj1.getImage1(), contactObj2.getImage1());
-		assertEqualsAndNotNull("info", contactObj1.getInfo(), contactObj2.getInfo());
-		assertEqualsAndNotNull("instant messenger1", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
-		assertEqualsAndNotNull("instant messenger2", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
-		assertEqualsAndNotNull("manager name", contactObj1.getManagerName(), contactObj2.getManagerName());
-		assertEqualsAndNotNull("marital status", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
-		assertEqualsAndNotNull("middle name", contactObj1.getMiddleName(), contactObj2.getMiddleName());
-		assertEqualsAndNotNull("nickname", contactObj1.getNickname(), contactObj2.getNickname());
-		assertEqualsAndNotNull("note", contactObj1.getNote(), contactObj2.getNote());
-		assertEqualsAndNotNull("number of children", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfChildren());
-		assertEqualsAndNotNull("number of employee", contactObj1.getNumberOfEmployee(), contactObj2.getNumberOfEmployee());
-		assertEqualsAndNotNull("position", contactObj1.getPosition(), contactObj2.getPosition());
-		assertEqualsAndNotNull("postal code business", contactObj1.getPostalCodeBusiness(), contactObj2.getPostalCodeBusiness());
-		assertEqualsAndNotNull("postal code home", contactObj1.getPostalCodeHome(), contactObj2.getPostalCodeHome());
-		assertEqualsAndNotNull("postal code other", contactObj1.getPostalCodeOther(), contactObj2.getPostalCodeOther());
-		assertEqualsAndNotNull("profession", contactObj1.getProfession(), contactObj2.getProfession());
-		assertEqualsAndNotNull("room number", contactObj1.getRoomNumber(), contactObj2.getRoomNumber());
-		assertEqualsAndNotNull("sales volume", contactObj1.getSalesVolume(), contactObj2.getSalesVolume());
-		assertEqualsAndNotNull("spouse name", contactObj1.getSpouseName(), contactObj2.getSpouseName());
-		assertEqualsAndNotNull("state business", contactObj1.getStreetBusiness(), contactObj2.getStateBusiness());
-		assertEqualsAndNotNull("state home", contactObj1.getStateHome(), contactObj2.getStateHome());
-		assertEqualsAndNotNull("state other", contactObj1.getStateOther(), contactObj2.getStateOther());
-		assertEqualsAndNotNull("street business", contactObj1.getStreetBusiness(), contactObj2.getStreetBusiness());
-		assertEqualsAndNotNull("street home", contactObj1.getStreetHome(), contactObj2.getStateHome());
-		assertEqualsAndNotNull("street other", contactObj1.getStateOther(), contactObj2.getStateOther());
-		assertEqualsAndNotNull("suffix", contactObj1.getSuffix(), contactObj2.getSuffix());
-		assertEqualsAndNotNull("tax id", contactObj1.getTaxID(), contactObj2.getTaxID());
-		assertEqualsAndNotNull("telephone assistant", contactObj1.getTelephoneAssistant(), contactObj2.getTelephoneAssistant());
-		assertEqualsAndNotNull("telephone business1", contactObj1.getTelephoneBusiness1(), contactObj2.getTelephoneBusiness1());
-		assertEqualsAndNotNull("telephone business2", contactObj1.getTelephoneBusiness2(), contactObj2.getTelephoneBusiness2());
-		assertEqualsAndNotNull("telephone callback", contactObj1.getTelephoneCallback(), contactObj2.getTelephoneCallback());
-		assertEqualsAndNotNull("telephone car", contactObj1.getTelephoneCar(), contactObj2.getTelephoneCar());
-		assertEqualsAndNotNull("telehpone company ", contactObj1.getTelephoneCompany(), contactObj2.getTelephoneCompany());
-		assertEqualsAndNotNull("telephone home1", contactObj1.getTelephoneHome1(), contactObj2.getTelephoneHome1());
-		assertEqualsAndNotNull("telephone home2", contactObj1.getTelephoneHome2(), contactObj2.getTelephoneHome2());
-		assertEqualsAndNotNull("telehpone ip", contactObj1.getTelephoneIP(), contactObj2.getTelephoneIP());
-		assertEqualsAndNotNull("telehpone isdn", contactObj1.getTelephoneISDN(), contactObj2.getTelephoneISDN());
-		assertEqualsAndNotNull("telephone other", contactObj1.getTelephoneOther(), contactObj2.getTelephoneOther());
-		assertEqualsAndNotNull("telephone pager", contactObj1.getTelephonePager(), contactObj2.getTelephonePager());
-		assertEqualsAndNotNull("telephone primary", contactObj1.getTelephonePrimary(), contactObj2.getTelephonePrimary());
-		assertEqualsAndNotNull("telephone radio", contactObj1.getTelephoneRadio(), contactObj2.getTelephoneRadio());
-		assertEqualsAndNotNull("telephone telex", contactObj1.getTelephoneTelex(), contactObj2.getTelephoneTelex());
-		assertEqualsAndNotNull("telephone ttytdd", contactObj1.getTelephoneTTYTTD(), contactObj2.getTelephoneTTYTTD());
-		assertEqualsAndNotNull("title", contactObj1.getTitle(), contactObj2.getTitle());
-		assertEqualsAndNotNull("url", contactObj1.getURL(), contactObj2.getURL());
-		assertEqualsAndNotNull("userfield01", contactObj1.getUserField01(), contactObj2.getUserField01());
-		assertEqualsAndNotNull("userfield02", contactObj1.getUserField02(), contactObj2.getUserField02());
-		assertEqualsAndNotNull("userfield03", contactObj1.getUserField03(), contactObj2.getUserField03());
-		assertEqualsAndNotNull("userfield04", contactObj1.getUserField04(), contactObj2.getUserField04());
-		assertEqualsAndNotNull("userfield05", contactObj1.getUserField05(), contactObj2.getUserField05());
-		assertEqualsAndNotNull("userfield06", contactObj1.getUserField06(), contactObj2.getUserField06());
-		assertEqualsAndNotNull("userfield07", contactObj1.getUserField07(), contactObj2.getUserField07());
-		assertEqualsAndNotNull("userfield08", contactObj1.getUserField08(), contactObj2.getUserField08());
-		assertEqualsAndNotNull("userfield09", contactObj1.getUserField09(), contactObj2.getUserField09());
-		assertEqualsAndNotNull("userfield10", contactObj1.getUserField10(), contactObj2.getUserField10());
-		assertEqualsAndNotNull("userfield11", contactObj1.getUserField11(), contactObj2.getUserField11());
-		assertEqualsAndNotNull("userfield12", contactObj1.getUserField12(), contactObj2.getUserField12());
-		assertEqualsAndNotNull("userfield13", contactObj1.getUserField13(), contactObj2.getUserField13());
-		assertEqualsAndNotNull("userfield14", contactObj1.getUserField14(), contactObj2.getUserField14());
-		assertEqualsAndNotNull("userfield15", contactObj1.getUserField15(), contactObj2.getUserField15());
-		assertEqualsAndNotNull("userfield16", contactObj1.getUserField16(), contactObj2.getUserField16());
-		assertEqualsAndNotNull("userfield17", contactObj1.getUserField17(), contactObj2.getUserField17());
-		assertEqualsAndNotNull("userfield18", contactObj1.getUserField18(), contactObj2.getUserField18());
-		assertEqualsAndNotNull("userfield19", contactObj1.getUserField19(), contactObj2.getUserField19());
-		assertEqualsAndNotNull("userfield20", contactObj1.getUserField20(), contactObj2.getUserField20());
+		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
+		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
+		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
+		assertEqualsAndNotNull("categories is not equals", contactObj1.getCategories(), contactObj2.getCategories());
+		assertEqualsAndNotNull("given name is not equals", contactObj1.getGivenName(), contactObj2.getGivenName());
+		assertEqualsAndNotNull("surname is not equals", contactObj1.getSurName(), contactObj2.getSurName());
+		// assertDateEqualsAndNotNull("anniversary is not equals", contactObj1.getAnniversary(), contactObj2.getAnniversary());
+		assertEqualsAndNotNull("assistant name is not equals", contactObj1.getAssistantName(), contactObj2.getAssistantName());
+		// assertDateEqualsAndNotNull("birthday is not equals", contactObj1.getBirthday(), contactObj2.getBirthday());
+		assertEqualsAndNotNull("branches is not equals", contactObj1.getBranches(), contactObj2.getBranches());
+		assertEqualsAndNotNull("business categorie is not equals", contactObj1.getBusinessCategory(), contactObj2.getBusinessCategory());
+		assertEqualsAndNotNull("cellular telephone1 is not equals", contactObj1.getCellularTelephone1(), contactObj2.getCellularTelephone1());
+		assertEqualsAndNotNull("cellular telephone2 is not equals", contactObj1.getCellularTelephone2(), contactObj2.getCellularTelephone2());
+		assertEqualsAndNotNull("city business is not equals", contactObj1.getCityBusiness(), contactObj2.getCityBusiness());
+		assertEqualsAndNotNull("city home is not equals", contactObj1.getCityHome(), contactObj2.getCityHome());
+		assertEqualsAndNotNull("city other is not equals", contactObj1.getCityOther(), contactObj2.getCityOther());
+		assertEqualsAndNotNull("commercial register is not equals", contactObj1.getCommercialRegister(), contactObj2.getCommercialRegister());
+		assertEqualsAndNotNull("company is not equals", contactObj1.getCompany(), contactObj2.getCompany());
+		assertEqualsAndNotNull("country business is not equals", contactObj1.getCountryBusiness(), contactObj2.getCountryBusiness());
+		assertEqualsAndNotNull("country home is not equals", contactObj1.getCountryHome(), contactObj2.getCountryHome());
+		assertEqualsAndNotNull("country other is not equals", contactObj1.getCountryOther(), contactObj2.getCountryOther());
+		assertEqualsAndNotNull("department is not equals", contactObj1.getDepartment(), contactObj2.getDepartment());
+		assertEqualsAndNotNull("display name is not equals", contactObj1.getDisplayName(), contactObj2.getDisplayName());
+		assertEqualsAndNotNull("email1 is not equals", contactObj1.getEmail1(), contactObj2.getEmail1());
+		assertEqualsAndNotNull("email2 is not equals", contactObj1.getEmail2(), contactObj2.getEmail2());
+		assertEqualsAndNotNull("email3 is not equals", contactObj1.getEmail3(), contactObj2.getEmail3());
+		assertEqualsAndNotNull("employee type is not equals", contactObj1.getEmployeeType(), contactObj2.getEmployeeType());
+		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
+		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
+		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
+		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
+		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
+		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
+		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
+		assertEqualsAndNotNull("manager name is not equals", contactObj1.getManagerName(), contactObj2.getManagerName());
+		assertEqualsAndNotNull("marital status is not equals", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
+		assertEqualsAndNotNull("middle name is not equals", contactObj1.getMiddleName(), contactObj2.getMiddleName());
+		assertEqualsAndNotNull("nickname is not equals", contactObj1.getNickname(), contactObj2.getNickname());
+		assertEqualsAndNotNull("note is not equals", contactObj1.getNote(), contactObj2.getNote());
+		assertEqualsAndNotNull("number of children is not equals", contactObj1.getNumberOfChildren(), contactObj2.getNumberOfChildren());
+		assertEqualsAndNotNull("number of employee is not equals", contactObj1.getNumberOfEmployee(), contactObj2.getNumberOfEmployee());
+		assertEqualsAndNotNull("position is not equals", contactObj1.getPosition(), contactObj2.getPosition());
+		assertEqualsAndNotNull("postal code business is not equals", contactObj1.getPostalCodeBusiness(), contactObj2.getPostalCodeBusiness());
+		assertEqualsAndNotNull("postal code home is not equals", contactObj1.getPostalCodeHome(), contactObj2.getPostalCodeHome());
+		assertEqualsAndNotNull("postal code other is not equals", contactObj1.getPostalCodeOther(), contactObj2.getPostalCodeOther());
+		assertEqualsAndNotNull("profession is not equals", contactObj1.getProfession(), contactObj2.getProfession());
+		assertEqualsAndNotNull("room number is not equals", contactObj1.getRoomNumber(), contactObj2.getRoomNumber());
+		assertEqualsAndNotNull("sales volume is not equals", contactObj1.getSalesVolume(), contactObj2.getSalesVolume());
+		assertEqualsAndNotNull("spouse name is not equals", contactObj1.getSpouseName(), contactObj2.getSpouseName());
+		assertEqualsAndNotNull("state businessis not equals", contactObj1.getStreetBusiness(), contactObj2.getStateBusiness());
+		assertEqualsAndNotNull("state homeis not equals", contactObj1.getStateHome(), contactObj2.getStateHome());
+		assertEqualsAndNotNull("state otheris not equals", contactObj1.getStateOther(), contactObj2.getStateOther());
+		assertEqualsAndNotNull("street businessis not equals", contactObj1.getStreetBusiness(), contactObj2.getStreetBusiness());
+		assertEqualsAndNotNull("street homeis not equals", contactObj1.getStreetHome(), contactObj2.getStateHome());
+		assertEqualsAndNotNull("street otheris not equals", contactObj1.getStateOther(), contactObj2.getStateOther());
+		assertEqualsAndNotNull("suffixis not equals", contactObj1.getSuffix(), contactObj2.getSuffix());
+		assertEqualsAndNotNull("tax idis not equals", contactObj1.getTaxID(), contactObj2.getTaxID());
+		assertEqualsAndNotNull("telephone assistantis not equals", contactObj1.getTelephoneAssistant(), contactObj2.getTelephoneAssistant());
+		assertEqualsAndNotNull("telephone business1is not equals", contactObj1.getTelephoneBusiness1(), contactObj2.getTelephoneBusiness1());
+		assertEqualsAndNotNull("telephone business2is not equals", contactObj1.getTelephoneBusiness2(), contactObj2.getTelephoneBusiness2());
+		assertEqualsAndNotNull("telephone callbackis not equals", contactObj1.getTelephoneCallback(), contactObj2.getTelephoneCallback());
+		assertEqualsAndNotNull("telephone caris not equals", contactObj1.getTelephoneCar(), contactObj2.getTelephoneCar());
+		assertEqualsAndNotNull("telehpone company is not equals", contactObj1.getTelephoneCompany(), contactObj2.getTelephoneCompany());
+		assertEqualsAndNotNull("telephone home1is not equals", contactObj1.getTelephoneHome1(), contactObj2.getTelephoneHome1());
+		assertEqualsAndNotNull("telephone home2is not equals", contactObj1.getTelephoneHome2(), contactObj2.getTelephoneHome2());
+		assertEqualsAndNotNull("telehpone ipis not equals", contactObj1.getTelephoneIP(), contactObj2.getTelephoneIP());
+		assertEqualsAndNotNull("telehpone isdnis not equals", contactObj1.getTelephoneISDN(), contactObj2.getTelephoneISDN());
+		assertEqualsAndNotNull("telephone otheris not equals", contactObj1.getTelephoneOther(), contactObj2.getTelephoneOther());
+		assertEqualsAndNotNull("telephone pageris not equals", contactObj1.getTelephonePager(), contactObj2.getTelephonePager());
+		assertEqualsAndNotNull("telephone primaryis not equals", contactObj1.getTelephonePrimary(), contactObj2.getTelephonePrimary());
+		assertEqualsAndNotNull("telephone radiois not equals", contactObj1.getTelephoneRadio(), contactObj2.getTelephoneRadio());
+		assertEqualsAndNotNull("telephone telexis not equals", contactObj1.getTelephoneTelex(), contactObj2.getTelephoneTelex());
+		assertEqualsAndNotNull("telephone ttytddis not equals", contactObj1.getTelephoneTTYTTD(), contactObj2.getTelephoneTTYTTD());
+		assertEqualsAndNotNull("titleis not equals", contactObj1.getTitle(), contactObj2.getTitle());
+		assertEqualsAndNotNull("urlis not equals", contactObj1.getURL(), contactObj2.getURL());
+		assertEqualsAndNotNull("userfield01is not equals", contactObj1.getUserField01(), contactObj2.getUserField01());
+		assertEqualsAndNotNull("userfield02is not equals", contactObj1.getUserField02(), contactObj2.getUserField02());
+		assertEqualsAndNotNull("userfield03is not equals", contactObj1.getUserField03(), contactObj2.getUserField03());
+		assertEqualsAndNotNull("userfield04is not equals", contactObj1.getUserField04(), contactObj2.getUserField04());
+		assertEqualsAndNotNull("userfield05is not equals", contactObj1.getUserField05(), contactObj2.getUserField05());
+		assertEqualsAndNotNull("userfield06is not equals", contactObj1.getUserField06(), contactObj2.getUserField06());
+		assertEqualsAndNotNull("userfield07is not equals", contactObj1.getUserField07(), contactObj2.getUserField07());
+		assertEqualsAndNotNull("userfield08is not equals", contactObj1.getUserField08(), contactObj2.getUserField08());
+		assertEqualsAndNotNull("userfield09is not equals", contactObj1.getUserField09(), contactObj2.getUserField09());
+		assertEqualsAndNotNull("userfield10is not equals", contactObj1.getUserField10(), contactObj2.getUserField10());
+		assertEqualsAndNotNull("userfield11is not equals", contactObj1.getUserField11(), contactObj2.getUserField11());
+		assertEqualsAndNotNull("userfield12is not equals", contactObj1.getUserField12(), contactObj2.getUserField12());
+		assertEqualsAndNotNull("userfield13is not equals", contactObj1.getUserField13(), contactObj2.getUserField13());
+		assertEqualsAndNotNull("userfield14is not equals", contactObj1.getUserField14(), contactObj2.getUserField14());
+		assertEqualsAndNotNull("userfield15is not equals", contactObj1.getUserField15(), contactObj2.getUserField15());
+		assertEqualsAndNotNull("userfield16is not equals", contactObj1.getUserField16(), contactObj2.getUserField16());
+		assertEqualsAndNotNull("userfield17is not equals", contactObj1.getUserField17(), contactObj2.getUserField17());
+		assertEqualsAndNotNull("userfield18is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
+		assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
+		assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
+		
+		assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
+		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 	
 	private ContactObject createContactObject(String displayname) {
@@ -540,12 +479,13 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setCountryBusiness("Deutschland");
 		contactObj.setTelephoneBusiness1("+49112233445566");
 		contactObj.setCompany("Internal Test AG");
+		contactObj.setEmail1("hebert.meier@open-xchange.com");
 		contactObj.setParentFolderID(contactFolderId);
 		
 		return contactObj;
 	}
 	
-	private ContactObject createCompleteContactObject() {
+	private ContactObject createCompleteContactObject() throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setPrivateFlag(true);
 		contactObj.setCategories("categories");
@@ -642,6 +582,29 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setUserField20("userfield20");
 		
 		contactObj.setParentFolderID(contactFolderId);
+		
+		ContactObject link1 = createContactObject("link1");
+		ContactObject link2 = createContactObject("link2");
+		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
+		link1.setObjectID(linkId1);
+		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
+		link2.setObjectID(linkId2);
+		
+		LinkEntryObject[] links = new LinkEntryObject[2];
+		links[0] = new LinkEntryObject();
+		links[0].setLinkID(link1.getObjectID());
+		links[0].setLinkDisplayname(link1.getDisplayName());
+		links[1] = new LinkEntryObject();
+		links[1].setLinkID(link2.getObjectID());
+		links[1].setLinkDisplayname(link2.getDisplayName());
+		
+		contactObj.setLinks(links);
+		
+		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
+		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
+		entry[1] = new DistributionListEntryObject(link1.getDisplayName(), link1.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		
+		contactObj.setDistributionList(entry);
 		
 		return contactObj;
 	}
@@ -1265,6 +1228,52 @@ public class ContactTest extends AbstractAJAXTest {
 				throw new Exception("missing field in mapping: " + field);
 				
 		}
+	}
+
+	private HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
+		if (linkEntryObject == null) {
+			return null;
+		}
+		
+		HashSet hs = new HashSet();
+		
+		for (int a = 0; a < linkEntryObject.length; a++) {
+			hs.add(link2String(linkEntryObject[a]));
+		}
+		
+		return hs;
+	}
+	
+	private String link2String(LinkEntryObject linkEntryObject) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("ID" + linkEntryObject.getLinkID());
+		sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
+		
+		return sb.toString();
+	}
+	
+	private HashSet distributionlist2String(DistributionListEntryObject[] distributionListEntry) throws Exception {
+		if (distributionListEntry == null) {
+			return null;
+		}
+		
+		HashSet hs = new HashSet();
+		
+		for (int a = 0; a < distributionListEntry.length; a++) {
+			hs.add(entry2String(distributionListEntry[a]));
+		}
+		
+		return hs;
+	}
+	
+	private String entry2String(DistributionListEntryObject entry) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("ID" + entry.getEntryID());
+		sb.append("D" + entry.getDisplayname());
+		sb.append("F" + entry.getEmailfield());
+		sb.append("E" + entry.getEmailaddress());
+		
+		return sb.toString();
 	}
 }
 
