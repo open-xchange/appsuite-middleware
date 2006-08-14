@@ -212,13 +212,18 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		int[] i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {1, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
+		int[] i = deleteAppointment(getWebConversation(), new int[][]{{ objectId, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check response", 0, i.length);
+		
+		i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {objectId, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response", 1, i.length);
-		assertEquals("check first element in array", 1, i[0]);
+		assertEquals("check first element in array", objectId, i[0]);
 	}
 	
 	public void testGet() throws Exception {
