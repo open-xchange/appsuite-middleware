@@ -9,6 +9,9 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -25,7 +28,6 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -1157,28 +1159,28 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setUserField01(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD02:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField02(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD03:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField03(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD04:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField04(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD05:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField05(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD06:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField06(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD07:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField07(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD08:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField08(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD09:
-				contactObj.setUserField01(jsonArray.getString(pos));
+				contactObj.setUserField09(jsonArray.getString(pos));
 				break;
 			case ContactObject.USERFIELD10:
 				contactObj.setUserField10(jsonArray.getString(pos));
@@ -1214,15 +1216,55 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setUserField20(jsonArray.getString(pos));
 				break;
 			case ContactObject.LINKS:
-				System.out.println("TODO: parse links");
+				contactObj.setLinks(parseLinks(contactObj, jsonArray.getJSONArray(pos)));
 				break;
 			case ContactObject.DISTRIBUTIONLIST:
-				System.out.println("TODO: parse distribution list");
+				contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
 				break;
 			default:
 				throw new Exception("missing field in mapping: " + field);
 				
 		}
+	}
+
+	private static LinkEntryObject[] parseLinks(ContactObject contactObj, JSONArray jsonArray) throws Exception {
+		LinkEntryObject[] links = new LinkEntryObject[jsonArray.length()];
+		for (int a = 0; a < links.length; a++) {
+			links[a] = new LinkEntryObject();
+			JSONObject entry = jsonArray.getJSONObject(a);
+			if (entry.has(ContactFields.ID)) {
+				links[a].setLinkID(DataParser.parseInt(entry, ContactFields.ID));
+			} 
+			
+			links[a].setLinkDisplayname(DataParser.parseString(entry, DistributionListFields.DISPLAY_NAME));
+		}
+		
+		return links;
+	}
+
+	private static DistributionListEntryObject[] parseDistributionList(ContactObject contactObj, JSONArray jsonArray) throws Exception {
+		DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
+		for (int a = 0; a < jsonArray.length(); a++) {
+			JSONObject entry = jsonArray.getJSONObject(a);
+			distributionlist[a] = new DistributionListEntryObject();
+			if (entry.has(DistributionListFields.ID)) {
+				distributionlist[a].setEntryID(DataParser.parseInt(entry, DistributionListFields.ID));
+			} 
+			
+			if (entry.has(DistributionListFields.FIRST_NAME)) {
+				distributionlist[a].setFirstname(DataParser.parseString(entry, DistributionListFields.FIRST_NAME));
+			} 
+			
+			if (entry.has(DistributionListFields.LAST_NAME)) {
+				distributionlist[a].setLastname(DataParser.parseString(entry, DistributionListFields.LAST_NAME));
+			} 
+			
+			distributionlist[a].setDisplayname(DataParser.parseString(entry, DistributionListFields.DISPLAY_NAME));
+			distributionlist[a].setEmailaddress(DataParser.parseString(entry, DistributionListFields.MAIL));
+			distributionlist[a].setEmailfield(DataParser.parseInt(entry, DistributionListFields.MAIL_FIELD));
+		}
+		
+		return distributionlist;
 	}
 
 	private HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
