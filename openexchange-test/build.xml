@@ -94,6 +94,8 @@
 		<!--test name="com.openexchange.ajax.ConfigMenuTest" todir="${test.xml.dir}" /-->
 		<test name="com.openexchange.ajax.ContactTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.AppointmentTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
 		
 		<!-- Webdav Interface -->
 		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
