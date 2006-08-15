@@ -1,5 +1,8 @@
 package com.openexchange.ajax.infostore;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -24,6 +27,45 @@ public class DeleteTest extends InfostoreAJAXTest {
 		assertEquals(0, a.length());
 		
 		clean.clear();
+	}
+	
+	public void testConflict() throws Exception{
+	
+		int[][] toDelete = new int[clean.size()][2];
+		
+		for(int i = 0; i < toDelete.length; i++) {
+			toDelete[i][0] = folderId; 
+			toDelete[i][1] = clean.get(i);
+		}
+		
+		int[] notDeleted = delete(sessionId,0,toDelete);
+		assertEquals(toDelete.length,notDeleted.length);
+		
+		Set<Integer> notDeletedExpect = new HashSet<Integer>(clean);
+		
+		for(int i : notDeleted) {
+			assertTrue(notDeletedExpect.remove(i));
+		}
+		assertTrue(notDeletedExpect.isEmpty());
+		
+		notDeletedExpect = new HashSet<Integer>(clean);
+		tearDown();
+		clean.clear();
+		
+		notDeleted = delete(sessionId,0,toDelete);
+		assertEquals(toDelete.length,notDeleted.length);
+		
+		
+		for(int i : notDeleted) {
+			assertTrue(notDeletedExpect.remove(i));
+		}
+		assertTrue(notDeletedExpect.isEmpty());
+		
+	}
+	
+	public void testDeleteVersion() throws Exception {
+		//TODO
+		assertTrue(true);
 	}
 
 }
