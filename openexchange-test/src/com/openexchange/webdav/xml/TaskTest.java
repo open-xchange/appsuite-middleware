@@ -60,7 +60,7 @@ public class TaskTest extends AbstractWebdavTest {
 	private static final long d7 = 604800000;
 	
 	private static final String TASK_URL = "/servlet/webdav.tasks";
-
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -74,7 +74,7 @@ public class TaskTest extends AbstractWebdavTest {
 		endTime = new Date(startTime.getTime() + 3600000);
 		
 		dateCompleted = new Date(c.getTimeInMillis() + d7);
-
+		
 		userParticipant2 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant2", "");
 		userParticipant3 = AbstractConfigWrapper.parseProperty(webdavProps, "user_participant3", "");
 		
@@ -329,12 +329,15 @@ public class TaskTest extends AbstractWebdavTest {
 		
 		if (response[0].hasError()) {
 			fail("xml error: " + response[0].getErrorMessage());
+		} else {
+			taskObj = (Task)response[0].getDataObject();
+			objectId = taskObj.getObjectID();
+			
+			assertNotNull("last modified is null", taskObj.getLastModified());
+			assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
-		
-		taskObj = (Task)response[0].getDataObject();
-		objectId = taskObj.getObjectID();
 		
 		assertTrue("check objectId", objectId > 0);
 		
@@ -371,6 +374,12 @@ public class TaskTest extends AbstractWebdavTest {
 		
 		if (response[0].hasError()) {
 			fail("xml error: " + response[0].getErrorMessage());
+		} else {
+			taskObj = (Task)response[0].getDataObject();
+			objectId = taskObj.getObjectID();
+			
+			assertNotNull("last modified is null", taskObj.getLastModified());
+			assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -418,9 +427,13 @@ public class TaskTest extends AbstractWebdavTest {
 		ArrayList idList = new ArrayList();
 		
 		for (int a = 0; a < response.length; a++) {
+			Task taskObj = (Task)response[a].getDataObject();
+			
 			if (response[a].hasError()) {
-				Task taskObj = (Task)response[a].getDataObject();
 				idList.add(new Integer(taskObj.getObjectID()));
+			} else {
+				assertNotNull("last modified is null", taskObj.getLastModified());
+				assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 			}
 			
 			assertEquals("check response status", 200, response[a].getStatus());
