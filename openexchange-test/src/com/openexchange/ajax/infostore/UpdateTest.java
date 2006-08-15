@@ -74,7 +74,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 		}
 	}
 	
-	public void notestSwitchVersion() throws Exception{
+	public void testSwitchVersion() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
