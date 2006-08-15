@@ -144,7 +144,7 @@ public class TasksTest extends AbstractAJAXTest {
         task.setEndDate(new Date(1133967600000l));
         task.setAfterComplete(new Date(1133971200000l));
         task.setNote("Description");
-        task.setStatus(Task.IN_PROGRESS);
+        task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
         task.setTargetDuration(1.0f);
@@ -252,7 +252,7 @@ public class TasksTest extends AbstractAJAXTest {
         task.setEndDate(new Date(1133967600000l));
         task.setAfterComplete(new Date(1133971200000l));
         task.setNote("Description");
-        task.setStatus(Task.IN_PROGRESS);
+        task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
         task.setTargetDuration(1.0f);
@@ -614,6 +614,7 @@ public class TasksTest extends AbstractAJAXTest {
     public static int insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
         throws JSONException, IOException, SAXException {
+    	task.setStatus(Task.NOT_STARTED); // FIXME! 
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
