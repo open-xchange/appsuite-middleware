@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 public class ResourceTest extends AbstractAJAXTest {
 	
-	private static final String GROUP_URL = "/ajax/resource";
+	private static final String RESOURCE_URL = "/ajax/resource";
 	
 	public void testSearch() throws Exception {
 		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
@@ -37,7 +37,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		jsonObj.put("pattern", searchpattern);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + GROUP_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
@@ -70,7 +70,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(groupId));
 		
-		WebRequest req = new GetMethodWebRequest(host + GROUP_URL + parameter.getURLParameters());
+		WebRequest req = new GetMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
