@@ -19,6 +19,10 @@ public class NewTest extends InfostoreAJAXTest {
 		super();
 	}
 	
+	public void testNothing(){
+		assertTrue(true);
+	}
+	
 	public void notestUpload() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
