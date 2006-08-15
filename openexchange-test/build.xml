@@ -96,9 +96,10 @@
 		<test name="com.openexchange.ajax.AppointmentTest" todir="${test.xml.dir}" />
 		
 		<!-- Webdav Interface -->
-		<!-- test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" /-->
+		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.ContactTest" todir="${test.xml.dir}" />	
+		<test name="com.openexchange.webdav.xml.FolderTest" todir="${test.xml.dir}" />	
 	
 		<!-- Server Internals -->
 		<test name="com.openexchange.ajax.infostore.InfostoreParserTest" todir="${test.xml.dir}" />
