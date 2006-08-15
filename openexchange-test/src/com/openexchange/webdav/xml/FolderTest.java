@@ -106,8 +106,12 @@ public class FolderTest extends AbstractWebdavTest {
 	public void testRenameFolder() throws Exception {
 		FolderObject folderObj = createFolderObject("testInsertRenameFolder", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
+		
+		folderObj = new FolderObject();
 		folderObj.setFolderName("testRenameFolder" + System.currentTimeMillis());
+		folderObj.setObjectID(objectId);
+		folderObj.setParentFolderID(2);		
+		
 		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
 		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
@@ -212,11 +216,20 @@ public class FolderTest extends AbstractWebdavTest {
 	private void compareFolder(FolderObject folderObj1, FolderObject folderObj2) throws Exception {
 		assertEqualsAndNotNull("id is not equals", folderObj1.getObjectID(), folderObj2.getObjectID());
 		assertEqualsAndNotNull("folder name is not equals", folderObj1.getFolderName(), folderObj2.getFolderName());
-		assertEqualsAndNotNull("type is not equals", folderObj1.getType(), folderObj2.getType());
-		assertEqualsAndNotNull("module name is not equals", folderObj1.getModule(), folderObj2.getModule());
+		
+		if (folderObj1.containsType()) {
+			assertEqualsAndNotNull("type is not equals", folderObj1.getType(), folderObj2.getType());
+		}
+		
+		if (folderObj1.containsModule()) {
+			assertEqualsAndNotNull("module name is not equals", folderObj1.getModule(), folderObj2.getModule());
+		} 
+		
 		assertEqualsAndNotNull("parent folder id is not equals", folderObj1.getParentFolderID(), folderObj2.getParentFolderID());
 		
-		assertEqualsAndNotNull("permissions are not equals" , permissions2String(folderObj1.getPermissionsAsArray()), permissions2String(folderObj2.getPermissionsAsArray()));
+		if (folderObj1.containsPermissions()) {
+			assertEqualsAndNotNull("permissions are not equals" , permissions2String(folderObj1.getPermissionsAsArray()), permissions2String(folderObj2.getPermissionsAsArray()));
+		} 
 	}
 	
 	private FolderObject createFolderObject(String title, int module, boolean isPublic) throws Exception {
@@ -308,8 +321,13 @@ public class FolderTest extends AbstractWebdavTest {
 		
 		DataWriter.addElement("title", folderObj.getFolderName(), eProp);
 		DataWriter.addElement("object_id", folderObj.getObjectID(), eProp);
-		DataWriter.addElement("folder_id", folderObj.getParentFolderID(), eProp);
-		FolderWriter.addElementPermission(folderObj.getPermissions(), eProp);
+		if (folderObj.containsParentFolderID()) {
+			DataWriter.addElement("folder_id", folderObj.getParentFolderID(), eProp);
+		} 
+		
+		if (folderObj.containsPermissions()) {
+			FolderWriter.addElementPermission(folderObj.getPermissions(), eProp);
+		} 
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
