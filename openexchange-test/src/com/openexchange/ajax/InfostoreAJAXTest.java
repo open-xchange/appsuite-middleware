@@ -1,19 +1,25 @@
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
@@ -64,7 +70,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		int[][] toDelete = new int[clean.size()][2];
 		
 		for(int i = 0; i < toDelete.length; i++) {
-			toDelete[i][0] = -1; // FIXME: Put a correct folderId here
+			toDelete[i][0] = folderId; // FIXME: Put a correct folderId here
 			toDelete[i][1] = clean.get(i);
 		}
 		
@@ -223,7 +229,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(url.toString());
 	}
 	
-	public void update(String sessionId, int id, long timestamp, Map<String,String> modified) throws MalformedURLException, IOException, SAXException, JSONException {
+	public Response update(String sessionId, int id, long timestamp, Map<String,String> modified) throws MalformedURLException, IOException, SAXException, JSONException {
 		StringBuffer url = getUrl(sessionId,"update");
 		url.append("&id=");
 		url.append(id);
@@ -235,7 +241,32 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 			obj.put(attr, modified.get(attr));
 		}
 		
-		putN(url.toString(),obj.toString());
+		return putT(url.toString(),obj.toString());
+	}
+	
+	public Response update(String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+		StringBuffer url = getUrl(sessionId,"update");
+		url.append("&id=");
+		url.append(id);
+		
+		url.append("&timestamp=");
+		url.append(timestamp);
+		
+		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
+		req.setMimeEncoded(true);
+		
+		JSONObject obj = new JSONObject();
+		for(String attr : modified.keySet()) {
+			obj.put(attr, modified.get(attr));
+		}
+		
+		req.setParameter("json",obj.toString());
+		
+		if(upload!=null) {
+			req.selectFile("file",upload,contentType);
+		}
+		WebResponse resp = getWebConversation().getResponse(req);
+		return Response.parse(resp.getText());
 	}
 	
 	public int createNew(String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
@@ -248,6 +279,26 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		
 		WebResponse resp = getWebConversation().getResponse(m);
+		
+		return new Integer(resp.getText());
+	}
+	
+	public int createNew(String sessionId, Map<String, String> fields, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+		StringBuffer url = getUrl(sessionId,"new");
+		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
+		req.setMimeEncoded(true);
+		
+		JSONObject obj = new JSONObject();
+		for(String attr : fields.keySet()) {
+			obj.put(attr, fields.get(attr));
+		}
+		
+		req.setParameter("json",obj.toString());
+		
+		if(upload != null) {
+			req.selectFile("file",upload,contentType);
+		}
+		WebResponse resp = getWebConversation().getResponse(req);
 		
 		return new Integer(resp.getText());
 	}
@@ -283,6 +334,22 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
+	public InputStream document(String sessionId, int id) throws HttpException, IOException {
+		return document(sessionId,id,-1);
+	}
+	
+	public InputStream document(String sessionId, int id, int version) throws HttpException, IOException{
+		StringBuffer url = getUrl(sessionId,"document");
+		url.append("&id="+id);
+		if(version!=-1)
+			url.append("&version="+version);
+		
+		HttpClient client = new HttpClient();
+		GetMethod get = new GetMethod(url.toString());
+		client.executeMethod(get);
+		return get.getResponseBodyAsStream();
+	}
+	
 	protected StringBuffer getUrl(String sessionId, String action) {
 		StringBuffer url = new StringBuffer("http://");
 		url.append(getHostName());
@@ -306,5 +373,26 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return m;
 		
 	}
+	
+	/*public void m() throws HttpException, IOException{
+		HttpClient client = new HttpClient();
+		
+		PostMethod m = new PostMethod(new URL("http://www.google.com").toString());
+		m.addParameter(new NameValuePair("query","openexchange"));
+		
+		client.executeMethod(m);
+		
+		m.getResponseBodyAsString();
+		
+	}*/
+	
+	public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
+		int i = 0;
+		while((i = is1.read()) != -1){
+			assertEquals(i, is2.read());
+		}
+		assertEquals(-1,is2.read());
+	}
+	
 
 }
