@@ -98,6 +98,10 @@ public class ContactParser extends CommonParser {
 		if (hasElement(eProp.getChild(OXContact.CATEGORIES, XmlServlet.NS))) {
 			contactObj.setCategories(getValue(eProp.getChild(OXContact.CATEGORIES, XmlServlet.NS)));
 		}
+
+		if (hasElement(eProp.getChild(OXContact.BUSINESS_CATEGORY, XmlServlet.NS))) {
+			contactObj.setBusinessCategory(getValue(eProp.getChild(OXContact.BUSINESS_CATEGORY, XmlServlet.NS)));
+		}
 		
 		if (hasElement(eProp.getChild(OXContact.MOBILE1, XmlServlet.NS))) {
 			contactObj.setCellularTelephone1(getValue(eProp.getChild(OXContact.MOBILE1, XmlServlet.NS)));
@@ -182,6 +186,14 @@ public class ContactParser extends CommonParser {
 		if (hasElement(eProp.getChild(OXContact.NOTE, XmlServlet.NS))) {
 			contactObj.setNote(getValue(eProp.getChild(OXContact.NOTE, XmlServlet.NS)));
 		}
+
+		if (hasElement(eProp.getChild(OXContact.MORE_INFO, XmlServlet.NS))) {
+			contactObj.setInfo(getValue(eProp.getChild(OXContact.MORE_INFO, XmlServlet.NS)));
+		}
+
+		if (hasElement(eProp.getChild(OXContact.MARTITAL_STATUS, XmlServlet.NS))) {
+			contactObj.setMaritalStatus(getValue(eProp.getChild(OXContact.MARTITAL_STATUS, XmlServlet.NS)));
+		}
 		
 		if (hasElement(eProp.getChild(OXContact.INSTANT_MESSENGER, XmlServlet.NS))) {
 			contactObj.setInstantMessenger1(getValue(eProp.getChild(OXContact.INSTANT_MESSENGER, XmlServlet.NS)));
@@ -252,7 +264,7 @@ public class ContactParser extends CommonParser {
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.BUSINESS_STATE, XmlServlet.NS))) {
-			contactObj.setStreetBusiness(getValue(eProp.getChild(OXContact.BUSINESS_STATE, XmlServlet.NS)));
+			contactObj.setStateBusiness(getValue(eProp.getChild(OXContact.BUSINESS_STATE, XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.SECOND_STATE, XmlServlet.NS))) {
@@ -345,6 +357,10 @@ public class ContactParser extends CommonParser {
 		
 		if (hasElement(eProp.getChild(OXContact.URL, XmlServlet.NS))) {
 			contactObj.setURL(getValue(eProp.getChild(OXContact.URL, XmlServlet.NS)));
+		}
+
+		if (hasElement(eProp.getChild(OXContact.TITLE, XmlServlet.NS))) {
+			contactObj.setTitle(getValue(eProp.getChild(OXContact.TITLE, XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.USERFIELD01, XmlServlet.NS))) {
@@ -472,7 +488,7 @@ public class ContactParser extends CommonParser {
 	protected void parseElementLinks(ContactObject contactObj, Element eLinks) throws Exception {
 		ArrayList links = new ArrayList();
 		
-		List elementEntries = eLinks.getChildren("links", XmlServlet.NS);
+		List elementEntries = eLinks.getChildren("link", XmlServlet.NS);
 		
 		for (int a = 0; a < elementEntries.size(); a++) {
 			Element eLink = (Element)elementEntries.get(a);
@@ -488,7 +504,7 @@ public class ContactParser extends CommonParser {
 	}
 	
 	protected void parseElementLink(Element e, LinkEntryObject link) throws Exception {
-		link.setLinkDisplayname(e.getAttributeValue(XmlServlet.NAMESPACE, OXContact.DistributionList.DISPLAYNAME));
+		link.setLinkDisplayname(e.getAttributeValue(OXContact.DistributionList.DISPLAYNAME, XmlServlet.NS));
 		link.setLinkID(getValueAsInt(e));
 	}
 }
