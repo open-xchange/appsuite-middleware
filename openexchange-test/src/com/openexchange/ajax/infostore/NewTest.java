@@ -23,7 +23,7 @@ public class NewTest extends InfostoreAJAXTest {
 		assertTrue(true);
 	}
 	
-	public void notestUpload() throws Exception{
+	public void testUpload() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				sessionId,
@@ -50,7 +50,7 @@ public class NewTest extends InfostoreAJAXTest {
 		InputStream is = null;
 		InputStream is2 = null;
 		try {
-			//is = new FileInputStream(upload);
+			is = new FileInputStream(upload);
 			is2 = document(sessionId,id,1);
 			
 			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
@@ -59,7 +59,7 @@ public class NewTest extends InfostoreAJAXTest {
 			//	System.out.println(line);
 			//}
 			
-			//assertSameContent(is,is2);
+			assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();
