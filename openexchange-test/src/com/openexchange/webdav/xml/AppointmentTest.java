@@ -314,6 +314,9 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentObj = (AppointmentObject)response[0].getDataObject();
 		objectId = appointmentObj.getObjectID();
 		
+		assertNotNull("last modified is null", appointmentObj.getLastModified());
+		assertTrue("last modified is not > 0", appointmentObj.getLastModified().getTime() > 0);
+		
 		assertTrue("check objectId", objectId > 0);
 		
 		return objectId;
@@ -352,6 +355,12 @@ public class AppointmentTest extends AbstractWebdavTest {
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
+		
+		appointmentObj = (AppointmentObject)response[0].getDataObject();
+		objectId = appointmentObj.getObjectID();
+		
+		assertNotNull("last modified is null", appointmentObj.getLastModified());
+		assertTrue("last modified is not > 0", appointmentObj.getLastModified().getTime() > 0);
 	}
 	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
@@ -398,6 +407,10 @@ public class AppointmentTest extends AbstractWebdavTest {
 		for (int a = 0; a < response.length; a++) {
 			if (response[a].hasError()) {
 				AppointmentObject appointmentObj = (AppointmentObject)response[a].getDataObject();
+				
+				assertNotNull("last modified is null", appointmentObj.getLastModified());
+				assertTrue("last modified is not > 0", appointmentObj.getLastModified().getTime() > 0);
+				
 				idList.add(new Integer(appointmentObj.getObjectID()));
 			}
 			
