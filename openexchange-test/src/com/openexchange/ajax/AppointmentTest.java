@@ -260,7 +260,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void notestGetWithAllFields() throws Exception {
+	public void testGetWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -308,7 +308,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
-	public void notestListWithAllFields() throws Exception {
+	public void testListWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
