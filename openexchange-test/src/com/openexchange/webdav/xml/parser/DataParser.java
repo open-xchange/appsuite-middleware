@@ -64,6 +64,8 @@ public abstract class DataParser {
 	protected void parseElement(DataObject dataobject, Element eProp) throws Exception {
 		if (hasElement(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS))) {
 			dataobject.setObjectID(getValueAsInt(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS)));
+		} else if (hasElement(eProp.getChild(OXObject.LAST_MODIFIED, XmlServlet.NS))) {
+			dataobject.setLastModified(getValueAsDate(eProp.getChild(OXObject.LAST_MODIFIED, XmlServlet.NS)));
 		} 
 	}
 	
