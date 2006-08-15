@@ -120,7 +120,7 @@ public class FolderTest extends AbstractWebdavTest {
 	 
 		folderObj = createFolderObject("testMoveFolder2", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(parentFolderId);
+		folderObj.setObjectID(objectId);
 		folderObj.setParentFolderID(parentFolderId);
 		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
@@ -128,7 +128,28 @@ public class FolderTest extends AbstractWebdavTest {
 		compareFolder(folderObj, loadFolder);
 	}
 	
-	public void testChangePermissionsOfFolder() throws Exception {
+	public void testChangePermissionsOfPrivateFolder() throws Exception {
+		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
+		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
+		
+		FolderObject folderObj = createFolderObject("testChangePermissionOfFolder", FolderObject.TASK, false);
+		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+		folderObj.setObjectID(objectId);
+		
+		OCLPermission oclp[] = new OCLPermission[3];
+		oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+		oclp[1] = createPermission( userParticipantId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+		oclp[2] = createPermission( groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+		
+		folderObj.setPermissionsAsArray( oclp );
+		
+		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+		
+		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
+		compareFolder(folderObj, loadFolder);
+	}
+	
+	public void testChangePermissionsOfPublicFolder() throws Exception {
 		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
 		
@@ -149,7 +170,7 @@ public class FolderTest extends AbstractWebdavTest {
 		compareFolder(folderObj, loadFolder);
 	}
 	 
-	public void testDeleteFolder() throws Exception {
+	public void _notestDeleteFolder() throws Exception {
 		FolderObject folderObj = createFolderObject("testDeleteFolder1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj = createFolderObject("testDeleteFolder2", FolderObject.CALENDAR, false);
@@ -171,7 +192,7 @@ public class FolderTest extends AbstractWebdavTest {
 		assertTrue("check response", folderArray.length == 2);
 	 }
 	 
-	public void testPropFindWithDeleted() throws Exception {
+	public void _notestPropFindWithDeleted() throws Exception {
 		Date modified = new Date();
 	 
 		FolderObject folderObj = createFolderObject("testPropFindWithDeleted1", FolderObject.CALENDAR, false);
