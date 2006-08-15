@@ -40,7 +40,7 @@ public class ContactTest extends AbstractWebdavTest {
 		
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		contactFolderId = folderObj.getObjectID();
-
+		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
@@ -123,10 +123,10 @@ public class ContactTest extends AbstractWebdavTest {
 		
 		ContactObject loadContact = appointmentArray[0];
 		contactObj.setObjectID(objectId);
-
+		
 		compareObject(contactObj, loadContact);
 	}
-
+	
 	private void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
@@ -401,12 +401,15 @@ public class ContactTest extends AbstractWebdavTest {
 		
 		if (response[0].hasError()) {
 			fail("xml error: " + response[0].getErrorMessage());
+		} else {
+			contactObj = (ContactObject)response[0].getDataObject();
+			objectId = contactObj.getObjectID();
+			
+			assertNotNull("last modified is null", contactObj.getLastModified());
+			assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
-		
-		contactObj = (ContactObject)response[0].getDataObject();
-		objectId = contactObj.getObjectID();
 		
 		assertTrue("check objectId", objectId > 0);
 		
@@ -443,6 +446,12 @@ public class ContactTest extends AbstractWebdavTest {
 		
 		if (response[0].hasError()) {
 			fail("xml error: " + response[0].getErrorMessage());
+		} else {
+			contactObj = (ContactObject)response[0].getDataObject();
+			objectId = contactObj.getObjectID();
+			
+			assertNotNull("last modified is null", contactObj.getLastModified());
+			assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -490,9 +499,13 @@ public class ContactTest extends AbstractWebdavTest {
 		ArrayList idList = new ArrayList();
 		
 		for (int a = 0; a < response.length; a++) {
+			ContactObject contactObj = (ContactObject)response[a].getDataObject();
+			
 			if (response[a].hasError()) {
-				ContactObject contactObj = (ContactObject)response[a].getDataObject();
 				idList.add(new Integer(contactObj.getObjectID()));
+			} else {
+				assertNotNull("last modified is null", contactObj.getLastModified());
+				assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 			}
 			
 			assertEquals("check response status", 200, response[a].getStatus());
@@ -505,48 +518,6 @@ public class ContactTest extends AbstractWebdavTest {
 		}
 		
 		return failed;
-	}
-	
-	public static void confirmContact(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String login, String password) throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
-		Element eProp = new Element("prop", webdav);
-		
-		Element eObjectId = new Element(OXObject.OBJECT_ID, XmlServlet.NS);
-		eObjectId.addContent(String.valueOf(objectId));
-		eProp.addContent(eObjectId);
-		
-		Element eMethod = new Element("method", XmlServlet.NS);
-		eMethod.addContent("CONFIRM");
-		eProp.addContent(eMethod);
-		
-		Element eConfirm = new Element("confirm", XmlServlet.NS);
-		eConfirm.addContent("decline");
-		eProp.addContent(eConfirm);
-		
-		Document doc = addProp2Document(eProp);
-		XMLOutputter xo = new XMLOutputter();
-		xo.output(doc, baos);
-		
-		byte b[] = baos.toByteArray();
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/javascript");
-		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		WebResponse resp = webCon.getResponse(req);
-		
-		assertEquals(207, resp.getResponseCode());
-		
-		bais = new ByteArrayInputStream(resp.getText().getBytes());
-		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
-		
-		assertEquals("check response", 1, response.length);
-		
-		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
-		}
-		
-		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, String objectMode, String host, String login, String password) throws Exception {
