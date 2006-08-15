@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +38,10 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	protected String sessionId;
 	
 	protected List<Integer> clean = new ArrayList<Integer>();
+	
+	
+	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\(([^\\)]*)\\);");
+	
 	
 	public InfostoreAJAXTest(){
 		super();
@@ -265,8 +272,9 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		if(upload!=null) {
 			req.selectFile("file",upload,contentType);
 		}
-		WebResponse resp = getWebConversation().getResponse(req);
-		return Response.parse(resp.getText());
+		WebResponse resp = getWebConversation().getResource(req);
+		JSONObject res = extractFromCallback(resp.getText());
+		return Response.parse(res.toString());
 	}
 	
 	public int createNew(String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
@@ -298,11 +306,15 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		if(upload != null) {
 			req.selectFile("file",upload,contentType);
 		}
-		WebResponse resp = getWebConversation().getResponse(req);
 		
-		return new Integer(resp.getText());
+		WebResponse resp = getWebConversation().getResource(req);
+		
+		String html = resp.getText();
+		JSONObject response = extractFromCallback(html);
+		
+		return response.getInt("data");
 	}
-	
+
 	public int[] delete(String sessionId, long timestamp, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"delete");
 		url.append("&timestamp=");
@@ -392,6 +404,17 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 			assertEquals(i, is2.read());
 		}
 		assertEquals(-1,is2.read());
+	}
+	
+	
+	// Helper
+	
+	private JSONObject extractFromCallback(String html) throws JSONException {
+		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
+		if(matcher.find()){
+			return new JSONObject(matcher.group(1));
+		}
+		return null;
 	}
 	
 
