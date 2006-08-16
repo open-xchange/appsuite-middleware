@@ -71,7 +71,6 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.FAX_BUSINESS,
 		ContactObject.FAX_HOME,
 		ContactObject.FAX_OTHER,
-		ContactObject.IMAGE1,
 		ContactObject.INFO,
 		ContactObject.INSTANT_MESSENGER1,
 		ContactObject.INSTANT_MESSENGER2,
@@ -395,7 +394,6 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
-		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
@@ -512,7 +510,6 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setFaxBusiness("fax business");
 		contactObj.setFaxHome("fax home");
 		contactObj.setFaxOther("fax other");
-		contactObj.setImage1("image1");
 		contactObj.setInfo("info");
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
@@ -1015,7 +1012,7 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setFaxOther(jsonArray.getString(pos));
 				break;
 			case ContactObject.IMAGE1:
-				contactObj.setImage1(jsonArray.getString(pos));
+				contactObj.setImage1(jsonArray.getString(pos).getBytes());
 				break;
 			case ContactObject.INFO:
 				contactObj.setInfo(jsonArray.getString(pos));
