@@ -180,7 +180,7 @@ public class ContactParser extends CommonParser {
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.IMAGE1, XmlServlet.NS))) {
-			contactObj.setImage1(getValue(eProp.getChild(OXContact.IMAGE1, XmlServlet.NS)));
+			contactObj.setImage1(getValue(eProp.getChild(OXContact.IMAGE1, XmlServlet.NS)).getBytes());
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.NOTE, XmlServlet.NS))) {
