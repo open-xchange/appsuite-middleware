@@ -212,6 +212,16 @@ public abstract class AbstractAJAXTest extends TestCase {
 		} 
 	} 
 	
+	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message + " byte array size is not equals", expect.length, value.length);
+			for (int a = 0; a < expect.length; a++) {
+				assertEquals(message + "bytes are not equals in pos: " + a,  expect[a], value[a]);
+			}
+		} 
+	} 
+	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
