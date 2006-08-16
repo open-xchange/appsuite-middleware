@@ -210,6 +210,13 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertEquals(message, expect.getTime(), value.getTime());
 		} 
 	} 
+
+	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message, new String(expect), new String(value));
+		} 
+	} 
 	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
