@@ -262,7 +262,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestGetWithAllFields() throws Exception {
+	public void testGetWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testGetWithAllFields");
 		appointmentObj.setStartDate(new Date(startTime));
@@ -280,15 +280,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId);
-		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId);
+		// participants[3] = new ResourceParticipant();
+		// participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
@@ -328,15 +328,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId);
-		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId);
+		// participants[3] = new ResourceParticipant();
+		// participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
