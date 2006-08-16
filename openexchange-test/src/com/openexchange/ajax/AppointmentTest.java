@@ -10,6 +10,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -20,6 +21,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.URLParameter;
@@ -321,6 +323,22 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setLabel(2);
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		
+		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userId);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId);
+		participants[2] = new GroupParticipant();
+		participants[2].setIdentifier(groupParticipantId);
+		participants[3] = new ResourceParticipant();
+		participants[3].setIdentifier(resourceParticipantId);
+		
+		appointmentObj.setParticipants(participants);
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
@@ -734,7 +752,45 @@ public class AppointmentTest extends AbstractAJAXTest {
 			case AppointmentObject.NOTE:
 				appointmentObj.setNote(jsonArray.getString(pos));
 				break;
+			case AppointmentObject.PARTICIPANTS:
+				appointmentObj.setParticipants(parseParticipants(jsonArray.getJSONArray(pos)));
+				break;
 		}
+	}
+	
+	private static Participant[] parseParticipants(JSONArray jsonArray) throws Exception {
+			Participant[] participant = new Participant[jsonArray.length()];
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jparticipant = jsonArray.getJSONObject(i);
+				int type = jparticipant.getInt("type");
+				int id = jparticipant.getInt("id");
+				Participant p = null;
+				switch (type) {
+					case Participant.USER:
+						UserParticipant user = new UserParticipant();
+						user.setIdentifier(id);
+
+						p = user;
+						break;
+					case Participant.GROUP:
+						p = new GroupParticipant();
+						p.setIdentifier(id);
+						break;
+					case Participant.RESOURCE:
+						p = new ResourceParticipant();
+						p.setIdentifier(id);
+						break;
+					case Participant.RESOURCEGROUP:
+						p = new ResourceGroupParticipant();
+						p.setIdentifier(id);
+						break;
+					default:
+						throw new OXConflictException("invalid type");
+				}
+				participant[i] = p;
+			}
+			
+			return participant;
 	}
 
 	private HashSet participants2String(Participant[] participant) throws Exception {
