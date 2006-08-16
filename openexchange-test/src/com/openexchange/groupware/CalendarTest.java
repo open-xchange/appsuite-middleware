@@ -166,14 +166,4 @@ public class CalendarTest extends TestCase {
     }
     
     
-    /*
-    public void testCalendarLog() throws Throwable {
-        CalendarCommonCollection.logInfo("Test logging Info ...");
-        CalendarCommonCollection.logDebug("Test logging Debug ...");
-        CalendarCommonCollection.logWarn("Test logging Warn ...");
-        CalendarCommonCollection.logError("Test logging Error ...");
-        CalendarCommonCollection.logFatal("Test logging Fatal ...");
-    }
-    */
-    
 }
