@@ -40,7 +40,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	protected List<Integer> clean = new ArrayList<Integer>();
 	
 	
-	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\(([^\\)]*)\\);");
+	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 	
 	
 	public InfostoreAJAXTest(){
@@ -311,7 +311,9 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		String html = resp.getText();
 		JSONObject response = extractFromCallback(html);
-		
+		if(!"".equals(response.optString("error"))) {
+			throw new IOException(response.getString("error"));
+		}
 		return response.getInt("data");
 	}
 
@@ -397,14 +399,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		m.getResponseBodyAsString();
 		
 	}*/
-	
-	public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
-		int i = 0;
-		while((i = is1.read()) != -1){
-			assertEquals(i, is2.read());
-		}
-		assertEquals(-1,is2.read());
-	}
+
 	
 	
 	// Helper

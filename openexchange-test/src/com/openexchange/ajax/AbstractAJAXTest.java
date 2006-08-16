@@ -2,6 +2,7 @@ package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Properties;
@@ -210,13 +211,6 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertEquals(message, expect.getTime(), value.getTime());
 		} 
 	} 
-
-	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
-		if (expect != null) {
-			assertNotNull(message + " is null", value);
-			assertEquals(message, new String(expect), new String(value));
-		} 
-	} 
 	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
@@ -224,4 +218,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertEquals(message, expect, value);
 		} 
 	} 
+	
+	public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
+		int i = 0;
+		while((i = is1.read()) != -1){
+			assertEquals(i, is2.read());
+		}
+		assertEquals(-1,is2.read());
+	}
 }
