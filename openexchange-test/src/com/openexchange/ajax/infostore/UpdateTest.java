@@ -1,7 +1,9 @@
 package com.openexchange.ajax.infostore;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import org.json.JSONObject;
@@ -13,16 +15,23 @@ import com.openexchange.groupware.Init;
 
 public class UpdateTest extends InfostoreAJAXTest {
 
+	public static final int SIZE = 15; // Size of the large file in Megabytes
+	
+	private static final byte[] megabyte = new byte[1000000];
+
+	
 	public UpdateTest() {
 		super();
 	}
 	
 	public void testBasic() throws Exception{
-		this.update(sessionId, clean.get(0),System.currentTimeMillis(),m(
+		Response res = this.update(sessionId, clean.get(0),System.currentTimeMillis(),m(
 				"title" , "test knowledge updated"
 		));
+		assertNoError(res);
 		
-		Response res = get(sessionId, clean.get(0));
+		
+		res = get(sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject object = (JSONObject) res.getData();
@@ -74,6 +83,40 @@ public class UpdateTest extends InfostoreAJAXTest {
 		}
 	}
 	
+	public void testLargeFileUpload() throws Exception{
+		File largeFile = File.createTempFile("test","bin");
+		largeFile.deleteOnExit();
+		
+		BufferedOutputStream out = null;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(largeFile),1000000);
+			for(int i = 0; i < SIZE; i++) {
+				out.write(megabyte);
+				out.flush();
+			}
+		} finally {
+			if(out != null)
+				out.close();
+		}
+		
+		try {
+			int id = createNew(
+					sessionId,
+					m(
+							"folder_id" 		,	((Integer)folderId).toString(),
+							"title"  		,  	"test large upload",
+							"description" 	, 	"test large upload description"
+					),
+					largeFile,
+					"text/plain"
+			);
+			clean.add(id);
+			fail("Uploaded Large File and got no error");
+		} catch (Exception x) {
+			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
+		}
+	}
+	
 	public void testSwitchVersion() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		
@@ -88,11 +131,14 @@ public class UpdateTest extends InfostoreAJAXTest {
 		res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");
 		assertNoError(res);
 		
-		update(sessionId,id,System.currentTimeMillis(),m("version" , "2"));
+		res = update(sessionId,id,System.currentTimeMillis(),m("version" , "2"));
+		assertNoError(res);
 		
 		res = get(sessionId,id);
 		JSONObject obj = (JSONObject) res.getData();
 		assertEquals(2,obj.get("version"));
 	}
+	
+	
 
 }

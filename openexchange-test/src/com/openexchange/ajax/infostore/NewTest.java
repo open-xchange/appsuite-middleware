@@ -1,10 +1,10 @@
 package com.openexchange.ajax.infostore;
 
-import java.io.BufferedReader;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.json.JSONObject;
 
@@ -15,6 +15,10 @@ import com.openexchange.groupware.Init;
 
 public class NewTest extends InfostoreAJAXTest {
 
+	public static final int SIZE = 15; // Size of the large file in Megabytes
+	
+	private static final byte[] megabyte = new byte[1000000];
+	
 	public NewTest() {
 		super();
 	}
@@ -85,6 +89,41 @@ public class NewTest extends InfostoreAJAXTest {
 		assertEquals("test no upload",obj.getString("title"));
 		assertEquals("test no upload description",obj.getString("description"));
 		
+	}
+	
+	
+	public void testLargeFileUpload() throws Exception{
+		File largeFile = File.createTempFile("test","bin");
+		largeFile.deleteOnExit();
+		
+		BufferedOutputStream out = null;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(largeFile),1000000);
+			for(int i = 0; i < SIZE; i++) {
+				out.write(megabyte);
+				out.flush();
+			}
+		} finally {
+			if(out != null)
+				out.close();
+		}
+		
+		try {
+			int id = createNew(
+					sessionId,
+					m(
+							"folder_id" 		,	((Integer)folderId).toString(),
+							"title"  		,  	"test large upload",
+							"description" 	, 	"test large upload description"
+					),
+					largeFile,
+					"text/plain"
+			);
+			clean.add(id);
+			fail("Uploaded Large File and got no error");
+		} catch (Exception x) {
+			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
+		}
 	}
 
 }
