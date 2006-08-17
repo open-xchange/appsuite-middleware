@@ -2,6 +2,7 @@ package com.openexchange.ajax;
 
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -24,6 +25,9 @@ import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +38,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ContactTest extends AbstractAJAXTest {
+	
+	public static final String CONTENT_TYPE = "text/plain";
+	
+	public static final String BASE64String = "ABCDEFGHIJK";
 	
 	protected final static int[] CONTACT_FIELDS = {
 		DataObject.OBJECT_ID,
@@ -74,6 +82,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.INFO,
 		ContactObject.INSTANT_MESSENGER1,
 		ContactObject.INSTANT_MESSENGER2,
+		ContactObject.IMAGE1,
 		ContactObject.LINKS,
 		ContactObject.MANAGER_NAME,
 		ContactObject.MARITAL_STATUS,
@@ -165,7 +174,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		dateTime = c.getTimeInMillis();
 	}
-
+	
 	public void testNew() throws Exception {
 		ContactObject contactObj = createContactObject("testNew");
 		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
@@ -306,7 +315,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
-
+	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
 		
@@ -322,6 +331,16 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
+	}
+	
+	public void testContactWithImage() throws Exception {
+		ContactObject contactObj = createContactObject("testContactWithImage");
+		contactObj.setImage1(BASE64String.getBytes());
+		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		
+		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
 	}
 	
 	public void testSearchLoginUser() throws Exception {
@@ -394,10 +413,11 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
+		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
-		assertEqualsAndNotNull("manager name is not equals", contactObj1.getManagerName(), contactObj2.getManagerName());
+		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
 		assertEqualsAndNotNull("marital status is not equals", contactObj1.getMaritalStatus(), contactObj2.getMaritalStatus());
 		assertEqualsAndNotNull("middle name is not equals", contactObj1.getMiddleName(), contactObj2.getMiddleName());
 		assertEqualsAndNotNull("nickname is not equals", contactObj1.getNickname(), contactObj2.getNickname());
@@ -513,6 +533,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setInfo("info");
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
+		contactObj.setImage1(BASE64String.getBytes());
 		contactObj.setManagerName("manager name");
 		contactObj.setMaritalStatus("marital status");
 		contactObj.setMiddleName("middle name");
@@ -620,13 +641,40 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		WebRequest req = null;
+		WebResponse resp = null;
+		
+		JSONObject jResponse = null;
+		
+		if (contactObj.containsImage1()) {
+			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+			postReq.setMimeEncoded(true);
+			
+			postReq.setParameter("json", new String(baos.toByteArray()));
+			
+			File f = File.createTempFile("open-xchange_image", ".jpg");
+			FileOutputStream fos = new FileOutputStream(f);
+			fos.write(contactObj.getImage1());
+			fos.flush();
+			fos.close();
+			
+			postReq.selectFile("file", f, CONTENT_TYPE);
+			
+			req = postReq;
+			resp = webCon.getResponse(req);	
+			jResponse = extractFromCallback(resp.getText());
+		} else {
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+			resp = webCon.getResponse(req);
+			
+			jResponse = new JSONObject(resp.getText());
+		}
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = Response.parse(resp.getText());
+		final Response response = Response.parse(jResponse.toString());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -658,13 +706,40 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(inFolder));
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
+		WebRequest req = null;
+		WebResponse resp = null;
+		
+		JSONObject jResponse = null;
+		
+		if (contactObj.containsImage1()) {
+			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+			postReq.setMimeEncoded(true);
+			
+			postReq.setParameter("json", new String(baos.toByteArray()));
+			
+			File f = File.createTempFile("open-xchange_image", ".jpg");
+			FileOutputStream fos = new FileOutputStream(f);
+			fos.write(contactObj.getImage1());
+			fos.flush();
+			fos.close();
+			
+			postReq.selectFile("file", f, CONTENT_TYPE);
+			
+			req = postReq;
+			resp = webCon.getResponse(req);	
+			jResponse = extractFromCallback(resp.getText());
+		} else {
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+			resp = webCon.getResponse(req);
+			
+			jResponse = new JSONObject(resp.getText());
+		}
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = Response.parse(resp.getText());
+		final Response response = Response.parse(jResponse.toString());
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
@@ -818,6 +893,32 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		return contactObj;
 	}
+	
+	public static byte[] loadImage(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_IMAGE);
+		parameter.setParameter(DataFields.ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		InputStream is = resp.getInputStream();
+		assertNotNull("response InputStream is null", is);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] b = new byte[1024];
+		int i = 0;
+		while ((i = is.read(b)) != -1) {
+			baos.write(b, 0, i);
+		}
+
+		return baos.toByteArray();
+	}
+
 	
 	public static ContactObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
@@ -1223,7 +1324,7 @@ public class ContactTest extends AbstractAJAXTest {
 				
 		}
 	}
-
+	
 	private static LinkEntryObject[] parseLinks(ContactObject contactObj, JSONArray jsonArray) throws Exception {
 		LinkEntryObject[] links = new LinkEntryObject[jsonArray.length()];
 		for (int a = 0; a < links.length; a++) {
@@ -1231,14 +1332,14 @@ public class ContactTest extends AbstractAJAXTest {
 			JSONObject entry = jsonArray.getJSONObject(a);
 			if (entry.has(ContactFields.ID)) {
 				links[a].setLinkID(DataParser.parseInt(entry, ContactFields.ID));
-			} 
+			}
 			
 			links[a].setLinkDisplayname(DataParser.parseString(entry, DistributionListFields.DISPLAY_NAME));
 		}
 		
 		return links;
 	}
-
+	
 	private static DistributionListEntryObject[] parseDistributionList(ContactObject contactObj, JSONArray jsonArray) throws Exception {
 		DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
 		for (int a = 0; a < jsonArray.length(); a++) {
@@ -1246,15 +1347,15 @@ public class ContactTest extends AbstractAJAXTest {
 			distributionlist[a] = new DistributionListEntryObject();
 			if (entry.has(DistributionListFields.ID)) {
 				distributionlist[a].setEntryID(DataParser.parseInt(entry, DistributionListFields.ID));
-			} 
+			}
 			
 			if (entry.has(DistributionListFields.FIRST_NAME)) {
 				distributionlist[a].setFirstname(DataParser.parseString(entry, DistributionListFields.FIRST_NAME));
-			} 
+			}
 			
 			if (entry.has(DistributionListFields.LAST_NAME)) {
 				distributionlist[a].setLastname(DataParser.parseString(entry, DistributionListFields.LAST_NAME));
-			} 
+			}
 			
 			distributionlist[a].setDisplayname(DataParser.parseString(entry, DistributionListFields.DISPLAY_NAME));
 			distributionlist[a].setEmailaddress(DataParser.parseString(entry, DistributionListFields.MAIL));
@@ -1263,7 +1364,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		return distributionlist;
 	}
-
+	
 	private HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
 		if (linkEntryObject == null) {
 			return null;
