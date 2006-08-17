@@ -208,14 +208,14 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(url.toString());
 	}
 	
-	public Response versions(String sessionId, int folderId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
-		return versions(sessionId,folderId,columns,-1,null);
+	public Response versions(String sessionId, int objectId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
+		return versions(sessionId,objectId,columns,-1,null);
 	}
 	
-	public Response versions(String sessionId, int folderId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response versions(String sessionId, int objectId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"versions");
-		url.append("&folder=");
-		url.append(folderId);
+		url.append("&id=");
+		url.append(objectId);
 		url.append("&columns=");
 		for(int col : columns) {
 			url.append(col);
