@@ -125,21 +125,13 @@ public class FolderParser extends FolderChildParser {
 				
 				OCLPermission oclp = new OCLPermission();
 				
-				if (e.getName().equals("admin_user")) {
+				if (e.getName().equals("user")) {
 					parseElementPermissionAttributes(oclp, e);
 					parseEntity(oclp, e);
-					oclp.setFolderAdmin(true);
-				} else if (e.getName().equals("admin_group")) {
+				} else if (e.getName().equals("group")) {
 					parseElementPermissionAttributes(oclp, e);
 					parseEntity(oclp, e);
-					oclp.setFolderAdmin(true);
 					oclp.setGroupPermission(true);
-				} else if (e.getName().equals("user") || e.getName().equals("shared_user")) {
-					parseElementPermissionAttributes(oclp, e);
-					parseEntity(oclp, e);
-				} else if (e.getName().equals("group") || e.getName().equals("shared_group")) {
-					parseElementPermissionAttributes(oclp, e);
-					parseEntity(oclp, e);
 				} else {
 					throw new OXConflictException("unknown xml tag in permissions!");
 				}
@@ -164,10 +156,15 @@ public class FolderParser extends FolderChildParser {
 		int odp = getPermissionAttributeValue(e, "objectdeletepermission");
 		
 		oclp.setAllPermission(fp, orp, owp, odp);
+		oclp.setFolderAdmin(getPermissionAdminFlag(e));
 	}
 	
 	protected int getPermissionAttributeValue(Element e, String name) throws Exception {
 		return Integer.parseInt(e.getAttributeValue("folderpermission", XmlServlet.NS));
+	}
+
+	protected boolean getPermissionAdminFlag(Element e) throws Exception {
+		return Boolean.parseBoolean(e.getAttributeValue("admin_flag", XmlServlet.NS));
 	}
 }
 
