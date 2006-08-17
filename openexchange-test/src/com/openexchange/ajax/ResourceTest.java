@@ -22,6 +22,19 @@ public class ResourceTest extends AbstractAJAXTest {
 		assertTrue("resource array size is not > 0", resources.length > 0);
 	}
 	
+	public void testList() throws Exception {
+		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		assertTrue("resource array size is not > 0", resources.length > 0);
+		
+		int[] id = new int[resources.length];
+		for (int a = 0; a < id.length; a++) {
+			id[a] = resources[a].getIdentifier();
+		}
+		
+		resources = listResource(getWebConversation(), id, PROTOCOL + getHostName(), getSessionId());
+		assertTrue("resource array size is not > 0", resources.length > 0);
+	}
+	
 	public void testGet() throws Exception {
 		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
@@ -49,6 +62,44 @@ public class ResourceTest extends AbstractAJAXTest {
 		}
 		
 		assertNotNull("timestamp is null", response.getTimestamp());
+		
+		JSONArray jsonArray = (JSONArray)response.getData();
+		com.openexchange.groupware.ldap.Resource[] r = new com.openexchange.groupware.ldap.Resource[jsonArray.length()];
+		for (int a = 0; a < r.length; a++) {
+			JSONObject jObj = jsonArray.getJSONObject(a);
+			r[a] = new com.openexchange.groupware.ldap.Resource();
+			r[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
+			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
+				r[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
+			}
+		}
+		
+		return r;
+	}
+	
+	public static com.openexchange.groupware.ldap.Resource[] listResource(WebConversation webCon, int[] id, String host, String session) throws Exception {
+        final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+		
+		JSONArray requestArray = new JSONArray();
+		for (int a = 0; a < id.length; a++) {
+			requestArray.put(id[a]);
+		}
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
+		WebRequest req = new PutMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
 		
 		JSONArray jsonArray = (JSONArray)response.getData();
 		com.openexchange.groupware.ldap.Resource[] r = new com.openexchange.groupware.ldap.Resource[jsonArray.length()];
