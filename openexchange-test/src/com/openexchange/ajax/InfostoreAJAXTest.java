@@ -399,18 +399,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		m.getResponseBodyAsString();
 		
 	}*/
-
-	
-	
-	// Helper
-	
-	private JSONObject extractFromCallback(String html) throws JSONException {
-		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
-		if(matcher.find()){
-			return new JSONObject(matcher.group(1));
-		}
-		return null;
-	}
 	
 
 }
