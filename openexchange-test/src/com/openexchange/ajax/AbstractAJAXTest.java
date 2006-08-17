@@ -21,6 +21,8 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -55,6 +57,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 	protected static final String jsonTagTimestamp = "timestamp";
 	
 	protected static final String jsonTagError = "error";
+	
+	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 
     protected String getAJAXProperty(final String key) {
         return getAJAXProperties().getProperty(key);
@@ -217,7 +221,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertNotNull(message + " is null", value);
 			assertEquals(message + " byte array size is not equals", expect.length, value.length);
 			for (int a = 0; a < expect.length; a++) {
-				assertEquals(message + "bytes are not equals in pos: " + a,  expect[a], value[a]);
+				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
 			}
 		} 
 	} 
@@ -235,5 +239,13 @@ public abstract class AbstractAJAXTest extends TestCase {
 			assertEquals(i, is2.read());
 		}
 		assertEquals(-1,is2.read());
+	}
+	
+	public static JSONObject extractFromCallback(String html) throws JSONException {
+		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
+		if(matcher.find()){
+			return new JSONObject(matcher.group(1));
+		}
+		return null;
 	}
 }
