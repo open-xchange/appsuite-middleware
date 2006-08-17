@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -21,6 +22,7 @@ import com.openexchange.tools.URLParameter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
@@ -30,8 +32,7 @@ public class LinkTest extends AbstractAJAXTest {
 	
 	private static final Log LOG = LogFactory.getLog(LinkTest.class);
 	
-	
-	public void testNew() throws Exception {
+	public int[] testNew() throws Exception {
 		
 		/*
 		 *  BUILD 2 OBJECTS FOR THE FIRST TEST
@@ -40,14 +41,13 @@ public class LinkTest extends AbstractAJAXTest {
 		 */
 		
 		FolderObject fo = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
-		int fid1 = fo.getObjectID();
+		int  fid1 = fo.getObjectID();
 		ContactObject co = new ContactObject();
 		co.setSurName("Meier");
 		co.setGivenName("Herbert");
 		co.setDisplayName("Meier, Herbert");
 		co.setParentFolderID(fid1);
 		int oid1 = ContactTest.insertContact(getWebConversation(),co, PROTOCOL+getHostName(), getSessionId());
-		
 		
 		fo = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
 		int fid2 = fo.getObjectID();
@@ -71,7 +71,7 @@ public class LinkTest extends AbstractAJAXTest {
 		
 		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, PROTOCOL+getHostName(), getSessionId());
 		
-		
+		int[] repo = {oid1,fid1,oid2,fid2};
 		/*
 		 *  Now Build The Link Object
 		 * 
@@ -128,7 +128,54 @@ public class LinkTest extends AbstractAJAXTest {
 			objectId = data.getInt(DataFields.ID);
 		}
 		*/
+		return repo;
 
+	}
+	
+	public void testAll() throws Exception {
+		
+		int[] go = testNew();
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, go[1]);
+		parameter.setParameter(AJAXServlet.PARAMETER_ID, go[0]);
+		parameter.setParameter("module", com.openexchange.groupware.Types.CONTACT);
+		
+		WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters());
+		WebResponse resp = getWebConversation().getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		//assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		JSONArray data = (JSONArray)response.getData();
+		
+		for (int i=0;i<data.length();i++){
+			JSONObject jo = data.getJSONObject(i);
+			//jo.getInt("id1");
+			//jo.getInt("folder1");
+			//jo.getInt("module1");
+			
+			if (jo.getInt("id2") == go[2] && jo.getInt("folder2") == go[3] && jo.getInt("module2") == com.openexchange.groupware.Types.APPOINTMENT){
+				//doll
+			}else{
+				fail("json error: OBJECT MISSMATCH");
+			}
+		}
+		
+		System.out.println(data.toString());
+		
+		//return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
 	}
 	
 }

@@ -803,6 +803,8 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
+		System.out.println(host + CONTACT_URL + parameter.getURLParameters());
+		
 		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
 		
