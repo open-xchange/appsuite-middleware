@@ -287,8 +287,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId);
-		// participants[3] = new ResourceParticipant();
-		// participants[3].setIdentifier(resourceParticipantId);
+		participants[3] = new ResourceParticipant();
+		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
@@ -335,8 +335,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		participants[1].setIdentifier(userParticipantId);
 		participants[2] = new GroupParticipant();
 		participants[2].setIdentifier(groupParticipantId);
-		// participants[3] = new ResourceParticipant();
-		// participants[3].setIdentifier(resourceParticipantId);
+		participants[3] = new ResourceParticipant();
+		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
