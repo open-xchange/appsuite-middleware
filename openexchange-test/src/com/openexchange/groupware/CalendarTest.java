@@ -140,8 +140,8 @@ public class CalendarTest extends TestCase {
     public void testPerformance() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
-        long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
-        long u = 4133890800000L; // 31.12.2100 00:00:00 (GMT)
+        long e = 1244458800000L; // 08.06.2009 13:00:00 (GMT)
+        long u = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -151,18 +151,28 @@ public class CalendarTest extends TestCase {
         cdao.setInterval(1);
         cdao.setDays(1);
         cdao.setRecurrenceID(1);
+        RecurringResults rrs = null;
+        int c_size = 0;
         long pass_one_start = System.currentTimeMillis();
-        RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        for (int a = 0; a < 400; a++) {
+            cdao.setInterval(1);
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+            c_size += rrs.size();
+        }
         long pass_one_end = System.currentTimeMillis();
-        System.out.println("Daily runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+rrs.size() + " entries");
+        System.out.println("Daily runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");
         
         cdao.setRecurrenceType(OXCalendar.WEEKLY);
         cdao.setDays(OXCalendar.MONDAY + OXCalendar.TUESDAY + OXCalendar.WEDNESDAY + OXCalendar.THURSDAY + OXCalendar.FRIDAY + OXCalendar.SATURDAY + OXCalendar.SUNDAY);
-        
         pass_one_start = System.currentTimeMillis();
-        rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        c_size = 0;
+        for (int a = 0; a < 400; a++) {
+            cdao.setInterval(1);
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+            c_size += rrs.size();
+        }
         pass_one_end = System.currentTimeMillis();
-        System.out.println("Weekly runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+rrs.size() + " entries");          
+        System.out.println("Weekly runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");          
     }
     
     
