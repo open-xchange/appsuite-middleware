@@ -343,6 +343,19 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
 	}
 	
+	public void testUpdateContactWithImage() throws Exception {
+		ContactObject contactObj = createContactObject("testUpdateContactWithImage");
+		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		
+		contactObj.setImage1(BASE64String.getBytes());
+		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
+	}
+
+	
 	public void testSearchLoginUser() throws Exception {
 		ContactObject[] contactArray = searchContact(getWebConversation(), getLogin(), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("contact array size is 0", contactArray.length > 0);
