@@ -68,10 +68,19 @@ public class ReminderTest extends TestCase {
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
 		reminderSql.insertReminder(reminderObj);
 		
-		reminderObj = createReminderObject(56789, Types.TASK);
-		reminderSql.deleteReminder(56789, sessionObj.getUserObject().getId());
+		reminderObj = createReminderObject(56789, Types.APPOINTMENT);
+		reminderSql.deleteReminder(56789, sessionObj.getUserObject().getId(), reminderObj.getModule());
 	}
 	
+	public void testDeleteAllReminders() throws Exception {
+		ReminderObject reminderObj = createReminderObject(67890, Types.TASK);
+		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));
+		reminderSql.insertReminder(reminderObj);
+		
+		reminderObj = createReminderObject(67890, Types.TASK);
+		reminderSql.deleteReminder(67890, Types.TASK);
+	}
+
 	public void testLoad() throws Exception {
 		Date alarm = new Date(System.currentTimeMillis()-3600000);
 		ReminderObject reminderObj = createReminderObject(11111, Types.CONTACT);
