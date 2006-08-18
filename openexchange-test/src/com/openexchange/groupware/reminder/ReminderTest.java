@@ -76,9 +76,10 @@ public class ReminderTest extends TestCase {
 		Date alarm = new Date(System.currentTimeMillis()-3600000);
 		ReminderObject reminderObj = createReminderObject(11111, Types.CONTACT);
 		reminderObj.setDate(alarm);
-		reminderSql.insertReminder(reminderObj);
+		int objectId = reminderSql.insertReminder(reminderObj);
+		assertTrue("object_id is not > 0", objectId > 0);
 		
-		reminderObj = reminderSql.loadReminder(11111, sessionObj.getUserObject().getId());
+		reminderObj = reminderSql.loadReminder(11111, sessionObj.getUserObject().getId(), Types.CONTACT);
 		
 		assertNotNull("is reminder object not null", reminderObj);
 		assertEquals("targetId", "11111", reminderObj.getTargetId());
