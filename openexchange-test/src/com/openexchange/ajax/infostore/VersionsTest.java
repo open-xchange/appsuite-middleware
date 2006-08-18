@@ -2,7 +2,6 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,9 +32,10 @@ public class VersionsTest extends InfostoreAJAXTest {
 		res = versions(sessionId,clean.get(0), new int[]{Metadata.VERSION});
 		assertNoError(res);
 
-		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{0,1,2,3}));
+		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
 		JSONArray arrayOfarrays = (JSONArray) res.getData();
 		
+		assertEquals(versions.size(), arrayOfarrays.length());
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			JSONArray comp = arrayOfarrays.getJSONArray(i);
 			assertTrue(versions.remove(comp.getInt(0)));
