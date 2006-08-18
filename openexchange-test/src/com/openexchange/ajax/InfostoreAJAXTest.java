@@ -348,6 +348,36 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
+	public int[] detach(String sessionId, long timestamp, int objectId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"detach");
+		url.append("&timestamp=");
+		url.append(timestamp);
+		url.append("&id=");
+		url.append(objectId);
+		
+		
+		StringBuffer data = new StringBuffer("[");
+		
+		if(ids.length > 0) {
+			for(int id : ids) {
+				data.append(id);
+				data.append(",");
+			}
+			data.deleteCharAt(data.length()-1);
+		}
+		
+		data.append("]");
+		
+		JSONArray arr = putA(url.toString(), data.toString());
+		int[] notDeleted = new int[arr.length()];
+		
+		for(int i = 0; i < arr.length(); i++) {
+			notDeleted[i] = arr.getInt(i);
+		}
+		
+		return notDeleted;
+	}
+	
 	public InputStream document(String sessionId, int id) throws HttpException, IOException {
 		return document(sessionId,id,-1);
 	}
