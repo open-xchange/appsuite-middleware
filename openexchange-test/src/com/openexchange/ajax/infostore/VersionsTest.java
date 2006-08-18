@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
@@ -32,7 +33,11 @@ public class VersionsTest extends InfostoreAJAXTest {
 		res = versions(sessionId,clean.get(0), new int[]{Metadata.VERSION});
 		assertNoError(res);
 
-		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
+		assureVersions(new Integer[]{1,2,3},res);
+	}
+	
+	public static final void assureVersions(Integer[] ids, Response res) throws JSONException{
+		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(ids));
 		JSONArray arrayOfarrays = (JSONArray) res.getData();
 		
 		assertEquals(versions.size(), arrayOfarrays.length());
