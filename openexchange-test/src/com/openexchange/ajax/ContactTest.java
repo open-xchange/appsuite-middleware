@@ -316,6 +316,24 @@ public class ContactTest extends AbstractAJAXTest {
 		compareObject(contactObject, loadContact);
 	}
 	
+	public void testGetWithAllFieldsOnUpdate() throws Exception {
+		ContactObject contactObject = new ContactObject();
+		contactObject.setSurName("testGetWithAllFieldsOnUpdate");
+		contactObject.setParentFolderID(contactFolderId);
+		
+		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+		
+		contactObject = createCompleteContactObject();
+		
+		updateContact(getWebConversation(), contactObject, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		contactObject.setObjectID(objectId);
+		compareObject(contactObject, loadContact);
+	}
+
+	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
 		
