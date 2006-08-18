@@ -252,7 +252,7 @@ public class TaskTest extends AbstractWebdavTest {
 		compareObject(taskObj, loadTask);
 	}
 	
-	public void testConfirm() throws Exception {
+	public void _notestConfirm() throws Exception {
 		Task taskObj = createTask("testConfirm");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		confirmTask(webCon, objectId, CalendarObject.DECLINE, null, PROTOCOL + hostName, login, password);
@@ -293,6 +293,7 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setStartDate(startTime);
 		taskObj.setEndDate(endTime);
 		taskObj.setParentFolderID(taskFolderId);
+		taskObj.setStatus(Task.IN_PROGRESS);
 		
 		return taskObj;
 	}
