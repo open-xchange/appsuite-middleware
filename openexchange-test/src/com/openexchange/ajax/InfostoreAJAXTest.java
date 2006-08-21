@@ -348,7 +348,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
-	public int[] detach(String sessionId, long timestamp, int objectId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+	public int[] detach(String sessionId, long timestamp, int objectId, int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"detach");
 		url.append("&timestamp=");
 		url.append(timestamp);
@@ -358,8 +358,8 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		StringBuffer data = new StringBuffer("[");
 		
-		if(ids.length > 0) {
-			for(int id : ids) {
+		if(versions.length > 0) {
+			for(int id : versions) {
 				data.append(id);
 				data.append(",");
 			}
