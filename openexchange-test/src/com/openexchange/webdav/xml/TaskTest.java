@@ -236,7 +236,6 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setTargetCosts(5.5F);
 		taskObj.setTargetDuration(7.5F);
 		taskObj.setTripMeter("trip meter");
-		taskObj.setTypeOfCosts("type of costs");
 		
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
@@ -281,7 +280,6 @@ public class TaskTest extends AbstractWebdavTest {
 		assertEqualsAndNotNull("target costs", taskObj1.getTargetCosts(), taskObj2.getTargetCosts());
 		assertEqualsAndNotNull("target duration", taskObj1.getTargetDuration(), taskObj2.getTargetDuration());
 		assertEqualsAndNotNull("trip meter", taskObj1.getTripMeter(), taskObj2.getTripMeter());
-		assertEqualsAndNotNull("type of costs", taskObj1.getTypeOfCosts(), taskObj2.getTypeOfCosts());
 		
 		assertEqualsAndNotNull("participants are not equals" , participants2String(taskObj1.getParticipants()), participants2String(taskObj2.getParticipants()));
 		assertEqualsAndNotNull("users are not equals" , users2String(taskObj1.getUsers()), users2String(taskObj2.getUsers()));
