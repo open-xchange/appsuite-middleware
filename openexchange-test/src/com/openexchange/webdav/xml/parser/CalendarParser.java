@@ -122,8 +122,12 @@ public abstract class CalendarParser extends CommonParser {
 		if (hasElement(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS))) {
 			calendarobject.setTitle(getValue(eProp.getChild(OXCalendar.TITLE, XmlServlet.NS)));
 		} 
+
+		if (hasElement(eProp.getChild(OXCalendar.NOTE, XmlServlet.NS))) {
+			calendarobject.setNote(getValue(eProp.getChild(OXCalendar.NOTE, XmlServlet.NS)));
+		} 
 		
-		parseElementParticipants(calendarobject, eProp.getChild("participants"));
+		parseElementParticipants(calendarobject, eProp.getChild(OXCalendar.PARTICIPANTS));
 		
 		parseElementCommon(calendarobject, eProp);
 	}

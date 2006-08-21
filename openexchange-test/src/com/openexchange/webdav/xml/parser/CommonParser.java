@@ -66,6 +66,10 @@ public abstract class CommonParser extends FolderChildParser {
 			commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild("private_flag", XmlServlet.NS)));
 		} 
 
+		if (hasElement(eProp.getChild(OXCommon.COLOR_LABEL, XmlServlet.NS))) {
+			commonobject.setLabel(getValueAsInt(eProp.getChild(OXCommon.COLOR_LABEL, XmlServlet.NS)));
+		} 
+
 		parseElementFolderChildObject(commonobject, eProp);
 	}
 }
