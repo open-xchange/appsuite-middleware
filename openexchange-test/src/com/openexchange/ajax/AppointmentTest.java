@@ -321,7 +321,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		appointmentObj.setLocation("Location");
 		appointmentObj.setShownAs(AppointmentObject.FREE);
-		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setPrivateFlag(true);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLabel(2);
@@ -343,6 +342,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
+		
+		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		
