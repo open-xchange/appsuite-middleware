@@ -309,6 +309,16 @@ public abstract class AbstractWebdavTest extends TestCase {
 		} 
 	} 
 	
+	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message + " byte array size is not equals", expect.length, value.length);
+			for (int a = 0; a < expect.length; a++) {
+				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
+			}
+		} 
+	} 
+	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
