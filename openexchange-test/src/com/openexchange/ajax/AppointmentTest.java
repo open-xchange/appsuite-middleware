@@ -360,6 +360,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		long newEndTime = newStartTime + 86400000;
 		
 		appointmentObj.setObjectID(objectId);
+		appointmentObj.setParentFolderID(appointmentFolderId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
@@ -414,6 +415,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		long newEndTime = newStartTime + 86400000;
 		
 		appointmentObj.setObjectID(objectId);
+		appointmentObj.setParentFolderID(appointmentFolderId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 	}
 	
@@ -445,7 +447,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertEquals("start", newStartTime, appointmentObj2.getStartDate().getTime());
 		assertEquals("end", newEndTime, appointmentObj2.getEndDate().getTime());
 		assertEqualsAndNotNull("location", appointmentObj1.getLocation(), appointmentObj2.getLocation());
-		// assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
+		assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
 		assertEquals("folder id", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
 		assertEquals("private flag", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
 		assertEquals("full time", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
