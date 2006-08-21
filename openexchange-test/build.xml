@@ -107,6 +107,9 @@
 		<!-- Server Internals -->
 		<test name="com.openexchange.ajax.infostore.InfostoreParserTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.infostore.InfostoreWriterTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.attach.AttachmentParserTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.attach.AttachmentWriterTest" todir="${test.xml.dir}" />
+						
 		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
