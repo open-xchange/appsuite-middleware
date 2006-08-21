@@ -37,10 +37,13 @@
 
 package com.openexchange.tools.file;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.tools.RandomString;
 
 import junit.framework.TestCase;
 
@@ -69,4 +72,20 @@ public class FileStorageTest extends TestCase {
         assertNotNull("Can't create file storage.", storage);
     }
 
+    /**
+     * Test method for
+     * 'com.openexchange.tools.file.FileStorage.saveNewFile(InputStream)'.
+     * @throws Throwable if an error occurs.
+     */
+    public final void testSaveNewFile() throws Throwable {
+        final File tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.delete();
+        final String fileContent = RandomString.generateLetter(100);
+        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
+            .getBytes("UTF-8"));
+        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final String identifier = storage.saveNewFile(baos);
+        tempFile.delete();
+        assertNotNull("Can't create new file in file storage.", identifier);
+    }
 }
