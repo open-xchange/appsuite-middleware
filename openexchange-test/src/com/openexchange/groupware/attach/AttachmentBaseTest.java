@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.api.OXException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
@@ -551,17 +552,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		
 		private int checked = -1;
 		
-		public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXPermissionException {
+		public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 1;
 			throw new OXPermissionException();
 		}
 		
-		public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXPermissionException {
+		public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 2;
 			throw new OXPermissionException();
 		}
 		
-		public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXPermissionException {
+		public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 3;
 			throw new OXPermissionException();
 		}
