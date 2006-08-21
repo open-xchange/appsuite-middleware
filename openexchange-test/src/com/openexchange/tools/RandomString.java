@@ -47,14 +47,14 @@ public class RandomString {
     private static char[] letter = null;
 
     private final static Random rand = new Random(System.currentTimeMillis());
-    
+
     /**
      * Prevent instanciation.
      */
     private RandomString() {
         super();
     }
-    
+
     public static String generateLetter(final int maxLength) {
         char[] value = new char[rand.nextInt(maxLength) + 1];
         for (int i = 0; i < value.length; i++) {
