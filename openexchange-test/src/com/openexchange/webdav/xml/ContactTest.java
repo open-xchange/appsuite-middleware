@@ -158,7 +158,7 @@ public class ContactTest extends AbstractWebdavTest {
 		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
-		// assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
+		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
@@ -275,7 +275,7 @@ public class ContactTest extends AbstractWebdavTest {
 		contactObj.setFaxBusiness("fax business");
 		contactObj.setFaxHome("fax home");
 		contactObj.setFaxOther("fax other");
-		// contactObj.setImage1("image1");
+		contactObj.setImage1("image1".getBytes());
 		contactObj.setInfo("info");
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
@@ -425,7 +425,10 @@ public class ContactTest extends AbstractWebdavTest {
 		
 		ContactWriter appointmentWriter = new ContactWriter();
 		appointmentWriter.addContent2PropElement(eProp, contactObj, false);
-		
+		Element eInFolder = new Element("infolder", XmlServlet.NS);
+		eInFolder.addContent(String.valueOf(inFolder));
+		eProp.addContent(eInFolder);
+
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
@@ -468,13 +471,15 @@ public class ContactTest extends AbstractWebdavTest {
 			
 			ContactObject contactObj = new ContactObject();
 			contactObj.setObjectID(i[0]);
-			contactObj.setParentFolderID(i[1]);
 			
 			Element eProp = new Element("prop", webdav);
 			
-			ContactWriter appointmentWriter = new ContactWriter();
-			appointmentWriter.addContent2PropElement(eProp, contactObj, false);
-			
+			ContactWriter contactWriter = new ContactWriter();
+			contactWriter.addContent2PropElement(eProp, contactObj, false);
+			Element eInFolder = new Element("infolder", XmlServlet.NS);
+			eInFolder.addContent(String.valueOf(i[1]));
+			eProp.addContent(eInFolder);
+
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
 		}
 		
