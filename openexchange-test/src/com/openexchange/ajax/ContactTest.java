@@ -366,6 +366,7 @@ public class ContactTest extends AbstractAJAXTest {
 		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObj.setImage1(BASE64String.getBytes());
+		contactObj.removeParentFolderID();
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
 		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
