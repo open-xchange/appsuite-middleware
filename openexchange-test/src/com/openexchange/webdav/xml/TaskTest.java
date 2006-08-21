@@ -354,6 +354,10 @@ public class TaskTest extends AbstractWebdavTest {
 		
 		TaskWriter appointmentWriter = new TaskWriter();
 		appointmentWriter.addContent2PropElement(eProp, taskObj, false);
+		Element eInFolder = new Element("infolder", XmlServlet.NS);
+		eInFolder.addContent(String.valueOf(inFolder));
+		eProp.addContent(eInFolder);
+
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -397,12 +401,15 @@ public class TaskTest extends AbstractWebdavTest {
 			
 			Task taskObj = new Task();
 			taskObj.setObjectID(i[0]);
-			taskObj.setParentFolderID(i[1]);
 			
 			Element eProp = new Element("prop", webdav);
 			
-			TaskWriter appointmentWriter = new TaskWriter();
-			appointmentWriter.addContent2PropElement(eProp, taskObj, false);
+			TaskWriter taskWriter = new TaskWriter();
+			taskWriter.addContent2PropElement(eProp, taskObj, false);
+			Element eInFolder = new Element("infolder", XmlServlet.NS);
+			eInFolder.addContent(String.valueOf(i[1]));
+			eProp.addContent(eInFolder);
+
 			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
 		}
