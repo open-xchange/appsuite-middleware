@@ -99,7 +99,7 @@
 		<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
 		
 		<!-- Webdav Interface -->
-		<!--test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" /-->
+		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.ContactTest" todir="${test.xml.dir}" />	
 		<test name="com.openexchange.webdav.xml.FolderTest" todir="${test.xml.dir}" />	
