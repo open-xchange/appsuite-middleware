@@ -35,14 +35,6 @@ import org.jdom.output.XMLOutputter;
 
 public class TaskTest extends AbstractWebdavTest {
 	
-	protected int userParticipantId2 = -1;
-	
-	protected int userParticipantId3 = -1;
-	
-	protected int groupParticipantId1 = -1;
-	
-	protected int resourceParticipantId1 = -1;
-	
 	protected int taskFolderId = -1;
 	
 	protected String userParticipant2 = null;
@@ -95,7 +87,7 @@ public class TaskTest extends AbstractWebdavTest {
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("contact array size is not > 0", contactArray.length > 0);
 		int userParticipantId = contactArray[0].getInternalUserId();
-		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 		
@@ -215,7 +207,7 @@ public class TaskTest extends AbstractWebdavTest {
 		Date modified = new Date();
 		
 		Task taskObj = new Task();
-		taskObj.setTitle("testGetWithAllFields");
+		taskObj.setTitle("testListWithAllFields");
 		taskObj.setStartDate(startTime);
 		taskObj.setEndDate(endTime);
 		taskObj.setParentFolderID(taskFolderId);
@@ -292,6 +284,7 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setEndDate(endTime);
 		taskObj.setParentFolderID(taskFolderId);
 		taskObj.setStatus(Task.IN_PROGRESS);
+		taskObj.setPercentComplete(50);
 		
 		return taskObj;
 	}
@@ -345,6 +338,7 @@ public class TaskTest extends AbstractWebdavTest {
 	
 	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		taskObj.setObjectID(objectId);
+		taskObj.setLastModified(new Date());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		

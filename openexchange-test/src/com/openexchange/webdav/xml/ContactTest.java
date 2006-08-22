@@ -418,7 +418,8 @@ public class ContactTest extends AbstractWebdavTest {
 	
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		contactObj.setObjectID(objectId);
-		
+		contactObj.setLastModified(new Date());
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);

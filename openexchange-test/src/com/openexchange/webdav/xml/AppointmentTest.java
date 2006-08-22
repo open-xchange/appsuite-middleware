@@ -328,7 +328,8 @@ public class AppointmentTest extends AbstractWebdavTest {
 	
 	public static void updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		appointmentObj.setObjectID(objectId);
-		
+		appointmentObj.setLastModified(new Date());
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
