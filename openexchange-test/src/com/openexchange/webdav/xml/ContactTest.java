@@ -472,6 +472,7 @@ public class ContactTest extends AbstractWebdavTest {
 			
 			ContactObject contactObj = new ContactObject();
 			contactObj.setObjectID(i[0]);
+			contactObj.setLastModified(new Date());
 			
 			Element eProp = new Element("prop", webdav);
 			
@@ -480,7 +481,11 @@ public class ContactTest extends AbstractWebdavTest {
 			Element eInFolder = new Element("infolder", XmlServlet.NS);
 			eInFolder.addContent(String.valueOf(i[1]));
 			eProp.addContent(eInFolder);
-
+			
+			Element eMethod = new Element("method", XmlServlet.NS);
+			eMethod.addContent("DELETE");
+			eProp.addContent(eMethod);
+			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
 		}
 		
