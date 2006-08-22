@@ -382,6 +382,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 			
 			AppointmentObject appointmentObj = new AppointmentObject();
 			appointmentObj.setObjectID(i[0]);
+			appointmentObj.setLastModified(new Date());
 			
 			Element eProp = new Element("prop", webdav);
 			
