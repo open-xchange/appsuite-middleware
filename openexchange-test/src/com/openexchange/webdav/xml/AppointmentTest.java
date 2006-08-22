@@ -392,6 +392,10 @@ public class AppointmentTest extends AbstractWebdavTest {
 			eInFolder.addContent(String.valueOf(i[1]));
 			eProp.addContent(eInFolder);
 			
+			Element eMethod = new Element("method", XmlServlet.NS);
+			eMethod.addContent("DELETE");
+			eProp.addContent(eMethod);
+			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
 		}
 		
@@ -402,7 +406,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/javascript");
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		WebResponse resp = webCon.getResponse(req);
 		
