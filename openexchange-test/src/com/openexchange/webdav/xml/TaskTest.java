@@ -243,6 +243,49 @@ public class TaskTest extends AbstractWebdavTest {
 		compareObject(taskObj, loadTask);
 	}
 	
+	public void testListWithAllFieldsOnUpdate() throws Exception {
+		Task taskObj = createTask("testListWithAllFieldsOnUpdate");
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		Date modified = new Date();
+		
+		taskObj = new Task();
+		taskObj.setTitle("testListWithAllFieldsOnUpdate");
+		taskObj.setStartDate(startTime);
+		taskObj.setEndDate(endTime);
+		taskObj.setPrivateFlag(true);
+		taskObj.setLabel(2);
+		taskObj.setNote("note");
+		taskObj.setCategories("testcat1,testcat2,testcat3");
+		taskObj.setActualCosts(1.5F);
+		taskObj.setActualDuration(3.5F);
+		taskObj.setBillingInformation("billing information");
+		taskObj.setCompanies("companies");
+		taskObj.setCurrency("currency");
+		taskObj.setDateCompleted(dateCompleted);
+		taskObj.setDurationType(Task.DURATION_HOURS);
+		taskObj.setPercentComplete(50);
+		taskObj.setPriority(Task.HIGH);
+		taskObj.setStatus(Task.IN_PROGRESS);
+		taskObj.setTargetCosts(5.5F);
+		taskObj.setTargetDuration(7.5F);
+		taskObj.setTripMeter("trip meter");
+		
+		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+		
+		Task[] taskArray = listTask(webCon, taskFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		
+		assertEquals("wrong response array length", 1, taskArray.length);
+		
+		Task loadTask = taskArray[0];
+		
+		taskObj.setObjectID(objectId);
+		taskObj.setStartDate(startTime);
+		taskObj.setEndDate(endTime);
+		taskObj.setParentFolderID(taskFolderId);
+		compareObject(taskObj, loadTask);
+	}
+	
 	public void _notestConfirm() throws Exception {
 		Task taskObj = createTask("testConfirm");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
@@ -393,6 +436,7 @@ public class TaskTest extends AbstractWebdavTest {
 			
 			Task taskObj = new Task();
 			taskObj.setObjectID(i[0]);
+			taskObj.setLastModified(new Date());
 			
 			Element eProp = new Element("prop", webdav);
 			
@@ -401,7 +445,10 @@ public class TaskTest extends AbstractWebdavTest {
 			Element eInFolder = new Element("infolder", XmlServlet.NS);
 			eInFolder.addContent(String.valueOf(i[1]));
 			eProp.addContent(eInFolder);
-
+			
+			Element eMethod = new Element("method", XmlServlet.NS);
+			eMethod.addContent("DELETE");
+			eProp.addContent(eMethod);
 			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
 		}
