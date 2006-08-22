@@ -693,7 +693,7 @@ public class ContactTest extends AbstractAJAXTest {
 			postReq.selectFile("file", f, CONTENT_TYPE);
 			
 			req = postReq;
-			resp = webCon.getResponse(req);	
+			resp = webCon.getResource(req);	
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -758,7 +758,7 @@ public class ContactTest extends AbstractAJAXTest {
 			postReq.selectFile("file", f, CONTENT_TYPE);
 			
 			req = postReq;
-			resp = webCon.getResponse(req);	
+			resp = webCon.getResource(req);	
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
