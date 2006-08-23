@@ -270,6 +270,7 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setTargetCosts(5.5F);
 		taskObj.setTargetDuration(7.5F);
 		taskObj.setTripMeter("trip meter");
+		taskObj.setParentFolderID(taskFolderId);
 		
 		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
 		
@@ -389,11 +390,7 @@ public class TaskTest extends AbstractWebdavTest {
 		
 		TaskWriter appointmentWriter = new TaskWriter();
 		appointmentWriter.addContent2PropElement(eProp, taskObj, false);
-		Element eInFolder = new Element("infolder", XmlServlet.NS);
-		eInFolder.addContent(String.valueOf(inFolder));
-		eProp.addContent(eInFolder);
 
-		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
@@ -436,15 +433,13 @@ public class TaskTest extends AbstractWebdavTest {
 			
 			Task taskObj = new Task();
 			taskObj.setObjectID(i[0]);
+			taskObj.setParentFolderID(i[1]);
 			taskObj.setLastModified(new Date());
 			
 			Element eProp = new Element("prop", webdav);
 			
 			TaskWriter taskWriter = new TaskWriter();
 			taskWriter.addContent2PropElement(eProp, taskObj, false);
-			Element eInFolder = new Element("infolder", XmlServlet.NS);
-			eInFolder.addContent(String.valueOf(i[1]));
-			eProp.addContent(eInFolder);
 			
 			Element eMethod = new Element("method", XmlServlet.NS);
 			eMethod.addContent("DELETE");

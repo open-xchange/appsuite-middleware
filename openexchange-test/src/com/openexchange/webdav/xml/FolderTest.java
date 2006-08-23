@@ -5,6 +5,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
@@ -274,8 +275,8 @@ public class FolderTest extends AbstractWebdavTest {
 		
 		Element eProp = new Element("prop", webdav);
 		
-		DataWriter.addElement("title", folderObj.getFolderName(), eProp);
-		DataWriter.addElement("folder_id", folderObj.getParentFolderID(), eProp);
+		DataWriter.addElement(OXFolder.TITLE, folderObj.getFolderName(), eProp);
+		DataWriter.addElement(OXFolder.FOLDER_ID, folderObj.getParentFolderID(), eProp);
 		addElementType(folderObj.getType(), eProp);
 		addElementModule(folderObj.getModule(), eProp);
 		FolderWriter.addElementPermission(folderObj.getPermissions(), eProp);
@@ -319,10 +320,10 @@ public class FolderTest extends AbstractWebdavTest {
 		
 		Element eProp = new Element("prop", webdav);
 		
-		DataWriter.addElement("title", folderObj.getFolderName(), eProp);
-		DataWriter.addElement("object_id", folderObj.getObjectID(), eProp);
+		DataWriter.addElement(OXFolder.TITLE, folderObj.getFolderName(), eProp);
+		DataWriter.addElement(OXFolder.OBJECT_ID, folderObj.getObjectID(), eProp);
 		if (folderObj.containsParentFolderID()) {
-			DataWriter.addElement("folder_id", folderObj.getParentFolderID(), eProp);
+			DataWriter.addElement("folder", folderObj.getParentFolderID(), eProp);
 		} 
 		
 		if (folderObj.containsPermissions()) {
@@ -364,7 +365,7 @@ public class FolderTest extends AbstractWebdavTest {
 		
 		for (int a = 0; a < id.length; a++) {
 			Element eProp = new Element("prop", webdav);
-			DataWriter.addElement("object_id", id[a], eProp);
+			DataWriter.addElement(OXFolder.OBJECT_ID, id[a], eProp);
 			DataWriter.addElement("method", "DELETE", eProp);
 			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
@@ -468,7 +469,7 @@ public class FolderTest extends AbstractWebdavTest {
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
-		Element eObjectId = new Element("object_id", XmlServlet.NS);
+		Element eObjectId = new Element(OXFolder.OBJECT_ID, XmlServlet.NS);
 		eObjectId.addContent(String.valueOf(objectId));
 		
 		ePropfind.addContent(eProp);
@@ -559,25 +560,25 @@ public class FolderTest extends AbstractWebdavTest {
 	
 	protected static void addElementType(int type, Element parent) throws Exception {
 		if (type == FolderObject.PRIVATE) {
-			DataWriter.addElement("type", FolderWriter.PRIVATE_STRING, parent);
+			DataWriter.addElement(OXFolder.TYPE, FolderWriter.PRIVATE_STRING, parent);
 		} else {
-			DataWriter.addElement("type", FolderWriter.PUBLIC_STRING, parent);
+			DataWriter.addElement(OXFolder.TYPE, FolderWriter.PUBLIC_STRING, parent);
 		}
 	}
 	
 	protected static void addElementModule(int module, Element parent) throws Exception {
 		switch (module) {
 			case FolderObject.CALENDAR:
-				DataWriter.addElement("module", "calendar", parent);
+				DataWriter.addElement(OXFolder.MODULE, "calendar", parent);
 				break;
 			case FolderObject.CONTACT:
-				DataWriter.addElement("module", "contact", parent);
+				DataWriter.addElement(OXFolder.MODULE, "contact", parent);
 				break;
 			case FolderObject.TASK:
-				DataWriter.addElement("module", "task", parent);
+				DataWriter.addElement(OXFolder.MODULE, "task", parent);
 				break;
 			default:
-				throw new OXConflictException("invalid module");
+				throw new OXConflictException("invalid module: " + module);
 		}
 	}
 	

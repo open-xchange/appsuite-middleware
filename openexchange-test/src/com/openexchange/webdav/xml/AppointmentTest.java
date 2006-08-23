@@ -131,8 +131,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentObj.setLocation(null);
 		appointmentObj.setShownAs(AppointmentObject.FREE);
 		
-		appointmentObj.removeParentFolderID();
-		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 	}
 	
@@ -163,8 +161,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
-		
-		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 	}
@@ -298,7 +294,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		byte b[] = baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/javascript");
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
 		WebResponse resp = webCon.getResponse(req);
 		
@@ -336,9 +332,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		AppointmentWriter appointmentWriter = new AppointmentWriter();
 		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
-		Element eInFolder = new Element("infolder", XmlServlet.NS);
-		eInFolder.addContent(String.valueOf(inFolder));
-		eProp.addContent(eInFolder);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -382,15 +375,13 @@ public class AppointmentTest extends AbstractWebdavTest {
 			
 			AppointmentObject appointmentObj = new AppointmentObject();
 			appointmentObj.setObjectID(i[0]);
+			appointmentObj.setParentFolderID(i[1]);
 			appointmentObj.setLastModified(new Date());
 			
 			Element eProp = new Element("prop", webdav);
 			
 			AppointmentWriter appointmentWriter = new AppointmentWriter();
 			appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
-			Element eInFolder = new Element("infolder", XmlServlet.NS);
-			eInFolder.addContent(String.valueOf(i[1]));
-			eProp.addContent(eInFolder);
 			
 			Element eMethod = new Element("method", XmlServlet.NS);
 			eMethod.addContent("DELETE");
