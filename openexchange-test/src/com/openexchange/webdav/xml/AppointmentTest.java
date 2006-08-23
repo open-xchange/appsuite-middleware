@@ -269,7 +269,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentobject.setStartDate(startTime);
 		appointmentobject.setEndDate(endTime);
 		appointmentobject.setLocation("Location");
-		appointmentobject.setShownAs(AppointmentObject.ABSEND);
+		appointmentobject.setShownAs(AppointmentObject.ABSENT);
 		appointmentobject.setParentFolderID(appointmentFolderId);
 		
 		return appointmentobject;

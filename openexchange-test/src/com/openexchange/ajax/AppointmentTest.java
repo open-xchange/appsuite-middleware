@@ -464,7 +464,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentobject.setStartDate(new Date(startTime));
 		appointmentobject.setEndDate(new Date(endTime));
 		appointmentobject.setLocation("Location");
-		appointmentobject.setShownAs(AppointmentObject.ABSEND);
+		appointmentobject.setShownAs(AppointmentObject.ABSENT);
 		appointmentobject.setParentFolderID(appointmentFolderId);
 		
 		return appointmentobject;

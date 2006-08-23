@@ -64,7 +64,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setStartDate(new Date(startTime));
 		ao.setEndDate(new Date(endTime));
 		ao.setLocation("Location");
-		ao.setShownAs(AppointmentObject.ABSEND);
+		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
 		
 		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, PROTOCOL+getHostName(), getSessionId());
@@ -144,7 +144,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setStartDate(new Date(startTime));
 		ao.setEndDate(new Date(endTime));
 		ao.setLocation("Location");
-		ao.setShownAs(AppointmentObject.ABSEND);
+		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
 		
 		int oid2 =	AppointmentTest.insertAppointment(webCon, ao, PROTOCOL+host, session);
