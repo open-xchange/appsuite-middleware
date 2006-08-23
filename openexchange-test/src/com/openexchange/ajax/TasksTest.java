@@ -117,7 +117,7 @@ public class TasksTest extends AbstractAJAXTest {
         int folderId = -1;
         for (FolderObject folder : folders) {
             if (folder.getModule() == FolderObject.TASK
-                && folder.getObjectID() >= 20) {
+                && folder.getObjectID() >= FolderObject.MIN_FOLDER_ID) {
                 folderId = folder.getObjectID();
             }
         }
@@ -168,8 +168,9 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), folderId, taskId);
         assertFalse(response.getErrorMessage(), response.hasError());
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -196,8 +197,9 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Description differs.", task.getNote(), reload.getNote());
         final Date lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -232,8 +234,9 @@ public class TasksTest extends AbstractAJAXTest {
             reload.getTargetCosts());
         final Date lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -293,8 +296,9 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -368,8 +372,9 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -402,8 +407,9 @@ public class TasksTest extends AbstractAJAXTest {
             ((Task) response.getData()).getTitle());
         lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), lastModified, new int[][] {{ folderId, taskId }});
+        final int[] notDeleted = deleteTasks(getWebConversation(),
+            getHostName(), getSessionId(), lastModified,
+            new int[][] {{ folderId, taskId }});
         assertEquals("Task can't be deleted.", 0, notDeleted.length);
     }
 
@@ -453,7 +459,8 @@ public class TasksTest extends AbstractAJAXTest {
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.LAST_MODIFIED, Task.FOLDER_ID };
         final Response response = getAllTasksInFolder(getWebConversation(),
-            getHostName(), getSessionId(), folderId, columns, HttpServletResponse.SC_OK, "asc");
+            getHostName(), getSessionId(), folderId, columns,
+            Task.TITLE, "asc");
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
         Date timestamp = response.getTimestamp();
