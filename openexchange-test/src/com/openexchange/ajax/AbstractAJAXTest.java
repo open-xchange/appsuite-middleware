@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,6 +25,10 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import junit.framework.TestCase;
 
 /**
@@ -37,6 +42,8 @@ public abstract class AbstractAJAXTest extends TestCase {
     public static final String PROTOCOL = "http://";
 
     protected static String sessionId = null;
+    
+    protected static String sessionId2 = null;
 
 	private static String hostName = null;
 	
@@ -82,6 +89,15 @@ public abstract class AbstractAJAXTest extends TestCase {
             assertNotNull("Can't get session id.", sessionId);
         }
         return sessionId;
+    }
+    
+    protected String getSecondSessionId() throws Exception {
+    	if(null == sessionId2) {
+    		sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
+    				getSeconduser(), getPassword());
+    		assertNotNull("Can't get session id for second user.",sessionId2);
+    	}
+    	return sessionId2;
     }
 
     /**
@@ -184,6 +200,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected Response gT(String url) throws MalformedURLException, JSONException, IOException, SAXException {
 		String res = gS(url);
+		//System.out.println("* "+res);
 		if("".equals(res.trim()))
 			return null;
 		return Response.parse(res);
@@ -247,5 +264,20 @@ public abstract class AbstractAJAXTest extends TestCase {
 			return new JSONObject(matcher.group(1));
 		}
 		return null;
+	}
+	
+	// A poor mans hash literal
+	protected Map<String,String> m(String ...pairs){
+		if(pairs.length % 2 != 0)
+			throw new IllegalArgumentException("Must contain matching pairs");
+		
+		Map<String,String> m = new HashMap<String,String>();
+		
+		for(int i = 0; i < pairs.length; i++) {
+			m.put(pairs[i], pairs[++i]);
+		}
+		
+		return m;
+		
 	}
 }

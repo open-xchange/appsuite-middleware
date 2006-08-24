@@ -39,10 +39,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	protected List<Integer> clean = new ArrayList<Integer>();
 	
-	
-	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
-	
-	
 	public InfostoreAJAXTest(){
 		super();
 	}	
@@ -403,32 +399,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		url.append(action);
 		return url;
 	}
-	
-	protected Map<String,String> m(String ...pairs){
-		if(pairs.length % 2 != 0)
-			throw new IllegalArgumentException("Must contain matching pairs");
-		
-		Map<String,String> m = new HashMap<String,String>();
-		
-		for(int i = 0; i < pairs.length; i++) {
-			m.put(pairs[i], pairs[++i]);
-		}
-		
-		return m;
-		
-	}
-	
-	/*public void m() throws HttpException, IOException{
-		HttpClient client = new HttpClient();
-		
-		PostMethod m = new PostMethod(new URL("http://www.google.com").toString());
-		m.addParameter(new NameValuePair("query","openexchange"));
-		
-		client.executeMethod(m);
-		
-		m.getResponseBodyAsString();
-		
-	}*/
 	
 
 }
