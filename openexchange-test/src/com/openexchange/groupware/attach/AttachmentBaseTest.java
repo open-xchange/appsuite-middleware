@@ -31,7 +31,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
 
-	private static final Mode MODE = new INTEGRATION();
+	private static final Mode MODE = new STATIC();
 	
 	private AttachmentBase attachmentBase;
 	
@@ -158,6 +158,20 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		assertFalse(iterator.hasNext());
 		
 		iterator.close();
+		
+		int[] idsToFetch = new int[]{
+				clean.get(0).getId(),
+				clean.get(2).getId(),
+				clean.get(4).getId()
+		};
+		
+		iterator = attachmentBase.getAttachments(folderId, attachedId, moduleId, idsToFetch, new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL}, MODE.getContext(), MODE.getUser(), null).results();
+		
+		int i = 0;
+		for(; iterator.hasNext(); i++) {
+			assertEquals(idsToFetch[i], ((AttachmentImpl) iterator.next()).getId());
+		}
+		assertEquals(idsToFetch.length, i);
 	}
 	
 	public void doDelta(int folderId, int attachedId, int moduleId) throws Exception {
