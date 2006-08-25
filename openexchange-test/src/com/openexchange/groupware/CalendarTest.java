@@ -48,7 +48,7 @@ public class CalendarTest extends TestCase {
             try {                
                 Connection tc = con[a];
                 DBPool.push(context, tc);
-                DBPool.push(context, tc);
+                //DBPool.push(context, tc);
             } catch(Exception e) {
                 e.printStackTrace();
             }
