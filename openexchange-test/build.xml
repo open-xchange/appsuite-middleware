@@ -97,7 +97,10 @@
 		<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
-		
+		<!-- AJAX Attachment Interface -->
+		<test name="com.openexchange.ajax.attach.SimpleAttachmentTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.attach.TaskAttachmentTest" todir="${test.xml.dir}" />
+
 		<!-- Webdav Interface -->
 		<test name="com.openexchange.webdav.xml.AppointmentTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
