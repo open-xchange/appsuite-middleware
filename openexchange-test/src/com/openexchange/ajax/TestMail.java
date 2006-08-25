@@ -8,11 +8,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.container.mail.MessageObject;
+import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.tools.URLParameter;
 
 public class TestMail extends TestCase {
 	
@@ -28,9 +30,8 @@ public class TestMail extends TestCase {
 		wc = new WebConversation();
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/login?name=thorben&password=netline");
 		resp = wc.getResponse(req);
-		sessionId = resp.getText();
-		int pos = sessionId.indexOf('\"');
-		sessionId = sessionId.substring(pos + 1, sessionId.indexOf('\"', pos + 1));
+		JSONObject respObj = new JSONObject(resp.getText());
+		sessionId = respObj.getString("session");
 	}
 	
 	
@@ -38,13 +39,32 @@ public class TestMail extends TestCase {
 		super.tearDown();
 	}
 	
+	public void notestSpellCheck() {
+		try {
+			String txt = "First line wioth soem incorrect worsd<br>Some texte for spell checker<br>Next linee fuckesr<br>Bye!";
+			ByteArrayInputStream bais = new ByteArrayInputStream(txt.getBytes("utf-8"));
+			URLParameter urlParam = new URLParameter();
+			urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "spellcheck");
+			urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+			req = new PostMethodWebRequest("http://127.0.0.1/ajax/spellcheck" + urlParam.getURLParameters(), bais,
+					"text/javascript; charset=UTF-8");
+			resp = wc.getResponse(req);
+			String s = resp.getText();
+			JSONObject respObj = new JSONObject(s);
+			System.out.println("Response: " + respObj.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testGetAllMailsInInbox() {
 		/*
 		 * Default folder "inbox"
 		 */
-		String columns = MessageObject.FIELD_ID + "";
+		String columns = JSONMessageObject.FIELD_ID + "";
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
-				+ "&action=all&folder=Inbox&sort="+MessageObject.FIELD_SENT_DATE+"&order=ASC&columns=" + columns);
+				+ "&action=all&folder=Inbox&sort="+JSONMessageObject.FIELD_SENT_DATE+"&order=ASC&columns=" + columns);
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);
@@ -62,7 +82,7 @@ public class TestMail extends TestCase {
 	
 	public void testGetMails() {
 		try {
-			String columns = MessageObject.FIELD_ID+","+MessageObject.FIELD_FROM;
+			String columns = JSONMessageObject.FIELD_ID+","+JSONMessageObject.FIELD_FROM;
 //			req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
 //					+ "&action=all&folder=Inbox&sort="+MessageObject.FIELD_SENT_DATE+"&order=ASC&columns=" + columns);
 			req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
@@ -79,6 +99,54 @@ public class TestMail extends TestCase {
 				resp = wc.getResponse(req);
 				JSONObject mailObj = new JSONObject(resp.getText());
 				System.out.println("Mail >"+nestedArr.getString(0)+"<: " + mailObj.getString("data"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testReplyMail() {
+		try {
+			String columns = JSONMessageObject.FIELD_ID+","+JSONMessageObject.FIELD_FROM;
+			req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
+					+ "&action=all&folder=Inbox&sort=thread&columns=" + columns);
+			resp = wc.getResponse(req);
+			String s = resp.getText();
+			JSONObject respObj = new JSONObject(s);
+			System.out.println("Thread-Sorted Messages: " + respObj.getJSONArray("data").toString());
+			JSONArray arr = respObj.getJSONArray("data");
+			for (int i = 0; i < arr.length(); i++) {
+				JSONArray nestedArr = arr.getJSONArray(i);
+				req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
+						+ "&action=reply&reply2all=1&id=" + nestedArr.getString(0));
+				resp = wc.getResponse(req);
+				JSONObject mailObj = new JSONObject(resp.getText());
+				System.out.println("Reply-Mail >"+nestedArr.getString(0)+"<: " + mailObj.getString("data"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testForwardMail() {
+		try {
+			String columns = JSONMessageObject.FIELD_ID+","+JSONMessageObject.FIELD_FROM;
+			req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
+					+ "&action=all&folder=Inbox&sort=thread&columns=" + columns);
+			resp = wc.getResponse(req);
+			String s = resp.getText();
+			JSONObject respObj = new JSONObject(s);
+			System.out.println("Thread-Sorted Messages: " + respObj.getJSONArray("data").toString());
+			JSONArray arr = respObj.getJSONArray("data");
+			for (int i = 0; i < arr.length(); i++) {
+				JSONArray nestedArr = arr.getJSONArray(i);
+				req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
+						+ "&action=forward&id=" + nestedArr.getString(0));
+				resp = wc.getResponse(req);
+				JSONObject mailObj = new JSONObject(resp.getText());
+				System.out.println("Forward-Mail >"+nestedArr.getString(0)+"<: " + mailObj.getString("data"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
