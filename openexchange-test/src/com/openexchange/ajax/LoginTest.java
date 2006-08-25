@@ -128,6 +128,7 @@ public class LoginTest extends AbstractAJAXTest {
         LOG.trace("Logging in.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL
             + hostname + LOGIN_URL);
+		req.setParameter("action", "login");
         req.setParameter("name", login);
         req.setParameter("password", password);
         req.setHeaderField("Content-Type", "");
