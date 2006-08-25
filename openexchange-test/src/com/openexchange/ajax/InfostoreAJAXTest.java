@@ -6,22 +6,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -374,6 +369,16 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
+	public Response revert(String sessionId, long timestamp, int objectId) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"revert");
+		url.append("&timestamp=");
+		url.append(timestamp);
+		url.append("&id=");
+		url.append(objectId);
+		
+		return gT(url.toString());
+	}
+	
 	public InputStream document(String sessionId, int id) throws HttpException, IOException {
 		return document(sessionId,id,-1);
 	}
@@ -388,6 +393,47 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		GetMethod get = new GetMethod(url.toString());
 		client.executeMethod(get);
 		return get.getResponseBodyAsStream();
+	}
+	
+	public int copy(String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws JSONException, IOException {
+		StringBuffer url = getUrl(sessionId,"copy");
+		url.append("&id=");
+		url.append(id);
+		
+		url.append("&timestamp=");
+		url.append(timestamp);
+		
+		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
+		req.setMimeEncoded(true);
+		
+		JSONObject obj = new JSONObject();
+		for(String attr : modified.keySet()) {
+			obj.put(attr, modified.get(attr));
+		}
+		
+		req.setParameter("json",obj.toString());
+		
+		if(upload!=null) {
+			req.selectFile("file",upload,contentType);
+		}
+		WebResponse resp = getWebConversation().getResource(req);
+		JSONObject res = extractFromCallback(resp.getText());
+		return (Integer) Response.parse(res.toString()).getData();
+	}
+	
+	public int copy(String sessionId, int id, long timestamp, Map<String, String> modified) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"copy");
+		url.append("&id=");
+		url.append(id);
+		
+		url.append("&timestamp=");
+		url.append(timestamp);
+		JSONObject obj = new JSONObject();
+		for(String attr : modified.keySet()) {
+			obj.put(attr, modified.get(attr));
+		}
+		
+		return (Integer)putT(url.toString(),obj.toString()).getData();
 	}
 	
 	protected StringBuffer getUrl(String sessionId, String action) {

@@ -34,7 +34,17 @@ public class DetachTest extends InfostoreAJAXTest {
 		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
 		assertEquals(0, notDetached.length);
 		
-		// Version magically reverts to 0
+		checkNoVersions();
+	}
+	
+	public void testRevert() throws Exception {
+		revert(sessionId,System.currentTimeMillis(), clean.get(0));
+		
+		checkNoVersions();
+	}
+	
+	public void checkNoVersions() throws Exception {
+//		 Version magically reverts to 0
 		Response res = get(sessionId, clean.get(0));
 		assertNoError(res);
 		
@@ -42,7 +52,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		
 		assertEquals(0, obj.getInt("version"));
 		
-		notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
+		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
 		
 		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
 		
@@ -51,16 +61,32 @@ public class DetachTest extends InfostoreAJAXTest {
 			assertTrue(versions.remove(id));
 		}
 		assertTrue(versions.isEmpty());
+		
+		res = get(sessionId, clean.get(0));
+		assertNoError(res);
+		
+		obj = (JSONObject) res.getData();
+		
+		assertEquals("",obj.get("filename"));
+		assertEquals("",obj.get("file_mimetype"));
+		assertEquals(-1, obj.get("file_size"));
 	}
 	
 	public void testSpotted() throws Exception {
 		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
 		assertEquals(0, notDetached.length);
 		
-		Response res = versions(sessionId,clean.get(0),new int[]{Metadata.VERSION});
+		Response res = versions(sessionId,clean.get(0),new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
+		assertNoError(res);
+		// Current Version reverts to 4 (being the newest available version
+		VersionsTest.assureVersions(new Integer[]{2,4},res,4);
+		
+		res = get(sessionId,clean.get(0));
 		assertNoError(res);
 		
-		VersionsTest.assureVersions(new Integer[]{2,4},res);
+		JSONObject obj = (JSONObject)res.getData();
+		
+		assertEquals(4,obj.getInt("version"));
 	}
 	
 	public void testDetachVersion0() throws Exception {

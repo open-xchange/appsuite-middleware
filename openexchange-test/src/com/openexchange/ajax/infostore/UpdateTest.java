@@ -5,12 +5,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 public class UpdateTest extends InfostoreAJAXTest {
@@ -122,13 +126,13 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		int id = clean.get(0);
 		
-		Response res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");
+		Response res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain"); // V1
 		assertNoError(res);
 		
-		res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");// V2
 		assertNoError(res);
 		
-		res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(sessionId,id,System.currentTimeMillis(),m(),upload,"text/plain");// V3
 		assertNoError(res);
 		
 		res = update(sessionId,id,System.currentTimeMillis(),m("version" , "2"));
@@ -137,6 +141,11 @@ public class UpdateTest extends InfostoreAJAXTest {
 		res = get(sessionId,id);
 		JSONObject obj = (JSONObject) res.getData();
 		assertEquals(2,obj.get("version"));
+		
+		res = versions(sessionId,id, new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
+		assertNoError(res);
+		
+		VersionsTest.assureVersions(new Integer[]{1,2,3},res,2);
 	}
 	
 	

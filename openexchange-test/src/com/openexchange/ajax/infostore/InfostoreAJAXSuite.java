@@ -18,6 +18,8 @@ public class InfostoreAJAXSuite extends TestSuite{
 		tests.addTestSuite( VersionsTest.class );
 		tests.addTestSuite( DetachTest.class );
 		tests.addTestSuite( DocumentTest.class );
+		tests.addTestSuite( CopyTest.class );
+		
 		
 		return tests;
 	}
