@@ -57,7 +57,7 @@ public class AttachmentTest extends AbstractWebdavTest {
 		contactObj.setParentFolderID(contactFolderId);
 		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, true);
-		loadAttachment(objectId, Types.CONTACT, objectId, contactFolderId, true);
+		loadAttachment(attachmentId, Types.CONTACT, objectId, contactFolderId, true);
 	}
 	
 	public void testDeleteAttachment() throws Exception {
@@ -73,7 +73,7 @@ public class AttachmentTest extends AbstractWebdavTest {
 	
 	protected int insertAttachment(String filename, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.toString().getBytes());
-		req = new PutMethodWebRequest(hostName + ATTACHMENT_URL, bais, "text/plain");
+		req = new PutMethodWebRequest(PROTOCOL + hostName + ATTACHMENT_URL, bais, "text/plain");
 		req.setHeaderField("Authorization", "Basic " + authData);
 		req.setHeaderField(OXAttachment.FILENAME, filename);
 		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
@@ -85,6 +85,7 @@ public class AttachmentTest extends AbstractWebdavTest {
 		}
 		
 		resp = webCon.getResponse(req);
+		assertEquals(207, resp.getResponseCode());
 		
 		bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
 		
@@ -93,17 +94,15 @@ public class AttachmentTest extends AbstractWebdavTest {
 	}
 	
 	protected void loadAttachment(int objectId, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
-		WebRequest req = new GetMethodWebRequest(hostName + ATTACHMENT_URL);
-		WebResponse resp = webCon.getResponse(req);
+		WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ATTACHMENT_URL);
+		req.setHeaderField("Authorization", "Basic " + authData);
 		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
 		req.setHeaderField(OXAttachment.TARGET_ID, String.valueOf(targetId));
 		req.setHeaderField(OXAttachment.OBJECT_ID, String.valueOf(objectId));
 		
+		WebResponse resp = webCon.getResponse(req);
+
 		assertEquals(200, resp.getResponseCode());
-		
-		if (rtf) {
-			assertEquals("check rtf flag", "true", resp.getHeaderField(OXAttachment.RTF_FLAG));
-		} 
 		
 		assertEquals("check response body size", data.length(), resp.getText().length());
 		assertEquals("check response body", data.toString(), resp.getText());
@@ -113,14 +112,14 @@ public class AttachmentTest extends AbstractWebdavTest {
 		HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
-		DeleteMethod deleteMethod = new DeleteMethod(hostName + ATTACHMENT_URL);
+		DeleteMethod deleteMethod = new DeleteMethod(PROTOCOL + hostName + ATTACHMENT_URL);
 		deleteMethod.setDoAuthentication( true );
 		deleteMethod.setRequestHeader(OXAttachment.MODULE, String.valueOf(module));
 		deleteMethod.setRequestHeader(OXAttachment.TARGET_ID, String.valueOf(targetId));
 		deleteMethod.setRequestHeader(OXAttachment.OBJECT_ID, String.valueOf(objectId));
 		deleteMethod.setRequestHeader(OXAttachment.TARGET_FOLDER_ID, String.valueOf(objectId));
 		
-		assertEquals(200, resp.getResponseCode());
+		assertEquals(207, resp.getResponseCode());
 	}
 }
 
