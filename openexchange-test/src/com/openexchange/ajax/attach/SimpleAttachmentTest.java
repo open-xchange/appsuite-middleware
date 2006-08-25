@@ -1,7 +1,7 @@
 package com.openexchange.ajax.attach;
 
 
-public class SimplAttachmentTest extends AbstractAttachmentTest {
+public class SimpleAttachmentTest extends AbstractAttachmentTest {
 
 	@Override
 	public int createExclusiveWritableAttachable(String sessionId, int folderId) throws Exception {
