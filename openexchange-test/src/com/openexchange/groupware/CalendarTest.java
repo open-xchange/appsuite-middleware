@@ -33,6 +33,30 @@ public class CalendarTest extends TestCase {
         super.tearDown();
     }
     
+    public void testPool() throws Throwable {
+        Context context = new RdbContextWrapper(1);
+        int testsize = DBPool.getReadSize(context);
+        Connection con[] = new Connection[testsize];
+        for (int a = 0; a < con.length; a++) {
+            try {
+                con[a] = DBPool.pickup(context);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+        for (int a = 0; a < con.length; a++) {
+            try {                
+                Connection tc = con[a];
+                DBPool.push(context, tc);
+                DBPool.push(context, tc);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }              
+        assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));
+        
+    }
+    
     public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();      
         assertFalse(cdao.calculateRecurrence());
