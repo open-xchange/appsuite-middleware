@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.api.OXException;
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
@@ -63,6 +64,22 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		doCheckPermissions(22,22,22);
 	}
 	
+	public void testNotExists() throws Exception {
+		doNotExists(22,22,22);
+	}
+	
+	public void doNotExists(int folderId, int attachedId, int moduleId) throws Exception{
+		try {
+			attachmentBase.getAttachment(folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(),null);
+			fail("Got Wrong Exception");
+		} catch (OXObjectNotFoundException x) {
+			assertTrue(true);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			fail("Got Wrong Exception: "+t);
+		}
+	}
+
 	public void doAttach(int folderId, int attachedId, int moduleId) throws Exception{
 		AttachmentMetadata attachment = getAttachment(testFile,folderId, attachedId,moduleId,false);
 		
