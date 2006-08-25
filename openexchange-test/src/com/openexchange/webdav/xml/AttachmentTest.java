@@ -4,7 +4,10 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.api.OXAttachment;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import java.io.ByteArrayInputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -26,34 +29,59 @@ public class AttachmentTest extends AbstractWebdavTest {
 	}
 	
 	public void testInsertAttachment() throws Exception {
-		insertAttachment(System.currentTimeMillis() + "test.txt", Types.APPOINTMENT, 12345, false);
+		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		int contactFolderId = folderObj.getObjectID();
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testInsertAttachment");
+		contactObj.setParentFolderID(contactFolderId);
+		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId,  false);
 	}
 
 	public void testLoadAttachment() throws Exception {
-		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, 112233, false);
-		loadAttachment(objectId, Types.CONTACT, 112233, false);
+		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		int contactFolderId = folderObj.getObjectID();
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testLoadAttachment");
+		contactObj.setParentFolderID(contactFolderId);
+		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, false);
+		loadAttachment(attachmentId, Types.CONTACT, objectId, contactFolderId, false);
 	}
 	
 	public void testLoadAttachmentWithRtf() throws Exception {
-		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, 112233, true);
-		loadAttachment(objectId, Types.CONTACT, 112233, true);
+		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		int contactFolderId = folderObj.getObjectID();
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testLoadAttachmentWithRtf");
+		contactObj.setParentFolderID(contactFolderId);
+		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, true);
+		loadAttachment(objectId, Types.CONTACT, objectId, contactFolderId, true);
 	}
 	
 	public void testDeleteAttachment() throws Exception {
-		int objectId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.TASK, 22334455, false);
-		deleteAttachment(objectId, Types.TASK, 22334455);
+		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
+		int contactFolderId = folderObj.getObjectID();
+		ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("testDeleteAttachment");
+		contactObj.setParentFolderID(contactFolderId);
+		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, false);
+		deleteAttachment(attachmentId, Types.TASK, objectId, contactFolderId);
 	}
 	
-	protected int insertAttachment(String filename, int module, int targetId, boolean rtf) throws Exception {
+	protected int insertAttachment(String filename, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.toString().getBytes());
-		req = new PutMethodWebRequest(PROTOCOL + hostName + getURL(), bais, "text/javascript");
+		req = new PutMethodWebRequest(hostName + ATTACHMENT_URL, bais, "text/plain");
 		req.setHeaderField("Authorization", "Basic " + authData);
-		req.setHeaderField("filename", filename);
-		req.setHeaderField("module", String.valueOf(module));
-		req.setHeaderField("target_id", String.valueOf(targetId));
+		req.setHeaderField(OXAttachment.FILENAME, filename);
+		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
+		req.setHeaderField(OXAttachment.TARGET_ID, String.valueOf(targetId));
+		req.setHeaderField(OXAttachment.TARGET_FOLDER_ID, String.valueOf(targetId));
 		
 		if (rtf) {
-			req.setHeaderField("rtf_flag", "true");
+			req.setHeaderField(OXAttachment.RTF_FLAG, String.valueOf(rtf));
 		}
 		
 		resp = webCon.getResponse(req);
@@ -64,32 +92,33 @@ public class AttachmentTest extends AbstractWebdavTest {
 		return parseResponse(doc, false);
 	}
 	
-	protected void loadAttachment(int objectId, int module, int targetId, boolean rtf) throws Exception {
-		WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + getURL());
+	protected void loadAttachment(int objectId, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
+		WebRequest req = new GetMethodWebRequest(hostName + ATTACHMENT_URL);
 		WebResponse resp = webCon.getResponse(req);
-		req.setHeaderField("module", String.valueOf(module));
-		req.setHeaderField("target_id", String.valueOf(targetId));
-		req.setHeaderField("object_id", String.valueOf(objectId));
+		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
+		req.setHeaderField(OXAttachment.TARGET_ID, String.valueOf(targetId));
+		req.setHeaderField(OXAttachment.OBJECT_ID, String.valueOf(objectId));
 		
 		assertEquals(200, resp.getResponseCode());
 		
 		if (rtf) {
-			assertEquals("check rtf flag", "true", resp.getHeaderField("rtf_flag"));
+			assertEquals("check rtf flag", "true", resp.getHeaderField(OXAttachment.RTF_FLAG));
 		} 
 		
 		assertEquals("check response body size", data.length(), resp.getText().length());
 		assertEquals("check response body", data.toString(), resp.getText());
 	}
 	
-	protected void deleteAttachment(int objectId, int module, int targetId) throws Exception {
+	protected void deleteAttachment(int objectId, int module, int targetId, int targetFolderId) throws Exception {
 		HttpClient httpclient = new HttpClient();
 		
 		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
-		DeleteMethod deleteMethod = new DeleteMethod(PROTOCOL + hostName + getURL());
+		DeleteMethod deleteMethod = new DeleteMethod(hostName + ATTACHMENT_URL);
 		deleteMethod.setDoAuthentication( true );
-		deleteMethod.setRequestHeader("module", String.valueOf(module));
-		deleteMethod.setRequestHeader("target_id", String.valueOf(targetId));
-		deleteMethod.setRequestHeader("object_id", String.valueOf(objectId));
+		deleteMethod.setRequestHeader(OXAttachment.MODULE, String.valueOf(module));
+		deleteMethod.setRequestHeader(OXAttachment.TARGET_ID, String.valueOf(targetId));
+		deleteMethod.setRequestHeader(OXAttachment.OBJECT_ID, String.valueOf(objectId));
+		deleteMethod.setRequestHeader(OXAttachment.TARGET_FOLDER_ID, String.valueOf(objectId));
 		
 		assertEquals(200, resp.getResponseCode());
 	}
