@@ -32,7 +32,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
 
-	private static final Mode MODE = new STATIC();
+	private static final Mode MODE = new INTEGRATION();
 	
 	private AttachmentBase attachmentBase;
 	
