@@ -383,7 +383,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
-        assertTrue(response.getData() instanceof Task);
+        assertTrue("Response can't be parsed to a task.",
+            response.getData() instanceof Task);
         Date lastModified = response.getTimestamp();
 
         task.setObjectID(taskId);
@@ -419,14 +420,10 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId(), folderId, columns, 0, null);
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
-        Date timestamp = response.getTimestamp();
-        if (null == timestamp) {
-            // TODO This has to be fixed.
-            timestamp = new Date();
-        }
+        final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask);
+                lastModified, folderAndTask);
         }
     }
 
@@ -453,14 +450,10 @@ public class TasksTest extends AbstractAJAXTest {
             Task.TITLE, "asc");
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
-        Date timestamp = response.getTimestamp();
-        if (null == timestamp) {
-            // TODO This has to be fixed.
-            timestamp = new Date();
-        }
+        final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask);
+                lastModified, folderAndTask);
         }
     }
 
@@ -498,7 +491,7 @@ public class TasksTest extends AbstractAJAXTest {
                 folderId, task, timestamp);
         }
         // And delete 2
-        int[][] deltasks = new int[2][2];
+        final int[][] deltasks = new int[2][2];
         System.arraycopy(tasks, 8, deltasks, 0, 2);
         for (int[] folderAndTask : deltasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
@@ -539,14 +532,10 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId(), tasks, columns);
         final JSONArray array = (JSONArray) response.getData();
         // TODO parse JSON array
-        Date timestamp = response.getTimestamp();
-        if (null == timestamp) {
-            // TODO This has to be fixed.
-            timestamp = new Date();
-        }
+        final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask);
+                lastModified, folderAndTask);
         }
     }
 
@@ -764,8 +753,7 @@ public class TasksTest extends AbstractAJAXTest {
             resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        return (Integer) response.getData();
+        return (Integer) Response.parse(body).getData();
     }
 
     public static Response getAllTasksInFolder(
@@ -781,7 +769,7 @@ public class TasksTest extends AbstractAJAXTest {
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (int i : columns) {
             sb.append(i);
             sb.append(',');
@@ -815,7 +803,7 @@ public class TasksTest extends AbstractAJAXTest {
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (int i : columns) {
             sb.append(i);
             sb.append(',');
@@ -856,13 +844,14 @@ public class TasksTest extends AbstractAJAXTest {
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_LIST);
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder columnString = new StringBuilder();
         for (int i : columns) {
-            sb.append(i);
-            sb.append(',');
+            columnString.append(i);
+            columnString.append(',');
         }
-        sb.delete(sb.length() - 1, sb.length());
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
+        columnString.delete(columnString.length() - 1, columnString.length());
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS,
+            columnString.toString());
         final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
             + TASKS_URL + parameter.getURLParameters(), bais, AJAXServlet
             .CONTENTTYPE_JAVASCRIPT);
@@ -936,7 +925,7 @@ public class TasksTest extends AbstractAJAXTest {
 
     public static void removeParticipant(List<Participant> participants,
         final int creatorId) {
-        Iterator<Participant> iter = participants.iterator();
+        final Iterator<Participant> iter = participants.iterator();
         while (iter.hasNext()) {
             if (iter.next().getIdentifier() == creatorId) {
                 iter.remove();
@@ -949,8 +938,8 @@ public class TasksTest extends AbstractAJAXTest {
         final Random rand = new Random(System.currentTimeMillis());
         final List<Participant> retval = new ArrayList<Participant>();
         do {
-            Participant participant = participants.get(rand.nextInt(participants
-                .size()));
+            final Participant participant = participants.get(rand.nextInt(
+                participants.size()));
             if (!retval.contains(participant)) {
                 retval.add(participant);
             }
