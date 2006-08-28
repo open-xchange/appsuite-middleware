@@ -39,10 +39,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	}
 	
 	public void tearDown() throws Exception {
-		super.tearDown();
+		removeAttachments();
 		removeAttachable(folderId, attachedId, sessionId);
 	}
 	
+	public void removeAttachments() throws Exception{
+		super.tearDown();
+	}
+
 	public abstract int createExclusiveWritableAttachable(String sessionId, int folderId) throws Exception;
 	
 	public abstract int getExclusiveWritableFolder(String sessionId) throws Exception;
@@ -55,7 +59,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	protected void doDetach() throws Exception {
 		doGet();
 		int id = clean.get(0).getId();
-		tearDown();
+		removeAttachments();
 		
 		Response res = get(sessionId,folderId,attachedId,moduleId,id);
 		assertTrue(res.hasError());
