@@ -168,10 +168,8 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), folderId, taskId);
         assertFalse(response.getErrorMessage(), response.hasError());
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     /**
@@ -197,10 +195,8 @@ public class TasksTest extends AbstractAJAXTest {
         assertEquals("Description differs.", task.getNote(), reload.getNote());
         final Date lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     /**
@@ -234,10 +230,8 @@ public class TasksTest extends AbstractAJAXTest {
             reload.getTargetCosts());
         final Date lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     /**
@@ -296,10 +290,8 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     public void testUpdateDelegatedTask() throws Throwable {
@@ -372,10 +364,8 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     public void testUpdate() throws Throwable {
@@ -407,10 +397,8 @@ public class TasksTest extends AbstractAJAXTest {
             ((Task) response.getData()).getTitle());
         lastModified = response.getTimestamp();
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     public void testAll() throws Throwable {
@@ -436,8 +424,10 @@ public class TasksTest extends AbstractAJAXTest {
             // TODO This has to be fixed.
             timestamp = new Date();
         }
-        deleteTasks(getWebConversation(), getHostName(), getSessionId(),
-            timestamp, tasks);
+        for (int[] folderAndTask : tasks) {
+            deleteTask(getWebConversation(), getHostName(), getSessionId(),
+                timestamp, folderAndTask);
+        }
     }
 
     /**
@@ -468,8 +458,10 @@ public class TasksTest extends AbstractAJAXTest {
             // TODO This has to be fixed.
             timestamp = new Date();
         }
-        deleteTasks(getWebConversation(), getHostName(), getSessionId(),
-            timestamp, tasks);
+        for (int[] folderAndTask : tasks) {
+            deleteTask(getWebConversation(), getHostName(), getSessionId(),
+                timestamp, folderAndTask);
+        }
     }
 
     public void testUpdates() throws Throwable {
@@ -508,9 +500,10 @@ public class TasksTest extends AbstractAJAXTest {
         // And delete 2
         int[][] deltasks = new int[2][2];
         System.arraycopy(tasks, 8, deltasks, 0, 2);
-        int[] notdeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), timestamp, deltasks);
-        assertEquals("Number of deleted tasks is wrong.", 0, notdeleted.length);
+        for (int[] folderAndTask : deltasks) {
+            deleteTask(getWebConversation(), getHostName(), getSessionId(),
+                timestamp, folderAndTask);
+        }
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
@@ -522,9 +515,10 @@ public class TasksTest extends AbstractAJAXTest {
             array.length() >= tasks.length / 2 + 2);
         // Clean up
         timestamp = response.getTimestamp();
-        notdeleted = deleteTasks(getWebConversation(), getHostName(),
-            getSessionId(), timestamp, tasks);
-        assertEquals("Number of deleted tasks is wrong.", 2, notdeleted.length);
+        for (int[] folderAndTask : tasks) {
+            deleteTask(getWebConversation(), getHostName(), getSessionId(),
+                timestamp, folderAndTask);
+        }
     }
 
     public void testTaskList() throws Throwable {
@@ -550,8 +544,10 @@ public class TasksTest extends AbstractAJAXTest {
             // TODO This has to be fixed.
             timestamp = new Date();
         }
-        deleteTasks(getWebConversation(), getHostName(), getSessionId(),
-            timestamp, tasks);
+        for (int[] folderAndTask : tasks) {
+            deleteTask(getWebConversation(), getHostName(), getSessionId(),
+                timestamp, folderAndTask);
+        }
     }
 
     public void notestConfirmation() throws Throwable {
@@ -600,11 +596,8 @@ public class TasksTest extends AbstractAJAXTest {
             }
         }
 
-        final int[] notDeleted = deleteTasks(getWebConversation(),
-            getHostName(), getSessionId(), lastModified,
-            new int[][] {{ folderId, taskId }});
-        assertEquals("Task can't be deleted.", 0, notDeleted.length);
-
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, new int[] { folderId, taskId });
     }
 
     /**
@@ -728,18 +721,15 @@ public class TasksTest extends AbstractAJAXTest {
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      */
-    public static int[] deleteTasks(final WebConversation conversation,
+    public static void deleteTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
-        final int[][] folderAndTaskIds) throws IOException, SAXException,
+        final int[] folderAndTask) throws IOException, SAXException,
         JSONException {
         LOG.trace("Deleting tasks.");
-        final JSONArray json = new JSONArray();
-        for (int[] folderAndTask : folderAndTaskIds) {
-            final JSONObject json2 = new JSONObject();
-            json2.put(DataFields.ID, folderAndTask[1]);
-            json2.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
-            json.put(json2);
-        }
+        final JSONObject json = new JSONObject();
+        json.put(AJAXServlet.PARAMETER_ID, folderAndTask[1]);
+        json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
+        json.put(AJAXServlet.PARAMETER_TIMESTAMP, lastUpdate.getTime());
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
@@ -756,12 +746,6 @@ public class TasksTest extends AbstractAJAXTest {
             resp.getResponseCode());
         final Response response = Response.parse(resp.getText());
         assertFalse(response.getErrorMessage(), response.hasError());
-        final JSONArray array = (JSONArray) response.getData();
-        final int[] retval = new int[array.length()];
-        for (int i = 0; i < array.length(); i++) {
-            retval[i] = array.getInt(i);
-        }
-        return retval;
     }
 
     public static int countTasks(final WebConversation conversation,
