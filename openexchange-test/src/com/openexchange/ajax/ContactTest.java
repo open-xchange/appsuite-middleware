@@ -266,7 +266,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
+
 	public void testAll() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
@@ -290,12 +290,9 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	public void testDelete() throws Exception {
 		ContactObject contactObj = createContactObject("testDelete");
-		int id1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+		int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
-		final int[][] objectIdAndFolderId = { { id1, contactFolderId }, { id2, contactFolderId }, { 1, contactFolderId } };
-		
-		deleteContact(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteContact(getWebConversation(), id, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGet() throws Exception {
@@ -373,7 +370,6 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
 	}
-
 	
 	public void testSearchLoginUser() throws Exception {
 		ContactObject[] contactArray = searchContact(getWebConversation(), getLogin(), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
@@ -778,23 +774,17 @@ public class ContactTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public static int[] deleteContact(WebConversation webCon, int[][] objectIdAndFolderId, String host, String session) throws Exception {
+	public static void deleteContact(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
 		
-		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(DataFields.ID, id);
+		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int[] i = objectIdAndFolderId[a];
-			JSONObject jObj = new JSONObject();
-			jObj.put(DataFields.ID, i[0]);
-			jObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
-			jsonArray.put(jObj);
-		}
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
 		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
@@ -805,14 +795,6 @@ public class ContactTest extends AbstractAJAXTest {
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
-		JSONArray data = (JSONArray)response.getData();
-		int i[] = new int[data.length()];
-		for (int a = 0; a < i.length; a++) {
-			i[a] = data.getInt(a);
-		}
-		
-		return i;
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, String host, String session) throws Exception {

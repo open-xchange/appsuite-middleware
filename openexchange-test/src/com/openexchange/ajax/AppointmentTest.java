@@ -215,17 +215,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
-		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int id = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		int[] i = deleteAppointment(getWebConversation(), new int[][]{{ objectId, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEquals("check response", 0, i.length);
-		
-		i = deleteAppointment(getWebConversation(), new int[][]{{id1, appointmentFolderId}, {id2, appointmentFolderId}, {objectId, appointmentFolderId}}, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEquals("check response", 1, i.length);
-		assertEquals("check first element in array", objectId, i[0]);
+		deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGet() throws Exception {
@@ -538,23 +530,17 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String session) throws Exception {
+	public static void deleteAppointment(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
 		
-		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(DataFields.ID, id);
+		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int[] i = objectIdAndFolderId[a];
-			JSONObject jObj = new JSONObject();
-			jObj.put(DataFields.ID, i[0]);
-			jObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
-			jsonArray.put(jObj);
-		}
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
 		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
@@ -565,24 +551,19 @@ public class AppointmentTest extends AbstractAJAXTest {
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
-		JSONArray data = (JSONArray)response.getData();
-		int i[] = new int[data.length()];
-		for (int a = 0; a < i.length; a++) {
-			i[a] = data.getInt(a);
-		}
-		
-		return i;
 	}
 	
 	public static void confirmAppointment(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM);
-		parameter.setParameter(DataFields.ID, objectId);
-		parameter.setParameter(AJAXServlet.PARAMETER_CONFIRM, confirm);
 		
-		WebRequest req = new PostMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(DataFields.ID, objectId);
+		jsonObj.put(AJAXServlet.PARAMETER_CONFIRM, confirm);
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());

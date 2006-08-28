@@ -26,8 +26,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	protected WebResponse resp = null;
 	
 	public void testDelete() throws Exception {
-		int id[] = {1};
-		actionDelete(id);
+		actionDelete(1);
 	}
 	
 	public void testUpdates() throws Exception {
@@ -83,32 +82,19 @@ public class ReminderTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 	}
 	
-	protected void actionDelete(int[] id) throws Exception {
+	protected void actionDelete(int id) throws Exception {
 		StringBuffer parameter = new StringBuffer();
 		parameter.append("?" + AJAXServlet.PARAMETER_SESSION + "=" + getSessionId());
 		parameter.append("&" + AJAXServlet.PARAMETER_ACTION + "=" + AJAXServlet.ACTION_DELETE);
-		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date(0).getTime());
+		parameter.append("&" + AJAXServlet.PARAMETER_TIMESTAMP + "=" + new Date().getTime());
 		
-		JSONArray jsonArray = new JSONArray();
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(DataFields.ID, id);
 		
-		for (int a = 0; a < id.length; a++) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put(DataFields.ID, id[a]);
-			jsonArray.put(jsonObj);
-		}
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
 		req = new PutMethodWebRequest(PROTOCOL + getHostName() + REMINDER_URL + parameter.toString(), bais, "text/javascript");
 		resp = getWebConversation().getResponse(req);
 		JSONObject jsonobject = new JSONObject(resp.getText());
-		
-		if (jsonobject.has(jsonTagData)) {
-			JSONArray data = jsonobject.getJSONArray(jsonTagData);
-			assertTrue("array length is 1", data.length() == 1);
-			assertEquals("first entry in array is 1", 1, data.getInt(0));
-		} else {
-			fail("no data in JSON object!");
-		}
 		
 		if (jsonobject.has("error")) {
 			fail("server error: " + jsonobject.getString("error"));
