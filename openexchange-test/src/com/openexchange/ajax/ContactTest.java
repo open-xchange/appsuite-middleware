@@ -442,6 +442,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
 		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
+		assertEqualsAndNotNull("image mimetype is not equals", contactObj1.getImageContentType(), contactObj2.getImageContentType());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
@@ -562,6 +563,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
 		contactObj.setImage1(BASE64String.getBytes());
+		contactObj.setImageContentType("text/plain");
 		contactObj.setManagerName("manager name");
 		contactObj.setMaritalStatus("marital status");
 		contactObj.setMiddleName("middle name");
@@ -742,7 +744,6 @@ public class ContactTest extends AbstractAJAXTest {
 		if (contactObj.containsImage1()) {
 			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 			postReq.setMimeEncoded(true);
-			
 			postReq.setParameter("json", new String(baos.toByteArray()));
 			
 			File f = File.createTempFile("open-xchange_image", ".jpg");
