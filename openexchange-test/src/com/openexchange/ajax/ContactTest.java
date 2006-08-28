@@ -442,7 +442,6 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
 		assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
-		assertEqualsAndNotNull("image mimetype is not equals", contactObj1.getImageContentType(), contactObj2.getImageContentType());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
