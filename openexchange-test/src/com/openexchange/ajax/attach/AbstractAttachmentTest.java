@@ -93,7 +93,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		}
 		
 		List<AttachmentMetadata> copy = new ArrayList<AttachmentMetadata>(clean);
-		tearDown();
+		removeAttachments();
 		
 		res = updates(sessionId,folderId,attachedId,moduleId, timestamp, new int[]{AttachmentField.ID, AttachmentField.FILENAME}, AttachmentField.CREATION_DATE, "ASC");
 		
