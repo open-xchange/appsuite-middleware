@@ -173,4 +173,45 @@ public class InfostoreWriterTest extends TestCase {
 		assertEquals(dm.getTitle(), o.getString("title"));
 		assertEquals(dm.getURL(), o.getString("url"));
 	}
+	
+	public void testLocked() throws Exception{
+		DocumentMetadataImpl dm = new DocumentMetadataImpl();
+		dm.setFolderId(22);
+		dm.setModifiedBy(1);
+		
+		dm = new DocumentMetadataImpl(dm);
+		dm.setCreationDate(now);
+		dm.setCreatedBy(1);
+		dm.setDescription("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+		dm.setLastModified(now);
+		dm.setTitle("Google");
+		dm.setURL("http://www.google.de");
+		dm.setVersion(0);
+		dm.setId(1);
+		dm.setLockedUntil(new Date(System.currentTimeMillis()-1000));
+		
+		StringWriter result = new StringWriter();
+		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		
+		w.write(dm);
+		
+		JSONObject o = new JSONObject(result.toString());
+		
+		assertEquals(0,o.getLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+		
+		long later = System.currentTimeMillis()+1000;
+		
+		dm.setLockedUntil(new Date(later));
+		
+		result = new StringWriter();
+		w = new InfostoreWriter(new PrintWriter(result));
+		
+		w.write(dm);
+		
+		o = new JSONObject(result.toString());
+		
+		assertEquals(later,o.getLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+		
+	}
+	
 }
