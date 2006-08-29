@@ -392,6 +392,8 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		HttpClient client = new HttpClient();
 		GetMethod get = new GetMethod(url.toString());
 		client.executeMethod(get);
+		if(200 != get.getStatusCode())
+			throw new HttpException("Got status: "+get.getStatusCode());
 		return get.getResponseBodyAsStream();
 	}
 	
@@ -434,6 +436,30 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		}
 		
 		return (Integer)putT(url.toString(),obj.toString()).getData();
+	}
+	
+	public Response lock(String sessionId, int id, long timeDiff) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"lock");
+		url.append("&id=");
+		url.append(id);
+		if(timeDiff > 0) {
+			url.append("&diff=");
+			url.append(timeDiff);
+		}
+		
+		return gT(url.toString());
+	}
+	
+	public Response lock(String sessionId, int id) throws MalformedURLException, JSONException, IOException, SAXException {
+		return lock(sessionId,id,-1);
+	}
+	
+	public Response unlock(String sessionId, int id ) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"unlock");
+		url.append("&id=");
+		url.append(id);
+		
+		return gT(url.toString());
 	}
 	
 	protected StringBuffer getUrl(String sessionId, String action) {
