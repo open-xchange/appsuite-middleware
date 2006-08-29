@@ -291,6 +291,8 @@ public class FolderTest extends AbstractAJAXTest {
 		JSONObject respObj = new JSONObject(resp.getText());
 		if (printOutput)
 			System.out.println(respObj.toString());
+		if (respObj.has("error") && respObj.getString("error").toLowerCase().startsWith("no oxfolder with id"))
+			throw new JSONException("JSON Response object contains an error: " + respObj.getString("error"));
 		JSONArray arr = respObj.getJSONArray("data");
 		int[] retval = new int[arr.length()];
 		for (int i = 0; i < arr.length(); i++) {
@@ -418,6 +420,22 @@ public class FolderTest extends AbstractAJAXTest {
 				i++;
 			}
 			printTestEnd("testGetRootFolders");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testDeleteFolder() {
+		try {
+			printTestStart("testDeleteFolder");
+			int fuid = insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "DeleteMeImmediately", "calendar", FolderObject.PUBLIC, null, true);
+			assertFalse(fuid == -1);
+			Calendar cal = GregorianCalendar.getInstance();
+			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+fuid, cal, true);
+			int[] failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
+			assertTrue((failedIds == null || failedIds.length == 0));
+			printTestEnd("testDeleteFolder");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -645,7 +663,7 @@ public class FolderTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public void notestMoveFolder() {
+	public void testMoveFolder() {
 		int parent01 = -1;
 		int parent02 = -1;
 		int moveFuid = -1;
@@ -666,7 +684,9 @@ public class FolderTest extends AbstractAJAXTest {
 			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+moveFuid, cal, true);
 			moved = moveFolder(getWebConversation(), getHostName(), getSessionId(), ""+moveFuid, ""+parent02, cal.getTimeInMillis(), true);
 			assertTrue(moved);
-			getFolder(getWebConversation(), getHostName(), getSessionId(), ""+moveFuid, cal, true);
+			FolderObject movedFolderObj = null;
+			movedFolderObj = getFolder(getWebConversation(), getHostName(), getSessionId(), ""+moveFuid, cal, true);
+			assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
 			failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { parent01, parent02, moveFuid }, cal.getTimeInMillis(), true);
 			assertFalse((failedIds != null && failedIds.length > 0));
 			printTestEnd("testMoveFolder");
