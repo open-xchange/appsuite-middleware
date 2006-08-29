@@ -81,7 +81,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 	}
 
 	public void doAttach(int folderId, int attachedId, int moduleId) throws Exception{
-		AttachmentMetadata attachment = getAttachment(testFile,folderId, attachedId,moduleId,false);
+		AttachmentMetadata attachment = getAttachment(testFile,folderId, attachedId,moduleId,true);
 		
 		AttachmentMetadata copy = new AttachmentImpl(attachment);
 		
