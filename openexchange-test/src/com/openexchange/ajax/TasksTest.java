@@ -717,7 +717,6 @@ public class TasksTest extends AbstractAJAXTest {
         final JSONObject json = new JSONObject();
         json.put(AJAXServlet.PARAMETER_ID, folderAndTask[1]);
         json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
-        json.put(AJAXServlet.PARAMETER_TIMESTAMP, lastUpdate.getTime());
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
