@@ -72,15 +72,6 @@ public class LockTest extends InfostoreAJAXTest {
 		// Object may not be modified
 		res = update(sessionId2,clean.get(0),System.currentTimeMillis(), m("title" , "Hallo"));
 		assertTrue(res.hasError());
-	
-		// Object may not be downloaded
-		try {
-			InputStream is = document(sessionId2,clean.get(0));
-			is.close();
-			//fail("Locked document was downloadeable");
-		} catch(HttpException x) {
-			assertTrue(true);
-		}
 		
 		
 		// Object may not be removed
@@ -112,28 +103,6 @@ public class LockTest extends InfostoreAJAXTest {
 		JSONObject o = (JSONObject) res.getData();
 		
 		assertEquals("Hallo",o.get("title"));
-		
-		// Lock owner may download
-
-		InputStream is = null;
-		InputStream is2 = null;
-		try {
-			is = new FileInputStream(testFile);
-			is2 = document(sessionId,clean.get(0),1);
-			
-			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
-			//String line = null;
-			//while((line=r.readLine())!=null){
-			//	System.out.println(line);
-			//}
-			
-			assertSameContent(is,is2);
-		} finally {
-			if(is!=null)
-				is.close();
-			if(is2!=null)
-				is2.close();
-		}
 		
 		//Lock owner may detach
 		notDetached = detach(sessionId,System.currentTimeMillis(),clean.get(0),new int[]{4});
