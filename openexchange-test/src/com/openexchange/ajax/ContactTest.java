@@ -647,6 +647,7 @@ public class ContactTest extends AbstractAJAXTest {
 		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject(link1.getDisplayName(), link1.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		entry[1].setEntryID(link1.getObjectID());
 		
 		contactObj.setDistributionList(entry);
 		
