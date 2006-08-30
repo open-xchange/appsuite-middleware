@@ -276,6 +276,7 @@ public class ContactTest extends AbstractWebdavTest {
 		contactObj.setFaxHome("fax home");
 		contactObj.setFaxOther("fax other");
 		contactObj.setImage1("image1".getBytes());
+		contactObj.setImageContentType("image/jpeg");
 		contactObj.setInfo("info");
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
@@ -363,6 +364,7 @@ public class ContactTest extends AbstractWebdavTest {
 		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
 		entry[1] = new DistributionListEntryObject(link1.getDisplayName(), link1.getEmail1(), DistributionListEntryObject.EMAILFIELD1);
+		entry[1].setEntryID(link1.getObjectID());
 		
 		contactObj.setDistributionList(entry);
 		
