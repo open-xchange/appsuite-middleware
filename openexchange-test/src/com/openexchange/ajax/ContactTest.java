@@ -145,7 +145,8 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.USERFIELD17,
 		ContactObject.USERFIELD18,
 		ContactObject.USERFIELD19,
-		ContactObject.USERFIELD20
+		ContactObject.USERFIELD20,
+		ContactObject.DEFAULT_ADDRESS
 	};
 	
 	private static final String CONTACT_URL = "/ajax/contacts";
@@ -506,6 +507,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("userfield18 is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
 		assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
 		assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
+		assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
 		
 		assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
@@ -624,6 +626,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setUserField18("userfield18");
 		contactObj.setUserField19("userfield19");
 		contactObj.setUserField20("userfield20");
+		contactObj.setDefaultAddress(1);
 		
 		contactObj.setParentFolderID(contactFolderId);
 		
