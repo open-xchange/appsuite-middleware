@@ -1108,6 +1108,9 @@ public class ContactTest extends AbstractAJAXTest {
 			case ContactObject.DEPARTMENT:
 				contactObj.setDepartment(jsonArray.getString(pos));
 				break;
+			case ContactObject.DEFAULT_ADDRESS:
+				contactObj.setDefaultAddress(jsonArray.getInt(pos));
+				break;
 			case ContactObject.DISPLAY_NAME:
 				contactObj.setDisplayName(jsonArray.getString(pos));
 				break;
