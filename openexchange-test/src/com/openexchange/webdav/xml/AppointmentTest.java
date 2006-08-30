@@ -234,8 +234,8 @@ public class AppointmentTest extends AbstractWebdavTest {
 		AppointmentObject loadAppointment = appointmentArray[0];
 		
 		appointmentObj.setObjectID(objectId);
-		appointmentObj.setStartDate(startTime);
-		appointmentObj.setEndDate(endTime);
+		// appointmentObj.setStartDate(startTime);
+		// appointmentObj.setEndDate(endTime);
 		compareObject(appointmentObj, loadAppointment);
 	}
 	
