@@ -182,6 +182,10 @@ public class ContactParser extends CommonParser {
 		if (hasElement(eProp.getChild(OXContact.IMAGE1, XmlServlet.NS))) {
 			contactObj.setImage1(getValue(eProp.getChild(OXContact.IMAGE1, XmlServlet.NS)).getBytes());
 		}
+
+		if (hasElement(eProp.getChild(OXContact.IMAGE_CONTENT_TYPE, XmlServlet.NS))) {
+			contactObj.setImageContentType(getValue(eProp.getChild(OXContact.IMAGE_CONTENT_TYPE, XmlServlet.NS)));
+		}
 		
 		if (hasElement(eProp.getChild(OXContact.NOTE, XmlServlet.NS))) {
 			contactObj.setNote(getValue(eProp.getChild(OXContact.NOTE, XmlServlet.NS)));
@@ -441,6 +445,10 @@ public class ContactParser extends CommonParser {
 		
 		if (hasElement(eProp.getChild(OXContact.USERFIELD20, XmlServlet.NS))) {
 			contactObj.setUserField20(getValue(eProp.getChild(OXContact.USERFIELD20, XmlServlet.NS)));
+		}
+
+		if (hasElement(eProp.getChild(OXContact.DEFAULTADDRESS, XmlServlet.NS))) {
+			contactObj.setDefaultAddress(getValueAsInt(eProp.getChild(OXContact.DEFAULTADDRESS, XmlServlet.NS)));
 		}
 		
 		if (hasElement(eProp.getChild(OXContact.DISTRIBUTIONLIST, XmlServlet.NS))) {
