@@ -58,7 +58,6 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -539,7 +538,7 @@ public class TasksTest extends AbstractAJAXTest {
         }
     }
 
-    public void notestConfirmation() throws Throwable {
+    public void testConfirmation() throws Throwable {
         final int folderId = getPrivateTaskFolder();
 
         final Task task = new Task();
@@ -550,6 +549,8 @@ public class TasksTest extends AbstractAJAXTest {
             getPassword());
         final String sessionId2 = tmp[0];
         final int userId2 = Integer.parseInt(tmp[1]);
+        final int folderId2 = getPrivateTaskFolder(getWebConversation(),
+            getHostName(), sessionId2);
 
         final List<UserParticipant> participants =
             new ArrayList<UserParticipant>();
@@ -563,27 +564,25 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), task);
         LOG.trace("Created delegated task for confirmation: " + taskId);
 
-        confirmTask(getWebConversation(), getHostName(), sessionId2, taskId,
-            CalendarObject.ACCEPT, "Testconfirmation.");
+        confirmTask(getWebConversation(), getHostName(), sessionId2, folderId2,
+            taskId, CalendarObject.ACCEPT, "Testconfirmation.");
         LOG.trace("Confirmed task.");
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Date lastModified = response.getTimestamp();
-        final Task reload = (Task) response.getData();
-        for (UserParticipant p1 : reload.getUsers()) {
-            boolean found = false;
-            for (UserParticipant p2 : participants) {
-                if (p1.getIdentifier() == p2.getIdentifier()) {
-                    found = true;
-                    assertTrue("Can't read accept of participant.",
-                        p1.getConfirm() == CalendarObject.ACCEPT);
-                }
-            }
-            if (!found) {
-                fail("Storing participant in delegated task failed.");
+        final JSONObject reload = response.getResponseData();
+        final JSONArray users = reload.getJSONArray("users");
+        boolean confirmed = false;
+        for (int i = 0; i < users.length(); i++) {
+            final JSONObject user = users.getJSONObject(i);
+            final int confirm = user.getInt("confirm");
+            final int userId = user.getInt("id");
+            if (userId2 == userId && CalendarObject.ACCEPT == confirm) {
+                confirmed = true;
             }
         }
+        assertTrue("Can't find confirmation.", confirmed);
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
             lastModified, new int[] { folderId, taskId });
@@ -866,18 +865,23 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     public static void confirmTask(final WebConversation conversation,
-        final String hostName, final String sessionId, final int taskId,
-        final int confirm, final String confirmMessage) throws IOException,
-        SAXException, JSONException {
-        final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostName
-            + TASKS_URL);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION,
+        final String hostName, final String sessionId, final int folderId,
+        final int taskId, final int confirm, final String confirmMessage)
+        throws IOException, SAXException, JSONException {
+        final JSONObject json = new JSONObject();
+        json.put(TaskFields.CONFIRM, confirm);
+        json.put(TaskFields.FOLDER_ID, folderId);
+        json.put(TaskFields.ID, taskId);
+        json.put(TaskFields.CONFIRM_MESSAGE, confirmMessage);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(json
+            .toString().getBytes("UTF-8"));
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_CONFIRM);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
-        req.setParameter(AJAXServlet.PARAMETER_CONFIRM,
-            String.valueOf(confirm));
-        req.setParameter(AJAXServlet.PARAMETER_CONFIRM_MESSAGE, confirmMessage);
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
+            + TASKS_URL + parameter.getURLParameters(), bais,
+            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
