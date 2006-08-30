@@ -214,7 +214,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		Date modified = new Date();
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testGetWithAllFields");
+		appointmentObj.setTitle("testListWithAllFields");
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
 		appointmentObj.setLocation("Location");
