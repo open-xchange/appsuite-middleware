@@ -296,6 +296,8 @@ public class LinkTest extends AbstractAJAXTest {
 	}
 	
 	public void testWrongDelete() throws Exception {
+	
+		int[] go = insertLink(getWebConversation(),getHostName(),getSessionId());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
@@ -307,9 +309,9 @@ public class LinkTest extends AbstractAJAXTest {
 		JSONArray jo1 = new JSONArray();
 		JSONArray jo2 = new JSONArray();
 		
-		jo2.put(0,2);
+		jo2.put(0,go[2]);
 		jo2.put(1,com.openexchange.groupware.Types.APPOINTMENT);
-		jo2.put(2,2);
+		jo2.put(2,go[3]);
 
 		jo1.put(0,jo2);
 
@@ -323,8 +325,8 @@ public class LinkTest extends AbstractAJAXTest {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
-		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, 1);
-		parameter.setParameter(AJAXServlet.PARAMETER_ID, 1);
+		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, go[1]);
+		parameter.setParameter(AJAXServlet.PARAMETER_ID, go[0]);
 		parameter.setParameter("module", com.openexchange.groupware.Types.CONTACT);
 		
 		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
@@ -334,10 +336,49 @@ public class LinkTest extends AbstractAJAXTest {
 
 		final Response response = Response.parse(resp.getText());
 		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
 		JSONArray data = (JSONArray)response.getData();
 		JSONArray jo = data.getJSONArray(0);		
 		
-		if (jo.getInt(0) != 2 || jo.getInt(1) != 1 || jo.getInt(2) !=2){
+		if (jo.getInt(0) != 0 && jo.getInt(1) != 0 && jo.getInt(2) != 0){
+			fail("json error: DATA MISSMATCH");
+		}
+		
+		//assertEquals(200, resp.getResponseCode());
+		
+		baos = new ByteArrayOutputStream();
+		pw = new PrintWriter(baos);
+		
+		jsonwriter = new JSONWriter(pw);
+		jsonwriter.object();
+		jsonwriter.key("data").value(jo1);
+		jsonwriter.endObject();
+		
+		pw.flush();
+
+		bais = new ByteArrayInputStream(baos.toByteArray());
+		
+		final URLParameter parameter2 = new URLParameter();
+		parameter2.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter2.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
+		parameter2.setParameter(AJAXServlet.PARAMETER_FOLDERID, go[1]);
+		parameter2.setParameter(AJAXServlet.PARAMETER_ID, go[0]);
+		parameter2.setParameter("module", com.openexchange.groupware.Types.CONTACT);
+		
+		req = new PutMethodWebRequest(PROTOCOL + getHostName() + LINK_URL + parameter2.getURLParameters(), bais, "text/javascript");
+		resp = getWebConversation().getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+
+		final Response response2 = Response.parse(resp.getText());
+		
+		data = (JSONArray)response2.getData();
+		jo = data.getJSONArray(0);		
+		
+		if (jo.getInt(0) != go[2] || jo.getInt(1) != com.openexchange.groupware.Types.APPOINTMENT || jo.getInt(2) != go[3]){
 			fail("json error: DATA MISSMATCH");
 		}
 		
