@@ -7,6 +7,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
@@ -84,7 +85,9 @@ public class ResourceTest extends AbstractAJAXTest {
 		
 		JSONArray requestArray = new JSONArray();
 		for (int a = 0; a < id.length; a++) {
-			requestArray.put(id[a]);
+			JSONObject jData = new JSONObject();
+			jData.put(DataFields.ID, id[a]);
+			requestArray.put(jData);
 		}
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
