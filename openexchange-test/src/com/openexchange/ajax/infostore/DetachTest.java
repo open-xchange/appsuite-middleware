@@ -69,7 +69,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		
 		assertEquals("",obj.get("filename"));
 		assertEquals("",obj.get("file_mimetype"));
-		assertEquals(-1, obj.get("file_size"));
+		assertEquals(0, obj.get("file_size"));
 	}
 	
 	public void testSpotted() throws Exception {
