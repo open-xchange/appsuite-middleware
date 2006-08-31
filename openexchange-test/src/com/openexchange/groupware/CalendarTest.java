@@ -2,16 +2,22 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.RdbContextWrapper;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.api.OXCalendar;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.calendar.RecurringResult;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
 import java.util.Date;
@@ -73,6 +79,22 @@ public class CalendarTest extends TestCase {
         cdao.setInterval(1);
         assertTrue(cdao.calculateRecurrence());
     }
+    
+    public void testBasicRecurringWithoutUntil() throws Throwable {
+        CalendarDataObject cdao = new CalendarDataObject();      
+        assertFalse(cdao.calculateRecurrence());
+        cdao.setStartDate(new Date(0));
+        cdao.setEndDate(new Date(0));        
+        cdao.setTitle("Basic Recurring Test");
+        cdao.setRecurrenceID(1);
+        assertFalse(cdao.calculateRecurrence());
+        cdao.setRecurrenceType(OXCalendar.DAILY);        
+        assertFalse(cdao.calculateRecurrence());
+        cdao.setRecurrenceCalculator(1);        
+        assertFalse(cdao.calculateRecurrence());
+        cdao.setInterval(1);
+        assertTrue(cdao.calculateRecurrence());
+    }    
     
     
     public void testDailyRecurring() throws Throwable {
@@ -207,6 +229,50 @@ public class CalendarTest extends TestCase {
         pass_one_end = System.currentTimeMillis();
         System.out.println("Weekly runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");          
     }
+    
+    public void testSaveRecurring() throws Throwable {
+        int userid = 11; // BISHOPH
+        int contextid = 1;
+        
+        Context context = new RdbContextWrapper(contextid);
+        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        long s = System.currentTimeMillis();
+        long mod = s%3600000;
+        s = s - mod;
+        long e = s + 3600000;
+        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
+        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        u = u - mod;
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("testSaveRecurring");
+        cdao.setRecurrenceType(OXCalendar.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        cdao.setRecurrenceID(1);
+        
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        
+        SessionObject so = new SessionObject("MySessionid");
+        cdao.setContext(context);
+        UserStorage us = UserStorage.getInstance(context);
+        int groups[] = { 1 };
+        UserConfiguration uc = new UserConfiguration(1, 11, groups, context);
+        uc = UserConfiguration.loadUserConfiguration(11, groups, context);
+        User uo = us.getUser(userid);
+        so.setContext(context);
+        so.setUserObject(uo);
+        so.setUserConfiguration(uc);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        
+        
+        
+    }    
     
     
 }
