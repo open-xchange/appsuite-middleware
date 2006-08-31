@@ -146,9 +146,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
-        task.setTargetDuration(1.0f);
-        task.setActualDuration(1.0f);
-        task.setDurationType(CalendarObject.DAYS);
+        task.setTargetDuration(1440);
+        task.setActualDuration(1440);
         task.setTargetCosts(1.0f);
         task.setActualCosts(1.0f);
         task.setCurrency("\u20ac");
@@ -204,8 +203,6 @@ public class TasksTest extends AbstractAJAXTest {
      */
     public void testFloats() throws Throwable {
         final Task task = new Task();
-        task.setActualDuration(1f);
-        task.setTargetDuration(1f);
         task.setActualCosts(1f);
         task.setTargetCosts(1f);
 
@@ -251,9 +248,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
-        task.setTargetDuration(1.0f);
-        task.setActualDuration(1.0f);
-        task.setDurationType(CalendarObject.DAYS);
+        task.setTargetDuration(1440);
+        task.setActualDuration(1440);
         task.setTargetCosts(1.0f);
         task.setActualCosts(1.0f);
         task.setCurrency("\u20ac");

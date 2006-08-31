@@ -216,17 +216,16 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setNote("note");
 		taskObj.setCategories("testcat1,testcat2,testcat3");
 		taskObj.setActualCosts(1.5F);
-		taskObj.setActualDuration(3.5F);
+		taskObj.setActualDuration(210);
 		taskObj.setBillingInformation("billing information");
 		taskObj.setCompanies("companies");
 		taskObj.setCurrency("currency");
 		taskObj.setDateCompleted(dateCompleted);
-		taskObj.setDurationType(Task.DURATION_HOURS);
 		taskObj.setPercentComplete(50);
 		taskObj.setPriority(Task.HIGH);
 		taskObj.setStatus(Task.IN_PROGRESS);
 		taskObj.setTargetCosts(5.5F);
-		taskObj.setTargetDuration(7.5F);
+		taskObj.setTargetDuration(450);
 		taskObj.setTripMeter("trip meter");
 		
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
@@ -258,17 +257,16 @@ public class TaskTest extends AbstractWebdavTest {
 		taskObj.setNote("note");
 		taskObj.setCategories("testcat1,testcat2,testcat3");
 		taskObj.setActualCosts(1.5F);
-		taskObj.setActualDuration(3.5F);
+		taskObj.setActualDuration(210);
 		taskObj.setBillingInformation("billing information");
 		taskObj.setCompanies("companies");
 		taskObj.setCurrency("currency");
 		taskObj.setDateCompleted(dateCompleted);
-		taskObj.setDurationType(Task.DURATION_HOURS);
 		taskObj.setPercentComplete(50);
 		taskObj.setPriority(Task.HIGH);
 		taskObj.setStatus(Task.IN_PROGRESS);
 		taskObj.setTargetCosts(5.5F);
-		taskObj.setTargetDuration(7.5F);
+		taskObj.setTargetDuration(450);
 		taskObj.setTripMeter("trip meter");
 		taskObj.setParentFolderID(taskFolderId);
 		
