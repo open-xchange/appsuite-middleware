@@ -97,6 +97,7 @@
 		<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.ajax.MultipleTest" todir="${test.xml.dir}" />
 		<!-- AJAX Attachment Interface -->
 		<test name="com.openexchange.ajax.attach.SimpleAttachmentTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.ajax.attach.TaskAttachmentTest" todir="${test.xml.dir}" />
