@@ -28,7 +28,7 @@ public class LockTest extends InfostoreAJAXTest {
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
 			myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, null, true);
 		FolderTest.updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
-		
+		//folderId=229;
 		Map<String,String> create = m(
 				"folder_id" 		,	((Integer)folderId).toString(),
 				"title"  		,  	"test knowledge",
