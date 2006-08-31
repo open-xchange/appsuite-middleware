@@ -20,7 +20,8 @@ public class AuthenticationSupportTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        Context context = cs.getContext(cs.getContextId("defaultcontext"));
         as = Factory.newAuthenticationSupport(context);
     }
 

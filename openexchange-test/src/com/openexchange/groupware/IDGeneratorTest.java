@@ -34,7 +34,8 @@ public class IDGeneratorTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         Init.initDB();
-        context = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        context = cs.getContext(cs.getContextId("defaultcontext"));
     }
 
     /*

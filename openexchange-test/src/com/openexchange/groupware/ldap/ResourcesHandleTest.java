@@ -22,7 +22,8 @@ public class ResourcesHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        Context context = cs.getContext(cs.getContextId("defaultcontext"));
         rh = Factory.newResourcesHandle(context, null);
     }
 

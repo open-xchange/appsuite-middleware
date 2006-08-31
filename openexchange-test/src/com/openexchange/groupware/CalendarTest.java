@@ -6,7 +6,7 @@ import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.RdbContextWrapper;
+import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -40,7 +40,7 @@ public class CalendarTest extends TestCase {
     }
     
     public void testPool() throws Throwable {
-        Context context = new RdbContextWrapper(1);
+        Context context = new ContextImpl(1);
         int testsize = DBPool.getReadSize(context);
         Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
@@ -171,7 +171,7 @@ public class CalendarTest extends TestCase {
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(new RdbContextWrapper(1));
+        cdao.setContext(new ContextImpl(1));
         cdao.setObjectID(1);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
@@ -180,7 +180,8 @@ public class CalendarTest extends TestCase {
         CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
         
-        Context context = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        Context context = cs.getContext(cs.getContextId("defaultcontext"));
         
         readcon = DBPool.pickupWriteable(context);
         assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, readcon, -1));
@@ -234,7 +235,7 @@ public class CalendarTest extends TestCase {
         int userid = 11; // BISHOPH
         int contextid = 1;
         
-        Context context = new RdbContextWrapper(contextid);
+        Context context = new ContextImpl(contextid);
         
         
         CalendarDataObject cdao = new CalendarDataObject();

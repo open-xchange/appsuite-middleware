@@ -31,7 +31,8 @@ public class UserGroupHandleTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        ctx = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        ctx = cs.getContext(cs.getContextId("defaultcontext"));
         ugh = Factory.newUserGroupHandle(ctx, null);
     }
 

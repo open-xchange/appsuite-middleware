@@ -19,7 +19,8 @@ public class MailSupportTest extends TestCase {
                 throw new Exception("Problem reading properties.");
             }
         }
-        Context context = ContextStorage.getInstance().getContext("defaultcontext");
+        ContextStorage cs = ContextStorage.getInstance();
+        Context context = cs.getContext(cs.getContextId("defaultcontext"));
         ms = Factory.newMailSupport(context, null);
     }
 
