@@ -88,10 +88,6 @@ public class TaskParser extends CalendarParser {
 			taskObj.setActualDuration(getValueAsLong(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS)));
 		} 
 
-		if (hasElement(eProp.getChild(OXTask.DURATION_TYPE, XmlServlet.NS))) {
-			taskObj.setDurationType(getValueAsInt(eProp.getChild(OXTask.DURATION_TYPE, XmlServlet.NS)));
-		} 
-		
 		if (hasElement(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS))) {
 			taskObj.setActualCosts(getValueAsFloat(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS)));
 		} 
