@@ -47,6 +47,15 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 	public void testList() throws Exception {
 		doList();
 	}
+	
+	public void testAddMany() throws Exception {
+		for(int i = 1; i < 1000000; i++) {
+			if(i % 1000 == 0)
+				System.out.println(i);
+			upload();
+		}
+		clean.clear();
+	}
 
 
 }
