@@ -4,6 +4,7 @@ package com.openexchange.ajax;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.URLParameter;
@@ -15,9 +16,11 @@ import org.json.JSONObject;
 
 public class MultipleTest extends AbstractAJAXTest {
 	
-	private static final String MULTIPLE_URL = "/ajax/resource";
+	private static final String MULTIPLE_URL = "/ajax/multiple";
 	
 	public void testMultiple() throws Exception {
+		int folderId = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId()).getObjectID();
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		
@@ -28,12 +31,13 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testMultiple1");
+		contactObj.setParentFolderID(folderId);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		ContactWriter contactWriter = new ContactWriter(pw);
 		contactWriter.writeContact(contactObj);
-		pw.flush();		
+		pw.flush();
 		
 		String data = new String(baos.toByteArray());
 		jsonObj.put("data", new JSONObject(data));
@@ -45,12 +49,13 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		contactObj = new ContactObject();
 		contactObj.setSurName("testMultiple2");
+		contactObj.setParentFolderID(folderId);
 		
 		baos = new ByteArrayOutputStream();
 		pw = new PrintWriter(baos);
 		contactWriter = new ContactWriter(pw);
 		contactWriter.writeContact(contactObj);
-		pw.flush();		
+		pw.flush();
 		
 		data = new String(baos.toByteArray());
 		jsonObj.put("data", new JSONObject(data));
@@ -61,6 +66,14 @@ public class MultipleTest extends AbstractAJAXTest {
 		WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
+		jsonArray = new JSONArray(resp.getText());
+		for (int a = 0; a < jsonArray.length(); a++) {
+			Response response = Response.parse(jsonArray.getJSONObject(a).toString());
+			
+			if (response.hasError()) {
+				fail("json error: " + response.getErrorMessage());
+			}
+		}
 	}
 	
 	/*
