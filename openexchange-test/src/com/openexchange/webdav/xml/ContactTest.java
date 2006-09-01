@@ -514,9 +514,6 @@ public class ContactTest extends AbstractWebdavTest {
 			
 			if (response[a].hasError()) {
 				idList.add(new Integer(contactObj.getObjectID()));
-			} else {
-				assertNotNull("last modified is null", contactObj.getLastModified());
-				assertTrue("last modified is not > 0", contactObj.getLastModified().getTime() > 0);
 			}
 			
 			assertEquals("check response status", 200, response[a].getStatus());

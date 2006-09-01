@@ -415,9 +415,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 			
 			if (response[a].hasError()) {
 				idList.add(new Integer(appointmentObj.getObjectID()));
-			} else {
-				assertNotNull("last modified is null", appointmentObj.getLastModified());
-				assertTrue("last modified is not > 0", appointmentObj.getLastModified().getTime() > 0);
 			}
 			
 			assertEquals("check response status", 200, response[a].getStatus());

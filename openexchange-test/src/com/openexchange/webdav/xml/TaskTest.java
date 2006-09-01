@@ -307,7 +307,6 @@ public class TaskTest extends AbstractWebdavTest {
 		assertEqualsAndNotNull("companies", taskObj1.getCompanies(), taskObj2.getCompanies());
 		assertEqualsAndNotNull("currency", taskObj1.getCurrency(), taskObj2.getCurrency());
 		assertEqualsAndNotNull("date completed", taskObj1.getDateCompleted(), taskObj2.getDateCompleted());
-		assertEqualsAndNotNull("duration type", taskObj1.getDurationType(), taskObj2.getDurationType());
 		assertEqualsAndNotNull("percent complete", taskObj1.getPercentComplete(), taskObj2.getPercentComplete());
 		assertEqualsAndNotNull("priority", taskObj1.getPriority(), taskObj2.getPriority());
 		assertEqualsAndNotNull("status", taskObj1.getStatus(), taskObj2.getStatus());
@@ -471,9 +470,6 @@ public class TaskTest extends AbstractWebdavTest {
 			
 			if (response[a].hasError()) {
 				idList.add(new Integer(taskObj.getObjectID()));
-			} else {
-				assertNotNull("last modified is null", taskObj.getLastModified());
-				assertTrue("last modified is not > 0", taskObj.getLastModified().getTime() > 0);
 			}
 			
 			assertEquals("check response status", 200, response[a].getStatus());
