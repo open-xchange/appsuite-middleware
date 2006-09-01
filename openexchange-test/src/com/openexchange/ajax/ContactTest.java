@@ -825,7 +825,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
 	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws Exception {
@@ -853,7 +853,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int[][] objectIdAndFolderId, int[] cols, String host, String session) throws Exception {
@@ -885,7 +885,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
 	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
@@ -1009,7 +1009,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactArray;
 	}
 	
-	private static ContactObject[] jsonArray2AppointmentArray(JSONArray jsonArray, int[] cols) throws Exception {
+	private static ContactObject[] jsonArray2ContactArray(JSONArray jsonArray, int[] cols) throws Exception {
 		ContactObject[] contactArray = new ContactObject[jsonArray.length()];
 		
 		for (int a = 0; a < contactArray.length; a++) {
