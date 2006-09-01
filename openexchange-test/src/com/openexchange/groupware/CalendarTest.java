@@ -7,6 +7,7 @@ import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.contexts.RdbContextWrapper;
 import com.openexchange.groupware.ldap.User;
