@@ -435,6 +435,19 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertTrue("response object is not an array", isArray);
 	}
 	
+	public void _notestSimpleSearch() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testSimpleSearch");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), getLogin(), appointmentFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		assertTrue("appointment array size is 0", appointmentArray.length > 0);
+	}
+	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
 		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
@@ -716,6 +729,34 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertEquals(200, resp.getResponseCode());
 		
 		return jsonArray2AppointmentArray((JSONArray)response.getData());
+	}
+	
+	public static AppointmentObject[] searchAppointment(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws Exception {
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+		
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("pattern", searchpattern);
+		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols);
 	}
 	
 	private static AppointmentObject[] jsonArray2AppointmentArray(JSONArray jsonArray) throws Exception {
