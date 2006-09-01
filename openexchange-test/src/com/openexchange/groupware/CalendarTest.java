@@ -5,9 +5,10 @@ package com.openexchange.groupware;
 import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.RdbContextWrapper;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
@@ -20,8 +21,10 @@ import com.openexchange.tools.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import junit.framework.TestCase;
 
 public class CalendarTest extends TestCase {
@@ -30,17 +33,34 @@ public class CalendarTest extends TestCase {
     private final static int TEST_PASS = 9999;
     private final static int TEST_PASS_HOT_SPOT = 99999;
     
+    private static int userid = 11; // bishoph
+    private final static int contextid = 1;
+    
     protected void setUp() throws Exception {        
         super.setUp();
         Init.initDB();
+        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+        userid = resolveUser(user);
     }
     
     protected void tearDown() throws Exception {
         super.tearDown();
     }
     
+    protected Properties getAJAXProperties() {
+        Properties properties = Init.getAJAXProperties();
+        return properties;
+    }    
+    
+    private int resolveUser(String user) throws Exception {
+        UserStorage uStorage = UserStorage.getInstance(new RdbContextWrapper(contextid));
+        userid = uStorage.getUserId(user);
+        return userid;
+    }
+    
     public void testPool() throws Throwable {
-        Context context = new ContextImpl(1);
+        Context context = new RdbContextWrapper(contextid);
+
         int testsize = DBPool.getReadSize(context);
         Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
@@ -167,11 +187,12 @@ public class CalendarTest extends TestCase {
         assertEquals("Check calculation", 1, m.size());
     }    
     
-    public void no_testWholeDay() throws Throwable { // TODO: Need connection 
+    public void testWholeDay() throws Throwable { // TODO: Need connection 
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(new ContextImpl(1));
+        cdao.setContext(new RdbContextWrapper(contextid));
+
         cdao.setObjectID(1);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
@@ -184,7 +205,10 @@ public class CalendarTest extends TestCase {
         Context context = cs.getContext(cs.getContextId("defaultcontext"));
         
         readcon = DBPool.pickupWriteable(context);
-        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, readcon, -1));
+        
+        int privatefolder = OXFolderTools.getCalendarStandardFolder(userid, cdao.getContext(), readcon);
+        
+        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, readcon, privatefolder));
         long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
@@ -232,11 +256,8 @@ public class CalendarTest extends TestCase {
     }
     
     public void testSaveRecurring() throws Throwable {
-        int userid = 11; // BISHOPH
-        int contextid = 1;
-        
         Context context = new ContextImpl(contextid);
-        
+
         
         CalendarDataObject cdao = new CalendarDataObject();
         long s = System.currentTimeMillis();
