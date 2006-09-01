@@ -9,7 +9,6 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.groupware.contexts.RdbContextWrapper;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
@@ -54,13 +53,13 @@ public class CalendarTest extends TestCase {
     }    
     
     private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(new RdbContextWrapper(contextid));
+        UserStorage uStorage = UserStorage.getInstance(new ContextImpl(contextid));
         userid = uStorage.getUserId(user);
         return userid;
     }
     
     public void testPool() throws Throwable {
-        Context context = new RdbContextWrapper(contextid);
+        Context context = new ContextImpl(contextid);
 
         int testsize = DBPool.getReadSize(context);
         Connection con[] = new Connection[testsize];
@@ -192,7 +191,7 @@ public class CalendarTest extends TestCase {
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(new RdbContextWrapper(contextid));
+        cdao.setContext(new ContextImpl(contextid));
 
         cdao.setObjectID(1);
         cdao.setStartDate(new Date(s));
