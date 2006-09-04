@@ -102,6 +102,12 @@ public class ConfigMenuTest extends AbstractAJAXTest {
         }
     }
 
+    public void testReadSettings() throws Throwable {
+        String value = readSetting(getWebConversation(), getHostName(),
+            getSessionId(), "");
+        assertTrue("Got no value from server.", value.length() > 0);
+    }
+    
     public static String readSetting(final WebConversation conversation,
         final String hostName, final String sessionId, final String path)
         throws Throwable {
