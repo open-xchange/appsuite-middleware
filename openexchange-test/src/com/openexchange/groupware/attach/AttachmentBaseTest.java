@@ -22,7 +22,6 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
@@ -483,7 +482,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 	public static interface Mode extends AbstractAttachmentTest.Mode {
 		public DBProvider getProvider();
 
-		public Context getContext() throws ContextException;
+		public Context getContext();
 
 		public User getUser();
 	}
@@ -515,9 +514,14 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		}
 
 
-		public Context getContext() throws ContextException {
+		public Context getContext()  {
             ContextStorage cs = ContextStorage.getInstance();
-			return cs.getContext(cs.getContextId("defaultcontext"));
+			try {
+				return cs.getContext(cs.getContextId("defaultcontext"));
+			} catch (ContextException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 
 		public User getUser() {
@@ -549,7 +553,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		}
 
 		public Context getContext() {
-			return new ContextImpl(1);
+			//return new ContextImpl(1);
+			return null;
 		}
 
 		public User getUser() {
