@@ -45,7 +45,13 @@ public final class Init {
 		if (!testPropertiesLoaded) {
 			testProps = new Properties();
 			try {
-				testProps.load(new FileInputStream(System.getProperty("test.propfile")));
+                final String propfile = System.getProperty("test.propfile");
+                if (null == propfile) {
+                    throw new RuntimeException("Test properties file "
+                        + "test.propfile is not defined as a JVM "
+                        + "system property.");
+                }
+				testProps.load(new FileInputStream(propfile));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
