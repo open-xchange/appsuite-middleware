@@ -139,7 +139,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		res = search(sessionId, "Test 1", COLS);
 		assertNoError(res);
 		
-		assertTitles(res,"Test 1", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19");
+		assertTitles(res,"Test 1", "Text 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19");
 	}
 	
 	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
