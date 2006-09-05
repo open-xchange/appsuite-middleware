@@ -104,11 +104,20 @@ public abstract class AbstractAJAXTest extends TestCase {
      * @return Returns the webConversation.
      */
     protected WebConversation getWebConversation() {
-    	HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         if (null == webConversation) {
-            webConversation = new WebConversation();
+            webConversation = newWebConversation();
         }
         return webConversation;
+    }
+
+    /**
+     * Setup the web conversation here so tests are able to create additional if
+     * several users are needed for tests.
+     * @return a new web conversation.
+     */
+    protected WebConversation newWebConversation() {
+        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        return new WebConversation();
     }
 
     /**
