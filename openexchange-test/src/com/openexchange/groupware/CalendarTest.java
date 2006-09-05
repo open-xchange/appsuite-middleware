@@ -122,7 +122,7 @@ public class CalendarTest extends TestCase {
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1150156800000L; // 13.06.2006 00:00 (GMT)
         long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
-        String testrecurrence = "ds|daily|daily_value|1|ds_start|"+s+"|ds_ends|"+u+"|";
+        String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
@@ -166,7 +166,7 @@ public class CalendarTest extends TestCase {
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1150156800000L; // 13.06.2006 00:00 (GMT)
         long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
-        String testrecurrence = "ds|daily|daily_value|1|ds_start|"+s+"|ds_ends|"+u+"|";
+        String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
