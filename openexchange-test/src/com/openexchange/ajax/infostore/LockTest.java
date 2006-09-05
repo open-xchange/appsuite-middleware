@@ -2,12 +2,14 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -25,12 +27,12 @@ public class LockTest extends InfostoreAJAXTest {
 		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
-		/*FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
+		FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-		myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, null, true);
+		myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, null, true);
 		FolderTest.updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
-		*/
-		folderId=228;
+		
+		//folderId=228;
 		Map<String,String> create = m(
 				"folder_id" 		,	((Integer)folderId).toString(),
 				"title"  		,  	"test knowledge",
@@ -56,8 +58,7 @@ public class LockTest extends InfostoreAJAXTest {
 	}
 	
 	public void tearDown() throws Exception{
-		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
-                getLogin(), getPassword());
+		refreshSessionId();
 		super.tearDown();
 		
 		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},System.currentTimeMillis(),false);
@@ -99,7 +100,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertTrue(res.hasError());
 		
 		// Lock owner may update
-		
+		refreshSessionId();
 		res = update(sessionId,clean.get(0),System.currentTimeMillis(), m("title" , "Hallo"));
 		assertNoError(res);
 		
@@ -161,5 +162,10 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	public static void assertUnlocked(JSONObject o) throws JSONException{
 		assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+	}
+	
+	public void refreshSessionId() throws IOException, SAXException, JSONException{
+		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
+                getLogin(), getPassword());
 	}
 }
