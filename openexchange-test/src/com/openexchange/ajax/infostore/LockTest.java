@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
+import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
@@ -24,11 +25,12 @@ public class LockTest extends InfostoreAJAXTest {
 		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
-		FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
+		/*FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
 		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-			myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, null, true);
+		myInfostore.getObjectID(), "NewInfostoreFolder", "infostore", FolderObject.PUBLIC, null, true);
 		FolderTest.updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
-		//folderId=229;
+		*/
+		folderId=228;
 		Map<String,String> create = m(
 				"folder_id" 		,	((Integer)folderId).toString(),
 				"title"  		,  	"test knowledge",
@@ -54,6 +56,8 @@ public class LockTest extends InfostoreAJAXTest {
 	}
 	
 	public void tearDown() throws Exception{
+		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
+                getLogin(), getPassword());
 		super.tearDown();
 		
 		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},System.currentTimeMillis(),false);
