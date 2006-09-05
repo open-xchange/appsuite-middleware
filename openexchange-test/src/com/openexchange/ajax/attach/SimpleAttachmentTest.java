@@ -48,7 +48,7 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 		doList();
 	}
 	
-	public void testAddMany() throws Exception {
+	public void notestAddMany() throws Exception {
 		for(int i = 1; i < 1000000; i++) {
 			if(i % 1000 == 0)
 				System.out.println(i);
