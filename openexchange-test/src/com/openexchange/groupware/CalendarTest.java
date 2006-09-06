@@ -34,7 +34,7 @@ public class CalendarTest extends TestCase {
     private final static int TEST_PASS_HOT_SPOT = 99999;
     
     private static int userid = 11; // bishoph
-    private final static int contextid = 1;
+    public final static int contextid = 1;
     
     protected void setUp() throws Exception {        
         super.setUp();
@@ -56,31 +56,6 @@ public class CalendarTest extends TestCase {
         UserStorage uStorage = UserStorage.getInstance(new ContextImpl(contextid));
         userid = uStorage.getUserId(user);
         return userid;
-    }
-    
-    public void testPool() throws Throwable {
-        Context context = new ContextImpl(contextid);
-
-        int testsize = DBPool.getReadSize(context);
-        Connection con[] = new Connection[testsize];
-        for (int a = 0; a < con.length; a++) {
-            try {
-                con[a] = DBPool.pickup(context);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-        for (int a = 0; a < con.length; a++) {
-            try {                
-                Connection tc = con[a];
-                DBPool.push(context, tc);
-                //DBPool.push(context, tc);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }              
-        assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));
-        
     }
     
     public void testBasicRecurring() throws Throwable {
