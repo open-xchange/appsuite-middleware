@@ -17,6 +17,7 @@ import com.openexchange.api.OXCalendar;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderPool;
 
@@ -261,16 +262,7 @@ public class CalendarTest extends TestCase {
         
         cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
         
-        SessionObject so = new SessionObject("MySessionid");
-        cdao.setContext(context);
-        UserStorage us = UserStorage.getInstance(context);
-        int groups[] = { 1 };
-        UserConfiguration uc = new UserConfiguration(1, 11, groups, context);
-        uc = UserConfiguration.loadUserConfiguration(11, groups, context);
-        User uo = us.getUser(userid);
-        so.setContext(context);
-        so.setUserObject(uo);
-        so.setUserConfiguration(uc);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         
