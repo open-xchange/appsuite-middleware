@@ -343,7 +343,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 		
 		@Override
-		protected void sendMessage(String messageTitle, String message, List<String> name) {
+		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session) {
 			messageCollector.add(new Message(messageTitle,message,name));
 		}
 		
