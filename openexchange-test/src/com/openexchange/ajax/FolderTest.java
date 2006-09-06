@@ -22,6 +22,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -187,7 +188,7 @@ public class FolderTest extends AbstractAJAXTest {
 		URLParameter urlParam = new URLParameter();
 		urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		urlParam.setParameter("folder", String.valueOf(parentFolderId));
+		urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
 		byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(), bais,
