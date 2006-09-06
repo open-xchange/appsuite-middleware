@@ -263,6 +263,8 @@ public class CalendarTest extends TestCase {
         cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         
