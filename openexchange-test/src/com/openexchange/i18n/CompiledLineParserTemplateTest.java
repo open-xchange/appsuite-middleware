@@ -42,5 +42,15 @@ public class CompiledLineParserTemplateTest extends TestCase {
 	
 		assertEquals(expected, output);
 	}
+	
+	public void testNull(){
+		String test = "[this] is unset";
+		String expected = " is unset";
+		
+		CompiledLineParserTemplate template = new StringTemplate(test);
+		String output = template.render();
+	
+		assertEquals(expected, output);
+	}
 }
 

@@ -1,0 +1,355 @@
+package com.openexchange.groupware.notify;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
+import junit.framework.TestCase;
+
+import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.container.ExternalParticipant;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.MockGroupLookup;
+import com.openexchange.groupware.ldap.MockUserLookup;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserConfigurationFactory;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.sessiond.SessionObject;
+
+public class ParticipantNotifyTest extends TestCase{
+	
+	private static final MockGroupLookup GROUP_STORAGE = new MockGroupLookup();
+	private static final MockUserLookup USER_STORAGE = new MockUserLookup();
+	private static final UserConfigurationFactory USER_CONFIGS = new UserConfigurationFactory();
+	
+	
+	public static final int EN = 0;
+	public static final int DE = 1;
+	
+	private TestParticipantNotify notify = new TestParticipantNotify();
+	
+	private Date start = new Date();
+	private Date end = new Date();
+	private SessionObject session = null;
+	
+	
+	public void testSimple(){
+		Participant[] participants = getParticipants(U(2),G(),S());
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "user1@test.invalid" );
+		assertLanguage( EN , msg );
+		assertNames( participantNames,"User 1" );
+		
+		notify.clearMessages();
+		
+		participants = getParticipants(U(4), G(),S());
+		t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		msg = notify.getMessages().get(0);
+		
+		participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "user3@test.invalid" );
+		assertLanguage( DE , msg );
+		assertNames( participantNames,"User 3" );
+		
+	}
+	
+	
+	public void testExternal(){
+		Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"));
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "don.external@external.invalid" );
+		assertNames( participantNames,"don.external@external.invalid" );	
+	}
+	
+	public void testNoSend(){
+		Participant[] participants = getParticipants(U(6,2),G(),S());
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "user1@test.invalid" );
+		assertLanguage( EN , msg );
+		assertNames( participantNames,"User 5", "User 1" );
+		
+		notify.clearMessages();
+		
+		participants = getParticipants(U(), G(1),S());
+		t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		assertEquals(3,notify.getMessages().size());
+		
+		for(Message message : notify.getMessages()){
+			assertNames(parseParticipants(message), "The Mailadmin", "User 1", "User 2", "User 3", "User 4", "User 5", "User 6", "User 7","User 8","User 9");
+			
+			if(message.addresses.size() == 1) {
+				// DE and Samoa
+				assertNames(message.addresses, "user3@test.invalid");
+				assertLanguage(DE, message);
+			} else {
+				int lang = guessLanguage(message);
+				switch(lang) {
+				case DE:
+					assertNames(message.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid","user9@test.invalid");
+					break;
+				case EN:
+					assertNames(message.addresses, "mailadmin@test.invalid", "user1@test.invalid", "user5@test.invalid", "user7@test.invalid");
+					break;
+				}
+			} 
+		}
+	}
+	
+	public void testResolveGroup(){
+		Participant[] participants = getParticipants(U(),G(2),S());
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
+		assertLanguage( DE , msg );
+		assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
+	}
+
+	public void testNoSendDouble(){
+		Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"));
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		
+		assertNames( msg.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
+		assertLanguage( DE , msg );
+		assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
+	}
+	
+	public static final void assertLanguage(int lang, Message msg) {
+		assertEquals(lang,guessLanguage(msg));
+	}
+	
+	public static final void assertNames(String[] names, String...expected) {
+		assertNames(Arrays.asList(names),expected);
+	}
+	
+	public static final void assertNames(Iterable<String> names, String...expected) {
+		Set<String> expectSet = new HashSet<String>(Arrays.asList(expected));
+		
+		for(String name : names) {
+			assertTrue(expectSet.remove(name));
+		}
+	}
+	
+	
+	public Task getTask(Participant[] participants) {
+		Task task = new Task();
+		task.setStartDate(start);
+		task.setEndDate(end);
+		task.setTitle("TestSimple");
+		task.setCreatedBy(session.getUserObject().getId());
+		task.setModifiedBy(session.getUserObject().getId());
+		
+		
+		task.setParticipants(participants);
+		return task;
+	}
+	
+	public static User[] U(int...ids) {
+		User[] users = new User[ids.length];
+		int i = 0;
+		for(int id : ids) {
+			try {
+				users[i++] = USER_STORAGE.getUser(id);
+			} catch (LdapException e) {
+				e.printStackTrace();
+			}
+		}
+		return users;
+	}
+	
+	public static final Group[] G(int...ids) {
+		Group[] groups = new Group[ids.length];
+		int i = 0;
+		for(int id : ids) {
+			try {
+				groups[i++] = GROUP_STORAGE.getGroup(id);
+			} catch (LdapException e) {
+				e.printStackTrace();
+			}       
+		}
+		return groups;
+	}
+	
+	public static final String[] S(String...strings) {
+		return strings;
+	}
+	
+	public static final Participant[] getParticipants(User[] users, Group[] groups, String[] external) {
+		Participant[] participants = new Participant[users.length+groups.length+external.length];
+		
+		int i = 0;
+		
+		for(User user : users) {
+			Participant p = new UserParticipant();
+			p.setDisplayName(user.getDisplayName());
+			p.setEmailAddress(user.getMail());
+			p.setIdentifier(user.getId());
+			participants[i++] = p;
+		}
+		
+		for(Group group : groups) {
+			Participant p = new GroupParticipant();
+			p.setDisplayName(group.getDisplayName());
+			p.setIdentifier(group.getIdentifier());
+			participants[i++] = p;	
+		}
+		
+		for(String externalMail : external) {
+			Participant p = new ExternalParticipant();
+			p.setDisplayName(externalMail);
+			p.setEmailAddress(externalMail);
+			participants[i++] = p;
+		}
+		
+		return participants;
+	}
+	
+	public void setUp() throws Exception {
+		session = new SessionObject("my_fake_sessionid");
+		
+		session.setContext(new ContextImpl(1));
+		session.setUserObject(new MockUserLookup().getUser(1));
+		session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
+	}
+	
+	public void tearDown() throws Exception {
+		notify.clearMessages();
+	}
+	
+	private String[] parseParticipants(Message msg) {
+		int language = guessLanguage(msg);
+		switch(language) {
+		case DE: return getLines(msg,"Teilnehmer:","Ressourcen:");
+		case EN: return getLines(msg,"Participants:", "Resources:");
+		default: return null;
+		}
+	}
+
+	private static int guessLanguage(Message msg) {
+		String[] german = new String[]{"angelegt", "geändert", "entfernt"};
+		for(String g : german) {
+			if(msg.messageTitle.contains(g))
+				return DE;
+		}
+		return EN;
+	}
+	
+	private String[] getLines(Message msg, String from, String to) {
+		boolean collect = false;
+		List<String> collector = new ArrayList<String>();
+		String[] allLines = msg.message.split("\n");
+		for(String line : allLines) {
+			line = line.trim();
+			if(line.equals(to)) {
+				break;
+			}
+			
+			if(collect) {
+				if(!"".equals(line))
+					collector.add(line);
+			}
+			
+			if(line.equals(from)) {
+				collect = true;
+			}
+			
+		}
+		return collector.toArray(new String[collector.size()]);
+	}
+
+
+	private static final class Message {
+		public String messageTitle;
+		public String message;
+		public List<String> addresses;
+		
+		public Message(String messageTitle, String message, List<String>addresses) {
+			this.messageTitle = messageTitle;
+			this.message = message;
+			this.addresses = addresses;
+		}
+	}
+	
+	private static final class TestParticipantNotify extends ParticipantNotify {
+
+		private List<Message> messageCollector = new ArrayList<Message>();
+		
+		@Override
+		protected Group[] resolveGroups(Context ctx, int... ids) throws LdapException {
+			return G(ids);
+		}
+
+		@Override
+		protected User[] resolveUsers(Context ctx, int... ids) throws LdapException {
+			return U(ids);
+		}
+
+		public List<Message> getMessages(){
+			return messageCollector;
+		}
+		
+		public void clearMessages(){
+			messageCollector.clear();
+		}
+		
+		@Override
+		protected void sendMessage(String messageTitle, String message, List<String> name) {
+			messageCollector.add(new Message(messageTitle,message,name));
+		}
+		
+		@Override
+		protected UserConfiguration getUserConfiguration(int id, int[] groups, Context context) throws SQLException {
+			return USER_CONFIGS.getConfiguration(id);
+		}		
+	}
+}
