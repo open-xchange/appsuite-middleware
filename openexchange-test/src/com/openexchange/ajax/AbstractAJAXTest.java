@@ -232,7 +232,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 	
 	public static void assertNoError(Response res) {
-		assertFalse(res.getErrorMessage(),res.hasError());
+		assertFalse(res.getErrorMessage()+" : "+res.getErrorParams(),res.hasError());
 	}
 	
 	public static void assertEqualsAndNotNull(String message, Date expect, Date value) throws Exception {

@@ -1,5 +1,6 @@
 package com.openexchange.groupware.notify;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.ExternalParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -25,6 +27,7 @@ import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.sessiond.SessionObject;
 
 public class ParticipantNotifyTest extends TestCase{
@@ -51,7 +54,6 @@ public class ParticipantNotifyTest extends TestCase{
 		notify.taskCreated(t,session);
 		
 		Message msg = notify.getMessages().get(0);
-		
 		String[] participantNames = parseParticipants( msg );
 		
 		assertNames( msg.addresses, "user1@test.invalid" );
@@ -255,6 +257,10 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 	
 	public void setUp() throws Exception {
+		
+		String templates = Init.getTestProperty("templatePath");
+		TemplateListResourceBundle.setTemplatePath(new File(templates));
+		
 		session = new SessionObject("my_fake_sessionid");
 		
 		session.setContext(new ContextImpl(1));
