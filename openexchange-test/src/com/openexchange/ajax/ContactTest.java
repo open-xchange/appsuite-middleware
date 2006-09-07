@@ -39,7 +39,7 @@ import org.json.JSONObject;
 
 public class ContactTest extends AbstractAJAXTest {
 	
-	public static final String CONTENT_TYPE = "text/plain";
+	public static final String CONTENT_TYPE = "image/png";
 	
 	public static final String BASE64String = "ABCDEFGHIJK";
     
@@ -361,6 +361,7 @@ public class ContactTest extends AbstractAJAXTest {
 	public void testContactWithImage() throws Exception {
 		ContactObject contactObj = createContactObject("testContactWithImage");
 		contactObj.setImage1(image);
+		contactObj.setImageContentType("image/png");
 		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
@@ -574,7 +575,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
 		contactObj.setImage1(image);
-		contactObj.setImageContentType("text/plain");
+		contactObj.setImageContentType("image/png");
 		contactObj.setManagerName("manager name");
 		contactObj.setMaritalStatus("marital status");
 		contactObj.setMiddleName("middle name");
