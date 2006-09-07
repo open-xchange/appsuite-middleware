@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -126,10 +127,18 @@ public class ParticipantNotifyTest extends TestCase{
 				int lang = guessLanguage(message);
 				switch(lang) {
 				case DE:
-					assertNames(message.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid","user9@test.invalid");
+					if (Locale.getDefault().getLanguage().equalsIgnoreCase("de")) {
+						assertNames(message.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid","user9@test.invalid");
+					} else {
+						assertNames(message.addresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");	
+					}	
 					break;
 				case EN:
-					assertNames(message.addresses, "mailadmin@test.invalid", "user1@test.invalid", "user5@test.invalid", "user7@test.invalid");
+					if (Locale.getDefault().getLanguage().equalsIgnoreCase("en")) {
+						assertNames(message.addresses, "mailadmin@test.invalid", "user1@test.invalid", "user5@test.invalid", "user7@test.invalid","user9@test.invalid");
+					} else {
+						assertNames(message.addresses, "mailadmin@test.invalid", "user1@test.invalid", "user5@test.invalid", "user7@test.invalid");	
+					}
 					break;
 				}
 			} 
