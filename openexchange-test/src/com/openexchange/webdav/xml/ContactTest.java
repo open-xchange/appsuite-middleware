@@ -276,8 +276,8 @@ public class ContactTest extends AbstractWebdavTest {
 		contactObj.setFaxBusiness("fax business");
 		contactObj.setFaxHome("fax home");
 		contactObj.setFaxOther("fax other");
-		contactObj.setImage1(com.openexchange.ajax.ContactTest.image);
-		contactObj.setImageContentType("image/jpeg");
+		//contactObj.setImage1(com.openexchange.ajax.ContactTest.image);
+		//contactObj.setImageContentType("image/jpeg");
 		contactObj.setInfo("info");
 		contactObj.setInstantMessenger1("instant messenger1");
 		contactObj.setInstantMessenger2("instant messenger2");
