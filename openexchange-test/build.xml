@@ -120,6 +120,7 @@
 		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
 	    <test name="com.openexchange.tools.file.FileStorageTest" todir="${test.xml.dir}" />
+		<test name="com.openexchange.tools.file.QuotaFileStorageTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.groupware.attach.AttachmentBaseTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.i18n.CompiledLineParserTemplateTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.groupware.notify.ParticipantNotifyTest" todir="${test.xml.dir}" />
