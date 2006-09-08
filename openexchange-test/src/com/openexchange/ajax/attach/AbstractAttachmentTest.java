@@ -1,5 +1,6 @@
 package com.openexchange.ajax.attach;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AttachmentTest;
+import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -173,7 +175,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertEquals(testFile.length(), data.getLong("file_size"));
 		assertEquals(clean.get(0).getId(), data.getInt("id"));
 	}
-	
+		
 	protected void doDocument() throws Exception {
 		upload();
 		
@@ -220,7 +222,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertTrue(res.hasError());
 	}
 	
-	protected void upload() throws Exception {
+	public void upload() throws Exception {
 		AttachmentMetadata attachment = new AttachmentImpl();
 		attachment.setFolderId(folderId);
 		attachment.setAttachedId(attachedId);
@@ -231,6 +233,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		
 		attachment.setId((Integer)res.getData());
 		clean.add(attachment);
+	}
+	
+	public AttachmentMetadata getAttachment(int index) {
+		return clean.get(index);
+	}
+	
+	public File getTestFile(){
+		return testFile;
 	}
 	
 }

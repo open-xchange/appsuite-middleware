@@ -20,7 +20,7 @@ public class InfostoreAJAXSuite extends TestSuite{
 		tests.addTestSuite( DocumentTest.class );
 		tests.addTestSuite( CopyTest.class );
 		tests.addTestSuite( LockTest.class );
-		
+		tests.addTestSuite( SaveAsTest.class );
 		
 		
 		return tests;
