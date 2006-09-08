@@ -3,6 +3,7 @@ package com.openexchange.tools.file;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import com.openexchange.tools.RandomString;
 
@@ -61,6 +62,30 @@ public class QuotaFileStorageTest extends TestCase {
         }
 	}
 	
+	public void notestExclusiveLock() throws Exception{
+		//FIXME
+//		 Taken from FileStorageTest
+		final File tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.deleteOnExit();
+        
+        tempFile.delete();
+        final FileStorage storage = FileStorage.getInstance(tempFile);
+        
+        TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(storage);
+        quotaStorage.setQuota(10000);
+        quotaStorage.storeUsage(5000);
+        
+        Thread[] threads = new Thread[30];
+        for(int i = 0; i < threads.length; i++) {
+        	threads[i] = new AddAndRemoveThread(50,quotaStorage);
+        }
+        
+        for(Thread thread : threads) { thread.start(); }
+        for(Thread thread : threads) { thread.join(); }
+        
+        assertEquals(5000, quotaStorage.getUsage());
+	}
+	
 	
 	private static final class TestQuotaFileStorage extends QuotaFileStorage{
 
@@ -92,9 +117,33 @@ public class QuotaFileStorageTest extends TestCase {
 		@Override
 		protected void storeUsage(long usage) throws IOException {
 			this.usage = usage;
+		}	
+	}
+	
+	private static final class AddAndRemoveThread extends Thread{
+		private int counter;
+		private FileStorage fs;
+		private byte[] bytes = new byte[10];
+		private Random r = new Random();
+		
+		public AddAndRemoveThread(int counter, FileStorage fs) {
+			super();
+			this.counter = counter;
+			this.fs = fs;
 		}
-		
-		
+
+		@Override
+		public void run() {
+			for(int i = 0; i < counter; i++) {
+				try {
+					String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
+					Thread.sleep(r.nextInt(200));
+					fs.deleteFile(id);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		
 	}
 }
