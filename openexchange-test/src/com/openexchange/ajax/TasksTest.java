@@ -599,7 +599,6 @@ public class TasksTest extends AbstractAJAXTest {
     public static int insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
         throws JSONException, IOException, SAXException {
-    	task.setStatus(Task.NOT_STARTED); // FIXME! 
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
@@ -639,7 +638,6 @@ public class TasksTest extends AbstractAJAXTest {
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException {
-    	task.setStatus(Task.NOT_STARTED); //FIXME
         LOG.trace("Updating task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);

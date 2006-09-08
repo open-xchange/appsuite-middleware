@@ -39,6 +39,8 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -80,6 +82,55 @@ public class LoginTest extends AbstractAJAXTest {
     }
 
     /**
+     * This method mades a login and returns the complete login object.
+     * @param conversation WebConversation.
+     * @param hostname hostname of the server running the server.
+     * @param login Login of the user.
+     * @param password Password of the user.
+     * @return the session identifier if the login is successful.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws IOException if the communication with the server fails.
+     */
+    public static JSONObject login(final WebConversation conversation,
+        final String hostname, final String login, final String password)
+        throws IOException, SAXException, JSONException {
+        LOG.trace("Logging in.");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL
+            + hostname + LOGIN_URL);
+        req.setParameter("action", "login");
+        req.setParameter("name", login);
+        req.setParameter("password", password);
+        req.setHeaderField("Content-Type", "");
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+        return new JSONObject(resp.getText());
+    }
+
+    /**
+     * This method mades a logout.
+     * @param conversation WebConversation.
+     * @param hostname hostname of the server running the server.
+     * @param sessionId Session identifier of the user.
+     * @throws IOException if the communication with the server fails.
+     * @throws SAXException if a SAX error occurs.
+     */
+    public static void logout(final WebConversation conversation,
+        final String hostname, final String sessionId)
+        throws IOException, SAXException {
+        LOG.trace("Logging out.");
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL
+            + hostname + LOGIN_URL);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION, "logout");
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setHeaderField("Context-Type", "");
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+    }
+
+    /**
      * This method mades a login and returns the sessionId if the login is
      * successful.
      * @param conversation WebConversation.
@@ -94,15 +145,8 @@ public class LoginTest extends AbstractAJAXTest {
     public static String getSessionId(final WebConversation conversation,
         final String hostname, final String login, final String password)
         throws IOException, SAXException, JSONException {
-        LOG.trace("Logging in.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL
-            + hostname + LOGIN_URL);
-        req.setParameter("action", "login");
-        req.setParameter("name", login);
-        req.setParameter("password", password);
-        req.setHeaderField("Content-Type", "");
-        final WebResponse resp = conversation.getResponse(req);
-        final JSONObject jslogin = new JSONObject(resp.getText());
+        final JSONObject jslogin = login(conversation, hostname, login,
+            password);
         final String sessionId = jslogin.getString("session");
         assertNotNull("Can't get sessionId", sessionId);
         assertTrue("Can't get sessionId", sessionId.length() > 0);
@@ -125,15 +169,8 @@ public class LoginTest extends AbstractAJAXTest {
         final WebConversation conversation, final String hostname,
         final String login, final String password) throws IOException,
         SAXException, JSONException {
-        LOG.trace("Logging in.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL
-            + hostname + LOGIN_URL);
-		req.setParameter("action", "login");
-        req.setParameter("name", login);
-        req.setParameter("password", password);
-        req.setHeaderField("Content-Type", "");
-        final WebResponse resp = conversation.getResponse(req);
-        final JSONObject jslogin = new JSONObject(resp.getText());
+        final JSONObject jslogin = login(conversation, hostname, login,
+            password);
         final String sessionId = jslogin.getString("session");
         assertNotNull("Can't get sessionId.", sessionId);
         assertTrue("Can't get sessionId.", sessionId.length() > 0);

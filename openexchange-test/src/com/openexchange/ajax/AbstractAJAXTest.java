@@ -25,10 +25,6 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
 
 /**
@@ -84,13 +80,25 @@ public abstract class AbstractAJAXTest extends TestCase {
      */
     protected String getSessionId() throws Exception {
         if (null == sessionId) {
-            sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
-                getLogin(), getPassword());
+            sessionId = LoginTest.getSessionId(getWebConversation(),
+                getHostName(), getLogin(), getPassword());
             assertNotNull("Can't get session id.", sessionId);
         }
         return sessionId;
     }
-    
+
+    /**
+     * Terminates the session on the server.
+     * @throws Exception if an error occurs.
+     */
+    protected void logout() throws Exception {
+        if (null != sessionId) {
+            LoginTest.logout(getWebConversation(), getHostName(),
+                getSessionId());
+            sessionId = null;
+        }
+    }
+
     protected String getSecondSessionId() throws Exception {
     	if(null == sessionId2) {
     		sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
