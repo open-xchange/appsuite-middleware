@@ -6,6 +6,7 @@ import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -19,6 +20,7 @@ import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.OXFolderTools;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
@@ -70,6 +72,16 @@ public class CalendarTest extends TestCase {
     public static Context getContext() {
         return new ContextImpl(contextid);
     }
+    
+    public static int getPrivateFolder() throws Exception {
+        int privatefolder = 0;
+        Context context = getContext();
+        Connection readcon = DBPool.pickupWriteable(context);
+        privatefolder = new Integer(OXFolderTools.getCalendarStandardFolder(userid, context, readcon)).intValue();
+        DBPool.pushWrite(context, readcon);
+        return privatefolder;        
+    }
+    
     
     public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();      
@@ -310,6 +322,19 @@ public class CalendarTest extends TestCase {
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
         
+    }
+    
+    public void testBasicSearch() throws Exception  {
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        CalendarSql csql = new CalendarSql(so);
+        int cols[] = new int[1];
+        cols[0] = AppointmentObject.TITLE;
+        SearchIterator si = csql.searchAppointments("test", getPrivateFolder(), 0, "ASC", cols);
+        boolean gotresults = si.hasNext();
+        assertTrue("Got real results", gotresults);
+        while (si.hasNext()) {
+            CalendarDataObject cdao = (CalendarDataObject)si.next();
+        }
     }
     
 }
