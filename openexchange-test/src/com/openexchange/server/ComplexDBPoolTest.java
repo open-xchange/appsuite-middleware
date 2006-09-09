@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;
 
-public class DBPoolTest extends TestCase {
+public class ComplexDBPoolTest extends TestCase {
     
     private final static int contextid = 1;
 
