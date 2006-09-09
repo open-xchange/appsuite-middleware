@@ -38,7 +38,7 @@ public class AppointmentAttachmentTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
         cdao.setTitle("Attachment Test");
-        cdao.setParentFolderID(getPrivateFolder());
+        cdao.setParentFolderID(CalendarTest.getPrivateFolder());
         CalendarTest.fillDatesInDao(cdao);
         SessionObject sessionobject = SessionObjectWrapper.createSessionObject(userid, context, "AttachmentTestId");
         CalendarSql csql = new CalendarSql(sessionobject);
@@ -62,15 +62,5 @@ public class AppointmentAttachmentTest extends TestCase {
         }
         throw new Exception("Test failed because detach should not be possible!");
     }
-
-    private int getPrivateFolder() throws Exception {
-        int privatefolder = 0;
-        Context context = CalendarTest.getContext();
-        Connection readcon = DBPool.pickupWriteable(context);
-        privatefolder = new Integer(OXFolderTools.getCalendarStandardFolder(userid, context, readcon)).intValue();
-        DBPool.pushWrite(context, readcon);
-        return privatefolder;        
-    }
-
     
 }
