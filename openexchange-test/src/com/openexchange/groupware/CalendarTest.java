@@ -37,26 +37,38 @@ public class CalendarTest extends TestCase {
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
     
+    private static boolean init = false;
+    
     protected void setUp() throws Exception {        
         super.setUp();
-        Init.initDB();
-        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
-        userid = resolveUser(user);
+        userid = getUserId();
     }
     
     protected void tearDown() throws Exception {
         super.tearDown();
     }
     
-    protected Properties getAJAXProperties() {
+    private static Properties getAJAXProperties() {
         Properties properties = Init.getAJAXProperties();
         return properties;
-    }    
+    }        
     
-    private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(new ContextImpl(contextid));
+    private static int resolveUser(String user) throws Exception {
+        UserStorage uStorage = UserStorage.getInstance(getContext());
         userid = uStorage.getUserId(user);
         return userid;
+    }
+    
+    public static int getUserId() throws Exception {
+        if (!init) {
+            Init.initDB();
+        }
+        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+        return resolveUser(user);
+    }
+    
+    public static Context getContext() {
+        return new ContextImpl(contextid);
     }
     
     public void testBasicRecurring() throws Throwable {
@@ -234,8 +246,8 @@ public class CalendarTest extends TestCase {
     public void testSaveRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
 
-        
         CalendarDataObject cdao = new CalendarDataObject();
+        
         long s = System.currentTimeMillis();
         long cals = s;
         long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
@@ -252,7 +264,7 @@ public class CalendarTest extends TestCase {
         
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));
+        cdao.setUntil(new Date(u));        
         cdao.setTitle("testSaveRecurring");
         cdao.setRecurrenceType(OXCalendar.DAILY);
         cdao.setRecurrenceCalculator(1);
@@ -279,5 +291,25 @@ public class CalendarTest extends TestCase {
         }
     }    
     
+    public static final void fillDatesInDao(CalendarDataObject cdao) {
+        long s = System.currentTimeMillis();
+        long cals = s;
+        long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
+        cals = cals- calsmod;
+        long endcalc = 3600000;
+        long mod = s%3600000;
+        s = s - mod;
+        long saves = s;
+        long e = s + endcalc;
+        long savee = e;
+        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
+        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        u = u - mod;
+        
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        
+    }
     
 }
