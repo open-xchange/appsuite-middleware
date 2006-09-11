@@ -149,7 +149,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertTitles(res,"Test 1", "Text 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19");
 	}
 	
-	public void testEscept() {
+	public void testEscape() {
 		//TODO
 	}
 	
