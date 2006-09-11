@@ -30,7 +30,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 	
 	public void testBasic() throws Exception{
 		Response res = this.update(sessionId, clean.get(0),System.currentTimeMillis(),m(
-				"title" , "test knowledge updated"
+				"title" , "test knowledge updated",
+				"color_label" , "1"
 		));
 		assertNoError(res);
 		
@@ -43,6 +44,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		assertEquals("test knowledge updated", object.getString("title"));
 		assertEquals("test knowledge description", object.getString("description"));
+		assertEquals(1, object.getInt("color_label"));
+		
 		assertEquals(0, object.getInt("version"));
 		
 	}

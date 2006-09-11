@@ -56,7 +56,14 @@ public class SearchTest extends InfostoreAJAXTest {
 		Response res = search(sessionId, "*", COLS);
 		assertNoError(res);
 		assertTitles(res,all);
+		
+		
+		res = search(sessionId, "Test ?5", COLS);
+		assertNoError(res);
+		assertTitles(res,"Test 15", "Test 25");
+		
 	}
+	
 	
 	public void testCaseInsensitive() throws Exception {
 		Response res = search(sessionId, "test", COLS);
@@ -140,6 +147,10 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		
 		assertTitles(res,"Test 1", "Text 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19");
+	}
+	
+	public void testEscept() {
+		//TODO
 	}
 	
 	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
