@@ -2,7 +2,9 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -23,17 +25,33 @@ public class VersionsTest extends InfostoreAJAXTest {
 	
 	public void testVersions() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		Response res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"),upload,"text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"),upload,"text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"),upload,"text/plain");
 		assertNoError(res);
 		
 		res = versions(sessionId,clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 
 		assureVersions(new Integer[]{1,2,3},res,3);
+		
+		res = versions(sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.VERSION_COMMENT});
+		assertNoError(res);
+		
+		Map<Integer, String> comments = new HashMap<Integer, String>();
+		comments.put(1,"Comment 1");
+		comments.put(2,"Comment 2");
+		comments.put(3,"Comment 3");
+		
+		JSONArray arrayOfarrays = (JSONArray) res.getData();
+		
+		for(int i = 0; i < arrayOfarrays.length(); i++) {
+			JSONArray payload = arrayOfarrays.getJSONArray(i);
+			assertEquals(comments.remove(payload.getInt(0)),payload.getString(1));
+		}
+		
 	}
 	
 	public static final void assureVersions(Integer[] ids, Response res, Integer current) throws JSONException{
