@@ -147,15 +147,32 @@ public class SearchTest extends InfostoreAJAXTest {
 		res = revert(sessionId,res.getTimestamp().getTime(), id );
 		assertNoError(res);
 		
-		res = search(sessionId, "Test 1", COLS);
+		res = search(sessionId, "1", COLS);
 		assertNoError(res);
 		
 		assertTitles(res,"Test 1", "Text 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19");
 	}
-	
-	public void testEscape() {
-		//TODO
+		
+	public void testEscape() throws Exception{
+		int id = clean.get(0);
+		Response res = update(sessionId,id,System.currentTimeMillis(),m("title" , "The mysterious ?"));
+		assertNoError(res);
+		
+		res = search(sessionId, "\\?", COLS);
+		assertNoError(res);
+		
+		assertTitles(res, "The mysterious ?");
+		
+		res = update(sessionId,id,System.currentTimeMillis(),m("title" , "The * of all trades"));
+		assertNoError(res);
+		
+		res = search(sessionId, "\\*", COLS);
+		assertNoError(res);
+		
+		assertTitles(res, "The * of all trades");
+		
 	}
+	
 	
 	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
 		JSONArray entry = results.getJSONArray(index);
