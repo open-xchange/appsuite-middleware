@@ -21,6 +21,7 @@ public class InfostoreAJAXSuite extends TestSuite{
 		tests.addTestSuite( CopyTest.class );
 		tests.addTestSuite( LockTest.class );
 		tests.addTestSuite( SaveAsTest.class );
+		tests.addTestSuite( SearchTest.class );
 		
 		
 		return tests;

@@ -490,8 +490,6 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public Response search(String sessionId, String query, int[] columns, int folderId, int sort, String order, int start, int end) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"search");
-		url.append("&pattern=");
-		url.append(query); // Escape this!
 		url.append("&columns=");
 		for(int c : columns) {
 			url.append(c);
@@ -520,8 +518,9 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 				url.append(end);
 			}
 		}
-		
-		return gT(url.toString());
+		JSONObject queryObject = new JSONObject();
+		queryObject.put("pattern",query);
+		return putT(url.toString(),queryObject.toString());
 	}
 	
 	protected StringBuffer getUrl(String sessionId, String action) {

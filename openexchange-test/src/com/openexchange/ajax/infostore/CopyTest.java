@@ -66,6 +66,7 @@ public class CopyTest extends InfostoreAJAXTest {
 		clean.add(id);
 		
 		int copyId = copy(sessionId,id,System.currentTimeMillis(),m());
+		clean.add(copyId);
 		
 		Response res = get(sessionId,id);
 		assertNoError(res);
@@ -129,6 +130,7 @@ public class CopyTest extends InfostoreAJAXTest {
 	public void testUploadCopy() throws Exception {
 		File upload = new File(Init.getTestProperty("webdavPropertiesFile"));
 		int id = copy(sessionId, clean.get(0),System.currentTimeMillis(),m("title" , "copy"),upload,"text/plain");
+		clean.add(id);
 		
 		Response res = get(sessionId, id);
 		assertNoError(res);
