@@ -58,7 +58,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertTitles(res,all);
 		
 		
-		res = search(sessionId, "Test ?5", COLS);
+		res = search(sessionId, "?5", COLS);
 		assertNoError(res);
 		assertTitles(res,"Test 5","Test 15", "Test 25");
 		
