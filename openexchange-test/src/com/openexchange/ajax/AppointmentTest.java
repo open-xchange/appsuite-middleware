@@ -671,7 +671,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		
-		AppointmentParser appointmentParser = new AppointmentParser(null);
+		AppointmentParser appointmentParser = new AppointmentParser();
 		appointmentParser.parse(appointmentObj, (JSONObject)response.getData());
 		
 		return appointmentObj;
