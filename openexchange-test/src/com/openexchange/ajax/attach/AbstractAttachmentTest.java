@@ -222,6 +222,25 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertTrue(res.hasError());
 	}
 	
+	protected void doQuota() throws Exception {
+		Response res = quota(sessionId);
+		assertNoError(res);
+		JSONObject quota = (JSONObject)res.getData(); 
+		int use = quota.getInt("use");
+		
+		upload();
+		
+		res = quota(sessionId);
+		assertNoError(res);
+		quota = (JSONObject)res.getData();
+		int useAfter = quota.getInt("use");
+		
+		res = get(sessionId,clean.get(0).getFolderId(), clean.get(0).getAttachedId(), clean.get(0).getAttachedId(), clean.get(0).getId());
+		assertNoError(res);
+		
+		assertEquals(useAfter-use,((JSONObject)res.getData()).get("file_size"));
+	}
+	
 	public void upload() throws Exception {
 		AttachmentMetadata attachment = new AttachmentImpl();
 		attachment.setFolderId(folderId);

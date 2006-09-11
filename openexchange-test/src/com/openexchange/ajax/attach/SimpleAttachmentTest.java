@@ -48,6 +48,10 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 		doList();
 	}
 	
+	public void testQuota() throws Exception {
+		doQuota();
+	}
+	
 	public void notestAddMany() throws Exception {
 		for(int i = 1; i < 1000000; i++) {
 			if(i % 1000 == 0)

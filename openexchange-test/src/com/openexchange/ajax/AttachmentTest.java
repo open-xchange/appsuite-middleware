@@ -170,6 +170,15 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return get.getResponseBodyAsStream();
 	}
 	
+	public Response quota(String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = new StringBuffer("http://");
+		url.append(getHostName());
+		url.append("/ajax/filestore?session=");
+		url.append(sessionId);
+		url.append("&action=get");
+		return gT(url.toString());
+	}
+	
 	private void addCommon(StringBuffer url, int folderId, int attachedId, int moduleId) {
 		url.append("&folder="+folderId);
 		url.append("&attached="+attachedId);
