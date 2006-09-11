@@ -76,15 +76,17 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		
 		JSONArray arrayOfarrays = (JSONArray) res.getData();
-		
+		assertEquals(2, arrayOfarrays.length());
 		assertTitle(0,arrayOfarrays, "Test 5");
 		assertTitle(1,arrayOfarrays, "Test 15");
+		
 		
 		res = search(sessionId, "5", COLS,-1, Metadata.DESCRIPTION, "DESC", 0, 1);
 		assertNoError(res);
 		
 		arrayOfarrays = (JSONArray) res.getData();
 		
+		assertEquals(2, arrayOfarrays.length());
 		assertTitle(0,arrayOfarrays, "Test 25");
 		assertTitle(1,arrayOfarrays, "Test 15");
 		
@@ -93,16 +95,18 @@ public class SearchTest extends InfostoreAJAXTest {
 		
 		arrayOfarrays = (JSONArray) res.getData();
 		
-		assertTitle(1,arrayOfarrays, "Test 15");
-		assertTitle(2,arrayOfarrays, "Test 5");
+		assertEquals(2, arrayOfarrays.length());
+		assertTitle(0,arrayOfarrays, "Test 15");
+		assertTitle(1,arrayOfarrays, "Test 5");
 		
 		res = search(sessionId, "5", COLS,-1, Metadata.DESCRIPTION, "DESC", 1, 5);
 		assertNoError(res);
 		
 		arrayOfarrays = (JSONArray) res.getData();
 		
-		assertTitle(1,arrayOfarrays, "Test 15");
-		assertTitle(2,arrayOfarrays, "Test 5");
+		assertEquals(2, arrayOfarrays.length());
+		assertTitle(0,arrayOfarrays, "Test 15");
+		assertTitle(1,arrayOfarrays, "Test 5");
 			
 	}
 	
