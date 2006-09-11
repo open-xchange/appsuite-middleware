@@ -160,7 +160,7 @@ public class FolderParser extends FolderChildParser {
 	}
 	
 	protected int getPermissionAttributeValue(Element e, String name) throws Exception {
-		return Integer.parseInt(e.getAttributeValue("folderpermission", XmlServlet.NS));
+		return Integer.parseInt(e.getAttributeValue(name, XmlServlet.NS));
 	}
 
 	protected boolean getPermissionAdminFlag(Element e) throws Exception {
