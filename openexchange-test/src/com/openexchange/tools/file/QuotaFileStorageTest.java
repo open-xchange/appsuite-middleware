@@ -62,8 +62,10 @@ public class QuotaFileStorageTest extends TestCase {
         }
 	}
 	
-	public void notestExclusiveLock() throws Exception{
+	public void testExclusiveLock() throws Exception{
 		//FIXME
+		
+		
 //		 Taken from FileStorageTest
 		final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.deleteOnExit();
@@ -75,7 +77,7 @@ public class QuotaFileStorageTest extends TestCase {
         quotaStorage.setQuota(10000);
         quotaStorage.storeUsage(5000);
         
-        Thread[] threads = new Thread[30];
+        Thread[] threads = new Thread[40];
         for(int i = 0; i < threads.length; i++) {
         	threads[i] = new AddAndRemoveThread(50,quotaStorage);
         }
@@ -136,9 +138,11 @@ public class QuotaFileStorageTest extends TestCase {
 		public void run() {
 			for(int i = 0; i < counter; i++) {
 				try {
+					int w = r.nextInt(200);
 					String id = fs.saveNewFile(new ByteArrayInputStream(bytes));
-					Thread.sleep(r.nextInt(200));
+					Thread.sleep(w);
 					fs.deleteFile(id);
+					//System.out.println(w);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
