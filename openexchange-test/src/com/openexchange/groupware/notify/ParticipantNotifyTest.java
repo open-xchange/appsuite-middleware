@@ -22,6 +22,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.IUser;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockGroupLookup;
 import com.openexchange.groupware.ldap.MockUserLookup;
@@ -205,8 +206,8 @@ public class ParticipantNotifyTest extends TestCase{
 		return task;
 	}
 	
-	public static User[] U(int...ids) {
-		User[] users = new User[ids.length];
+	public static IUser[] U(int...ids) {
+		IUser[] users = new IUser[ids.length];
 		int i = 0;
 		for(int id : ids) {
 			try {
@@ -235,12 +236,12 @@ public class ParticipantNotifyTest extends TestCase{
 		return strings;
 	}
 	
-	public static final Participant[] getParticipants(User[] users, Group[] groups, String[] external) {
+	public static final Participant[] getParticipants(IUser[] users, Group[] groups, String[] external) {
 		Participant[] participants = new Participant[users.length+groups.length+external.length];
 		
 		int i = 0;
 		
-		for(User user : users) {
+		for(IUser user : users) {
 			Participant p = new UserParticipant();
 			p.setDisplayName(user.getDisplayName());
 			p.setEmailAddress(user.getMail());
@@ -273,7 +274,7 @@ public class ParticipantNotifyTest extends TestCase{
 		session = new SessionObject("my_fake_sessionid");
 		
 		session.setContext(new ContextImpl(1));
-		session.setUserObject(new MockUserLookup().getUser(1));
+		//session.setUserObject(new MockUserLookup().getUser(1)); //FIXME
 		session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
@@ -345,7 +346,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 
 		@Override
-		protected User[] resolveUsers(Context ctx, int... ids) throws LdapException {
+		protected IUser[] resolveUsers(Context ctx, int... ids) throws LdapException {
 			return U(ids);
 		}
 

@@ -27,7 +27,7 @@ public class UserConfigurationFactory {
 		MockUserLookup users = new MockUserLookup();
 		
 		
-		User user = users.getUser(1);
+		IUser user = users.getUser(1);
 		UserConfiguration config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
 		UserSettingMail mailSetting = new UserSettingMail();
 		mailSetting.setNotifyAppointments(true);

@@ -9,10 +9,10 @@ import java.util.Map;
  */
 public class MockUserLookup {
 	
-	private Map<Integer, User> users = new HashMap<Integer, User>();
+	private Map<Integer, IUser> users = new HashMap<Integer, IUser>();
 	
 	
-	public User getUser(int uid) throws LdapException {
+	public IUser getUser(int uid) throws LdapException {
 		if(!users.containsKey(uid)) {
 			throw new LdapException("User not found: "+uid);
 		}
@@ -24,7 +24,7 @@ public class MockUserLookup {
 		String tz = "Europe/Berlin";
 		
 		int i = 0;
-		User user = new User();
+		MockUser user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("The Mailadmin");
 		user.setPreferredLanguage("en");
@@ -33,7 +33,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 1");
 		user.setPreferredLanguage("en");
@@ -42,7 +42,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,4});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 2");
 		user.setPreferredLanguage("de");
@@ -51,7 +51,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,2});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 3");
 		user.setPreferredLanguage("de");
@@ -60,7 +60,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,4});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 4");
 		user.setPreferredLanguage("de");
@@ -69,7 +69,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,2,3});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 5");
 		user.setPreferredLanguage("en");
@@ -78,7 +78,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,3,4});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 6");
 		user.setPreferredLanguage("de");
@@ -87,7 +87,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,2});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 7");
 		user.setPreferredLanguage("en");
@@ -96,7 +96,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,4});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 8");
 		user.setPreferredLanguage("de");
@@ -105,7 +105,7 @@ public class MockUserLookup {
 		user.setGroups(new int[]{1,2,3});
 		addUser(user);
 		
-		user = new User();
+		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 9");
 		user.setPreferredLanguage("fr");
@@ -116,7 +116,7 @@ public class MockUserLookup {
 		
 	}
 
-	private void addUser(User user) {
+	private void addUser(IUser user) {
 		users.put(user.getId(),user);
 	}
 
