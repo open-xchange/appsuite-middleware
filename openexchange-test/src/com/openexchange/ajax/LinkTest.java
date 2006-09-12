@@ -233,7 +233,7 @@ public class LinkTest extends AbstractAJAXTest {
 			JSONObject jo = data.getJSONObject(i);
 			
 			if (jo.getInt("id2") == go[2] && jo.getInt("folder2") == go[3] && jo.getInt("module2") == com.openexchange.groupware.Types.APPOINTMENT){
-				//doll
+				int iii  = 0;
 			}else{
 				fail("json error: OBJECT MISSMATCH");
 			}
