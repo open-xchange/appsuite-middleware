@@ -94,13 +94,14 @@ public class AppointmentTest extends AbstractAJAXTest {
 			userId = Integer.parseInt(values[1]);
 			
 			Calendar c = Calendar.getInstance();
+			c.setTimeZone(timeZone);
 			c.set(Calendar.HOUR_OF_DAY, 8);
 			c.set(Calendar.MINUTE, 0);
 			c.set(Calendar.SECOND, 0);
 			c.set(Calendar.MILLISECOND, 0);
-			c.setTimeZone(TimeZone.getTimeZone("GMT"));
 			
 			startTime = c.getTimeInMillis();
+			startTime += timeZone.getOffset(startTime);
 			endTime = startTime + 3600000;
 			
 			userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
