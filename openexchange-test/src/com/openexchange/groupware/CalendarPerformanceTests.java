@@ -8,6 +8,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.api.OXCalendar;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
 import java.util.Date;
@@ -70,10 +71,10 @@ public class CalendarPerformanceTests extends TestCase {
     public void testcheckAndAlterColsPerformance() throws Throwable {
         long pass_one_start = System.currentTimeMillis();
         final int RUNS = 4000*100;
-        CalendarOperation co = new CalendarOperation();
+        
         for (int a = 0; a < RUNS; a++)  {
             int changeable_cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.START_DATE,  AppointmentObject.END_DATE, AppointmentObject.LOCATION, AppointmentObject.SHOWN_AS, AppointmentObject.RECURRENCE_TYPE }; //cols.clone();        
-            int new_cols[] = co.checkAndAlterCols(changeable_cols);
+            int new_cols[] = CalendarCommonCollection.checkAndAlterCols(changeable_cols);
             assertNotSame(new_cols, changeable_cols);
         }
         long pass_one_end = System.currentTimeMillis();
