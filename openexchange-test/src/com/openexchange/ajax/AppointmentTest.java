@@ -79,10 +79,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	private String resourceParticipant = null;
 	
+	private static TimeZone timeZone = null;
+	
 	private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		timeZone = TimeZone.getDefault();
+		
 		try {
 			String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
 			sessionId = values[0];
@@ -483,7 +488,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
+		AppointmentWriter appointmentwriter = new AppointmentWriter(pw, timeZone);
 		appointmentwriter.writeAppointment(appointmentObj);
 		
 		pw.flush();
@@ -518,7 +523,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw);
+		AppointmentWriter appointmentwriter = new AppointmentWriter(pw, timeZone);
 		appointmentwriter.writeAppointment(appointmentObj);
 		
 		pw.flush();
@@ -671,7 +676,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		
-		AppointmentParser appointmentParser = new AppointmentParser();
+		AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, (JSONObject)response.getData());
 		
 		return appointmentObj;
@@ -762,7 +767,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	private static AppointmentObject[] jsonArray2AppointmentArray(JSONArray jsonArray) throws Exception {
 		AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
 		
-		AppointmentParser appointmentParser = new AppointmentParser();
+		AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			appointmentArray[a] = new AppointmentObject();
