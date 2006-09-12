@@ -40,7 +40,7 @@ public class CalendarTest extends TestCase {
     
     private final static int TEST_PASS = 9999;
     private final static int TEST_PASS_HOT_SPOT = 99999;
-    private static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
+    public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
@@ -221,44 +221,6 @@ public class CalendarTest extends TestCase {
         
         DBPool.pushWrite(context, readcon);
         
-    }
-    
-    public void testPerformance() throws Throwable {
-        CalendarDataObject cdao = new CalendarDataObject();
-        long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
-        long e = 1244458800000L; // 08.06.2009 13:00:00 (GMT)
-        long u = SUPER_END; 
-        cdao.setStartDate(new Date(s));
-        cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));
-        cdao.setTitle("Daily Appointment Test");
-        cdao.setRecurrenceType(OXCalendar.DAILY);
-        cdao.setRecurrenceCalculator(1);
-        cdao.setInterval(1);
-        cdao.setDays(1);
-        cdao.setRecurrenceID(1);
-        RecurringResults rrs = null;
-        int c_size = 0;
-        long pass_one_start = System.currentTimeMillis();
-        for (int a = 0; a < 400; a++) {
-            cdao.setInterval(1);
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-            c_size += rrs.size();
-        }
-        long pass_one_end = System.currentTimeMillis();
-        System.out.println("Daily runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");
-        
-        cdao.setRecurrenceType(OXCalendar.WEEKLY);
-        cdao.setDays(OXCalendar.MONDAY + OXCalendar.TUESDAY + OXCalendar.WEDNESDAY + OXCalendar.THURSDAY + OXCalendar.FRIDAY + OXCalendar.SATURDAY + OXCalendar.SUNDAY);
-        pass_one_start = System.currentTimeMillis();
-        c_size = 0;
-        for (int a = 0; a < 400; a++) {
-            cdao.setInterval(1);
-            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-            c_size += rrs.size();
-        }
-        pass_one_end = System.currentTimeMillis();
-        System.out.println("Weekly runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");          
     }
     
     public void testSaveRecurring() throws Throwable {
