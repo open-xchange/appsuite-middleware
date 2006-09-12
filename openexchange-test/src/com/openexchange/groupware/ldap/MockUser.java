@@ -1,6 +1,6 @@
 package com.openexchange.groupware.ldap;
 
-public class MockUser implements IUser {
+public class MockUser implements User {
 	private static final int GROUP_ALL = 0;
 
     /**

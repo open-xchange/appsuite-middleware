@@ -9,10 +9,10 @@ import java.util.Map;
  */
 public class MockUserLookup {
 	
-	private Map<Integer, IUser> users = new HashMap<Integer, IUser>();
+	private Map<Integer, User> users = new HashMap<Integer, User>();
 	
 	
-	public IUser getUser(int uid) throws LdapException {
+	public User getUser(int uid) throws LdapException {
 		if(!users.containsKey(uid)) {
 			throw new LdapException("User not found: "+uid);
 		}
@@ -116,7 +116,7 @@ public class MockUserLookup {
 		
 	}
 
-	private void addUser(IUser user) {
+	private void addUser(User user) {
 		users.put(user.getId(),user);
 	}
 
