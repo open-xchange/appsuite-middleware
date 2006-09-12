@@ -22,6 +22,8 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.ldap.IUser;
+import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
@@ -484,7 +486,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
 		public Context getContext();
 
-		public User getUser();
+		public IUser getUser();
 	}
 	
 	public static class ISOLATION extends AbstractAttachmentTest.ISOLATION implements Mode {
@@ -500,7 +502,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 			return null;
 		}
 
-		public User getUser() {
+		public IUser getUser() {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -524,11 +526,11 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 			}
 		}
 
-		public User getUser() {
+		public IUser getUser() {
 			try {
 				UserStorage users = UserStorage.getInstance(getContext());
 				int id = users.getUserId("francisco");
-				return users.getUser(id);
+				return (IUser) users.getUser(id);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -557,8 +559,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 			return null;
 		}
 
-		public User getUser() {
-			User u = new User();
+		public IUser getUser() {
+			MockUser u = new MockUser();
 			u.setId(23);
 			return u;
 		}
