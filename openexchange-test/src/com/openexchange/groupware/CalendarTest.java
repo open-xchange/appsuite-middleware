@@ -330,17 +330,15 @@ public class CalendarTest extends TestCase {
         CalendarMySQL calmysql = new CalendarMySQL();
         PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(SUPER_END), readcon);
         ResultSet rs = calmysql.getResultSet(prep);
-        FreeBusyResults fbr = new FreeBusyResults(rs);
-        while (true) {
-            CalendarDataObject cdao = fbr.getNext();
-            System.err.println(cdao);
-            if (cdao == null) {
-                break;
-            }
+        SearchIterator fbr = new FreeBusyResults(rs);   
+        int counter = 0;
+        while (fbr.hasNext()) {
+            CalendarDataObject cdao = (CalendarDataObject)fbr.next();            
             assertTrue(cdao.containsShownAs());
             assertTrue(cdao.containsStartDate());
             assertTrue(cdao.containsEndDate());
-        }
+            counter++;
+        }        
         DBPool.pushWrite(getContext(), readcon);
         
     }    
