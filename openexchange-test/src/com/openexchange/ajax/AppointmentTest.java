@@ -79,14 +79,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	private String resourceParticipant = null;
 	
-	private static TimeZone timeZone = null;
+	private static TimeZone timeZone = TimeZone.getDefault();
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		timeZone = TimeZone.getDefault();
 		
 		try {
 			String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
