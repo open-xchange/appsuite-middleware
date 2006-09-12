@@ -273,7 +273,7 @@ public class ParticipantNotifyTest extends TestCase{
 		session = new SessionObject("my_fake_sessionid");
 		
 		session.setContext(new ContextImpl(1));
-		//session.setUserObject(new MockUserLookup().getUser(1)); //FIXME
+		session.setUserObject(new MockUserLookup().getUser(1)); 
 		session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
