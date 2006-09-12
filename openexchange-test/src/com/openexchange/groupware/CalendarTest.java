@@ -5,8 +5,12 @@ package com.openexchange.groupware;
 import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.FreeBusyResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -24,6 +28,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Map;
@@ -35,6 +40,7 @@ public class CalendarTest extends TestCase {
     
     private final static int TEST_PASS = 9999;
     private final static int TEST_PASS_HOT_SPOT = 99999;
+    private static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
@@ -65,7 +71,7 @@ public class CalendarTest extends TestCase {
         if (!init) {
             Init.initDB();
         }
-        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        
         return resolveUser(user);
     }
     
@@ -221,7 +227,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1244458800000L; // 08.06.2009 13:00:00 (GMT)
-        long u = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
+        long u = SUPER_END; 
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -336,5 +342,47 @@ public class CalendarTest extends TestCase {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
         }
     }
+    
+    public void testfillUserParticipantsWithoutGroups() throws Exception  {
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(getContext());
+        Participants participants = new Participants();
+        Participant p = new UserParticipant();
+        p.setIdentifier(userid);
+        participants.add(p);
+ 
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        
+        Participant p2 = new UserParticipant();
+        p2.setIdentifier(resolveUser(user2));
+        participants.add(p2);
+        
+        cdao.setParticipants(participants.getList());
+        CalendarOperation.fillUserParticipants(cdao);
+   
+        assertEquals("Check participant size", cdao.getParticipants().length, cdao.getUsers().length);
+    }
+    
+    public void testFreeBusy() throws Exception  {
+        Connection readcon = DBPool.pickupWriteable(getContext());
+        CalendarMySQL calmysql = new CalendarMySQL();
+        PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(SUPER_END), readcon);
+        ResultSet rs = calmysql.getResultSet(prep);
+        FreeBusyResults fbr = new FreeBusyResults(rs);
+        while (true) {
+            CalendarDataObject cdao = fbr.getNext();
+            System.err.println(cdao);
+            if (cdao == null) {
+                break;
+            }
+            assertTrue(cdao.containsShownAs());
+            assertTrue(cdao.containsStartDate());
+            assertTrue(cdao.containsEndDate());
+        }
+        DBPool.pushWrite(getContext(), readcon);
+        
+    }    
+    
+    
     
 }
