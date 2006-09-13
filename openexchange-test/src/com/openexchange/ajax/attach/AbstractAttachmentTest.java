@@ -2,14 +2,18 @@ package com.openexchange.ajax.attach;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.AttachmentTest;
+import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -218,9 +222,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		attachment.setModuleId(moduleId);
 		
 		Response res = attach(getSecondSessionId(),folderId,attachedId,moduleId,testFile);
-		sessionId = getSessionId();
+		refreshSessionId();
 		assertTrue(res.hasError());
 		
+	}
+	
+	public void refreshSessionId() throws IOException, SAXException, JSONException{
+		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
+                getLogin(), getPassword());
 	}
 	
 	protected void doQuota() throws Exception {
