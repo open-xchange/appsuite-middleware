@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 
@@ -34,6 +35,8 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	protected String sessionId;
 	
 	protected List<Integer> clean = new ArrayList<Integer>();
+	
+	private WebConversation overrideWebConversation=null;
 	
 	public InfostoreAJAXTest(){
 		super("InfostoreAJAXTest");
@@ -531,6 +534,17 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		url.append("&action=");
 		url.append(action);
 		return url;
+	}
+
+	@Override
+	protected WebConversation getWebConversation() {
+		if(null != overrideWebConversation)
+			return overrideWebConversation;
+		return super.getWebConversation();
+	}
+	
+	public void setOverrideWebConversation(WebConversation override) {
+		this.overrideWebConversation = override;
 	}
 	
 

@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
@@ -30,6 +31,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 	protected File testFile = null;
 	
 	protected List<AttachmentMetadata> clean = new ArrayList<AttachmentMetadata>();
+	private WebConversation overrideWebConversation;
 	
 	public void setUp() throws Exception {
 		sessionId = getSessionId();
@@ -197,5 +199,16 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append("&action=");
 		url.append(action);
 		return url;
+	}
+	
+	@Override
+	protected WebConversation getWebConversation() {
+		if(null != overrideWebConversation)
+			return overrideWebConversation;
+		return super.getWebConversation();
+	}
+	
+	public void setOverrideWebConversation(WebConversation override) {
+		this.overrideWebConversation = override;
 	}
 }
