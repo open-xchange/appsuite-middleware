@@ -548,14 +548,10 @@ public class TasksTest extends AbstractAJAXTest {
         final Task task = new Task();
         task.setTitle("Task to test confirmation");
 
-        final WebConversation conversation2 = newWebConversation();
-        final String[] tmp = LoginTest.getSessionIdWithUserId(
-            conversation2, getHostName(), getSeconduser(),
-            getPassword());
-        final String sessionId2 = tmp[0];
-        final int userId2 = Integer.parseInt(tmp[1]);
-        final int folderId2 = getPrivateTaskFolder(conversation2,
-            getHostName(), sessionId2);
+        final int folderId2 = getPrivateTaskFolder(getSecondWebConversation(),
+            getHostName(), getSecondSessionId());
+        final int userId2 = getMyId(getSecondWebConversation(), getHostName(),
+            getSecondSessionId());
 
         final List<UserParticipant> participants =
             new ArrayList<UserParticipant>();
@@ -569,8 +565,9 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), task);
         LOG.trace("Created delegated task for confirmation: " + taskId);
 
-        confirmTask(conversation2, getHostName(), sessionId2, folderId2,
-            taskId, CalendarObject.ACCEPT, "Testconfirmation.");
+        confirmTask(getSecondWebConversation(), getHostName(),
+            getSecondSessionId(), folderId2, taskId, CalendarObject.ACCEPT,
+            "Testconfirmation.");
         LOG.trace("Confirmed task.");
 
         final Response response = getTask(getWebConversation(), getHostName(),

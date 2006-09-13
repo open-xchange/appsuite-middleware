@@ -56,6 +56,8 @@ public abstract class AbstractAJAXTest extends TestCase {
     
     private WebConversation webConversation = null;
 
+    private WebConversation webConversation2 = null;
+
     private String sessionId = null;
 	
     private String sessionId2 = null;
@@ -113,6 +115,16 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     /**
+     * @return Returns the webConversation.
+     */
+    protected WebConversation getSecondWebConversation() {
+        if (null == webConversation2) {
+            webConversation2 = newWebConversation();
+        }
+        return webConversation2;
+    }
+
+    /**
      * Setup the web conversation here so tests are able to create additional if
      * several users are needed for tests.
      * @return a new web conversation.
@@ -137,8 +149,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 
     protected String getSecondSessionId() throws Exception {
         if(null == sessionId2) {
-            sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
-                    getSeconduser(), getPassword());
+            sessionId2 = LoginTest.getSessionId(getSecondWebConversation(),
+                    getHostName(), getSeconduser(), getPassword());
             assertNotNull("Can't get session id for second user.",sessionId2);
         }
         return sessionId2;
@@ -153,7 +165,15 @@ public abstract class AbstractAJAXTest extends TestCase {
             LoginTest.logout(getWebConversation(), getHostName(),
                 getSessionId());
             sessionId = null;
+            webConversation = null;
         }
+        webConversation = null;
+        if (null != sessionId2) {
+            LoginTest.logout(getSecondWebConversation(), getHostName(),
+                getSecondSessionId());
+            sessionId2 = null;
+        }
+        webConversation2 = null;
     }
 
 	public String getLogin() {
