@@ -36,7 +36,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	protected List<Integer> clean = new ArrayList<Integer>();
 	
-	private WebConversation overrideWebConversation=null;
+	protected String hostName = null;
 	
 	public InfostoreAJAXTest(){
 		super("InfostoreAJAXTest");
@@ -537,15 +537,14 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 
 	@Override
-	protected WebConversation getWebConversation() {
-		if(null != overrideWebConversation)
-			return overrideWebConversation;
-		return super.getWebConversation();
+	public String getHostName() {
+		if(null == hostName)
+			return super.getHostName();
+		return hostName;
 	}
 	
-	public void setOverrideWebConversation(WebConversation override) {
-		this.overrideWebConversation = override;
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
 	}
-	
 
 }
