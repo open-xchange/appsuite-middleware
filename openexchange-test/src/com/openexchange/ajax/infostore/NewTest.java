@@ -122,6 +122,7 @@ public class NewTest extends InfostoreAJAXTest {
 			clean.add(id);
 			fail("Uploaded Large File and got no error");
 		} catch (Exception x) {
+			System.out.println(x.getMessage());
 			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
 		}
 	}
