@@ -31,6 +31,8 @@ import com.openexchange.tools.URLParameter;
 
 public class FolderTest extends AbstractAJAXTest {
 	
+	private String sessionId;
+
 	public FolderTest(String name) {
 		super(name);
 	}
@@ -525,6 +527,14 @@ public class FolderTest extends AbstractAJAXTest {
 	
 	public static void printTestEnd(String testName) {
 		System.out.println("--------------------------------"+testName+"--------------------------------");
+	}
+	
+	public void setUp() throws Exception{
+		sessionId = getSessionId();
+	}
+	
+	public void tearDown() throws Exception{
+		logout();
 	}
 	
 	public void testUnknownAction() {
