@@ -282,8 +282,11 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		
 		WebResponse resp = webConv.getResponse(m);
-		
-		return new Integer(new JSONObject(resp.getText()).getInt("data"));
+		try {
+			return new Integer(new JSONObject(resp.getText()).getInt("data"));
+		} catch (JSONException x) {
+			throw new JSONException("Got unexpected answer: "+resp.getText());
+		}
 	}
 	
 	public int createNew(WebConversation webConv, String sessionId, Map<String, String> fields, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
@@ -309,7 +312,11 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		if(!"".equals(response.optString("error"))) {
 			throw new IOException(response.getString("error"));
 		}
-		return response.getInt("data");
+		try {
+			return response.getInt("data");
+		} catch (JSONException x) {
+			throw new JSONException("Got unexpected answer: "+response);
+		}
 	}
 	
 	public int saveAs(WebConversation webConv, String sessionId, int folderId, int attached, int module, int attachment, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
