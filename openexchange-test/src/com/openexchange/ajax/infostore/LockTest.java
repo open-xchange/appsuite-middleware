@@ -154,6 +154,7 @@ public class LockTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		
 		// Owner may unlock
+		refreshSessionId();
 		res = unlock(sessionId,clean.get(0));
 		assertNoError(res);
 		

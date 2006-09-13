@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
@@ -167,11 +168,10 @@ public class AttachmentTest extends AbstractAJAXTest {
 		addCommon(url, folderId, attachedId, moduleId);
 		url.append("&id="+id);
 		
-		HttpClient client = new HttpClient();
-		GetMethod get = new GetMethod(url.toString());
-		client.executeMethod(get);
+		GetMethodWebRequest m = new GetMethodWebRequest(url.toString());
+		WebResponse resp = getWebConversation().getResource(m);
 		
-		return get.getResponseBodyAsStream();
+		return resp.getInputStream();
 	}
 	
 	public Response quota(String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {

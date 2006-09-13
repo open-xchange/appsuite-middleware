@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -411,12 +412,11 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 		if(version!=-1)
 			url.append("&version="+version);
 		
-		HttpClient client = new HttpClient();
-		GetMethod get = new GetMethod(url.toString());
-		client.executeMethod(get);
-		if(200 != get.getStatusCode())
-			throw new HttpException("Got status: "+get.getStatusCode());
-		return get.getResponseBodyAsStream();
+		
+		GetMethodWebRequest m = new GetMethodWebRequest(url.toString());
+		WebResponse resp = getWebConversation().getResource(m);
+		
+		return resp.getInputStream();
 	}
 	
 	public int copy(String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws JSONException, IOException {

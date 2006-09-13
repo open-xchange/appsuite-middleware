@@ -58,6 +58,8 @@ public abstract class AbstractAJAXTest extends TestCase {
     private WebConversation webConversation = null;
 
     private Properties ajaxProps = null;
+
+	private WebConversation webConversation2;
 	
 	protected static final String jsonTagData = "data";
 
@@ -113,11 +115,11 @@ public abstract class AbstractAJAXTest extends TestCase {
     	if(null == sessionId2) {
     		sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
     				getSeconduser(), getPassword());
-			cookie2 = getWebConversation().getHeaderField("Set-Cookie");
-    		assertNotNull("Can't get session id for second user.",sessionId2);
-    	}
+    		cookie2 = getWebConversation().getCookieValue("open-xchange-session-" + sessionId2);
+            assertNotNull("Can't get session id.", sessionId);
+        }
+		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId2 + "=" + cookie2);
 		
-		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId + "=" + cookie);
     	return sessionId2;
     }
 

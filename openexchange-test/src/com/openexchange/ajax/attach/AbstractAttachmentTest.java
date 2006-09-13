@@ -21,7 +21,6 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		super(name);
 	}
 
-	protected String sessionId2 = null;
 	
 	protected int attachedId = -1;
 	protected int folderId = -1;
@@ -32,7 +31,6 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	public void setUp() throws Exception{
 		super.setUp();
 		
-		sessionId2 = getSecondSessionId();
 		
 		folderId = getExclusiveWritableFolder(sessionId);
 		attachedId = createExclusiveWritableAttachable(sessionId,folderId);
@@ -219,8 +217,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		attachment.setAttachedId(attachedId);
 		attachment.setModuleId(moduleId);
 		
-		Response res = attach(sessionId2,folderId,attachedId,moduleId,testFile);
+		Response res = attach(getSecondSessionId(),folderId,attachedId,moduleId,testFile);
+		sessionId = getSessionId();
 		assertTrue(res.hasError());
+		
 	}
 	
 	protected void doQuota() throws Exception {
