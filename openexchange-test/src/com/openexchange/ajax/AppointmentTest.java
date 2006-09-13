@@ -469,14 +469,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public void testSimpleSearch() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testSimpleSearch");
+		String date = String.valueOf(System.currentTimeMillis());
+		appointmentObj.setTitle("testSimpleSearch" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), getLogin(), appointmentFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("appointment array size is 0", appointmentArray.length > 0);
 	}
 	
