@@ -8,14 +8,13 @@ import junit.textui.TestRunner;
 public class FolderTestRunner {
 
 
-	public static Test suite() {
+	public static Test createFolderTestSuite() {
 		TestSuite testSuite = new TestSuite();
-		testSuite.addTest(new FolderTest("testDeleteFolder"));
-		testSuite.addTest(new FolderTest("testFailDeleteFolder"));
+		testSuite.addTest(new FolderTest("testSharedFolder"));
 		return testSuite;
 	}
 	
 	public static void main(String[] args) {
-		TestRunner.run(suite());
+		TestRunner.run(createFolderTestSuite());
 	}
 }
