@@ -201,11 +201,8 @@ public class FolderTest extends AbstractAJAXTest {
 			}
 			fo.setPermissionsAsArray(perms);
 		}
-		
-		if (fo.getModule() != FolderObject.MAIL && (!respObj.has("timestamp") || respObj.isNull("timestamp"))) {
-			throw new OXException("Error occured: Missing key \"timestamp\"");
-		}
-		if (respObj.has("timestamp"))
+
+		if (respObj.has("timestamp") && !respObj.isNull("timestamp"))
 			timestamp.setTimeInMillis(respObj.getLong("timestamp"));
 		if (printOutput)
 			System.out.println(respObj.toString());
