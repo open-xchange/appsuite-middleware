@@ -37,6 +37,7 @@
 
 package com.openexchange.ajax;
 
+import java.io.ByteArrayInputStream;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
@@ -46,10 +47,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.tools.RandomString;
+import com.openexchange.tools.URLParameter;
 
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
@@ -58,12 +62,11 @@ import com.openexchange.tools.RandomString;
  */
 public class ConfigMenuTest extends AbstractAJAXTest {
 
-    public ConfigMenuTest(String name) {
-		super(name);
-	}
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
 
-	private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
-    
     private static final String CONFIG_URL = "/ajax/config/";
 
     private static final int NUMBER_OF_SETTINGS = 10;
@@ -73,6 +76,14 @@ public class ConfigMenuTest extends AbstractAJAXTest {
     private static final int MAX_PATH_NAME_LENGTH = 10;
 
     private static final int MAX_VALUE_LENGTH = 10;
+
+    /**
+     * Default constructor.
+     * @param name Name of this test.
+     */
+    public ConfigMenuTest(final String name) {
+        super(name);
+    }
 
     /**
      * This method tests storing of a number of random values under path with
@@ -106,40 +117,58 @@ public class ConfigMenuTest extends AbstractAJAXTest {
         }
     }
 
+    /**
+     * Tests if the settings can be read from the server.
+     * @throws Throwable if an error occurs.
+     */
     public void testReadSettings() throws Throwable {
-        String value = readSetting(getWebConversation(), getHostName(),
+        final String value = readSetting(getWebConversation(), getHostName(),
             getSessionId(), "");
         assertTrue("Got no value from server.", value.length() > 0);
     }
-    
+
+    public void testTimeZone() throws Throwable {
+        final String timeZone = readSetting(getWebConversation(), getHostName(),
+            getSessionId(), "timezone");
+        final String testTimeZone = "Australia/Hobart";
+        storeSetting(getWebConversation(), getHostName(), getSessionId(),
+            "timezone", testTimeZone);
+        assertEquals(testTimeZone, readSetting(getWebConversation(),
+            getHostName(), getSessionId(), "timezone"));
+        storeSetting(getWebConversation(), getHostName(), getSessionId(),
+            "timezone", timeZone);
+    }
+
     public static String readSetting(final WebConversation conversation,
         final String hostName, final String sessionId, final String path)
         throws Throwable {
         LOG.trace("Reading setting.");
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + CONFIG_URL + path);
-        req.setParameter("session", sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setHeaderField("Content-Type", "");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: \"" + body + "\"");
-        return body;
+        final Response response = Response.parse(body);
+        return response.getData().toString();
     }
 
     public static void storeSetting(final WebConversation conversation,
         final String hostName, final String sessionId, final String path,
         final String value) throws Throwable {
         LOG.trace("Storing setting.");
-        final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostName
-            + CONFIG_URL + path);
-        req.setParameter("session", sessionId);
-        req.setParameter("value", value);
+        URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
+            + CONFIG_URL + path + parameter.getURLParameters(),
+            new ByteArrayInputStream(value.getBytes("UTF-8")),
+            "application/octet-stream");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
-        // assertEquals(0, resp.getContentLength());
         LOG.trace("Setting stored.");
     }
 }
