@@ -50,7 +50,11 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskAttachmentTest extends AbstractAttachmentTest {
 
-    /**
+    public TaskAttachmentTest(String name) {
+		super(name);
+	}
+
+	/**
      * {@inheritDoc}
      */
     @Override

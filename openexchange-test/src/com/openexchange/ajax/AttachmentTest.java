@@ -21,6 +21,10 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class AttachmentTest extends AbstractAJAXTest {
 	
+	public AttachmentTest(String name) {
+		super(name);
+	}
+
 	protected String sessionId = null;
 	protected File testFile = null;
 	

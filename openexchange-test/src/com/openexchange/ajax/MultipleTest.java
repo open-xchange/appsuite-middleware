@@ -16,6 +16,10 @@ import org.json.JSONObject;
 
 public class MultipleTest extends AbstractAJAXTest {
 	
+	public MultipleTest(String name) {
+		super(name);
+	}
+
 	private static final String MULTIPLE_URL = "/ajax/multiple";
 	
 	public void testMultiple() throws Exception {

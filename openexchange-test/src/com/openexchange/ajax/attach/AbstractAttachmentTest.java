@@ -4,21 +4,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AttachmentTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
+
+	public AbstractAttachmentTest(String name) {
+		super(name);
+	}
 
 	protected String sessionId2 = null;
 	

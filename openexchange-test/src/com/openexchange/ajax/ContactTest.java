@@ -39,6 +39,10 @@ import org.json.JSONObject;
 
 public class ContactTest extends AbstractAJAXTest {
 	
+	public ContactTest(String name) {
+		super(name);
+	}
+
 	public static final String CONTENT_TYPE = "image/png";
 	
 	public static final String BASE64String = "ABCDEFGHIJK";

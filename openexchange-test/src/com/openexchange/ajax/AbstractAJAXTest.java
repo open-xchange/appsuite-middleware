@@ -62,6 +62,10 @@ public abstract class AbstractAJAXTest extends TestCase {
 	protected static final String jsonTagError = "error";
 	
 	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
+	
+	public AbstractAJAXTest(String name) {
+		super(name);
+	}
 
     protected String getAJAXProperty(final String key) {
         return getAJAXProperties().getProperty(key);

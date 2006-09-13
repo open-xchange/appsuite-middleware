@@ -59,7 +59,11 @@ import com.meterware.httpunit.WebResponse;
  */
 public class LoginTest extends AbstractAJAXTest {
 
-    /**
+    public LoginTest(String name) {
+		super(name);
+	}
+
+	/**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(LoginTest.class);

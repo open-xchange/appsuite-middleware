@@ -82,7 +82,11 @@ import com.openexchange.tools.URLParameter;
  */
 public class TasksTest extends AbstractAJAXTest {
 
-    /**
+    public TasksTest(String name) {
+		super(name);
+	}
+
+	/**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(TasksTest.class);

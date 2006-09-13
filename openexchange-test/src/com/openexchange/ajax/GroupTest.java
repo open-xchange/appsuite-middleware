@@ -16,6 +16,10 @@ import org.json.JSONObject;
 
 public class GroupTest extends AbstractAJAXTest {
 	
+	public GroupTest(String name) {
+		super(name);
+	}
+
 	private static final String GROUP_URL = "/ajax/group";
 	
 	public void testSearch() throws Exception {

@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -28,7 +27,7 @@ public class TestMail extends TestCase {
 	
 	public void setUp() throws Exception {
 		wc = new WebConversation();
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/login?name=thorben&password=netline");
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/login?action=login&name=thorben&password=netline");
 		resp = wc.getResponse(req);
 		JSONObject respObj = new JSONObject(resp.getText());
 		sessionId = respObj.getString("session");
@@ -58,13 +57,35 @@ public class TestMail extends TestCase {
 		}
 	}
 	
-	public void testGetAllMailsInInbox() {
+	public void notestGetAllMailsInInbox() {
 		/*
 		 * Default folder "inbox"
 		 */
 		String columns = JSONMessageObject.FIELD_ID + "";
 		req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
 				+ "&action=all&folder=Inbox&sort="+JSONMessageObject.FIELD_SENT_DATE+"&order=ASC&columns=" + columns);
+		try {
+			long start = System.currentTimeMillis();
+			resp = wc.getResponse(req);
+			String s = resp.getText();
+			JSONObject respObj = new JSONObject(s);
+			System.out.println("Response:\n" + respObj.toString());
+			System.out.println("\n\tDuration: " + (System.currentTimeMillis() - start)
+					+ "msec");
+			assertFalse(resp.getText().indexOf("error") > -1);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testNewMailsInInbox() {
+		/*
+		 * Default folder "inbox"
+		 */
+		String columns = JSONMessageObject.FIELD_ID + "";
+		req = new GetMethodWebRequest("http://127.0.0.1/ajax/mail?session=" + sessionId
+				+ "&action=newmsgs&folder=Inbox&sort="+JSONMessageObject.FIELD_SENT_DATE+"&order=ASC&columns=" + columns);
 		try {
 			long start = System.currentTimeMillis();
 			resp = wc.getResponse(req);

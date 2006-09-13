@@ -27,6 +27,10 @@ import org.json.JSONWriter;
 
 public class LinkTest extends AbstractAJAXTest {
 		
+	public LinkTest(String name) {
+		super(name);
+	}
+
 	private static final String LINK_URL = "/ajax/link";
 
 	

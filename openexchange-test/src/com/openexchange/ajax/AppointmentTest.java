@@ -1,14 +1,26 @@
 package com.openexchange.ajax;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -25,20 +37,13 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.URLParameter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class AppointmentTest extends AbstractAJAXTest {
 	
+	public AppointmentTest(String name) {
+		super(name);
+	}
+
 	public static final int[] APPOINTMENT_FIELDS = {
 		DataObject.OBJECT_ID,
 		DataObject.CREATED_BY,

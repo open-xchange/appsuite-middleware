@@ -1,18 +1,23 @@
 package com.openexchange.ajax;
 
 
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.DataFields;
-import java.io.ByteArrayInputStream;
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ReminderTest extends AbstractAJAXTest {
 	
+	public ReminderTest(String name) {
+		super(name);
+	}
+
 	private static final String REMINDER_URL = "/ajax/reminder";
 	
 	private static final long d7 = 604800000;

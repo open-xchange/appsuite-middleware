@@ -16,6 +16,10 @@ import org.json.JSONObject;
 
 public class ResourceTest extends AbstractAJAXTest {
 	
+	public ResourceTest(String name) {
+		super(name);
+	}
+
 	private static final String RESOURCE_URL = "/ajax/resource";
 	
 	public void testSearch() throws Exception {

@@ -58,7 +58,11 @@ import com.openexchange.tools.RandomString;
  */
 public class ConfigMenuTest extends AbstractAJAXTest {
 
-    private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
+    public ConfigMenuTest(String name) {
+		super(name);
+	}
+
+	private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
     
     private static final String CONFIG_URL = "/ajax/config/";
 

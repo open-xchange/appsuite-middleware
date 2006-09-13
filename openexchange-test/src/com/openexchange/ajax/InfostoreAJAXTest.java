@@ -35,7 +35,7 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	protected List<Integer> clean = new ArrayList<Integer>();
 	
 	public InfostoreAJAXTest(){
-		super();
+		super("InfostoreAJAXTest");
 	}	
 	
 	public void setUp() throws Exception {

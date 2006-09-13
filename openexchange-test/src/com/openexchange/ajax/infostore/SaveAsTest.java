@@ -13,7 +13,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 	
-	private TaskAttachmentTest attachmentTest = new TaskAttachmentTest();
+	private TaskAttachmentTest attachmentTest = new TaskAttachmentTest("TaskAttachmentTest");
 	
 	
 	public void testBasic() throws Exception {
