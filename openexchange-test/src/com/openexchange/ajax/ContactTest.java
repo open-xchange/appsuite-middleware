@@ -42,19 +42,19 @@ public class ContactTest extends AbstractAJAXTest {
 	public ContactTest(String name) {
 		super(name);
 	}
-
+	
 	public static final String CONTENT_TYPE = "image/png";
 	
 	public static final String BASE64String = "ABCDEFGHIJK";
-    
-    public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0,
-            0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0,
-            37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1,
-            -1, 85, 124, -11, 108, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64, -26,
-            -40, 102, 0, 0, 0, 1, 98, 75, 71, 68, 0, -120, 5, 29, 72, 0, 0, 0,
-            9, 112, 72, 89, 115, 0, 0, 11, 18, 0, 0, 11, 18, 1, -46, -35, 126,
-            -4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
-            1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
+	
+	public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0,
+	0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0,
+	37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1,
+	-1, 85, 124, -11, 108, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64, -26,
+	-40, 102, 0, 0, 0, 1, 98, 75, 71, 68, 0, -120, 5, 29, 72, 0, 0, 0,
+	9, 112, 72, 89, 115, 0, 0, 11, 18, 0, 0, 11, 18, 1, -46, -35, 126,
+	-4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
+	1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
 	
 	protected final static int[] CONTACT_FIELDS = {
 		DataObject.OBJECT_ID,
@@ -168,17 +168,16 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	private long dateTime = 0;
 	
+	private int userId = 0;
+	
 	private static final Log LOG = LogFactory.getLog(ContactTest.class);
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-		sessionId = values[0];
-		userId = Integer.parseInt(values[1]);
-		
-		FolderObject contactFolder = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
-		contactFolderId = contactFolder.getObjectID();
+		final FolderObject folderObj = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
+		contactFolderId = folderObj.getObjectID();
+		userId = folderObj.getCreatedBy();
 		
 		Calendar c = Calendar.getInstance();
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -280,7 +279,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-
+	
 	public void testAll() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
@@ -343,7 +342,7 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
-
+	
 	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
@@ -456,7 +455,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
-        // FIXME Image must be loaded in another way from server.
+		// FIXME Image must be loaded in another way from server.
 		// assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
@@ -709,11 +708,11 @@ public class ContactTest extends AbstractAJAXTest {
 			postReq.selectFile("file", f, CONTENT_TYPE);
 			
 			req = postReq;
-			resp = webCon.getResource(req);	
+			resp = webCon.getResource(req);
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-
+			
 			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 			resp = webCon.getResponse(req);
 			
@@ -773,11 +772,11 @@ public class ContactTest extends AbstractAJAXTest {
 			postReq.selectFile("file", f, CONTENT_TYPE);
 			
 			req = postReq;
-			resp = webCon.getResource(req);	
+			resp = webCon.getResource(req);
 			jResponse = extractFromCallback(resp.getText());
 		} else {
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-
+			
 			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 			resp = webCon.getResponse(req);
 			
@@ -950,10 +949,10 @@ public class ContactTest extends AbstractAJAXTest {
 		while ((i = is.read(b)) != -1) {
 			baos.write(b, 0, i);
 		}
-
+		
 		return baos.toByteArray();
 	}
-
+	
 	
 	public static ContactObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
 		final URLParameter parameter = new URLParameter();

@@ -84,6 +84,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	private String resourceParticipant = null;
 	
+	private int userId = 0;
+	
 	private static TimeZone timeZone = TimeZone.getDefault();
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
@@ -92,9 +94,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		super.setUp();
 		
 		try {
-			String values[] = LoginTest.getSessionIdWithUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
-			sessionId = values[0];
-			userId = Integer.parseInt(values[1]);
+			final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
+			appointmentFolderId = folderObj.getObjectID();
+			userId = folderObj.getCreatedBy();
 			
 			Calendar c = Calendar.getInstance();
 			c.setTimeZone(timeZone);
@@ -113,9 +115,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 			groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
 			
 			resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
-			
-			final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-			appointmentFolderId = folderObj.getObjectID();
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			
