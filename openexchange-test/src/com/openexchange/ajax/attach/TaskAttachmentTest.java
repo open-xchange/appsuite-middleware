@@ -96,7 +96,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
             getHostName(), sessionId, folderId, taskId);
         final Date lastModified = response.getTimestamp();
         TasksTest.deleteTask(getWebConversation(), getHostName(), sessionId,
-            lastModified, new int[] { folder, taskId });
+            lastModified, folder, taskId);
     }
 
     /**

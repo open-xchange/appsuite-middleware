@@ -82,11 +82,7 @@ import com.openexchange.tools.URLParameter;
  */
 public class TasksTest extends AbstractAJAXTest {
 
-    public TasksTest(String name) {
-		super(name);
-	}
-
-	/**
+    /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(TasksTest.class);
@@ -95,6 +91,14 @@ public class TasksTest extends AbstractAJAXTest {
      * URL of the tasks AJAX interface.
      */
     private static final String TASKS_URL = "/ajax/tasks";
+
+    /**
+     * Default constructor.
+     * @param name Name of this test.
+     */
+    public TasksTest(final String name) {
+        super(name);
+    }
 
     /**
      * Tests counting of tasks in the private folder.
@@ -171,7 +175,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertFalse(response.getErrorMessage(), response.hasError());
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     /**
@@ -198,7 +202,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Date lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     /**
@@ -231,7 +235,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Date lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     /**
@@ -290,7 +294,7 @@ public class TasksTest extends AbstractAJAXTest {
         }
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     public void testUpdateDelegatedTask() throws Throwable {
@@ -364,7 +368,7 @@ public class TasksTest extends AbstractAJAXTest {
         }
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     public void testUpdate() throws Throwable {
@@ -398,7 +402,7 @@ public class TasksTest extends AbstractAJAXTest {
         lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     public void testAll() throws Throwable {
@@ -422,7 +426,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask);
+                lastModified, folderAndTask[0], folderAndTask[1]);
         }
     }
 
@@ -452,7 +456,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask);
+                lastModified, folderAndTask[0], folderAndTask[1]);
         }
     }
 
@@ -494,7 +498,7 @@ public class TasksTest extends AbstractAJAXTest {
         System.arraycopy(tasks, 8, deltasks, 0, 2);
         for (int[] folderAndTask : deltasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask);
+                timestamp, folderAndTask[0], folderAndTask[1]);
         }
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
@@ -509,7 +513,7 @@ public class TasksTest extends AbstractAJAXTest {
         timestamp = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask);
+                timestamp, folderAndTask[0], folderAndTask[1]);
         }
     }
 
@@ -534,7 +538,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Date lastModified = response.getTimestamp();
         for (int[] folderAndTask : tasks) {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask);
+                lastModified, folderAndTask[0], folderAndTask[1]);
         }
     }
 
@@ -586,7 +590,7 @@ public class TasksTest extends AbstractAJAXTest {
         assertTrue("Can't find confirmation.", confirmed);
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, new int[] { folderId, taskId });
+            lastModified, folderId, taskId);
     }
 
     /**
@@ -700,22 +704,20 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * @param folderAndTaskIds the first dimension contains several folder and
-     * task identifier that should be deleted. The second dimension contains the
-     * folder identifier with the index <code>0</code> and the task identifier
-     * with the index <code>1</code>.
+     * @param folderAndTaskId Contains the folder identifier with the index
+     * <code>0</code> and the task identifier with the index <code>1</code>.
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      */
     public static void deleteTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
-        final int[] folderAndTask) throws IOException, SAXException,
+        final int folder, final int task) throws IOException, SAXException,
         JSONException {
         LOG.trace("Deleting tasks.");
         final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, folderAndTask[1]);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
+        json.put(AJAXServlet.PARAMETER_ID, task);
+        json.put(AJAXServlet.PARAMETER_INFOLDER, folder);
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes("UTF-8"));
         final URLParameter parameter = new URLParameter();
