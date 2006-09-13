@@ -38,8 +38,12 @@ public abstract class AbstractAJAXTest extends TestCase {
     public static final String PROTOCOL = "http://";
 
     protected static String sessionId = null;
+	
+	protected static String cookie = null;
     
     protected static String sessionId2 = null;
+	
+	protected static String cookie2 = null;
 
 	private static String hostName = null;
 	
@@ -86,8 +90,10 @@ public abstract class AbstractAJAXTest extends TestCase {
         if (null == sessionId) {
             sessionId = LoginTest.getSessionId(getWebConversation(),
                 getHostName(), getLogin(), getPassword());
+			cookie = getWebConversation().getCookieValue("open-xchange-session-" + sessionId);
             assertNotNull("Can't get session id.", sessionId);
         }
+		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId + "=" + cookie);
         return sessionId;
     }
 
@@ -107,8 +113,11 @@ public abstract class AbstractAJAXTest extends TestCase {
     	if(null == sessionId2) {
     		sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
     				getSeconduser(), getPassword());
+			cookie2 = getWebConversation().getHeaderField("Set-Cookie");
     		assertNotNull("Can't get session id for second user.",sessionId2);
     	}
+		
+		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId + "=" + cookie);
     	return sessionId2;
     }
 
