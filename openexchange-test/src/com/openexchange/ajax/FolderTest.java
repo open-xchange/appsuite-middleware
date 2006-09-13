@@ -176,7 +176,7 @@ public class FolderTest extends AbstractAJAXTest {
 		if(!jsonFolder.isNull("module"))
 		fo.setModule(FolderParser.getModuleFromString(jsonFolder.getString("module"), fo.containsObjectID() ? fo.getObjectID() : -1));
 		
-		if (jsonFolder.has(FolderFields.PERMISSIONS)) {
+		if (jsonFolder.has(FolderFields.PERMISSIONS) && !jsonFolder.isNull(FolderFields.PERMISSIONS)) {
 			JSONArray jsonArr = jsonFolder.getJSONArray(FolderFields.PERMISSIONS);
 			OCLPermission[] perms = new OCLPermission[jsonArr.length()];
 			for (int i = 0; i < jsonArr.length(); i++) {
