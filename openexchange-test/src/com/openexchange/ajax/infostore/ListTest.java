@@ -25,7 +25,7 @@ public class ListTest extends InfostoreAJAXTest {
 		bothEntries[1][0] = folderId;
 		
 		
-		Response res = list(sessionId, new int[]{Metadata.ID,Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL},bothEntries);
+		Response res = list(getWebConversation(), sessionId,new int[]{Metadata.ID,Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL}, bothEntries);
 		
 		assertNoError(res);
 		

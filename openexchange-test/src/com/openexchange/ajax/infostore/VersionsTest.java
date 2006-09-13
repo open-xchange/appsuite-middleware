@@ -25,19 +25,19 @@ public class VersionsTest extends InfostoreAJAXTest {
 	
 	public void testVersions() throws Exception{
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"),upload,"text/plain");
+		Response res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"),upload, "text/plain");
 		assertNoError(res);
 		
-		res = versions(sessionId,clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
+		res = versions(getWebConversation(),sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 
 		assureVersions(new Integer[]{1,2,3},res,3);
 		
-		res = versions(sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.VERSION_COMMENT});
+		res = versions(getWebConversation(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.VERSION_COMMENT});
 		assertNoError(res);
 		
 		Map<Integer, String> comments = new HashMap<Integer, String>();

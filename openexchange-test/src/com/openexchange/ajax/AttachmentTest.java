@@ -31,7 +31,6 @@ public class AttachmentTest extends AbstractAJAXTest {
 	protected File testFile = null;
 	
 	protected List<AttachmentMetadata> clean = new ArrayList<AttachmentMetadata>();
-	private WebConversation overrideWebConversation;
 	
 	public void setUp() throws Exception {
 		sessionId = getSessionId();
@@ -40,17 +39,17 @@ public class AttachmentTest extends AbstractAJAXTest {
 	
 	public void tearDown() throws Exception {
 		for(AttachmentMetadata attachment : clean) {
-			detach(sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), new int[]{attachment.getId()});
+			detach(getWebConversation(), sessionId, attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), new int[]{attachment.getId()});
 		}
 		clean.clear();
 	}
 	
 	
-	public Response attach(String sessionId, int folderId, int attachedId, int moduleId, File upload) throws JSONException, IOException {
-		return attach(sessionId,folderId,attachedId,moduleId,upload,null,null);
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload) throws JSONException, IOException {
+		return attach(webConv,sessionId,folderId,attachedId,moduleId,upload,null, null);
 	}
 	
-	public Response attach(String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
 		StringBuffer url = getUrl(sessionId,"attach");
 		
 		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
@@ -72,7 +71,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 			req.selectFile("file",upload);
 		}
 		
-		WebResponse resp = getWebConversation().getResource(req);
+		WebResponse resp = webConv.getResource(req);
 		
 		String html = resp.getText();
 		JSONObject response = extractFromCallback(html);
@@ -83,7 +82,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return Response.parse(response.toString());
 	}
 
-	public Response detach(String sessionId, int folderId, int attachedId, int moduleId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response detach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId,"detach");
 		addCommon(url, folderId, attachedId, moduleId);
 		
@@ -95,24 +94,24 @@ public class AttachmentTest extends AbstractAJAXTest {
 		data.setLength(data.length()-1);
 		data.append("]");
 		
-		return putT(url.toString(),data.toString());
+		return putT(webConv,url.toString(), data.toString());
 	}
 	
-	public Response updates(String sessionId, int folderId, int attachedId, int moduleId, long timestamp, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response updates(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, long timestamp, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId, "updates");
 		addCommon(url, folderId, attachedId, moduleId);
 		addSort(url,columns,sort,order);
 		url.append("&timestamp="+timestamp);
-		return gT(url.toString());
+		return gT(webConv, url.toString());
 	}
 	
-	public Response all(String sessionId, int folderId, int attachedId, int moduleId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response all(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId, "all");
 		addCommon(url, folderId, attachedId, moduleId);
 		addSort(url, columns,sort,order);
 		
 		
-		return gT(url.toString());
+		return gT(webConv, url.toString());
 	}
 	
 	private void addSort(StringBuffer url, int[] columns, int sort, String order) {
@@ -133,7 +132,7 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append(order);
 	}
 
-	public Response list(String sessionId, int folderId, int attachedId, int moduleId, int[] ids, int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
+	public Response list(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids, int[] columns) throws JSONException, MalformedURLException, IOException, SAXException {
 		StringBuffer url = getUrl(sessionId, "list");
 		addCommon(url,folderId,attachedId,moduleId);
 		StringBuffer data = new StringBuffer("[");
@@ -155,17 +154,17 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append(cols);
 		
 		
-		return putT(url.toString(), data.toString());
+		return putT(webConv, url.toString(), data.toString());
 	}
 	
-	public Response get(String sessionId, int folderId, int attachedId, int moduleId, int id) throws MalformedURLException, JSONException, IOException, SAXException{
+	public Response get(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws MalformedURLException, JSONException, IOException, SAXException{
 		StringBuffer url = getUrl(sessionId,"get");
 		addCommon(url, folderId, attachedId, moduleId);
 		url.append("&id="+id);
-		return gT(url.toString());
+		return gT(webConv, url.toString());
 	}
 	
-	public InputStream document(String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException{
+	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException{
 		StringBuffer url = getUrl(sessionId,"document");
 		addCommon(url, folderId, attachedId, moduleId);
 		url.append("&id="+id);
@@ -176,13 +175,13 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return resp.getInputStream();
 	}
 	
-	public Response quota(String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
+	public Response quota(WebConversation webConv, String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = new StringBuffer("http://");
 		url.append(getHostName());
 		url.append("/ajax/filestore?session=");
 		url.append(sessionId);
 		url.append("&action=get");
-		return gT(url.toString());
+		return gT(webConv, url.toString());
 	}
 	
 	private void addCommon(StringBuffer url, int folderId, int attachedId, int moduleId) {
@@ -199,16 +198,5 @@ public class AttachmentTest extends AbstractAJAXTest {
 		url.append("&action=");
 		url.append(action);
 		return url;
-	}
-	
-	@Override
-	protected WebConversation getWebConversation() {
-		if(null != overrideWebConversation)
-			return overrideWebConversation;
-		return super.getWebConversation();
-	}
-	
-	public void setOverrideWebConversation(WebConversation override) {
-		this.overrideWebConversation = override;
 	}
 }

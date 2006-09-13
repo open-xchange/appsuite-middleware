@@ -16,14 +16,14 @@ public class DocumentTest extends InfostoreAJAXTest {
 		super.setUp();
 		upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		id = createNew(
+				getWebConversation(),
 				sessionId,
 				m(
 						"folder_id" 		,	((Integer)folderId).toString(),
 						"title"  		,  	"test upload",
 						"description" 	, 	"test upload description"
 				),
-				upload,
-				"text/plain"
+				upload, "text/plain"
 		);
 		clean.add(id);
 	}
@@ -33,7 +33,7 @@ public class DocumentTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(sessionId,id,-1);
+			is2 = document(getWebConversation(),sessionId,id, -1);
 			
 			assertSameContent(is,is2);
 		} finally {

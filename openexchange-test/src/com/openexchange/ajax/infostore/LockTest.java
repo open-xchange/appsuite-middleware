@@ -47,118 +47,115 @@ public class LockTest extends InfostoreAJAXTest {
 				"description" 	, 	"test knowledge description"
 		);
 		
-		int c = this.createNew(sessionId,create,testFile,"text/plain");
+		int c = this.createNew(getWebConversation(),sessionId,create,testFile, "text/plain");
 		
 		clean.add(c);
 		
-		Response res = this.update(sessionId,c,System.currentTimeMillis(),m(),testFile,"text/plain");
+		Response res = this.update(getWebConversation(),sessionId,c,System.currentTimeMillis(),m(),testFile, "text/plain");
 		assertNoError(res);
 		
-		res = this.update(sessionId,c,System.currentTimeMillis(),m(),testFile,"text/plain");
+		res = this.update(getWebConversation(),sessionId,c,System.currentTimeMillis(),m(),testFile, "text/plain");
 		assertNoError(res);
 		
-		res = this.update(sessionId,c,System.currentTimeMillis(),m(),testFile,"text/plain");
+		res = this.update(getWebConversation(),sessionId,c,System.currentTimeMillis(),m(),testFile, "text/plain");
 		assertNoError(res);
 		
-		res = this.update(sessionId,c,System.currentTimeMillis(),m(),testFile,"text/plain");
+		res = this.update(getWebConversation(),sessionId,c,System.currentTimeMillis(),m(),testFile, "text/plain");
 		assertNoError(res);
 		
 	}
 	
 	public void tearDown() throws Exception{
-		refreshSessionId();
 		super.tearDown();
 		
 		FolderTest.deleteFolders(getWebConversation(),getHostName(),sessionId,new int[]{folderId},System.currentTimeMillis(),false);
 	}
 	
 	public void testLock() throws Exception{
-		Response res = lock(sessionId,clean.get(0));
+		Response res = lock(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
-		res = get(sessionId,clean.get(0));
+		res = get(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		assertLocked((JSONObject)res.getData());
 		
 		String sessionId2 = this.getSecondSessionId();
 		
 		// Object may not be modified
-		res = update(sessionId2,clean.get(0),System.currentTimeMillis(), m("title" , "Hallo"));
+		res = update(getSecondWebConversation(),sessionId2,clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
 		assertTrue(res.hasError());
 		
 		
 		// Object may not be removed
-		int[] notDeleted = delete(sessionId2,System.currentTimeMillis(),new int[][]{{folderId, clean.get(0)}});
+		int[] notDeleted = delete(getSecondWebConversation(),sessionId2,System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
 		assertEquals(1, notDeleted.length);
 		assertEquals(clean.get(0),(Object) notDeleted[0]);
 		
 		// Versions may not be removed
-		int[] notDetached = detach(sessionId2,System.currentTimeMillis(),clean.get(0),new int[]{4});
+		int[] notDetached = detach(getSecondWebConversation(),sessionId2,System.currentTimeMillis(),clean.get(0), new int[]{4});
 		assertEquals(1,notDetached.length);
 		assertEquals(4,notDetached[0]);
 		
 		// Object may not be locked
-		res = lock(sessionId2,clean.get(0));
+		res = lock(getSecondWebConversation(),sessionId2, clean.get(0));
 		assertTrue(res.hasError());
 		
 		
 		// Object may not be unlocked
 		
-		res = unlock(sessionId2,clean.get(0));
+		res = unlock(getSecondWebConversation(),sessionId2, clean.get(0));
 		assertTrue(res.hasError());
 		
 		// Lock owner may update
-		refreshSessionId();
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(), m("title" , "Hallo"));
+		res = update(getWebConversation(),sessionId,clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
 		assertNoError(res);
 		
-		res = get(sessionId, clean.get(0));
+		res = get(getWebConversation(), sessionId, clean.get(0));
 		JSONObject o = (JSONObject) res.getData();
 		
 		assertEquals("Hallo",o.get("title"));
 		
 		//Lock owner may detach
-		notDetached = detach(sessionId,System.currentTimeMillis(),clean.get(0),new int[]{4});
+		notDetached = detach(getWebConversation(),sessionId,System.currentTimeMillis(),clean.get(0), new int[]{4});
 		assertEquals(0,notDetached.length);
 		
 		//Lock owner may remove
-		notDeleted = delete(sessionId,System.currentTimeMillis(),new int[][]{{folderId, clean.get(0)}});
+		notDeleted = delete(getWebConversation(),sessionId,System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
 		assertEquals(0, notDeleted.length);
 		clean.remove(0);
 		
 	}
 	
 	public void testUnlock() throws Exception{
-		Response res = lock(sessionId,clean.get(0));
+		Response res = lock(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
-		res = get(sessionId,clean.get(0));
+		res = get(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		assertLocked((JSONObject)res.getData());
 		
 		// Lock owner may relock
-		res = lock(sessionId,clean.get(0));
+		res = lock(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
 		// Lock owner may unlock (duh!)
-		res = unlock(sessionId,clean.get(0));
+		res = unlock(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
-		res = get(sessionId,clean.get(0));
+		res = get(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
 		
 		String sessionId2 = getSecondSessionId();
 		
-		res = lock(sessionId2,clean.get(0));
+		res = lock(getSecondWebConversation(),sessionId2, clean.get(0));
 		assertNoError(res);
 		
 		// Owner may unlock
-		refreshSessionId();
-		res = unlock(sessionId,clean.get(0));
+		res = unlock(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
-		res = get(sessionId,clean.get(0));
+		res = get(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		assertUnlocked((JSONObject)res.getData());
 		
@@ -171,11 +168,6 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	public static void assertUnlocked(JSONObject o) throws JSONException{
 		assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
-	}
-	
-	public void refreshSessionId() throws IOException, SAXException, JSONException{
-		sessionId = LoginTest.getSessionId(getWebConversation(), getHostName(),
-                getLogin(), getPassword());
 	}
 	
 	// Copied from FolderTest

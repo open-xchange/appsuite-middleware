@@ -18,41 +18,41 @@ public class DetachTest extends InfostoreAJAXTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		Response res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
 		assertNoError(res);
-		res = update(sessionId,clean.get(0),System.currentTimeMillis(),m(),upload,"text/plain");
+		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
 		assertNoError(res);
 	}
 	
 	public void testBasic() throws Exception {
-		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
+		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
 		assertEquals(0, notDetached.length);
 		
 		checkNoVersions();
 	}
 	
 	public void testRevert() throws Exception {
-		revert(sessionId,System.currentTimeMillis(), clean.get(0));
+		revert(getWebConversation(),sessionId, System.currentTimeMillis(), clean.get(0));
 		
 		checkNoVersions();
 	}
 	
 	public void checkNoVersions() throws Exception {
 //		 Version magically reverts to 0
-		Response res = get(sessionId, clean.get(0));
+		Response res = get(getWebConversation(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals(0, obj.getInt("version"));
 		
-		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
+		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
 		
 		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
 		
@@ -62,7 +62,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		}
 		assertTrue(versions.isEmpty());
 		
-		res = get(sessionId, clean.get(0));
+		res = get(getWebConversation(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		obj = (JSONObject) res.getData();
@@ -73,15 +73,15 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testSpotted() throws Exception {
-		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
+		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
 		assertEquals(0, notDetached.length);
 		
-		Response res = versions(sessionId,clean.get(0),new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
+		Response res = versions(getWebConversation(),sessionId,clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
 		assertNoError(res);
 		// Current Version reverts to 4 (being the newest available version
 		VersionsTest.assureVersions(new Integer[]{2,4},res,4);
 		
-		res = get(sessionId,clean.get(0));
+		res = get(getWebConversation(),sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject obj = (JSONObject)res.getData();
@@ -90,7 +90,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testDetachVersion0() throws Exception {
-		int[] notDetached = detach(sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
+		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
 		assertEquals(1, notDetached.length);
 		assertEquals(0,notDetached[0]);
 	}

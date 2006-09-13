@@ -14,7 +14,7 @@ public class GetTest extends InfostoreAJAXTest {
 	
 	public void testBasic() throws Exception{
 		
-		Response res = this.get(sessionId, clean.get(0));
+		Response res = this.get(getWebConversation(), sessionId, clean.get(0));
 		
 		assertNoError(res);
 		

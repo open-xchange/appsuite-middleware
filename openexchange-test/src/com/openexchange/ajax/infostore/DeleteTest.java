@@ -18,7 +18,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 	public void testBasic() throws Exception{
 		tearDown();
 		
-		Response res = this.all(sessionId,folderId,new int[]{Metadata.ID});
+		Response res = this.all(getWebConversation(),sessionId,folderId, new int[]{Metadata.ID});
 		
 		assertNoError(res);
 		
@@ -38,7 +38,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 			toDelete[i][1] = clean.get(i);
 		}
 		
-		int[] notDeleted = delete(sessionId,0,toDelete);
+		int[] notDeleted = delete(getWebConversation(),sessionId,0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
 		
 		Set<Integer> notDeletedExpect = new HashSet<Integer>(clean);
@@ -52,7 +52,7 @@ public class DeleteTest extends InfostoreAJAXTest {
 		tearDown();
 		clean.clear();
 		
-		notDeleted = delete(sessionId,0,toDelete);
+		notDeleted = delete(getWebConversation(),sessionId,0, toDelete);
 		assertEquals(toDelete.length,notDeleted.length);
 		
 		

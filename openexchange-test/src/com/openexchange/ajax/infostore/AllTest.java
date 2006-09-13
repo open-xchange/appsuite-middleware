@@ -18,7 +18,7 @@ public class AllTest extends InfostoreAJAXTest {
 	
 	public void testBasic() throws Exception{
 		
-		Response res = this.all(sessionId,folderId,new int[]{Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID});
+		Response res = this.all(getWebConversation(),sessionId,folderId, new int[]{Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID});
 		
 		Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
 		Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));
