@@ -32,6 +32,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 	
 	protected int moduleId = -1;
 	
+	protected String sessionId;
+	
 	public void setUp() throws Exception{
 		super.setUp();
 		
@@ -40,7 +42,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		attachedId = createExclusiveWritableAttachable(sessionId,folderId);
 		
 		moduleId = getModule();
-		
+		sessionId = getSessionId();
 	}
 	
 	public void tearDown() throws Exception {
