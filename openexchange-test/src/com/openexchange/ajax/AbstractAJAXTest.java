@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,45 +35,51 @@ import junit.framework.TestCase;
  */
 public abstract class AbstractAJAXTest extends TestCase {
 
-    private static final String HOSTNAME = "hostname";
-
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(AbstractAJAXTest.class);
+    
     public static final String PROTOCOL = "http://";
 
-    protected static String sessionId = null;
-	
-	protected static String cookie = null;
-    
-    protected static String sessionId2 = null;
-	
-	protected static String cookie2 = null;
+    private static final String HOSTNAME = "hostname";
 
-	private static String hostName = null;
+    protected static final String jsonTagData = "data";
+
+    protected static final String jsonTagTimestamp = "timestamp";
+    
+    protected static final String jsonTagError = "error";
+    
+    private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
+    
+    private String hostName = null;
+    
+    private WebConversation webConversation = null;
+
+    private String sessionId = null;
 	
-	private static String login = null;
+    private String sessionId2 = null;
+	
+	private String login = null;
 	
 	private String seconduser = null;
 	
-	private static String password = null;
-
-	protected static int userId = -1;
-
-    private WebConversation webConversation = null;
+	private String password = null;
 
     private Properties ajaxProps = null;
-
-	private WebConversation webConversation2;
-	
-	protected static final String jsonTagData = "data";
-
-	protected static final String jsonTagTimestamp = "timestamp";
-	
-	protected static final String jsonTagError = "error";
-	
-	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 	
 	public AbstractAJAXTest(String name) {
 		super(name);
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        logout();
+        super.tearDown();
+    }
 
     protected String getAJAXProperty(final String key) {
         return getAJAXProperties().getProperty(key);
@@ -85,42 +93,13 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
     
     /**
-     * @return Returns the sessionId.
-     * @throws Exception if an error occurs while authenticating.
+     * @return Returns the hostname.
      */
-    protected String getSessionId() throws Exception {
-        if (null == sessionId) {
-            sessionId = LoginTest.getSessionId(getWebConversation(),
-                getHostName(), getLogin(), getPassword());
-			cookie = getWebConversation().getCookieValue("open-xchange-session-" + sessionId);
-            assertNotNull("Can't get session id.", sessionId);
+    public String getHostName() {
+        if (null == hostName) {
+            hostName = getAJAXProperty(HOSTNAME);
         }
-		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId + "=" + cookie);
-        return sessionId;
-    }
-
-    /**
-     * Terminates the session on the server.
-     * @throws Exception if an error occurs.
-     */
-    protected void logout() throws Exception {
-        if (null != sessionId) {
-            LoginTest.logout(getWebConversation(), getHostName(),
-                getSessionId());
-            sessionId = null;
-        }
-    }
-
-    protected String getSecondSessionId() throws Exception {
-    	if(null == sessionId2) {
-    		sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
-    				getSeconduser(), getPassword());
-    		cookie2 = getWebConversation().getCookieValue("open-xchange-session-" + sessionId2);
-            assertNotNull("Can't get session id.", sessionId);
-        }
-		getWebConversation().setHeaderField("Cookie", "open-xchange-session-" + sessionId2 + "=" + cookie2);
-		
-    	return sessionId2;
+        return hostName;
     }
 
     /**
@@ -144,14 +123,38 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     /**
-     * @return Returns the hostname.
+     * @return Returns the sessionId.
+     * @throws Exception if an error occurs while authenticating.
      */
-	public String getHostName() {
-        if (null == hostName) {
-            hostName = getAJAXProperty(HOSTNAME);
+    protected String getSessionId() throws Exception {
+        if (null == sessionId) {
+            sessionId = LoginTest.getSessionId(getWebConversation(),
+                getHostName(), getLogin(), getPassword());
+            assertNotNull("Can't get session id.", sessionId);
         }
-		return hostName;
-	}
+        return sessionId;
+    }
+
+    protected String getSecondSessionId() throws Exception {
+        if(null == sessionId2) {
+            sessionId2 = LoginTest.getSessionId(getWebConversation(), getHostName(),
+                    getSeconduser(), getPassword());
+            assertNotNull("Can't get session id for second user.",sessionId2);
+        }
+        return sessionId2;
+    }
+
+    /**
+     * Terminates the session on the server.
+     * @throws Exception if an error occurs.
+     */
+    protected void logout() throws Exception {
+        if (null != sessionId) {
+            LoginTest.logout(getWebConversation(), getHostName(),
+                getSessionId());
+            sessionId = null;
+        }
+    }
 
 	public String getLogin() {
         if (null == login) {
