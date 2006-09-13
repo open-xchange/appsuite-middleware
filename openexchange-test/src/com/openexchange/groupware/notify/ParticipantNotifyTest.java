@@ -48,7 +48,7 @@ public class ParticipantNotifyTest extends TestCase{
 	private SessionObject session = null;
 	
 	
-	public void testSimple(){
+	public void testSimple() throws Exception{
 		Participant[] participants = getParticipants(U(2),G(),S());
 		Task t = getTask(participants);
 		
@@ -79,7 +79,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 	
 	
-	public void testExternal(){
+	public void testExternal() throws Exception{
 		Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"));
 		Task t = getTask(participants);
 		
@@ -93,7 +93,7 @@ public class ParticipantNotifyTest extends TestCase{
 		assertNames( participantNames,"don.external@external.invalid" );	
 	}
 	
-	public void testNoSend(){
+	public void testNoSend() throws Exception{
 		Participant[] participants = getParticipants(U(6,2),G(),S());
 		Task t = getTask(participants);
 		
@@ -145,7 +145,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 	}
 	
-	public void testResolveGroup(){
+	public void testResolveGroup() throws Exception{
 		Participant[] participants = getParticipants(U(),G(2),S());
 		Task t = getTask(participants);
 		
@@ -160,7 +160,7 @@ public class ParticipantNotifyTest extends TestCase{
 		assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
 	}
 
-	public void testNoSendDouble(){
+	public void testNoSendDouble() throws Exception{
 		Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"));
 		Task t = getTask(participants);
 		
@@ -205,28 +205,20 @@ public class ParticipantNotifyTest extends TestCase{
 		return task;
 	}
 	
-	public static User[] U(int...ids) {
+	public static User[] U(int...ids) throws LdapException {
 		User[] users = new User[ids.length];
 		int i = 0;
 		for(int id : ids) {
-			try {
-				users[i++] = USER_STORAGE.getUser(id);
-			} catch (LdapException e) {
-				e.printStackTrace();
-			}
+			users[i++] = USER_STORAGE.getUser(id);
 		}
 		return users;
 	}
 	
-	public static final Group[] G(int...ids) {
+	public static final Group[] G(int...ids) throws LdapException {
 		Group[] groups = new Group[ids.length];
 		int i = 0;
 		for(int id : ids) {
-			try {
-				groups[i++] = GROUP_STORAGE.getGroup(id);
-			} catch (LdapException e) {
-				e.printStackTrace();
-			}       
+			groups[i++] = GROUP_STORAGE.getGroup(id);       
 		}
 		return groups;
 	}
