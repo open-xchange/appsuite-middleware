@@ -198,7 +198,7 @@ public class ParticipantNotifyTest extends TestCase{
 		task.setEndDate(end);
 		task.setTitle("TestSimple");
 		task.setCreatedBy(session.getUserObject().getId());
-		task.setModifiedBy(session.getUserObject().getId());
+		//task.setModifiedBy(session.getUserObject().getId());
 		
 		
 		task.setParticipants(participants);
