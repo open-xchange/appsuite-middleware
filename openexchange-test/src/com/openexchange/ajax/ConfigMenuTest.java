@@ -38,7 +38,6 @@
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
-import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,13 +45,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.tools.RandomString;
+import com.openexchange.groupware.settings.ConfigTree;
 import com.openexchange.tools.URLParameter;
 
 /**
@@ -67,15 +65,10 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      */
     private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
 
+    /**
+     * URL of the AJAX config interface.
+     */
     private static final String CONFIG_URL = "/ajax/config/";
-
-    private static final int NUMBER_OF_SETTINGS = 10;
-
-    private static final int PATH_DEPTH = 10;
-
-    private static final int MAX_PATH_NAME_LENGTH = 10;
-
-    private static final int MAX_VALUE_LENGTH = 10;
 
     /**
      * Default constructor.
@@ -83,38 +76,6 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      */
     public ConfigMenuTest(final String name) {
         super(name);
-    }
-
-    /**
-     * This method tests storing of a number of random values under path with
-     * random length and depth.
-     * @throws Throwable if an error occurs.
-     */
-    public void notestStoreExampleSetting() throws Throwable {
-        final Random rand = new Random(System.currentTimeMillis());
-        String[] path = new String[NUMBER_OF_SETTINGS];
-        String[] value = new String[path.length];
-        for (int i = 0; i < path.length; i++) {
-            path[i] = "";
-            final StringBuilder pathBuilder = new StringBuilder();
-            final int pathLength = rand.nextInt(PATH_DEPTH) + 1;
-            for (int j = 0; j < pathLength; j++) {
-                pathBuilder.append(RandomString.generateLetter(
-                    rand.nextInt(MAX_PATH_NAME_LENGTH) + 1) + "/");
-                path[i] = pathBuilder.toString();
-            }
-            path[i] = path[i].substring(0, path[i].length() - 1);
-            value[i] = RandomString.generateLetter(
-                rand.nextInt(MAX_VALUE_LENGTH) + 1);
-        }
-        for (int i = 0; i < path.length; i++) {
-            storeSetting(getWebConversation(), getHostName(), getSessionId(),
-                path[i], value[i]);
-        }
-        for (int i = 0; i < path.length; i++) {
-            assertEquals("Value of the setting differs.", value[i], readSetting(
-                getWebConversation(), getHostName(), getSessionId(), path[i]));
-        }
     }
 
     /**
@@ -127,18 +88,34 @@ public class ConfigMenuTest extends AbstractAJAXTest {
         assertTrue("Got no value from server.", value.length() > 0);
     }
 
+    /**
+     * Tests if the timezone of a user can be changed.
+     * @throws Throwable if an error occurs.
+     */
     public void testTimeZone() throws Throwable {
         final String timeZone = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), "timezone");
+            getSessionId(), ConfigTree.TIMEZONE);
         final String testTimeZone = "Australia/Hobart";
         storeSetting(getWebConversation(), getHostName(), getSessionId(),
-            "timezone", testTimeZone);
-        assertEquals(testTimeZone, readSetting(getWebConversation(),
-            getHostName(), getSessionId(), "timezone"));
+            ConfigTree.TIMEZONE, testTimeZone);
+        assertEquals("Written timezone isn't returned from server.",
+            testTimeZone, readSetting(getWebConversation(), getHostName(),
+                getSessionId(), ConfigTree.TIMEZONE));
         storeSetting(getWebConversation(), getHostName(), getSessionId(),
-            "timezone", timeZone);
+            ConfigTree.TIMEZONE, timeZone);
     }
 
+    /**
+     * Reads a configuration setting. A tree of configuration settings can also
+     * be read. This tree will be returned as a string in JSON.
+     * @param conversation web conversation.
+     * @param hostName host name of the server.
+     * @param sessionId session identifier of the user.
+     * @param path path to the setting.
+     * @return the value of the setting or a string with the tree of settings in
+     * JSON.
+     * @throws Throwable if an error occurs.
+     */
     public static String readSetting(final WebConversation conversation,
         final String hostName, final String sessionId, final String path)
         throws Throwable {
@@ -153,14 +130,24 @@ public class ConfigMenuTest extends AbstractAJAXTest {
         final String body = resp.getText();
         LOG.trace("Response body: \"" + body + "\"");
         final Response response = Response.parse(body);
+        assertFalse(response.getErrorMessage(), response.hasError());
         return response.getData().toString();
     }
 
+    /**
+     * Stores a configuration setting.
+     * @param conversation web conversation.
+     * @param hostName host name of the server.
+     * @param sessionId session identifier of the user.
+     * @param path path to the setting.
+     * @param value the value to write.
+     * @throws Throwable if an error occurs.
+     */
     public static void storeSetting(final WebConversation conversation,
         final String hostName, final String sessionId, final String path,
         final String value) throws Throwable {
         LOG.trace("Storing setting.");
-        URLParameter parameter = new URLParameter();
+        final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
             + CONFIG_URL + path + parameter.getURLParameters(),
