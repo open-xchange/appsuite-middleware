@@ -81,4 +81,15 @@ public class CalendarPerformanceTests extends TestCase {
         System.out.println("checkAndAlterColsPerformance runtime ("+RUNS+"): "+(pass_one_end-pass_one_start));        
     }
     
+    public void testMisc() throws Throwable {
+        CalendarDataObject cdao = new CalendarDataObject();
+        CalendarDataObject edao = new CalendarDataObject();
+        
+        cdao.setTitle("test");
+        edao.setTitle("test");
+        
+        assertTrue("same strings", cdao.getTitle() == edao.getTitle());
+    }
+    
+    
 }
