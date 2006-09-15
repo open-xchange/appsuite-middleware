@@ -178,9 +178,9 @@ public class AttachmentTest extends AbstractAJAXTest {
 	public Response quota(WebConversation webConv, String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {
 		StringBuffer url = new StringBuffer("http://");
 		url.append(getHostName());
-		url.append("/ajax/filestore?session=");
+		url.append("/ajax/quota?session=");
 		url.append(sessionId);
-		url.append("&action=get");
+		url.append("&action=filestore");
 		return gT(webConv, url.toString());
 	}
 	
