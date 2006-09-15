@@ -1,0 +1,259 @@
+package com.openexchange.webdav.resource;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
+
+import com.openexchange.webdav.resource.Protocol.Property;
+import com.openexchange.webdav.resource.impl.DummyResourceManager;
+import com.openexchange.webdav.resource.util.Utils;
+
+public class ResourceTest extends AbstractResourceTest{
+	
+	public static final int SKEW = 1000;
+
+	static protected final WebdavFactory FACTORY = DummyResourceManager.getInstance();
+	
+	public void testBody() throws Exception{
+		WebdavResource res = createResource();
+		String content = "Hello, I'm the content!";
+		byte[] bytes = content.getBytes("UTF-8");
+		
+		res.putBody(new ByteArrayInputStream(bytes));
+		
+		InputStream in = null;
+		InputStream in2 = null;
+		try {
+			in = res.getBody();
+			in2 = new ByteArrayInputStream(bytes);
+			
+			int b = -1;
+			while((b = in.read()) != -1) {
+				assertEquals(b, in2.read());
+			}
+			assertEquals(-1, in2.read());
+		} finally {
+			if(in != null)
+				in.close();
+			if(in2 != null) 
+				in2.close();
+		}
+	}
+	
+	public void testDelete() throws Exception {
+		//TODO
+	}
+	
+	public void testMove() throws Exception {
+		//TODO
+	}
+	
+	public void testCopy() throws Exception {
+		//TODO
+	}
+	
+	protected List<Property> getPropertiesToTest() {
+		return resourceManager.getProtocol().getKnownProperties();
+	}
+
+	protected WebdavResource createResource() throws WebdavException {
+		WebdavResource resource = FACTORY.resolveResource(testCollection+"/testResource"+Math.random());
+		clean.add(resource);
+		assertFalse(resource.exists());
+		resource.create();
+		resource = resourceManager.resolveResource(resource.getUrl());
+		assertTrue(resource.exists());
+		return resource;
+	}
+	
+	@Override
+	protected WebdavFactory getWebdavFactory() {
+		return FACTORY;
+	}
+	
+	
+	// TESTS FOR PROPERTIES
+
+	public Object creationDate() throws WebdavException {
+		Date now = new Date();
+		WebdavResource res = createResource();
+		assertEquals(res.getCreationDate(), res.getProperty("DAV", "creationdate").getValue());
+		assertEquals(now, Utils.convert(res.getCreationDate()), SKEW);
+		
+		try {
+			Thread.sleep(SKEW+10);
+		} catch (InterruptedException e) {
+		}
+		res.save();
+		assertEquals(now, Utils.convert(res.getCreationDate()), SKEW);
+		
+		
+		return null;
+	}
+
+	public Object displayName() throws WebdavException {
+		WebdavResource res = createResource();
+		String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
+		assertEquals(res.getDisplayName(), res.getProperty("DAV", "displayname").getValue());
+		assertEquals(defaultDispName, res.getDisplayName());
+		
+		res.setDisplayName("Other Disp");
+		res.save();
+		res = resourceManager.resolveResource(res.getUrl());
+		assertEquals("Other Disp", res.getDisplayName());
+		assertEquals(res.getDisplayName(), res.getProperty("DAV", "displayname").getValue());
+		
+		WebdavProperty prop = Protocol.DISPLAYNAME_LITERAL.getWebdavProperty();
+		prop.setValue("My other disp");
+		res.putProperty(prop);
+		
+		assertEquals("My other disp", res.getDisplayName());
+		assertEquals(res.getDisplayName(), res.getProperty("DAV","displayname").getValue());
+		
+		
+		return null;
+	}
+
+	public Object contentLanguage() throws WebdavException {
+		WebdavResource res = createResource();
+		String defaultLanguage = "en";
+		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals(defaultLanguage, res.getLanguage());
+		
+		try {
+			res.setLanguage("de");
+		} catch (WebdavException e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+		res.save();
+		res = resourceManager.resolveResource(res.getUrl());
+		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals("de", res.getLanguage());
+		
+		WebdavProperty prop = Protocol.GETCONTENTLANGUAGE_LITERAL.getWebdavProperty();
+		prop.setValue("fr");
+		res.putProperty(prop);
+		
+		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals("fr", res.getLanguage());
+		
+		
+		return null;
+	}
+
+	public Object contentLength() throws WebdavException {
+		WebdavResource res = createResource();
+		Long defaultLength = 0l;
+		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals(defaultLength, res.getLength());
+		
+		try {
+			res.setLength(1l);
+		} catch (WebdavException e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+		res.save();
+		res = resourceManager.resolveResource(res.getUrl());
+		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals((Long)1l, res.getLength());
+		
+		WebdavProperty prop = Protocol.GETCONTENTLENGTH_LITERAL.getWebdavProperty();
+		prop.setValue("2");
+		res.putProperty(prop);
+		
+		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals((Long)2l, res.getLength());
+		return null;
+	}
+
+	public Object contentType() throws WebdavException {
+		WebdavResource res = createResource();
+		
+		res.setContentType("text/plain");
+		res.save();
+		res = resourceManager.resolveResource(res.getUrl());
+		assertEquals("text/plain", res.getContentType());
+		assertEquals(res.getContentType(), res.getProperty("DAV", "getcontenttype").getValue());
+		
+		WebdavProperty prop = Protocol.GETCONTENTTYPE_LITERAL.getWebdavProperty();
+		prop.setValue("text/html");
+		res.putProperty(prop);
+		
+		assertEquals("text/html", res.getContentType());
+		assertEquals(res.getContentType(), res.getProperty("DAV", "getcontenttype").getValue());
+		
+		return null;
+	}
+
+	public Object etag() throws WebdavException {
+		WebdavResource res = createResource();
+		assertEquals(res.getETag(), res.getProperty("DAV", "getetag").getValue());
+		
+		res.setDisplayName("one");
+		String eTag = res.getETag();
+		res.save();
+		
+		assertEquals(res.getETag(), res.getProperty("DAV", "getetag").getValue());
+		assertEquals(eTag, res.getETag());
+		
+		String text = "Hallo";
+		byte[] bytes;
+		try {
+			bytes = text.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		try {
+			res.putBody(new ByteArrayInputStream(bytes));
+		} catch (WebdavException e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+		res.save();
+		
+		assertFalse(eTag.equals(res.getETag()));
+			
+		return null;
+	}
+
+	public Object lastModified() throws WebdavException {
+		Date now = new Date();
+		WebdavResource res = createResource();
+		assertEquals(res.getLastModified(), res.getProperty("DAV", "getlastmodified").getValue());
+		assertEquals(now, Utils.convert(res.getLastModified()), SKEW);
+		try {
+			Thread.sleep(SKEW+10);
+		} catch (InterruptedException e) {
+		}
+		now = new Date();
+		res.save();
+		assertEquals(now, Utils.convert(res.getLastModified()), SKEW);
+		
+		return null;
+	}
+
+	public Object resourceType() throws WebdavException {
+		WebdavResource res = createResource();
+		assertEquals(null, res.getProperty("DAV", "resourcetype"));
+		assertEquals(null, res.getResourceType());
+		
+		return null;
+	}
+
+	public Object lockDiscovery() throws WebdavException {
+		// Tested in Lock Test
+		return null;
+	}
+
+	public Object supportedLock() throws WebdavException {
+		// Tested in Lock Test
+		return null;
+	}
+	
+}
