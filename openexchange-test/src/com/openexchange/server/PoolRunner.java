@@ -19,17 +19,21 @@ import java.sql.SQLException;
 public class PoolRunner implements Runnable {
     
     private Context c;
+    private boolean close_connections;
     private Thread run;
     private int current_run = 0;
     
-    public static final int TEST_RUNS = 5;
+    public static final int TEST_RUNS = 20;
     public static final int WAIT_TIME = 200;
     public static final String TEST_QUERY = "SELECT 1 as test";
     
     private boolean isrunning = true;
+
+    private int modrunner = 0;
     
-    public PoolRunner(Context c) {
+    public PoolRunner(Context c, boolean close_connections) {
         this.c = c;
+        this.close_connections = close_connections;
         this.start();
     }
     
@@ -40,10 +44,19 @@ public class PoolRunner implements Runnable {
     }
     
     public void run() {
-        while (current_run <= TEST_RUNS) {
+        while (current_run < TEST_RUNS) {
             try {
                 Connection con = DBPool.pickup(c);
                 synchronized(this) { wait(WAIT_TIME); }
+                if (close_connections) {
+                    if (modrunner % 3 == 0) {
+                        con.close();
+                    } else if (modrunner % 5 == 0) {
+                        con.close();
+                        con = null;
+                    }
+                }
+                modrunner++;
                 simpleAction(con);
                 DBPool.push(c, con);
                 current_run++;                
@@ -55,10 +68,12 @@ public class PoolRunner implements Runnable {
     }
 
     private void simpleAction(Connection con) throws SQLException {
-        ResultSet rs = con.createStatement().executeQuery(TEST_QUERY);
-        int counter = 0;
-        while (rs.next()) {
-            counter++;
+        if (con != null && !con.isClosed()) {
+            ResultSet rs = con.createStatement().executeQuery(TEST_QUERY);
+            int counter = 0;
+            while (rs.next()) {
+                counter++;
+            }
         }
     }
 
@@ -72,6 +87,10 @@ public class PoolRunner implements Runnable {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
+    }
+    
+    Thread getRunnerThread() {
+        return run;
     }
     
 }

@@ -47,24 +47,37 @@ public class ComplexDBPoolTest extends TestCase {
     
     public void testThreadedPool() throws Throwable {
         Context context = new ContextImpl(contextid);
-
         int testsize = DBPool.getReadSize(context);
         int min = testsize*4;
         if (TEST_RUNS < min)
             TEST_RUNS = min;
         PoolRunner pr[] = new PoolRunner[TEST_RUNS];
         for (int a = 0; a < TEST_RUNS; a++) {
-            pr[a] = new PoolRunner(context);
+            pr[a] = new PoolRunner(context, false);
         }
-        
-        for (int a = 0; a < TEST_RUNS; a++) {
-            pr[a].joinThread();
-        }
-        
-        assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));
-        
+
+       for (int a = 0; a < TEST_RUNS; a++) {
+            pr[a].getRunnerThread().join();
+       }
+       assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));
     }
     
+    public void testThreadedPoolWothClosedConnections() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int testsize = DBPool.getReadSize(context);
+        int min = testsize*4;
+        if (TEST_RUNS < min)
+            TEST_RUNS = min;
+        PoolRunner pr[] = new PoolRunner[TEST_RUNS];
+        for (int a = 0; a < TEST_RUNS; a++) {
+            pr[a] = new PoolRunner(context, true);
+        }
+
+       for (int a = 0; a < TEST_RUNS; a++) {
+            pr[a].getRunnerThread().join();
+       }
+       assertTrue("Check pool size ", DBPool.getReadSize(context) > 0);
+    }    
         
     
     
