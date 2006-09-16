@@ -3,11 +3,14 @@ package com.openexchange.groupware;
 
 
 import com.openexchange.api.OXFolder;
+import com.openexchange.api2.FolderSQLInterface;
+import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.FreeBusyResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
@@ -342,6 +345,41 @@ public class CalendarTest extends TestCase {
         DBPool.pushWrite(getContext(), readcon);
         
     }    
+    
+    
+    public void todo_testInsertMoveAndDeleteAppointments() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        CalendarDataObject cdao = new CalendarDataObject();
+
+        cdao.setTitle("testMove");
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        
+        int object_id = cdao.getObjectID();
+        
+        // TODO: Create public folder
+        
+        // TODO: "Move" folder
+        
+        // TODO: LoadObject by ID and make some tests
+        
+        // TODO: Move again to private folder
+        
+        // TODO: LoadObject by ID and make some tests
+        
+        // TODO: Delete complete folder
+        
+        // TODO: Test if all objects have been deleted
+        
+        
+        
+
+    }      
     
     
     
