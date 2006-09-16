@@ -24,6 +24,10 @@ public class ComplexDBPoolTest extends TestCase {
 
     private int TEST_RUNS = 50;
     
+    private static int checksize = 0;
+    private static int poolsize = 0;
+    private static int totalcount = 0;
+    
     protected void setUp() throws Exception {        
         super.setUp();
         Init.initDB();
@@ -47,10 +51,8 @@ public class ComplexDBPoolTest extends TestCase {
     
     public void testThreadedPool() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int testsize = DBPool.getReadSize(context);
-        int min = testsize*4;
-        if (TEST_RUNS < min)
-            TEST_RUNS = min;
+        poolsize = DBPool.getReadSize(context);
+        checksize = poolsize;
         PoolRunner pr[] = new PoolRunner[TEST_RUNS];
         for (int a = 0; a < TEST_RUNS; a++) {
             pr[a] = new PoolRunner(context, false);
@@ -58,16 +60,15 @@ public class ComplexDBPoolTest extends TestCase {
 
        for (int a = 0; a < TEST_RUNS; a++) {
             pr[a].getRunnerThread().join();
+            totalcount += pr[a].getRunnerCount();
        }
-       assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));
+       assertEquals("Check pool size ", checksize, DBPool.getReadSize(context));
     }
     
     public void testThreadedPoolWothClosedConnections() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int testsize = DBPool.getReadSize(context);
-        int min = testsize*4;
-        if (TEST_RUNS < min)
-            TEST_RUNS = min;
+        int poolsize = DBPool.getReadSize(context);
+        checksize = poolsize;
         PoolRunner pr[] = new PoolRunner[TEST_RUNS];
         for (int a = 0; a < TEST_RUNS; a++) {
             pr[a] = new PoolRunner(context, true);
@@ -75,10 +76,21 @@ public class ComplexDBPoolTest extends TestCase {
 
        for (int a = 0; a < TEST_RUNS; a++) {
             pr[a].getRunnerThread().join();
+            totalcount += pr[a].getRunnerCount();
        }
-       assertTrue("Check pool size ", DBPool.getReadSize(context) > 0);
+       assertEquals("Check pool size ", checksize, DBPool.getReadSize(context));
+       
+       System.err.println("Total runs : "+totalcount);
     }    
         
-    
+    public static synchronized void countSize(boolean action) {
+        if (action) {
+            if (checksize < poolsize)
+                checksize++;
+        } else {
+        if (checksize > 0)
+            checksize--;            
+        }
+    }
     
 }
