@@ -37,6 +37,7 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.URLParameter;
+import org.json.JSONWriter;
 
 public class AppointmentTest extends AbstractAJAXTest {
 	
@@ -515,8 +516,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
+		JSONWriter jsonWriter = new JSONWriter(pw);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw, timeZone);
+		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 		appointmentwriter.writeAppointment(appointmentObj);
 		
 		pw.flush();
@@ -550,8 +552,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static void updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String session) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
+		JSONWriter jsonWriter = new JSONWriter(pw);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(pw, timeZone);
+		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 		appointmentwriter.writeAppointment(appointmentObj);
 		
 		pw.flush();
