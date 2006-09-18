@@ -381,19 +381,14 @@ public class CalendarTest extends TestCase {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
-        int public_folder_id = 611;
-        try {
         ofa.createFolder(fo, so, true, readcon, writecon, false);
-        public_folder_id = fo.getObjectID();
-        } catch(Exception e) {
-            // TODO: remove me
-        }
+        int public_folder_id = fo.getObjectID();
         
         // TODO: "Move" folder to a public folder
         CalendarDataObject update1 = new CalendarDataObject();
         update1.setContext(so.getContext());
         update1.setObjectID(object_id);
-        update1.setParentFolderID(public_folder_id);
+        update1.setParentFolderID(private_folder_id);
         update1.setTitle("testMove - Step 2 - Update");
         csql.updateAppointmentObject(update1, public_folder_id, new Date(SUPER_END));
         
@@ -409,7 +404,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
         
         update2.setTitle("testMove - Step 3 - Update");
-        update2.setParentFolderID(private_folder_id);
+        update2.setParentFolderID(public_folder_id);
         csql.updateAppointmentObject(update2, private_folder_id, new Date(SUPER_END));        
         
         // TODO: LoadObject by ID and make some tests
@@ -431,7 +426,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
         
         update3.setTitle("testMove - Step 4 - Update");
-        update3.setParentFolderID(public_folder_id);
+        update3.setParentFolderID(private_folder_id);
         csql.updateAppointmentObject(update3, public_folder_id, new Date(SUPER_END));        
         
         ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
