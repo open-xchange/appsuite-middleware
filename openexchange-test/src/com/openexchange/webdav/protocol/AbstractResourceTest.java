@@ -1,4 +1,4 @@
-package com.openexchange.webdav.resource;
+package com.openexchange.webdav.protocol;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,8 +10,12 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import com.openexchange.webdav.resource.Protocol.Property;
-import com.openexchange.webdav.resource.util.PropertySwitch;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.util.PropertySwitch;
 
 public abstract class AbstractResourceTest extends TestCase implements PropertySwitch {
 	
@@ -20,9 +24,6 @@ public static final int SKEW = 1000;
 	protected WebdavFactory resourceManager;
 	protected String testCollection = "/testCollection";
 	
-	protected List<WebdavResource> clean = new ArrayList<WebdavResource>();
-
-
 	protected abstract WebdavFactory getWebdavFactory() throws Exception;
 	protected abstract List<Property> getPropertiesToTest() throws Exception;
 	protected abstract WebdavResource createResource() throws Exception;
@@ -34,15 +35,11 @@ public static final int SKEW = 1000;
 		WebdavResource resource = resourceManager.resolveCollection(testCollection);
 		assertTrue(resource.isCollection());
 		resource.create();
-		clean.add(resource);
 	}
 	
 
 	public void tearDown() throws Exception {
-		Collections.reverse(clean);
-		for(WebdavResource res : clean) {
-			res.delete();
-		}
+		resourceManager.resolveCollection(testCollection).delete();
 	}
 	
 	public void testProperties() throws Exception{
@@ -72,7 +69,6 @@ public static final int SKEW = 1000;
 		WebdavResource resource = createResource();
 		assertTrue(resource.exists());
 		resource.delete();
-		clean.remove(resource);
 		resource = resourceManager.resolveResource(resource.getUrl());
 		assertFalse(resource.exists());
 	}
@@ -94,7 +90,7 @@ public static final int SKEW = 1000;
 		Set<String> nameSet = new HashSet<String>(Arrays.asList(displayNames));
 		
 		for(WebdavResource res : resources) {
-			assertTrue(nameSet.remove(res.getDisplayName()));
+			assertTrue(res.getDisplayName()+" not expected",nameSet.remove(res.getDisplayName()));
 		}
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}

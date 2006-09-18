@@ -1,4 +1,4 @@
-package com.openexchange.webdav.resource;
+package com.openexchange.webdav.protocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -6,9 +6,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.webdav.resource.Protocol.Property;
-import com.openexchange.webdav.resource.impl.DummyResourceManager;
-import com.openexchange.webdav.resource.util.Utils;
+import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.impl.DummyResourceManager;
+import com.openexchange.webdav.protocol.util.Utils;
 
 public class ResourceTest extends AbstractResourceTest{
 	
@@ -42,16 +50,107 @@ public class ResourceTest extends AbstractResourceTest{
 		}
 	}
 	
-	public void testDelete() throws Exception {
-		//TODO
-	}
-	
 	public void testMove() throws Exception {
-		//TODO
+		WebdavResource res = createResource();
+		
+		String lastModified = res.getLastModified();
+		String creationDate = res.getCreationDate();
+		
+		res.setDisplayName("myDisplayName");
+		
+		WebdavProperty prop = new WebdavProperty();
+		prop.setName("myvalue");
+		prop.setNamespace("ox");
+		prop.setValue("gnaaa!");
+		
+		res.putProperty(prop);
+		
+		String content = "Hello, I'm the content!";
+		byte[] bytes = content.getBytes("UTF-8");
+		
+		res.putBody(new ByteArrayInputStream(bytes));
+		
+		Thread.sleep(1000);
+		
+		res.move(testCollection+"/moved");
+		assertFalse(res.exists());
+		
+		res = resourceManager.resolveResource(testCollection+"/moved");
+		assertTrue(res.exists());
+		
+		assertEquals("myDisplayName",res.getDisplayName());
+		assertFalse(lastModified.equals(res.getLastModified()));
+		assertEquals(creationDate, res.getCreationDate());
+		
+		assertEquals("gnaaa!",res.getProperty("ox","myvalue").getValue());
+		InputStream in = null;
+		InputStream in2 = null;
+		try {
+			in = res.getBody();
+			in2 = new ByteArrayInputStream(bytes);
+			
+			int b = -1;
+			while((b = in.read()) != -1) {
+				assertEquals(b, in2.read());
+			}
+			assertEquals(-1, in2.read());
+		} finally {
+			if(in != null)
+				in.close();
+			if(in2 != null) 
+				in2.close();
+		}
 	}
 	
 	public void testCopy() throws Exception {
-		//TODO
+		WebdavResource res = createResource();
+		
+		String lastModified = res.getLastModified();
+		String creationDate = res.getCreationDate();
+		
+		res.setDisplayName("myDisplayName");
+		
+		WebdavProperty prop = new WebdavProperty();
+		prop.setName("myvalue");
+		prop.setNamespace("ox");
+		prop.setValue("gnaaa!");
+		
+		res.putProperty(prop);
+		
+		String content = "Hello, I'm the content!";
+		byte[] bytes = content.getBytes("UTF-8");
+		
+		res.putBody(new ByteArrayInputStream(bytes));
+		
+		Thread.sleep(1000);
+		
+		res.copy(testCollection+"/copy");
+		assertTrue(res.exists());
+		
+		res = resourceManager.resolveResource(testCollection+"/copy");
+		assertTrue(res.exists());
+		
+		assertEquals("myDisplayName",res.getDisplayName());
+		assertFalse(lastModified.equals(res.getLastModified()));
+		assertFalse(creationDate.equals(res.getCreationDate()));
+		assertEquals("gnaaa!",res.getProperty("ox","myvalue").getValue());
+		InputStream in = null;
+		InputStream in2 = null;
+		try {
+			in = res.getBody();
+			in2 = new ByteArrayInputStream(bytes);
+			
+			int b = -1;
+			while((b = in.read()) != -1) {
+				assertEquals(b, in2.read());
+			}
+			assertEquals(-1, in2.read());
+		} finally {
+			if(in != null)
+				in.close();
+			if(in2 != null) 
+				in2.close();
+		}
 	}
 	
 	protected List<Property> getPropertiesToTest() {
@@ -60,7 +159,6 @@ public class ResourceTest extends AbstractResourceTest{
 
 	protected WebdavResource createResource() throws WebdavException {
 		WebdavResource resource = FACTORY.resolveResource(testCollection+"/testResource"+Math.random());
-		clean.add(resource);
 		assertFalse(resource.exists());
 		resource.create();
 		resource = resourceManager.resolveResource(resource.getUrl());
@@ -71,6 +169,46 @@ public class ResourceTest extends AbstractResourceTest{
 	@Override
 	protected WebdavFactory getWebdavFactory() {
 		return FACTORY;
+	}
+	
+	public void testLock() throws Exception {
+		WebdavLock lock = new WebdavLock();
+		lock.setType(WebdavLock.Type.WRITE_LITERAL);
+		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
+		lock.setDepth(0);
+		lock.setOwner("me");
+		lock.setTimeout(3000);
+		assertNull(lock.getToken());
+		
+		WebdavResource res = createResource();
+		
+		res.lock(lock);
+		res.save();
+		
+		assertNotNull(lock.getToken());
+		
+		List<WebdavLock> locks = res.getLocks();
+		assertEquals(1, locks.size());
+		assertEquals(lock, locks.get(0));
+		assertEquals(lock, res.getLock(lock.getToken()));
+		
+		res.unlock(lock.getToken());
+		res.save();
+		
+		locks = res.getLocks();
+		assertEquals(0, locks.size());
+		
+		// TODO: unlock and lock semantics
+	}
+	
+	public void testConflict() throws Exception {
+		WebdavResource res = createResource();
+		try {
+			resourceManager.resolveResource(res.getUrl()+"/resource").create();
+			fail();
+		} catch (WebdavException x) {
+			assertEquals(HttpServletResponse.SC_CONFLICT,x.getStatus());
+		}
 	}
 	
 	
