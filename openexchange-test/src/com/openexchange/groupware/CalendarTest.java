@@ -5,6 +5,7 @@ package com.openexchange.groupware;
 import com.openexchange.api.OXFolder;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
+import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.FreeBusyResults;
@@ -54,7 +55,10 @@ public class CalendarTest extends TestCase {
     
     protected void setUp() throws Exception {        
         super.setUp();
+        EventConfigImpl event = new EventConfigImpl();
+        event.setEventQueueEnabled(false);
         userid = getUserId();
+        
     }
     
     protected void tearDown() throws Exception {

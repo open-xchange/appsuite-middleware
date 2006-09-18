@@ -7,6 +7,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
@@ -26,6 +27,8 @@ public class AppointmentAttachmentTest extends TestCase {
     
     protected void setUp() throws Exception {        
         super.setUp();
+        EventConfigImpl event = new EventConfigImpl();
+        event.setEventQueueEnabled(false);        
         userid = CalendarTest.getUserId();
         context = CalendarTest.getContext();
     }
