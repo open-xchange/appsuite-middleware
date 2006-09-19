@@ -449,6 +449,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, userId);
+		parameter.setParameter("type", Participant.USER);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_FREEBUSY);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, new Date(System.currentTimeMillis()-d7));
 		parameter.setParameter(AJAXServlet.PARAMETER_END, new Date(System.currentTimeMillis()+d7));
