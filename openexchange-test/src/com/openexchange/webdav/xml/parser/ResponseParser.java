@@ -115,7 +115,9 @@ public class ResponseParser {
 		response.setStatus(Integer.valueOf(eStatus.getValue()));
 		
 		String responseDescription = eResponsedescription.getValue();
-		if (responseDescription != null && !responseDescription.equals("OK")) {
+		
+		int status = Integer.parseInt(eStatus.getValue());
+		if (status != 200) {
 			response.setErrorMessage(responseDescription);
 		}
 		
