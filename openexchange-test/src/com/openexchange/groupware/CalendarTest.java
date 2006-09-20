@@ -454,6 +454,49 @@ public class CalendarTest extends TestCase {
 
     }      
     
+ 
+    public void testConflictHandling() throws Exception  {
+        Context context = new ContextImpl(contextid);
+        CalendarDataObject cdao = new CalendarDataObject();
+
+        cdao.setTitle("testConflict Step 1 - Insert - ignore conflicts");
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        
+        fillDatesInDao(cdao);
+        cdao.setIgnoreConflicts(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        
+        CalendarDataObject conflict_cdao = new CalendarDataObject();
+
+        conflict_cdao.setTitle("testConflict Step 2 - Insert - Must conflict");
+        conflict_cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        
+        
+        conflict_cdao.setContext(so.getContext());
+        
+        fillDatesInDao(conflict_cdao);
+        conflict_cdao.setIgnoreConflicts(false);
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(conflict_cdao);
+        
+        assertTrue("Check if the conflict has been detected", conflicts.length > 0);
+        
+        boolean found_first_appointment = false;
+        for (int a  = 0; a < conflicts.length; a++) {
+            if (conflicts[a].getObjectID() == cdao.getObjectID()) {
+                found_first_appointment = true;
+                break;
+            }
+        }
+        
+        assertTrue("Check for conflict object ", found_first_appointment);
+ 
+        assertTrue("Check that we did not create the second appointment", conflict_cdao.containsObjectID() == false);
+        
+    }
     
     
 }
