@@ -265,7 +265,7 @@ public class CalendarTest extends TestCase {
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
-        
+        cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         
@@ -364,7 +364,7 @@ public class CalendarTest extends TestCase {
         cdao.setContext(so.getContext());
         
         fillDatesInDao(cdao);
-        
+        cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         int private_folder_id = cdao.getEffectiveFolderId();
@@ -394,6 +394,7 @@ public class CalendarTest extends TestCase {
         update1.setObjectID(object_id);
         update1.setParentFolderID(private_folder_id);
         update1.setTitle("testMove - Step 2 - Update");
+        update1.setIgnoreConflicts(true);
         csql.updateAppointmentObject(update1, public_folder_id, new Date(SUPER_END));
         
         // TODO: LoadObject by ID and make some tests
@@ -409,6 +410,7 @@ public class CalendarTest extends TestCase {
         
         update2.setTitle("testMove - Step 3 - Update");
         update2.setParentFolderID(public_folder_id);
+        update2.setIgnoreConflicts(true);
         csql.updateAppointmentObject(update2, private_folder_id, new Date(SUPER_END));        
         
         // TODO: LoadObject by ID and make some tests
@@ -431,6 +433,7 @@ public class CalendarTest extends TestCase {
         
         update3.setTitle("testMove - Step 4 - Update");
         update3.setParentFolderID(private_folder_id);
+        update3.setIgnoreConflicts(true);
         csql.updateAppointmentObject(update3, public_folder_id, new Date(SUPER_END));        
         
         ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
