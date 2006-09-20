@@ -84,30 +84,8 @@ public class SimpleDBPoolTest extends TestCase {
             }
         }              
         
-        assertEquals("Check if pool is emtpy", 0, DBPool.getReadSize(context));
-       
-        for (int a = 0; a < con.length; a++) {
-            try {
-                con[a] = DBPool.pickup(context);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }        
-
-        for (int a = 0; a < con.length; a++) {
-            try {                
-                Connection tc = con[a];
-                DBPool.push(context, tc);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }  
-        
-        assertEquals("Check refilled pool size ", testsize, DBPool.getReadSize(context));      
+        assertEquals("Check if pool is emtpy", 0, DBPool.getReadSize(context));    
 
     }    
-    
-    
-    
     
 }
