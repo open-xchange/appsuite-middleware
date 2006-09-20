@@ -52,10 +52,10 @@ public class PoolRunner implements Runnable {
                 open = true;
                 synchronized(this) { wait(WAIT_TIME); }
                 if (close_connections) {
-                    if (modrunner % 3 == 0) {
+                    if (modrunner % 6 == 0) {
                         con.close();
                         open = false;
-                    } else if (modrunner % 5 == 0) {
+                    } else if (modrunner % 9 == 0) {
                         con.close();
                         con = null;
                         open = false;
