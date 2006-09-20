@@ -8,6 +8,7 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.FreeBusyResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -492,7 +493,9 @@ public class CalendarTest extends TestCase {
             }
         }
         
-        assertTrue("Check for conflict object ", found_first_appointment);
+        if (conflicts.length != ConflictHandler.MAX_CONFLICT_RESULTS) {
+            assertTrue("Check for conflict object ", found_first_appointment);
+        }        
  
         assertTrue("Check that we did not create the second appointment", conflict_cdao.containsObjectID() == false);
         
