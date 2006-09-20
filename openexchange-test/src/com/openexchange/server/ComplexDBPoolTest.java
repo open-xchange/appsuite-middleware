@@ -66,7 +66,7 @@ public class ComplexDBPoolTest extends TestCase {
        assertEquals("Check pool size ", checksize, DBPool.getReadSize(context));
     }
     
-    public void testThreadedPoolWothClosedConnections() throws Throwable {
+    public void testThreadedPoolWithClosedConnections() throws Throwable {
         Context context = new ContextImpl(contextid);
         int poolsize = DBPool.getReadSize(context);
         checksize = poolsize;
