@@ -61,7 +61,6 @@ public class ComplexDBPoolTest extends TestCase {
        for (int a = 0; a < TEST_RUNS; a++) {
             assertTrue("Check pool size ", DBPool.getReadSize(context) <= poolsize);
             pr[a].getRunnerThread().join();
-            totalcount += pr[a].getRunnerCount();
        }
        assertEquals("Check pool size ", checksize, DBPool.getReadSize(context));
     }
@@ -77,22 +76,11 @@ public class ComplexDBPoolTest extends TestCase {
 
        for (int a = 0; a < TEST_RUNS; a++) {
             assertTrue("Check pool size ", DBPool.getReadSize(context) <= poolsize);
-            pr[a].getRunnerThread().join();
-            totalcount += pr[a].getRunnerCount();
+            pr[a].getRunnerThread().join();            
        }
-       assertEquals("Check pool size ", checksize, DBPool.getReadSize(context));
+       assertEquals("Check pool size ", poolsize, DBPool.getReadSize(context));
        
        System.err.println("Total runs : "+totalcount);
     }    
-        
-    public static synchronized void countSize(boolean action) {
-        if (action) {
-            if (checksize < poolsize)
-                checksize++;
-        } else {
-        if (checksize > 0)
-            checksize--;            
-        }
-    }
     
 }

@@ -44,7 +44,7 @@ public class SimpleDBPoolTest extends TestCase {
         Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
-                con[a] = DBPool.pickup(context);
+                con[a] = DBPool.pickup(context);                
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -84,7 +84,7 @@ public class SimpleDBPoolTest extends TestCase {
             }
         }              
         
-        assertEquals("Check if pool is emtpy", 0, DBPool.getReadSize(context));    
+        assertEquals("Check that pool is  not emtpy", testsize, DBPool.getReadSize(context));    
 
     }    
     

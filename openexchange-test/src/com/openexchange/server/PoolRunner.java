@@ -28,7 +28,6 @@ public class PoolRunner implements Runnable {
     public static final String TEST_QUERY = "SELECT 1 as test";
     
     private boolean isrunning = true;
-    private boolean open = true;
     private int modrunner = 0;
 
     
@@ -46,25 +45,19 @@ public class PoolRunner implements Runnable {
     
     public void run() {
         while (current_run < TEST_RUNS) {
-            try {
+            try {                
                 Connection con = DBPool.pickup(c);
-                ComplexDBPoolTest.countSize(false);
-                open = true;
                 synchronized(this) { wait(WAIT_TIME); }
                 if (close_connections) {
-                    if (modrunner % 6 == 0) {
+                    if (modrunner % 2 == 0) {
                         con.close();
-                        open = false;
-                    } else if (modrunner % 9 == 0) {
+                    } else if (modrunner % 3 == 0) {
                         con.close();
                         con = null;
-                        open = false;
                     }
                 }
                 modrunner++;
                 simpleAction(con);
-                if (open)
-                    ComplexDBPoolTest.countSize(true);
                 DBPool.push(c, con);
                 current_run++;                
             } catch(Exception e) {
@@ -91,10 +84,6 @@ public class PoolRunner implements Runnable {
     
     Thread getRunnerThread() {
         return run;
-    }
-    
-    int getRunnerCount() {    
-        return modrunner;
     }
     
 }
