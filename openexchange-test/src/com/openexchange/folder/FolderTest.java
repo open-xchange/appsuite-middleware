@@ -106,7 +106,8 @@ public class FolderTest extends TestCase {
 			fo.setModule(FolderObject.CALENDAR);
 			fo.setType(FolderObject.PRIVATE);
 			final OCLPermission ocl = new OCLPermission();
-			ocl.setEntity(userId);
+			// Wrong user id in permission!
+			ocl.setEntity(userId - 2);
 			ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 			ocl.setGroupPermission(false);
 			ocl.setFolderAdmin(true);
@@ -118,8 +119,10 @@ public class FolderTest extends TestCase {
 			} catch (Exception e) {
 				assertTrue(true);
 			}
-			oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
-			fail("Exception expected!");
+			if (fuid != -1) {
+				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				fail("Exception expected!");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
