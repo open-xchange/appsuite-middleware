@@ -107,28 +107,7 @@
 		<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.ContactTest" todir="${test.xml.dir}" />	
 		<test name="com.openexchange.webdav.xml.FolderTest" todir="${test.xml.dir}" />	
-	
-		<!-- Server Internals -->
-		<test name="com.openexchange.ajax.infostore.InfostoreParserTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.infostore.InfostoreWriterTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.infostore.JSONSimpleRequestTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.attach.AttachmentParserTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.attach.AttachmentWriterTest" todir="${test.xml.dir}" />
-		
-						
-		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
-	    <test name="com.openexchange.tools.file.FileStorageTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.tools.file.QuotaFileStorageTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.attach.AttachmentBaseTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.i18n.CompiledLineParserTemplateTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.notify.ParticipantNotifyTest" todir="${test.xml.dir}" />
-		<!-- test name="com.openexchange.groupware.reminder.ReminderTest" todir="${test.xml.dir}" /-->
-				
-		
-		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
-		
+
 		<formatter type="brief" usefile="false" /> 
 		<formatter type="xml" /> 
 		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
@@ -139,7 +118,49 @@
 	
 	</target>
 	
-  
+	<target name="cc-test-internal" depends="jar"> 
+		<delete dir="${test.xml.dir}"/> 
+		<mkdir dir="${test.xml.dir}"/> 
+		<junit errorProperty="test.failed" failureProperty="test.failed"> 
+			<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="${lib}/mysql-connector-java-3.1.13-bin.jar" />
+				<pathelement location="openexchange-test.jar"/>
+	    	</classpath>
+	    	
+			<!-- Server Internals -->
+			<test name="com.openexchange.ajax.infostore.InfostoreParserTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.infostore.InfostoreWriterTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.infostore.JSONSimpleRequestTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.attach.AttachmentParserTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.attach.AttachmentWriterTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.protocol.ProtocolTestSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.action.ActionTestSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.writer.LockWriterTest" todir="${test.xml.dir}" />
+			
+							
+			<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
+		    <test name="com.openexchange.tools.file.FileStorageTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.tools.file.QuotaFileStorageTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.groupware.attach.AttachmentBaseTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.i18n.CompiledLineParserTemplateTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.groupware.notify.ParticipantNotifyTest" todir="${test.xml.dir}" />
+			<!-- test name="com.openexchange.groupware.reminder.ReminderTest" todir="${test.xml.dir}" /-->
+					
+			
+			<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
+			
+			<formatter type="brief" usefile="false" /> 
+			<formatter type="xml" /> 
+			<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+			<sysproperty key="java.util.logging.config.file" value="${logging.propFile}" />
+		</junit> 
+		
+		<fail message="Tests failed!" if="test.failed" />
+		
+		</target>
 
   <target name="clean">
     <delete dir="${build}"/>
