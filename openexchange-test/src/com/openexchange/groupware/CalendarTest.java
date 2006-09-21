@@ -393,10 +393,10 @@ public class CalendarTest extends TestCase {
         CalendarDataObject update1 = new CalendarDataObject();
         update1.setContext(so.getContext());
         update1.setObjectID(object_id);
-        update1.setParentFolderID(private_folder_id);
+        update1.setParentFolderID(public_folder_id);
         update1.setTitle("testMove - Step 2 - Update");
         update1.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update1, public_folder_id, new Date(SUPER_END));
+        csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
         
         // TODO: LoadObject by ID and make some tests
         CalendarDataObject testobject = csql.getObjectById(object_id, public_folder_id);
@@ -410,9 +410,9 @@ public class CalendarTest extends TestCase {
         CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
         
         update2.setTitle("testMove - Step 3 - Update");
-        update2.setParentFolderID(public_folder_id);
+        update2.setParentFolderID(private_folder_id);
         update2.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update2, private_folder_id, new Date(SUPER_END));        
+        csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
         
         // TODO: LoadObject by ID and make some tests
 
@@ -433,9 +433,9 @@ public class CalendarTest extends TestCase {
         CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
         
         update3.setTitle("testMove - Step 4 - Update");
-        update3.setParentFolderID(private_folder_id);
+        update3.setParentFolderID(public_folder_id);
         update3.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update3, public_folder_id, new Date(SUPER_END));        
+        csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
         
         ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
 
@@ -483,21 +483,23 @@ public class CalendarTest extends TestCase {
         conflict_cdao.setIgnoreConflicts(false);
         CalendarDataObject conflicts[] = csql.insertAppointmentObject(conflict_cdao);
         
-        assertTrue("Check if the conflict has been detected", conflicts.length > 0);
-        
-        boolean found_first_appointment = false;
-        for (int a  = 0; a < conflicts.length; a++) {
-            if (conflicts[a].getObjectID() == cdao.getObjectID()) {
-                found_first_appointment = true;
-                break;
+        if (conflicts != null) { // could be that the whole conflict detection is deactivated 
+            assertTrue("Check if the conflict has been detected", conflicts.length > 0);
+
+            boolean found_first_appointment = false;
+            for (int a  = 0; a < conflicts.length; a++) {
+                if (conflicts[a].getObjectID() == cdao.getObjectID()) {
+                    found_first_appointment = true;
+                    break;
+                }
             }
+
+            if (conflicts.length != ConflictHandler.MAX_CONFLICT_RESULTS) {
+                assertTrue("Check for conflict object ", found_first_appointment);
+            }        
+
+            assertTrue("Check that we did not create the second appointment", conflict_cdao.containsObjectID() == false);
         }
-        
-        if (conflicts.length != ConflictHandler.MAX_CONFLICT_RESULTS) {
-            assertTrue("Check for conflict object ", found_first_appointment);
-        }        
- 
-        assertTrue("Check that we did not create the second appointment", conflict_cdao.containsObjectID() == false);
         
     }
     
