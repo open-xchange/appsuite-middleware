@@ -285,7 +285,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		Element eProp = new Element("prop", webdav);
 		
 		AppointmentWriter appointmentWriter = new AppointmentWriter();
-		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
+		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false, true);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
