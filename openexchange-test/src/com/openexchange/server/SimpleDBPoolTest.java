@@ -83,8 +83,11 @@ public class SimpleDBPoolTest extends TestCase {
                 e.printStackTrace();
             }
         }              
-        
-        assertEquals("Check that pool is  not emtpy", testsize, DBPool.getReadSize(context));    
+        if (DBPool.isPreFill(context, true)) {
+            assertEquals("Check that pool is  not emtpy", testsize, DBPool.getReadSize(context));    
+        } else if (DBPool.isPostFill(context, true)) {
+            assertEquals("Check that pool is  not emtpy", 0, DBPool.getReadSize(context));    
+        }
 
     }    
     
