@@ -164,15 +164,28 @@ public class AttachmentTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException{
-		StringBuffer url = getUrl(sessionId,"document");
-		addCommon(url, folderId, attachedId, moduleId);
-		url.append("&id="+id);
-		
-		GetMethodWebRequest m = new GetMethodWebRequest(url.toString());
+	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id) throws IOException {
+		return document(webConv, sessionId, folderId, attachedId, moduleId, id, null);
+	}
+	
+	public InputStream document(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) throws IOException{
+		GetMethodWebRequest m = documentRequest(sessionId, folderId, attachedId, moduleId, id, contentType);
 		WebResponse resp = getWebConversation().getResource(m);
 		
 		return resp.getInputStream();
+	}
+	
+	public GetMethodWebRequest documentRequest(String sessionId, int folderId, int attachedId, int moduleId, int id, String contentType) {
+		StringBuffer url = getUrl(sessionId,"document");
+		addCommon(url, folderId, attachedId, moduleId);
+		url.append("&id="+id);
+		if(null != contentType) {
+			contentType = contentType.replaceAll("/", "%2F");
+			url.append("&content_type=");
+			url.append(contentType);
+		}
+		
+		return new GetMethodWebRequest(url.toString());
 	}
 	
 	public Response quota(WebConversation webConv, String sessionId) throws MalformedURLException, JSONException, IOException, SAXException {

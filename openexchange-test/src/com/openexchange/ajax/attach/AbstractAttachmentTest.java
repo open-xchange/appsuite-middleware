@@ -12,6 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AttachmentTest;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
@@ -196,6 +198,15 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 			if(local != null)
 				local.close();
 		}
+		
+		GetMethodWebRequest req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), null);
+		WebResponse resp = getWebConversation().getResource(req);
+		assertEquals("text/plain",resp.getContentType());
+		
+		req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), "application/octet-stream");
+		resp = getWebConversation().getResource(req);
+		assertEquals("application/octet-stream",resp.getContentType());
+		
 	}
 	
 	protected void doNotExists() throws Exception {

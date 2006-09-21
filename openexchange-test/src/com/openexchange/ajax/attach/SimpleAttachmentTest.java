@@ -55,15 +55,6 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 	public void testQuota() throws Exception {
 		doQuota();
 	}
-	
-	public void notestAddMany() throws Exception {
-		for(int i = 1; i < 1000000; i++) {
-			if(i % 1000 == 0)
-				System.out.println(i);
-			upload();
-		}
-		clean.clear();
-	}
 
 
 }
