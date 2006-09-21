@@ -494,7 +494,7 @@ public class CalendarTest extends TestCase {
                 }
             }
 
-            if (conflicts.length != ConflictHandler.MAX_CONFLICT_RESULTS) {
+            if (conflicts.length != ConflictHandler.MAX_CONFLICT_RESULTS) {                
                 assertTrue("Check for conflict object ", found_first_appointment);
             }        
 
