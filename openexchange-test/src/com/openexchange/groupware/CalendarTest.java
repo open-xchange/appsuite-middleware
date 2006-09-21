@@ -92,9 +92,9 @@ public class CalendarTest extends TestCase {
     public static int getPrivateFolder() throws Exception {
         int privatefolder = 0;
         Context context = getContext();
-        Connection readcon = DBPool.pickupWriteable(context);
+        Connection readcon = DBPool.pickup(context);
         privatefolder = new Integer(OXFolderTools.getCalendarStandardFolder(userid, context, readcon)).intValue();
-        DBPool.pushWrite(context, readcon);
+        DBPool.push(context, readcon);
         return privatefolder;        
     }
     
@@ -220,7 +220,7 @@ public class CalendarTest extends TestCase {
         ContextStorage cs = ContextStorage.getInstance();
         Context context = cs.getContext(cs.getContextId("defaultcontext"));
         
-        readcon = DBPool.pickupWriteable(context);
+        readcon = DBPool.pickup(context);
         
         int privatefolder = OXFolderTools.getCalendarStandardFolder(userid, cdao.getContext(), readcon);
         
@@ -229,7 +229,7 @@ public class CalendarTest extends TestCase {
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
         
-        DBPool.pushWrite(context, readcon);
+        DBPool.push(context, readcon);
         
     }
     
