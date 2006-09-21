@@ -336,11 +336,11 @@ public class CalendarTest extends TestCase {
     }
     
     public void testFreeBusy() throws Exception  {
-        Connection readcon = DBPool.pickupWriteable(getContext());
+        Connection readcon = DBPool.pickup(getContext());
         CalendarMySQL calmysql = new CalendarMySQL();
         PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(SUPER_END), readcon);
         ResultSet rs = calmysql.getResultSet(prep);
-        SearchIterator fbr = new FreeBusyResults(rs);   
+        SearchIterator fbr = new FreeBusyResults(rs, getContext(), readcon);   
         int counter = 0;
         while (fbr.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)fbr.next();            
@@ -349,8 +349,7 @@ public class CalendarTest extends TestCase {
             assertTrue(cdao.containsEndDate());
             counter++;
         }        
-        DBPool.pushWrite(getContext(), readcon);
-        
+        fbr.close();
     }    
     
     
@@ -388,6 +387,7 @@ public class CalendarTest extends TestCase {
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
         ofa.createFolder(fo, so, true, readcon, writecon, false);
         int public_folder_id = fo.getObjectID();
+
         
         // TODO: "Move" folder to a public folder
         CalendarDataObject update1 = new CalendarDataObject();
