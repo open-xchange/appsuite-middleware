@@ -483,6 +483,84 @@ public class AppointmentTest extends AbstractAJAXTest {
 		assertTrue("appointment array size is 0", appointmentArray.length > 0);
 	}
 	
+	public void testCopy() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		String date = String.valueOf(System.currentTimeMillis());
+		appointmentObj.setTitle("testCopy" + date);
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+		
+		FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
+		int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
+		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
+		parameter.setParameter("target_folder", targetFolder);
+		
+		WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters());
+		WebResponse resp = getWebConversation().getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+	}
+	
+	public void testMove2PrivateFolder() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		String date = String.valueOf(System.currentTimeMillis());
+		appointmentObj.setTitle("testMove2PrivateFolder" + date);
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+		
+		FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PrivateFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
+		int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+
+		appointmentObj.setParentFolderID(targetFolder);
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+	}	
+	
+	public void testMove2PublicFolder() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		String date = String.valueOf(System.currentTimeMillis());
+		appointmentObj.setTitle("testMove2PublicFolder" + date);
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		
+		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+		String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+		
+		FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testMove2PublicFolder" + System.currentTimeMillis(), FolderObject.CALENDAR, true);
+		int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password);
+
+		appointmentObj.setParentFolderID(targetFolder);
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+	}	
+	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
 		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
 		assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
