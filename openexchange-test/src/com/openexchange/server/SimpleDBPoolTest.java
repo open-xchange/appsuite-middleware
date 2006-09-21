@@ -79,10 +79,22 @@ public class SimpleDBPoolTest extends TestCase {
             try {                
                 Connection tc = con[a];
                 DBPool.push(context, tc);
+                tc = null;
             } catch(Exception e) {
                 e.printStackTrace();
             }
         }              
+        
+        for (int a = 0; a < con.length; a++) {
+            try {                
+                Connection tc = con[a];
+                assertTrue(con != null);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }              
+                
+        
         if (DBPool.isPreFill(context, true)) {
             assertEquals("Check that pool is  not emtpy", testsize, DBPool.getReadSize(context));    
         } else if (DBPool.isPostFill(context, true)) {
