@@ -139,8 +139,8 @@
 			<test name="com.openexchange.webdav.xml.writer.LockWriterTest" todir="${test.xml.dir}" />
 			
 							
-			<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
 		    <test name="com.openexchange.tools.file.FileStorageTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.tools.file.QuotaFileStorageTest" todir="${test.xml.dir}" />
