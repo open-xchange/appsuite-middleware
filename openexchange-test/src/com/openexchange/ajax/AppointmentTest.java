@@ -1,5 +1,6 @@
 package com.openexchange.ajax;
 
+import com.openexchange.ajax.fields.FolderChildFields;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -503,9 +504,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId);
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
-		parameter.setParameter("target_folder", targetFolder);
-		
-		WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters());
+
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
+		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
+		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = getWebConversation().getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
