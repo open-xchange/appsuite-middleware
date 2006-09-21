@@ -24,7 +24,7 @@ public class PoolRunner implements Runnable {
     private int current_run = 0;
     
     public static final int TEST_RUNS = 20;
-    public static final int WAIT_TIME = 200;
+    public static final int WAIT_TIME = 20;
     public static final String TEST_QUERY = "SELECT 1 as test";
     
     private boolean isrunning = true;
