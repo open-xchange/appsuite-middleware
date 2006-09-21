@@ -44,9 +44,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXAppointment;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.AppointmentFields;
 import org.jdom.Element;
 
 /**
@@ -62,24 +62,24 @@ public class AppointmentParser extends CalendarParser {
 	}
 	
 	protected void parse(AppointmentObject appointmentObj, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXAppointment.SHOWN_AS, XmlServlet.NS))) {
-			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(OXAppointment.SHOWN_AS, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS))) {
+			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXAppointment.FULL_TIME, XmlServlet.NS))) {
-			appointmentObj.setFullTime(getValueAsBoolean(eProp.getChild(OXAppointment.FULL_TIME, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(AppointmentFields.FULL_TIME, XmlServlet.NS))) {
+			appointmentObj.setFullTime(getValueAsBoolean(eProp.getChild(AppointmentFields.FULL_TIME, XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXAppointment.LOCATION, XmlServlet.NS))) {
-			appointmentObj.setLocation(getValue(eProp.getChild(OXAppointment.LOCATION, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(AppointmentFields.LOCATION, XmlServlet.NS))) {
+			appointmentObj.setLocation(getValue(eProp.getChild(AppointmentFields.LOCATION, XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXAppointment.ALARM, XmlServlet.NS))) {
-			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(OXAppointment.ALARM, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS))) {
+			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXAppointment.DELETE_EXCEPTIONS, XmlServlet.NS))) {
-			String[] tmp = getValue(eProp.getChild(OXAppointment.DELETE_EXCEPTIONS)).split(",");
+		if (hasElement(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS))) {
+			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS)).split(",");
 			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
 			
 			int counter = 0;
