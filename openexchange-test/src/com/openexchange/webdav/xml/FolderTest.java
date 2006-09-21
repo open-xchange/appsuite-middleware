@@ -51,7 +51,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 
 	public void testInsertPrivateFolderCalendar() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPrivateFolderCalendar", FolderObject.CALENDAR, false);
+	FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderCalendar", FolderObject.CALENDAR, false);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -60,7 +60,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testInsertPrivateFolderContact() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPrivateFolderContact", FolderObject.CONTACT, false);
+		FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderContact", FolderObject.CONTACT, false);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -69,7 +69,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testInsertPrivateFolderTask() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPrivateFolderTask", FolderObject.TASK, false);
+		FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderTask", FolderObject.TASK, false);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -78,7 +78,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testInsertPublicFolderCalendar() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPublicFolderCalendar", FolderObject.CALENDAR, true);
+		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderCalendar", FolderObject.CALENDAR, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -87,7 +87,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testInsertPublicFolderContact() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPublicFolderContact", FolderObject.CONTACT, true);
+		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderContact", FolderObject.CONTACT, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -96,7 +96,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testInsertPublicFolderTask() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertPublicFolderTask", FolderObject.TASK, true);
+		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderTask", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 	 
@@ -105,7 +105,7 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testRenameFolder() throws Exception {
-		FolderObject folderObj = createFolderObject("testInsertRenameFolder", FolderObject.TASK, true);
+		FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		
 		folderObj = new FolderObject();
@@ -120,10 +120,10 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void testMoveFolder() throws Exception {
-		FolderObject folderObj = createFolderObject("testMoveFolder1", FolderObject.TASK, true);
+		FolderObject folderObj = createFolderObject(userId, "testMoveFolder1", FolderObject.TASK, true);
 		int parentFolderId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
-		folderObj = createFolderObject("testMoveFolder2", FolderObject.TASK, true);
+		folderObj = createFolderObject(userId, "testMoveFolder2", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 		folderObj.setParentFolderID(parentFolderId);
@@ -137,7 +137,7 @@ public class FolderTest extends AbstractWebdavTest {
 		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
 		
-		FolderObject folderObj = createFolderObject("testChangePermissionOfPrivateFolder", FolderObject.TASK, false);
+		FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPrivateFolder", FolderObject.TASK, false);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 		
@@ -158,7 +158,7 @@ public class FolderTest extends AbstractWebdavTest {
 		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
 		
-		FolderObject folderObj = createFolderObject("testChangePermissionOfPublicFolder", FolderObject.TASK, true);
+		FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPublicFolder", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj.setObjectID(objectId);
 		
@@ -176,9 +176,9 @@ public class FolderTest extends AbstractWebdavTest {
 	}
 	 
 	public void _notestDeleteFolder() throws Exception {
-		FolderObject folderObj = createFolderObject("testDeleteFolder1", FolderObject.CALENDAR, false);
+		FolderObject folderObj = createFolderObject(userId, "testDeleteFolder1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject("testDeleteFolder2", FolderObject.CALENDAR, false);
+		folderObj = createFolderObject(userId, "testDeleteFolder2", FolderObject.CALENDAR, false);
 		int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
 		deleteFolder(webCon, new int[] { objectId1, objectId2 }, PROTOCOL + hostName, login, password);
@@ -187,9 +187,9 @@ public class FolderTest extends AbstractWebdavTest {
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 	 
-		FolderObject folderObj = createFolderObject("testPropFindWithModified1", FolderObject.CONTACT, false);
+		FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
 		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject("testPropFindWithModified2", FolderObject.TASK, false);
+		folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
 		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
 		FolderObject[] folderArray = listFolder(webCon, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
@@ -200,9 +200,9 @@ public class FolderTest extends AbstractWebdavTest {
 	public void _notestPropFindWithDeleted() throws Exception {
 		Date modified = new Date();
 	 
-		FolderObject folderObj = createFolderObject("testPropFindWithDeleted1", FolderObject.CALENDAR, false);
+		FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject("testPropFindWithDeleted2", FolderObject.CONTACT, false);
+		folderObj = createFolderObject(userId, "testPropFindWithDeleted2", FolderObject.CONTACT, false);
 		int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
 		int[] id = { objectId1, objectId2 };
@@ -233,7 +233,7 @@ public class FolderTest extends AbstractWebdavTest {
 		} 
 	}
 	
-	private FolderObject createFolderObject(String title, int module, boolean isPublic) throws Exception {
+	public static FolderObject createFolderObject(int entity, String title, int module, boolean isPublic) throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName(title + System.currentTimeMillis());
 		folderObj.setModule(module);
@@ -246,12 +246,12 @@ public class FolderTest extends AbstractWebdavTest {
 			folderObj.setParentFolderID(1);
 		}
 		
-		folderObj.setPermissionsAsArray(new OCLPermission[] { createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) } );
+		folderObj.setPermissionsAsArray(new OCLPermission[] { createPermission( entity, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) } );
 		
 		return folderObj;
 	}
 	
-	private OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) throws Exception {
+	private static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) throws Exception {
 		OCLPermission oclp = new OCLPermission();
 		oclp.setEntity(entity);
 		oclp.setGroupPermission(isGroup);
