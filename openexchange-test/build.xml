@@ -77,7 +77,7 @@
 	<junit errorProperty="test.failed" failureProperty="test.failed"> 
 		<classpath>
 			<path refid="project.classpath" />
-			<pathelement location="${lib}/mysql.jar" />
+			<pathelement location="${lib}/mysql-connector-java-3.1.13-bin.jar" />
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
     	
