@@ -40,7 +40,7 @@ public class SimpleDBPoolTest extends TestCase {
     public void testBasicPoolFunctions() throws Throwable {
         Context context = new ContextImpl(CalendarTest.contextid);
 
-        int testsize = DBPool.getReadSize(context);
+        int testsize = DBPool.getSize(context, true);
         Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
@@ -58,13 +58,13 @@ public class SimpleDBPoolTest extends TestCase {
             }
         }              
         
-        assertEquals("Check pool size ", testsize, DBPool.getReadSize(context));      
+        assertEquals("Check pool size ", testsize, DBPool.getSize(context, true));
     }
     
     public void testClosedConnectionsInPool() throws Throwable {
         Context context = new ContextImpl(CalendarTest.contextid);
 
-        int testsize = DBPool.getReadSize(context);
+        int testsize = DBPool.getSize(context, true);
         Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
@@ -96,9 +96,9 @@ public class SimpleDBPoolTest extends TestCase {
                 
         
         if (DBPool.isPreFill(context, true)) {
-            assertEquals("Check that pool is  not emtpy", testsize, DBPool.getReadSize(context));    
+            assertEquals("Check that pool is  not emtpy", testsize, DBPool.getSize(context, true));
         } else if (DBPool.isPostFill(context, true)) {
-            assertEquals("Check that pool is  not emtpy", 0, DBPool.getReadSize(context));    
+            assertEquals("Check that pool is  not emtpy", 0, DBPool.getSize(context, true));
         }
 
     }    
