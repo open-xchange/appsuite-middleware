@@ -85,11 +85,11 @@ public class IDGeneratorTest extends TestCase {
             LOG.info("Inserted " + ((float) rows / TIME / THREADS) + " rows.");
             stmt.close();
         } finally {
-            DBPool.closeWriterSilent(context, con);
+            DBPool.closeReaderSilent(context, con);
             con = null;
         }
             
-        con = DBPool.pickup(context);
+        con = DBPool.pickupWriteable(context);
         try {
             final Statement stmt = con.createStatement();
             try {
