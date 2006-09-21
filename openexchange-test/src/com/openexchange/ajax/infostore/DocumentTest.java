@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.groupware.Init;
 
@@ -42,5 +44,16 @@ public class DocumentTest extends InfostoreAJAXTest {
 			if(is2!=null)
 				is2.close();
 		}
+	}
+	
+	public void testContentType() throws Exception {
+		GetMethodWebRequest req = documentRequest(sessionId, id, -1, "application/octet-stream");
+		WebResponse resp = getWebConversation().getResource(req);
+		assertEquals("application/octet-stream", resp.getContentType());
+		
+		req = documentRequest(sessionId, id, -1, null);
+		resp = getWebConversation().getResource(req);
+		assertEquals("text/plain", resp.getContentType());
+		
 	}
 }

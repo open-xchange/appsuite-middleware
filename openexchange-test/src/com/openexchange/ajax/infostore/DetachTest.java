@@ -38,8 +38,8 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testRevert() throws Exception {
-		revert(getWebConversation(),sessionId, System.currentTimeMillis(), clean.get(0));
-		
+		Response res = revert(getWebConversation(),sessionId, System.currentTimeMillis(), clean.get(0));
+		assertNoError(res);
 		checkNoVersions();
 	}
 	

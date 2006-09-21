@@ -411,20 +411,37 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 	
 	public InputStream document(WebConversation webConv, String sessionId, int id) throws HttpException, IOException {
-		return document(webConv,sessionId,id, -1);
+		return document(webConv,sessionId,id, -1, null);
+	}
+	
+	public InputStream document(WebConversation webConv, String sessionId, int id, String contentType) throws HttpException, IOException {
+		return document(webConv, sessionId, id, -1, contentType);
 	}
 	
 	public InputStream document(WebConversation webConv, String sessionId, int id, int version) throws HttpException, IOException{
+		return document(webConv,sessionId,id,version,null);
+	}
+	
+	public InputStream document(WebConversation webConv, String sessionId, int id, int version, String contentType) throws HttpException, IOException{
+		
+		GetMethodWebRequest m = documentRequest(sessionId, id, version, contentType);
+		WebResponse resp = webConv.getResource(m);
+		
+		return resp.getInputStream();
+	}
+	
+	public GetMethodWebRequest documentRequest(String sessionId, int id, int version, String contentType) {
 		StringBuffer url = getUrl(sessionId,"document");
 		url.append("&id="+id);
 		if(version!=-1)
 			url.append("&version="+version);
 		
-		
-		GetMethodWebRequest m = new GetMethodWebRequest(url.toString());
-		WebResponse resp = webConv.getResource(m);
-		
-		return resp.getInputStream();
+		if(null != contentType) {
+			contentType = contentType.replaceAll("/", "%2F");
+			url.append("&content_type=");
+			url.append(contentType);
+		}
+		return new GetMethodWebRequest(url.toString());
 	}
 	
 	public int copy(WebConversation webConv, String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws JSONException, IOException {
