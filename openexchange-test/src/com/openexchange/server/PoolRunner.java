@@ -49,9 +49,9 @@ public class PoolRunner implements Runnable {
                 Connection con = DBPool.pickup(c);
                 synchronized(this) { wait(WAIT_TIME); }
                 if (close_connections) {
-                    if (modrunner % 2 == 0) {
+                    if (modrunner % 8 == 0) {
                         con.close();
-                    } else if (modrunner % 3 == 0) {
+                    } else if (modrunner % 9 == 0) {
                         con.close();
                         con = null;
                     }
