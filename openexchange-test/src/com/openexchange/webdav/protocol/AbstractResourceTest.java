@@ -95,4 +95,14 @@ public static final int SKEW = 1000;
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}
 	
+	public static void assertOptions(Iterable<Protocol.WEBDAV_METHOD> expect, Protocol.WEBDAV_METHOD...methods) throws WebdavException{
+		//assertEquals(displayNames.length, resources.size());
+		
+		Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
+		
+		for(Protocol.WEBDAV_METHOD method : expect) {
+			assertTrue(method+" not expected",methodSet.remove(method));
+		}
+		assertTrue(methodSet.toString(),methodSet.isEmpty());
+	}
 }

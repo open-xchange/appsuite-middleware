@@ -3,6 +3,7 @@ package com.openexchange.webdav.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -53,8 +54,8 @@ public class ResourceTest extends AbstractResourceTest{
 	public void testMove() throws Exception {
 		WebdavResource res = createResource();
 		
-		String lastModified = res.getLastModified();
-		String creationDate = res.getCreationDate();
+		Date lastModified = res.getLastModified();
+		Date creationDate = res.getCreationDate();
 		
 		res.setDisplayName("myDisplayName");
 		
@@ -105,8 +106,8 @@ public class ResourceTest extends AbstractResourceTest{
 	public void testCopy() throws Exception {
 		WebdavResource res = createResource();
 		
-		String lastModified = res.getLastModified();
-		String creationDate = res.getCreationDate();
+		Date lastModified = res.getLastModified();
+		Date creationDate = res.getCreationDate();
 		
 		res.setDisplayName("myDisplayName");
 		
@@ -177,7 +178,7 @@ public class ResourceTest extends AbstractResourceTest{
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
 		lock.setDepth(0);
 		lock.setOwner("me");
-		lock.setTimeout(3000);
+		lock.setTimeout(1000);
 		assertNull(lock.getToken());
 		
 		WebdavResource res = createResource();
@@ -198,7 +199,35 @@ public class ResourceTest extends AbstractResourceTest{
 		locks = res.getLocks();
 		assertEquals(0, locks.size());
 		
-		// TODO: unlock and lock semantics
+		lock.setTimeout(22);
+		res.lock(lock);
+		res.save();
+		
+		Thread.sleep(23);
+		
+		locks = res.getLocks();
+		assertEquals(0, locks.size());
+		
+		
+		// Renew
+		lock.setTimeout(1000);
+		
+		res.lock(lock);
+		res.save();
+		
+		WebdavLock lock2 = new WebdavLock();
+		lock2.setType(WebdavLock.Type.WRITE_LITERAL);
+		lock2.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
+		lock2.setDepth(0);
+		lock2.setOwner("me");
+		lock2.setTimeout(WebdavLock.NEVER);
+		lock2.setToken(lock.getToken());
+		
+		res.lock(lock2);
+		locks = res.getLocks();
+		assertEquals(1, locks.size());
+		lock = res.getLock(lock.getToken());
+		assertEquals(WebdavLock.NEVER,lock.getTimeout());
 	}
 	
 	public void testConflict() throws Exception {
@@ -211,21 +240,28 @@ public class ResourceTest extends AbstractResourceTest{
 		}
 	}
 	
+	public void testOptions() throws Exception {
+		WebdavResource res = createResource();
+		assertOptions(Arrays.asList(res.getOptions()), Protocol.WEBDAV_METHOD.values());
+		
+		//TODO Newly created, already locked
+	}
+	
 	
 	// TESTS FOR PROPERTIES
 
 	public Object creationDate() throws WebdavException {
 		Date now = new Date();
 		WebdavResource res = createResource();
-		assertEquals(res.getCreationDate(), res.getProperty("DAV", "creationdate").getValue());
-		assertEquals(now, Utils.convert(res.getCreationDate()), SKEW);
+		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV", "creationdate").getValue());
+		assertEquals(now, res.getCreationDate(), SKEW);
 		
 		try {
 			Thread.sleep(SKEW+10);
 		} catch (InterruptedException e) {
 		}
 		res.save();
-		assertEquals(now, Utils.convert(res.getCreationDate()), SKEW);
+		assertEquals(now, res.getCreationDate(), SKEW);
 		
 		
 		return null;
@@ -363,15 +399,15 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object lastModified() throws WebdavException {
 		Date now = new Date();
 		WebdavResource res = createResource();
-		assertEquals(res.getLastModified(), res.getProperty("DAV", "getlastmodified").getValue());
-		assertEquals(now, Utils.convert(res.getLastModified()), SKEW);
+		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV", "getlastmodified").getValue());
+		assertEquals(now, res.getLastModified(), SKEW);
 		try {
 			Thread.sleep(SKEW+10);
 		} catch (InterruptedException e) {
 		}
 		now = new Date();
 		res.save();
-		assertEquals(now, Utils.convert(res.getLastModified()), SKEW);
+		assertEquals(now, res.getLastModified(), SKEW);
 		
 		return null;
 	}

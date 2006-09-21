@@ -1,8 +1,9 @@
 package com.openexchange.webdav.protocol;
 
 import java.io.ByteArrayInputStream;
-import java.security.spec.MGF1ParameterSpec;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,16 +13,17 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.tools.collections.Collector;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 
 
 public class CollectionTest extends ResourceTest {
 	
+	public static final String INDEX_HTML = "<html><head /><body>Company Site</body></html>";
+	public static final String SITEMAP_HTML = "<html><head /><body>You are here</body></html>";
+	public static final String INDEX3_HTML = "<html><head /><body>GUI Site</body></html>";
+	public static final String INDEX2_HTML = "<html><head /><body>PM Site</body></html>";
+
+
 	@Override
 	public void testBody() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
@@ -37,11 +39,17 @@ public class CollectionTest extends ResourceTest {
 		}
 	}
 	
-	protected void createStructure(WebdavCollection coll) throws WebdavException {
+	public static void createStructure(WebdavCollection coll, WebdavFactory factory) throws WebdavException, UnsupportedEncodingException {
 		WebdavResource res = coll.resolveResource("index.html");
+		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes("UTF-8")));
+		res.setContentType("text/html");
+		res.setLength((long)INDEX_HTML.getBytes("UTF-8").length);
 		res.create();
 		
 		res = coll.resolveResource("sitemap.html");
+		res.putBody(new ByteArrayInputStream(SITEMAP_HTML.getBytes("UTF-8")));
+		res.setContentType("text/html");
+		res.setLength((long)SITEMAP_HTML.getBytes("UTF-8").length);
 		res.create();
 		
 		res = coll.resolveCollection("development");
@@ -51,18 +59,24 @@ public class CollectionTest extends ResourceTest {
 		res.create();
 		
 		res = res.toCollection().resolveResource("index3.html");
+		res.putBody(new ByteArrayInputStream(INDEX3_HTML.getBytes("UTF-8")));
+		res.setContentType("text/html");
+		res.setLength((long)INDEX3_HTML.getBytes("UTF-8").length);
 		res.create();
 		
-		res = resourceManager.resolveCollection(coll.getUrl()+"/pm");
+		res = factory.resolveCollection(coll.getUrl()+"/pm");
 		res.create();
 		
 		res = coll.resolveCollection("pm").resolveResource("index2.html");
+		res.putBody(new ByteArrayInputStream(INDEX2_HTML.getBytes("UTF-8")));
+		res.setContentType("text/html");
+		res.setLength((long)INDEX2_HTML.getBytes("UTF-8").length);
 		res.create();
 	}
 	
 	public void testChildren() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		
 		List<WebdavResource> children = coll.getChildren();
 		assertResources(children, "index.html", "sitemap.html", "development", "pm");
@@ -90,7 +104,7 @@ public class CollectionTest extends ResourceTest {
 
 	public void testIterate() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		assertResources(coll,"index.html", "sitemap.html", "development", "pm","gui","index2.html", "index3.html"); // Note: Children ONLY
 		assertResources(coll.toIterable(1), "index.html", "sitemap.html", "development", "pm");
 		assertResources(coll.toIterable(0));
@@ -105,7 +119,7 @@ public class CollectionTest extends ResourceTest {
 	
 	public void testDelete() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		WebdavCollection dev = coll.resolveCollection("development");
 		
 		List<WebdavResource> subList = new ArrayList<WebdavResource>();
@@ -123,11 +137,11 @@ public class CollectionTest extends ResourceTest {
 	
 	public void testMove() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		WebdavCollection dev = coll.resolveCollection("development");
 		
-		String lastModified = dev.getLastModified();
-		String creationDate = dev.getCreationDate();
+		Date lastModified = dev.getLastModified();
+		Date creationDate = dev.getCreationDate();
 		
 		dev.setDisplayName("myDisplayName");
 		
@@ -167,11 +181,11 @@ public class CollectionTest extends ResourceTest {
 	
 	public void testCopy() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		WebdavCollection dev = coll.resolveCollection("development");
 		
-		String lastModified = dev.getLastModified();
-		String creationDate = dev.getCreationDate();
+		Date lastModified = dev.getLastModified();
+		Date creationDate = dev.getCreationDate();
 		
 		dev.setDisplayName("myDisplayName");
 		
@@ -224,7 +238,7 @@ public class CollectionTest extends ResourceTest {
 	public void testLock() throws Exception {
 		super.testLock();
 		WebdavCollection coll = createResource().toCollection();
-		createStructure(coll);
+		createStructure(coll, resourceManager);
 		
 		//Test Depth-Infinity lock
 		WebdavLock lock = new WebdavLock();
@@ -232,6 +246,7 @@ public class CollectionTest extends ResourceTest {
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
 		lock.setDepth(WebdavCollection.INFINITY);
 		lock.setOwner("me");
+		lock.setTimeout(WebdavLock.NEVER);
 		
 		coll.lock(lock);
 		
