@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,11 @@ public class IDGeneratorTest extends TestCase {
      */
     private static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
 
-    private static final int TYPE = Types.DOCUMENT;
+    private static final int TYPE = Types.TASK;
+
+    private static final Random rand = new Random(System.currentTimeMillis());
+
+    private static final int MAX_IN_COMMIT = 10;
 
     private static final int THREADS = 10;
 
@@ -108,40 +113,44 @@ public class IDGeneratorTest extends TestCase {
         boolean run = true;
         
         public void run() {
-            Connection con = null;
-            try {
-                con = DBPool.pickupWriteable(context);
-            } catch (DBPoolingException e) {
-                LOG.error("Can't get writable database connection.", e);
-                return;
-            }
-            try {
-                con.setAutoCommit(false);
-                final PreparedStatement insert = con.prepareStatement(
+            while (run) {
+                Connection con = null;
+                try {
+                    con = DBPool.pickupWriteable(context);
+                } catch (DBPoolingException e) {
+                    LOG.error("Can't get writable database connection.", e);
+                    return;
+                }
+                try {
+                    con.setAutoCommit(false);
+                    final PreparedStatement insert = con.prepareStatement(
                     "INSERT INTO id_generator_test (cid, id) VALUES (?, ?)");
-                while (run) {
-                    final int ident = IDGenerator.getId(context, TYPE, con);
-                    insert.setInt(1, context.getContextId());
-                    insert.setInt(2, ident);
-                    insert.executeUpdate();
+                    final int countInCommit = rand.nextInt(MAX_IN_COMMIT) + 1;
+                    for (int i = 0; i < countInCommit; i++) {
+                        final int ident = IDGenerator.getId(context, TYPE, con);
+                        insert.setInt(1, context.getContextId());
+                        insert.setInt(2, ident);
+                        insert.executeUpdate();
+                    }
                     con.commit();
-                }
-                insert.close();
-            } catch (SQLException e) {
-                try {
-                    con.rollback();
-                } catch (SQLException e1) {
-                    LOG.fatal("Error while rollback.", e);
-                }
-                LOG.fatal("Error while getting ID and inserting.", e);
-                fail(e.getMessage());
-            } finally {
-                try {
-                    con.setAutoCommit(true);
+                    insert.close();
                 } catch (SQLException e) {
-                    LOG.fatal("Error while setting autocommit true.", e);
+                    try {
+                        con.rollback();
+                    } catch (SQLException e1) {
+                        LOG.fatal("Error while rollback.", e);
+                    }
+                    LOG.fatal("Error while getting ID and inserting.", e);
+                    fail(e.getMessage());
+                    return;
+                } finally {
+                    try {
+                        con.setAutoCommit(true);
+                    } catch (SQLException e) {
+                        LOG.fatal("Error while setting autocommit true.", e);
+                    }
+                    DBPool.closeWriterSilent(context, con);
                 }
-                DBPool.closeWriterSilent(context, con);
             }
         }
     }
