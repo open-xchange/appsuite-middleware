@@ -1072,13 +1072,23 @@ public class ContactTest extends AbstractAJAXTest {
 				contactObj.setGivenName(jsonArray.getString(pos));
 				break;
 			case ContactObject.ANNIVERSARY:
-				contactObj.setAnniversary(new Date(jsonArray.getLong(pos)));
+				String lAnniversary = jsonArray.getString(pos);
+				if (lAnniversary != null && !lAnniversary.equals("null")) {
+					contactObj.setAnniversary(new Date(Long.parseLong(lAnniversary)));
+				} else {
+					contactObj.setAnniversary(null);
+				}
 				break;
 			case ContactObject.ASSISTANT_NAME:
 				contactObj.setAssistantName(jsonArray.getString(pos));
 				break;
 			case ContactObject.BIRTHDAY:
-				contactObj.setBirthday(new Date(jsonArray.getLong(pos)));
+				String lBirthday = jsonArray.getString(pos);
+				if (lBirthday != null && !lBirthday.equals("null")) {
+					contactObj.setBirthday(new Date(Long.parseLong(lBirthday)));
+				} else {
+					contactObj.setBirthday(null);
+				}
 				break;
 			case ContactObject.BRANCHES:
 				contactObj.setBranches(jsonArray.getString(pos));
