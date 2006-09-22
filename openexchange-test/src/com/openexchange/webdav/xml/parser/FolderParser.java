@@ -74,7 +74,7 @@ public class FolderParser extends FolderChildParser {
 		
 		if (hasElement(eProp.getChild(OXFolder.TYPE, XmlServlet.NS))) {
 			String type = getValue(eProp.getChild(OXFolder.TYPE, XmlServlet.NS));
-			if (type.equals("private")) {
+			if (type.equals("private") || type.equals("shared")) {
 				folderObj.setType(OXFolder.PRIVATE);
 			} else if (type.equals("public")) {
 				folderObj.setType(OXFolder.PUBLIC);
