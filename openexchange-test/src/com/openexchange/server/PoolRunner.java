@@ -23,8 +23,8 @@ public class PoolRunner implements Runnable {
     private Thread run;
     private int current_run = 0;
     
-    public static final int TEST_RUNS = 20;
-    public static final int WAIT_TIME = 20;
+    public static final int TEST_RUNS = 100;
+    public static final int WAIT_TIME = 200;
     public static final String TEST_QUERY = "SELECT 1 as test";
     
     private boolean isrunning = true;
@@ -37,7 +37,6 @@ public class PoolRunner implements Runnable {
         this.start();
     }
     
-    
     public void start() {
         run = new Thread(this);
         run.start();
@@ -47,7 +46,9 @@ public class PoolRunner implements Runnable {
         while (current_run < TEST_RUNS) {
             try {                
                 Connection con = DBPool.pickup(c);
-                synchronized(this) { wait(WAIT_TIME); }
+                try {
+                    run.sleep(WAIT_TIME);
+                } catch(java.lang.InterruptedException ie) { }
                 if (close_connections) {
                     if (modrunner % 8 == 0) {
                         con.close();
