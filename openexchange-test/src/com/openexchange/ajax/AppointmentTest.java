@@ -128,6 +128,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testNewAppointmentWithParticipants() throws Exception {
@@ -147,6 +148,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setParticipants(participants);
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testUpdateAppointment() throws Exception {
@@ -160,6 +162,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testUpdateAppointmentWithParticipant() throws Exception {
@@ -190,6 +193,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.removeParentFolderID();
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testAll() throws Exception {
@@ -214,6 +218,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, appointmentArray.length);
+		
+		deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testConfirm() throws Exception {
@@ -221,6 +229,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		confirmAppointment(getWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testDelete() throws Exception {
@@ -239,6 +248,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGetWithParticipants() throws Exception {
@@ -265,6 +276,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGetWithAllFields() throws Exception {
@@ -313,6 +326,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testGetWithAllFieldsOnUpdate() throws Exception {
@@ -367,6 +382,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testListWithAllFields() throws Exception {
@@ -422,6 +439,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testHasAppointment() throws Exception {
@@ -482,6 +501,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		AppointmentObject[] appointmentArray = searchAppointment(getWebConversation(), "testSimpleSearch" + date, appointmentFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("appointment array size is 0", appointmentArray.length > 0);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testCopy() throws Exception {
@@ -491,7 +512,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
 		String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
@@ -502,7 +523,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
-		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId);
+		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
 
 		JSONObject jsonObj = new JSONObject();
@@ -518,6 +539,16 @@ public class AppointmentTest extends AbstractAJAXTest {
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
+		
+		int objectId2 = 0;
+		
+		JSONObject data = (JSONObject)response.getData();
+		if (data.has(DataFields.ID)) {
+			objectId2 = data.getInt(DataFields.ID);
+		}
+		
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testMove2PrivateFolder() throws Exception {
@@ -540,6 +571,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
+		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
 	
 	public void testMove2PublicFolder() throws Exception {
@@ -562,6 +596,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
+		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
