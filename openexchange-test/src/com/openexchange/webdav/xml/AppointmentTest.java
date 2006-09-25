@@ -84,9 +84,11 @@ public class AppointmentTest extends AbstractWebdavTest {
 	
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
-		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
-	
+
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 		
@@ -107,7 +109,9 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testNewAppointmentWithUsers() throws Exception {
@@ -120,7 +124,10 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		appointmentObj.setUsers(users);
 		
-		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+
 	}
 	
 	public void testUpdateAppointment() throws Exception {
@@ -132,6 +139,9 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentObj.setShownAs(AppointmentObject.FREE);
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId }, { appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testUpdateAppointmentWithParticipants() throws Exception {
@@ -163,6 +173,10 @@ public class AppointmentTest extends AbstractWebdavTest {
 		appointmentObj.setParticipants(participants);
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId }, { appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+
 	}
 	
 	public void testDelete() throws Exception {
@@ -179,12 +193,16 @@ public class AppointmentTest extends AbstractWebdavTest {
 		Date modified = new Date();
 		
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithModified");
-		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
-		insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", appointmentArray.length >= 2);
+		
+		int[][] objectIdAndFolderId = { {objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
@@ -195,7 +213,6 @@ public class AppointmentTest extends AbstractWebdavTest {
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
 		int[][] objectIdAndFolderId = { { objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
-		
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "DELETED", PROTOCOL + hostName, login, password);
@@ -208,6 +225,9 @@ public class AppointmentTest extends AbstractWebdavTest {
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testListWithAllFields() throws Exception {
@@ -234,15 +254,19 @@ public class AppointmentTest extends AbstractWebdavTest {
 		AppointmentObject loadAppointment = appointmentArray[0];
 		
 		appointmentObj.setObjectID(objectId);
-		// appointmentObj.setStartDate(startTime);
-		// appointmentObj.setEndDate(endTime);
 		compareObject(appointmentObj, loadAppointment);
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testConfirm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		confirmAppointment(webCon, objectId, CalendarObject.DECLINE, null, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2) throws Exception {
