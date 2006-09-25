@@ -125,7 +125,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
 	}
 	
-	/*
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
@@ -505,7 +504,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	 */
 	
 	public void testCopy() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
@@ -555,7 +553,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		} 
 	}
 	
-	/*
 	public void testMove2PrivateFolder() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		String date = String.valueOf(System.currentTimeMillis());
@@ -605,7 +602,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
-	 */
 	
 	private void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2, long newStartTime, long newEndTime) throws Exception {
 		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
