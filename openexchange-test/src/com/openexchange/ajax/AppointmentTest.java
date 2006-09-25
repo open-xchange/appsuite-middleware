@@ -125,6 +125,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
 	}
 	
+	/*	
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
@@ -577,6 +578,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
+	 */
 	
 	public void testMove2PublicFolder() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
@@ -676,7 +678,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		JSONWriter jsonWriter = new JSONWriter(pw);
 		
 		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
-		appointmentwriter.writeAppointment(appointmentObj);
+		appointmentwriter.writeAppointment(appointmentObj, true);
 		
 		pw.flush();
 		
