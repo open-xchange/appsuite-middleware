@@ -125,7 +125,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		}
 	}
 	
-	/*	
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
@@ -548,6 +547,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 			objectId2 = data.getInt(DataFields.ID);
 		}
 		
+		if (data.has("conflicts")) {
+			fail("conflicts found!");
+		}
+		
 		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		if (objectId2 > 0) {
 			deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
@@ -578,7 +581,6 @@ public class AppointmentTest extends AbstractAJAXTest {
 		deleteAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
-	 */
 	
 	public void testMove2PublicFolder() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
@@ -669,6 +671,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 			objectId = data.getInt(DataFields.ID);
 		}
 		
+		if (data.has("conflicts")) {
+			fail("conflicts found!");
+		}
+		
 		return objectId;
 	}
 	
@@ -701,6 +707,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
+		}
+		
+		JSONObject data = (JSONObject)response.getData();
+		if (data.has("conflicts")) {
+			fail("conflicts found!");
 		}
 	}
 	
