@@ -2,6 +2,7 @@ package com.openexchange.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,38 +12,32 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 public class XMLCompare {
 
 		
 	private static Map<String,Method>  methods = new HashMap<String,Method>();
 	private static boolean inited;
-	private static DocumentBuilder builder = null;
 	private Set<String> checkTextNames = Collections.EMPTY_SET;
 	
-	public boolean compare(String expect, String got) throws ParserConfigurationException, SAXException, IOException{
-		if(builder == null)
-			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document expectedDoc = builder.parse(new ByteArrayInputStream(expect.getBytes("UTF-8")));
-		Document gotDoc = builder.parse(new ByteArrayInputStream(got.getBytes("UTF-8")));
+	public boolean compare(String expect, String got) throws UnsupportedEncodingException, JDOMException, IOException {
+		SAXBuilder builder = new SAXBuilder();
+		Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes("UTF-8")));
+		Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes("UTF-8")));
 		
-		return compareDocuments(expectedDoc, gotDoc);
+		return compareDocuments(expectedDoc.getRootElement(), gotDoc.getRootElement());
 	}
 	
-	public boolean compareDocuments(Node expectedDoc, Node gotDoc) {
-		if(!expectedDoc.getNodeName().equals(gotDoc.getNodeName())) {
+	public boolean compareDocuments(Element expectedDoc, Element gotDoc) {
+		//System.out.println(expectedDoc.getName()+" == "+gotDoc.getName()+" ? "+expectedDoc.getName().equals(gotDoc.getName()));
+		if(!expectedDoc.getName().equals(gotDoc.getName()) || !expectedDoc.getNamespace().equals(gotDoc.getNamespace())) {
 			return false;
 		}
-		String nodeName = expectedDoc.getNodeName();
+		String nodeName = expectedDoc.getName();
 		Method m = findCompareMethod(nodeName);
 		if(m != null) {
 			try {
@@ -55,7 +50,7 @@ public class XMLCompare {
 				e.printStackTrace();
 			}
 		}
-		if(checkText(nodeName) && ! expectedDoc.getTextContent().equals(gotDoc.getTextContent())) {
+		if(checkText(nodeName) && ! expectedDoc.getText().equals(gotDoc.getText())) {
 			return false;
 		}
 		return compareChildElems(expectedDoc, gotDoc);
@@ -73,9 +68,9 @@ public class XMLCompare {
 		checkTextNames = new HashSet<String>(Arrays.asList(names));
 	}
 
-	protected boolean compareChildElems(Node expectedDoc, Node gotDoc){
-		Set<Element> expectedNodes = elementSet(expectedDoc.getChildNodes());
-		Set<Element> gotNodes = elementSet(gotDoc.getChildNodes());
+	protected boolean compareChildElems(Element expectedDoc, Element gotDoc){
+		Set<Element> expectedNodes = new HashSet<Element>(expectedDoc.getChildren());
+		Set<Element> gotNodes = new HashSet<Element>(gotDoc.getChildren());
 Expect: for(Element expect : expectedNodes) {
 			for(Element got : new HashSet<Element>(gotNodes)) {
 				if(compareDocuments(expect, got)) {
@@ -83,6 +78,7 @@ Expect: for(Element expect : expectedNodes) {
 					continue Expect;
 				}
 			}
+			System.out.println("Can't find "+expect+" with text "+expect.getText());
 			return false;
 		}
 		return gotNodes.isEmpty();
@@ -110,15 +106,4 @@ Expect: for(Element expect : expectedNodes) {
 			}
 		}
 	}
-
-	protected final Set<Element> elementSet(NodeList childNodes) {
-		Set<Element> elements = new HashSet<Element>();
-		for(int i = 0; i < childNodes.getLength(); i++) {
-			Node node = childNodes.item(i);
-			if(node.getNodeType() == Node.ELEMENT_NODE)
-				elements.add((Element) node);
-		}
-		return elements;
-	}
-
 }
