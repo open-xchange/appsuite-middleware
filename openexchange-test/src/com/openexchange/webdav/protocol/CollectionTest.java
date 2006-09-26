@@ -297,7 +297,7 @@ public class CollectionTest extends ResourceTest {
 	public Object resourceType() throws WebdavException {
 		WebdavCollection coll = createResource().toCollection();
 		assertEquals(Protocol.COLLECTION, coll.getResourceType());
-		assertEquals(coll.getResourceType(), coll.getProperty("DAV", "resourcetype").getValue());
+		assertEquals(coll.getResourceType(), coll.getProperty("DAV:", "resourcetype").getValue());
 		return null;
 	}
 
@@ -305,7 +305,7 @@ public class CollectionTest extends ResourceTest {
 	public Object contentLanguage() throws WebdavException {
 		WebdavResource res = createResource();
 		String defaultLanguage = null;
-		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage"));
+		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage"));
 		assertEquals(defaultLanguage, res.getLanguage());
 		
 		try {
@@ -331,7 +331,7 @@ public class CollectionTest extends ResourceTest {
 	@Override
 	public Object contentLength() throws WebdavException {
 		WebdavResource res = createResource();
-		assertEquals(res.getLength(), res.getProperty("DAV", "getcontentlength"));
+		assertEquals(res.getLength(), res.getProperty("DAV:", "getcontentlength"));
 		assertEquals(null, res.getLength());
 		
 		
@@ -358,7 +358,7 @@ public class CollectionTest extends ResourceTest {
 	@Override
 	public Object etag() throws WebdavException{
 		WebdavResource res = createResource();
-		assertEquals(res.getETag(), res.getProperty("DAV", "getetag"));
+		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag"));
 		assertEquals(null, res.getETag());
 		
 		return null;

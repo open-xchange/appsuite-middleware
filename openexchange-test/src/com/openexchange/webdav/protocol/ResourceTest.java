@@ -253,7 +253,7 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object creationDate() throws WebdavException {
 		Date now = new Date();
 		WebdavResource res = createResource();
-		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV", "creationdate").getValue());
+		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV:", "creationdate").getValue());
 		assertEquals(now, res.getCreationDate(), SKEW);
 		
 		try {
@@ -270,21 +270,21 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object displayName() throws WebdavException {
 		WebdavResource res = createResource();
 		String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
-		assertEquals(res.getDisplayName(), res.getProperty("DAV", "displayname").getValue());
+		assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
 		assertEquals(defaultDispName, res.getDisplayName());
 		
 		res.setDisplayName("Other Disp");
 		res.save();
 		res = resourceManager.resolveResource(res.getUrl());
 		assertEquals("Other Disp", res.getDisplayName());
-		assertEquals(res.getDisplayName(), res.getProperty("DAV", "displayname").getValue());
+		assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
 		
 		WebdavProperty prop = Protocol.DISPLAYNAME_LITERAL.getWebdavProperty();
 		prop.setValue("My other disp");
 		res.putProperty(prop);
 		
 		assertEquals("My other disp", res.getDisplayName());
-		assertEquals(res.getDisplayName(), res.getProperty("DAV","displayname").getValue());
+		assertEquals(res.getDisplayName(), res.getProperty("DAV:","displayname").getValue());
 		
 		
 		return null;
@@ -293,7 +293,7 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object contentLanguage() throws WebdavException {
 		WebdavResource res = createResource();
 		String defaultLanguage = "en";
-		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
 		assertEquals(defaultLanguage, res.getLanguage());
 		
 		try {
@@ -304,14 +304,14 @@ public class ResourceTest extends AbstractResourceTest{
 		}
 		res.save();
 		res = resourceManager.resolveResource(res.getUrl());
-		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
 		assertEquals("de", res.getLanguage());
 		
 		WebdavProperty prop = Protocol.GETCONTENTLANGUAGE_LITERAL.getWebdavProperty();
 		prop.setValue("fr");
 		res.putProperty(prop);
 		
-		assertEquals(res.getLanguage(), res.getProperty("DAV", "getcontentlanguage").getValue());
+		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
 		assertEquals("fr", res.getLanguage());
 		
 		
@@ -321,7 +321,7 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object contentLength() throws WebdavException {
 		WebdavResource res = createResource();
 		Long defaultLength = 0l;
-		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals(defaultLength, res.getLength());
 		
 		try {
@@ -332,14 +332,14 @@ public class ResourceTest extends AbstractResourceTest{
 		}
 		res.save();
 		res = resourceManager.resolveResource(res.getUrl());
-		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals((Long)1l, res.getLength());
 		
 		WebdavProperty prop = Protocol.GETCONTENTLENGTH_LITERAL.getWebdavProperty();
 		prop.setValue("2");
 		res.putProperty(prop);
 		
-		assertEquals(""+res.getLength(), res.getProperty("DAV", "getcontentlength").getValue());
+		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals((Long)2l, res.getLength());
 		return null;
 	}
@@ -351,27 +351,27 @@ public class ResourceTest extends AbstractResourceTest{
 		res.save();
 		res = resourceManager.resolveResource(res.getUrl());
 		assertEquals("text/plain", res.getContentType());
-		assertEquals(res.getContentType(), res.getProperty("DAV", "getcontenttype").getValue());
+		assertEquals(res.getContentType(), res.getProperty("DAV:", "getcontenttype").getValue());
 		
 		WebdavProperty prop = Protocol.GETCONTENTTYPE_LITERAL.getWebdavProperty();
 		prop.setValue("text/html");
 		res.putProperty(prop);
 		
 		assertEquals("text/html", res.getContentType());
-		assertEquals(res.getContentType(), res.getProperty("DAV", "getcontenttype").getValue());
+		assertEquals(res.getContentType(), res.getProperty("DAV:", "getcontenttype").getValue());
 		
 		return null;
 	}
 
 	public Object etag() throws WebdavException {
 		WebdavResource res = createResource();
-		assertEquals(res.getETag(), res.getProperty("DAV", "getetag").getValue());
+		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag").getValue());
 		
 		res.setDisplayName("one");
 		String eTag = res.getETag();
 		res.save();
 		
-		assertEquals(res.getETag(), res.getProperty("DAV", "getetag").getValue());
+		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag").getValue());
 		assertEquals(eTag, res.getETag());
 		
 		String text = "Hallo";
@@ -399,7 +399,7 @@ public class ResourceTest extends AbstractResourceTest{
 	public Object lastModified() throws WebdavException {
 		Date now = new Date();
 		WebdavResource res = createResource();
-		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV", "getlastmodified").getValue());
+		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV:", "getlastmodified").getValue());
 		assertEquals(now, res.getLastModified(), SKEW);
 		try {
 			Thread.sleep(SKEW+10);
@@ -414,7 +414,8 @@ public class ResourceTest extends AbstractResourceTest{
 
 	public Object resourceType() throws WebdavException {
 		WebdavResource res = createResource();
-		assertEquals(null, res.getProperty("DAV", "resourcetype"));
+		assertNotNull(res.getProperty("DAV:", "resourcetype"));
+		assertNull(res.getProperty("DAV:", "resourcetype").getValue()); // Is set, but is empty
 		assertEquals(null, res.getResourceType());
 		
 		return null;

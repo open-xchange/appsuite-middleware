@@ -1,6 +1,7 @@
 package com.openexchange.webdav.action;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -8,6 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
+import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -32,6 +38,12 @@ public class MockWebdavRequest implements WebdavRequest {
 		if(res != null)
 			return res;
 		return res = factory.resolveResource(url);
+	}
+	
+	public WebdavCollection getCollection() throws WebdavException {
+		if(res != null)
+			return (WebdavCollection) res;
+		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
 
 	public String getUrl() {
@@ -61,6 +73,10 @@ public class MockWebdavRequest implements WebdavRequest {
 
 	public List<String> getHeaderNames() {
 		return new LinkedList<String>(headers.keySet());
+	}
+
+	public Document getBodyAsDocument() throws JDOMException, IOException {
+		return new SAXBuilder().build(getBody());
 	}
 
 }

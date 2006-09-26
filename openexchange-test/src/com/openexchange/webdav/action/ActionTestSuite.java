@@ -12,7 +12,10 @@ public class ActionTestSuite {
 		tests.addTestSuite(DeleteTest.class);
 		tests.addTestSuite(OptionsTest.class);
 		tests.addTestSuite(TraceTest.class);
-		
+		tests.addTestSuite(MoveTest.class);
+		tests.addTestSuite(CopyTest.class);
+		tests.addTestSuite(MkcolTest.class);
+		tests.addTestSuite(PropfindTest.class);
 		return tests;
 	}
 }
