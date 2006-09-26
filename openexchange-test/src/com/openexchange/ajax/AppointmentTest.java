@@ -556,7 +556,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		if (objectId2 > 0) {
-			deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+			deleteAppointment(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		} 
 	}
 	
