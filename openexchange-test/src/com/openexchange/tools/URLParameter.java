@@ -42,6 +42,10 @@ public class URLParameter {
         parameters.put(name, String.valueOf(value));
     }
 	
+    public void setParameter(final String name, final boolean value) {
+        parameters.put(name, String.valueOf(value));
+    }
+	
     public void setParameter(final String name, final Date value) {
         parameters.put(name, String.valueOf(value.getTime()));
     }
