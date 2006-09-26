@@ -577,7 +577,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
@@ -602,7 +602,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
 		appointmentObj.setParentFolderID(targetFolder);
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
