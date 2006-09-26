@@ -20,6 +20,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -511,6 +512,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		appointmentObj.setTitle("testCopy" + date);
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.FREE);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		int objectId1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
 		
@@ -525,6 +527,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, objectId1);
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, appointmentFolderId);
+		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
 
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
