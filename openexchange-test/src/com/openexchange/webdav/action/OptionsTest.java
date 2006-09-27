@@ -8,7 +8,7 @@ public class OptionsTest extends ActionTestCase {
 	public void testOptions() throws Exception {
 		final String INDEX_HTML_URL = testCollection+"/index.html";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost");
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);

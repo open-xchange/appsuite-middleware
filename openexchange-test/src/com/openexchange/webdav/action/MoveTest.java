@@ -13,7 +13,7 @@ public class MoveTest extends ActionTestCase {
 		
 		String content = getContent(INDEX_HTML_URL);
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost");
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
