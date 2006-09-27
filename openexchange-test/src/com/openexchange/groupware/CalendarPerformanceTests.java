@@ -9,6 +9,7 @@ package com.openexchange.groupware;
 
 import com.openexchange.api.OXCalendar;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
 import java.util.Date;

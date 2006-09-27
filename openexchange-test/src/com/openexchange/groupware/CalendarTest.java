@@ -6,7 +6,7 @@ import com.openexchange.api.OXFolder;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.EventConfigImpl;
-import com.openexchange.groupware.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.FreeBusyResults;

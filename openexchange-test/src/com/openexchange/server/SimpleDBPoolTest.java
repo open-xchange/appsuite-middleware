@@ -3,7 +3,7 @@ package com.openexchange.server;
 
 import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.*;
-import com.openexchange.groupware.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
@@ -65,7 +65,7 @@ public class SimpleDBPoolTest extends TestCase {
         Context context = new ContextImpl(CalendarTest.contextid);
 
         int testsize = DBPool.getSize(context, true);
-        Connection con[] = new Connection[testsize];
+    Connection con[] = new Connection[testsize];
         for (int a = 0; a < con.length; a++) {
             try {
                 con[a] = DBPool.pickup(context);
