@@ -112,10 +112,7 @@ public class LdapTests {
 		TestSuite suite = new TestSuite(
 			"Test for com.openexchange.groupware.ldap.test");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(AuthenticationSupportTest.class);
 		suite.addTestSuite(UserGroupHandleTest.class);
-		suite.addTestSuite(MailSupportTest.class);
-		suite.addTestSuite(ResourcesHandleTest.class);
 		//$JUnit-END$
 		return suite;
 	}
