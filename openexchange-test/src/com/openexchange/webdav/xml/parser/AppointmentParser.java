@@ -78,6 +78,10 @@ public class AppointmentParser extends CalendarParser {
 			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS)));
 		}
 		
+		if (hasElement(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS))) {
+			appointmentObj.setIgnoreConflicts(getValueAsBoolean(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS)));
+		}
+		
 		if (hasElement(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS))) {
 			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS)).split(",");
 			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
