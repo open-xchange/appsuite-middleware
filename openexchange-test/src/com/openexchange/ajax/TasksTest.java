@@ -62,7 +62,6 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.container.Response;
@@ -830,7 +829,7 @@ public class TasksTest extends AbstractAJAXTest {
         final JSONArray json = new JSONArray();
         for (int[] folderAndTask : folderAndTaskIds) {
             final JSONObject json2 = new JSONObject();
-            json2.put(DataFields.ID, folderAndTask[1]);
+            json2.put(TaskFields.ID, folderAndTask[1]);
             json2.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
             json.put(json2);
         }
@@ -924,7 +923,7 @@ public class TasksTest extends AbstractAJAXTest {
         return participants;
     }
 
-    public static void removeParticipant(List<Participant> participants,
+    public static void removeParticipant(final List<Participant> participants,
         final int creatorId) {
         final Iterator<Participant> iter = participants.iterator();
         while (iter.hasNext()) {
