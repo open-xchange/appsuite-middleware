@@ -8,6 +8,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.webdav.xml.parser.ResponseParser;
@@ -522,9 +523,12 @@ public class FolderTest extends AbstractWebdavTest {
 	public static FolderObject getAppointmentDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
 		
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
+		int userId = contactArray[0].getInternalUserId();
+
 		for (int a = 0; a < folderArray.length; a++) {
 			FolderObject folderObj = folderArray[a];
-			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CALENDAR) {
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CALENDAR && folderObj.getCreatedBy() == userId) {
 				return folderObj;
 			}
 		}
@@ -535,9 +539,12 @@ public class FolderTest extends AbstractWebdavTest {
 	public static FolderObject getContactDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
 		
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
+		int userId = contactArray[0].getInternalUserId();
+		
 		for (int a = 0; a < folderArray.length; a++) {
 			FolderObject folderObj = folderArray[a];
-			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CONTACT) {
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CONTACT && folderObj.getCreatedBy() == userId) {
 				return folderObj;
 			}
 		}
@@ -548,9 +555,12 @@ public class FolderTest extends AbstractWebdavTest {
 	public static FolderObject getTaskDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
 		
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
+		int userId = contactArray[0].getInternalUserId();
+		
 		for (int a = 0; a < folderArray.length; a++) {
 			FolderObject folderObj = folderArray[a];
-			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.TASK) {
+			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.TASK && folderObj.getCreatedBy() == userId) {
 				return folderObj;
 			}
 		}
