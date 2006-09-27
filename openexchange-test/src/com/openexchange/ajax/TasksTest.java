@@ -499,6 +499,9 @@ public class TasksTest extends AbstractAJAXTest {
             deleteTask(getWebConversation(), getHostName(), getSessionId(),
                 timestamp, folderAndTask[0], folderAndTask[1]);
         }
+        final int[][] remainingTasks = new int[8][2];
+        System.arraycopy(tasks, 0, remainingTasks, 0, 8);
+        tasks = remainingTasks;
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
