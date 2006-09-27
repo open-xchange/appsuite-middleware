@@ -7,11 +7,11 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarMySQL;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.FreeBusyResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -341,7 +341,7 @@ public class CalendarTest extends TestCase {
     
     public void testFreeBusy() throws Exception  {
         Connection readcon = DBPool.pickup(getContext());
-        CalendarMySQL calmysql = new CalendarMySQL();
+        CalendarSqlImp calmysql = CalendarSql.getCalendarSqlImplementation();
         PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(SUPER_END), readcon);
         ResultSet rs = calmysql.getResultSet(prep);
         SearchIterator fbr = new FreeBusyResults(rs, getContext(), readcon);   
