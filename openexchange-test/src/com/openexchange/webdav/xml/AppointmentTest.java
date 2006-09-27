@@ -35,6 +35,8 @@ import org.jdom.output.XMLOutputter;
 
 public class AppointmentTest extends AbstractWebdavTest {
 	
+	protected int userId = -1;
+	
 	protected int userParticipantId2 = -1;
 	
 	protected int userParticipantId3 = -1;
@@ -79,7 +81,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
 		
 		final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		appointmentFolderId = folderObj.getObjectID();
+		appointmentFolderId = folderObj.getObjectID();	
 	}
 	
 	public void testNewAppointment() throws Exception {
@@ -140,7 +142,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		
-		int[][] objectIdAndFolderId = { {objectId }, { appointmentFolderId } };
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
@@ -174,7 +176,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		
-		int[][] objectIdAndFolderId = { {objectId }, { appointmentFolderId } };
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 
 	}
@@ -355,7 +357,7 @@ public class AppointmentTest extends AbstractWebdavTest {
 		Element eProp = new Element("prop", webdav);
 		
 		AppointmentWriter appointmentWriter = new AppointmentWriter();
-		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
+		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false, true);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
