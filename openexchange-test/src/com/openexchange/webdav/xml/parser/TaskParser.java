@@ -45,10 +45,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXTask;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.XmlServlet;
-import com.sun.java_cup.internal.parser;
+import com.openexchange.webdav.xml.fields.TaskFields;
 import org.jdom.Element;
 
 /**
@@ -64,56 +63,56 @@ public class TaskParser extends CalendarParser {
 	}
 	
 	protected void parse(Task taskObj, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXTask.STATUS, XmlServlet.NS))) {
-			taskObj.setStatus(getValueAsInt(eProp.getChild(OXTask.STATUS, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.STATUS, XmlServlet.NS))) {
+			taskObj.setStatus(getValueAsInt(eProp.getChild(TaskFields.STATUS, XmlServlet.NS)));
 		} 
 
-		if (hasElement(eProp.getChild(OXTask.PERCENT_COMPLETE, XmlServlet.NS))) {
-			taskObj.setPercentComplete(getValueAsInt(eProp.getChild(OXTask.PERCENT_COMPLETE, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS))) {
+			taskObj.setPercentComplete(getValueAsInt(eProp.getChild(TaskFields.PERCENT_COMPLETED, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.PRIORITY, XmlServlet.NS))) {
-			taskObj.setPriority(getValueAsInt(eProp.getChild(OXTask.PRIORITY, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS))) {
+			taskObj.setPriority(getValueAsInt(eProp.getChild(TaskFields.PRIORITY, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.TARGET_DURATION, XmlServlet.NS))) {
-			taskObj.setTargetDuration(getValueAsLong(eProp.getChild(OXTask.TARGET_DURATION, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS))) {
+			taskObj.setTargetDuration(getValueAsLong(eProp.getChild(TaskFields.TARGET_DURATION, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.TARGET_COSTS, XmlServlet.NS))) {
-			taskObj.setTargetCosts(getValueAsFloat(eProp.getChild(OXTask.TARGET_COSTS, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS))) {
+			taskObj.setTargetCosts(getValueAsFloat(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS))) {
-			taskObj.setActualDuration(getValueAsLong(eProp.getChild(OXTask.ACTUAL_DURATION, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS))) {
+			taskObj.setActualDuration(getValueAsLong(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS)));
 		} 
 
-		if (hasElement(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS))) {
-			taskObj.setActualCosts(getValueAsFloat(eProp.getChild(OXTask.ACTUAL_COSTS, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS))) {
+			taskObj.setActualCosts(getValueAsFloat(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.DATE_COMPLETED, XmlServlet.NS))) {
-			taskObj.setDateCompleted(getValueAsDate(eProp.getChild(OXTask.DATE_COMPLETED, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS))) {
+			taskObj.setDateCompleted(getValueAsDate(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.ALARM, XmlServlet.NS))) {
-			taskObj.setAlarm(getValueAsDate(eProp.getChild(OXTask.ALARM, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.ALARM, XmlServlet.NS))) {
+			taskObj.setAlarm(getValueAsDate(eProp.getChild(TaskFields.ALARM, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXTask.CURRENCY, XmlServlet.NS))) {
-			taskObj.setCurrency(getValue(eProp.getChild(OXTask.CURRENCY, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS))) {
+			taskObj.setCurrency(getValue(eProp.getChild(TaskFields.CURRENCY, XmlServlet.NS)));
 		} 		
 		
-		if (hasElement(eProp.getChild(OXTask.BILLING_INFORMATION, XmlServlet.NS))) {
-			taskObj.setBillingInformation(getValue(eProp.getChild(OXTask.BILLING_INFORMATION, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS))) {
+			taskObj.setBillingInformation(getValue(eProp.getChild(TaskFields.BILLING_INFORMATION, XmlServlet.NS)));
 		} 	
 		
-		if (hasElement(eProp.getChild(OXTask.COMPANIES, XmlServlet.NS))) {
-			taskObj.setCompanies(getValue(eProp.getChild(OXTask.COMPANIES, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS))) {
+			taskObj.setCompanies(getValue(eProp.getChild(TaskFields.COMPANIES, XmlServlet.NS)));
 		} 		
 
-		if (hasElement(eProp.getChild(OXTask.TRIP_METER, XmlServlet.NS))) {
-			taskObj.setTripMeter(getValue(eProp.getChild(OXTask.TRIP_METER, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS))) {
+			taskObj.setTripMeter(getValue(eProp.getChild(TaskFields.TRIP_METER, XmlServlet.NS)));
 		} 		
 
 		parseElementCalendar(taskObj, eProp);
