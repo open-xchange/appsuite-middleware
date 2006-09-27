@@ -48,6 +48,7 @@ package com.openexchange.webdav.xml.parser;
 import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.IOException;
 import java.util.Date;
 import org.jdom.Element;
@@ -64,6 +65,10 @@ public abstract class DataParser {
 	protected void parseElement(DataObject dataobject, Element eProp) throws Exception {
 		if (hasElement(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS))) {
 			dataobject.setObjectID(getValueAsInt(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS)));
+		} 
+
+		if (hasElement(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS))) {
+			dataobject.setCreatedBy(getValueAsInt(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS)));
 		} 
 		
 		if (hasElement(eProp.getChild(OXObject.LAST_MODIFIED, XmlServlet.NS))) {
