@@ -21,13 +21,15 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class MockWebdavRequest implements WebdavRequest {
 
 	private String url;
+	private String uriPrefix = null;
 	private WebdavFactory factory;
 	private String content;
 	private Map<String,String> headers = new HashMap<String,String>();
 	private WebdavResource res = null;
 	
-	public MockWebdavRequest(WebdavFactory factory) {
+	public MockWebdavRequest(WebdavFactory factory, String prefix) {
 		this.factory = factory;
+		this.uriPrefix = prefix;
 	}
 	
 	public void setUrl(String url) {
@@ -77,6 +79,10 @@ public class MockWebdavRequest implements WebdavRequest {
 
 	public Document getBodyAsDocument() throws JDOMException, IOException {
 		return new SAXBuilder().build(getBody());
+	}
+
+	public String getURLPrefix() {
+		return uriPrefix;
 	}
 
 }

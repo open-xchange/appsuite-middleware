@@ -12,7 +12,7 @@ public class CopyTest extends ActionTestCase {
 		
 		String content = getContent(INDEX_HTML_URL);
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);

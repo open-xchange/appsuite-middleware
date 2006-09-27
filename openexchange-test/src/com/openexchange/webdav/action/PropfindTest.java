@@ -23,7 +23,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -36,7 +36,7 @@ public class PropfindTest extends ActionTestCase {
 		compare.setCheckTextNames("getlastmodified","status");
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
-		req = new MockWebdavRequest(factory);
+		req = new MockWebdavRequest(factory, "http://localhost/");
 		res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -56,7 +56,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/><D:displayname/><D:resourcetype/></D:prop></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified><D:displayname>index.html</D:displayname><D:resourcetype /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -77,7 +77,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:propname /></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><multistatus xmlns=\"DAV:\"><response><href>http://localhost/"+INDEX_HTML_URL+"</href><propstat><prop><getlastmodified /><creationdate /><resourcetype /><displayname /><getcontentlanguage /><getcontentlength /><getcontenttype /><getetag /><lockdiscovery /><supportedlock /><source /></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -100,7 +100,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:allprop /></D:propfind>"; 
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><multistatus xmlns=\"DAV:\"><response><href>http://localhost/"+INDEX_HTML_URL+"</href><propstat><prop><getlastmodified>"+Utils.convert(resource.getLastModified())+"</getlastmodified> <creationdate>"+Utils.convert(resource.getCreationDate())+"</creationdate><resourcetype /><displayname>"+resource.getDisplayName()+"</displayname><getcontentlanguage>"+resource.getLanguage()+"</getcontentlanguage><getcontentlength>"+resource.getLength()+"</getcontentlength><getcontenttype>"+resource.getContentType()+"</getcontenttype><getetag>"+resource.getETag()+"</getetag><lockdiscovery /><supportedlock /><source /></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -128,7 +128,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);
@@ -146,7 +146,7 @@ public class PropfindTest extends ActionTestCase {
 		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"</D:href><D:propstat><D:prop><D:displayname>"+testCollDispName+"</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+PM_URL+"</D:href><D:propstat><D:prop><D:displayname>pm</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+SITEMAP_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>sitemap.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		res = new MockWebdavResponse();
 		
-		req = new MockWebdavRequest(factory);
+		req = new MockWebdavRequest(factory, "http://localhost/");
 		
 		req.setBodyAsString(body);
 		req.setHeader("depth","1");
@@ -157,7 +157,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+GUI_URL+"</D:href><D:propstat><D:prop><D:displayname>gui</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX3_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index3.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		res = new MockWebdavResponse();
-		req = new MockWebdavRequest(factory);
+		req = new MockWebdavRequest(factory, "http://localhost/");
 		
 		req.setBodyAsString(body);
 		req.setHeader("depth","infinity");
@@ -183,7 +183,7 @@ public class PropfindTest extends ActionTestCase {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:prop><OX:test/></D:prop></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\" xmlns:OX=\""+TEST_NS.getURI()+"\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><OX:test><OX:quark> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</OX:quark></OX:test></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setBodyAsString(body);

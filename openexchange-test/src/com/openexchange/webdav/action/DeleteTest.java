@@ -6,7 +6,7 @@ public class DeleteTest extends ActionTestCase {
 		final String DEVELOPMENT_URL = testCollection+"/development";
 		final String DEVELOPMENT_GUI_INDEX3_HTML_URL = testCollection+"/development/gui/index3.html";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
@@ -18,7 +18,7 @@ public class DeleteTest extends ActionTestCase {
 		
 		assertFalse(factory.resolveResource(INDEX_HTML_URL).exists());
 		
-		req = new MockWebdavRequest(factory);
+		req = new MockWebdavRequest(factory, "http://localhost");
 		req.setUrl(DEVELOPMENT_URL);
 		
 		action.perform(req,res);

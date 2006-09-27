@@ -6,7 +6,7 @@ public class MkcolTest extends ActionTestCase {
 	public void testCreateCollection() throws Exception {
 		final String NEW_COLLECTION = testCollection+"/newCollection";
 		
-		MockWebdavRequest req = new MockWebdavRequest(factory);
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(NEW_COLLECTION);
