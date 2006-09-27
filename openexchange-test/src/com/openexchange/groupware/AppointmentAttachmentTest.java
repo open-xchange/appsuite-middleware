@@ -8,6 +8,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventConfigImpl;
+import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
