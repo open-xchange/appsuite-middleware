@@ -426,6 +426,7 @@ public class FolderTest extends TestCase {
 			fail(e.getMessage());
 		}
 	}
+	
 	public void testUpdateFolderSuccessAll() {
 		try {
 			final int userId = session.getUserObject().getId();
@@ -501,6 +502,122 @@ public class FolderTest extends TestCase {
 				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				assertTrue(tmp == null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testDeleteFolder() {
+		try {
+			final int userId = session.getUserObject().getId();
+			final int[] groups = session.getUserObject().getGroups();
+			int fuid = -1;
+			OXFolderAction oxfa = null;
+			try {
+				FolderObject fo = new FolderObject();
+				fo.setFolderName("NewCalendarTestFolder");
+				fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+				fo.setModule(FolderObject.CALENDAR);
+				fo.setType(FolderObject.PRIVATE);
+				OCLPermission ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				oxfa = new OXFolderAction(session);
+				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				/*
+				 * Check folder object
+				 */
+				assertTrue(fuid > 0);
+				assertTrue(fuid == fo.getObjectID());
+				assertTrue(fo.getCreatedBy() == userId);
+				assertTrue(fo.getModifiedBy() == userId);
+				assertTrue(fo.containsCreationDate());
+				assertTrue(fo.containsLastModified());
+				/*
+				 * Create multiple subfolders
+				 */
+				fo.reset();
+				fo.setFolderName("NewContactTestSubFolder001");
+				fo.setParentFolderID(fuid);
+				fo.setModule(FolderObject.CONTACT);
+				fo.setType(FolderObject.PRIVATE);
+				ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				
+				fo.reset();
+				fo.setFolderName("NewTaskTestSubFolder002");
+				fo.setParentFolderID(fuid);
+				fo.setModule(FolderObject.TASK);
+				fo.setType(FolderObject.PRIVATE);
+				ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				
+				int subfolderId = -1;
+				
+				fo.reset();
+				fo.setFolderName("NewCalendarTestSubFolder003");
+				fo.setParentFolderID(fuid);
+				fo.setModule(FolderObject.CALENDAR);
+				fo.setType(FolderObject.PRIVATE);
+				ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				subfolderId = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				
+				
+				fo.reset();
+				fo.setFolderName("NewContactTestSubSubFolder001");
+				fo.setParentFolderID(subfolderId);
+				fo.setModule(FolderObject.CONTACT);
+				fo.setType(FolderObject.PRIVATE);
+				ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				
+				/*
+				 * Delet parent folder that should also delete all subfolders
+				 */
+				final long lastModified = System.currentTimeMillis();
+				try {
+					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, lastModified);
+				} catch (Exception e) {
+					e.printStackTrace();
+					fail(e.getMessage());
+				}
+				
+				fo.reset();
+				fo.setObjectID(fuid);
+				assertFalse(fo.exists(session.getContext()));
+			} finally {
+				/*
+				 * Delete Test Folder...
+				 */
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				if (tmp != null) {
+					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
