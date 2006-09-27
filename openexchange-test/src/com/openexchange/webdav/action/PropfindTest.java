@@ -87,7 +87,7 @@ public class PropfindTest extends ActionTestCase {
 		action.perform(req, res);
 		
 		XMLCompare compare = new XMLCompare();
-		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag","source","status"); // FIXME: lockdiscovery und supportedlock
+		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag","source","status","lockdiscovery" ,"supportedlock");
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
@@ -98,7 +98,7 @@ public class PropfindTest extends ActionTestCase {
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:allprop /></D:propfind>"; 
-		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><multistatus xmlns=\"DAV:\"><response><href>http://localhost/"+INDEX_HTML_URL+"</href><propstat><prop><getlastmodified>"+Utils.convert(resource.getLastModified())+"</getlastmodified> <creationdate>"+Utils.convert(resource.getCreationDate())+"</creationdate><resourcetype /><displayname>"+resource.getDisplayName()+"</displayname><getcontentlanguage>"+resource.getLanguage()+"</getcontentlanguage><getcontentlength>"+resource.getLength()+"</getcontentlength><getcontenttype>"+resource.getContentType()+"</getcontenttype><getetag>"+resource.getETag()+"</getetag><lockdiscovery /><supportedlock /><source /></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>";
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><multistatus xmlns=\"DAV:\"><response><href>http://localhost/"+INDEX_HTML_URL+"</href><propstat><prop><getlastmodified>"+Utils.convert(resource.getLastModified())+"</getlastmodified> <creationdate>"+Utils.convert(resource.getCreationDate())+"</creationdate><resourcetype /><displayname>"+resource.getDisplayName()+"</displayname><getcontentlanguage>"+resource.getLanguage()+"</getcontentlanguage><getcontentlength>"+resource.getLength()+"</getcontentlength><getcontenttype>"+resource.getContentType()+"</getcontenttype><getetag>"+resource.getETag()+"</getetag><lockdiscovery /><supportedlock><lockentry><lockscope><exclusive/></lockscope><locktype><write/></locktype></lockentry><lockentry><lockscope><shared/></lockscope><locktype><write/></locktype></lockentry></supportedlock><source /></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
@@ -110,8 +110,7 @@ public class PropfindTest extends ActionTestCase {
 		action.perform(req, res);
 		
 		XMLCompare compare = new XMLCompare();
-		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag", "source"); // FIXME: lockdiscovery und supportedlock
-		
+		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag", "source","lockdiscovery" ,"supportedlock"); // FIXME: lockdiscovery und supportedlock
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 	
