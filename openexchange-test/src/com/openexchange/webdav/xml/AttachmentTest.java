@@ -4,10 +4,11 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api.OXAttachment;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.attachments;
+import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.ByteArrayInputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -75,13 +76,13 @@ public class AttachmentTest extends AbstractWebdavTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.toString().getBytes());
 		req = new PutMethodWebRequest(PROTOCOL + hostName + ATTACHMENT_URL, bais, "text/plain");
 		req.setHeaderField("Authorization", "Basic " + authData);
-		req.setHeaderField(OXAttachment.FILENAME, filename);
-		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
-		req.setHeaderField(OXAttachment.TARGET_ID, String.valueOf(targetId));
-		req.setHeaderField(OXAttachment.TARGET_FOLDER_ID, String.valueOf(targetId));
+		req.setHeaderField(attachments.FILENAME, filename);
+		req.setHeaderField(attachments.MODULE, String.valueOf(module));
+		req.setHeaderField(attachments.TARGET_ID, String.valueOf(targetId));
+		req.setHeaderField(attachments.TARGET_FOLDER_ID, String.valueOf(targetId));
 		
 		if (rtf) {
-			req.setHeaderField(OXAttachment.RTF_FLAG, String.valueOf(rtf));
+			req.setHeaderField(attachments.RTF_FLAG, String.valueOf(rtf));
 		}
 		
 		resp = webCon.getResponse(req);
@@ -96,9 +97,9 @@ public class AttachmentTest extends AbstractWebdavTest {
 	protected void loadAttachment(int objectId, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
 		WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName + ATTACHMENT_URL);
 		req.setHeaderField("Authorization", "Basic " + authData);
-		req.setHeaderField(OXAttachment.MODULE, String.valueOf(module));
-		req.setHeaderField(OXAttachment.TARGET_ID, String.valueOf(targetId));
-		req.setHeaderField(OXAttachment.OBJECT_ID, String.valueOf(objectId));
+		req.setHeaderField(attachments.MODULE, String.valueOf(module));
+		req.setHeaderField(attachments.TARGET_ID, String.valueOf(targetId));
+		req.setHeaderField(DataFields.OBJECT_ID, String.valueOf(objectId));
 		
 		WebResponse resp = webCon.getResponse(req);
 
@@ -114,10 +115,10 @@ public class AttachmentTest extends AbstractWebdavTest {
 		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
 		DeleteMethod deleteMethod = new DeleteMethod(PROTOCOL + hostName + ATTACHMENT_URL);
 		deleteMethod.setDoAuthentication( true );
-		deleteMethod.setRequestHeader(OXAttachment.MODULE, String.valueOf(module));
-		deleteMethod.setRequestHeader(OXAttachment.TARGET_ID, String.valueOf(targetId));
-		deleteMethod.setRequestHeader(OXAttachment.OBJECT_ID, String.valueOf(objectId));
-		deleteMethod.setRequestHeader(OXAttachment.TARGET_FOLDER_ID, String.valueOf(objectId));
+		deleteMethod.setRequestHeader(attachments.MODULE, String.valueOf(module));
+		deleteMethod.setRequestHeader(attachments.TARGET_ID, String.valueOf(targetId));
+		deleteMethod.setRequestHeader(DataFields.OBJECT_ID, String.valueOf(objectId));
+		deleteMethod.setRequestHeader(attachments.TARGET_FOLDER_ID, String.valueOf(objectId));
 		
 		assertEquals(207, resp.getResponseCode());
 	}

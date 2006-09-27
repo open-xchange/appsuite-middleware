@@ -1,28 +1,11 @@
 
 package com.openexchange.server;
 
-import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.*;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.api.OXCalendar;
-import com.openexchange.groupware.calendar.RecurringResults;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.OXFolderTools;
-import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
 import junit.framework.TestCase;
 
 public class SimpleDBPoolTest extends TestCase {

@@ -3,13 +3,10 @@ package com.openexchange.groupware;
 
 
 import com.openexchange.api.OXFolder;
-import com.openexchange.api2.FolderSQLInterface;
-import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
@@ -23,26 +20,22 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.api.OXCalendar;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.calendar.RecurringResult;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.OXFolderTools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAction;
-import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
-import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;
 
@@ -112,7 +105,7 @@ public class CalendarTest extends TestCase {
         cdao.setTitle("Basic Recurring Test");
         cdao.setRecurrenceID(1);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceType(OXCalendar.DAILY);        
+        cdao.setRecurrenceType(CalendarObject.DAILY);        
         assertFalse(cdao.calculateRecurrence());
         cdao.setRecurrenceCalculator(1);        
         assertFalse(cdao.calculateRecurrence());
@@ -128,7 +121,7 @@ public class CalendarTest extends TestCase {
         cdao.setTitle("Basic Recurring Test");
         cdao.setRecurrenceID(1);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceType(OXCalendar.DAILY);        
+        cdao.setRecurrenceType(CalendarObject.DAILY);        
         assertFalse(cdao.calculateRecurrence());
         cdao.setRecurrenceCalculator(1);        
         assertFalse(cdao.calculateRecurrence());
@@ -194,7 +187,7 @@ public class CalendarTest extends TestCase {
         cdao.setTitle("Daily Appointment Test only with DAO");
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
-        cdao.setRecurrenceType(OXCalendar.DAILY);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         for (int a = 0; a < TEST_PASS; a++) {
             CalendarRecurringCollection.fillDAO(cdao);
@@ -260,7 +253,7 @@ public class CalendarTest extends TestCase {
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));        
         cdao.setTitle("testSaveRecurring");
-        cdao.setRecurrenceType(OXCalendar.DAILY);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);

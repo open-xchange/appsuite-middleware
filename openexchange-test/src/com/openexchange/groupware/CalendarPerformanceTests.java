@@ -7,12 +7,12 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.api.OXCalendar;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import java.util.Date;
 import junit.framework.TestCase;
 
@@ -41,7 +41,7 @@ public class CalendarPerformanceTests extends TestCase {
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
         cdao.setTitle("Daily Appointment Test");
-        cdao.setRecurrenceType(OXCalendar.DAILY);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);
@@ -57,8 +57,8 @@ public class CalendarPerformanceTests extends TestCase {
         long pass_one_end = System.currentTimeMillis();
         System.out.println("Daily runtime: "+(pass_one_end-pass_one_start)+ " ms. for "+ c_size + " entries");
         
-        cdao.setRecurrenceType(OXCalendar.WEEKLY);
-        cdao.setDays(OXCalendar.MONDAY + OXCalendar.TUESDAY + OXCalendar.WEDNESDAY + OXCalendar.THURSDAY + OXCalendar.FRIDAY + OXCalendar.SATURDAY + OXCalendar.SUNDAY);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setDays(CalendarObject.MONDAY + CalendarObject.TUESDAY + CalendarObject.WEDNESDAY + CalendarObject.THURSDAY + CalendarObject.FRIDAY + CalendarObject.SATURDAY + CalendarObject.SUNDAY);
         pass_one_start = System.currentTimeMillis();
         c_size = 0;
         for (int a = 0; a < 400; a++) {
