@@ -10,6 +10,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
@@ -21,7 +22,8 @@ import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
 public class PropertiesWriterTest extends TestCase {
 	
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
-
+	private static final Namespace TEST_NS = Namespace.getNamespace("http://www.open-xchange.com/namespace/webdav-test");
+	
 	private String testCollection = null;
 	
 	public void setUp() throws Exception {
@@ -183,11 +185,52 @@ public class PropertiesWriterTest extends TestCase {
 	}
 
 	public void testXMLProperty() throws Exception {
-		//TODO
-	}
+		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
+		WebdavProperty property = new WebdavProperty();
+		property.setNamespace(TEST_NS.getURI());
+		property.setName("test");
+		property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark>");
+		property.setXML(true);
+		resource.putProperty(property);
+		resource.create();
 		
-	public void testDepth() throws Exception {
-		//TODO
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		marshaller
+			.addProperty(TEST_NS.getURI(),"test");
+		
+		Element response = marshaller.marshal(resource).get(0);
+		
+		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		
+		for(Element element : (List<Element>)response.getChildren()) {
+			if(!element.getName().equals("propstat"))
+				continue;
+			assertStatus(element, "HTTP/1.1 200 OK");
+			Element prop = element.getChild("prop", DAV_NS);
+			Element child = prop.getChild("test", TEST_NS);
+			Element quark = child.getChild("quark",TEST_NS);
+			assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
+		}
+		
+		property.setValue("<quark xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!</quark><gnurk xmlns=\"http://www.open-xchange.com/namespace/webdav-test\"> In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!</gnurk>");
+		resource.putProperty(property);
+		resource.save();
+		
+		response = marshaller.marshal(resource).get(0);
+		
+		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		
+		for(Element element : (List<Element>)response.getChildren()) {
+			if(!element.getName().equals("propstat"))
+				continue;
+			assertStatus(element, "HTTP/1.1 200 OK");
+			Element prop = element.getChild("prop", DAV_NS);
+			Element child = prop.getChild("test", TEST_NS);
+			Element quark = child.getChild("quark",TEST_NS);
+			assertEquals(" In the left corner: The incredible Tessssssst Vallllhhhhuuuuuueeeee!", quark.getText());
+			Element gnurk = child.getChild("gnurk",TEST_NS);
+			assertEquals(" In the right corner: The incredible other Tessssssst Vallllhhhhuuuuuueeeee!", gnurk.getText());
+		}
 	}
 	
 	private static final void assertHref(Element element, String uri) {

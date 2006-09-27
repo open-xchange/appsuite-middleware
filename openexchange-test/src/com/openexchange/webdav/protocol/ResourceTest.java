@@ -430,5 +430,29 @@ public class ResourceTest extends AbstractResourceTest{
 		// Tested in Lock Test
 		return null;
 	}
+
+	public Object source() throws WebdavException {
+		WebdavResource res = createResource();
+		try {
+			res.setSource("http://localhost/theSecretSource");
+		} catch (WebdavException e) {
+			e.printStackTrace();
+			fail(e.toString());
+		}
+		res.save();
+		res = resourceManager.resolveResource(res.getUrl());
+		assertEquals(res.getSource(), res.getProperty("DAV:", "source").getValue());
+		assertEquals("http://localhost/theSecretSource", res.getSource());
+		
+		WebdavProperty prop = Protocol.SOURCE_LITERAL.getWebdavProperty();
+		prop.setValue("http://localhost/theSuperSecretSource");
+		res.putProperty(prop);
+		
+		assertEquals(res.getSource(), res.getProperty("DAV:", "source").getValue());
+		assertEquals("http://localhost/theSuperSecretSource", res.getSource());
+		
+		
+		return null;
+	}
 	
 }

@@ -56,6 +56,24 @@ public static final int SKEW = 1000;
 		res = resourceManager.resolveResource(res.getUrl());
 		
 		assertEquals(prop, res.getProperty("OXTest","myvalue"));
+		
+		prop = new WebdavProperty();
+		prop.setNamespace("OXTest");
+		prop.setName("myvalue");
+		prop.setLanguage("en");
+		prop.setValue("testValue2");
+		
+		res.putProperty(prop);
+		res.save();
+		
+		res = resourceManager.resolveResource(res.getUrl());
+		
+		assertEquals(prop, res.getProperty("OXTest","myvalue"));
+		
+		res.removeProperty("OXTest","myvalue");
+		res.save();
+		
+		assertNull(res.getProperty("OXTest","myvalue"));
 	}
 	
 	public void testMandatoryProperties() throws Exception {
