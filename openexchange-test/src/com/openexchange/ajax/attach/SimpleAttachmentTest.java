@@ -55,6 +55,12 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 	public void testQuota() throws Exception {
 		doQuota();
 	}
+	
+	/*public void testMany() throws Exception {
+		while(true) {
+			upload();
+		}
+	}*/
 
 
 }
