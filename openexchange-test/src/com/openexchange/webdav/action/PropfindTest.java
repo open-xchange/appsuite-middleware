@@ -114,7 +114,7 @@ public class PropfindTest extends ActionTestCase {
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 	
-	public void testDepth() throws Exception {
+	public void testCollection() throws Exception {
 		final String DEVELOPMENT_URL = testCollection+"/development";
 		final String PM_URL = testCollection+"/pm";
 		final String INDEX_HTML_URL = testCollection+"/index.html";
@@ -124,8 +124,8 @@ public class PropfindTest extends ActionTestCase {
 		
 		String testCollDispName = factory.resolveResource(testCollection).getDisplayName();
 		
-		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>";
-		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/><D:resourcetype /></D:prop></D:propfind>";
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname><D:resourcetype><D:collection /></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
@@ -139,9 +139,9 @@ public class PropfindTest extends ActionTestCase {
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("displayname","status");
-		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
+		body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>";
 		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"</D:href><D:propstat><D:prop><D:displayname>"+testCollDispName+"</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+PM_URL+"</D:href><D:propstat><D:prop><D:displayname>pm</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+SITEMAP_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>sitemap.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		res = new MockWebdavResponse();
 		

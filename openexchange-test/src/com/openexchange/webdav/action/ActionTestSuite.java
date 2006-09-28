@@ -17,6 +17,7 @@ public class ActionTestSuite {
 		tests.addTestSuite(MkcolTest.class);
 		tests.addTestSuite(PropfindTest.class);
 		tests.addTestSuite(ProppatchTest.class);
+		tests.addTestSuite(LockTest.class);
 		return tests;
 	}
 }

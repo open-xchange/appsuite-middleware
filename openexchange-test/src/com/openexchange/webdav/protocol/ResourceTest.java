@@ -187,6 +187,9 @@ public class ResourceTest extends AbstractResourceTest{
 		res.save();
 		
 		assertNotNull(lock.getToken());
+		assertNotNull(res.getProperty("DAV:", "lockdiscovery"));
+		assertNotNull(res.getProperty("DAV:", "lockdiscovery").getValue()); // Content checked in LockWriterTest
+		assertTrue(res.getProperty("DAV:", "lockdiscovery").isXML());
 		
 		List<WebdavLock> locks = res.getLocks();
 		assertEquals(1, locks.size());
