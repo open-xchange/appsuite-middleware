@@ -18,6 +18,8 @@ public class ActionTestSuite {
 		tests.addTestSuite(PropfindTest.class);
 		tests.addTestSuite(ProppatchTest.class);
 		tests.addTestSuite(LockTest.class);
+		tests.addTestSuite(UnlockTest.class);
+		
 		return tests;
 	}
 }

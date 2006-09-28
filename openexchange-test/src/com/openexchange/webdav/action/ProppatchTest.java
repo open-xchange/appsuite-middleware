@@ -61,7 +61,6 @@ public class ProppatchTest extends ActionTestCase {
 		
 		action.perform(req, res);
 		
-		System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 		resource = factory.resolveResource(INDEX_HTML_URL);
