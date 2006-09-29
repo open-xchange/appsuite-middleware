@@ -16,7 +16,7 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
 
-public class AttachmentTest extends AbstractWebdavTest {
+public class AttachmentTest extends AbstractWebdavXMLTest {
 	
 	public static final String ATTACHMENT_URL = "/servlet/webdav.attachments";
 

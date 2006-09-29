@@ -19,7 +19,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-public class GroupUserTest extends AbstractWebdavTest {
+public class GroupUserTest extends AbstractWebdavXMLTest {
 	
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 

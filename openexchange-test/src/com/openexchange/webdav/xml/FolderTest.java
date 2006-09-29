@@ -26,7 +26,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-public class FolderTest extends AbstractWebdavTest {
+public class FolderTest extends AbstractWebdavXMLTest {
 	
 	public static final String FOLDER_URL = "/servlet/webdav.folders";
 	

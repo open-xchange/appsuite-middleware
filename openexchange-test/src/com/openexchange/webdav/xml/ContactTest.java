@@ -27,7 +27,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-public class ContactTest extends AbstractWebdavTest {
+public class ContactTest extends AbstractWebdavXMLTest {
 	
 	protected int contactFolderId = -1;
 	

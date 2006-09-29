@@ -33,7 +33,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-public class TaskTest extends AbstractWebdavTest {
+public class TaskTest extends AbstractWebdavXMLTest {
 	
 	protected int taskFolderId = -1;
 	

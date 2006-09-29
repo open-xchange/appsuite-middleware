@@ -33,7 +33,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-public class AppointmentTest extends AbstractWebdavTest {
+public class AppointmentTest extends AbstractWebdavXMLTest {
 	
 	protected int userId = -1;
 	
