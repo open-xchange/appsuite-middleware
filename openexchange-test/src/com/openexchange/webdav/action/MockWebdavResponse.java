@@ -11,6 +11,8 @@ public class MockWebdavResponse implements WebdavResponse {
 	private ByteArrayOutputStream out = new ByteArrayOutputStream();
 	
 	private Map<String,String> headers = new HashMap<String,String>();
+
+	private int status;
 	
 	public String getResponseBodyAsString() {
 		try {
@@ -31,6 +33,14 @@ public class MockWebdavResponse implements WebdavResponse {
 
 	public void setHeader(String header, String value) {
 		headers.put(header.toUpperCase(),value);
+	}
+
+	public int getStatus() {
+		return status;
+	}
+	
+	public void setStatus(int status) {
+		this.status = status;
 	}
 
 }
