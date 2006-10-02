@@ -13,6 +13,9 @@ import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
+import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -26,6 +29,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	private String content;
 	private Map<String,String> headers = new HashMap<String,String>();
 	private WebdavResource res = null;
+	private WebdavResource dest;
 	
 	public MockWebdavRequest(WebdavFactory factory, String prefix) {
 		this.factory = factory;
@@ -40,6 +44,14 @@ public class MockWebdavRequest implements WebdavRequest {
 		if(res != null)
 			return res;
 		return res = factory.resolveResource(url);
+	}
+	
+	public WebdavResource getDestination() throws WebdavException {
+		if(null == getHeader("destination"))
+			return null;
+		if(dest != null)
+			return dest;
+		return dest = factory.resolveResource(getHeader("destination"));
 	}
 	
 	public WebdavCollection getCollection() throws WebdavException {
@@ -83,6 +95,13 @@ public class MockWebdavRequest implements WebdavRequest {
 
 	public String getURLPrefix() {
 		return uriPrefix;
+	}
+
+	public IfHeader getIfHeader() throws IfHeaderParseException {
+		String ifHeader = getHeader("If");
+		if(ifHeader == null)
+			return null;
+		return new IfHeaderParser().parse(getHeader("If"));
 	}
 
 }

@@ -25,6 +25,7 @@ public class IfHeaderParserTest extends TestCase {
 		
 		IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isETag());
+		assertTrue(entity.mustMatch());
 		assertFalse(entity.isLockToken());
 		assertEquals("etag", entity.getPayload());
 	}
@@ -40,6 +41,7 @@ public class IfHeaderParserTest extends TestCase {
 		
 		IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isLockToken());
+		assertTrue(entity.mustMatch());
 		assertEquals("http://www.open-xchange.com/webdav/12345", entity.getPayload());
 	}
 	
@@ -54,6 +56,7 @@ public class IfHeaderParserTest extends TestCase {
 		
 		IfHeaderEntity entity = list.get(0);
 		assertTrue(entity.isETag());
+		assertTrue(entity.mustMatch());
 		assertFalse(entity.isLockToken());
 		assertEquals("etag", entity.getPayload());
 	}
@@ -68,6 +71,7 @@ public class IfHeaderParserTest extends TestCase {
 		assertEquals(1, list.size());
 		
 		IfHeaderEntity entity = list.get(0);
+		assertTrue(entity.mustMatch());
 		assertTrue(entity.isLockToken());
 		assertEquals("http://www.open-xchange.com/webdav/12345", entity.getPayload());
 	}
@@ -164,6 +168,28 @@ public class IfHeaderParserTest extends TestCase {
 			}
 		}
 		assertTrue(resources.isEmpty());
+		assertTrue(etags.toString(), etags.isEmpty());
+		assertTrue(lockToken.toString(), lockToken.isEmpty());
+	}
+	
+	public void testGetRelevant() throws Exception {
+		IfHeader ifHeader = new IfHeaderParser().parse("<http://myResource1> ([etag]) <  http://myResource1> (<lockToken>) <http://myResource3> ([etag2])");
+		
+		assertEquals(3, ifHeader.getLists().size());
+		
+		Set<String> etags = new HashSet<String>(Arrays.asList("etag"));
+		Set<String> lockToken = new HashSet<String>(Arrays.asList("lockToken"));
+		
+		for(IfHeaderList list : ifHeader.getRelevant("http://myResource1")) {
+			assertEquals(1, list.size());
+			assertTrue(list.isTagged());
+			IfHeaderEntity entity = list.get(0);
+			if(entity.isETag()) {
+				assertTrue(entity.getPayload(), etags.remove(entity.getPayload()));
+			} else {
+				assertTrue(entity.getPayload(), lockToken.remove(entity.getPayload()));	
+			}
+		}
 		assertTrue(etags.toString(), etags.isEmpty());
 		assertTrue(lockToken.toString(), lockToken.isEmpty());
 	}

@@ -20,6 +20,8 @@ public class ActionTestSuite {
 		tests.addTestSuite(LockTest.class);
 		tests.addTestSuite(UnlockTest.class);
 		tests.addTestSuite(IfMatchTest.class);
+		tests.addTestSuite(IfTest.class);
+		
 		
 		return tests;
 	}
