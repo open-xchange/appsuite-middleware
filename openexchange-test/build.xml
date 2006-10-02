@@ -117,6 +117,7 @@
 		<test name="com.openexchange.webdav.protocol.ProtocolTestSuite" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.action.ActionTestSuite" todir="${test.xml.dir}" />
 		<test name="com.openexchange.webdav.xml.writer.WriterSuite" todir="${test.xml.dir}" />
+		<test name="com.openexchange.webdav.action.IfHeaderParserTest" todir="${test.xml.dir}" />
 		
 						
 		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
