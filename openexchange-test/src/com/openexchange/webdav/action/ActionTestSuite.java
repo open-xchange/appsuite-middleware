@@ -21,7 +21,7 @@ public class ActionTestSuite {
 		tests.addTestSuite(UnlockTest.class);
 		tests.addTestSuite(IfMatchTest.class);
 		tests.addTestSuite(IfTest.class);
-		
+		tests.addTestSuite(DefaultHeaderTest.class);
 		
 		return tests;
 	}
