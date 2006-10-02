@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -180,10 +181,12 @@ public class ContactTest extends AbstractAJAXTest {
 		userId = folderObj.getCreatedBy();
 		
 		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
+		
 		
 		dateTime = c.getTimeInMillis();
 	}
@@ -342,7 +345,6 @@ public class ContactTest extends AbstractAJAXTest {
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
-	
 	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
@@ -677,7 +679,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		ContactWriter contactWriter = new ContactWriter(pw);
+		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
 		contactWriter.writeContact(contactObj);
 		
 		pw.flush();
@@ -739,7 +741,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
-		ContactWriter contactWriter = new ContactWriter(pw);
+		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
 		contactWriter.writeContact(contactObj);
 		
 		pw.flush();

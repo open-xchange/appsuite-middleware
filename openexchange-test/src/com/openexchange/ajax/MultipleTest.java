@@ -11,6 +11,7 @@ import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,7 +40,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		ContactWriter contactWriter = new ContactWriter(pw);
+		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
 		contactWriter.writeContact(contactObj);
 		pw.flush();
 		
@@ -57,7 +58,7 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		baos = new ByteArrayOutputStream();
 		pw = new PrintWriter(baos);
-		contactWriter = new ContactWriter(pw);
+		contactWriter = new ContactWriter(pw, TimeZone.getDefault());
 		contactWriter.writeContact(contactObj);
 		pw.flush();
 		

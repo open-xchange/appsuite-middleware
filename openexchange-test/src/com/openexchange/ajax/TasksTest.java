@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.URLParameter;
+import java.util.TimeZone;
 
 /**
  * This class tests the AJAX interface of the tasks.
@@ -609,7 +610,9 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-        final TaskWriter taskW = new TaskWriter(printW);
+		TimeZone tz = TimeZone.getDefault();
+		LOG.error("USE TIMEZONE: " + tz);
+        final TaskWriter taskW = new TaskWriter(printW, tz);
         taskW.writeTask(task);
         printW.flush();
         final String object = stringW.toString();
@@ -648,7 +651,10 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Updating task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-        final TaskWriter taskW = new TaskWriter(printW);
+		TimeZone tz = TimeZone.getDefault();
+		LOG.error("USE TIMEZONE: " + tz);
+        final TaskWriter taskW = new TaskWriter(printW, tz);
+
         taskW.writeTask(task);
         printW.flush();
         final String object = stringW.toString();
