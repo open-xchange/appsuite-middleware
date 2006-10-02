@@ -19,6 +19,7 @@ public class ActionTestSuite {
 		tests.addTestSuite(ProppatchTest.class);
 		tests.addTestSuite(LockTest.class);
 		tests.addTestSuite(UnlockTest.class);
+		tests.addTestSuite(IfMatchTest.class);
 		
 		return tests;
 	}
