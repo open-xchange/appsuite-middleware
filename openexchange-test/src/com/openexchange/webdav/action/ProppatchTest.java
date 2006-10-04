@@ -3,6 +3,7 @@ package com.openexchange.webdav.action;
 import org.jdom.Namespace;
 
 import com.openexchange.test.XMLCompare;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -61,6 +62,8 @@ public class ProppatchTest extends ActionTestCase {
 		
 		action.perform(req, res);
 		
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 		resource = factory.resolveResource(INDEX_HTML_URL);
@@ -95,6 +98,7 @@ public class ProppatchTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavProppatchAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		

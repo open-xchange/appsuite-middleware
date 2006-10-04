@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class MkcolTest extends ActionTestCase {
@@ -14,6 +16,7 @@ public class MkcolTest extends ActionTestCase {
 		WebdavAction action = new WebdavMkcolAction();
 		action.perform(req,res);
 		
+		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(NEW_COLLECTION);
 		assertTrue(resource.exists() && resource.isCollection());

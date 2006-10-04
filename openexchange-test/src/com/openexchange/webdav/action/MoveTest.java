@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class MoveTest extends ActionTestCase {
@@ -21,6 +23,8 @@ public class MoveTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavMoveAction();
 		action.perform(req, res);
+		
+		assertEquals(HttpServletResponse.SC_NO_CONTENT, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		assertFalse(resource.exists());

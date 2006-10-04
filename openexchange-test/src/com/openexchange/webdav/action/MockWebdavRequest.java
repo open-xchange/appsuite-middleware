@@ -59,6 +59,10 @@ public class MockWebdavRequest implements WebdavRequest {
 			return (WebdavCollection) res;
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
+	
+	public String getDestinationUrl(){
+		return getHeader("destination");
+	}
 
 	public String getUrl() {
 		return url;

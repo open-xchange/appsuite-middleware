@@ -2,9 +2,12 @@ package com.openexchange.webdav.action;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.jdom.Namespace;
 
 import com.openexchange.test.XMLCompare;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.util.Utils;
@@ -32,6 +35,9 @@ public class PropfindTest extends ActionTestCase {
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
 		
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+		
+		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("getlastmodified","status");
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
@@ -43,6 +49,8 @@ public class PropfindTest extends ActionTestCase {
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("depth", "0");
 		action.perform(req, res);
+		
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
@@ -64,6 +72,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("getlastmodified", "displayname","resourcetype","status" );
@@ -85,6 +94,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag","source","status","lockdiscovery" ,"supportedlock");
@@ -108,6 +118,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("creationdate", "resourcetype", "displayname", "getcontenttype", "getcontentlanguage", "getcontentlength", "getlastmodified", "getetag", "source","lockdiscovery" ,"supportedlock"); // FIXME: lockdiscovery und supportedlock
@@ -136,6 +147,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("displayname","status");
@@ -163,6 +175,8 @@ public class PropfindTest extends ActionTestCase {
 		req.setUrl(DEVELOPMENT_URL);
 		
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 	}
@@ -190,6 +204,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavPropfindAction();
 		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("test","quark", "status");

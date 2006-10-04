@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class PutTest extends ActionTestCase {
@@ -20,6 +22,8 @@ public class PutTest extends ActionTestCase {
 		WebdavAction action = new WebdavPutAction();
 		
 		action.perform(req,res);
+		
+		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		assertEquals(resource.getLength(), new Long(content.getBytes("UTF-8").length));
