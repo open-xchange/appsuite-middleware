@@ -402,6 +402,8 @@ public class CalendarTest extends TestCase {
             assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
         }
         
+        assertEquals("testMove - Step 2 - Update", update1.getTitle());
+        
         // TODO: Move again to private folder
 
         CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
