@@ -23,6 +23,19 @@ public class CollectionTest extends ResourceTest {
 	public static final String INDEX3_HTML = "<html><head /><body>GUI Site</body></html>";
 	public static final String INDEX2_HTML = "<html><head /><body>PM Site</body></html>";
 
+	public void testRoot() throws Exception {
+		
+		List<WebdavResource> children = FACTORY.resolveCollection("/").getChildren();
+		int size = children.size();
+		FACTORY.resolveCollection("/test").create();
+		List<WebdavResource> childrenAfter = FACTORY.resolveCollection("/").getChildren();
+		assertEquals(childrenAfter.toString(), size+1, childrenAfter.size());
+		
+		Set<String> childrenNames = new HashSet<String>();
+		for(WebdavResource res : childrenAfter) { childrenNames.add(res.getDisplayName()); }
+		for(WebdavResource res : children) { childrenNames.remove(res.getDisplayName());   }
+		assertEquals("test" , childrenNames.iterator().next());
+	}
 
 	@Override
 	public void testBody() throws Exception {

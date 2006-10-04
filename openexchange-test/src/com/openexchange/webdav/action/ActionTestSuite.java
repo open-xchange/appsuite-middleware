@@ -22,6 +22,7 @@ public class ActionTestSuite {
 		tests.addTestSuite(IfMatchTest.class);
 		tests.addTestSuite(IfTest.class);
 		tests.addTestSuite(DefaultHeaderTest.class);
+		tests.addTestSuite(NotExistTest.class);
 		
 		return tests;
 	}

@@ -30,4 +30,31 @@ public class PutTest extends ActionTestCase {
 		assertEquals("text/html", resource.getContentType());
 		assertEquals(content, getContent(INDEX_HTML_URL));
 	}
+	
+	public void testCreate() throws Exception {
+		final String INDEX23_HTML_URL = testCollection+"/index23.html";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl(INDEX23_HTML_URL);
+		
+		String content = "<html><head /><body>The New, Better Index</body></html>";
+		req.setBodyAsString(content);
+		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-type", "text/html");
+		
+		WebdavAction action = new WebdavPutAction();
+		
+		action.perform(req,res);
+		
+		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
+		
+		WebdavResource resource = factory.resolveResource(INDEX23_HTML_URL);
+		assertNotNull(resource);
+		assertTrue(resource.exists());
+		assertEquals(resource.getLength(), new Long(content.getBytes("UTF-8").length));
+		assertEquals("text/html", resource.getContentType());
+		assertEquals(content, getContent(INDEX23_HTML_URL));
+	}
 }

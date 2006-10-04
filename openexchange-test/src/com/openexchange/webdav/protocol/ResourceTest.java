@@ -49,6 +49,8 @@ public class ResourceTest extends AbstractResourceTest{
 			if(in2 != null) 
 				in2.close();
 		}
+		
+		assertEquals(bytes.length, res.getLength().intValue());
 	}
 	
 	public void testMove() throws Exception {

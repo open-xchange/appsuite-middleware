@@ -29,6 +29,7 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 		tests.addTestSuite(com.openexchange.webdav.xml.ContactTest.class);	
 		tests.addTestSuite(com.openexchange.webdav.xml.FolderTest.class);
+		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
 		
 
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);
