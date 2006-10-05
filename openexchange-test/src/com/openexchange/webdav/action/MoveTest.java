@@ -2,12 +2,12 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
 
-public class MoveTest extends ActionTestCase {
+public class MoveTest extends StructureTest {
 
 	//TODO noroot
-	//TODO overwrite
 	
 	public void testResource() throws Exception {
 		final String INDEX_HTML_URL = testCollection+"/index.html";
@@ -21,7 +21,7 @@ public class MoveTest extends ActionTestCase {
 		req.setUrl(INDEX_HTML_URL);
 		req.setHeader("Destination", MOVED_INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavMoveAction();
+		WebdavAction action = new WebdavMoveAction(factory);
 		action.perform(req, res);
 		
 		assertEquals(HttpServletResponse.SC_NO_CONTENT, res.getStatus());
@@ -35,7 +35,8 @@ public class MoveTest extends ActionTestCase {
 		assertEquals(content, getContent(MOVED_INDEX_HTML_URL));
 	}
 	
-	public void testCollection() throws Exception {
-		
+	@Override
+	public WebdavAction getAction(WebdavFactory factory) {
+		return new WebdavMoveAction(factory);
 	}
 }

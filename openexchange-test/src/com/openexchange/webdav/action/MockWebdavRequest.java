@@ -108,4 +108,11 @@ public class MockWebdavRequest implements WebdavRequest {
 		return new IfHeaderParser().parse(getHeader("If"));
 	}
 
+	public int getDepth(int def) {
+		String depth = getHeader("depth");
+		if(null == depth)
+			return def;
+		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
+	}
+
 }
