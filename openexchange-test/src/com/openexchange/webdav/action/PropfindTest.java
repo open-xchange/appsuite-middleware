@@ -2,8 +2,6 @@ package com.openexchange.webdav.action;
 
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.jdom.Namespace;
 
 import com.openexchange.test.XMLCompare;
@@ -211,6 +209,30 @@ public class PropfindTest extends ActionTestCase {
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
+	}
+	
+	public void testMissingProperty() throws Exception {
+		final String INDEX_HTML_URL = testCollection+"/index.html";
+		
+		Date lastModified = factory.resolveResource(INDEX_HTML_URL).getLastModified();
+		
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/><D:displayname/><D:resourcetype/><testProp xmlns=\""+TEST_NS.getURI()+"\"/></D:prop></D:propfind>";
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified><D:displayname>index.html</D:displayname><D:resourcetype /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><testProp xmlns=\""+TEST_NS.getURI()+"\"/></D:prop><D:status>HTTP/1.1 404 NOT FOUND</D:status></D:propstat></D:response></D:multistatus>";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setBodyAsString(body);
+		req.setUrl(INDEX_HTML_URL);
+		
+		WebdavAction action = new WebdavPropfindAction();
+		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+		
+		XMLCompare compare = new XMLCompare();
+		compare.setCheckTextNames("getlastmodified", "displayname","resourcetype","status", "testProp" );
+		
+		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 	
 }

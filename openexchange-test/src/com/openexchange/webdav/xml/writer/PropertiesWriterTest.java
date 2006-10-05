@@ -233,6 +233,39 @@ public class PropertiesWriterTest extends TestCase {
 		}
 	}
 	
+	public void testNotExists() throws Exception {
+		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
+		resource.setDisplayName("myDisplayName");
+		resource.create();
+		
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		marshaller
+			.addProperty("DAV:","getlastmodified")
+			.addProperty("DAV:", "displayname")
+			.addProperty("OX:", "notExist");
+		Element response = marshaller.marshal(resource).get(0);
+		
+		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		
+		int count = 0;
+		int status = 0;
+		for(Element element : (List<Element>)response.getChildren()) {
+			if(!element.getName().equals("propstat"))
+				continue;
+			if(element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 200 OK")) {
+				assertStatus(element, "HTTP/1.1 200 OK");
+				assertProp(element, DAV_NS, "getlastmodified", Utils.convert(resource.getLastModified()));
+				count++;
+				status += 2;
+			} else if (element.getChild("status", DAV_NS).getText().equals("HTTP/1.1 404 NOT FOUND")) {
+				count++;
+				status += 1;
+			}
+		}
+		assertEquals(2, count);
+		assertTrue(status == 3);
+	}
+	
 	private static final void assertHref(Element element, String uri) {
 		assertEquals(uri, element.getChild("href", DAV_NS).getText());
 	}
