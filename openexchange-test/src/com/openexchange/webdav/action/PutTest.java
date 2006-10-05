@@ -2,6 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class PutTest extends ActionTestCase {
@@ -56,5 +57,29 @@ public class PutTest extends ActionTestCase {
 		assertEquals(resource.getLength(), new Long(content.getBytes("UTF-8").length));
 		assertEquals("text/html", resource.getContentType());
 		assertEquals(content, getContent(INDEX23_HTML_URL));
+	}
+	
+	public void testInvalidParent() throws Exception {
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl("/notExists/lalala");
+		
+		String content = "<html><head /><body>The New, Better Index</body></html>";
+		req.setBodyAsString(content);
+		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-type", "text/html");
+		
+		WebdavAction action = new WebdavPutAction();
+		
+		try {
+			action.perform(req,res);
+			fail("Expected 409 CONFLICT");
+		} catch (WebdavException x) {
+			assertEquals(HttpServletResponse.SC_CONFLICT, x.getStatus());
+		}
+		
+		
 	}
 }

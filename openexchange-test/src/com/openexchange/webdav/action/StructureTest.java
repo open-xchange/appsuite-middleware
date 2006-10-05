@@ -119,6 +119,24 @@ public abstract class StructureTest extends ActionTestCase {
 		}
 	}
 	
+	public void testConflict() throws Exception {
+		final String DEVELOPMENT_URL = testCollection+"/development";
+			
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl(DEVELOPMENT_URL);
+		req.setHeader("Destination", "/doesntExist/nonono");
+		
+		WebdavAction action = getAction(factory);
+		try {
+			action.perform(req, res);
+			fail("Expected 409 CONFLICT");
+		} catch (WebdavException x) {
+			assertEquals(HttpServletResponse.SC_CONFLICT, x.getStatus());
+		}
+	}
+	
 	
 	
 	public abstract WebdavAction getAction(WebdavFactory factory);
