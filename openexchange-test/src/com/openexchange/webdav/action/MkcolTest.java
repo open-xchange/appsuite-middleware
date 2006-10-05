@@ -2,6 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class MkcolTest extends ActionTestCase {
@@ -20,6 +21,24 @@ public class MkcolTest extends ActionTestCase {
 		
 		WebdavResource resource = factory.resolveResource(NEW_COLLECTION);
 		assertTrue(resource.exists() && resource.isCollection());
+		
+	}
+	
+	public void testInvalidParent() throws Exception {
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl("/doesntExist/lalala");
+		
+		WebdavAction action = new WebdavMkcolAction();
+		
+		try {
+			action.perform(req,res);
+			fail("Expected 409 CONFLICT");
+		} catch (WebdavException e) {
+			assertEquals(HttpServletResponse.SC_CONFLICT, e.getStatus());
+		}
+		
 		
 	}
 }
