@@ -25,7 +25,7 @@ public class ProppatchTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavProppatchAction();
+		WebdavAction action = new WebdavProppatchAction(new Protocol());
 		action.perform(req, res);
 		
 		XMLCompare compare = new XMLCompare();
@@ -96,7 +96,7 @@ public class ProppatchTest extends ActionTestCase {
 		req.setBodyAsString(body);
 		req.setUrl(INDEX_HTML_URL);
 		
-		WebdavAction action = new WebdavProppatchAction();
+		WebdavAction action = new WebdavProppatchAction(new Protocol());
 		action.perform(req, res);
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
@@ -111,5 +111,26 @@ public class ProppatchTest extends ActionTestCase {
 		assertNotNull(prop);
 		assertTrue(prop.isXML());
 		assertEquals("<OX:gnatzel xmlns:OX=\"http://www.open-xchange.com/namespace/webdav-test\">GNA!</OX:gnatzel><bla xmlns=\"http://www.open-xchange.com/namespace/webdav-test2\" />", prop.getValue());
+	}
+	
+	public void testForbidden() throws Exception {
+		final String INDEX_HTML_URL = testCollection+"/index.html";
+		
+		
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propertyupdate xmlns:D=\"DAV:\"><D:set><D:prop><D:displayname>The index page</D:displayname></D:prop><D:prop><D:getlastmodified>Hallo</D:getlastmodified></D:prop></D:set></D:propertyupdate>";
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname /></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat><D:propstat><D:prop><D:getlastmodified /></D:prop><D:status>HTTP/1.1 403 FORBIDDEN</D:status></D:propstat></D:response></D:multistatus>";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setBodyAsString(body);
+		req.setUrl(INDEX_HTML_URL);
+		
+		WebdavAction action = new WebdavProppatchAction(new Protocol());
+		action.perform(req, res);
+		
+		XMLCompare compare = new XMLCompare();
+		
+		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 }
