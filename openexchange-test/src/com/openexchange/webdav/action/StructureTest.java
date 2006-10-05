@@ -100,5 +100,26 @@ public abstract class StructureTest extends ActionTestCase {
 		assertTrue(factory.resolveResource(PM_URL+"/test.html").exists());
 	}
 	
+	public void testSame() throws Exception {
+		final String DEVELOPMENT_URL = testCollection+"/development";
+		
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl(DEVELOPMENT_URL);
+		req.setHeader("Destination", DEVELOPMENT_URL);
+		
+		WebdavAction action = getAction(factory);
+		try {
+			action.perform(req, res);
+			fail("Expected 403 FORBIDDEN");
+		} catch (WebdavException x) {
+			assertEquals(HttpServletResponse.SC_FORBIDDEN, x.getStatus());
+		}
+	}
+	
+	
+	
 	public abstract WebdavAction getAction(WebdavFactory factory);
 }
