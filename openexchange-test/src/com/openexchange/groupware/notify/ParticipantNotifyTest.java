@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
-import com.openexchange.groupware.container.ExternalParticipant;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -248,7 +248,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 		
 		for(String externalMail : external) {
-			Participant p = new ExternalParticipant();
+			Participant p = new ExternalUserParticipant();
 			p.setDisplayName(externalMail);
 			p.setEmailAddress(externalMail);
 			participants[i++] = p;
