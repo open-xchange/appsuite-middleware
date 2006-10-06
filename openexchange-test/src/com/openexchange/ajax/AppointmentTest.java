@@ -316,11 +316,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		
 		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
-		c.setTimeZone(TimeZone.getTimeZone("GMT"));
 		
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
@@ -371,11 +371,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		
 		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
-		c.setTimeZone(TimeZone.getTimeZone("GMT"));
 		
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
@@ -428,11 +428,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		AppointmentObject loadAppointment = appointmentArray[0];
 		
 		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
-		c.setTimeZone(TimeZone.getTimeZone("GMT"));
 		
 		long newStartTime = c.getTimeInMillis();
 		long newEndTime = newStartTime + 86400000;
