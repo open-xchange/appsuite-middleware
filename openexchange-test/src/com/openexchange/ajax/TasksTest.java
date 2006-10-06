@@ -66,7 +66,7 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.api.OXException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;

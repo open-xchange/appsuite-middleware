@@ -37,7 +37,7 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
