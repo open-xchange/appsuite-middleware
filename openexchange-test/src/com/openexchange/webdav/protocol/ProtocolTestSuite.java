@@ -10,6 +10,7 @@ public class ProtocolTestSuite extends TestSuite {
 		tests.addTestSuite(ResourceTest.class);
 		tests.addTestSuite(CollectionTest.class);
 		tests.addTestSuite(LockTest.class);
+		tests.addTestSuite(LockInteractionTest.class);
 		return tests;
 	}
 
