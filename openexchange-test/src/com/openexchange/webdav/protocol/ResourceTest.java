@@ -16,6 +16,7 @@ import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
 import com.openexchange.webdav.protocol.util.Utils;
 
@@ -247,7 +248,7 @@ public class ResourceTest extends AbstractResourceTest{
 	
 	public void testOptions() throws Exception {
 		WebdavResource res = createResource();
-		assertOptions(Arrays.asList(res.getOptions()), Protocol.WEBDAV_METHOD.values());
+		assertOptions(Arrays.asList(res.getOptions()), WEBDAV_METHOD.GET, WEBDAV_METHOD.PUT, WEBDAV_METHOD.DELETE, WEBDAV_METHOD.HEAD, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.TRACE, WEBDAV_METHOD.PROPPATCH, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.MOVE, WEBDAV_METHOD.COPY, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK);
 		
 		//TODO Newly created, already locked
 	}

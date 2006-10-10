@@ -167,6 +167,9 @@ public class LockInteractionTest extends TestCase {
 		assertTrue(res.exists());
 		assertFalse(res.isCollection());
 		assertFalse(res.isLockNull());
+		
+		assertEquals(1, res.getLocks().size());
+		assertNotNull(res.getLock(lock.getToken()));
 	}
 	
 	public void testTransformLockNullCollection() throws Exception {
@@ -182,5 +185,9 @@ public class LockInteractionTest extends TestCase {
 		assertTrue(res.exists());
 		assertTrue(res.isCollection());
 		assertFalse(res.isLockNull());
+		
+		assertEquals(1, res.getLocks().size());
+		assertNotNull(res.getLock(lock.getToken()));
+
 	}
 }

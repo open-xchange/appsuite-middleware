@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
@@ -30,6 +32,7 @@ public class UnlockTest extends ActionTestCase {
 		
 		action.perform(req,res);
 		
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		assertTrue(resource.getLocks().isEmpty());
 	}
 }

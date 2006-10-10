@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.jdom.Namespace;
 
 import com.openexchange.test.XMLCompare;
@@ -26,7 +28,7 @@ public class LockTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavLockAction();
 		action.perform(req, res);
-		
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		
 		// LockToken Header
 		assertEquals(1,factory.resolveResource(INDEX_HTML_URL).getLocks().size());
@@ -61,6 +63,7 @@ public class LockTest extends ActionTestCase {
 		WebdavAction action = new WebdavLockAction();
 		action.perform(req, res);
 		
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		
 		// LockToken Header
 		assertEquals(1,factory.resolveResource(INDEX_HTML_URL).getLocks().size());
@@ -95,6 +98,7 @@ public class LockTest extends ActionTestCase {
 		
 		WebdavAction action = new WebdavLockAction();
 		action.perform(req, res);
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(GUI_URL);
 		
@@ -135,12 +139,36 @@ public class LockTest extends ActionTestCase {
 		WebdavAction action = new WebdavLockAction();
 		action.perform(req, res);
 		
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		
 		// LockToken Header
 		assertEquals(1,factory.resolveResource(INDEX_HTML_URL).getLocks().size());
 		WebdavLock lock = factory.resolveResource(INDEX_HTML_URL).getLocks().get(0);
 		
 		assertTrue(3600-lock.getTimeout()<100);
+		
+	}
+	
+	public void testLockNull() throws Exception {
+		final String LOCK_HTML_URL = testCollection+"/lock.html";
+		
+		
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setBodyAsString(body);
+		req.setUrl(LOCK_HTML_URL);
+		req.setHeader("Timeout", "infinite");
+		
+		WebdavAction action = new WebdavLockAction();
+		action.perform(req, res);
+		
+		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
+		
+		WebdavResource resource = factory.resolveResource(LOCK_HTML_URL);
+		assertTrue(resource.isLockNull());
 		
 	}
 }
