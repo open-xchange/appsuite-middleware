@@ -41,7 +41,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -64,15 +63,18 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.TaskWriter;
+import com.openexchange.ajax.container.Response;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
 import java.util.TimeZone;
 
@@ -81,6 +83,11 @@ import java.util.TimeZone;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TasksTest extends AbstractAJAXTest {
+
+    /**
+     * To use character encoding.
+     */
+    private static final String ENCODING = "UTF-8";
 
     /**
      * Logger.
@@ -272,7 +279,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 2, true,
-            getMyId(getWebConversation(), getHostName(), getSessionId()));
+            ConfigMenuTest.getUserId(getWebConversation(), getHostName(),
+                getSessionId()));
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
@@ -302,7 +310,8 @@ public class TasksTest extends AbstractAJAXTest {
     public void testUpdateDelegatedTask() throws Throwable {
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 4, true,
-            getMyId(getWebConversation(), getHostName(), getSessionId()));
+            ConfigMenuTest.getUserId(getWebConversation(), getHostName(),
+                getSessionId()));
         final List<Participant> firstParticipants =
             new ArrayList<Participant>();
         firstParticipants.addAll(participants.subList(0, 2));
@@ -555,8 +564,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         final int folderId2 = getPrivateTaskFolder(getSecondWebConversation(),
             getHostName(), getSecondSessionId());
-        final int userId2 = getMyId(getSecondWebConversation(), getHostName(),
-            getSecondSessionId());
+        final int userId2 = ConfigMenuTest.getUserId(getSecondWebConversation(),
+            getHostName(), getSecondSessionId());
 
         final List<UserParticipant> participants =
             new ArrayList<UserParticipant>();
@@ -596,6 +605,19 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
+     * Tests the search for tasks.
+     * @throws Throwable if an error occurs.
+     */
+    public void testSearch() throws Throwable {
+        final TaskSearchObject search = new TaskSearchObject();
+        final Response response = searchTask(getWebConversation(),
+            getHostName(), getSessionId(), search, new int[] { Task.OBJECT_ID },
+            -1, null);
+        assertNotNull("Response contains no data.", response.getData());
+        // TODO parse response
+    }
+
+    /**
      * This method implements storing of a task through the AJAX interface.
      * @param conversation WebConversation.
      * @param hostName Host name of the server.
@@ -612,15 +634,15 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-		TimeZone tz = TimeZone.getDefault();
-		LOG.error("USE TIMEZONE: " + tz);
-        final TaskWriter taskW = new TaskWriter(printW, tz);
+        final TimeZone timezone = ConfigMenuTest.getTimeZone(conversation,
+            hostName, sessionId);
+        final TaskWriter taskW = new TaskWriter(printW, timezone);
         taskW.writeTask(task);
         printW.flush();
         final String object = stringW.toString();
         LOG.trace(object);
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
-            .getBytes("UTF-8"));
+            .getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
@@ -653,16 +675,15 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Updating task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-		TimeZone tz = TimeZone.getDefault();
-		LOG.error("USE TIMEZONE: " + tz);
+		TimeZone tz = ConfigMenuTest.getTimeZone(conversation, hostName,
+            sessionId);
         final TaskWriter taskW = new TaskWriter(printW, tz);
-
         taskW.writeTask(task);
         printW.flush();
         final String object = stringW.toString();
         LOG.trace(object);
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
-            .getBytes("UTF-8"));
+            .getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_UPDATE);
@@ -726,7 +747,7 @@ public class TasksTest extends AbstractAJAXTest {
         json.put(AJAXServlet.PARAMETER_ID, task);
         json.put(AJAXServlet.PARAMETER_INFOLDER, folder);
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes("UTF-8"));
+            .toString().getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_DELETE);
@@ -845,7 +866,7 @@ public class TasksTest extends AbstractAJAXTest {
             json.put(json2);
         }
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes("UTF-8"));
+            .toString().getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
             AJAXServlet.ACTION_LIST);
@@ -881,7 +902,7 @@ public class TasksTest extends AbstractAJAXTest {
         json.put(TaskFields.ID, taskId);
         json.put(TaskFields.CONFIRM_MESSAGE, confirmMessage);
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes("UTF-8"));
+            .toString().getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
@@ -896,6 +917,59 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Response body: " + body);
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
+    }
+
+    /**
+     * Executes a searach.
+     * @param conversation WebConversation.
+     * @param hostName Host name of the server.
+     * @param sessionId Session identifier of the user.
+     * @param search object with the search patterns.
+     * @param columns attributes of the found task that should be returned.
+     * @param sort Sort the result by this attribute.
+     * @param order Sort direction. (ASC, DESC).
+     * @return a response object that data contains the task list.
+     * @throws TaskException if the search object contains invalid values.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws IOException if the communication with the server fails.
+     */
+    public static Response searchTask(final WebConversation conversation,
+        final String hostName, final String sessionId,
+        final TaskSearchObject search, final int[] columns, final int sort,
+        final String order) throws JSONException, TaskException, IOException,
+        SAXException {
+        final JSONObject json = TaskSearchJSONWriter.write(search);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(json
+            .toString().getBytes(ENCODING));
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
+            AJAXServlet.ACTION_SEARCH);
+        final StringBuilder columnString = new StringBuilder();
+        for (int i : columns) {
+            columnString.append(i);
+            columnString.append(',');
+        }
+        columnString.delete(columnString.length() - 1, columnString.length());
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS,
+            columnString.toString());
+        if (null != order) {
+            parameter.setParameter(AJAXServlet.PARAMETER_SORT,
+                String.valueOf(sort));
+            parameter.setParameter(AJAXServlet.PARAMETER_ORDER, order);
+        }
+        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
+            + TASKS_URL + parameter.getURLParameters(), bais,
+            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: " + body);
+        final Response response = Response.parse(body);
+        assertFalse(response.getErrorMessage(), response.hasError());
+        return response;
     }
 
     private int privateTaskFolder = 0;
@@ -969,19 +1043,6 @@ public class TasksTest extends AbstractAJAXTest {
         }
         participants = extractByRandom(participants, count);
         return participants;
-    }
-
-    public static int getMyId(final WebConversation conversation,
-        final String hostName, final String sessionId)
-        throws MalformedURLException, IOException, SAXException, JSONException,
-        OXException {
-        LOG.trace("Getting my user identifier through my standard task "
-            + "folder.");
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            conversation, hostName, sessionId);
-        final int retval = myTasks.getCreatedBy();
-        LOG.trace("My identifier is " + retval);
-        return retval;
     }
 
     public void compareAttributes(final Task task, final Task reload) {
