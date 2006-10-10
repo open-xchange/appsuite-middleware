@@ -251,6 +251,7 @@ public class IfTest extends ActionTestCase {
 		
 		WebdavIfAction action = new WebdavIfAction();
 		action.setDefaultDepth(0);
+		action.checkSourceLocks(true);
 		action.setNext(mockAction);
 		
 		try {
@@ -296,6 +297,7 @@ public class IfTest extends ActionTestCase {
 		
 		WebdavIfAction action = new WebdavIfAction();
 		action.setDefaultDepth(0);
+		action.checkDestinationLocks(true);
 		action.setNext(mockAction);
 		
 		try {
