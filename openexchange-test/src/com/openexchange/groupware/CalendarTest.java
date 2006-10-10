@@ -502,5 +502,16 @@ public class CalendarTest extends TestCase {
         
     }
     
+    public void testGetAllAppointmentsFromUserInAllFolders() throws Exception {
+        Connection readcon = DBPool.pickup(getContext());
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
+        CalendarSql csql = new CalendarSql(so);
+        int cols[] = new int[1];
+        cols[0] = AppointmentObject.TITLE;        
+        SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
+        assertTrue("Test if we got appointments", si.hasNext());
+    }
+    
     
 }
