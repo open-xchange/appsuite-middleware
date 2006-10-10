@@ -14,7 +14,7 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.ajax.ReminderTest.class);
 		tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.ConfigMenuTest.class);
-		tests.addTestSuite(com.openexchange.ajax.ContactTest.class);
+		tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.AppointmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.GroupTest.class);
 		tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
