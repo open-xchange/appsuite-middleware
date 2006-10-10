@@ -48,6 +48,7 @@ public class CCTests {
 	    tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
 	
