@@ -29,49 +29,6 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		data.append("123465678901223456\n");
 	}
 	
-	public void testInsertAttachment() throws Exception {
-		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		int contactFolderId = folderObj.getObjectID();
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testInsertAttachment");
-		contactObj.setParentFolderID(contactFolderId);
-		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId,  false);
-	}
-
-	public void testLoadAttachment() throws Exception {
-		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		int contactFolderId = folderObj.getObjectID();
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testLoadAttachment");
-		contactObj.setParentFolderID(contactFolderId);
-		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, false);
-		loadAttachment(attachmentId, Types.CONTACT, objectId, contactFolderId, false);
-	}
-	
-	public void testLoadAttachmentWithRtf() throws Exception {
-		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		int contactFolderId = folderObj.getObjectID();
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testLoadAttachmentWithRtf");
-		contactObj.setParentFolderID(contactFolderId);
-		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, true);
-		loadAttachment(attachmentId, Types.CONTACT, objectId, contactFolderId, true);
-	}
-	
-	public void testDeleteAttachment() throws Exception {
-		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		int contactFolderId = folderObj.getObjectID();
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testDeleteAttachment");
-		contactObj.setParentFolderID(contactFolderId);
-		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		int attachmentId = insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId, false);
-		deleteAttachment(attachmentId, Types.TASK, objectId, contactFolderId);
-	}
-	
 	protected int insertAttachment(String filename, int module, int targetId, int targetFolderId, boolean rtf) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.toString().getBytes());
 		req = new PutMethodWebRequest(PROTOCOL + hostName + ATTACHMENT_URL, bais, "text/plain");
