@@ -52,84 +52,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		dateTime = c.getTimeInMillis();
 	}
 	
-	public void testNewContact() throws Exception {
-		ContactObject contactObj = createContactObject("testNewContact");
-		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-	}
-	
-	public void testUpdateContact() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContact");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		contactObj = createContactObject("testUpdateContact2");
-		contactObj.setEmail1(null);
-		
-		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-	}
-	
-	public void testDelete() throws Exception {
-		ContactObject contactObj = createContactObject("testDelete");
-		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
-		
-		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
-	}
-	
-	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-		
-		ContactObject contactObj = createContactObject("testPropFindWithModified");
-		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
-		
-		assertTrue("check response", contactArray.length >= 2);
-	}
-	
-	public void testPropFindWithDelete() throws Exception {
-		Date modified = new Date();
-		
-		ContactObject contactObj = createContactObject("testPropFindWithModified");
-		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
-		
-		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
-		
-		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, "DELETED", PROTOCOL + hostName, login, password);
-		
-		assertTrue("wrong response array length", appointmentArray.length >= 2);
-	}
-	
-	public void testPropFindWithObjectId() throws Exception {
-		ContactObject contactObj = createContactObject("testPropFindWithObjectId");
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		ContactObject loadContact = loadContact(webCon, objectId, contactFolderId, PROTOCOL + hostName, login, password);
-	}
-	
-	public void testListWithAllFields() throws Exception {
-		ContactObject contactObj = createCompleteContactObject();
-		
-		Date modified = new Date();
-		
-		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
-		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
-		
-		assertEquals("wrong response array length", 1, appointmentArray.length);
-		
-		ContactObject loadContact = appointmentArray[0];
-		contactObj.setObjectID(objectId);
-		
-		compareObject(contactObj, loadContact);
-	}
-	
-	private void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
+	protected void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
 		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -231,7 +154,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 	
-	private ContactObject createContactObject(String displayname) {
+	protected ContactObject createContactObject(String displayname) {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
@@ -248,7 +171,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	private ContactObject createCompleteContactObject() throws Exception {
+	protected ContactObject createCompleteContactObject() throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setPrivateFlag(true);
 		contactObj.setCategories("categories");
