@@ -59,6 +59,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	
 	protected Date endTime = null;
 	
+	protected static final int dayInMillis = 86400000;
+	
 	private static final String APPOINTMENT_URL = "/servlet/webdav.calendar";
 	
 	protected void setUp() throws Exception {
@@ -161,7 +163,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static void updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setLastModified(new Date());
 
@@ -201,6 +203,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
+		
+		return objectId;
 	}
 	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
