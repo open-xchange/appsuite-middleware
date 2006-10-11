@@ -30,11 +30,7 @@ public class TestFolder extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		wc = new WebConversation();
-		req = new GetMethodWebRequest("http://127.0.0.1/ajax/login?name=marcus&password=netline");
-		resp = wc.getResponse(req);
-		sessionId = resp.getText();
-		int pos = sessionId.indexOf('\"');
-		sessionId = sessionId.substring(pos + 1, sessionId.indexOf('\"', pos + 1));
+        sessionId = LoginTest.getSessionId(wc, "127.0.0.1", "marcus", "netline");
 	}
 
 	protected void tearDown() throws Exception {
