@@ -75,4 +75,12 @@ public abstract class AbstractWebdavTest extends TestCase {
 		
 		return new String(Base64.encode(login + ":" + password));
 	}
+	
+	protected WebConversation getWebConversation() {
+		return webCon;
+	}
+	
+	protected String getHostName() {
+		return hostName;
+	}
 }
