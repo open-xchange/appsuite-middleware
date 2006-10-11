@@ -28,15 +28,6 @@ public class ListTest extends AppointmentTest {
 		super.setUp();
 	}
 	
-	public void testAll() throws Exception {
-		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
-		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
-		
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
-		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
-	}
-	
 	public void testList() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
