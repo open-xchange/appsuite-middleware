@@ -46,8 +46,6 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	public static final String CONTENT_TYPE = "image/png";
 	
-	public static final String BASE64String = "ABCDEFGHIJK";
-	
 	public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0,
 	0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0,
 	37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1,
@@ -163,13 +161,13 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.DEFAULT_ADDRESS
 	};
 	
-	private static final String CONTACT_URL = "/ajax/contacts";
+	protected static final String CONTACT_URL = "/ajax/contacts";
 	
-	private static int contactFolderId = -1;
+	protected static int contactFolderId = -1;
 	
-	private long dateTime = 0;
+	protected long dateTime = 0;
 	
-	private int userId = 0;
+	protected int userId = 0;
 	
 	private static final Log LOG = LogFactory.getLog(ContactTest.class);
 	
@@ -189,208 +187,6 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		
 		dateTime = c.getTimeInMillis();
-	}
-	
-	public void testNew() throws Exception {
-		ContactObject contactObj = createContactObject("testNew");
-		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testNewWithDistributionList() throws Exception {
-		ContactObject contactEntry = createContactObject("internal contact");
-		contactEntry.setEmail1("internalcontact@x.de");
-		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
-		contactEntry.setObjectID(contactId);
-		
-		int objectId = createContactWithDistributionList("testNewWithDistributionList", contactEntry);
-	}
-	
-	public void testNewWithLinks() throws Exception {
-		ContactObject link1 = createContactObject("link1");
-		ContactObject link2 = createContactObject("link2");
-		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
-		link1.setObjectID(linkId1);
-		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
-		link2.setObjectID(linkId2);
-		
-		int objectId = createContactWithLinks("testNewWithLinks", link1, link2);
-	}
-	
-	public void testUpdate() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdate");
-		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		contactObj.setObjectID(objectId);
-		
-		contactObj.setTelephoneBusiness1("+49009988776655");
-		contactObj.setStateBusiness(null);
-		contactObj.removeParentFolderID();
-		
-		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testUpdateWithDistributionList() throws Exception {
-		ContactObject contactEntry = createContactObject("internal contact");
-		contactEntry.setEmail1("internalcontact@x.de");
-		int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
-		contactEntry.setObjectID(contactId);
-		
-		int objectId = createContactWithDistributionList("testUpdateWithDistributionList", contactEntry);
-		
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testUpdateWithDistributionList");
-		contactObj.setParentFolderID(contactFolderId);
-		contactObj.setObjectID(objectId);
-		
-		DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
-		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
-		entry[1] = new DistributionListEntryObject("displayname b", "b@b.de", DistributionListEntryObject.INDEPENDENT);
-		
-		contactObj.setDistributionList(entry);
-		
-		contactObj.removeParentFolderID();
-		
-		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testUpdateWithLinks() throws Exception {
-		ContactObject link1 = createContactObject("link1");
-		ContactObject link2 = createContactObject("link2");
-		int linkId1 = insertContact(getWebConversation(), link1, PROTOCOL + getHostName(), getSessionId());
-		link1.setObjectID(linkId1);
-		int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
-		link2.setObjectID(linkId2);
-		
-		int objectId = createContactWithLinks("testUpdateWithLinks", link1, link2);
-		
-		ContactObject link3 = createContactObject("link3");
-		int linkId3 = insertContact(getWebConversation(), link3, PROTOCOL + getHostName(), getSessionId());
-		
-		ContactObject contactObj = new ContactObject();
-		contactObj.setSurName("testUpdateWithLinks");
-		contactObj.setParentFolderID(contactFolderId);
-		contactObj.setObjectID(objectId);
-		
-		LinkEntryObject[] links = new LinkEntryObject[1];
-		links[0] = new LinkEntryObject();
-		links[0].setLinkID(linkId3);
-		links[0].setLinkDisplayname(link3.getDisplayName());
-		
-		contactObj.setLinks(links);
-		
-		contactObj.removeParentFolderID();
-		
-		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testAll() throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
-		
-		ContactObject[] contactArray = listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testList() throws Exception {
-		ContactObject contactObj = createContactObject("testList");
-		int id1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		int id3 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		final int[][] objectIdAndFolderId = { { id1, contactFolderId }, { id2, contactFolderId }, { id3, contactFolderId } };
-		
-		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
-		
-		ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEquals("check response array", 3, contactArray.length);
-	}
-	
-	public void testDelete() throws Exception {
-		ContactObject contactObj = createContactObject("testDelete");
-		int id = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		deleteContact(getWebConversation(), id, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testGet() throws Exception {
-		ContactObject contactObj = createContactObject("testGet");
-		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-	}
-	
-	public void testGetWithAllFields() throws Exception {
-		ContactObject contactObject = createCompleteContactObject();
-		
-		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
-		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		contactObject.setObjectID(objectId);
-		compareObject(contactObject, loadContact);
-	}
-	
-	public void testGetWithAllFieldsOnUpdate() throws Exception {
-		ContactObject contactObject = new ContactObject();
-		contactObject.setSurName("testGetWithAllFieldsOnUpdate");
-		contactObject.setParentFolderID(contactFolderId);
-		
-		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
-		
-		contactObject = createCompleteContactObject();
-		
-		updateContact(getWebConversation(), contactObject, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		contactObject.setObjectID(objectId);
-		compareObject(contactObject, loadContact);
-	}
-	
-	public void testListWithAllFields() throws Exception {
-		ContactObject contactObject = createCompleteContactObject();
-		
-		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
-		
-		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
-		
-		ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId, CONTACT_FIELDS, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEquals("check response array", 1, contactArray.length);
-		
-		ContactObject loadContact = contactArray[0];
-		
-		contactObject.setObjectID(objectId);
-		compareObject(contactObject, loadContact);
-	}
-	
-	public void testContactWithImage() throws Exception {
-		ContactObject contactObj = createContactObject("testContactWithImage");
-		contactObj.setImage1(image);
-		contactObj.setImageContentType("image/png");
-		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
-	}
-	
-	public void testUpdateContactWithImage() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactWithImage");
-		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
-		
-		contactObj.setImage1(image);
-		contactObj.removeParentFolderID();
-		updateContact(getWebConversation(), contactObj, objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
-		
-		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
-	}
-	
-	public void testSearchLoginUser() throws Exception {
-		ContactObject[] contactArray = searchContact(getWebConversation(), getLogin(), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
-		assertTrue("contact array size is 0", contactArray.length > 0);
-		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
 	}
 	
 	protected int createContactWithDistributionList(String title, ContactObject contactEntry) throws Exception {
@@ -426,7 +222,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	private void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
+	protected void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
 		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -457,8 +253,6 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("fax business is not equals", contactObj1.getFaxBusiness(), contactObj2.getFaxBusiness());
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
-		// FIXME Image must be loaded in another way from server.
-		// assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
@@ -529,7 +323,7 @@ public class ContactTest extends AbstractAJAXTest {
 		assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
 	}
 	
-	private ContactObject createContactObject(String displayname) {
+	protected ContactObject createContactObject(String displayname) {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
@@ -546,7 +340,7 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactObj;
 	}
 	
-	private ContactObject createCompleteContactObject() throws Exception {
+	protected ContactObject createCompleteContactObject() throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setPrivateFlag(true);
 		contactObj.setCategories("categories");
