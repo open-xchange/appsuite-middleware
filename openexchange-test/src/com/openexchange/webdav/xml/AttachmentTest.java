@@ -36,7 +36,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		req.setHeaderField(attachments.FILENAME, filename);
 		req.setHeaderField(attachments.MODULE, String.valueOf(module));
 		req.setHeaderField(attachments.TARGET_ID, String.valueOf(targetId));
-		req.setHeaderField(attachments.TARGET_FOLDER_ID, String.valueOf(targetId));
+		req.setHeaderField(attachments.TARGET_FOLDER_ID, String.valueOf(targetFolderId));
 		
 		if (rtf) {
 			req.setHeaderField(attachments.RTF_FLAG, String.valueOf(rtf));
@@ -56,6 +56,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		req.setHeaderField("Authorization", "Basic " + authData);
 		req.setHeaderField(attachments.MODULE, String.valueOf(module));
 		req.setHeaderField(attachments.TARGET_ID, String.valueOf(targetId));
+		req.setHeaderField(attachments.TARGET_FOLDER_ID, String.valueOf(targetFolderId));
 		req.setHeaderField(DataFields.OBJECT_ID, String.valueOf(objectId));
 		
 		WebResponse resp = webCon.getResponse(req);
@@ -75,7 +76,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		deleteMethod.setRequestHeader(attachments.MODULE, String.valueOf(module));
 		deleteMethod.setRequestHeader(attachments.TARGET_ID, String.valueOf(targetId));
 		deleteMethod.setRequestHeader(DataFields.OBJECT_ID, String.valueOf(objectId));
-		deleteMethod.setRequestHeader(attachments.TARGET_FOLDER_ID, String.valueOf(objectId));
+		deleteMethod.setRequestHeader(attachments.TARGET_FOLDER_ID, String.valueOf(targetFolderId));
 		
 		assertEquals(207, resp.getResponseCode());
 	}
