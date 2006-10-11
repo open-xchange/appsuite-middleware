@@ -5,6 +5,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.GroupTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -152,7 +153,6 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		
-		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		int resourceParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
@@ -278,6 +278,235 @@ public class NewTest extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment, startTime, endTime);
 		deleteAppointment(getSecondWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSecondSessionId());
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
+	public void _notestDailyRecurrence() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDailyRecurrence");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestWeeklyRecurrence() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (10*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testWeeklyRecurrence");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.WEEKLY);
+		appointmentObj.setDays(AppointmentObject.SUNDAY + AppointmentObject.MONDAY + AppointmentObject.TUESDAY + AppointmentObject.WEDNESDAY + AppointmentObject.THURSDAY + AppointmentObject.FRIDAY + AppointmentObject.SATURDAY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestMonthlyRecurrenceDayInMonth() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (60*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
+		appointmentObj.setDays(15);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestMonthlyRecurrenceDays() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (90*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testMonthlyRecurrenceDays");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
+		appointmentObj.setDays(AppointmentObject.WEDNESDAY);
+		appointmentObj.setDayInMonth(3);
+		appointmentObj.setInterval(2);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestYearlyRecurrenceDayInMonth() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.YEARLY);
+		appointmentObj.setMonth(Calendar.JULY);
+		appointmentObj.setDays(15);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestYearlyRecurrenceDays() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (800*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testYearlyRecurrenceDays");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
+		appointmentObj.setMonth(Calendar.JULY);
+		appointmentObj.setDays(AppointmentObject.WEDNESDAY);
+		appointmentObj.setDayInMonth(3);
+		appointmentObj.setInterval(2);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestConflict() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testConflict");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		try {
+			int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+			deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+			assertEquals("conflict expected here object id should be 0", 0, objectId2);
+		} catch (OXConflictException exc) {
+			assertTrue(true);
+		}
+		
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestConflictWithResource() throws Exception {
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testConflictWithResource");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		
+		int resourceParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userId);
+		participants[1] = new ResourceParticipant();
+		participants[1].setIdentifier(resourceParticipantId);
+		
+		appointmentObj.setParticipants(participants);
+		
+		int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+
+		try {
+			int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+			deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+			assertEquals("conflict expected here object id should be 0", 0, objectId2);
+		} catch (OXConflictException exc) {
+			assertTrue(true);
+		}
+		
+		appointmentObj.setIgnoreConflicts(true);
+		try {
+			int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+			deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+			assertEquals("conflict expected here object id should be 0", 0, objectId2);
+		} catch (OXConflictException exc) {
+			assertTrue(true);
+		}
+		
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 }
 
