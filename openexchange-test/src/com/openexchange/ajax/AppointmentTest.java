@@ -19,6 +19,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -203,7 +204,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return objectId;
     }
     
-    public static void updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, TimeZone userTimeZone, String host, String session) throws Exception {
+    public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, TimeZone userTimeZone, String host, String session) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);
         JSONWriter jsonWriter = new JSONWriter(pw);
@@ -233,11 +234,17 @@ public class AppointmentTest extends AbstractAJAXTest {
         if (response.hasError()) {
             fail("json error: " + response.getErrorMessage());
         }
-        
+		
         JSONObject data = (JSONObject)response.getData();
+        if (data.has(DataFields.ID)) {
+            objectId = data.getInt(DataFields.ID);
+        }
+        
         if (data.has("conflicts")) {
             throw new OXConflictException("conflicts found!");
         }
+		
+		return objectId;
     }
     
     public static void deleteAppointment(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
@@ -259,7 +266,31 @@ public class AppointmentTest extends AbstractAJAXTest {
         final Response response = Response.parse(resp.getText());
         
         if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
+            throw new Exception("json error: " + response.getErrorMessage());
+        }
+    }
+	
+    public static void deleteAppointment(WebConversation webCon, int id, int inFolder, int recurrencePosition, String host, String session) throws Exception {
+        final URLParameter parameter = new URLParameter();
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
+        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+        
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put(DataFields.ID, id);
+        jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		jsonObj.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+        WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
+        WebResponse resp = webCon.getResponse(req);
+        
+        assertEquals(200, resp.getResponseCode());
+        
+        final Response response = Response.parse(resp.getText());
+        
+        if (response.hasError()) {
+            throw new Exception("json error: " + response.getErrorMessage());
         }
     }
     
