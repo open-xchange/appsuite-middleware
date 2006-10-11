@@ -8,8 +8,8 @@ import com.openexchange.ajax.container.Response;
 
 public class GetTest extends InfostoreAJAXTest {
 
-	public GetTest() {
-		super();
+	public GetTest(String name) {
+		super(name);
 	}
 	
 	public void testBasic() throws Exception{

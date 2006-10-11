@@ -17,6 +17,10 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class CopyTest extends InfostoreAJAXTest {
 	
+	public CopyTest(String name){
+		super(name);
+	}
+	
 	private Set<String> skipKeys = new HashSet<String>(Arrays.asList(
 			Metadata.ID_LITERAL.getName(),
 			Metadata.CREATION_DATE_LITERAL.getName(),

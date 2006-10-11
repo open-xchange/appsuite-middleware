@@ -12,8 +12,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class ListTest extends InfostoreAJAXTest {
 
-	public ListTest() {
-		super();
+	public ListTest(String name) {
+		super(name);
 	}
 	
 	public void testBasic() throws Exception {

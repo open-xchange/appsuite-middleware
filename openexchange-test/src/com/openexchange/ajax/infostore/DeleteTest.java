@@ -11,8 +11,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DeleteTest extends InfostoreAJAXTest {
 
-	public DeleteTest() {
-		super();
+	public DeleteTest(String name) {
+		super(name);
 	}
 	
 	public void testBasic() throws Exception{

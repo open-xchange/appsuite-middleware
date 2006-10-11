@@ -24,8 +24,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 	private static final byte[] megabyte = new byte[1000000];
 
 	
-	public UpdateTest() {
-		super();
+	public UpdateTest(String name) {
+		super(name);
 	}
 	
 	public void testBasic() throws Exception{

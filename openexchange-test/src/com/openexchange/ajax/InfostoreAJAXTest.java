@@ -36,8 +36,8 @@ public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	protected String hostName = null;
 	
-	public InfostoreAJAXTest(){
-		super("InfostoreAJAXTest");
+	public InfostoreAJAXTest(String name){
+		super(name);
 	}	
 	
 	public void setUp() throws Exception {

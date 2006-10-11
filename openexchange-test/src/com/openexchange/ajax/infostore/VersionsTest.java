@@ -19,8 +19,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 public class VersionsTest extends InfostoreAJAXTest {
 
 	
-	public VersionsTest() {
-		super();
+	public VersionsTest(String name) {
+		super(name);
 	}
 	
 	public void testVersions() throws Exception{

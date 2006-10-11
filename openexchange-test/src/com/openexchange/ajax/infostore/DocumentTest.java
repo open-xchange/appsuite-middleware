@@ -14,6 +14,10 @@ public class DocumentTest extends InfostoreAJAXTest {
 	protected File upload;
 	protected int id;
 	
+	public DocumentTest(String name){
+		super(name);
+	}
+	
 	public void setUp() throws Exception{
 		super.setUp();
 		upload = new File(Init.getTestProperty("ajaxPropertiesFile"));

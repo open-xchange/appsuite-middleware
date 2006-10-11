@@ -19,7 +19,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
@@ -30,6 +29,10 @@ import com.openexchange.tools.URLParameter;
 public class LockTest extends InfostoreAJAXTest {
 	
 	protected File testFile;
+	
+	public LockTest(String name){
+		super(name);
+	}
 	
 	public void setUp() throws Exception{
 		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));

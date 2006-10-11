@@ -15,6 +15,9 @@ public class SaveAsTest extends InfostoreAJAXTest {
 	
 	private TaskAttachmentTest attachmentTest = new TaskAttachmentTest("TaskAttachmentTest");
 	
+	public SaveAsTest(String name) {
+		super(name);
+	}
 	
 	public void testBasic() throws Exception {
 		AttachmentMetadata attachment = attachmentTest.getAttachment(0);

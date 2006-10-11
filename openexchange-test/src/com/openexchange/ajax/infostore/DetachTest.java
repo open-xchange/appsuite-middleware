@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -15,6 +14,10 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DetachTest extends InfostoreAJAXTest {
 
+	public DetachTest(String name){
+		super(name);
+	}
+	
 	public void setUp() throws Exception {
 		super.setUp();
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
