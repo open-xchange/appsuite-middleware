@@ -25,7 +25,7 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
 
 
-		tests.addTestSuite(com.openexchange.webdav.xml.AppointmentTest.class);
+		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 		tests.addTestSuite(com.openexchange.webdav.xml.ContactTest.class);	
 		tests.addTestSuite(com.openexchange.webdav.xml.FolderTest.class);
