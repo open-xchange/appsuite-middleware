@@ -282,13 +282,14 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
     
-    public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, String host, String session) throws Exception {
+    public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, String host, String session) throws Exception {
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
+		parameter.setParameter("all", showAll);
         parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
         
         WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
