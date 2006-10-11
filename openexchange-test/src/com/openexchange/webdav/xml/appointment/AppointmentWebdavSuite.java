@@ -4,7 +4,7 @@ package com.openexchange.webdav.xml.appointment;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class AppointmentAJAXSuite extends TestSuite{
+public class AppointmentWebdavSuite extends TestSuite{
 	
 	public static Test suite(){
 		TestSuite tests = new TestSuite();
