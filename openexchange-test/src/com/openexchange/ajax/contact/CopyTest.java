@@ -15,4 +15,8 @@ public class CopyTest extends ContactTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
+	
+	public void testDummy() throws Exception {
+		
+	}
 }
