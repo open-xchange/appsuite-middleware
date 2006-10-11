@@ -36,11 +36,11 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	
 	protected int groupParticipantId1 = -1;
 	
-	private String userParticipant2 = null;
+	protected String userParticipant2 = null;
 	
-	private String userParticipant3 = null;
+	protected String userParticipant3 = null;
 	
-	private String groupParticipant = null;
+	protected String groupParticipant = null;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -50,172 +50,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
 	}
-
-	public void testInsertPrivateFolderCalendar() throws Exception {
-	FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderCalendar", FolderObject.CALENDAR, false);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testInsertPrivateFolderContact() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderContact", FolderObject.CONTACT, false);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testInsertPrivateFolderTask() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderTask", FolderObject.TASK, false);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testInsertPublicFolderCalendar() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderCalendar", FolderObject.CALENDAR, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testInsertPublicFolderContact() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderContact", FolderObject.CONTACT, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testInsertPublicFolderTask() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertPublicFolderTask", FolderObject.TASK, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testRenameFolder() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		
-		folderObj = new FolderObject();
-		folderObj.setFolderName("testRenameFolder" + System.currentTimeMillis());
-		folderObj.setObjectID(objectId);
-		folderObj.setParentFolderID(2);		
-		
-		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void testMoveFolder() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testMoveFolder1", FolderObject.TASK, true);
-		int parentFolderId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		folderObj = createFolderObject(userId, "testMoveFolder2", FolderObject.TASK, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-		folderObj.setParentFolderID(parentFolderId);
-		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
 	
-	public void testChangePermissionsOfPrivateFolder() throws Exception {
-		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
-		
-		FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPrivateFolder", FolderObject.TASK, false);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-		
-		OCLPermission oclp[] = new OCLPermission[3];
-		oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		oclp[1] = createPermission( userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
-		oclp[2] = createPermission( groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		
-		folderObj.setPermissionsAsArray( oclp );
-		
-		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	
-	public void testChangePermissionsOfPublicFolder() throws Exception {
-		int userParticipantId = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
-		int groupParticipantId = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password)[0].getIdentifier();
-		
-		FolderObject folderObj = createFolderObject(userId, "testChangePermissionOfPublicFolder", FolderObject.TASK, true);
-		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj.setObjectID(objectId);
-		
-		OCLPermission oclp[] = new OCLPermission[3];
-		oclp[0] = createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		oclp[1] = createPermission( userParticipantId, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
-		oclp[2] = createPermission( groupParticipantId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		
-		folderObj.setPermissionsAsArray( oclp );
-		
-		updateFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		
-		FolderObject loadFolder = loadFolder(webCon, objectId, PROTOCOL + hostName, login, password);
-		compareFolder(folderObj, loadFolder);
-	}
-	 
-	public void _notestDeleteFolder() throws Exception {
-		FolderObject folderObj = createFolderObject(userId, "testDeleteFolder1", FolderObject.CALENDAR, false);
-		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject(userId, "testDeleteFolder2", FolderObject.CALENDAR, false);
-		int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		deleteFolder(webCon, new int[] { objectId1, objectId2 }, PROTOCOL + hostName, login, password);
-	}
-	 
-	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-	 
-		FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
-		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
-		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		FolderObject[] folderArray = listFolder(webCon, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
-	 
-		assertTrue("check response", folderArray.length == 2);
-	 }
-	 
-	public void _notestPropFindWithDeleted() throws Exception {
-		Date modified = new Date();
-	 
-		FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
-		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-		folderObj = createFolderObject(userId, "testPropFindWithDeleted2", FolderObject.CONTACT, false);
-		int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
-	 
-		int[] id = { objectId1, objectId2 };
-	 
-		int[] failed = deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
-	 
-		FolderObject[] folderArray = listFolder(webCon, modified, "DELETED", PROTOCOL + hostName, login, password);
-	 
-		assertTrue("check response", folderArray.length == 2);
-	}
-	
-	private void compareFolder(FolderObject folderObj1, FolderObject folderObj2) throws Exception {
+	protected void compareFolder(FolderObject folderObj1, FolderObject folderObj2) throws Exception {
 		assertEqualsAndNotNull("id is not equals", folderObj1.getObjectID(), folderObj2.getObjectID());
 		assertEqualsAndNotNull("folder name is not equals", folderObj1.getFolderName(), folderObj2.getFolderName());
 		
