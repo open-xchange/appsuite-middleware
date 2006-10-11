@@ -114,7 +114,13 @@ public class LoginTest extends AbstractAJAXTest {
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
         final String body = resp.getText();
-        final JSONObject json = new JSONObject(body);
+        final JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (JSONException e) {
+            LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+            throw e;
+        }
         assertTrue("Session ID is missing: " + body, json.has(
             Login.PARAMETER_SESSION));
         assertTrue("Random is missing: " + body, json.has(Login._random));
