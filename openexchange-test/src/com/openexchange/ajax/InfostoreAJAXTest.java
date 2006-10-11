@@ -22,9 +22,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 
-
-
-public abstract class InfostoreAJAXTest extends AbstractAJAXTest {
+public class InfostoreAJAXTest extends AbstractAJAXTest {
 
 	public static final String INFOSTORE_FOLDER = "infostore.folder";
 	
