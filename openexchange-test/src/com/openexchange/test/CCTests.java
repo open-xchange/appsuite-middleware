@@ -24,14 +24,14 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
 
-
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
+		tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());	
+		tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
+		tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());		
+		tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());	
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-		tests.addTestSuite(com.openexchange.webdav.xml.ContactTest.class);	
-		tests.addTestSuite(com.openexchange.webdav.xml.FolderTest.class);
 		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
 		
-
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreWriterTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.JSONSimpleRequestTest.class);
@@ -41,7 +41,6 @@ public class CCTests {
 		tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
 		
-						
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
 		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
@@ -51,7 +50,6 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
-	
 		
 		return tests;
 	}
