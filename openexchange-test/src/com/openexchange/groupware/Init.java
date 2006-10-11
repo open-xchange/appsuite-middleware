@@ -99,7 +99,7 @@ public final class Init {
 		}
 		else {
 
-			retval = testProps.getProperty("webdavPropertiesFile");
+			retval = testProps.getProperty("ajaxPropertiesFile");
 		}
 
 		return retval;
