@@ -2,6 +2,9 @@ package com.openexchange.ajax.appointment;
 
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.AppointmentObject;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,6 +26,55 @@ public class DeleteTest extends AppointmentTest {
         int id = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
         deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		try {
+			deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+			fail("OXObjectNotFoundException expected!");
+		} catch (Exception ex) {
+			assertTrue(true);
+		}
     }
+	
+	public void _notestDeleteRecurrenceWithPosition() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		
+		int changeExceptionPosition = 3;
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDeleteRecurrenceWithPosition");
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		
+		appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDeleteRecurrenceWithPosition - exception");
+		appointmentObj.setStartDate(new Date(startTime + 60*60*1000));
+		appointmentObj.setEndDate(new Date(endTime + 60*60*1000));
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrencePosition(changeExceptionPosition);
+		
+		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
+		
+		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
 }
 
