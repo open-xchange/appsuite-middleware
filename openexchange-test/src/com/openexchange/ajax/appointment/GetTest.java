@@ -165,7 +165,7 @@ public class GetTest extends AppointmentTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		long newStartTime = c.getTimeInMillis();
-		long newEndTime = newStartTime + 86400000;
+		long newEndTime = newStartTime + dayInMillis;
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(appointmentFolderId);
