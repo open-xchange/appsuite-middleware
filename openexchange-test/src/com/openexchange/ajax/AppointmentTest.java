@@ -1,6 +1,5 @@
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.fields.FolderChildFields;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -20,7 +19,6 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -29,7 +27,6 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -140,6 +137,12 @@ public class AppointmentTest extends AbstractAJAXTest {
         assertEquals("private flag", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
         assertEquals("full time", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
         assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
+        assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
+        assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
+        assertEquals("days", appointmentObj1.getDays(), appointmentObj2.getDays());
+        assertEquals("month", appointmentObj1.getMonth(), appointmentObj2.getMonth());
+		assertEquals("day_in_month", appointmentObj1.getDayInMonth(), appointmentObj2.getDayInMonth());
+        assertEquals("until", appointmentObj1.getUntil(), appointmentObj2.getUntil());
         assertEqualsAndNotNull("note", appointmentObj1.getNote(), appointmentObj2.getNote());
         assertEqualsAndNotNull("categories", appointmentObj1.getCategories(), appointmentObj2.getCategories());
         
@@ -158,7 +161,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentobject;
     }
     
-    public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, TimeZone userTimeZone, String host, String session) throws Exception {
+    public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, TimeZone userTimeZone, String host, String session) throws Exception, OXConflictException {
         int objectId = 0;
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -194,7 +197,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
         
         if (data.has("conflicts")) {
-            fail("conflicts found!");
+            throw new OXConflictException("conflicts found!");
         }
         
         return objectId;
@@ -233,7 +236,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         
         JSONObject data = (JSONObject)response.getData();
         if (data.has("conflicts")) {
-            fail("conflicts found!");
+            throw new OXConflictException("conflicts found!");
         }
     }
     
