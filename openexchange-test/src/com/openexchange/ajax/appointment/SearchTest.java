@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class SearchTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(SearchTest.class);
 	
 	public SearchTest(String name) {
 		super(name);

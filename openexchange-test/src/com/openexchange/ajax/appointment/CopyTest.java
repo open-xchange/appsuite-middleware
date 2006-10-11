@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 public class CopyTest extends AppointmentTest {
 	
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(CopyTest.class);
 	
 	public CopyTest(String name) {
 		super(name);

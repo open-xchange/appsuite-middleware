@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class HasTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(HasTest.class);
 	
 	public HasTest(String name) {
 		super(name);

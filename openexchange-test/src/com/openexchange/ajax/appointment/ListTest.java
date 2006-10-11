@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class ListTest extends AppointmentTest {
 	
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(ListTest.class);
 	
 	public ListTest(String name) {
 		super(name);
