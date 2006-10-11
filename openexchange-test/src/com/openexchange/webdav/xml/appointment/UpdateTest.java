@@ -1,0 +1,65 @@
+package com.openexchange.webdav.xml.appointment;
+
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.GroupUserTest;
+import java.util.Date;
+
+public class UpdateTest extends AppointmentTest {
+	
+	public void testUpdateAppointment() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		appointmentObj = createAppointmentObject("testUpdateAppointment2");
+		appointmentObj.setLocation(null);
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		
+		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void testUpdateAppointmentWithParticipants() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+		
+		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("contact array size is not > 0", contactArray.length > 0);
+		int userParticipantId = contactArray[0].getInternalUserId();
+		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("group array size is not > 0", groupArray.length > 0);
+		int groupParticipantId = groupArray[0].getIdentifier();
+		Resource[] resourceArray = GroupUserTest.searchResource(webCon, resourceParticipant, new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("resource array size is not > 0", resourceArray.length > 0);
+		int resourceParticipantId = resourceArray[0].getIdentifier();
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userId);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId);
+		participants[2] = new GroupParticipant();
+		participants[2].setIdentifier(groupParticipantId);
+		participants[3] = new ResourceParticipant();
+		participants[3].setIdentifier(resourceParticipantId);
+		
+		appointmentObj.setParticipants(participants);
+		
+		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+
+	}
+}
+
