@@ -8,5 +8,9 @@ public class UpdateTest extends AttachmentTest {
 		fail("not implemented!");
 	}
 	
+	public void testDummy() throws Exception {
+		
+	}
+	
 }
 
