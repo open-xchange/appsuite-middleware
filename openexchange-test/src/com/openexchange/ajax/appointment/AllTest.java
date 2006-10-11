@@ -18,14 +18,21 @@ public class AllTest extends AppointmentTest {
 		super.setUp();
 	}
 	
-	public void testAll() throws Exception {
-		
-		
+	public void testShowAppointmentsBetween() throws Exception {
 		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
 		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void _notestShowAllAppointmentWhereIAmParticipant() throws Exception {
+		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
+		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
+		
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
 	}
 }
