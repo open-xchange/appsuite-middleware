@@ -13,5 +13,9 @@ public class DeleteTest extends FolderTest {
 	 
 		deleteFolder(webCon, new int[] { objectId1, objectId2 }, PROTOCOL + hostName, login, password);
 	}
+	
+	public void testDummy() throws Exception {
+		
+	}
 }
 
