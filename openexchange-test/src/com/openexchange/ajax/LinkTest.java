@@ -71,7 +71,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
 		
-		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, PROTOCOL+getHostName(), getSessionId());
+		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, TimeZone.getDefault(), PROTOCOL+getHostName(), getSessionId());
 		
 		/*
 		 *  Now Build The Link Object
@@ -151,7 +151,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
 		
-		int oid2 =	AppointmentTest.insertAppointment(webCon, ao, PROTOCOL+host, session);
+		int oid2 =	AppointmentTest.insertAppointment(webCon, ao, TimeZone.getDefault(), PROTOCOL+host, session);
 		
 		int[] repo = {oid1,fid1,oid2,fid2};
 		
