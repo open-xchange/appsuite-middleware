@@ -251,12 +251,16 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		return folderObj;
 	}
+
+	public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) throws Exception {
+		return createPermission(entity, isGroup, fp, orp, owp, odp, true);
+	}
 	
-	private static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) throws Exception {
+	public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp, boolean isAdmin) throws Exception {
 		OCLPermission oclp = new OCLPermission();
 		oclp.setEntity(entity);
 		oclp.setGroupPermission(isGroup);
-		oclp.setFolderAdmin(true);
+		oclp.setFolderAdmin(isAdmin);
 		oclp.setFolderPermission(fp);
 		oclp.setReadObjectPermission(orp);
 		oclp.setWriteObjectPermission(owp);
