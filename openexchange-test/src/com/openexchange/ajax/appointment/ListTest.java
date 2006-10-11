@@ -34,20 +34,20 @@ public class ListTest extends AppointmentTest {
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testList() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
-		int id1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
-		int id2 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
-		int id3 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { { id1, appointmentFolderId }, { id2, appointmentFolderId }, { id3, appointmentFolderId } };
 		
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 3, appointmentArray.length);
 		
@@ -58,9 +58,9 @@ public class ListTest extends AppointmentTest {
 	
 	public void testGet() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testGet");
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
@@ -87,9 +87,9 @@ public class ListTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		
@@ -126,9 +126,9 @@ public class ListTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -153,7 +153,7 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setLocation("Location");
 		appointmentObj.setShownAs(AppointmentObject.FREE);
@@ -181,9 +181,9 @@ public class ListTest extends AppointmentTest {
 		
 		appointmentObj.removeParentFolderID();
 		
-		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -232,11 +232,11 @@ public class ListTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 		
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
 		
-		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, PROTOCOL + getHostName(), getSessionId());
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, APPOINTMENT_FIELDS, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("check response array", 1, appointmentArray.length);
 		

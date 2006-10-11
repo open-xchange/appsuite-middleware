@@ -27,7 +27,7 @@ public class UpdateTest extends AppointmentTest {
 
 	public void testUpdateAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
@@ -35,13 +35,13 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.removeParentFolderID();
 		
-		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testUpdateAppointmentWithParticipant() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setFullTime(true);
@@ -66,7 +66,7 @@ public class UpdateTest extends AppointmentTest {
 		
 		appointmentObj.removeParentFolderID();
 		
-		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}	
 }

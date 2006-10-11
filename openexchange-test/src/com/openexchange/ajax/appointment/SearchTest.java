@@ -39,7 +39,7 @@ public class SearchTest extends AppointmentTest {
         appointmentObj.setEndDate(new Date(endTime));
         appointmentObj.setShownAs(AppointmentObject.FREE);
         appointmentObj.setParentFolderID(appointmentFolderId);
-        int objectId1 = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSessionId());
+        int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
         String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
         String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
