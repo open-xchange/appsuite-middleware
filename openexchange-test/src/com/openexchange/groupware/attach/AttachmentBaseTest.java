@@ -470,10 +470,11 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		}
 		clean.clear();
 		
-		super.tearDown();
-		
 		attachmentBase.commit();
 		attachmentBase.finish();
+	
+		super.tearDown();
+		
 	}
 
 	public Mode getMode(){
