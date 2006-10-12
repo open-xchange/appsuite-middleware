@@ -10,10 +10,11 @@ public class ListTest extends AppointmentTest {
 		Date modified = new Date();
 		
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithModified");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
-		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", appointmentArray.length >= 2);
 		
@@ -26,13 +27,14 @@ public class ListTest extends AppointmentTest {
 		Date modified = new Date();
 		
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithDelete");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
 		int[][] objectIdAndFolderId = { { objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 		
-		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "DELETED", PROTOCOL + hostName, login, password);
+		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 
 		assertTrue("wrong response array length (length=" + appointmentArray.length + ")", appointmentArray.length >= 2);
 	}
@@ -61,10 +63,11 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setLabel(2);
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
-		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertEquals("wrong response array length", 1, appointmentArray.length);
 		

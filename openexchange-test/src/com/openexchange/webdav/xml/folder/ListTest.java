@@ -14,7 +14,7 @@ public class ListTest extends FolderTest {
 		folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
 		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 	 
-		FolderObject[] folderArray = listFolder(webCon, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
 	 
 		assertTrue("check response", folderArray.length == 2);
 	 }
@@ -31,7 +31,7 @@ public class ListTest extends FolderTest {
 	 
 		int[] failed = deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
 	 
-		FolderObject[] folderArray = listFolder(webCon, modified, "DELETED", PROTOCOL + hostName, login, password);
+		FolderObject[] folderArray = listFolder(webCon, modified, false, true, PROTOCOL + hostName, login, password);
 	 
 		assertTrue("check response", folderArray.length == 2);
 	}
