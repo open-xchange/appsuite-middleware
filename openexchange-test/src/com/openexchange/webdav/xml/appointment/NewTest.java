@@ -14,6 +14,7 @@ public class NewTest extends AppointmentTest {
 	
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
@@ -21,6 +22,7 @@ public class NewTest extends AppointmentTest {
 
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
+		appointmentObj.setIgnoreConflicts(true);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("contact array size is not > 0", contactArray.length > 0);
@@ -46,6 +48,7 @@ public class NewTest extends AppointmentTest {
 	
 	public void testNewAppointmentWithUsers() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithUsers");
+		appointmentObj.setIgnoreConflicts(true);
 		
 		UserParticipant[] users = new UserParticipant[1];
 		users[0] = new UserParticipant();
