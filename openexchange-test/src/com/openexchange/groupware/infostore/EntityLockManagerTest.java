@@ -9,7 +9,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
+import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
+import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
@@ -61,7 +63,7 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	public void testFindLocks() throws Exception {
-		int lockId = lockManager.lock(entity ,EntityLockManager.INFINITE, EntityLockManager.Scope.EXCLUSIVE, EntityLockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
 		clean.add(lockId);
 		
 		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
@@ -70,12 +72,12 @@ public class EntityLockManagerTest extends TestCase {
 		assertEquals(lockId, lock.getId());
 		assertEquals(user.getId(), lock.getOwner());
 		assertTrue(Long.MAX_VALUE-lock.getTimeout()-System.currentTimeMillis()<1000);
-		assertEquals(EntityLockManager.Scope.EXCLUSIVE, lock.getScope());
-		assertEquals(EntityLockManager.Type.WRITE, lock.getType());
+		assertEquals(LockManager.Scope.EXCLUSIVE, lock.getScope());
+		assertEquals(LockManager.Type.WRITE, lock.getType());
 	}
 	
 	public void testUnlock() throws Exception {
-		int lockId = lockManager.lock(entity ,EntityLockManager.INFINITE, EntityLockManager.Scope.EXCLUSIVE, EntityLockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
 		clean.add(lockId);
 		
 		lockManager.unlock(lockId, ctx, user, userConfig);
@@ -86,7 +88,7 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	public void testTimeout() throws Exception {
-		int lockId = lockManager.lock(entity ,-23, EntityLockManager.Scope.EXCLUSIVE, EntityLockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
 		clean.add(lockId);
 		
 		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
