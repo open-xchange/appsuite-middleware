@@ -102,13 +102,12 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		
 		int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant2, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-		int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userId);
-		participants[1] = new GroupParticipant();
-		participants[1].setIdentifier(groupParticipantId);
+		participants[1] = new UserParticipant();
+		participants[1].setIdentifier(userParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
