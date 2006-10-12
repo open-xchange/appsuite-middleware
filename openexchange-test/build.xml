@@ -81,65 +81,8 @@
 			<pathelement location="openexchange-test.jar"/>
     	</classpath>
     	
-    	<!-- Failling Test -->
-    	
-    	<!-- test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}"/-->
+    	<test name="com.openexchange.test.CCTests" todir="${test.xml.dir}" />
 		
-		<!-- AJAX Interface -->
-	    <test name="com.openexchange.ajax.LoginTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.TasksTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.ReminderTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.infostore.InfostoreAJAXSuite" todir="${test.xml.dir}"/>
-		<test name="com.openexchange.ajax.ConfigMenuTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.contact.ContactAJAXSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.appointment.AppointmentAJAXSuite" todir="${test.xml.dir}"/>
-		<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.MultipleTest" todir="${test.xml.dir}" />
-		<!-- AJAX Attachment Interface -->
-		<test name="com.openexchange.ajax.attach.SimpleAttachmentTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.attach.TaskAttachmentTest" todir="${test.xml.dir}" />
-
-		<!-- Webdav Interface -->
-		<test name="com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.xml.contact.ContactWebdavSuite" todir="${test.xml.dir}" />	
-		<test name="com.openexchange.webdav.xml.task.TaskWebdavSuite" todir="${test.xml.dir}" />	
-		<test name="com.openexchange.webdav.xml.folder.FolderWebdavSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.client.SmokeTest" todir="${test.xml.dir}" />
-				
-		
-		<!-- Server Internals -->
-		<test name="com.openexchange.ajax.infostore.InfostoreParserTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.infostore.InfostoreWriterTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.infostore.JSONSimpleRequestTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.attach.AttachmentParserTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.ajax.attach.AttachmentWriterTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.protocol.ProtocolTestSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.action.ActionTestSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.xml.writer.WriterSuite" todir="${test.xml.dir}" />
-		<test name="com.openexchange.webdav.action.IfHeaderParserTest" todir="${test.xml.dir}" />
-		
-						
-		<test name="com.openexchange.groupware.IDGeneratorTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.sessiond.SessiondTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.CalendarTest" todir="${test.xml.dir}" />
-	    <test name="com.openexchange.tools.file.FileStorageTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.tools.file.QuotaFileStorageTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.attach.AttachmentBaseTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.infostore.PropertyStoreTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.infostore.EntityLockManagerTest" todir="${test.xml.dir}" />
-				
-		<test name="com.openexchange.i18n.CompiledLineParserTemplateTest" todir="${test.xml.dir}" />
-		<test name="com.openexchange.groupware.notify.ParticipantNotifyTest" todir="${test.xml.dir}" />
-		<!-- test name="com.openexchange.groupware.reminder.ReminderTest" todir="${test.xml.dir}" /-->
-				
-		
-		<!--test name="com.openexchange.cruisecontrol.FaillingTest" todir="${test.xml.dir}" /-->
-
 		<formatter type="brief" usefile="false" /> 
 		<formatter type="xml" /> 
 		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />

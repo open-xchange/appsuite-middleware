@@ -40,6 +40,7 @@ public class CCTests {
 		tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
+		tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
 		
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
@@ -48,6 +49,7 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
 		
