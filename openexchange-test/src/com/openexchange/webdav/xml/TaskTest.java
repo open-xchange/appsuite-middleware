@@ -311,7 +311,11 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
-	public static Task[] listTask(WebConversation webCon, int inFolder, Date modified, String objectMode, String host, String login, String password) throws Exception {
+	public static Task[] listTask(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		if (!changed && !deleted) {
+			return new Task[] { };
+		}
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
@@ -322,10 +326,20 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		eFolderId.addContent(String.valueOf(inFolder));
 		eLastSync.addContent(String.valueOf(modified.getTime()));
 		
-		if (objectMode != null) {
-			eObjectmode.addContent(objectMode);
-			eProp.addContent(eObjectmode);
+		StringBuffer objectMode = new StringBuffer();
+		
+		if (changed) {
+			objectMode.append("NEW_AND_MODIFIED,");
 		}
+		
+		if (deleted) {
+			objectMode.append("DELETED,");
+		}
+		
+		objectMode.delete(objectMode.length()-1, objectMode.length());
+		
+		eObjectmode.addContent(objectMode.toString());
+		eProp.addContent(eObjectmode);
 		
 		ePropfind.addContent(eProp);
 		eProp.addContent(eFolderId);

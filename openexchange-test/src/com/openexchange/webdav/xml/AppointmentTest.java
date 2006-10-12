@@ -208,6 +208,10 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
+	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, Date[] deleteException, String host, String login, String password) throws Exception {
+		throw new Exception("not supported yet!");
+	}
+	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
 		Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -329,7 +333,11 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
-	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, Date modified, String objectMode, String host, String login, String password) throws Exception {
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		if (!changed && !deleted) {
+			return new AppointmentObject[] { };
+		}
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
@@ -340,10 +348,20 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		eFolderId.addContent(String.valueOf(inFolder));
 		eLastSync.addContent(String.valueOf(modified.getTime()));
 		
-		if (objectMode != null) {
-			eObjectmode.addContent(objectMode);
-			eProp.addContent(eObjectmode);
+		StringBuffer objectMode = new StringBuffer();
+		
+		if (changed) {
+			objectMode.append("NEW_AND_MODIFIED,");
 		}
+		
+		if (deleted) {
+			objectMode.append("DELETED,");
+		}
+		
+		objectMode.delete(objectMode.length()-1, objectMode.length());
+		
+		eObjectmode.addContent(objectMode.toString());
+		eProp.addContent(eObjectmode);
 		
 		ePropfind.addContent(eProp);
 		eProp.addContent(eFolderId);

@@ -250,7 +250,11 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return failed;
 	}
 	
-	public static FolderObject[] listFolder(WebConversation webCon, Date modified, String objectMode, String host, String login, String password) throws Exception {
+	public static FolderObject[] listFolder(WebConversation webCon, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		if (!changed && !deleted) {
+			return new FolderObject[] { };
+		}
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
@@ -259,10 +263,20 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		eLastSync.addContent(String.valueOf(modified.getTime()));
 		
-		if (objectMode != null) {
-			eObjectmode.addContent(objectMode);
-			eProp.addContent(eObjectmode);
+		StringBuffer objectMode = new StringBuffer();
+		
+		if (changed) {
+			objectMode.append("NEW_AND_MODIFIED,");
 		}
+		
+		if (deleted) {
+			objectMode.append("DELETED,");
+		}
+		
+		objectMode.delete(objectMode.length()-1, objectMode.length());
+		
+		eObjectmode.addContent(objectMode.toString());
+		eProp.addContent(eObjectmode);
 		
 		ePropfind.addContent(eProp);
 		eProp.addContent(eLastSync);
@@ -361,7 +375,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	
 	
 	public static FolderObject getAppointmentDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
-		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
 		int userId = contactArray[0].getInternalUserId();
@@ -377,7 +391,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject getContactDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
-		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
 		int userId = contactArray[0].getInternalUserId();
@@ -393,7 +407,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject getTaskDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
-		FolderObject[] folderArray = listFolder(webCon, new Date(0), null, host, login, password);
+		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
 		int userId = contactArray[0].getInternalUserId();
