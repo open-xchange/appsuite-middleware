@@ -126,7 +126,7 @@ public abstract class CalendarParser extends CommonParser {
 			calendarobject.setNote(getValue(eProp.getChild(CalendarFields.NOTE, XmlServlet.NS)));
 		} 
 		
-		parseElementParticipants(calendarobject, eProp.getChild(CalendarFields.PARTICIPANTS));
+		parseElementParticipants(calendarobject, eProp.getChild(CalendarFields.PARTICIPANTS, XmlServlet.NS));
 		
 		parseElementCommon(calendarobject, eProp);
 	}
@@ -189,7 +189,7 @@ public abstract class CalendarParser extends CommonParser {
 	
 	private void parseElementUser(Element e, Participants participants) throws Exception {
 		UserParticipant userparticipant = new UserParticipant();
-		String confirm = e.getAttributeValue(XmlServlet.NAMESPACE, "confirm");
+		String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
 		 
 		if (confirm != null) {
 			if (confirm.equals("accept")) {
