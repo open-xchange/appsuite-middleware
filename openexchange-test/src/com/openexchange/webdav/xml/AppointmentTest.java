@@ -84,6 +84,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		appointmentFolderId = folderObj.getObjectID();	
+		userId = folderObj.getCreatedBy();
 	}
 	
 	protected void compareObject(AppointmentObject appointmentObj1, AppointmentObject appointmentObj2) throws Exception {
@@ -126,7 +127,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		Element eProp = new Element("prop", webdav);
 		
 		AppointmentWriter appointmentWriter = new AppointmentWriter();
-		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false, true);
+		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -172,7 +173,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		Element eProp = new Element("prop", webdav);
 		
 		AppointmentWriter appointmentWriter = new AppointmentWriter();
-		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false, true);
+		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -286,7 +287,21 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		eProp.addContent(eMethod);
 		
 		Element eConfirm = new Element("confirm", XmlServlet.NS);
-		eConfirm.addContent("decline");
+		switch (confirm) {
+			case AppointmentObject.ACCEPT:
+				eConfirm.addContent("accept");
+				break;
+			case AppointmentObject.DECLINE:
+				eConfirm.addContent("decline");
+				break;
+			case AppointmentObject.NONE:
+				eConfirm.addContent("none");
+				break;
+			default:
+				throw new Exception("invalid confirm value: " + confirm);
+		} 
+			
+			
 		eProp.addContent(eConfirm);
 		
 		Document doc = addProp2Document(eProp);
