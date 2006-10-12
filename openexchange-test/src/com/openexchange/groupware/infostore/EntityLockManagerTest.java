@@ -31,12 +31,16 @@ public class EntityLockManagerTest extends TestCase {
 	
 	public void setUp() throws Exception {
 		Init.initDB();
-		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId("thorben")); //FIXME
+		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId(getUsername())); //FIXME
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
 		lockManager.startTransaction();
 		
 	}
 	
+	private String getUsername() {
+		return Init.getAJAXProperty("login");
+	}
+
 	public void tearDown() throws Exception {
 		for(int id : clean) {
 			lockManager.unlock(id, ctx, user, userConfig);
