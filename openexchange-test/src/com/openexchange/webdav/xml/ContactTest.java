@@ -84,7 +84,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("fax home is not equals", contactObj1.getFaxHome(), contactObj2.getFaxHome());
 		assertEqualsAndNotNull("fax other is not equals", contactObj1.getFaxOther(), contactObj2.getFaxOther());
 		// FIXME Image must be loaded in another way from server.
-        // assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
+		// assertEqualsAndNotNull("image1 is not equals", contactObj1.getImage1(), contactObj2.getImage1());
 		assertEqualsAndNotNull("info is not equals", contactObj1.getInfo(), contactObj2.getInfo());
 		assertEqualsAndNotNull("instant messenger1 is not equals", contactObj1.getInstantMessenger1(), contactObj2.getInstantMessenger1());
 		assertEqualsAndNotNull("instant messenger2 is not equals", contactObj1.getInstantMessenger2(), contactObj2.getInstantMessenger2());
@@ -347,7 +347,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		contactObj.setObjectID(objectId);
 		contactObj.setLastModified(new Date());
-
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
@@ -357,7 +357,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		Element eInFolder = new Element("infolder", XmlServlet.NS);
 		eInFolder.addContent(String.valueOf(inFolder));
 		eProp.addContent(eInFolder);
-
+		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
@@ -454,7 +454,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return failed;
 	}
 	
-	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, String objectMode, String host, String login, String password) throws Exception {
+	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		if (!changed && !deleted) {
+			return new ContactObject[] { };
+		}
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
@@ -465,10 +469,20 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		eFolderId.addContent(String.valueOf(inFolder));
 		eLastSync.addContent(String.valueOf(modified.getTime()));
 		
-		if (objectMode != null) {
-			eObjectmode.addContent(objectMode);
-			eProp.addContent(eObjectmode);
+		StringBuffer objectMode = new StringBuffer();
+		
+		if (changed) {
+			objectMode.append("NEW_AND_MODIFIED,");
 		}
+		
+		if (deleted) {
+			objectMode.append("DELETED,");
+		}
+		
+		objectMode.delete(objectMode.length()-1, objectMode.length());
+		
+		eObjectmode.addContent(objectMode.toString());
+		eProp.addContent(eObjectmode);
 		
 		ePropfind.addContent(eProp);
 		eProp.addContent(eFolderId);
