@@ -208,14 +208,10 @@ public final class Init {
 	}
 
     public synchronized static void stopDB() throws Exception {
-        // TODO This doesn't work because parallel execution of tests will cause
-        // invalid dbpool state.
-        /*
         if (dbInitialized) {
             dbInitialized = false;
             DBPool.releasePool();
         }
-        */
     }
     
 	public static void initSessiond() throws Exception {
