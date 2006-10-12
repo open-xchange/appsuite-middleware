@@ -13,7 +13,7 @@ public class ListTest extends ContactTest {
 		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
-		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", contactArray.length >= 2);
 	}
@@ -29,7 +29,7 @@ public class ListTest extends ContactTest {
 		
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 		
-		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, "DELETED", PROTOCOL + hostName, login, password);
+		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 2);
 	}
@@ -48,7 +48,7 @@ public class ListTest extends ContactTest {
 		
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
-		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, "NEW_AND_MODIFIED", PROTOCOL + hostName, login, password);
+		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertEquals("wrong response array length", 1, appointmentArray.length);
 		
