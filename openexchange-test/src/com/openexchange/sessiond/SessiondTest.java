@@ -75,6 +75,7 @@ public class SessiondTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         if (isInit) {
+            isInit = false;
             Init.stopDB();
         }
         super.tearDown();
