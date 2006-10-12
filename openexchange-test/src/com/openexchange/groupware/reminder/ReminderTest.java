@@ -47,7 +47,18 @@ public class ReminderTest extends TestCase {
 		reminderSql = new ReminderHandler(sessionObj);
 	}
 	
-	public void testInsert() throws Exception {
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        if (isInit) {
+            Init.stopDB();
+        }
+        super.tearDown();
+    }
+
+    public void testInsert() throws Exception {
 		int targetId = IDGenerator.getId(sessionObj.getContext(), Types.REMINDER);
 		ReminderObject reminderObj = createReminderObject(targetId, Types.APPOINTMENT);
 		reminderObj.setDate(new Date(System.currentTimeMillis()-3600000));

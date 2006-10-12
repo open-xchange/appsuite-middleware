@@ -60,6 +60,10 @@ public class FolderTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
+        if (init) {
+            init = false;
+            Init.stopDB();
+        }
 		super.tearDown();
 	}
 	

@@ -31,6 +31,7 @@ public class PropertyStoreTest extends TestCase{
 	
 	
 	public void setUp() throws Exception {
+        super.setUp();
 		Init.initDB();
 		this.propertyStore = new PropertyStoreImpl(new DBPoolProvider(), "infostore_property");
 		
@@ -60,6 +61,8 @@ public class PropertyStoreTest extends TestCase{
 		clean.clear();
 		propertyStore.commit();
 		propertyStore.finish();
+        Init.stopDB();
+        super.tearDown();
 	}
 	
 	public void testLoadSpecificForOneEntity() throws Exception {

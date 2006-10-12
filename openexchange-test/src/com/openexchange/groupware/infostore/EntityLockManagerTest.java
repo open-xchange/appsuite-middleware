@@ -30,6 +30,7 @@ public class EntityLockManagerTest extends TestCase {
 	private UserConfiguration userConfig = null;
 	
 	public void setUp() throws Exception {
+        super.setUp();
 		Init.initDB();
 		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId(getUsername())); //FIXME
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
@@ -47,6 +48,8 @@ public class EntityLockManagerTest extends TestCase {
 		}
 		lockManager.commit();
 		lockManager.finish();
+        Init.stopDB();
+        super.tearDown();
 	}
 	
 	public void testExclusiveLock() throws Exception {

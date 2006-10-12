@@ -17,6 +17,7 @@ public class SimpleDBPoolTest extends TestCase {
     }
     
     protected void tearDown() throws Exception {
+        Init.stopDB();
         super.tearDown();
     }
     

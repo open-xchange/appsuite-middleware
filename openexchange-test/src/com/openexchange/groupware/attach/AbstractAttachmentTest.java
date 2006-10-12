@@ -7,12 +7,19 @@ import junit.framework.TestCase;
 public abstract class AbstractAttachmentTest extends TestCase {
 	private Mode mode;
 
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 		  super.setUp();
 		  mode().setUp();
 	}
 	
-	protected Mode mode(){
+    @Override
+    protected void tearDown() throws Exception {
+        mode().tearDown();
+        super.tearDown();
+    }
+
+    protected Mode mode(){
 		if(mode==null)
 			mode = getMode();
 		return mode;
@@ -22,19 +29,23 @@ public abstract class AbstractAttachmentTest extends TestCase {
 	
 	public static interface Mode {
 		public void setUp() throws Exception;
+        public void tearDown() throws Exception;
 	}
 	
 	
 	public static class INTEGRATION implements Mode {
-
 		public void setUp() throws Exception {
 	        Init.initDB();
 		}
-		
+        public void tearDown() throws Exception {
+            Init.stopDB();
+        }
 	}
 	
 	public static class ISOLATION implements Mode {
 		public void setUp() throws Exception {
 	    }
+        public void tearDown() throws Exception {
+        }
 	}
 }

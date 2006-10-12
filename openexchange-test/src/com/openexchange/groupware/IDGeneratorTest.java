@@ -24,6 +24,10 @@ public class IDGeneratorTest extends TestCase {
      */
     private static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
 
+    private static final String TEST_TABLE = "CREATE TABLE id_generator_test "
+        + "(cid INT4 UNSIGNED NOT NULL, id INT4 UNSIGNED NOT NULL, "
+        + "PRIMARY KEY (cid,id))";
+
     private static final int TYPE = Types.TASK;
 
     private static final Random rand = new Random(System.currentTimeMillis());
@@ -36,6 +40,10 @@ public class IDGeneratorTest extends TestCase {
     
     private transient Context context;
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         Init.initDB();
@@ -43,15 +51,25 @@ public class IDGeneratorTest extends TestCase {
         context = cs.getContext(cs.getContextId("defaultcontext"));
     }
 
-    /*
-     * Test method for 'com.openexchange.groupware.IDGenerator.getId(Context, int)'
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        Init.stopDB();
+        super.tearDown();
+    }
+
+    /**
+     * Test method for 'com.openexchange.groupware.IDGenerator.getId(Context,
+     * int)'
      */
     public void testGetId() throws Throwable {
         Connection con = DBPool.pickupWriteable(context);
         try {
             final Statement stmt = con.createStatement();
             try {
-                stmt.execute("CREATE TABLE id_generator_test (cid INT4 UNSIGNED NOT NULL, id INT4 UNSIGNED NOT NULL, PRIMARY KEY (cid,id))");
+                stmt.execute(TEST_TABLE);
             } catch (SQLException e) {
                 LOG.fatal("Error while creating test table.", e);
                 fail("Error while creating test table.");

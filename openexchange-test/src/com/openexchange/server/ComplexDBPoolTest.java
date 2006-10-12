@@ -35,6 +35,7 @@ public class ComplexDBPoolTest extends TestCase {
     }
     
     protected void tearDown() throws Exception {
+        Init.stopDB();
         super.tearDown();
     }
     

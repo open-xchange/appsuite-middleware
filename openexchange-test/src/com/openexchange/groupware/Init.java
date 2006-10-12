@@ -199,7 +199,7 @@ public final class Init {
 		}
 	}
 
-	public static void initDB() {
+	public synchronized static void initDB() {
 		if (!dbInitialized) {
 			loadServerConf();
 			new DBPool(0, 0);
@@ -207,6 +207,17 @@ public final class Init {
 		}
 	}
 
+    public synchronized static void stopDB() throws Exception {
+        // TODO This doesn't work because parallel execution of tests will cause
+        // invalid dbpool state.
+        /*
+        if (dbInitialized) {
+            dbInitialized = false;
+            DBPool.releasePool();
+        }
+        */
+    }
+    
 	public static void initSessiond() throws Exception {
 		if (!sessiondInit) {
 			String propfile = ComfireConfig.properties

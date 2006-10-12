@@ -69,7 +69,18 @@ public class SessiondTest extends TestCase {
 		isInit = true;
 	}
 
-	public void testAddSession() throws Exception {
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        if (isInit) {
+            Init.stopDB();
+        }
+        super.tearDown();
+    }
+
+    public void testAddSession() throws Exception {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		sc.addSession(testUser1, password, "localhost");
 	}

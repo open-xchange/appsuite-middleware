@@ -60,6 +60,10 @@ public class CalendarTest extends TestCase {
     }
     
     protected void tearDown() throws Exception {
+        if (init) {
+            init = false;
+            Init.stopDB();
+        }
         super.tearDown();
     }
     
@@ -77,6 +81,7 @@ public class CalendarTest extends TestCase {
     public static int getUserId() throws Exception {
         if (!init) {
             Init.initDB();
+            init = true;
         }
         String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        
         return resolveUser(user);
