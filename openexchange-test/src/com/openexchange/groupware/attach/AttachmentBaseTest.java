@@ -21,6 +21,7 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
@@ -555,8 +556,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		}
 
 		public Context getContext() {
-			//return new ContextImpl(1);
-			return null;
+			return new ContextImpl(1);
 		}
 
 		public User getUser() {
