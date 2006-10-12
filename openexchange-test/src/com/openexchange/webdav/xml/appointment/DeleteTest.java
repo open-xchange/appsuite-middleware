@@ -10,6 +10,7 @@ public class DeleteTest extends AppointmentTest {
 	
 	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
@@ -39,6 +40,7 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
@@ -52,11 +54,10 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceDatePosition(new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis));
 		
-		int newObjectId = updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
-		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
+		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
-		loadAppointment = loadAppointment(webCon, newObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
-		compareObject(appointmentObj, loadAppointment);
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertEquals("delete exception is not equals", loadAppointment.getDeleteException(), "wsdsd");
 		
 		deleteAppointment(webCon, new int[][] { { objectId }, { appointmentFolderId } }, PROTOCOL + hostName, login, password);
 	}
