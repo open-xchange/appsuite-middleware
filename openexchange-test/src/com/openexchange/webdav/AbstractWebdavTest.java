@@ -25,10 +25,6 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected static final String propertyHost = "hostname";
 	
-	protected static final String propertyLogin = "login";
-	
-	protected static final String propertyPassword = "password";
-	
 	protected static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
 	
 	protected String hostName = "localhost";
@@ -36,6 +32,10 @@ public abstract class AbstractWebdavTest extends TestCase {
 	protected String login = null;
 	
 	protected String password = null;
+	
+	protected String secondlogin = null;
+	
+	protected String secondpassword = null;
 	
 	protected int userId = -1;
 	
@@ -49,6 +49,8 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected WebConversation webCon = null;
 	
+	protected WebConversation secondWebCon = null;
+	
 	public static final String AUTHORIZATION = "authorization";
 	
 	/**
@@ -57,11 +59,15 @@ public abstract class AbstractWebdavTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		webCon = new WebConversation();
+		secondWebCon = new WebConversation();
 		
 		webdavProps = Init.getWebdavProperties();
 		
 		login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
 		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
+
+		secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
+		secondpassword = AbstractConfigWrapper.parseProperty(webdavProps, "secondpassword", "");
 		
 		userId = GroupUserTest.searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		
@@ -79,8 +85,28 @@ public abstract class AbstractWebdavTest extends TestCase {
 	protected WebConversation getWebConversation() {
 		return webCon;
 	}
+
+	protected WebConversation getSecondWebConversation() {
+		return secondWebCon;
+	}
 	
 	protected String getHostName() {
 		return hostName;
+	}
+	
+	protected String getLogin() {
+		return login;
+	}
+
+	protected String getPassword() {
+		return password;
+	}
+
+	protected String getSecondLogin() {
+		return secondlogin;
+	}
+
+	protected String getSecondPassword() {
+		return secondpassword;
 	}
 }
