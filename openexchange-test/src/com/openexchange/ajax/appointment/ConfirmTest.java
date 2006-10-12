@@ -21,9 +21,12 @@ public class ConfirmTest extends AppointmentTest {
 		super.setUp();
 	}
 	
-    public void _notestConfirm() throws Exception {
+	public void testDummy() throws Exception {
+		
+	}
+	
+    public void testConfirm() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
-		final int secondFolderId = sharedFolderObject.getObjectID();
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
         AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
@@ -35,28 +38,24 @@ public class ConfirmTest extends AppointmentTest {
 		
 		appointmentObj.setParticipants(participants);
 
-        int objectId = insertAppointment(getSecondWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
+        int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
-        confirmAppointment(getWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSessionId());
+        confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondSessionId());
 		
-		AppointmentObject loadAppointment = loadAppointment(getSecondWebConversation(), objectId, secondFolderId, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
 		
 		UserParticipant[] users = loadAppointment.getUsers();
 		for (int a = 0; a < users.length; a++) {
-			if (users[a].getIdentifier() == userId) {
+			if (users[a].getIdentifier() == secondUserId) {
 				found = true;
 				assertEquals("wrong confirm status", AppointmentObject.ACCEPT, users[a].getConfirm());
 			}
 		}
 		
-		assertTrue("user participant with id " + userId + " not found", found);
+		assertTrue("user participant with id " + secondUserId + " not found", found);
 		
-        deleteAppointment(getSecondWebConversation(), objectId, secondFolderId, PROTOCOL + getHostName(), getSecondSessionId());
+        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
     }
-	
-	public void testDummy() throws Exception {
-		
-	}
 }
