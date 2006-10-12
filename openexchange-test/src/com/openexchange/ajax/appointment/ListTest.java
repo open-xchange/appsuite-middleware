@@ -46,6 +46,25 @@ public class ListTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
+	
+	public void _notestListWithNoEntries() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testList");
+		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		final int[][] objectIdAndFolderId = { };
+		
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		
+		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), objectIdAndFolderId, cols, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("check response array", 3, appointmentArray.length);
+		
+		deleteAppointment(getWebConversation(), id1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), id2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), id3, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
 
 	public void testListWithAllFields() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
