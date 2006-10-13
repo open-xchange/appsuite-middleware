@@ -75,7 +75,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     
     protected static long endTime = 0;
     
-    protected static final int dayInMillis = 86400000;
+    protected static final long dayInMillis = 86400000;
     
     protected String userParticipant2 = null;
     
