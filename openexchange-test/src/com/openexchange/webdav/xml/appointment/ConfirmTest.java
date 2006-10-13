@@ -17,7 +17,7 @@ public class ConfirmTest extends AppointmentTest {
 	}
 	
     public void testConfirm() throws Exception {
-		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getSecondPassword());
+		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
         AppointmentObject appointmentObj = createAppointmentObject("testConfirm");
@@ -32,7 +32,7 @@ public class ConfirmTest extends AppointmentTest {
 
         int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
         
-        confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getSecondPassword());
+        confirmAppointment(getSecondWebConversation(), objectId, AppointmentObject.ACCEPT, null, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		
