@@ -20,9 +20,8 @@ public class NewTest extends TaskTest {
 	public void testNewTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testNewTaskWithParticipants");
 		
-		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is not > 0", contactArray.length > 0);
-		int userParticipantId = contactArray[0].getInternalUserId();
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
 		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
@@ -41,9 +40,12 @@ public class NewTest extends TaskTest {
 	public void _notestNewTaskWithUsers() throws Exception {
 		Task taskObj = createTask("testNewTaskWithUsers");
 		
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
+		
 		UserParticipant[] users = new UserParticipant[1];
 		users[0] = new UserParticipant();
-		users[0].setIdentifier(userId);
+		users[0].setIdentifier(userParticipantId);
 		users[0].setConfirm(CalendarObject.ACCEPT);
 		
 		taskObj.setUsers(users);
