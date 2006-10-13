@@ -269,4 +269,11 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 			assertEquals(message, expect, value);
 		} 
 	}   
+	
+	public static String appendPrefix(String host) {
+		if (host.startsWith("http://")) {
+			return host;
+		}
+		return "http://" + host;
+	}
 }
