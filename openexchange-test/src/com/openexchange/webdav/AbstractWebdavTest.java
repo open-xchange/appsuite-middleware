@@ -104,6 +104,6 @@ public abstract class AbstractWebdavTest extends TestCase {
 	}
 
 	protected String getSecondLogin() {
-		return password;
+		return secondlogin;
 	}
 }
