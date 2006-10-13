@@ -23,7 +23,7 @@ import org.jdom.output.XMLOutputter;
 public class GroupUserTest extends AbstractWebdavXMLTest {
 	
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
-
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -31,7 +31,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public void testSearchUser() throws Exception {
 		searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
-
+	
 	public void testSearchGroup() throws Exception {
 		searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
@@ -74,10 +74,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		int status = httpclient.executeMethod(propFindMethod);
 		
-		assertEquals("check propfind response", 207, status);
-		
 		byte responseByte[] = propFindMethod.getResponseBody();
 		bais = new ByteArrayInputStream(responseByte);
+		
+		if (status != 207) {
+			fail("response code is not 207 response data: " + new String(responseByte));
+		}
+
 		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
 		
 		ContactObject[] contactArray = new ContactObject[response.length];
