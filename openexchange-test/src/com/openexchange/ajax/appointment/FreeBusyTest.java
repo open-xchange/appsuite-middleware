@@ -95,7 +95,7 @@ public class FreeBusyTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestUserParticipantStatusFree() throws Exception {
+	public void testUserParticipantStatusFree() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUserParticipantStatusFree");
 		appointmentObj.setStartDate(new Date(startTime));
