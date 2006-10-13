@@ -144,7 +144,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		}
 		
 		if (response[0].getStatus() != 200) {
