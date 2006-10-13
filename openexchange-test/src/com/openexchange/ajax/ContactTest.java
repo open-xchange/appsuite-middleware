@@ -469,6 +469,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static int insertContact(WebConversation webCon, ContactObject contactObj, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		int objectId = 0;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -533,6 +535,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		
@@ -590,6 +594,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static void deleteContact(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
@@ -613,6 +619,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
@@ -640,6 +648,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -668,6 +678,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int[][] objectIdAndFolderId, int[] cols, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -700,6 +712,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
@@ -726,6 +740,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static byte[] loadImage(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_IMAGE);
@@ -752,6 +768,8 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	
 	public static ContactObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
 		
 		final URLParameter parameter = new URLParameter();
@@ -781,6 +799,8 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
 		
 		final URLParameter parameter = new URLParameter();

@@ -299,6 +299,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertContact(WebConversation webCon, ContactObject contactObj, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		int objectId = 0;
 		
 		contactObj.removeObjectID();
@@ -346,6 +348,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		contactObj.setObjectID(objectId);
 		contactObj.setLastModified(new Date());
 		
@@ -391,6 +395,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteContact(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
@@ -456,6 +462,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		if (!changed && !deleted) {
 			return new ContactObject[] { };
 		}
@@ -529,6 +537,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		

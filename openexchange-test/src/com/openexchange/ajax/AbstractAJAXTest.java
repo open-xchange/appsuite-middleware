@@ -34,166 +34,166 @@ import junit.framework.TestCase;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAJAXTest extends TestCase {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AbstractAJAXTest.class);
-    
-    public static final String PROTOCOL = "http://";
-
-    private static final String HOSTNAME = "hostname";
-
-    protected static final String jsonTagData = "data";
-
-    protected static final String jsonTagTimestamp = "timestamp";
-    
-    protected static final String jsonTagError = "error";
-    
-    private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
-    
-    private String hostName = null;
-    
-    private WebConversation webConversation = null;
-
-    private WebConversation webConversation2 = null;
-
-    private String sessionId = null;
 	
-    private String sessionId2 = null;
+	/**
+	 * Logger.
+	 */
+	private static final Log LOG = LogFactory.getLog(AbstractAJAXTest.class);
+	
+	public static final String PROTOCOL = "http://";
+	
+	private static final String HOSTNAME = "hostname";
+	
+	protected static final String jsonTagData = "data";
+	
+	protected static final String jsonTagTimestamp = "timestamp";
+	
+	protected static final String jsonTagError = "error";
+	
+	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
+	
+	private String hostName = null;
+	
+	private WebConversation webConversation = null;
+	
+	private WebConversation webConversation2 = null;
+	
+	private String sessionId = null;
+	
+	private String sessionId2 = null;
 	
 	private String login = null;
 	
 	private String seconduser = null;
 	
 	private String password = null;
-
-    private Properties ajaxProps = null;
+	
+	private Properties ajaxProps = null;
 	
 	public AbstractAJAXTest(String name) {
 		super(name);
 	}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        logout();
-        super.tearDown();
-    }
-
-    protected String getAJAXProperty(final String key) {
-        return getAJAXProperties().getProperty(key);
-    }
-
-    protected Properties getAJAXProperties() {
-        if (null == ajaxProps) {
-            ajaxProps = Init.getAJAXProperties();
-        }
-        return ajaxProps;
-    }
-    
-    /**
-     * @return Returns the hostname.
-     */
-    public String getHostName() {
-        if (null == hostName) {
-            hostName = getAJAXProperty(HOSTNAME);
-        }
-        return hostName;
-    }
-
-    /**
-     * @return Returns the webConversation.
-     */
-    protected WebConversation getWebConversation() {
-        if (null == webConversation) {
-            webConversation = newWebConversation();
-        }
-        return webConversation;
-    }
-
-    /**
-     * @return Returns the webConversation.
-     */
-    protected WebConversation getSecondWebConversation() {
-        if (null == webConversation2) {
-            webConversation2 = newWebConversation();
-        }
-        return webConversation2;
-    }
-
-    /**
-     * Setup the web conversation here so tests are able to create additional if
-     * several users are needed for tests.
-     * @return a new web conversation.
-     */
-    protected WebConversation newWebConversation() {
-        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
-        return new WebConversation();
-    }
-
-    /**
-     * @return Returns the sessionId.
-     * @throws Exception if an error occurs while authenticating.
-     */
-    protected String getSessionId() throws Exception {
-        if (null == sessionId) {
-            sessionId = LoginTest.getSessionId(getWebConversation(),
-                getHostName(), getLogin(), getPassword());
-            assertNotNull("Can't get session id.", sessionId);
-        }
-        return sessionId;
-    }
-
-    protected String getSecondSessionId() throws Exception {
-        if(null == sessionId2) {
-            sessionId2 = LoginTest.getSessionId(getSecondWebConversation(),
-                    getHostName(), getSeconduser(), getPassword());
-            assertNotNull("Can't get session id for second user.",sessionId2);
-        }
-        return sessionId2;
-    }
-
-    /**
-     * Terminates the session on the server.
-     * @throws Exception if an error occurs.
-     */
-    protected void logout() throws Exception {
-        if (null != sessionId) {
-            LoginTest.logout(getWebConversation(), getHostName(),
-                getSessionId());
-            sessionId = null;
-            webConversation = null;
-        }
-        webConversation = null;
-        if (null != sessionId2) {
-            LoginTest.logout(getSecondWebConversation(), getHostName(),
-                getSecondSessionId());
-            sessionId2 = null;
-        }
-        webConversation2 = null;
-    }
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+			protected void tearDown() throws Exception {
+		logout();
+		super.tearDown();
+	}
+	
+	protected String getAJAXProperty(final String key) {
+		return getAJAXProperties().getProperty(key);
+	}
+	
+	protected Properties getAJAXProperties() {
+		if (null == ajaxProps) {
+			ajaxProps = Init.getAJAXProperties();
+		}
+		return ajaxProps;
+	}
+	
+	/**
+	 * @return Returns the hostname.
+	 */
+	public String getHostName() {
+		if (null == hostName) {
+			hostName = getAJAXProperty(HOSTNAME);
+		}
+		return hostName;
+	}
+	
+	/**
+	 * @return Returns the webConversation.
+	 */
+	protected WebConversation getWebConversation() {
+		if (null == webConversation) {
+			webConversation = newWebConversation();
+		}
+		return webConversation;
+	}
+	
+	/**
+	 * @return Returns the webConversation.
+	 */
+	protected WebConversation getSecondWebConversation() {
+		if (null == webConversation2) {
+			webConversation2 = newWebConversation();
+		}
+		return webConversation2;
+	}
+	
+	/**
+	 * Setup the web conversation here so tests are able to create additional if
+	 * several users are needed for tests.
+	 * @return a new web conversation.
+	 */
+	protected WebConversation newWebConversation() {
+		HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+		return new WebConversation();
+	}
+	
+	/**
+	 * @return Returns the sessionId.
+	 * @throws Exception if an error occurs while authenticating.
+	 */
+	protected String getSessionId() throws Exception {
+		if (null == sessionId) {
+			sessionId = LoginTest.getSessionId(getWebConversation(),
+					getHostName(), getLogin(), getPassword());
+			assertNotNull("Can't get session id.", sessionId);
+		}
+		return sessionId;
+	}
+	
+	protected String getSecondSessionId() throws Exception {
+		if(null == sessionId2) {
+			sessionId2 = LoginTest.getSessionId(getSecondWebConversation(),
+					getHostName(), getSeconduser(), getPassword());
+			assertNotNull("Can't get session id for second user.",sessionId2);
+		}
+		return sessionId2;
+	}
+	
+	/**
+	 * Terminates the session on the server.
+	 * @throws Exception if an error occurs.
+	 */
+	protected void logout() throws Exception {
+		if (null != sessionId) {
+			LoginTest.logout(getWebConversation(), getHostName(),
+					getSessionId());
+			sessionId = null;
+			webConversation = null;
+		}
+		webConversation = null;
+		if (null != sessionId2) {
+			LoginTest.logout(getSecondWebConversation(), getHostName(),
+					getSecondSessionId());
+			sessionId2 = null;
+		}
+		webConversation2 = null;
+	}
+	
 	public String getLogin() {
-        if (null == login) {
-            login = getAJAXProperty("login");
-        }
+		if (null == login) {
+			login = getAJAXProperty("login");
+		}
 		return login;
 	}
-
+	
 	public String getPassword() {
-        if (null == password) {
-            password = getAJAXProperty("password");
-        }
+		if (null == password) {
+			password = getAJAXProperty("password");
+		}
 		return password;
 	}
-
+	
 	public String getSeconduser() {
-        if (null == seconduser) {
-            seconduser = getAJAXProperty("seconduser");
-        }
+		if (null == seconduser) {
+			seconduser = getAJAXProperty("seconduser");
+		}
 		return seconduser;
 	}
 	
@@ -267,7 +267,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 		if("".equals(res.trim()))
 			return null;
 		return Response.parse(res);
-			
+		
 	}
 	
 	protected Response putT(WebConversation webConv, String url, String data) throws MalformedURLException, JSONException, IOException, SAXException  {
@@ -285,8 +285,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect.getTime(), value.getTime());
-		} 
-	} 
+		}
+	}
 	
 	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
 		if (expect != null) {
@@ -295,15 +295,15 @@ public abstract class AbstractAJAXTest extends TestCase {
 			for (int a = 0; a < expect.length; a++) {
 				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
 			}
-		} 
-	} 
+		}
+	}
 	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect, value);
-		} 
-	} 
+		}
+	}
 	
 	public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
 		int i = 0;
@@ -334,5 +334,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 		
 		return m;
 		
+	}
+	
+	public static String appendPrefix(String host) {
+		if (host.startsWith("http://")) {
+			return host;
+		}
+		return "http://" + host;
 	}
 }

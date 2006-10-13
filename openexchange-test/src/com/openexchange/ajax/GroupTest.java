@@ -52,6 +52,8 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Group[] searchGroup(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -88,6 +90,8 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Group[] listGroup(WebConversation webCon, int[] id, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -128,6 +132,8 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Group loadGroup(WebConversation webCon, int groupId, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);

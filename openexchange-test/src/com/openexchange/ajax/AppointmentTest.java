@@ -162,7 +162,9 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentobject;
     }
     
-    public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, TimeZone userTimeZone, String host, String session) throws Exception, OXConflictException {
+    public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, TimeZone userTimeZone, String host, String session) throws Exception, OXConflictException {		
+		host = appendPrefix(host);
+		
         int objectId = 0;
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -205,6 +207,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);
         JSONWriter jsonWriter = new JSONWriter(pw);
@@ -248,6 +252,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static void deleteAppointment(WebConversation webCon, int id, int inFolder, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
@@ -271,6 +277,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 	
     public static void deleteAppointment(WebConversation webCon, int id, int inFolder, int recurrencePosition, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
@@ -295,6 +303,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static void confirmAppointment(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM);
@@ -317,6 +327,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
@@ -345,6 +357,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] listAppointment(WebConversation webCon, int[][] objectIdAndFolderId, int[] cols, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -377,6 +391,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject loadAppointment(WebConversation webCon, int objectId, int inFolder, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
@@ -405,6 +421,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
@@ -432,6 +450,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
@@ -459,6 +479,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] searchAppointment(WebConversation webCon, String searchpattern, int inFolder, int[] cols, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -487,6 +509,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static boolean[] hasAppointments(WebConversation webCon, Date start, Date end, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_HAS);
@@ -518,6 +542,8 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     public static AppointmentObject[] getFreeBusy(WebConversation webCon, int particiantId, int type, Date start, Date end, TimeZone userTimeZone, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ID, particiantId);

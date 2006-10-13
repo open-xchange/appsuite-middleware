@@ -47,6 +47,8 @@ public class ResourceTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Resource[] searchResource(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -83,6 +85,8 @@ public class ResourceTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Resource[] listResource(WebConversation webCon, int[] id, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
         final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
@@ -123,6 +127,8 @@ public class ResourceTest extends AbstractAJAXTest {
 	}
 	
 	public static com.openexchange.groupware.ldap.Resource loadResource(WebConversation webCon, int groupId, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);

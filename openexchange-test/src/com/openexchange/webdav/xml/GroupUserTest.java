@@ -49,6 +49,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ContactObject[] searchUser(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element eUsers = new Element("user", XmlServlet.NS);
 		eUsers.addContent(searchpattern);
 		
@@ -91,6 +93,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Group[] searchGroup(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element eGroups = new Element("group", XmlServlet.NS);
 		eGroups.addContent(searchpattern);
 		
@@ -133,6 +137,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Resource[] searchResource(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element eResources = new Element("resource", XmlServlet.NS);
 		eResources.addContent(searchpattern);
 		
@@ -175,6 +181,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static ResourceGroup[] searchResourcegroup(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element eResourceGroups = new Element("resourcegroup", XmlServlet.NS);
 		eResourceGroups.addContent(searchpattern);
 		
@@ -217,6 +225,8 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int getUserId(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
 		for (int a = 0; a < contactArray.length; a++) {
 			ContactObject contactObj = contactArray[a];

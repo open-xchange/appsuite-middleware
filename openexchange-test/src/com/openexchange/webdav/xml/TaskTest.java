@@ -117,6 +117,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertTask(WebConversation webCon, Task taskObj, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		int objectId = 0;
 		
 		taskObj.removeObjectID();
@@ -164,6 +166,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		taskObj.setObjectID(objectId);
 		taskObj.setLastModified(new Date());
 		
@@ -206,6 +210,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteTask(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
@@ -271,6 +277,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void confirmTask(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
@@ -313,6 +321,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Task[] listTask(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		if (!changed && !deleted) {
 			return new Task[] { };
 		}
@@ -386,6 +396,8 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static Task loadTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		

@@ -118,6 +118,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		int objectId = 0;
 		
 		appointmentObj.removeObjectID();
@@ -165,6 +167,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setLastModified(new Date());
 
@@ -209,10 +213,14 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, Date[] deleteException, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		throw new Exception("not supported yet!");
 	}
 	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
 		
@@ -278,6 +286,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void confirmAppointment(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
@@ -334,6 +344,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		if (!changed && !deleted) {
 			return new AppointmentObject[] { };
 		}
@@ -407,6 +419,8 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static AppointmentObject loadAppointment(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		

@@ -6,6 +6,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXFolder;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.ContactObject;
@@ -61,13 +62,13 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		if (folderObj1.containsModule()) {
 			assertEqualsAndNotNull("module name is not equals", folderObj1.getModule(), folderObj2.getModule());
-		} 
+		}
 		
 		assertEqualsAndNotNull("parent folder id is not equals", folderObj1.getParentFolderID(), folderObj2.getParentFolderID());
 		
 		if (folderObj1.containsPermissions()) {
 			assertEqualsAndNotNull("permissions are not equals" , permissions2String(folderObj1.getPermissionsAsArray()), permissions2String(folderObj2.getPermissionsAsArray()));
-		} 
+		}
 	}
 	
 	public static FolderObject createFolderObject(int entity, String title, int module, boolean isPublic) throws Exception {
@@ -87,7 +88,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		return folderObj;
 	}
-
+	
 	public static OCLPermission createPermission(int entity, boolean isGroup, int fp, int orp, int owp, int odp) throws Exception {
 		return createPermission(entity, isGroup, fp, orp, owp, odp, true);
 	}
@@ -105,7 +106,9 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return oclp;
 	}
 	
-	public static int insertFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception {
+	public static int insertFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception, OXException {
+		host = appendPrefix(host);
+		
 		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
 		
 		int objectId = 0;
@@ -144,7 +147,9 @@ public class FolderTest extends AbstractWebdavXMLTest {
 			fail("xml error: " + response[0].getErrorMessage());
 		}
 		
-		assertEquals("check response status", 200, response[0].getStatus());
+		if (response[0].getStatus() != 200) {
+			throw new OXException(response[0].getErrorMessage());
+		}
 		
 		folderObj = (FolderObject)response[0].getDataObject();
 		objectId = folderObj.getObjectID();
@@ -154,7 +159,9 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static void updateFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception {
+	public static void updateFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception, OXException {
+		host = appendPrefix(host);
+		
 		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -165,11 +172,11 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		DataWriter.addElement(OXFolder.OBJECT_ID, folderObj.getObjectID(), eProp);
 		if (folderObj.containsParentFolderID()) {
 			DataWriter.addElement("folder", folderObj.getParentFolderID(), eProp);
-		} 
+		}
 		
 		if (folderObj.containsPermissions()) {
 			FolderWriter.addElementPermission(folderObj.getPermissions(), eProp);
-		} 
+		}
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -193,10 +200,14 @@ public class FolderTest extends AbstractWebdavXMLTest {
 			fail("xml error: " + response[0].getErrorMessage());
 		}
 		
-		assertEquals("check response status", 200, response[0].getStatus());
+		if (response[0].getStatus() != 200) {
+			throw new OXException(response[0].getErrorMessage());
+		}
 	}
 	
-	public static int[] deleteFolder(WebConversation webCon, int[] id, String host, String login, String password) throws Exception {
+	public static int[] deleteFolder(WebConversation webCon, int[] id, String host, String login, String password) throws Exception, OXException {
+		host = appendPrefix(host);
+		
 		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -238,7 +249,9 @@ public class FolderTest extends AbstractWebdavXMLTest {
 				idList.add(new Integer(folderObj.getObjectID()));
 			}
 			
-			assertEquals("check response status", 200, response[a].getStatus());
+			if (response[0].getStatus() != 200) {
+				throw new OXException(response[0].getErrorMessage());
+			}
 		}
 		
 		int[] failed = new int[idList.size()];
@@ -251,6 +264,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject[] listFolder(WebConversation webCon, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		if (!changed && !deleted) {
 			return new FolderObject[] { };
 		}
@@ -321,6 +336,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject loadFolder(WebConversation webCon, int objectId, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		Element ePropfind = new Element("propfind", webdav);
 		Element eProp = new Element("prop", webdav);
 		
@@ -375,11 +392,13 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	
 	
 	public static FolderObject getAppointmentDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
 		int userId = contactArray[0].getInternalUserId();
-
+		
 		for (int a = 0; a < folderArray.length; a++) {
 			FolderObject folderObj = folderArray[a];
 			if (folderObj.isDefaultFolder() && folderObj.getModule() == FolderObject.CALENDAR && folderObj.getCreatedBy() == userId) {
@@ -391,6 +410,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject getContactDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
@@ -407,6 +428,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static FolderObject getTaskDefaultFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
 		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
