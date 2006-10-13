@@ -76,7 +76,7 @@ public abstract class DataParser {
 		} 
 	}
 	
-	public int getValueAsInt(Element e) throws XmlPullParserException, IOException {
+	public static int getValueAsInt(Element e) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = e.getValue()) != null && s.length() > 0) {
@@ -86,7 +86,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public float getValueAsFloat(Element e) throws Exception {
+	public static float getValueAsFloat(Element e) throws Exception {
 		String s = null;
 		
 		if ((s = e.getValue()) != null && s.length() > 0) {
@@ -96,7 +96,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public long getValueAsLong(Element e) throws Exception {
+	public static long getValueAsLong(Element e) throws Exception {
 		String s = null;
 		
 		if ((s = e.getValue()) != null && s.length() > 0) {
@@ -106,7 +106,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public Date getValueAsDate(Element e) throws Exception {
+	public static Date getValueAsDate(Element e) throws Exception {
 		String s = null;
 		
 		if ((s = e.getValue()) != null && s.length() > 0) {
@@ -116,7 +116,7 @@ public abstract class DataParser {
 		}
 	}
 	
-	public boolean getValueAsBoolean(Element e) throws Exception {
+	public static boolean getValueAsBoolean(Element e) throws Exception {
 		String s = null;
 		
 		if ((s = e.getValue()) != null && s.equalsIgnoreCase("true")) {
@@ -125,7 +125,7 @@ public abstract class DataParser {
 		return false;
 	}
 	
-	public String getValue(Element e) throws Exception {
+	public static String getValue(Element e) throws Exception {
 		String s = e.getValue();
 		
 		if (s != null && s.length() == 0) {
@@ -134,7 +134,7 @@ public abstract class DataParser {
 		return s;
 	}
 	
-	public boolean hasElement(Element e) throws Exception {
+	public static boolean hasElement(Element e) throws Exception {
 		return (e != null);
 	}
 }
