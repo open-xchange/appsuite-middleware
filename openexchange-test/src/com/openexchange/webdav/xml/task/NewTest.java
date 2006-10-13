@@ -27,20 +27,18 @@ public class NewTest extends TaskTest {
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
-		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId);
-		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId);
+		participants[0].setIdentifier(userParticipantId);
+		participants[1] = new GroupParticipant();
+		participants[1].setIdentifier(groupParticipantId);
 		
 		taskObj.setParticipants(participants);
 		
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 	}
 	
-	public void testNewTaskWithUsers() throws Exception {
+	public void _notestNewTaskWithUsers() throws Exception {
 		Task taskObj = createTask("testNewTaskWithUsers");
 		
 		UserParticipant[] users = new UserParticipant[1];
