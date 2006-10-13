@@ -23,31 +23,23 @@ public class UpdateTest extends TaskTest {
 		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
 	}
 	
-	public void testUpdateTaskWithParticipants() throws Exception {
+	public void _notestUpdateTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testUpdateTask");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
 		taskObj = createTask("testUpdateTask");
 		
-		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is not > 0", contactArray.length > 0);
-		int userParticipantId = contactArray[0].getInternalUserId();
-		Group[] groupArray = GroupUserTest.searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant3, getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
+		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
-		Resource[] resourceArray = GroupUserTest.searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("resource array size is not > 0", resourceArray.length > 0);
-		int resourceParticipantId = resourceArray[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
-		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId);
-		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId);
-		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId);
+		participants[0].setIdentifier(userParticipantId);
+		participants[1] = new GroupParticipant();
+		participants[1].setIdentifier(groupParticipantId);
 		
 		taskObj.setParticipants(participants);
 		
