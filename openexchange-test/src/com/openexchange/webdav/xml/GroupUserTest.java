@@ -12,6 +12,7 @@ import com.openexchange.webdav.xml.types.Response;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
@@ -30,13 +31,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	public void testSearchUser() throws Exception {
 		searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
-	
-	public void testSearchLoginUser() throws Exception {
-		ContactObject[] contactArray = searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is 0", contactArray.length > 0);
-		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
-	}
-	
+
 	public void testSearchGroup() throws Exception {
 		searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
 	}
@@ -47,6 +42,10 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	
 	public void testSearchResourceGroup() throws Exception {
 		searchResourcegroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+	}
+	
+	public void testGetUserId() throws Exception {
+		getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public static ContactObject[] searchUser(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
@@ -215,6 +214,18 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		}
 		
 		return resourcegroupArray;
+	}
+	
+	public static int getUserId(WebConversation webCon, String host, String login, String password) throws Exception {
+		ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		for (int a = 0; a < contactArray.length; a++) {
+			ContactObject contactObj = contactArray[a];
+			Map m = contactObj.getMap();
+			if (m != null && m.containsKey("myidentity")) {
+				return contactObj.getInternalUserId();
+			}
+		}
+		return -1;
 	}
 	
 	public static Document addElement2PropFind(Element e, Date modified) throws Exception {
