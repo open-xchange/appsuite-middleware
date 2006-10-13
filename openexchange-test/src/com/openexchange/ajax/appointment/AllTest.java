@@ -27,7 +27,7 @@ public class AllTest extends AppointmentTest {
 		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestShowAllAppointmentWhereIAmParticipant() throws Exception {
+	public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
 		Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
 		Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		
