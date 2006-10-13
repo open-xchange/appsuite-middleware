@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.apache.commons.logging.Log;
 
@@ -94,11 +95,9 @@ public final class Init {
 					}
 				}
 			}
-
-			retval = ajaxPropFiles[(int) Math.random() * ajaxPropFiles.length];
+			retval = ajaxPropFiles[(int) (Math.random() * ajaxPropFiles.length)];
 		}
 		else {
-
 			retval = testProps.getProperty("ajaxPropertiesFile");
 		}
 
@@ -139,7 +138,9 @@ public final class Init {
 	}
 
 	public static Properties getAJAXProperties() {
-		if (!ajaxPropertiesLoaded) {
+
+		if (!ajaxPropertiesLoaded
+				|| testProps.getProperty("ajaxPropertiesDir") != null) {
 			loadAJAXProperties();
 		}
 		return ajaxProps;
@@ -207,13 +208,13 @@ public final class Init {
 		}
 	}
 
-    public synchronized static void stopDB() throws Exception {
-        if (dbInitialized) {
-            dbInitialized = false;
-            DBPool.releasePool();
-        }
-    }
-    
+	public synchronized static void stopDB() throws Exception {
+		if (dbInitialized) {
+			dbInitialized = false;
+			DBPool.releasePool();
+		}
+	}
+
 	public static void initSessiond() throws Exception {
 		if (!sessiondInit) {
 			String propfile = ComfireConfig.properties
