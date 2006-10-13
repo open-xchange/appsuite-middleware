@@ -35,8 +35,6 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected String secondlogin = null;
 	
-	protected String secondpassword = null;
-	
 	protected int userId = -1;
 	
 	protected Properties webdavProps = null;
@@ -67,7 +65,6 @@ public abstract class AbstractWebdavTest extends TestCase {
 		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
 
 		secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
-		secondpassword = AbstractConfigWrapper.parseProperty(webdavProps, "secondpassword", "");
 		
 		userId = GroupUserTest.searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
 		
@@ -84,6 +81,10 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected WebConversation getWebConversation() {
 		return webCon;
+	}
+	
+	protected WebConversation getNewWebConversation() {
+		return new WebConversation();
 	}
 
 	protected WebConversation getSecondWebConversation() {
@@ -103,10 +104,6 @@ public abstract class AbstractWebdavTest extends TestCase {
 	}
 
 	protected String getSecondLogin() {
-		return secondlogin;
-	}
-
-	protected String getSecondPassword() {
-		return secondpassword;
+		return password;
 	}
 }
