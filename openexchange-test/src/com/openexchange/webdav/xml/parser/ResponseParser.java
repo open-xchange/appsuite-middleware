@@ -49,6 +49,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.types.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -170,7 +171,7 @@ public class ResponseParser {
 		
 		for (int a = 0; a < userList.size(); a++) {
 			response[counter] = new Response();
-			response[counter].setDataObject(parseContactResponse((Element)userList.get(a)));
+			response[counter].setDataObject(parseUserResponse((Element)userList.get(a)));
 			response[counter].setStatus(200);
 			
 			counter++;
@@ -230,6 +231,20 @@ public class ResponseParser {
 		TaskParser taskParser = new TaskParser();
 		taskParser.parse(taskObj, eProp);
 		return taskObj;
+	}
+	
+	protected static ContactObject parseUserResponse(Element eProp) throws Exception {
+		ContactObject contactObj = new ContactObject();
+		ContactParser contactParser = new ContactParser();
+		contactParser.parse(contactObj, eProp);
+		
+		if (DataParser.hasElement(eProp.getChild("myidentity", XmlServlet.NS))) {
+			HashMap hm = new HashMap();
+			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));
+			contactObj.setMap(hm);
+		}
+		
+		return contactObj;
 	}
 
 	protected static Group parseGroupResponse(Element eProp) throws Exception {
