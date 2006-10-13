@@ -74,6 +74,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		final FolderObject folderObj = FolderTest.getTaskDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		taskFolderId = folderObj.getObjectID();
+		userId = folderObj.getCreatedBy();
 	}
 	
 	protected void compareObject(Task taskObj1, Task taskObj2) throws Exception {

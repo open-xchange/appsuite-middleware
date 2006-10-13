@@ -41,6 +41,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		final FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		contactFolderId = folderObj.getObjectID();
+		userId = folderObj.getCreatedBy();
 		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
