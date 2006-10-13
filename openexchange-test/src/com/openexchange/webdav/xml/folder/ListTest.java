@@ -19,7 +19,7 @@ public class ListTest extends FolderTest {
 		assertTrue("check response", folderArray.length == 2);
 	 }
 	 
-	public void _notestPropFindWithDeleted() throws Exception {
+	public void testPropFindWithDeleted() throws Exception {
 		Date modified = new Date();
 	 
 		FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
