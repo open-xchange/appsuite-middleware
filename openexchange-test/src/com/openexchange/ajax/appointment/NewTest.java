@@ -279,7 +279,7 @@ public class NewTest extends AppointmentTest {
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestDailyRecurrence() throws Exception {
+	public void testDailyRecurrence() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -305,7 +305,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestWeeklyRecurrence() throws Exception {
+	public void testWeeklyRecurrence() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -332,7 +332,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestMonthlyRecurrenceDayInMonth() throws Exception {
+	public void testMonthlyRecurrenceDayInMonth() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -349,7 +349,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
-		appointmentObj.setDays(15);
+                appointmentObj.setDayInMonth(15);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
