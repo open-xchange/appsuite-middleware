@@ -1,35 +1,20 @@
 package com.openexchange.groupware.folder;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
+import java.util.Random;
 
 import com.openexchange.groupware.FolderTreeUtil;
 import com.openexchange.groupware.FolderTreeUtilImpl;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderAction;
-import com.openexchange.tools.oxfolder.OXFolderLogicException;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 public class FolderTreeUtilTest extends FolderTestCase {
-	FolderTreeUtil treeUtil = new FolderTreeUtilImpl(new DBPoolProvider());
+	private FolderTreeUtil treeUtil = new FolderTreeUtilImpl(new DBPoolProvider());
 
+	private Random r = new Random();
+	
 	public void testPathIDs() throws Exception {
-		FolderObject folder = mkdir(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, "folder");
+		FolderObject folder = mkdir(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, "folder"+r.nextInt());
 		clean.add(folder);
 		
 		FolderObject subfolder = mkdir(folder.getObjectID(), "subfolder");

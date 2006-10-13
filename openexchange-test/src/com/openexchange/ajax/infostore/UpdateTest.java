@@ -29,14 +29,14 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testBasic() throws Exception{
-		Response res = this.update(getWebConversation(), sessionId,clean.get(0),System.currentTimeMillis(), m(
+		Response res = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m(
 				"title" , "test knowledge updated",
 				"color_label" , "1"
 		));
 		assertNoError(res);
 		
 		
-		res = get(getWebConversation(), sessionId, clean.get(0));
+		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject object = (JSONObject) res.getData();
@@ -51,8 +51,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testConflict() throws Exception{
-		Response res = this.get(getWebConversation(),sessionId, clean.get(0));
-		Response res2 = this.update(getWebConversation(), sessionId,clean.get(0),res.getTimestamp().getTime()-2000, m(
+		Response res = this.get(getWebConversation(),getHostName(), sessionId, clean.get(0));
+		Response res2 = this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), res.getTimestamp().getTime()-2000, m(
 					"title" , "test knowledge updated"
 			));
 		assertNotNull(res2.getErrorMessage());
@@ -65,10 +65,10 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),sessionId,id,System.currentTimeMillis(),m(),upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
 		
-		res = get(getWebConversation(),sessionId, id);
+		res = get(getWebConversation(),getHostName(), sessionId, id);
 		JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals(1,obj.getInt("version"));
@@ -80,7 +80,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(getWebConversation(),sessionId,id, 1);
+			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
@@ -109,13 +109,13 @@ public class UpdateTest extends InfostoreAJAXTest {
 		try {
 			int id = createNew(
 					getWebConversation(),
+					getHostName(),
 					sessionId,
 					m(
 							"folder_id" 		,	((Integer)folderId).toString(),
 							"title"  		,  	"test large upload",
 							"description" 	, 	"test large upload description"
-					),
-					largeFile, "text/plain"
+					), largeFile, "text/plain"
 			);
 			clean.add(id);
 			fail("Uploaded Large File and got no error");
@@ -129,23 +129,23 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		int id = clean.get(0);
 		
-		Response res = update(getWebConversation(),sessionId,id,System.currentTimeMillis(),m(),upload, "text/plain"); // V1
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain"); // V1
 		assertNoError(res);
 		
-		res = update(getWebConversation(),sessionId,id,System.currentTimeMillis(),m(),upload, "text/plain");// V2
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V2
 		assertNoError(res);
 		
-		res = update(getWebConversation(),sessionId,id,System.currentTimeMillis(),m(),upload, "text/plain");// V3
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V3
 		assertNoError(res);
 		
-		res = update(getWebConversation(),sessionId,id,System.currentTimeMillis(), m("version" , "2"));
+		res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("version" , "2"));
 		assertNoError(res);
 		
-		res = get(getWebConversation(),sessionId, id);
+		res = get(getWebConversation(),getHostName(), sessionId, id);
 		JSONObject obj = (JSONObject) res.getData();
 		assertEquals(2,obj.get("version"));
 		
-		res = versions(getWebConversation(),sessionId, id, new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
+		res = versions(getWebConversation(),getHostName(), sessionId, id, new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
 		assertNoError(res);
 		
 		VersionsTest.assureVersions(new Integer[]{1,2,3},res,2);

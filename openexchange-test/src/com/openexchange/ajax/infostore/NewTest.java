@@ -31,17 +31,17 @@ public class NewTest extends InfostoreAJAXTest {
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
+				getHostName(),
 				sessionId,
 				m(
 						"folder_id" 		,	((Integer)folderId).toString(),
 						"title"  		,  	"test upload",
 						"description" 	, 	"test upload description"
-				),
-				upload, "text/plain"
+				), upload, "text/plain"
 		);
 		clean.add(id);
 		
-		Response res = get(getWebConversation(),sessionId, id);
+		Response res = get(getWebConversation(),getHostName(), sessionId, id);
 		JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals("test upload",obj.getString("title"));
@@ -55,7 +55,7 @@ public class NewTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(getWebConversation(),sessionId,id, 1);
+			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			
 			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
 			//String line = null;
@@ -73,17 +73,17 @@ public class NewTest extends InfostoreAJAXTest {
 		
 		id = createNew(
 			getWebConversation(),
+			getHostName(),
 			sessionId,
 			m(
 					"folder_id" 		,	((Integer)folderId).toString(),
 					"title"  		,  	"test no upload",
 					"description" 	, 	"test no upload description"
-			),
-			null, ""
+			), null, ""
 		);
 		clean.add(id);
 		
-		res = get(getWebConversation(),sessionId, id);
+		res = get(getWebConversation(),getHostName(), sessionId, id);
 		obj = (JSONObject) res.getData();
 		
 		assertEquals("test no upload",obj.getString("title"));
@@ -111,13 +111,13 @@ public class NewTest extends InfostoreAJAXTest {
 		try {
 			int id = createNew(
 					getWebConversation(),
+					getHostName(),
 					sessionId,
 					m(
 							"folder_id" 		,	((Integer)folderId).toString(),
 							"title"  		,  	"test large upload",
 							"description" 	, 	"test large upload description"
-					),
-					largeFile, "text/plain"
+					), largeFile, "text/plain"
 			);
 			clean.add(id);
 			fail("Uploaded Large File and got no error");

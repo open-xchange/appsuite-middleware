@@ -32,15 +32,15 @@ public class CopyTest extends InfostoreAJAXTest {
 	));
 	
 	public void testCopy() throws Exception {
-		int id = copy(getWebConversation(), sessionId,clean.get(0),System.currentTimeMillis(), m());
+		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m());
 		clean.add(id);
 		
-		Response res = get(getWebConversation(), sessionId, clean.get(0));
+		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject orig = (JSONObject) res.getData();
 		
-		res = get(getWebConversation(), sessionId, id);
+		res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
 		JSONObject copy = (JSONObject) res.getData();
@@ -59,24 +59,24 @@ public class CopyTest extends InfostoreAJAXTest {
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
+				getHostName(),
 				sessionId,
 				m(
 						"folder_id" 		,	((Integer)folderId).toString(),
 						"title"  		,  	"test upload",
 						"description" 	, 	"test upload description"
-				),
-				upload, "text/plain"
+				), upload, "text/plain"
 		);
 		clean.add(id);
 		
-		int copyId = copy(getWebConversation(),sessionId,id,System.currentTimeMillis(), m());
+		int copyId = copy(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m());
 		clean.add(copyId);
 		
-		Response res = get(getWebConversation(),sessionId, id);
+		Response res = get(getWebConversation(),getHostName(), sessionId, id);
 		assertNoError(res);
 		JSONObject orig = (JSONObject) res.getData();
 		
-		res = get(getWebConversation(),sessionId, copyId);
+		res = get(getWebConversation(),getHostName(), sessionId, copyId);
 		assertNoError(res);
 		JSONObject copy = (JSONObject) res.getData();
 		
@@ -88,7 +88,7 @@ public class CopyTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(getWebConversation(),sessionId,copyId, 1);
+			is2 = document(getWebConversation(),getHostName(),sessionId, copyId, 1);
 			
 			//BufferedReader r = new BufferedReader(new InputStreamReader(is2));
 			//String line = null;
@@ -106,15 +106,15 @@ public class CopyTest extends InfostoreAJAXTest {
 	}
 	
 	public void testModifyingCopy() throws Exception {
-		int id = copy(getWebConversation(), sessionId,clean.get(0),System.currentTimeMillis(), m("title" , "copy"));
+		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("title" , "copy"));
 		clean.add(id);
 		
-		Response res = get(getWebConversation(), sessionId, clean.get(0));
+		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject orig = (JSONObject) res.getData();
 		
-		res = get(getWebConversation(), sessionId, id);
+		res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
 		JSONObject copy = (JSONObject) res.getData();
@@ -133,10 +133,10 @@ public class CopyTest extends InfostoreAJAXTest {
 	
 	public void testUploadCopy() throws Exception {
 		File upload = new File(Init.getTestProperty("webdavPropertiesFile"));
-		int id = copy(getWebConversation(), sessionId,clean.get(0),System.currentTimeMillis(),m("title" , "copy"),upload, "text/plain");
+		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("title" , "copy"), upload, "text/plain");
 		clean.add(id);
 		
-		Response res = get(getWebConversation(), sessionId, id);
+		Response res = get(getWebConversation(), getHostName(), sessionId, id);
 		assertNoError(res);
 		
 		JSONObject copy = (JSONObject) res.getData();

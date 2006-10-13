@@ -21,7 +21,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 	
 	public void testBasic() throws Exception {
 		AttachmentMetadata attachment = attachmentTest.getAttachment(0);
-		int id = saveAs(getWebConversation(), sessionId, attachment.getFolderId(),attachment.getAttachedId(), attachment.getModuleId(),attachment.getId(), m(
+		int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
 				"folder_id"			,		""+folderId,
 				"title"				,		"My Attachment",
 				"description"		,		"An attachment cum InfoItem"
@@ -29,7 +29,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		
 		clean.add(id);
 		
-		Response res = get(getWebConversation(),sessionId, id);
+		Response res = get(getWebConversation(),getHostName(), sessionId, id);
 		JSONObject obj = (JSONObject) res.getData();
 		
 		File upload = attachmentTest.getTestFile();
@@ -44,7 +44,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(getWebConversation(),sessionId,id, 1);
+			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
 			assertSameContent(is,is2);
 		} finally {
 			if(is!=null)

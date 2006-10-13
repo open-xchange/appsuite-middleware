@@ -16,15 +16,15 @@ public class UpdatesTest extends InfostoreAJAXTest{
 	}
 	
 	public void testBasic() throws Exception{
-		Response res = all(getWebConversation(),sessionId,folderId, new int[]{Metadata.ID});
+		Response res = all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
 		assertNoError(res);
 		long ts = res.getTimestamp().getTime()+2;
 		
-		this.update(getWebConversation(), sessionId,clean.get(0),ts, m(
+		this.update(getWebConversation(), getHostName(),sessionId,clean.get(0), ts, m(
 				"title" , "test knowledge updated"
 		));
 		
-		res = updates(getWebConversation(),sessionId,folderId,new int[]{Metadata.TITLE, Metadata.DESCRIPTION}, ts);
+		res = updates(getWebConversation(),getHostName(),sessionId,folderId, new int[]{Metadata.TITLE, Metadata.DESCRIPTION}, ts);
 		assertNoError(res);
 		
 		JSONArray modAndDel = (JSONArray) res.getData();
@@ -44,7 +44,7 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		tearDown();
 		clean.clear();
 		
-		res = updates(getWebConversation(),sessionId,folderId,new int[]{Metadata.TITLE,Metadata.DESCRIPTION}, ts);
+		res = updates(getWebConversation(),getHostName(),sessionId,folderId, new int[]{Metadata.TITLE,Metadata.DESCRIPTION}, ts);
 		
 		assertNoError(res);
 		

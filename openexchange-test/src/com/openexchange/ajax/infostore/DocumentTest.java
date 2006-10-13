@@ -23,13 +23,13 @@ public class DocumentTest extends InfostoreAJAXTest {
 		upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		id = createNew(
 				getWebConversation(),
+				getHostName(),
 				sessionId,
 				m(
 						"folder_id" 		,	((Integer)folderId).toString(),
 						"title"  		,  	"test upload",
 						"description" 	, 	"test upload description"
-				),
-				upload, "text/plain"
+				), upload, "text/plain"
 		);
 		clean.add(id);
 	}
@@ -39,7 +39,7 @@ public class DocumentTest extends InfostoreAJAXTest {
 		InputStream is2 = null;
 		try {
 			is = new FileInputStream(upload);
-			is2 = document(getWebConversation(),sessionId,id, -1);
+			is2 = document(getWebConversation(),getHostName(),sessionId, id, -1);
 			
 			assertSameContent(is,is2);
 		} finally {
@@ -51,11 +51,11 @@ public class DocumentTest extends InfostoreAJAXTest {
 	}
 	
 	public void testContentType() throws Exception {
-		GetMethodWebRequest req = documentRequest(sessionId, id, -1, "application/octet-stream");
+		GetMethodWebRequest req = documentRequest(sessionId, getHostName(), id, -1, "application/octet-stream");
 		WebResponse resp = getWebConversation().getResource(req);
 		assertEquals("application/octet-stream", resp.getContentType());
 		
-		req = documentRequest(sessionId, id, -1, null);
+		req = documentRequest(sessionId, getHostName(), id, -1, null);
 		resp = getWebConversation().getResource(req);
 		assertEquals("text/plain", resp.getContentType());
 		

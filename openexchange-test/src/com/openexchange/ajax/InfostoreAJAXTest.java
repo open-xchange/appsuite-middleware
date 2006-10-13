@@ -48,7 +48,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 			"description" 	, 	"test knowledge description"
 		);
 		
-		int c = this.createNew(getWebConversation(),sessionId, create);
+		int c = this.createNew(getWebConversation(),getHostName(), sessionId, create);
 		
 		clean.add(c);
 		
@@ -59,7 +59,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 				"url" 			, 	"http://www.open-xchange.com"
 			);
 			
-		c = this.createNew(getWebConversation(),sessionId, create);
+		c = this.createNew(getWebConversation(),getHostName(), sessionId, create);
 		
 		clean.add(c);
 	}
@@ -72,7 +72,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 			toDelete[i][1] = clean.get(i);
 		}
 		
-		int[] notDeleted = delete(getWebConversation(),sessionId,System.currentTimeMillis(), toDelete);
+		int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, System.currentTimeMillis(), toDelete);
 		assertEquals("Couldn't delete "+j(notDeleted),0,notDeleted.length);
 	}
 	
@@ -90,12 +90,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	// Methods from the specification
 	
 	
-	public Response all(WebConversation webConv, String sessionId, int folderId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException  {
-		return all(webConv,sessionId,folderId,columns,-1, null);
+	public Response all(WebConversation webConv, String hostname, String sessionId, int folderId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException  {
+		return all(webConv,hostname,sessionId,folderId,columns, -1, null);
 	}
 	
-	public Response all(WebConversation webConv, String sessionId, int folderId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"all");
+	public Response all(WebConversation webConv, String hostname, String sessionId, int folderId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"all", hostname);
 		url.append("&folder=");
 		url.append(folderId);
 		url.append("&columns=");
@@ -118,8 +118,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public Response list(WebConversation webConv, String sessionId, int[] columns, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"list");
+	public Response list(WebConversation webConv, String hostname, String sessionId, int[] columns, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"list", hostname);
 		url.append("&columns=");
 		for(int col : columns) {
 			url.append(col);
@@ -143,16 +143,16 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return putT(webConv,url.toString(), data.toString()); 
 	}
 
-	public Response updates(WebConversation webConv, String sessionId, int folderId, int[] columns, long timestamp) throws MalformedURLException, JSONException, IOException, SAXException {
-		return updates(webConv,sessionId,folderId,columns,timestamp,-1,null, null);
+	public Response updates(WebConversation webConv, String hostname, String sessionId, int folderId, int[] columns, long timestamp) throws MalformedURLException, JSONException, IOException, SAXException {
+		return updates(webConv,hostname,sessionId,folderId,columns,timestamp,-1, null, null);
 	}
 	
-	public Response updates(WebConversation webConv, String sessionId, int folderId, int[] columns, long timestamp, String ignore) throws MalformedURLException, JSONException, IOException, SAXException {
-		return updates(webConv,sessionId,folderId,columns,timestamp,-1,null, ignore);
+	public Response updates(WebConversation webConv, String hostname, String sessionId, int folderId, int[] columns, long timestamp, String ignore) throws MalformedURLException, JSONException, IOException, SAXException {
+		return updates(webConv,hostname,sessionId,folderId,columns,timestamp,-1, null, ignore);
 	}
 	
-	public Response updates(WebConversation webConv, String sessionId, int folderId, int[] columns, long timestamp, int sort, String order, String ignore) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"updates");
+	public Response updates(WebConversation webConv, String hostname, String sessionId, int folderId, int[] columns, long timestamp, int sort, String order, String ignore) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"updates", hostname);
 		url.append("&folder=");
 		url.append(folderId);
 		url.append("&columns=");
@@ -183,12 +183,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public Response get(WebConversation webConv, String sessionId, int objectId) throws MalformedURLException, JSONException, IOException, SAXException  {
-		return get(webConv,sessionId,objectId, -1);
+	public Response get(WebConversation webConv, String hostname, String sessionId, int objectId) throws MalformedURLException, JSONException, IOException, SAXException  {
+		return get(webConv,hostname,sessionId, objectId, -1);
 	}
 	
-	public Response get(WebConversation webConv, String sessionId, int objectId, int version) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"get");
+	public Response get(WebConversation webConv, String hostname, String sessionId, int objectId, int version) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"get", hostname);
 		url.append("&id=");
 		url.append(objectId);
 		if(version != -1) {
@@ -199,12 +199,12 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public Response versions(WebConversation webConv, String sessionId, int objectId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
-		return versions(webConv,sessionId,objectId,columns,-1, null);
+	public Response versions(WebConversation webConv, String hostname, String sessionId, int objectId, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
+		return versions(webConv,hostname,sessionId,objectId,columns, -1, null);
 	}
 	
-	public Response versions(WebConversation webConv, String sessionId, int objectId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"versions");
+	public Response versions(WebConversation webConv, String hostname, String sessionId, int objectId, int[] columns, int sort, String order) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"versions", hostname);
 		url.append("&id=");
 		url.append(objectId);
 		url.append("&columns=");
@@ -227,8 +227,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public Response update(WebConversation webConv, String sessionId, int id, long timestamp, Map<String,String> modified) throws MalformedURLException, IOException, SAXException, JSONException {
-		StringBuffer url = getUrl(sessionId,"update");
+	public Response update(WebConversation webConv, String hostname, String sessionId, int id, long timestamp, Map<String,String> modified) throws MalformedURLException, IOException, SAXException, JSONException {
+		StringBuffer url = getUrl(sessionId,"update", hostname);
 		url.append("&id=");
 		url.append(id);
 		
@@ -242,8 +242,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return putT(webConv,url.toString(), obj.toString());
 	}
 	
-	public Response update(WebConversation webConv, String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
-		StringBuffer url = getUrl(sessionId,"update");
+	public Response update(WebConversation webConv, String hostname, String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+		StringBuffer url = getUrl(sessionId,"update", hostname);
 		url.append("&id=");
 		url.append(id);
 		
@@ -268,8 +268,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return Response.parse(res.toString());
 	}
 	
-	public int createNew(WebConversation webConv, String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
-		StringBuffer url = getUrl(sessionId,"new");
+	public int createNew(WebConversation webConv, String hostname, String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
+		StringBuffer url = getUrl(sessionId,"new", hostname);
 		JSONObject obj = new JSONObject();
 		for(String attr : fields.keySet()) {
 			obj.put(attr, fields.get(attr));
@@ -285,8 +285,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public int createNew(WebConversation webConv, String sessionId, Map<String, String> fields, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
-		StringBuffer url = getUrl(sessionId,"new");
+	public int createNew(WebConversation webConv, String hostname, String sessionId, Map<String, String> fields, File upload, String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+		StringBuffer url = getUrl(sessionId,"new", hostname);
 		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
 		req.setMimeEncoded(true);
 		
@@ -315,8 +315,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		}
 	}
 	
-	public int saveAs(WebConversation webConv, String sessionId, int folderId, int attached, int module, int attachment, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
-		StringBuffer url = getUrl(sessionId,"saveAs");
+	public int saveAs(WebConversation webConv, String hostname, String sessionId, int folderId, int attached, int module, int attachment, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
+		StringBuffer url = getUrl(sessionId,"saveAs", hostname);
 		url.append("&folder=");
 		url.append(folderId);
 		url.append("&attached=");
@@ -337,8 +337,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return new Integer(new JSONObject(resp.getText()).getInt("data"));
 	}
 
-	public int[] delete(WebConversation webConv, String sessionId, long timestamp, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"delete");
+	public int[] delete(WebConversation webConv, String hostname, String sessionId, long timestamp, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"delete", hostname);
 		url.append("&timestamp=");
 		url.append(timestamp);
 		
@@ -368,8 +368,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
-	public int[] detach(WebConversation webConv, String sessionId, long timestamp, int objectId, int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"detach");
+	public int[] detach(WebConversation webConv, String hostname, String sessionId, long timestamp, int objectId, int[] versions) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"detach", hostname);
 		url.append("&timestamp=");
 		url.append(timestamp);
 		url.append("&id=");
@@ -398,8 +398,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return notDeleted;
 	}
 	
-	public Response revert(WebConversation webConv, String sessionId, long timestamp, int objectId) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"revert");
+	public Response revert(WebConversation webConv, String hostname, String sessionId, long timestamp, int objectId) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"revert", hostname);
 		url.append("&timestamp=");
 		url.append(timestamp);
 		url.append("&id=");
@@ -408,28 +408,28 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int id) throws HttpException, IOException {
-		return document(webConv,sessionId,id, -1, null);
+	public InputStream document(WebConversation webConv, String hostname, String sessionId, int id) throws HttpException, IOException {
+		return document(webConv,hostname,sessionId, id, -1, null);
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int id, String contentType) throws HttpException, IOException {
-		return document(webConv, sessionId, id, -1, contentType);
+	public InputStream document(WebConversation webConv, String hostname, String sessionId, int id, String contentType) throws HttpException, IOException {
+		return document(webConv, hostname, sessionId, id, -1, contentType);
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int id, int version) throws HttpException, IOException{
-		return document(webConv,sessionId,id,version,null);
+	public InputStream document(WebConversation webConv, String hostname, String sessionId, int id, int version) throws HttpException, IOException{
+		return document(webConv,hostname,sessionId,id,version, null);
 	}
 	
-	public InputStream document(WebConversation webConv, String sessionId, int id, int version, String contentType) throws HttpException, IOException{
+	public InputStream document(WebConversation webConv, String hostname, String sessionId, int id, int version, String contentType) throws HttpException, IOException{
 		
-		GetMethodWebRequest m = documentRequest(sessionId, id, version, contentType);
+		GetMethodWebRequest m = documentRequest(sessionId, hostname, id, version, contentType);
 		WebResponse resp = webConv.getResource(m);
 		
 		return resp.getInputStream();
 	}
 	
-	public GetMethodWebRequest documentRequest(String sessionId, int id, int version, String contentType) {
-		StringBuffer url = getUrl(sessionId,"document");
+	public GetMethodWebRequest documentRequest(String sessionId, String hostname, int id, int version, String contentType) {
+		StringBuffer url = getUrl(sessionId,"document", hostname);
 		url.append("&id="+id);
 		if(version!=-1)
 			url.append("&version="+version);
@@ -442,8 +442,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return new GetMethodWebRequest(url.toString());
 	}
 	
-	public int copy(WebConversation webConv, String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws JSONException, IOException {
-		StringBuffer url = getUrl(sessionId,"copy");
+	public int copy(WebConversation webConv, String hostname, String sessionId, int id, long timestamp, Map<String, String> modified, File upload, String contentType) throws JSONException, IOException {
+		StringBuffer url = getUrl(sessionId,"copy", hostname);
 		url.append("&id=");
 		url.append(id);
 		
@@ -468,8 +468,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return (Integer) Response.parse(res.toString()).getData();
 	}
 	
-	public int copy(WebConversation webConv, String sessionId, int id, long timestamp, Map<String, String> modified) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"copy");
+	public int copy(WebConversation webConv, String hostname, String sessionId, int id, long timestamp, Map<String, String> modified) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"copy", hostname);
 		url.append("&id=");
 		url.append(id);
 		
@@ -483,8 +483,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return (Integer)putT(webConv,url.toString(), obj.toString()).getData();
 	}
 	
-	public Response lock(WebConversation webConv, String sessionId, int id, long timeDiff) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"lock");
+	public Response lock(WebConversation webConv, String hostname, String sessionId, int id, long timeDiff) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"lock", hostname);
 		url.append("&id=");
 		url.append(id);
 		if(timeDiff > 0) {
@@ -495,24 +495,24 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
-	public Response lock(WebConversation webConv, String sessionId, int id) throws MalformedURLException, JSONException, IOException, SAXException {
-		return lock(webConv,sessionId,id, -1);
+	public Response lock(WebConversation webConv, String hostname, String sessionId, int id) throws MalformedURLException, JSONException, IOException, SAXException {
+		return lock(webConv,hostname,sessionId, id, -1);
 	}
 	
-	public Response unlock(WebConversation webConv, String sessionId, int id ) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"unlock");
+	public Response unlock(WebConversation webConv, String hostname, String sessionId, int id ) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"unlock", hostname);
 		url.append("&id=");
 		url.append(id);
 		
 		return gT(webConv, url.toString());
 	}
 	
-	public Response search(WebConversation webConv, String sessionId, String query, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
-		return search(webConv,sessionId,query,columns,-1,-1,null,-1, -1);
+	public Response search(WebConversation webConv, String hostname, String sessionId, String query, int[] columns) throws MalformedURLException, JSONException, IOException, SAXException {
+		return search(webConv,hostname,sessionId,query,columns,-1,-1,null, -1, -1);
 	}
 	
-	public Response search(WebConversation webConv, String sessionId, String query, int[] columns, int folderId, int sort, String order, int start, int end) throws MalformedURLException, JSONException, IOException, SAXException {
-		StringBuffer url = getUrl(sessionId,"search");
+	public Response search(WebConversation webConv, String hostname, String sessionId, String query, int[] columns, int folderId, int sort, String order, int start, int end) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"search", hostname);
 		url.append("&columns=");
 		for(int c : columns) {
 			url.append(c);
@@ -546,9 +546,9 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return putT(webConv,url.toString(), queryObject.toString());
 	}
 	
-	protected StringBuffer getUrl(String sessionId, String action) {
+	protected StringBuffer getUrl(String sessionId, String action, String hostname) {
 		StringBuffer url = new StringBuffer("http://");
-		url.append(getHostName());
+		url.append((hostname == null) ? getHostName() : hostname );
 		url.append("/ajax/infostore?session=");
 		url.append(sessionId);
 		url.append("&action=");

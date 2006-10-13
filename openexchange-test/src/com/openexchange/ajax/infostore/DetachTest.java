@@ -21,41 +21,41 @@ public class DetachTest extends InfostoreAJAXTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
-		Response res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
+		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
-		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
-		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
-		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
-		res = update(getWebConversation(),sessionId,clean.get(0),System.currentTimeMillis(),m(),upload, "text/plain");
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
 	}
 	
 	public void testBasic() throws Exception {
-		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
+		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3,4,5});
 		assertEquals(0, notDetached.length);
 		
 		checkNoVersions();
 	}
 	
 	public void testRevert() throws Exception {
-		Response res = revert(getWebConversation(),sessionId, System.currentTimeMillis(), clean.get(0));
+		Response res = revert(getWebConversation(),getHostName(), sessionId, System.currentTimeMillis(), clean.get(0));
 		assertNoError(res);
 		checkNoVersions();
 	}
 	
 	public void checkNoVersions() throws Exception {
 //		 Version magically reverts to 0
-		Response res = get(getWebConversation(), sessionId, clean.get(0));
+		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject obj = (JSONObject) res.getData();
 		
 		assertEquals(0, obj.getInt("version"));
 		
-		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
+		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,2,3});
 		
 		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2,3}));
 		
@@ -65,7 +65,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		}
 		assertTrue(versions.isEmpty());
 		
-		res = get(getWebConversation(), sessionId, clean.get(0));
+		res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		obj = (JSONObject) res.getData();
@@ -76,15 +76,15 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testSpotted() throws Exception {
-		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
+		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{1,3,5});
 		assertEquals(0, notDetached.length);
 		
-		Response res = versions(getWebConversation(),sessionId,clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
+		Response res = versions(getWebConversation(),getHostName(),sessionId, clean.get(0), new int[]{Metadata.VERSION,Metadata.CURRENT_VERSION});
 		assertNoError(res);
 		// Current Version reverts to 4 (being the newest available version
 		VersionsTest.assureVersions(new Integer[]{2,4},res,4);
 		
-		res = get(getWebConversation(),sessionId, clean.get(0));
+		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		JSONObject obj = (JSONObject)res.getData();
@@ -93,7 +93,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	}
 	
 	public void testDetachVersion0() throws Exception {
-		int[] notDetached = detach(getWebConversation(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
+		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, System.currentTimeMillis(), clean.get(0), new int[]{0});
 		assertEquals(1, notDetached.length);
 		assertEquals(0,notDetached[0]);
 	}
