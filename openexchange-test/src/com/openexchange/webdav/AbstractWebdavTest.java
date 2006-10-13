@@ -66,7 +66,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 
 		secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
 		
-		userId = GroupUserTest.searchUser(webCon, login, new Date(0), PROTOCOL + hostName, login, password)[0].getInternalUserId();
+		userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		authData = getAuthData(login, password);		
 	} 
