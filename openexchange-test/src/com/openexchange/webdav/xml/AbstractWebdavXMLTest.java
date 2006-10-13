@@ -1,28 +1,17 @@
 package com.openexchange.webdav.xml;
 
-import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXObject;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.AbstractWebdavTest;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
-import java.util.Properties;
-
-import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
@@ -162,7 +151,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		bais = new ByteArrayInputStream(responseByte);
 		
 		Document doc = new SAXBuilder().build(bais);
-
+		
 		parseResponse(doc, false);
 	}
 	
@@ -172,12 +161,12 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		Element e_objectId = new Element("object_id", XmlServlet.NS);
 		e_objectId.addContent(String.valueOf(folderChildObj.getObjectID()));
 		e_prop.addContent(e_objectId);
-
+		
 		if (inFolder != -1) {
 			Element eFolderId = new Element("folder_id", XmlServlet.NS);
 			eFolderId.addContent(String.valueOf(inFolder));
 			e_prop.addContent(eFolderId);
-		} 
+		}
 		
 		Element e_method = new Element("method", XmlServlet.NS);
 		e_method.addContent("DELETE");
@@ -186,7 +175,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		byte[] b = null; // writeRequest(e_prop);
 		sendPut(b, true);
 	}
-		
+	
 	protected void listObjects(int folderId, Date lastSync, boolean delete) throws Exception {
 		Element e_propfind = new Element("propfind", webdav);
 		Element e_prop = new Element("prop", webdav);
@@ -205,7 +194,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		if (delete) {
 			e_objectmode.addContent("NEW_AND_MODIFIED,DELETED");
 			e_prop.addContent(e_objectmode);
-		} 
+		}
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -217,7 +206,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		baos.flush();
 		
 		sendPropFind(baos.toByteArray());
-	} 
+	}
 	
 	protected void loadObject(int objectId) throws Exception {
 		Element e_propfind = new Element("propfind", webdav);
@@ -250,8 +239,8 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect.getTime(), value.getTime());
-		} 
-	} 
+		}
+	}
 	
 	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
 		if (expect != null) {
@@ -260,20 +249,26 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 			for (int a = 0; a < expect.length; a++) {
 				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
 			}
-		} 
-	} 
+		}
+	}
 	
 	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
 			assertEquals(message, expect, value);
-		} 
-	}   
+		}
+	}
 	
 	public static String appendPrefix(String host) {
 		if (host.startsWith("http://")) {
 			return host;
 		}
 		return "http://" + host;
+	}
+	
+	protected static void assertExceptionMessage(String message, int expectedStatus) throws Exception {
+		System.out.println("message: "+ message);
+		int status = Integer.parseInt(message.substring(1, 5));
+		assertEquals("message status is not correct", expectedStatus, status);
 	}
 }
