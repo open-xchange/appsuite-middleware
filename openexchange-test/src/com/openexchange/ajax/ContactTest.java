@@ -752,13 +752,15 @@ public class ContactTest extends AbstractAJAXTest {
 	
 	
 	public static ContactObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
-		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
-		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
 		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
@@ -775,17 +777,19 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		return jsonArray2AppointmentArray((JSONArray)response.getData());
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
 	public static ContactObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, String host, String session) throws Exception {
+		int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
+		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "updated");
-		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
-		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
 		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
@@ -802,7 +806,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		return jsonArray2AppointmentArray((JSONArray)response.getData());
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
 	private static ContactObject[] jsonArray2AppointmentArray(JSONArray jsonArray) throws Exception {
