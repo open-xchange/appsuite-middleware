@@ -414,8 +414,8 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		FolderObject[] folderArray = listFolder(webCon, new Date(0), true, false, host, login, password);
 		
-		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password);
-		int userId = contactArray[0].getInternalUserId();
+		final int userId = GroupUserTest.getUserId(webCon, host, login, password);
+		assertTrue("user not found", userId != -1);
 		
 		for (int a = 0; a < folderArray.length; a++) {
 			FolderObject folderObj = folderArray[a];
