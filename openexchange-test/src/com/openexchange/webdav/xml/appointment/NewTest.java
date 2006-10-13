@@ -24,10 +24,9 @@ public class NewTest extends AppointmentTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 		appointmentObj.setIgnoreConflicts(true);
 		
-		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant2, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is not > 0", contactArray.length > 0);
-		int userParticipantId = contactArray[0].getInternalUserId();
-		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
+		Group[] groupArray = GroupUserTest.searchGroup(getWebConversation(), groupParticipant, new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword());
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 		
@@ -50,10 +49,16 @@ public class NewTest extends AppointmentTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithUsers");
 		appointmentObj.setIgnoreConflicts(true);
 		
-		UserParticipant[] users = new UserParticipant[1];
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
+		
+		UserParticipant[] users = new UserParticipant[2];
 		users[0] = new UserParticipant();
 		users[0].setIdentifier(userId);
 		users[0].setConfirm(CalendarObject.ACCEPT);
+		users[1] = new UserParticipant();
+		users[1].setIdentifier(userParticipantId);
+		users[1].setConfirm(CalendarObject.DECLINE);
 		
 		appointmentObj.setUsers(users);
 		

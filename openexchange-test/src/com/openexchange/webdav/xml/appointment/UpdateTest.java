@@ -38,9 +38,8 @@ public class UpdateTest extends AppointmentTest {
 		
 		appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
 		
-		ContactObject[] contactArray = GroupUserTest.searchUser(webCon, userParticipant3, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("contact array size is not > 0", contactArray.length > 0);
-		int userParticipantId = contactArray[0].getInternalUserId();
+		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("user participant not found", userParticipantId != -1);
 		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
