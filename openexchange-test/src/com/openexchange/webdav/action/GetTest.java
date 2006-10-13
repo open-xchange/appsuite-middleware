@@ -46,4 +46,12 @@ public class GetTest extends ActionTestCase {
 		
 	}
 	
+	public void testPartial() throws Exception {
+		//TODO
+	}
+	
+	public void testPartialWithOpenEnd() throws Exception {
+		//TODO
+	}
+	
 }
