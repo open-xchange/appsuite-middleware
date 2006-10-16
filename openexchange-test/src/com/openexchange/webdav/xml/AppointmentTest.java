@@ -5,18 +5,13 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXObject;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -83,7 +78,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		resourceParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "resource_participant", "");
 		
 		final FolderObject folderObj = FolderTest.getAppointmentDefaultFolder(webCon, PROTOCOL + hostName, login, password);
-		appointmentFolderId = folderObj.getObjectID();	
+		appointmentFolderId = folderObj.getObjectID();
 		userId = folderObj.getCreatedBy();
 	}
 	
@@ -117,7 +112,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return appointmentobject;
 	}
 	
-	public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, String host, String login, String password) throws Exception {
+	public static int insertAppointment(WebConversation webCon, AppointmentObject appointmentObj, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		int objectId = 0;
@@ -150,7 +145,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -166,12 +161,12 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setLastModified(new Date());
-
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
@@ -198,7 +193,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		} else {
 			appointmentObj = (AppointmentObject)response[0].getDataObject();
 			objectId = appointmentObj.getObjectID();
@@ -212,13 +207,23 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, Date[] deleteException, String host, String login, String password) throws Exception {
+	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, Date[] deleteException, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		throw new Exception("not supported yet!");
 	}
 	
 	public static int[] deleteAppointment(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		ArrayList failed = new ArrayList();
+		
+		for (int a = 0; a < objectIdAndFolderId.length; a++) {
+			deleteAppointment(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
+		}
+		
+		return new int[] { };
+	}
+	
+	public static void deleteAppointment(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -226,25 +231,21 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int[] i = objectIdAndFolderId[a];
-			
-			AppointmentObject appointmentObj = new AppointmentObject();
-			appointmentObj.setObjectID(i[0]);
-			appointmentObj.setParentFolderID(i[1]);
-			appointmentObj.setLastModified(new Date());
-			
-			Element eProp = new Element("prop", webdav);
-			
-			AppointmentWriter appointmentWriter = new AppointmentWriter();
-			appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
-			
-			Element eMethod = new Element("method", XmlServlet.NS);
-			eMethod.addContent("DELETE");
-			eProp.addContent(eMethod);
-			
-			rootElement.addContent(addProp2PropertyUpdate(eProp));
-		}
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setObjectID(objectId);
+		appointmentObj.setParentFolderID(inFolder);
+		appointmentObj.setLastModified(new Date());
+		
+		Element eProp = new Element("prop", webdav);
+		
+		AppointmentWriter appointmentWriter = new AppointmentWriter();
+		appointmentWriter.addContent2PropElement(eProp, appointmentObj, false);
+		
+		Element eMethod = new Element("method", XmlServlet.NS);
+		eMethod.addContent("DELETE");
+		eProp.addContent(eMethod);
+		
+		rootElement.addContent(addProp2PropertyUpdate(eProp));
 		
 		Document doc = new Document(rootElement);
 		XMLOutputter xo = new XMLOutputter();
@@ -262,27 +263,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
 		
-		assertEquals("check response", objectIdAndFolderId.length, response.length);
-		
-		ArrayList idList = new ArrayList();
-		
-		for (int a = 0; a < response.length; a++) {
-			AppointmentObject appointmentObj = (AppointmentObject)response[a].getDataObject();
-			
-			if (response[a].hasError()) {
-				idList.add(new Integer(appointmentObj.getObjectID()));
-			}
-			
-			assertEquals("check response status", 200, response[a].getStatus());
+		if (response[0].hasError()) {
+			throw new OXException(response[0].getErrorMessage());
 		}
-		
-		int[] failed = new int[idList.size()];
-		
-		for (int a = 0; a < failed.length; a++) {
-			failed[a] = ((Integer)idList.get(a)).intValue();
-		}
-		
-		return failed;
 	}
 	
 	public static void confirmAppointment(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String login, String password) throws Exception {
@@ -313,9 +296,9 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 				break;
 			default:
 				throw new Exception("invalid confirm value: " + confirm);
-		} 
-			
-			
+		}
+		
+		
 		eProp.addContent(eConfirm);
 		
 		Document doc = addProp2Document(eProp);
