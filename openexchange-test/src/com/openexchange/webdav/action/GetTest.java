@@ -121,6 +121,8 @@ public class GetTest extends ActionTestCase {
 		
 		action.perform(req,res);
 		
+		assertEquals(HttpServletResponse.SC_PARTIAL_CONTENT, res.getStatus());
+		
 		byte[] bytes = res.getResponseBytes();
 		
 		assertEquals(expect.length, bytes.length);
@@ -142,5 +144,4 @@ public class GetTest extends ActionTestCase {
 				is.close();
 		}
 	}
-	
 }
