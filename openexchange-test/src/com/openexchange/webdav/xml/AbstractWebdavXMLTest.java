@@ -1,9 +1,9 @@
 package com.openexchange.webdav.xml;
 
 import com.meterware.httpunit.PutMethodWebRequest;
-import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.webdav.AbstractWebdavTest;
+import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,7 +62,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		assertNotNull("prop element (null)", e);
 		assertEquals("prop element", "prop", e.getName());
 		
-		return parseObjectIdElement(e.getChild(OXObject.OBJECT_ID, XmlServlet.NS));
+		return parseObjectIdElement(e.getChild(DataFields.OBJECT_ID, XmlServlet.NS));
 	}
 	
 	protected void parseStatusElement(Element e) throws Exception {
