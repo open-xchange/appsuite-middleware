@@ -15,7 +15,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api.OXFolder;
+import com.openexchange.groupware.container.FolderObject;
 
 public class TestFolder extends TestCase {
 	
@@ -105,7 +105,7 @@ public class TestFolder extends TestCase {
 		String oxFolderName = "CalendarFolder07";
 		String mailFolderName = "MyMailFolder25";
 		String newOXFolderObj = "{\"folder_id\":65,\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":140}],\"title\":\""+oxFolderName+"\",\"module\":2}";
-		String newMailFolderObj = "{\"folder_id\":\"INBOX\",\"permissions\":[{\"group\":false,\"bits\":\"lrswipcda\",\"entity\":140}],\"title\":\""+mailFolderName+"\",\"module\":"+OXFolder.MAIL+"}";
+		String newMailFolderObj = "{\"folder_id\":\"INBOX\",\"permissions\":[{\"group\":false,\"bits\":\"lrswipcda\",\"entity\":140}],\"title\":\""+mailFolderName+"\",\"module\":"+FolderObject.MAIL+"}";
 		byte[] bytes;
 		String expectedInsertPrefix = "{OK: Folder successfully inserted";
 		int oxFolderId = -1;
@@ -168,7 +168,7 @@ public class TestFolder extends TestCase {
 			fail(e.getMessage());
 		}
 		String updateOXFolderObj = "{\"folder_id\":65,\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":140}],\"title\":\""+oxFolderName+"_Changed\",\"module\":2}";
-		String updateMailFolderObj = "{\"folder_id\":\"INBOX\",\"permissions\":[{\"group\":false,\"bits\":\"lrswipcda\",\"entity\":140}],\"title\":\""+mailFolderName+"Changed\",\"module\":"+OXFolder.MAIL+"}";
+		String updateMailFolderObj = "{\"folder_id\":\"INBOX\",\"permissions\":[{\"group\":false,\"bits\":\"lrswipcda\",\"entity\":140}],\"title\":\""+mailFolderName+"Changed\",\"module\":"+FolderObject.MAIL+"}";
 		String expectedUpdatePrefix = "{OK: Folder successfully updated";
 		/*
 		 * Update OX folder
