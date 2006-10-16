@@ -45,7 +45,6 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
@@ -63,16 +62,16 @@ import org.xmlpull.v1.XmlPullParserException;
 public abstract class DataParser {
 	
 	protected void parseElement(DataObject dataobject, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS))) {
-			dataobject.setObjectID(getValueAsInt(eProp.getChild(OXObject.OBJECT_ID, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS))) {
+			dataobject.setObjectID(getValueAsInt(eProp.getChild(DataFields.OBJECT_ID, XmlServlet.NS)));
 		} 
 
 		if (hasElement(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS))) {
 			dataobject.setCreatedBy(getValueAsInt(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild(OXObject.LAST_MODIFIED, XmlServlet.NS))) {
-			dataobject.setLastModified(getValueAsDate(eProp.getChild(OXObject.LAST_MODIFIED, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS))) {
+			dataobject.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		} 
 	}
 	

@@ -44,9 +44,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXCommon;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.CommonFields;
 import org.jdom.Element;
 
 /**
@@ -58,8 +58,8 @@ import org.jdom.Element;
 public abstract class FolderChildParser extends DataParser {
 	
 	protected void parseElementFolderChildObject(FolderChildObject folderchildobject, Element eProp) throws Exception {		
-		if (hasElement(eProp.getChild(OXCommon.FOLDER_ID, XmlServlet.NS))) {
-			folderchildobject.setParentFolderID(getValueAsInt(eProp.getChild(OXCommon.FOLDER_ID, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(CommonFields.FOLDER_ID, XmlServlet.NS))) {
+			folderchildobject.setParentFolderID(getValueAsInt(eProp.getChild(CommonFields.FOLDER_ID, XmlServlet.NS)));
 		} 
 		
 		parseElement(folderchildobject, eProp);

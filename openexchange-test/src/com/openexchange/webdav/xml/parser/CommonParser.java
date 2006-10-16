@@ -44,9 +44,9 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api.OXCommon;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.CommonFields;
 import org.jdom.Element;
 
 /**
@@ -58,16 +58,16 @@ import org.jdom.Element;
 public abstract class CommonParser extends FolderChildParser {
 		
 	protected void parseElementCommon(CommonObject commonobject, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXCommon.CATEGORIES, XmlServlet.NS))) {
-			commonobject.setCategories(getValue(eProp.getChild(OXCommon.CATEGORIES, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS))) {
+			commonobject.setCategories(getValue(eProp.getChild(CommonFields.CATEGORIES, XmlServlet.NS)));
 		} 
 		
-		if (hasElement(eProp.getChild("private_flag", XmlServlet.NS))) {
-			commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild("private_flag", XmlServlet.NS)));
+		if (hasElement(eProp.getChild(CommonFields.PRIVATE_FLAG, XmlServlet.NS))) {
+			commonobject.setPrivateFlag(getValueAsBoolean(eProp.getChild(CommonFields.PRIVATE_FLAG, XmlServlet.NS)));
 		} 
 
-		if (hasElement(eProp.getChild(OXCommon.COLOR_LABEL, XmlServlet.NS))) {
-			commonobject.setLabel(getValueAsInt(eProp.getChild(OXCommon.COLOR_LABEL, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(CommonFields.COLORLABEL, XmlServlet.NS))) {
+			commonobject.setLabel(getValueAsInt(eProp.getChild(CommonFields.COLORLABEL, XmlServlet.NS)));
 		} 
 
 		parseElementFolderChildObject(commonobject, eProp);

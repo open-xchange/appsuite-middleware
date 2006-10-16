@@ -4,7 +4,6 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api.OXObject;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -12,6 +11,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -275,7 +275,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		Element eProp = new Element("prop", webdav);
 		
-		Element eObjectId = new Element(OXObject.OBJECT_ID, XmlServlet.NS);
+		Element eObjectId = new Element(DataFields.OBJECT_ID, XmlServlet.NS);
 		eObjectId.addContent(String.valueOf(objectId));
 		eProp.addContent(eObjectId);
 		

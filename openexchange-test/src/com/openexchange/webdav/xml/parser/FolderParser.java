@@ -47,10 +47,10 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api.OXFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.FolderFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom.Element;
@@ -68,33 +68,33 @@ public class FolderParser extends FolderChildParser {
 	}
 	
 	public void parse(FolderObject folderObj, Element eProp) throws Exception {
-		if (hasElement(eProp.getChild(OXFolder.TITLE, XmlServlet.NS))) {
-			folderObj.setFolderName(getValue(eProp.getChild(OXFolder.TITLE, XmlServlet.NS)));
+		if (hasElement(eProp.getChild(FolderFields.TITLE, XmlServlet.NS))) {
+			folderObj.setFolderName(getValue(eProp.getChild(FolderFields.TITLE, XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXFolder.TYPE, XmlServlet.NS))) {
-			String type = getValue(eProp.getChild(OXFolder.TYPE, XmlServlet.NS));
+		if (hasElement(eProp.getChild(FolderFields.TYPE, XmlServlet.NS))) {
+			String type = getValue(eProp.getChild(FolderFields.TYPE, XmlServlet.NS));
 			if (type.equals("private") || type.equals("shared")) {
-				folderObj.setType(OXFolder.PRIVATE);
+				folderObj.setType(FolderObject.PRIVATE);
 			} else if (type.equals("public")) {
-				folderObj.setType(OXFolder.PUBLIC);
+				folderObj.setType(FolderObject.PUBLIC);
 			} else {
-				throw new OXConflictException("unknown value in " + OXFolder.TYPE + ": " + type);
+				throw new OXConflictException("unknown value in " + FolderFields.TYPE + ": " + type);
 			}
 		}
 		
-		if (hasElement(eProp.getChild(OXFolder.MODULE, XmlServlet.NS))) {
-			String module = eProp.getChild(OXFolder.MODULE, XmlServlet.NS).getValue();
+		if (hasElement(eProp.getChild(FolderFields.MODULE, XmlServlet.NS))) {
+			String module = eProp.getChild(FolderFields.MODULE, XmlServlet.NS).getValue();
 			if (module.equals("calendar")) {
-				folderObj.setModule(OXFolder.CALENDAR);
+				folderObj.setModule(FolderObject.CALENDAR);
 			} else if (module.equals("contact")) {
-				folderObj.setModule(OXFolder.CONTACT);
+				folderObj.setModule(FolderObject.CONTACT);
 			} else if (module.equals("task")) {
-				folderObj.setModule(OXFolder.TASK);
+				folderObj.setModule(FolderObject.TASK);
 			} else if (module.equals("unbound")) {
-				folderObj.setModule(OXFolder.UNBOUND);
+				folderObj.setModule(FolderObject.UNBOUND);
 			} else {
-				throw new OXConflictException("unknown value in " + OXFolder.MODULE + ": " + module);
+				throw new OXConflictException("unknown value in " + FolderFields.MODULE + ": " + module);
 			}
 		}
 		
@@ -102,8 +102,8 @@ public class FolderParser extends FolderChildParser {
 			folderObj.setDefaultFolder(getValueAsBoolean(eProp.getChild("defaultfolder", XmlServlet.NS)));
 		}
 		
-		if (hasElement(eProp.getChild(OXFolder.PERMISSIONS, XmlServlet.NS))) {
-			parseElementPermissions(folderObj, eProp.getChild(OXFolder.PERMISSIONS, XmlServlet.NS));
+		if (hasElement(eProp.getChild(FolderFields.PERMISSIONS, XmlServlet.NS))) {
+			parseElementPermissions(folderObj, eProp.getChild(FolderFields.PERMISSIONS, XmlServlet.NS));
 		}
 
 		parseElementFolderChildObject(folderObj, eProp);
