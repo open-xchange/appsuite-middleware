@@ -588,7 +588,6 @@ public class AppointmentTest extends AbstractAJAXTest {
     
     private static AppointmentObject[] jsonArray2AppointmentArray(JSONArray jsonArray, TimeZone userTimeZone) throws Exception {
         AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
-        
         AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
         
         for (int a = 0; a < appointmentArray.length; a++) {
