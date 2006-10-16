@@ -12,7 +12,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -270,7 +269,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		Element eProp = new Element("prop", webdav);
 		
-		Element eObjectId = new Element(DataFields.OBJECT_ID, XmlServlet.NS);
+		Element eObjectId = new Element(OXObject.OBJECT_ID, XmlServlet.NS);
 		eObjectId.addContent(String.valueOf(objectId));
 		eProp.addContent(eObjectId);
 		
