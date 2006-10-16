@@ -2,7 +2,6 @@
 package com.openexchange.groupware;
 
 
-import com.openexchange.api.OXFolder;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
@@ -264,7 +263,7 @@ public class CalendarTest extends TestCase {
         cdao.setDays(1);
         cdao.setRecurrenceID(1);
         
-        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -360,7 +359,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testMove - Step 1 - Insert");
-        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -465,7 +464,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testConflict Step 1 - Insert - ignore conflicts");
-        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -478,7 +477,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject conflict_cdao = new CalendarDataObject();
 
         conflict_cdao.setTitle("testConflict Step 2 - Insert - Must conflict");
-        conflict_cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, OXFolder.CALENDAR, context));
+        conflict_cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
         
         
         conflict_cdao.setContext(so.getContext());
