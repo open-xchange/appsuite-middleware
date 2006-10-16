@@ -14,6 +14,7 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -647,7 +648,11 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws Exception {
+	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, String host, String session) throws OXException, Exception {
+		return searchContact(webCon, searchpattern, inFolder, cols, false, host, session);
+	}
+	
+	public static ContactObject[] searchContact(WebConversation webCon, String searchpattern, int inFolder, int[] cols, boolean startletter, String host, String session) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -658,6 +663,7 @@ public class ContactTest extends AbstractAJAXTest {
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
 		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		jsonObj.put("startletter", startletter);
 		
 		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
@@ -667,7 +673,7 @@ public class ContactTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
+			throw new OXException(response.getErrorMessage());
 		}
 		
 		assertNotNull("timestamp", response.getTimestamp());
