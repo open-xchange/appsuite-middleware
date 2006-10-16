@@ -39,6 +39,7 @@ public class CopyTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.FREE);
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");

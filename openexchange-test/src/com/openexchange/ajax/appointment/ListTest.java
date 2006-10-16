@@ -30,6 +30,8 @@ public class ListTest extends AppointmentTest {
 	
 	public void testList() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
+		appointmentObj.setIgnoreConflicts(true);
+		
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -49,6 +51,7 @@ public class ListTest extends AppointmentTest {
 	
 	public void testListWithNoEntries() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
+		appointmentObj.setIgnoreConflicts(true);
 		int id1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		int id2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		int id3 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());

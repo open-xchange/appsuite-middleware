@@ -172,7 +172,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         JSONWriter jsonWriter = new JSONWriter(pw);
         
         AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, userTimeZone);
-        appointmentwriter.writeAppointment(appointmentObj, true);
+        appointmentwriter.writeAppointment(appointmentObj);
         
         pw.flush();
         
@@ -214,7 +214,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         JSONWriter jsonWriter = new JSONWriter(pw);
         
         AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, userTimeZone);
-        appointmentwriter.writeAppointment(appointmentObj, true);
+        appointmentwriter.writeAppointment(appointmentObj);
         
         pw.flush();
         

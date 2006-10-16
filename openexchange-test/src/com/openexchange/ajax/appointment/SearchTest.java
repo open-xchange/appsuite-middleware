@@ -25,6 +25,7 @@ public class SearchTest extends AppointmentTest {
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		

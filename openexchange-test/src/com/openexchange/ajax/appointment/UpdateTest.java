@@ -30,6 +30,7 @@ public class UpdateTest extends AppointmentTest {
 
 	public void testSimple() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testSimple");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);
@@ -44,6 +45,7 @@ public class UpdateTest extends AppointmentTest {
 	
 	public void testUpdateAppointmentWithParticipant() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentWithParticipants");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		appointmentObj.setShownAs(AppointmentObject.RESERVED);

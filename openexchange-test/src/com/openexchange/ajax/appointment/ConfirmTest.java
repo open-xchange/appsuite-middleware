@@ -37,6 +37,8 @@ public class ConfirmTest extends AppointmentTest {
 		participants[1].setIdentifier(secondUserId);
 		
 		appointmentObj.setParticipants(participants);
+		
+		appointmentObj.setIgnoreConflicts(true);
 
         int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         

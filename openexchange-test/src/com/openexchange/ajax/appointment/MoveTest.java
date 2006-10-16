@@ -27,6 +27,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
@@ -52,6 +53,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
