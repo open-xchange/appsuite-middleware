@@ -5,17 +5,12 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api.OXObject;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -149,7 +144,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		} else {
 			taskObj = (Task)response[0].getDataObject();
 			objectId = taskObj.getObjectID();
@@ -177,7 +172,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		TaskWriter appointmentWriter = new TaskWriter();
 		appointmentWriter.addContent2PropElement(eProp, taskObj, false);
-
+		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
@@ -197,7 +192,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		} else {
 			taskObj = (Task)response[0].getDataObject();
 			objectId = taskObj.getObjectID();
@@ -210,6 +205,16 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteTask(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		ArrayList failed = new ArrayList();
+		
+		for (int a = 0; a < objectIdAndFolderId.length; a++) {
+			deleteTask(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
+		}
+		
+		return new int[] { };
+	}
+	
+	public static void deleteTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -217,25 +222,22 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int[] i = objectIdAndFolderId[a];
-			
-			Task taskObj = new Task();
-			taskObj.setObjectID(i[0]);
-			taskObj.setParentFolderID(i[1]);
-			taskObj.setLastModified(new Date());
-			
-			Element eProp = new Element("prop", webdav);
-			
-			TaskWriter taskWriter = new TaskWriter();
-			taskWriter.addContent2PropElement(eProp, taskObj, false);
-			
-			Element eMethod = new Element("method", XmlServlet.NS);
-			eMethod.addContent("DELETE");
-			eProp.addContent(eMethod);
-			
-			rootElement.addContent(addProp2PropertyUpdate(eProp));
-		}
+		
+		Task taskObj = new Task();
+		taskObj.setObjectID(objectId);
+		taskObj.setParentFolderID(inFolder);
+		taskObj.setLastModified(new Date());
+		
+		Element eProp = new Element("prop", webdav);
+		
+		TaskWriter taskWriter = new TaskWriter();
+		taskWriter.addContent2PropElement(eProp, taskObj, false);
+		
+		Element eMethod = new Element("method", XmlServlet.NS);
+		eMethod.addContent("DELETE");
+		eProp.addContent(eMethod);
+		
+		rootElement.addContent(addProp2PropertyUpdate(eProp));
 		
 		Document doc = new Document(rootElement);
 		XMLOutputter xo = new XMLOutputter();
@@ -252,28 +254,12 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
-		
-		assertEquals("check response", objectIdAndFolderId.length, response.length);
-		
-		ArrayList idList = new ArrayList();
-		
-		for (int a = 0; a < response.length; a++) {
-			Task taskObj = (Task)response[a].getDataObject();
-			
-			if (response[a].hasError()) {
-				idList.add(new Integer(taskObj.getObjectID()));
-			}
-			
-			assertEquals("check response status", 200, response[a].getStatus());
+
+		if (response[0].hasError()) {
+			throw new OXException(response[0].getErrorMessage());
 		}
 		
-		int[] failed = new int[idList.size()];
-		
-		for (int a = 0; a < failed.length; a++) {
-			failed[a] = ((Integer)idList.get(a)).intValue();
-		}
-		
-		return failed;
+		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
 	public static void confirmTask(WebConversation webCon, int objectId, int confirm, String confirmMessage, String host, String login, String password) throws Exception {

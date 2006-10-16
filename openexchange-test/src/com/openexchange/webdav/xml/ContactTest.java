@@ -4,9 +4,8 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api.OXObject;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -298,7 +297,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return contactObj;
 	}
 	
-	public static int insertContact(WebConversation webCon, ContactObject contactObj, String host, String login, String password) throws Exception {
+	public static int insertContact(WebConversation webCon, ContactObject contactObj, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		int objectId = 0;
@@ -331,7 +330,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		} else {
 			contactObj = (ContactObject)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
@@ -347,7 +346,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return objectId;
 	}
 	
-	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		contactObj.setObjectID(objectId);
@@ -382,7 +381,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		} else {
 			contactObj = (ContactObject)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
@@ -395,6 +394,16 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteContact(WebConversation webCon, int[][] objectIdAndFolderId, String host, String login, String password) throws Exception {
+		ArrayList failed = new ArrayList();
+		
+		for (int a = 0; a < objectIdAndFolderId.length; a++) {
+			deleteContact(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
+		}
+		
+		return new int[] { };
+	}
+	
+	public static void deleteContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -402,25 +411,21 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int[] i = objectIdAndFolderId[a];
-			
-			ContactObject contactObj = new ContactObject();
-			contactObj.setObjectID(i[0]);
-			contactObj.setParentFolderID(i[1]);
-			contactObj.setLastModified(new Date());
-			
-			Element eProp = new Element("prop", webdav);
-			
-			ContactWriter contactWriter = new ContactWriter();
-			contactWriter.addContent2PropElement(eProp, contactObj, false);
-			
-			Element eMethod = new Element("method", XmlServlet.NS);
-			eMethod.addContent("DELETE");
-			eProp.addContent(eMethod);
-			
-			rootElement.addContent(addProp2PropertyUpdate(eProp));
-		}
+		ContactObject contactObj = new ContactObject();
+		contactObj.setObjectID(objectId);
+		contactObj.setParentFolderID(inFolder);
+		contactObj.setLastModified(new Date());
+		
+		Element eProp = new Element("prop", webdav);
+		
+		ContactWriter contactWriter = new ContactWriter();
+		contactWriter.addContent2PropElement(eProp, contactObj, false);
+		
+		Element eMethod = new Element("method", XmlServlet.NS);
+		eMethod.addContent("DELETE");
+		eProp.addContent(eMethod);
+		
+		rootElement.addContent(addProp2PropertyUpdate(eProp));
 		
 		Document doc = new Document(rootElement);
 		XMLOutputter xo = new XMLOutputter();
@@ -438,27 +443,11 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 		
-		assertEquals("check response", objectIdAndFolderId.length, response.length);
-		
-		ArrayList idList = new ArrayList();
-		
-		for (int a = 0; a < response.length; a++) {
-			ContactObject contactObj = (ContactObject)response[a].getDataObject();
-			
-			if (response[a].hasError()) {
-				idList.add(new Integer(contactObj.getObjectID()));
-			}
-			
-			assertEquals("check response status", 200, response[a].getStatus());
+		if (response[0].hasError()) {
+			throw new OXException(response[0].getErrorMessage());		
 		}
 		
-		int[] failed = new int[idList.size()];
-		
-		for (int a = 0; a < failed.length; a++) {
-			failed[a] = ((Integer)idList.get(a)).intValue();
-		}
-		
-		return failed;
+		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
