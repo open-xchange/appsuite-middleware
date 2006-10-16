@@ -24,6 +24,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -453,7 +454,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols, userTimeZone);
     }
     
-    public static AppointmentObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date start, Date end, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
+    public static AppointmentObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date start, Date end, Date modified, TimeZone userTimeZone, String host, String session) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		final int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
@@ -476,14 +477,21 @@ public class AppointmentTest extends AbstractAJAXTest {
         final Response response = Response.parse(resp.getText());
         
         if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
+            throw new OXException(response.getErrorMessage());
         }
         
         assertNotNull("timestamp", response.getTimestamp());
         
         assertEquals(200, resp.getResponseCode());
+		
+		JSONArray jsonArray = (JSONArray)response.getData();
+		AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
+		for (int a = 0; a < jsonArray.length(); a++) {
+			appointmentArray[a] = new AppointmentObject();
+			appointmentArray[a].setObjectID(jsonArray.getInt(a));
+		}
         
-        return jsonArray2AppointmentArray((JSONArray)response.getData(), userTimeZone);
+       return appointmentArray;
     }
     
     public static AppointmentObject[] searchAppointment(WebConversation webCon, String searchpattern, int inFolder, int[] cols, TimeZone userTimeZone, String host, String session) throws Exception {
