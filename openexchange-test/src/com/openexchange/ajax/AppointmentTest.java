@@ -420,16 +420,20 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentObj;
     }
     
-    public static AppointmentObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
+    public static AppointmentObject[] listModifiedAppointment(WebConversation webCon, int inFolder, Date start, Date end, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
 		host = appendPrefix(host);
+		
+		final int[] cols = new int[]{ AppointmentObject.OBJECT_ID };
 		
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
         parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP_SINCE, modified);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(new int[]{ AppointmentObject.OBJECT_ID }));
+        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
+		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
+		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
         
         WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         WebResponse resp = webCon.getResponse(req);
@@ -446,7 +450,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         
         assertEquals(200, resp.getResponseCode());
         
-        return jsonArray2AppointmentArray((JSONArray)response.getData(), userTimeZone);
+		return jsonArray2AppointmentArray((JSONArray)response.getData(), cols, userTimeZone);
     }
     
     public static AppointmentObject[] listDeleteAppointment(WebConversation webCon, int inFolder, Date modified, TimeZone userTimeZone, String host, String session) throws Exception {
