@@ -21,8 +21,8 @@ public class UpdatesTest extends AppointmentTest {
 		
 	}
 	
-	public void _notesttestUpdates() throws Exception {
-		AppointmentTest.listModifiedAppointment(getWebConversation(), appointmentFolderId, new Date(System.currentTimeMillis()-(dayInMillis*7)), timeZone, PROTOCOL + getHostName(), getSessionId());
+	public void testUpdates() throws Exception {
+		AppointmentTest.listModifiedAppointment(getWebConversation(), appointmentFolderId, new Date(), new Date(), new Date(System.currentTimeMillis()-(dayInMillis*7)), timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 }
 
