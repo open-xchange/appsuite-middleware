@@ -53,10 +53,13 @@ public class CollectionTest extends ResourceTest {
 	}
 	
 	public static void createStructure(WebdavCollection coll, WebdavFactory factory) throws WebdavException, UnsupportedEncodingException {
+		String content = "Hallo Welt!";
+		byte[] bytes = content.getBytes("UTF-8");
+		
 		WebdavResource res = coll.resolveResource("index.html");
 		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
-		res.setLength((long)INDEX_HTML.getBytes("UTF-8").length);
+		res.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
 		res.create();
 		
 		res = coll.resolveResource("sitemap.html");

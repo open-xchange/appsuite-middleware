@@ -51,7 +51,6 @@ public class ResourceTest extends AbstractResourceTest{
 				in2.close();
 		}
 		
-		assertEquals(bytes.length, res.getLength().intValue());
 	}
 	
 	public void testMove() throws Exception {
@@ -347,6 +346,20 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals((Long)2l, res.getLength());
+		
+		try {
+			String content = "Hello, I'm the content!";
+			byte[] bytes = content.getBytes("UTF-8");
+			
+			res.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
+			
+			assertEquals(bytes.length, (int)(long) res.getLength());
+			
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		
 		return null;
 	}
 

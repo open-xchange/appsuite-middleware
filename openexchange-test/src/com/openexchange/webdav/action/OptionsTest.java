@@ -33,5 +33,6 @@ public class OptionsTest extends ActionTestCase {
 		assertEquals("1", davs[0]);
 		assertEquals("2", davs[1]);
 		
+		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}
 }

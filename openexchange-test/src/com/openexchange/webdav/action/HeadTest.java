@@ -18,5 +18,6 @@ public class HeadTest extends ActionTestCase {
 		assertEquals("", res.getResponseBodyAsString());
 		assertEquals(content.getBytes("UTF-8").length, (int) new Integer(res.getHeader("content-length")));
 		assertEquals("text/html", res.getHeader("content-type"));
+		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}
 }

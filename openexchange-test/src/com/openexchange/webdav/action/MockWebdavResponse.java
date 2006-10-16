@@ -43,4 +43,8 @@ public class MockWebdavResponse implements WebdavResponse {
 		this.status = status;
 	}
 
+	public byte[] getResponseBytes() {
+		return out.toByteArray();
+	}
+
 }
