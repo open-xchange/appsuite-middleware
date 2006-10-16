@@ -332,7 +332,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void testMonthlyRecurrenceDayInMonth() throws Exception {
+	public void _notestMonthlyRecurrenceDayInMonth() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -350,7 +350,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
                 appointmentObj.setDayInMonth(15);
-		appointmentObj.setInterval(1);
+		appointmentObj.setInterval(1); 
 		appointmentObj.setUntil(until);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
@@ -359,7 +359,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestMonthlyRecurrenceDays() throws Exception {
+	public void testMonthlyRecurrenceDays() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -405,7 +405,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceType(AppointmentObject.YEARLY);
 		appointmentObj.setMonth(Calendar.JULY);
-		appointmentObj.setDays(15);
+		appointmentObj.setDayInMonth(15);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -431,7 +431,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceType(AppointmentObject.MONTHLY);
+		appointmentObj.setRecurrenceType(AppointmentObject.YEARLY);
 		appointmentObj.setMonth(Calendar.JULY);
 		appointmentObj.setDays(AppointmentObject.WEDNESDAY);
 		appointmentObj.setDayInMonth(3);
