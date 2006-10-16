@@ -109,8 +109,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	public static int insertFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception, OXException {
 		host = appendPrefix(host);
 		
-		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
-		
 		int objectId = 0;
 		
 		folderObj.removeObjectID();
@@ -162,8 +160,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	public static void updateFolder(WebConversation webCon, FolderObject folderObj, String host, String login, String password) throws Exception, OXException {
 		host = appendPrefix(host);
 		
-		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
-		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		Element eProp = new Element("prop", webdav);
@@ -207,8 +203,6 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	
 	public static int[] deleteFolder(WebConversation webCon, int[] id, String host, String login, String password) throws Exception, OXException {
 		host = appendPrefix(host);
-		
-		int userId = GroupUserTest.searchUser(webCon, login, new Date(0), host, login, password)[0].getInternalUserId();
 		
 		Element rootElement = new Element("multistatus", webdav);
 		rootElement.addNamespaceDeclaration(XmlServlet.NS);
@@ -335,7 +329,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return folderArray;
 	}
 	
-	public static FolderObject loadFolder(WebConversation webCon, int objectId, String host, String login, String password) throws Exception {
+	public static FolderObject loadFolder(WebConversation webCon, int objectId, String host, String login, String password) throws Exception, OXException {
 		host = appendPrefix(host);
 		
 		Element ePropfind = new Element("propfind", webdav);
@@ -379,7 +373,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		FolderObject[] folderArray = new FolderObject[response.length];
 		for (int a = 0; a < folderArray.length; a++) {
 			if (response[a].hasError()) {
-				fail("xml error: " + response[a].getErrorMessage());
+				throw new OXException(response[a].getErrorMessage());
 			}
 			
 			folderArray[a] = (FolderObject)response[a].getDataObject();
