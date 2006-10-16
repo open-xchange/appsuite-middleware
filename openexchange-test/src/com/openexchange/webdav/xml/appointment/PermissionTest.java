@@ -15,7 +15,7 @@ public class PermissionTest extends AppointmentTest {
 		
 	}
 	
-	public void _notestInsertAppointmentInPrivateFolderWithoutPermission() throws Exception {
+	public void testInsertAppointmentInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -48,7 +48,7 @@ public class PermissionTest extends AppointmentTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestInsertAppointmentInPublicFolderWithoutPermission() throws Exception {
+	public void testInsertAppointmentInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -81,7 +81,7 @@ public class PermissionTest extends AppointmentTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateAppointmentInPrivateFolderWithoutPermission() throws Exception {
+	public void testUpdateAppointmentInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -117,7 +117,7 @@ public class PermissionTest extends AppointmentTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateAppointmentInPublicFolderWithoutPermission() throws Exception {
+	public void testUpdateAppointmentInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testUpdateAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -153,7 +153,7 @@ public class PermissionTest extends AppointmentTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestDeleteAppointmentInPrivateFolderWithoutPermission() throws Exception {
+	public void testDeleteAppointmentInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteAppointmentInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -189,7 +189,7 @@ public class PermissionTest extends AppointmentTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestDeleteAppointmentInPublicFolderWithoutPermission() throws Exception {
+	public void testDeleteAppointmentInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteAppointmentInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
