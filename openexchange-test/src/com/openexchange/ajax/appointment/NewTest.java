@@ -259,7 +259,7 @@ public class NewTest extends AppointmentTest {
 		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestSharedFolder() throws Exception {
+	public void testSharedFolder() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getStandardCalendarFolder(getSecondWebConversation(), getHostName(), getSecondSessionId());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
@@ -279,7 +279,8 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(targetFolder);
-		
+		appointmentObj.setIgnoreConflicts(true);
+                
 		int objectId = insertAppointment(getSecondWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getSecondWebConversation(), objectId, targetFolder, timeZone, PROTOCOL + getHostName(), getSecondSessionId());
