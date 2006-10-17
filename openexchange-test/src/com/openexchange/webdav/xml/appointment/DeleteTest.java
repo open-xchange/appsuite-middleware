@@ -21,7 +21,7 @@ public class DeleteTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 	}
 	
-	public void _notestUpdateAppointmentConcurentConflict() throws Exception {
+	public void _notestDeleteConcurentConflict() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -36,7 +36,7 @@ public class DeleteTest extends AppointmentTest {
 		deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestUpdateAppointmentNotFound() throws Exception {
+	public void _notestDeleteNotFound() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
