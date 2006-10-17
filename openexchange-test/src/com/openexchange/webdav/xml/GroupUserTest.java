@@ -15,13 +15,17 @@ import java.util.Date;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 public class GroupUserTest extends AbstractWebdavXMLTest {
-	
+
+    private static final Log LOG = LogFactory.getLog(GroupUserTest.class);
+
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 	
 	protected void setUp() throws Exception {
@@ -69,6 +73,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
+        LOG.debug("Request Body: " + new String(baos.toByteArray(), "UTF-8"));
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
