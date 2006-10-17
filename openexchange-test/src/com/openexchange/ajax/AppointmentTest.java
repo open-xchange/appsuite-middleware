@@ -1,5 +1,6 @@
 package com.openexchange.ajax;
 
+import com.openexchange.tools.StringCollection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -612,6 +613,10 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
     
     private static void parseCols(int[] cols, JSONArray jsonArray, AppointmentObject appointmentObj) throws Exception {
+		if (cols.length != jsonArray.length()) {
+			LOG.debug("expected cols: " + StringCollection.convertArray2String(cols) + " recieved cols: " + jsonArray.toString());
+		}
+		
         assertEquals("compare array size with cols size", cols.length, jsonArray.length());
         
         for (int a = 0; a < cols.length; a++) {
