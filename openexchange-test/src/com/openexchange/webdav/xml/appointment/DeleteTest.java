@@ -1,7 +1,9 @@
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -17,6 +19,36 @@ public class DeleteTest extends AppointmentTest {
 		int[][] objectIdAndFolderId = { { objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
 		
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
+	}
+	
+	public void _notestUpdateAppointmentConcurentConflict() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		try {
+			deleteAppointment(webCon, objectId, appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password );
+			fail("expected concurent modification exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
+		}
+		
+		deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void _notestUpdateAppointmentNotFound() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		try {
+			deleteAppointment(webCon, (objectId + 1000), appointmentFolderId, PROTOCOL + hostName, login, password );
+			fail("expected object not found exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+		}
+		
+		deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void _notestDeleteRecurrenceWithDatePosition() throws Exception {
