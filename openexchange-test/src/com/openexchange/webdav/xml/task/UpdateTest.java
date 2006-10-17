@@ -1,14 +1,13 @@
 package com.openexchange.webdav.xml.task;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.GroupParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class UpdateTest extends TaskTest {
@@ -44,6 +43,40 @@ public class UpdateTest extends TaskTest {
 		taskObj.setParticipants(participants);
 		
 		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+	}
+	
+	public void _notestUpdateConcurentConflict() throws Exception {
+		Task taskObj = createTask("testUpdateTaskConcurentConflict");
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		taskObj = createTask("testUpdateTaskConcurentConflict2");
+		
+		try {
+			updateTask(webCon, taskObj, objectId, taskFolderId, new Date(0), PROTOCOL + hostName, login, password);
+			fail("expected concurent modification exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
+		}
+		
+		int[][] objectIdAndFolderId = { {objectId, taskFolderId } };
+		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void testUpdateNotFound() throws Exception {
+		Task taskObj = createTask("testUpdateTaskNotFound");
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		taskObj = createTask("testUpdateTaskNotFound2");
+		
+		try {
+			updateTask(webCon, taskObj, (objectId + 1000), taskFolderId, new Date(0), PROTOCOL + hostName, login, password);
+			fail("expected object not found exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+		}
+		
+		int[][] objectIdAndFolderId = { {objectId, taskFolderId } };
+		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 }
 
