@@ -40,9 +40,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 public class CalendarRecurringTests extends TestCase {
-    
-    private final static int TEST_PASS = 1;
-    private final static int TEST_PASS_HOT_SPOT = 1;    
+     
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     
     private static int userid = 11; // bishoph
@@ -99,7 +97,6 @@ public class CalendarRecurringTests extends TestCase {
         return privatefolder;        
     }
     
-    
    public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();      
         assertFalse(cdao.calculateRecurrence());
@@ -149,16 +146,16 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         long pass_one_start = System.currentTimeMillis();
-        for (int a = 0; a < TEST_PASS; a++) {
-            CalendarRecurringCollection.fillDAO(cdao);
-        }
+
+        CalendarRecurringCollection.fillDAO(cdao);
+        
         long pass_one_end = System.currentTimeMillis();
         long pass_one_time = pass_one_end - pass_one_start;
         
         long pass_two_start = System.currentTimeMillis();
-        for (int a = 0; a < TEST_PASS_HOT_SPOT; a++) {
-            CalendarRecurringCollection.fillDAO(cdao);
-        }
+
+        CalendarRecurringCollection.fillDAO(cdao);
+        
         long pass_two_end = System.currentTimeMillis();
         long pass_two_time = pass_two_end - pass_two_start;
         
@@ -189,9 +186,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
-        for (int a = 0; a < TEST_PASS; a++) {
-            CalendarRecurringCollection.fillDAO(cdao);
-        }
+        CalendarRecurringCollection.fillDAO(cdao);
         String check = CalendarRecurringCollection.createDSString(cdao);        
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
         RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
@@ -200,6 +195,7 @@ public class CalendarRecurringTests extends TestCase {
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
     }       
+    
     
     public void testWeeklyRecurrence() throws Throwable {
         
@@ -215,8 +211,12 @@ So Mo Di Mi Do Fr Sa
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1151100000000L; // 24.06.2006 00:00 (GMT)
+        Calendar c = Calendar.getInstance();
+        RecurringResults m = null;
+        CalendarDataObject cdao = null;
         
-        CalendarDataObject cdao = new CalendarDataObject();
+        // MONDAY
+        cdao = new CalendarDataObject();
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -224,16 +224,152 @@ So Mo Di Mi Do Fr Sa
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.MONDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
+        
+        
+        // SUNDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.SUNDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);        
+        
+        // TUESDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.TUESDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (TUESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.TUESDAY);          
+        
+        
+        // WEDNESDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.WEDNESDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);         
+        
+        // THURSDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.THURSDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.THURSDAY);         
+        
+        // FRIDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.FRIDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);         
+        
+        // SATURDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.SATURDAY);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (SATURDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SATURDAY);           
+        
+        // MONDAY + THURSDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.THURSDAY);
         CalendarRecurringCollection.fillDAO(cdao);
-        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 5, m.size()); 
-        Calendar c = Calendar.getInstance();
+        
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.THURSDAY);
         c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
-        assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
+        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
+        
+        
+        // SUNDAY + MONDAY
+        cdao = new CalendarDataObject();
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceCalculator(1);
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.SUNDAY);
+        CalendarRecurringCollection.fillDAO(cdao);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Check calculation", 5, m.size()); 
+        
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);
+        c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
+        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);        
+        
         
     }       
     
