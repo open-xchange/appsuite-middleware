@@ -1,7 +1,11 @@
 package com.openexchange.webdav.xml.folder;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class ListTest extends FolderTest {
@@ -16,7 +20,7 @@ public class ListTest extends FolderTest {
 	 
 		FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
 	 
-		assertTrue("check response", folderArray.length == 2);
+		assertTrue("expected response size is < 2", folderArray.length >= 2);
 	 }
 	 
 	public void testPropFindWithDeleted() throws Exception {
@@ -33,7 +37,47 @@ public class ListTest extends FolderTest {
 	 
 		FolderObject[] folderArray = listFolder(webCon, modified, false, true, PROTOCOL + hostName, login, password);
 	 
-		assertTrue("check response", folderArray.length == 2);
+		assertTrue("expected response size is < 2", folderArray.length >= 2);
+	}
+	
+	public void _notestPropFindWithObjectIdOnPrivateFolder() throws Exception {
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testPropFindWithObjectIdOnPrivateFolderWithoutPermission" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.TASK);
+		folderObj.setType(FolderObject.PRIVATE);
+		folderObj.setParentFolderID(1);
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+
+		int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		FolderObject loadFolder = loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
+	public void _notestPropFindWithObjectIdOnPublicFolder() throws Exception {
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testPropFindWithObjectIdOnPublicFolder" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.TASK);
+		folderObj.setType(FolderObject.PRIVATE);
+		folderObj.setParentFolderID(1);
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+
+		int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		FolderObject loadFolder = loadFolder(getWebConversation(), objectId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 }
 
