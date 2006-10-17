@@ -41,6 +41,7 @@ public class ListTest extends AppointmentTest {
 	
 	public void testPropFindWithObjectId() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithObjectId");
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
