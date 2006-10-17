@@ -16,7 +16,7 @@ import java.util.TimeZone;
 
 public class UpdateTest extends AppointmentTest {
 	
-	public void testUpdateAppointment() throws Exception {
+	public void testUpdatet() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -32,7 +32,7 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestUpdateAppointmentConcurentConflict() throws Exception {
+	public void _notestUpdateConcurentConflict() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -53,7 +53,7 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestUpdateAppointmentNotFound() throws Exception {
+	public void _notestUpdateNotFound() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
