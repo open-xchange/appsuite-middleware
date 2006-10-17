@@ -12,6 +12,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -161,10 +162,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		updateTask(webCon, taskObj, objectId, inFolder, new Date(), host, login, password);
+	}
+	
+	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws Exception {
 		host = appendPrefix(host);
 		
 		taskObj.setObjectID(objectId);
-		taskObj.setLastModified(new Date());
+		taskObj.setLastModified(lastModified);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
@@ -215,6 +220,10 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+		deleteTask(webCon, objectId, inFolder, new Date(), host, login, password);
+	}
+	
+	public static void deleteTask(WebConversation webCon, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws Exception {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -226,7 +235,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		Task taskObj = new Task();
 		taskObj.setObjectID(objectId);
 		taskObj.setParentFolderID(inFolder);
-		taskObj.setLastModified(new Date());
+		taskObj.setLastModified(lastModified);
 		
 		Element eProp = new Element("prop", webdav);
 		
@@ -269,7 +278,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		
 		Element eProp = new Element("prop", webdav);
 		
-		Element eObjectId = new Element(OXObject.OBJECT_ID, XmlServlet.NS);
+		Element eObjectId = new Element(DataFields.OBJECT_ID, XmlServlet.NS);
 		eObjectId.addContent(String.valueOf(objectId));
 		eProp.addContent(eObjectId);
 		
