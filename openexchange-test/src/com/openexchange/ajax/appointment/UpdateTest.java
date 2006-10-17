@@ -75,16 +75,19 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _testPrivateFolder() throws Exception {
-		fail("not implemented!");
-	}
-	
-	public void _notestPublicFolder() throws Exception {
-		fail("not implemented!");
-	}
-	
-	public void _notestSharedFolder() throws Exception {
-		fail("not implemented!");
+	public void testSimple() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testSimple");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setFullTime(true);
+		appointmentObj.setLocation(null);
+		appointmentObj.setObjectID(objectId);
+		appointmentObj.removeParentFolderID();
+		
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void _notestUpdateRecurrenceWithPosition() throws Exception {
@@ -129,5 +132,7 @@ public class UpdateTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
+	
+	
 }
 
