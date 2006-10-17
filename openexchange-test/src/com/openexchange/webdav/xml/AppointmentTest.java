@@ -162,10 +162,14 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
+		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(), host, login, password);
+	}
+
+	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		appointmentObj.setObjectID(objectId);
-		appointmentObj.setLastModified(new Date());
+		appointmentObj.setLastModified(lastModified);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
