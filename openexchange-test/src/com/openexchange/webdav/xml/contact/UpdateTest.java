@@ -40,6 +40,7 @@ public class UpdateTest extends ContactTest {
 		
 		updateContact(webCon, contactObj, objectId, contactFolderId, PROTOCOL + hostName, login, password);
 		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		contactObj.removeImage1();
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
