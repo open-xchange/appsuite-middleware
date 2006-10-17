@@ -6,6 +6,10 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ConfirmTest extends TaskTest {
 	
+	public void testDummy() {
+		
+	}
+	
 	public void _notestConfirm() throws Exception {
 		Task taskObj = createTask("testConfirm");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
