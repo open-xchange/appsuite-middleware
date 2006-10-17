@@ -226,8 +226,12 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		return new int[] { };
 	}
-	
+
 	public static void deleteAppointment(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
+		deleteAppointment(webCon, objectId, inFolder, new Date(), host, login, password);
+	}
+	
+	public static void deleteAppointment(WebConversation webCon, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -238,7 +242,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setParentFolderID(inFolder);
-		appointmentObj.setLastModified(new Date());
+		appointmentObj.setLastModified(lastModified);
 		
 		Element eProp = new Element("prop", webdav);
 		
