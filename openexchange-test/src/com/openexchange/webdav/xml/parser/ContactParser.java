@@ -482,7 +482,7 @@ public class ContactParser extends CommonParser {
 	protected void parseElementEntry(Element e, DistributionListEntryObject entry) throws Exception {
 		String s = null;
 		
-		if ((s = e.getAttributeValue(ContactFields.OBJECT_ID, XmlServlet.NS)) != null) {
+		if ((s = e.getAttributeValue(ContactFields.ID, XmlServlet.NS)) != null) {
 			int contactId = Integer.parseInt(s);
 			entry.setEntryID(contactId);
 		}
