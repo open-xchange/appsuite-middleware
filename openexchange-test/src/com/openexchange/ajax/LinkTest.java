@@ -70,6 +70,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setLocation("Location");
 		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
+		ao.setIgnoreConflicts(true);
 		
 		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, TimeZone.getDefault(), PROTOCOL+getHostName(), getSessionId());
 		
@@ -150,6 +151,7 @@ public class LinkTest extends AbstractAJAXTest {
 		ao.setLocation("Location");
 		ao.setShownAs(AppointmentObject.ABSENT);
 		ao.setParentFolderID(fid2);
+		ao.setIgnoreConflicts(true);
 		
 		int oid2 =	AppointmentTest.insertAppointment(webCon, ao, TimeZone.getDefault(), PROTOCOL+host, session);
 		
