@@ -1,7 +1,7 @@
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -9,6 +9,7 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.GroupUserTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -26,6 +27,48 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void _notestUpdateAppointmentConcurentConflict() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict2");
+		appointmentObj.setLocation(null);
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setIgnoreConflicts(true);
+		
+		try {
+			updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password);
+			fail("expected concurent modification exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.MODIFICATION_STATUS);
+		}
+		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void _notestUpdateAppointmentNotFound() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
+		appointmentObj.setLocation(null);
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setIgnoreConflicts(true);
+		
+		try {
+			updateAppointment(webCon, appointmentObj, (objectId + 1000), appointmentFolderId, new Date(0), PROTOCOL + hostName, login, password);
+			fail("expected object not found exception!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+		}
 		
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
