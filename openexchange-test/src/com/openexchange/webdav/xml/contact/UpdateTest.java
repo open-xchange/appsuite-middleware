@@ -48,7 +48,7 @@ public class UpdateTest extends ContactTest {
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateConcurentConflict() throws Exception {
+	public void testUpdateConcurentConflict() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContactConcurentConflict");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
@@ -65,7 +65,7 @@ public class UpdateTest extends ContactTest {
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestUpdateNotFound() throws Exception {
+	public void testUpdateNotFound() throws Exception {
 		ContactObject contactObj = createContactObject("testUpdateContactNotFound");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
