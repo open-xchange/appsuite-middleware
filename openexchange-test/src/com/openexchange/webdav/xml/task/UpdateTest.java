@@ -20,9 +20,10 @@ public class UpdateTest extends TaskTest {
 		taskObj.setNote(null);
 		
 		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateTaskWithParticipants() throws Exception {
+	public void testUpdateTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testUpdateTask");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
@@ -34,7 +35,7 @@ public class UpdateTest extends TaskTest {
 		assertTrue("group array size is not > 0", groupArray.length > 0);
 		int groupParticipantId = groupArray[0].getIdentifier();
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userParticipantId);
 		participants[1] = new GroupParticipant();
@@ -43,6 +44,7 @@ public class UpdateTest extends TaskTest {
 		taskObj.setParticipants(participants);
 		
 		updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void _notestUpdateConcurentConflict() throws Exception {
