@@ -10,12 +10,14 @@ public class ListTest extends ContactTest {
 		Date modified = new Date();
 		
 		ContactObject contactObj = createContactObject("testPropFindWithModified");
-		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", contactArray.length >= 2);
+		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteContact(getWebConversation(), objectId2, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
@@ -39,6 +41,10 @@ public class ListTest extends ContactTest {
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		ContactObject loadContact = loadContact(webCon, objectId, contactFolderId, PROTOCOL + hostName, login, password);
+		
+		contactObj.setObjectID(objectId);
+		compareObject(contactObj, loadContact);
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testListWithAllFields() throws Exception {
@@ -50,12 +56,13 @@ public class ListTest extends ContactTest {
 		
 		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
-		assertEquals("wrong response array length", 1, appointmentArray.length);
+		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
 		ContactObject loadContact = appointmentArray[0];
 		contactObj.setObjectID(objectId);
 		
 		compareObject(contactObj, loadContact);
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 }
