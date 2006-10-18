@@ -70,7 +70,7 @@ public class ListTest extends AppointmentTest {
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
-		assertEquals("wrong response array length", 1, appointmentArray.length);
+		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
 		AppointmentObject loadAppointment = appointmentArray[0];
 		
