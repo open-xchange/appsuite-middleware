@@ -129,7 +129,7 @@ public class CalendarTest extends TestCase {
         
     }
     
-    private static final void fillDatesInDao(CalendarDataObject cdao) {
+    static final void fillDatesInDao(CalendarDataObject cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
         long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
