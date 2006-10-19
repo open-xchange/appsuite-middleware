@@ -9,6 +9,7 @@
   
   <property name="build.compiler" value="modern"/>
   <path id="project.classpath"> 
+  		<pathelement location="${lib}/ox_server.jar" />
 		<pathelement location="${lib}/junit.jar"/>
 		<pathelement location="${lib}/commons-httpclient-2.0.2.jar"/>
 		<pathelement location="${lib}/logging.jar"/>
@@ -16,12 +17,6 @@
 		<pathelement location="${lib}/activation.jar"/>
 		<pathelement location="${lib}/mail.jar"/>
 		<pathelement location="${lib}/jdom.jar"/>
-		<pathelement location="${lib}/comfiretools.jar"/>
-		<pathelement location="${lib}/ajax.jar"/>
-		<pathelement location="${lib}/nas.jar"/>
-		<pathelement location="${lib}/intranet.jar"/>
-		<pathelement location="${lib}/sessiond.jar"/>
-		<pathelement location="${lib}/webdav.jar"/>
 		<pathelement location="${lib}/httpunit.jar"/>
 		<pathelement location="${lib}/js.jar"/>
 		<pathelement location="${lib}/servlet.jar"/>
