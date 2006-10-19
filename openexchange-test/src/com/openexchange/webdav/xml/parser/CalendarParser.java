@@ -47,6 +47,7 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -69,66 +70,66 @@ import org.jdom.Element;
 public abstract class CalendarParser extends CommonParser {
 	
 	protected void parseElementCalendar(CalendarObject calendarobject, Element eProp) throws Exception {		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS))) {
-			calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS)));
-		} 
+		calendarobject.setRecurrenceID(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_ID, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_POSITION, XmlServlet.NS))) {
+		calendarobject.setRecurrencePosition(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_POSITION, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_DATE_POSITION, XmlServlet.NS))) {
+		calendarobject.setRecurrenceDatePosition(getValueAsDate(eProp.getChild(CalendarFields.RECURRENCE_DATE_POSITION, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.MONTH, XmlServlet.NS))) {
+		calendarobject.setMonth(getValueAsInt(eProp.getChild(CalendarFields.MONTH, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.DAY_IN_MONTH, XmlServlet.NS))) {
+		calendarobject.setDayInMonth(getValueAsInt(eProp.getChild(CalendarFields.DAY_IN_MONTH, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.DAYS, XmlServlet.NS))) {
+		calendarobject.setDays(getValueAsInt(eProp.getChild(CalendarFields.DAYS, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.INTERVAL, XmlServlet.NS))) {
+		calendarobject.setInterval(getValueAsInt(eProp.getChild(CalendarFields.INTERVAL, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.UNTIL, XmlServlet.NS))) {
+		calendarobject.setUntil(getValueAsDate(eProp.getChild(CalendarFields.UNTIL, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.START_DATE, XmlServlet.NS))) {
+		calendarobject.setStartDate(getValueAsDate(eProp.getChild(CalendarFields.START_DATE, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.END_DATE, XmlServlet.NS))) {
+		calendarobject.setEndDate(getValueAsDate(eProp.getChild(CalendarFields.END_DATE, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS))) {
+		int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS)));
 		
-		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_POSITION, XmlServlet.NS))) {
-			calendarobject.setRecurrencePosition(getValueAsInt(eProp.getChild(CalendarFields.RECURRENCE_POSITION, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_DATE_POSITION, XmlServlet.NS))) {
-			calendarobject.setRecurrenceDatePosition(getValueAsDate(eProp.getChild(CalendarFields.RECURRENCE_DATE_POSITION, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.MONTH, XmlServlet.NS))) {
-			calendarobject.setMonth(getValueAsInt(eProp.getChild(CalendarFields.MONTH, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.DAY_IN_MONTH, XmlServlet.NS))) {
-			calendarobject.setDayInMonth(getValueAsInt(eProp.getChild(CalendarFields.DAY_IN_MONTH, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.DAYS, XmlServlet.NS))) {
-			calendarobject.setDays(getValueAsInt(eProp.getChild(CalendarFields.DAYS, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.INTERVAL, XmlServlet.NS))) {
-			calendarobject.setInterval(getValueAsInt(eProp.getChild(CalendarFields.INTERVAL, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.UNTIL, XmlServlet.NS))) {
-			calendarobject.setUntil(getValueAsDate(eProp.getChild(CalendarFields.UNTIL, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.START_DATE, XmlServlet.NS))) {
-			calendarobject.setStartDate(getValueAsDate(eProp.getChild(CalendarFields.START_DATE, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.END_DATE, XmlServlet.NS))) {
-			calendarobject.setEndDate(getValueAsDate(eProp.getChild(CalendarFields.END_DATE, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS))) {
-			int recurrenceType = parseRecurrenceType(getValue(eProp.getChild(CalendarFields.RECURRENCE_TYPE, XmlServlet.NS)));
-		
-			calendarobject.setRecurrenceType(recurrenceType);
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.NOTIFICATION, XmlServlet.NS))) {
-			calendarobject.setNotification(getValueAsBoolean(eProp.getChild(CalendarFields.NOTIFICATION, XmlServlet.NS)));
-		} 
-		
-		if (hasElement(eProp.getChild(CalendarFields.TITLE, XmlServlet.NS))) {
-			calendarobject.setTitle(getValue(eProp.getChild(CalendarFields.TITLE, XmlServlet.NS)));
-		} 
-
-		if (hasElement(eProp.getChild(CalendarFields.NOTE, XmlServlet.NS))) {
-			calendarobject.setNote(getValue(eProp.getChild(CalendarFields.NOTE, XmlServlet.NS)));
-		} 
-		
-		parseElementParticipants(calendarobject, eProp.getChild(CalendarFields.PARTICIPANTS, XmlServlet.NS));
-		
-		parseElementCommon(calendarobject, eProp);
+		calendarobject.setRecurrenceType(recurrenceType);
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.NOTIFICATION, XmlServlet.NS))) {
+		calendarobject.setNotification(getValueAsBoolean(eProp.getChild(CalendarFields.NOTIFICATION, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.TITLE, XmlServlet.NS))) {
+		calendarobject.setTitle(getValue(eProp.getChild(CalendarFields.TITLE, XmlServlet.NS)));
+	}
+	
+	if (hasElement(eProp.getChild(CalendarFields.NOTE, XmlServlet.NS))) {
+		calendarobject.setNote(getValue(eProp.getChild(CalendarFields.NOTE, XmlServlet.NS)));
+	}
+	
+	parseElementParticipants(calendarobject, eProp.getChild(CalendarFields.PARTICIPANTS, XmlServlet.NS));
+	
+	parseElementCommon(calendarobject, eProp);
 	}
 	
 	protected int parseRecurrenceType(String value) throws Exception {
@@ -183,39 +184,56 @@ public abstract class CalendarParser extends CommonParser {
 		
 		if (hasParticipants) {
 			calendarObj.setUsers(participants.getUsers());
+			calendarObj.setParticipants(participants.getList());
 		}
 	}
 	
 	
 	private void parseElementUser(Element e, Participants participants) throws Exception {
-		UserParticipant userparticipant = new UserParticipant();
-		String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
-		 
-		if (confirm != null) {
-			if (confirm.equals("accept")) {
-				userparticipant.setConfirm(CalendarObject.ACCEPT);
-			} else if (confirm.equals("decline")) {
-				userparticipant.setConfirm(CalendarObject.DECLINE);
-			} else if (confirm.equals("tentative")) {
-				userparticipant.setConfirm(CalendarObject.TENTATIVE);
-			} else if (confirm.equals("none")) {
-				userparticipant.setConfirm(CalendarObject.NONE);
-			} else {
-				throw new OXConflictException("unknown value in confirm attribute: " + confirm);
+		Participant participant = null;
+		
+		String external = e.getAttributeValue("external", XmlServlet.NS);
+		if (external != null && "true".equals(external)) {
+			participant = new ExternalUserParticipant();
+			participant.setEmailAddress(getValue(e));
+		} else {
+			UserParticipant userparticipant = new UserParticipant();
+			userparticipant.setIdentifier(getValueAsInt(e));
+			participant = userparticipant;
+			String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
+			
+			if (confirm != null) {
+				if (confirm.equals("accept")) {
+					userparticipant.setConfirm(CalendarObject.ACCEPT);
+				} else if (confirm.equals("decline")) {
+					userparticipant.setConfirm(CalendarObject.DECLINE);
+				} else if (confirm.equals("tentative")) {
+					userparticipant.setConfirm(CalendarObject.TENTATIVE);
+				} else if (confirm.equals("none")) {
+					userparticipant.setConfirm(CalendarObject.NONE);
+				} else {
+					throw new OXConflictException("unknown value in confirm attribute: " + confirm);
+				}
 			}
+			
+			participants.add(userparticipant);
 		}
-		 
-		userparticipant.setIdentifier(getValueAsInt(e));
-		participants.add(userparticipant);
+		participants.add(participant);
 	}
 	
 	private void parseElementGroup(Element e, Participants participants) throws Exception {
-		int id = getValueAsInt(e);
-		 
-		Participant p = new GroupParticipant();
-		p.setIdentifier(id);
-		 
-		participants.add(p);
+		Participant participant = null;
+		
+		String external = e.getAttributeValue("external", XmlServlet.NS);
+		if (external != null && "true".equals(external)) {
+			participant = new ExternalUserParticipant();
+			participant.setEmailAddress(getValue(e));
+		} else {
+			participant = new GroupParticipant();
+			participant.setIdentifier(getValueAsInt(e));
+		}
+		
+		participants.add(participant);
 	}
 	
 	private void parseElementResource(Element e, Participants participants) throws Exception {
