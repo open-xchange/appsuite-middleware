@@ -129,55 +129,7 @@ public class CalendarTest extends TestCase {
         
     }
     
-    public void testSaveRecurring() throws Throwable {
-        Context context = new ContextImpl(contextid);
-
-        CalendarDataObject cdao = new CalendarDataObject();
-        
-        long s = System.currentTimeMillis();
-        long cals = s;
-        long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
-        cals = cals- calsmod;
-        long endcalc = 3600000;
-        long mod = s%3600000;
-        s = s - mod;
-        long saves = s;
-        long e = s + endcalc;
-        long savee = e;
-        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
-        mod = u%CalendarRecurringCollection.MILLI_DAY;
-        u = u - mod;
-        
-        cdao.setStartDate(new Date(s));
-        cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));        
-        cdao.setTitle("testSaveRecurring");
-        cdao.setRecurrenceType(CalendarObject.DAILY);
-        cdao.setRecurrenceCalculator(1);
-        cdao.setInterval(1);
-        cdao.setDays(1);
-        cdao.setRecurrenceID(1);
-        
-        cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
-        
-        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        cdao.setContext(so.getContext());
-        cdao.setIgnoreConflicts(true);
-        CalendarSql csql = new CalendarSql(so);
-        csql.insertAppointmentObject(cdao);
-        
-        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, cals, u, 0);
-        assertEquals("Testing size ", rss.size(), 10);
-        for (int a = 0; a < rss.size(); a++) {
-            RecurringResult rs = rss.getRecurringResult(a);
-            assertEquals("Testing start time", rs.getStart(), saves);
-            assertEquals("Testing end time", rs.getEnd(), savee);
-            saves += CalendarRecurringCollection.MILLI_DAY;
-            savee += CalendarRecurringCollection.MILLI_DAY;
-        }
-    }    
-    
-    public static final void fillDatesInDao(CalendarDataObject cdao) {
+    private static final void fillDatesInDao(CalendarDataObject cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
         long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
