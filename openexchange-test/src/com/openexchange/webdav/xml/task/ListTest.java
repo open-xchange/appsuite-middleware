@@ -1,7 +1,9 @@
 package com.openexchange.webdav.xml.task;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class ListTest extends TaskTest {
@@ -39,6 +41,21 @@ public class ListTest extends TaskTest {
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
 		Task loadTask = loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+	}
+	
+	public void testObjectNotFound() throws Exception {
+		Task taskObj = createTask("testObjectNotFound");
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		try {
+			Task loadTask = loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password);
+			fail("object not found exception expected!");
+		} catch (OXException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
+		}
+		
+		int[][] objectIdAndFolderId = { { objectId ,taskFolderId } };
+		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testListWithAllFields() throws Exception {
