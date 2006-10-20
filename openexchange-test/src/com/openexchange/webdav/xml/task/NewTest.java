@@ -37,6 +37,17 @@ public class NewTest extends TaskTest {
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 	}
 	
+	public void testNewTaskWithAlarm() throws Exception {
+		Task taskObj = createTask("testNewTaskWithAlarm");
+		taskObj.setAlarm(new Date(startTime.getTime()-(2*dayInMillis)));
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		taskObj.setObjectID(objectId);
+		Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(taskObj, loadTask);
+		int[][] objectIdAndFolderId = { {objectId, taskFolderId } };
+		deleteTask(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
 	public void _notestNewTaskWithUsers() throws Exception {
 		Task taskObj = createTask("testNewTaskWithUsers");
 		
