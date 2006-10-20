@@ -6,6 +6,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceGroup;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -33,15 +34,27 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchUser() throws Exception {
-		searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		ContactObject[] contactObj = searchUser(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		for (int a = 0; a < contactObj.length; a++) {
+			assertTrue("id > 0 expected", contactObj[a].getInternalUserId() > 0);
+			assertNotNull("last modified is null", contactObj[a].getLastModified());
+		} 
 	}
 	
 	public void testSearchGroup() throws Exception {
-		searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		Group group[] = searchGroup(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		for (int a = 0; a < group.length; a++) {
+			assertTrue("id > 0 expected", group[a].getIdentifier() > 0);
+			assertNotNull("last modified is null", group[a].getLastModified());
+		} 
 	}
 	
 	public void testSearchResource() throws Exception {
-		searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		Resource[] resource = searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		for (int a = 0; a < resource.length; a++) {
+			assertTrue("id > 0 expected", resource[a].getIdentifier() > 0);
+			assertNotNull("last modified is null", resource[a].getLastModified());
+		} 
 	}
 	
 	public void testSearchResourceGroup() throws Exception {
@@ -49,7 +62,13 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testGetUserId() throws Exception {
-		getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		final int userId = getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("user id for login user not found", userId != -1);
+	}
+	
+	public void testGetContextId() throws Exception {
+		final int contextId = getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("context id for login user not found", contextId != -1);
 	}
 	
 	public static ContactObject[] searchUser(WebConversation webCon, String searchpattern, Date modified, String host, String login, String password) throws Exception {
@@ -241,6 +260,20 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 			Map m = contactObj.getMap();
 			if (m != null && m.containsKey("myidentity")) {
 				return contactObj.getInternalUserId();
+			}
+		}
+		return -1;
+	}
+	
+	public static int getContextId(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
+		ContactObject[] contactArray = searchUser(webCon, "*", new Date(0), host, login, password);
+		for (int a = 0; a < contactArray.length; a++) {
+			ContactObject contactObj = contactArray[a];
+			Map m = contactObj.getMap();
+			if (m != null && m.containsKey("context_id")) {
+				return Integer.parseInt(m.get("context_id").toString());
 			}
 		}
 		return -1;
