@@ -50,6 +50,17 @@ public class ListTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
+	public void testObjectNotFound() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testObjectNotFound");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		AppointmentObject loadAppointment = loadAppointment(webCon, (objectId+1000), appointmentFolderId, PROTOCOL + hostName, login, password);
+		
+		int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
 	public void testListWithAllFields() throws Exception {
 		Date modified = new Date();
 		
