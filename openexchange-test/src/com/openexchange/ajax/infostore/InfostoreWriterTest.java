@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -74,7 +75,7 @@ public class InfostoreWriterTest extends TestCase {
 		StringWriter results = new StringWriter();
 		InfostoreWriter w = new InfostoreWriter(new PrintWriter(results));
 		
-		w.writeMetadata(new SearchIteratorAdapter(DUMMY_DATA.iterator()), new Metadata[]{Metadata.URL_LITERAL, Metadata.TITLE_LITERAL, Metadata.CREATED_BY_LITERAL});
+		w.writeMetadata(new SearchIteratorAdapter(DUMMY_DATA.iterator()), new Metadata[]{Metadata.URL_LITERAL, Metadata.TITLE_LITERAL, Metadata.CREATED_BY_LITERAL}, TimeZone.getTimeZone("utc"));
 		
 		JSONArray listOfArrays = new JSONArray(results.toString());
 		
@@ -102,7 +103,7 @@ public class InfostoreWriterTest extends TestCase {
 		DocumentMetadata m = new DocumentMetadataImpl();
 		m.setCategories("cat1, cat2, cat3");
 		
-		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL});
+		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL},TimeZone.getTimeZone("utc"));
 		JSONArray listOfArrays = new JSONArray(results.toString());
 		JSONArray metadata1 = listOfArrays.getJSONArray(0);
 		JSONArray categories = metadata1.getJSONArray(0);
@@ -113,7 +114,7 @@ public class InfostoreWriterTest extends TestCase {
 		
 		results = new StringWriter();
 		w = new InfostoreWriter(new PrintWriter(results));
-		w.write(m);
+		w.write(m,TimeZone.getTimeZone("utc"));
 		
 		
 		JSONObject o = new JSONObject(results.toString());
@@ -128,7 +129,7 @@ public class InfostoreWriterTest extends TestCase {
 		
 		results = new StringWriter();
 		w = new InfostoreWriter(new PrintWriter(results));
-		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL});
+		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL},TimeZone.getTimeZone("utc"));
 		
 		listOfArrays = new JSONArray(results.toString());
 		metadata1 = listOfArrays.getJSONArray(0);
@@ -138,7 +139,7 @@ public class InfostoreWriterTest extends TestCase {
 		
 		results = new StringWriter();
 		w = new InfostoreWriter(new PrintWriter(results));
-		w.write(m);
+		w.write(m,TimeZone.getTimeZone("utc"));
 		
 		o = new JSONObject(results.toString());
 		categories = o.getJSONArray("categories");
@@ -165,7 +166,7 @@ public class InfostoreWriterTest extends TestCase {
 		StringWriter result = new StringWriter();
 		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
 		
-		w.write(dm);
+		w.write(dm,TimeZone.getTimeZone("utc"));
 		
 		JSONObject o = new JSONObject(result.toString());
 		
@@ -193,7 +194,7 @@ public class InfostoreWriterTest extends TestCase {
 		StringWriter result = new StringWriter();
 		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
 		
-		w.write(dm);
+		w.write(dm,TimeZone.getTimeZone("utc"));
 		
 		JSONObject o = new JSONObject(result.toString());
 		
@@ -206,11 +207,27 @@ public class InfostoreWriterTest extends TestCase {
 		result = new StringWriter();
 		w = new InfostoreWriter(new PrintWriter(result));
 		
-		w.write(dm);
+		w.write(dm,TimeZone.getTimeZone("utc"));
 		
 		o = new JSONObject(result.toString());
 		
 		assertEquals(later,o.getLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+		
+	}
+	
+	public void testTimeZone() throws Exception {
+		DocumentMetadataImpl dm = new DocumentMetadataImpl();
+		
+		dm.setLastModified(new Date(230023));
+		
+		StringWriter result = new StringWriter();
+		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		
+		w.write(dm,TimeZone.getTimeZone("Europe/Berlin"));
+		
+		JSONObject o = new JSONObject(result.toString());
+		
+		assertEquals(3830023,o.getLong(Metadata.LAST_MODIFIED_LITERAL.getName()));
 		
 	}
 	
