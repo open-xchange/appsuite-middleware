@@ -534,7 +534,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return appointmentArray;
 	}
 	
-	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		Element ePropfind = new Element("propfind", webdav);
@@ -580,7 +580,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response" , 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
