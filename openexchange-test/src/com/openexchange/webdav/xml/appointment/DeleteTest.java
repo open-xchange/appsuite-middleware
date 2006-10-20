@@ -21,7 +21,7 @@ public class DeleteTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 	}
 	
-	public void _notestDeleteConcurentConflict() throws Exception {
+	public void testDeleteConcurentConflict() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentConcurentConflict");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -78,20 +78,12 @@ public class DeleteTest extends AppointmentTest {
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
-		appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testDeleteRecurrenceWithDatePosition - exception");
-		appointmentObj.setStartDate(new Date(startTime.getTime() + 60*60*1000));
-		appointmentObj.setEndDate(new Date(endTime.getTime() + 60*60*1000));
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
-		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setRecurrenceDatePosition(new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis));
-		
-		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), getLogin(), getPassword());
+		deleteAppointment(webCon, objectId, appointmentFolderId, new Date(), new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis), PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
-		assertEquals("delete exception is not equals", loadAppointment.getDeleteException(), "wsdsd");
+		assertEqualsAndNotNull("delete exception is not equals", loadAppointment.getDeleteException(), new Date[] { new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis) } );
 		
-		deleteAppointment(webCon, new int[][] { { objectId }, { appointmentFolderId } }, PROTOCOL + hostName, login, password);
+		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + hostName, login, password);
 	}
 }
 
