@@ -46,6 +46,7 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 import org.jdom.Element;
 
 /**
@@ -62,6 +63,7 @@ public class ResourceParser extends DataParser {
 	
 	public void parse(Resource resourceObj, Element eProp) throws Exception {
 		resourceObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+		resourceObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		resourceObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
 	}
 }

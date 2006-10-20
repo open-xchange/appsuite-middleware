@@ -46,6 +46,7 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 import java.util.List;
 import org.jdom.Element;
 
@@ -63,6 +64,8 @@ public class GroupParser extends DataParser {
 	
 	public void parse(Group groupObj, Element eProp) throws Exception {
 		groupObj.setIdentifier(getValueAsInt(eProp.getChild("uid", XmlServlet.NS)));
+		groupObj.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
+		groupObj.setDisplayName(getValue(eProp.getChild("displayname", XmlServlet.NS)));
 		
 		parseMembers(groupObj, eProp.getChild("members", XmlServlet.NS));
 	}
