@@ -36,7 +36,7 @@ public class DeleteTest extends AppointmentTest {
 		deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestDeleteNotFound() throws Exception {
+	public void testDeleteNotFound() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentNotFound");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -51,7 +51,7 @@ public class DeleteTest extends AppointmentTest {
 		deleteAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestDeleteRecurrenceWithDatePosition() throws Exception {
+	public void testDeleteRecurrenceWithDatePosition() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
