@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.TimeZone;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
@@ -53,13 +54,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		super.setUp();
 		
 		Calendar c = Calendar.getInstance();
-		c.set(Calendar.HOUR_OF_DAY, 12);
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
 		startTime = new Date(c.getTimeInMillis());
-		endTime = new Date(startTime.getTime() + 3600000);
+		endTime = new Date(startTime.getTime() + dayInMillis);
 		
 		dateCompleted = new Date(c.getTimeInMillis() + d7);
 		
