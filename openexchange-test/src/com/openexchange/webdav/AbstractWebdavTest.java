@@ -49,6 +49,8 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	protected WebConversation secondWebCon = null;
 	
+	protected static final int dayInMillis = 86400000;
+	
 	public static final String AUTHORIZATION = "authorization";
 	
 	/**
