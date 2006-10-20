@@ -20,7 +20,7 @@ public class ListTest extends AppointmentTest {
 		
 		int[][] objectIdAndFolderId = { {objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
-
+		
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
@@ -35,7 +35,7 @@ public class ListTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, false, true, PROTOCOL + hostName, login, password);
-
+		
 		assertTrue("wrong response array length (length=" + appointmentArray.length + ")", appointmentArray.length >= 2);
 	}
 	
@@ -72,10 +72,18 @@ public class ListTest extends AppointmentTest {
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
-		AppointmentObject loadAppointment = appointmentArray[0];
+		boolean found = false;
+		for (int a = 0; a < appointmentArray.length; a++) {
+			AppointmentObject loadAppointment = appointmentArray[a];
+			
+			if (loadAppointment.getObjectID() == objectId) {
+				found = true;
+				appointmentObj.setObjectID(objectId);
+				compareObject(appointmentObj, loadAppointment);
+			}
+		}
 		
-		appointmentObj.setObjectID(objectId);
-		compareObject(appointmentObj, loadAppointment);
+		assertTrue("object not found in response", found);
 		
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
