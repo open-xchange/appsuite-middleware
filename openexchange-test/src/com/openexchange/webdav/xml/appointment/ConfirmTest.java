@@ -16,7 +16,7 @@ public class ConfirmTest extends AppointmentTest {
 		
 	}
 	
-    public void testConfirm() throws Exception {
+    public void _notestConfirm() throws Exception {
 		final FolderObject sharedFolderObject = FolderTest.getAppointmentDefaultFolder(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		final int secondUserId = sharedFolderObject.getCreatedBy();
 		
