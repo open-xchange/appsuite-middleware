@@ -82,8 +82,7 @@ public class LoginTest extends AbstractAJAXTest {
      * @throws Throwable if an error occurs.
      */
     public void testLogin() throws Throwable {
-        final String sessionId = getSessionId(getWebConversation(),
-            getHostName(), getLogin(), getPassword());
+        final String sessionId = getSessionId();
         assertNotNull("Got no sessionId", sessionId);
         assertTrue("Length of session identifier is zero.",
             sessionId.length() > 0);
