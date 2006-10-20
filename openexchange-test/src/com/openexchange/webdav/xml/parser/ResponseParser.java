@@ -238,11 +238,17 @@ public class ResponseParser {
 		ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, eProp);
 		
+		HashMap hm = new HashMap();
+		
 		if (DataParser.hasElement(eProp.getChild("myidentity", XmlServlet.NS))) {
-			HashMap hm = new HashMap();
-			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));
-			contactObj.setMap(hm);
+			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));			
 		}
+
+		if (DataParser.hasElement(eProp.getChild("context_id", XmlServlet.NS))) {
+			hm.put("context_id", DataParser.getValue(eProp.getChild("context_id", XmlServlet.NS)));
+		}
+		
+		contactObj.setMap(hm);
 		
 		return contactObj;
 	}
