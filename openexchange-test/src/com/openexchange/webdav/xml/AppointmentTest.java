@@ -91,6 +91,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("private flag is not equals", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
 		assertEquals("full time is not equals", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
 		assertEquals("label is not equals", appointmentObj1.getLabel(), appointmentObj2.getLabel());
+		assertEquals("alarm is not equals", appointmentObj1.getAlarm(), appointmentObj2.getAlarm());
 		assertEqualsAndNotNull("note is not equals", appointmentObj1.getNote(), appointmentObj2.getNote());
 		assertEqualsAndNotNull("categories is not equals", appointmentObj1.getCategories(), appointmentObj2.getCategories());
 		
