@@ -200,6 +200,33 @@ public class CalendarTest extends TestCase {
         fbr.close();
     }    
     
+    public void testInsertAndLabel() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testInsertAndLabel - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        cdao.setTitle("testInsertAndLabel - Step 2 - Update (only Label)");
+        update.setLabel(3);
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertEquals("Check label", 3, testobject.getLabel());
+        
+    }
+    
+    
     
     public void testInsertMoveAndDeleteAppointments() throws Throwable {
         Context context = new ContextImpl(contextid);
