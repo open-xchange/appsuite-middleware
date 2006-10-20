@@ -83,7 +83,7 @@ public class AppointmentParser extends CalendarParser {
 		}
 		
 		if (hasElement(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS))) {
-			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS)).split(",");
+			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS)).split(",");
 			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
 			
 			int counter = 0;
