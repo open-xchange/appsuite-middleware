@@ -21,6 +21,18 @@ public class NewTest extends AppointmentTest {
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
+	
+	public void testNewAppointmentWithAlarm() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithAlarm");
+		appointmentObj.setIgnoreConflicts(true);
+		appointmentObj.setAlarm(45);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
 
 	public void testNewAppointmentWithParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");

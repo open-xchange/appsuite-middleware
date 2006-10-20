@@ -16,7 +16,7 @@ import java.util.TimeZone;
 
 public class UpdateTest extends AppointmentTest {
 	
-	public void testUpdatet() throws Exception {
+	public void testUpdate() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
@@ -27,7 +27,28 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
 		
+		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void testUpdateAppointmentRemoveAlarm() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointmentRemoveAlarm");
+		appointmentObj.setIgnoreConflicts(true);
+		appointmentObj.setAlarm(45);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		appointmentObj = createAppointmentObject("testUpdateAppointmentRemoveAlarm");
+		appointmentObj.setLocation(null);
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		appointmentObj.setIgnoreConflicts(true);
+		appointmentObj.setAlarmFlag(false);
+		
+		updateAppointment(webCon, appointmentObj, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
