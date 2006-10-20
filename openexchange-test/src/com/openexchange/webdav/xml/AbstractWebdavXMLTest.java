@@ -242,6 +242,16 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
+	public static void assertEqualsAndNotNull(String message, Date[] expect, Date[] value) throws Exception {
+		if (expect != null) {
+			assertNotNull(message + " is null", value);
+			assertEquals(message + " date array size is not equals", expect.length, value.length);
+			for (int a = 0; a < expect.length; a++) {
+				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a].getTime(), value[a].getTime());
+			}
+		}
+	}
+	
 	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
 		if (expect != null) {
 			assertNotNull(message + " is null", value);
