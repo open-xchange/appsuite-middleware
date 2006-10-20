@@ -5,14 +5,16 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.webdav.xml.GroupUserTest;
 import java.util.Date;
-import junit.framework.TestCase;
 
 public class FreeBusyTest extends AbstractWebdavTest {
 	
 	protected Date startTime = null;
 
 	protected Date endTime = null;
+	
+	protected static final long dayInMillis = 86400000;
 	
 	private static final String FREEBUSY_URL = "/servlet/webdav.freebusy";
 	
@@ -25,14 +27,17 @@ public class FreeBusyTest extends AbstractWebdavTest {
 	}
 	
 	public void testConnect() throws Exception {
-		Date start = new Date();
-		Date end = new Date();
+		final int contextId = GroupUserTest.getContextId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		final Date start = new Date(System.currentTimeMillis()-(dayInMillis*7));
+		final Date end = new Date(System.currentTimeMillis()+(dayInMillis*7));
 		
         final URLParameter parameter = new URLParameter();
+		parameter.setParameter("contextid", contextId);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 		parameter.setParameter("username", getLogin());
-		parameter.setParameter("server", "localhost");
+		parameter.setParameter("server", "prototyp.de");
         
         WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FREEBUSY_URL + parameter.getURLParameters());
         WebResponse resp = webCon.getResponse(req);
