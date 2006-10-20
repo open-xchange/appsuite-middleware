@@ -203,7 +203,7 @@ public final class Init {
 	public synchronized static void initDB() {
 		if (!dbInitialized) {
 			loadServerConf();
-			new DBPool(0, 0);
+			// new DBPool(0, 0);
 			dbInitialized = true;
 		}
 	}
@@ -211,7 +211,7 @@ public final class Init {
 	public synchronized static void stopDB() throws Exception {
 		if (dbInitialized) {
 			dbInitialized = false;
-			DBPool.releasePool();
+			// DBPool.releasePool();
 		}
 	}
 
