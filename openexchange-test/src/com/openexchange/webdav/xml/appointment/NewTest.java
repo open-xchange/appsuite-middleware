@@ -22,7 +22,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void testNewAppointmentWithAlarm() throws Exception {
+	public void _notestNewAppointmentWithAlarm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithAlarm");
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setAlarm(45);
