@@ -82,7 +82,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("end is not equals", taskObj1.getEndDate(), taskObj2.getEndDate());
 		assertEquals("folder id is not equals", taskObj1.getParentFolderID(), taskObj2.getParentFolderID());
 		assertEquals("private flag is not equals", taskObj1.getPrivateFlag(), taskObj2.getPrivateFlag());
-		assertEquals("label is not equals", taskObj1.getLabel(), taskObj2.getLabel());
+		assertEquals("alarm is not equals", taskObj1.getAlarm(), taskObj2.getAlarm());
 		assertEqualsAndNotNull("note is not equals", taskObj1.getNote(), taskObj2.getNote());
 		assertEqualsAndNotNull("categories is not equals", taskObj1.getCategories(), taskObj2.getCategories());
 		assertEqualsAndNotNull("actual costs is not equals", taskObj1.getActualCosts(), taskObj2.getActualCosts());
@@ -392,7 +392,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		return taskArray;
 	}
 	
-	public static Task loadTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
+	public static Task loadTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
 		Element ePropfind = new Element("propfind", webdav);
@@ -438,7 +438,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response" , 1, response.length);
 		
 		if (response[0].hasError()) {
-			fail("xml error: " + response[0].getErrorMessage());
+			throw new OXException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
