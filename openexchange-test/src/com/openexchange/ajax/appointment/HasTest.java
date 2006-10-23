@@ -33,20 +33,9 @@ public class HasTest extends AppointmentTest {
         Date start = c.getTime();
         Date end = new Date(start.getTime() + (dayInMillis*numberOfDays));
 		
-		boolean conflict = true;
-		
-		int posInArray = -1;
+		int posInArray = 3;
 		boolean[] hasAppointments = hasAppointments(getWebConversation(), start, end, PROTOCOL + getHostName(), getSessionId());
-		for (int a = 0; a < hasAppointments.length; a++) {
-			if (!hasAppointments[a]) {
-				posInArray = a;
-				conflict = false;
-				break;
-			}
-		}
-		
-		// assertEquals("all days have appointments", conflict, false);
-		
+
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testHasAppointmentFullTime");
 		appointmentObj.setStartDate(new Date(start.getTime()+(dayInMillis*posInArray)+(60*60*1000)));
@@ -78,17 +67,8 @@ public class HasTest extends AppointmentTest {
 		
 		boolean conflict = true;
 		
-		int posInArray = -1;
+		int posInArray = 3;
 		boolean[] hasAppointments = hasAppointments(getWebConversation(), start, end, PROTOCOL + getHostName(), getSessionId());
-		for (int a = 0; a < hasAppointments.length; a++) {
-			if (!hasAppointments[a]) {
-				posInArray = a;
-				conflict = false;
-				break;
-			}
-		}
-		
-		// assertEquals("all days have appointments", conflict, false);
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testHasAppointmentFullTime");
