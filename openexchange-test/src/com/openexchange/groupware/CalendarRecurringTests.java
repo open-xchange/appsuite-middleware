@@ -477,7 +477,8 @@ public class CalendarRecurringTests extends TestCase {
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();
-
+        Date last = cdao.getLastModified();
+        
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, cals, u, 0);
         assertEquals("Testing size ", rss.size(), 10);
         for (int a = 0; a < rss.size(); a++) {
@@ -515,7 +516,36 @@ public class CalendarRecurringTests extends TestCase {
         test_delete_not_owner.setRecurrencePosition(5);
         csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date(SUPER_END));
         
+        CalendarDataObject test_master_object = csql.getObjectById(object_id, folder_id);
+        UserParticipant up[] = test_master_object.getUsers();
+        assertEquals("Testing participants in master object", up.length, 2);
         
+        int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
+        
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        
+        boolean found_exception = false;
+        while (si.hasNext()) {
+            CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            if (tcdao.getRecurrenceID() == object_id && tcdao.getObjectID() != object_id) {
+                // found the single exception we have just created
+                found_exception = true;
+                Date test_deleted_exceptions[] = tcdao.getDeleteException();
+                Date test_changed_exceptions[] = tcdao.getChangeException();
+                assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null);
+                assertTrue("Test changed exception is NULL" , test_changed_exceptions == null);
+                assertEquals("Check correct recurrence position", 5, tcdao.getRecurrencePosition());
+            } else {                
+                Date test_deleted_exceptions[] = tcdao.getDeleteException();
+                Date test_changed_exceptions[] = tcdao.getChangeException();
+                assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null);
+                assertTrue("Test changed exception is ! NULL" , test_changed_exceptions != null);
+                assertTrue("Test changed exception is 1" , test_changed_exceptions.length == 1);
+                assertEquals("Check master recurrence position", 0, tcdao.getRecurrencePosition());
+            }
+        }
+        
+        assertTrue("Found created exception ", found_exception);
         
         
     }          
