@@ -92,6 +92,12 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("full time is not equals", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
 		assertEquals("label is not equals", appointmentObj1.getLabel(), appointmentObj2.getLabel());
 		assertEquals("alarm is not equals", appointmentObj1.getAlarm(), appointmentObj2.getAlarm());
+		assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
+		assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
+		assertEquals("days", appointmentObj1.getDays(), appointmentObj2.getDays());
+		assertEquals("month", appointmentObj1.getMonth(), appointmentObj2.getMonth());
+		assertEquals("day_in_month", appointmentObj1.getDayInMonth(), appointmentObj2.getDayInMonth());
+		assertEquals("until", appointmentObj1.getUntil(), appointmentObj2.getUntil());
 		assertEqualsAndNotNull("note is not equals", appointmentObj1.getNote(), appointmentObj2.getNote());
 		assertEqualsAndNotNull("categories is not equals", appointmentObj1.getCategories(), appointmentObj2.getCategories());
 		
