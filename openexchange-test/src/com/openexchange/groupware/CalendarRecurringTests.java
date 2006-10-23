@@ -20,6 +20,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.ParticipantNotifyTest;
 import com.openexchange.server.DBPool;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.calendar.RecurringResult;
@@ -52,8 +53,7 @@ public class CalendarRecurringTests extends TestCase {
         super.setUp();
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        userid = getUserId();
-        
+        this.userid = getUserId();
     }
     
     protected void tearDown() throws Exception {
@@ -69,10 +69,9 @@ public class CalendarRecurringTests extends TestCase {
         return properties;
     }        
     
-    private static int resolveUser(String user) throws Exception {
+    private static int resolveUser(String u) throws Exception {
         UserStorage uStorage = UserStorage.getInstance(getContext());
-        userid = uStorage.getUserId(user);
-        return userid;
+        return uStorage.getUserId(u);
     }
     
     public static int getUserId() throws Exception {
@@ -199,15 +198,15 @@ public class CalendarRecurringTests extends TestCase {
     
     public void testWeeklyRecurrence() throws Throwable {
         
-/*
-      Juni 2006
-So Mo Di Mi Do Fr Sa 
-             1  2  3
- 4  5  6  7  8  9 10
-11 12 13 14 15 16 17
-18 19 20 21 22 23 24
-25 26 27 28 29 30 
-*/       
+//
+//      Juni 2006
+//So Mo Di Mi Do Fr Sa 
+//             1  2  3
+// 4  5  6  7  8  9 10
+//11 12 13 14 15 16 17
+//18 19 20 21 22 23 24
+//25 26 27 28 29 30 
+       
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1151100000000L; // 24.06.2006 00:00 (GMT)
@@ -421,8 +420,7 @@ So Mo Di Mi Do Fr Sa
             savee += CalendarRecurringCollection.MILLI_DAY;
         }
     }        
-    
-    
+
     public void testDeleteSingleRecurringAppointment() throws Throwable {
         Context context = new ContextImpl(contextid);
         CalendarDataObject cdao = new CalendarDataObject();
@@ -441,20 +439,39 @@ So Mo Di Mi Do Fr Sa
         mod = u%CalendarRecurringCollection.MILLI_DAY;
         u = u - mod;
         
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        
         int folder_id = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);
+        int folder_id2 = OXFolderTools.getStandardFolder(uid2, FolderObject.CALENDAR, context);        
         
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));        
-        cdao.setTitle("testSaveRecurring");
+        cdao.setTitle("testDeleteSingleRecurringAppointment - step 1 - insert ");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);
-        cdao.setRecurrenceID(1);
+        
         cdao.setParentFolderID(folder_id);
         
-        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Participants p = new Participants();        
+        Participant pa = new UserParticipant();
+        pa.setIdentifier(userid);
+        p.add(pa);
+
+        Participant pa2 = new UserParticipant();
+        pa2.setIdentifier(uid2);
+        p.add(pa2);
+        
+        cdao.setParticipants(p.getList());
+        
         cdao.setContext(so.getContext());
         cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
@@ -475,8 +492,12 @@ So Mo Di Mi Do Fr Sa
         CalendarDataObject test_delete = csql.getObjectById(object_id, folder_id);        
         rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Testing size ", rss.size(), 11);
-        test_delete.setRecurrencePosition(3);
-        csql.deleteAppointmentObject(test_delete, folder_id, new Date(SUPER_END));
+        
+        CalendarDataObject delete_owner = new CalendarDataObject();
+        delete_owner.setContext(so.getContext());
+        delete_owner.setRecurrencePosition(3);
+        delete_owner.setObjectID(object_id);
+        csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
         
         CalendarDataObject test_object = csql.getObjectById(object_id, folder_id);        
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 0);
@@ -484,6 +505,18 @@ So Mo Di Mi Do Fr Sa
         
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 3);
         assertEquals("Testing size after requesting single deleted app from sequence", rss.size(), 0);
+        
+        // Now we delete a virtual exception and we are not the owner 
+        
+        CalendarSql csql2 = new CalendarSql(so2);
+        CalendarDataObject test_delete_not_owner = new CalendarDataObject();
+        test_delete_not_owner.setContext(so.getContext());
+        test_delete_not_owner.setObjectID(object_id);
+        test_delete_not_owner.setRecurrencePosition(5);
+        csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date(SUPER_END));
+        
+        
+        
         
     }          
     
