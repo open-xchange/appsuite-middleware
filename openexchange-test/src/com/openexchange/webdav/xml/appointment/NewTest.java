@@ -10,7 +10,9 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.GroupUserTest;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class NewTest extends AppointmentTest {
 	
@@ -18,6 +20,9 @@ public class NewTest extends AppointmentTest {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
@@ -107,6 +112,33 @@ public class NewTest extends AppointmentTest {
 		compareObject(appointmentObj, loadAppointment);
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
+	
+	public void testDailyRecurrence() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDailyRecurrence");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 }
 
