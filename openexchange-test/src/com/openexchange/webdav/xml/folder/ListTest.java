@@ -10,6 +10,10 @@ import java.util.Date;
 
 public class ListTest extends FolderTest {
 	
+	public void testDummy() {
+		
+	}
+	
 	public void _notestPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
