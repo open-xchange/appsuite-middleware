@@ -400,7 +400,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);
-        cdao.setRecurrenceID(1);
         
         cdao.setParentFolderID(OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context));
         
@@ -547,6 +546,17 @@ public class CalendarRecurringTests extends TestCase {
         
         assertTrue("Found created exception ", found_exception);
         
+        // delete whole sequence incl. all exceptions
+        CalendarDataObject delete_all = new CalendarDataObject();
+        delete_all.setContext(so.getContext());        
+        delete_all.setObjectID(object_id);
+        csql.deleteAppointmentObject(delete_all, folder_id, new Date(SUPER_END));
+        
+        si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        while (si.hasNext()) {
+            CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
+        }
         
     }          
     
