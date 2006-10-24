@@ -44,7 +44,7 @@ public class CCTests {
 		
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
-		tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
+		// tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
 	    tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
