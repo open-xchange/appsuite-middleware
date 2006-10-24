@@ -150,19 +150,6 @@ public class CalendarTest extends TestCase {
         
     }
     
-    public void testBasicSearch() throws Exception  {
-        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
-        CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[1];
-        cols[0] = AppointmentObject.TITLE;
-        SearchIterator si = csql.searchAppointments("test", getPrivateFolder(), 0, "ASC", cols);
-        boolean gotresults = si.hasNext();
-        assertTrue("Got real results", gotresults);
-        while (si.hasNext()) {
-            CalendarDataObject cdao = (CalendarDataObject)si.next();
-        }
-    }
-    
     public void testfillUserParticipantsWithoutGroups() throws Exception  {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
@@ -226,6 +213,18 @@ public class CalendarTest extends TestCase {
         
     }
     
+    public void testBasicSearch() throws Exception  {
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        CalendarSql csql = new CalendarSql(so);
+        int cols[] = new int[1];
+        cols[0] = AppointmentObject.TITLE;
+        SearchIterator si = csql.searchAppointments("test", getPrivateFolder(), 0, "ASC", cols);
+        boolean gotresults = si.hasNext();
+        assertTrue("Got real results", gotresults);
+        while (si.hasNext()) {
+            CalendarDataObject cdao = (CalendarDataObject)si.next();
+        }
+    }
     
     
     public void testInsertMoveAndDeleteAppointments() throws Throwable {
@@ -262,59 +261,60 @@ public class CalendarTest extends TestCase {
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
         ofa.createFolder(fo, so, true, readcon, writecon, false);
         int public_folder_id = fo.getObjectID();
+        CalendarDataObject testobject = null;
+        try {
+            // TODO: "Move" folder to a public folder
+            CalendarDataObject update1 = new CalendarDataObject();
+            update1.setContext(so.getContext());
+            update1.setObjectID(object_id);
+            update1.setParentFolderID(public_folder_id);
+            update1.setTitle("testMove - Step 2 - Update");
+            update1.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
 
-        
-        // TODO: "Move" folder to a public folder
-        CalendarDataObject update1 = new CalendarDataObject();
-        update1.setContext(so.getContext());
-        update1.setObjectID(object_id);
-        update1.setParentFolderID(public_folder_id);
-        update1.setTitle("testMove - Step 2 - Update");
-        update1.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
-        
-        // TODO: LoadObject by ID and make some tests
-        CalendarDataObject testobject = csql.getObjectById(object_id, public_folder_id);
-        UserParticipant up[] = testobject.getUsers();
-        for (int a = 0; a < up.length; a++) {
-            assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
+            // TODO: LoadObject by ID and make some tests
+            testobject = csql.getObjectById(object_id, public_folder_id);
+            UserParticipant up[] = testobject.getUsers();
+            for (int a = 0; a < up.length; a++) {
+                assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
+            }
+
+            assertEquals("testMove - Step 2 - Update", update1.getTitle());
+
+            // TODO: Move again to private folder
+
+            CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
+
+            update2.setTitle("testMove - Step 3 - Update");
+            update2.setParentFolderID(private_folder_id);
+            update2.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
+
+            // TODO: LoadObject by ID and make some tests
+
+            CalendarDataObject testobject2 = csql.getObjectById(object_id, private_folder_id);
+
+            assertEquals("Test folder id ", testobject2.getEffectiveFolderId(), private_folder_id);
+
+            UserParticipant up2[] = testobject2.getUsers();
+
+            assertEquals("check length ", up2.length, 1);
+
+            for (int a = 0; a < up2.length; a++) {
+                assertEquals("check that folder id private folder ", up2[a].getPersonalFolderId(), private_folder_id);
+            }        
+
+            // TODO: Move again to public folder and delete complete folder
+
+            CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
+
+            update3.setTitle("testMove - Step 4 - Update");
+            update3.setParentFolderID(public_folder_id);
+            update3.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
+        } finally {
+            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
-        
-        assertEquals("testMove - Step 2 - Update", update1.getTitle());
-        
-        // TODO: Move again to private folder
-
-        CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
-        
-        update2.setTitle("testMove - Step 3 - Update");
-        update2.setParentFolderID(private_folder_id);
-        update2.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
-        
-        // TODO: LoadObject by ID and make some tests
-
-        CalendarDataObject testobject2 = csql.getObjectById(object_id, private_folder_id);
-        
-        assertEquals("Test folder id ", testobject2.getEffectiveFolderId(), private_folder_id);
-        
-        UserParticipant up2[] = testobject2.getUsers();
-        
-        assertEquals("check length ", up2.length, 1);
-        
-        for (int a = 0; a < up2.length; a++) {
-            assertEquals("check that folder id private folder ", up2[a].getPersonalFolderId(), private_folder_id);
-        }        
-        
-        // TODO: Move again to public folder and delete complete folder
-        
-        CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
-        
-        update3.setTitle("testMove - Step 4 - Update");
-        update3.setParentFolderID(public_folder_id);
-        update3.setIgnoreConflicts(true);
-        csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
-        
-        ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
 
         try {
             DBPool.push(context, readcon);
@@ -385,11 +385,24 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
         CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[1];
-        cols[0] = AppointmentObject.TITLE;        
+        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
         assertTrue("Test if we got appointments", si.hasNext());
+        while (si.hasNext()) {
+            CalendarDataObject cdao = (CalendarDataObject)si.next();
+            if (cdao.containsRecurrenceID() && cdao.getRecurrencePosition() == 0) {
+                testDelete(cdao);
+            }
+        }
+        DBPool.push(context, readcon);
     }
     
-    
+    private void testDelete(CalendarDataObject cdao) throws Exception {        
+        Connection writecon = DBPool.pickupWriteable(getContext());
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
+        CalendarSql csql = new CalendarSql(so);
+        csql.deleteAppointmentObject(cdao, cdao.getEffectiveFolderId(), new Date(SUPER_END));
+        DBPool.pushWrite(context, writecon);
+    }
 }
