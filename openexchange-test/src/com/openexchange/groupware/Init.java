@@ -124,7 +124,8 @@ public final class Init {
 			for (String fileName : dir.list()) {
 				myFile = new File(new StringBuilder().append(ajaxPropertiesDir)
 						.append(fileName).toString());
-				if (!myFile.isDirectory() && myFile.canRead()) {
+				if (!myFile.isDirectory() && myFile.canRead()
+						&& !myFile.getName().startsWith(".")) {
 					fileList.add(myFile.getAbsolutePath());
 				}
 			}
