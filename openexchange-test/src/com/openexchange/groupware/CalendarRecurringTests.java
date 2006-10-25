@@ -415,6 +415,7 @@ public class CalendarRecurringTests extends TestCase {
             RecurringResult rs = rss.getRecurringResult(a);
             assertEquals("Testing start time", rs.getStart(), saves);
             assertEquals("Testing end time", rs.getEnd(), savee);
+            assertEquals("Testing Position", a+1, rs.getPosition());
             saves += CalendarRecurringCollection.MILLI_DAY;
             savee += CalendarRecurringCollection.MILLI_DAY;
         }
@@ -484,6 +485,7 @@ public class CalendarRecurringTests extends TestCase {
             RecurringResult rs = rss.getRecurringResult(a);
             assertEquals("Testing start time", rs.getStart(), saves);
             assertEquals("Testing end time", rs.getEnd(), savee);
+            assertEquals("Testing Position", a+1, rs.getPosition());
             saves += CalendarRecurringCollection.MILLI_DAY;
             savee += CalendarRecurringCollection.MILLI_DAY;
         }
