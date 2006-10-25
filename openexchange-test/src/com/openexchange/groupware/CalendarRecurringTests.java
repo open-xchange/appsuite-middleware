@@ -170,6 +170,25 @@ public class CalendarRecurringTests extends TestCase {
         
     }    
     
+    public void testDailyByPosition() throws Throwable {
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("Daily Appointment By Position Test");
+        CalendarTest.fillDatesInDao(cdao);        
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        CalendarRecurringCollection.fillDAO(cdao);        
+        RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        for (int a = 0; a < rrs.size(); a++) {
+            RecurringResults rrs_check = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, rrs.getRecurringResult(a).getPosition());
+            RecurringResult rr = rrs_check.getRecurringResult(0);
+            assertEquals("Check correct recurrence position", rrs.getRecurringResult(a).getPosition(), rr.getPosition());
+            assertEquals("Check correct start time", rrs.getRecurringResult(a).getStart(), rr.getStart());
+            assertTrue("Check correct position calculation", a+1 == rr.getPosition());
+            //System.out.println(">>> "+new Date(rr.getStart()));
+        }
+    }        
+    
+    
     public void testDailyRecurringWithDAO() throws Throwable {
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
@@ -561,6 +580,9 @@ public class CalendarRecurringTests extends TestCase {
         }
         
     }          
+    
+    
+    
     
     
     
