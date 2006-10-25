@@ -63,7 +63,7 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	public void testFindLocks() throws Exception {
-		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
 		clean.add(lockId);
 		
 		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
@@ -77,7 +77,7 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	public void testUnlock() throws Exception {
-		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
 		clean.add(lockId);
 		
 		lockManager.unlock(lockId, ctx, user, userConfig);
@@ -88,11 +88,26 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	public void testTimeout() throws Exception {
-		int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
 		clean.add(lockId);
 		
 		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
 		assertEquals(0, locks.size());
+		
+	}
+	
+	public void testRemoveAll() throws Exception {
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		
+		lockManager.removeAll(entity, ctx, user, userConfig);
+		
+		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		assertTrue(locks.isEmpty());
 		
 	}
 	
