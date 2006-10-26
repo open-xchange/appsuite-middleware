@@ -24,7 +24,7 @@ public class ResourceTest extends AbstractResourceTest{
 	
 	public static final int SKEW = 1000;
 
-	static protected final WebdavFactory FACTORY = DummyResourceManager.getInstance();
+	static protected final WebdavFactory FACTORY = TestWebdavFactoryBuilder.buildFactory();
 	
 	public void testBody() throws Exception{
 		WebdavResource res = createResource();
