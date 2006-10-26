@@ -6,7 +6,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.tools.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderPool;
 
 import java.sql.Connection;

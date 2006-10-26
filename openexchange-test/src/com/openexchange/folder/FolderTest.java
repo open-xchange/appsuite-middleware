@@ -17,7 +17,7 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderAction;
 
 /**

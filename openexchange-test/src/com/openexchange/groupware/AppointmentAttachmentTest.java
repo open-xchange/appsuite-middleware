@@ -14,7 +14,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 import java.sql.Connection;
 import junit.framework.TestCase;
 
