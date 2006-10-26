@@ -2,43 +2,34 @@
 package com.openexchange.groupware;
 
 
+import java.sql.Connection;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
+
+import junit.framework.TestCase;
+
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.CalendarSqlImp;
-import com.openexchange.groupware.calendar.ConflictHandler;
-import com.openexchange.groupware.calendar.FreeBusyResults;
+import com.openexchange.groupware.calendar.RecurringResult;
+import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.notify.ParticipantNotifyTest;
 import com.openexchange.server.DBPool;
-import com.openexchange.groupware.calendar.RecurringResults;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import junit.framework.TestCase;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class CalendarRecurringTests extends TestCase {
      

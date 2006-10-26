@@ -1,20 +1,15 @@
 package com.openexchange.server;
 
 
+import java.util.Properties;
+
+import junit.framework.TestCase;
+
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.tools.oxfolder.OXFolderPool;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
-import junit.framework.TestCase;
 
 public class ComplexDBPoolTest extends TestCase {
     
