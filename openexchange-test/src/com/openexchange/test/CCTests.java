@@ -47,11 +47,11 @@ public class CCTests {
 		// tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
 	    tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
-		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
-		/*tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
+		//tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
 		tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
-		tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);*/
+		tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
 		
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
 		
