@@ -507,7 +507,7 @@ public class FolderTest extends AbstractAJAXTest {
 				break;
 			}
 		}
-		System.out.println("MyInfostore");
+//		System.out.println("MyInfostore");
 		l = getSubfolders(conversation, hostname, sessionId, ""+userStore.getObjectID(), false);
 		for (Iterator iter = l.iterator(); iter.hasNext();) {
 			FolderObject f = (FolderObject) iter.next();
