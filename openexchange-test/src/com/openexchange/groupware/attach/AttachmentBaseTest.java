@@ -461,6 +461,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		testFile = new File(System.getProperty("test.propfile"));
 		
 		attachmentBase = new AttachmentBaseImpl(MODE.getProvider());
+		attachmentBase.setTransactional(true);
 		attachmentBase.startTransaction();
 		clean.clear();
 	}
