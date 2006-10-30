@@ -23,7 +23,7 @@ public class UpdateTest extends TaskTest {
 		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateTaskRemoveAlarm() throws Exception {
+	public void testUpdateTaskRemoveAlarm() throws Exception {
 		Task taskObj = createTask("testUpdateTaskRemoveAlarm");
 		taskObj.setAlarm(new Date(startTime.getTime()-(2*dayInMillis)));
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
@@ -38,7 +38,7 @@ public class UpdateTest extends TaskTest {
 		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateTaskWithParticipants() throws Exception {
+	public void _testUpdateTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testUpdateTask");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
@@ -64,7 +64,7 @@ public class UpdateTest extends TaskTest {
 		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateConcurentConflict() throws Exception {
+	public void testUpdateConcurentConflict() throws Exception {
 		Task taskObj = createTask("testUpdateTaskConcurentConflict");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
