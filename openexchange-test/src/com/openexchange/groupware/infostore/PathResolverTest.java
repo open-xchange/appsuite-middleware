@@ -52,7 +52,7 @@ public class PathResolverTest extends TestCase {
 	
 	public void setUp() throws Exception {
 		Init.initDB();
-		
+		database.setTransactional(true);
 		ctx = getContext();
 		
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(getUsername()), ctx, "gnitzelgnatzel");
