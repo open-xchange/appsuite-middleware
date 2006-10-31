@@ -590,10 +590,89 @@ public class CalendarRecurringTests extends TestCase {
         }
         
     }          
+
     
-    
-    
-    
-    
+   public void testRecurringSimpleUpdate() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testRecurringSimpleUpdate - Step 1 - Insert");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        Date save_start = testobject.getStartDate();
+        Date save_end = testobject.getEndDate();
+        String rec_string = CalendarRecurringCollection.createDSString(testobject);
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setTitle("testRecurringSimpleUpdate - Step 2 - Update");
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        
+        CalendarDataObject testobject_update = csql.getObjectById(object_id, folder_id);
+        assertEquals("Check start date", save_start, testobject_update.getStartDate());
+        assertEquals("Check end date", save_end, testobject_update.getEndDate());
+        assertTrue("Check rec string", rec_string.equals(CalendarRecurringCollection.createDSString(testobject_update)));
+
+        
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject_update, 0, 0, 1);
+        assertTrue("Got results ", rss.size() == 1);
+        RecurringResult rs = rss.getRecurringResult(0);
+        
+        CalendarDataObject update_with_times = new CalendarDataObject();
+        
+        update_with_times.setContext(so.getContext());
+        update_with_times.setTitle("testRecurringSimpleUpdate - Step 3 - Update");
+        update_with_times.setObjectID(object_id);
+        update_with_times.setStartDate(new Date(rs.getStart()));
+        update_with_times.setEndDate(new Date(rs.getEnd()));
+        update_with_times.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update_with_times, folder_id, new Date(SUPER_END));
+
+        testobject_update = csql.getObjectById(object_id, folder_id);
+        assertEquals("Check start date", save_start, testobject_update.getStartDate());
+        assertEquals("Check end date", save_end, testobject_update.getEndDate());
+        assertEquals("Check rec string", rec_string, CalendarRecurringCollection.createDSString(testobject_update));
+        
+        
+        CalendarDataObject update_with_changed_times = new CalendarDataObject();
+        
+        update_with_changed_times.setContext(so.getContext());
+        update_with_changed_times.setTitle("testRecurringSimpleUpdate - Step 4 - Update");
+        update_with_changed_times.setObjectID(object_id);
+        update_with_changed_times.setStartDate(new Date(rs.getStart()+3600000));
+        update_with_changed_times.setEndDate(new Date(rs.getEnd()+3600000));
+        update_with_changed_times.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date(SUPER_END));
+ 
+        testobject_update = csql.getObjectById(object_id, folder_id);
+        assertEquals("Check start date", new Date(save_start.getTime()+3600000), testobject_update.getStartDate());
+        assertEquals("Check end date", new Date(save_end.getTime()+3600000), testobject_update.getEndDate());
+        
+        assertTrue("Check rec string", !rec_string.equals(CalendarRecurringCollection.createDSString(testobject_update)));
+        
+   }
     
 }
