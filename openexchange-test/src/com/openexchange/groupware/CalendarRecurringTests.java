@@ -2,6 +2,7 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.tools.OXFolderTools;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,7 +30,17 @@ import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAction;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
+import junit.framework.TestCase;
+
 
 public class CalendarRecurringTests extends TestCase {
      
@@ -174,8 +185,7 @@ public class CalendarRecurringTests extends TestCase {
             RecurringResult rr = rrs_check.getRecurringResult(0);
             assertEquals("Check correct recurrence position", rrs.getRecurringResult(a).getPosition(), rr.getPosition());
             assertEquals("Check correct start time", rrs.getRecurringResult(a).getStart(), rr.getStart());
-            assertTrue("Check correct position calculation", a+1 == rr.getPosition());
-            //System.out.println(">>> "+new Date(rr.getStart()));
+            assertTrue("Check correct position calculation", a+1 == rr.getPosition());            
         }
     }        
     
@@ -220,7 +230,7 @@ public class CalendarRecurringTests extends TestCase {
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1151100000000L; // 24.06.2006 00:00 (GMT)
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         RecurringResults m = null;
         CalendarDataObject cdao = null;
         
@@ -402,6 +412,11 @@ public class CalendarRecurringTests extends TestCase {
         mod = u%CalendarRecurringCollection.MILLI_DAY;
         u = u - mod;
         
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        start.setTimeInMillis(saves);
+        Calendar ende = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        ende.setTimeInMillis(savee);
+        
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));        
@@ -423,11 +438,11 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Testing size ", rss.size(), 10);
         for (int a = 0; a < rss.size(); a++) {
             RecurringResult rs = rss.getRecurringResult(a);
-            assertEquals("Testing start time", rs.getStart(), saves);
-            assertEquals("Testing end time", rs.getEnd(), savee);
+            assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
+            assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
             assertEquals("Testing Position", a+1, rs.getPosition());
-            saves += CalendarRecurringCollection.MILLI_DAY;
-            savee += CalendarRecurringCollection.MILLI_DAY;
+            start.add(Calendar.DAY_OF_MONTH, 1);
+            ende.add(Calendar.DAY_OF_MONTH, 1);
         }
     }        
 
@@ -450,6 +465,11 @@ public class CalendarRecurringTests extends TestCase {
         u = u - mod;
         
         
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        start.setTimeInMillis(saves);
+        Calendar ende = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        ende.setTimeInMillis(savee);        
+        
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         int uid2 = resolveUser(user2);        
         
@@ -466,7 +486,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setDays(1);
         
         cdao.setParentFolderID(folder_id);
-        
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");        
         SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
@@ -493,11 +512,11 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Testing size ", rss.size(), 10);
         for (int a = 0; a < rss.size(); a++) {
             RecurringResult rs = rss.getRecurringResult(a);
-            assertEquals("Testing start time", rs.getStart(), saves);
-            assertEquals("Testing end time", rs.getEnd(), savee);
+            assertEquals("Testing start time", rs.getStart(), start.getTimeInMillis());
+            assertEquals("Testing end time", rs.getEnd(), ende.getTimeInMillis());
             assertEquals("Testing Position", a+1, rs.getPosition());
-            saves += CalendarRecurringCollection.MILLI_DAY;
-            savee += CalendarRecurringCollection.MILLI_DAY;
+            start.add(Calendar.DAY_OF_MONTH, 1);
+            ende.add(Calendar.DAY_OF_MONTH, 1);
         }
         
         // Delete (virtually) a single app in the sequence
