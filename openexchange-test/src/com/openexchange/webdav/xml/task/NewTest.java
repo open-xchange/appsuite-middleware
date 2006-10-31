@@ -17,7 +17,7 @@ public class NewTest extends TaskTest {
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 	}
 	
-	public void testNewTaskWithParticipants() throws Exception {
+	public void _notestNewTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testNewTaskWithParticipants");
 		
 		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
