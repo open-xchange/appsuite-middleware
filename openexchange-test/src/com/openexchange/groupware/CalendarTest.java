@@ -211,6 +211,67 @@ public class CalendarTest extends TestCase {
         
     }
     
+    
+    public void testInsertAndAlarm() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testInsertAndAlarm - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        
+        UserParticipant up = new UserParticipant();
+        up.setIdentifier(userid);
+        up.setAlarmMinutes(5);
+        cdao.setUsers(new UserParticipant[] { up });
+        
+        
+        Participants participants = new Participants();
+        Participant p = new UserParticipant();
+        p.setIdentifier(userid);
+        participants.add(p);
+ 
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        
+        Participant p2 = new UserParticipant();
+        p2.setIdentifier(resolveUser(user2));
+        participants.add(p2);        
+        
+        cdao.setParticipants(participants.getList());        
+        
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertEquals("Check Alarm" , 5, testobject.getAlarm());
+        
+        
+        
+        CalendarDataObject cdao2 = new CalendarDataObject();
+        cdao2.setTitle("testInsertAndAlarm(2) - Step 1 - Insert");
+        cdao2.setParentFolderID(fid);
+        
+        cdao2.setContext(so.getContext());
+        cdao2.setIgnoreConflicts(true);
+        
+        cdao2.setAlarm(5);
+        
+        fillDatesInDao(cdao2);
+        
+        cdao2.setParticipants(participants.getList());        
+        
+        csql.insertAppointmentObject(cdao2);        
+        object_id = cdao2.getObjectID();
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
+        assertEquals("Check Alarm" , 5, testobject2.getAlarm());        
+        
+    }    
+    
     public void testBasicSearch() throws Exception  {
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         CalendarSql csql = new CalendarSql(so);
