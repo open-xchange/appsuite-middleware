@@ -48,7 +48,7 @@ public class NewTest extends TaskTest {
 		deleteTask(getWebConversation(), objectIdAndFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestNewTaskWithUsers() throws Exception {
+	public void testNewTaskWithUsers() throws Exception {
 		Task taskObj = createTask("testNewTaskWithUsers");
 		
 		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
