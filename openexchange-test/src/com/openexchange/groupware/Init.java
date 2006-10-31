@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
-import org.apache.commons.logging.Log;
-
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.Sessiond;
@@ -87,7 +85,6 @@ public final class Init {
 
 		String retval = null;
 		if (testProps.getProperty("ajaxPropertiesDir") != null) {
-			StringBuilder filename = new StringBuilder();
 			if (!isAjaxDirInitialized) {
 				synchronized (Init.class) {
 					if (!isAjaxDirInitialized) {
@@ -185,8 +182,10 @@ public final class Init {
 	public static void loadSystemProperties() {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
-			GlobalConfig.loadConf(testProps
-					.getProperty("openexchange.propfile"));
+            final String propFileName = testProps.getProperty(
+                "openexchange.propfile");
+			GlobalConfig.loadConf(propFileName);
+            SystemConfig.loadProperties(propFileName);
 			systemPropertiesLoaded = true;
 		}
 	}
