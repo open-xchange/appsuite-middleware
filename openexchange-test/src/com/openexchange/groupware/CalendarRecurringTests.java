@@ -2,7 +2,6 @@
 package com.openexchange.groupware;
 
 
-import com.openexchange.tools.OXFolderTools;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,6 +30,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
