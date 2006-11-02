@@ -184,8 +184,8 @@ public final class Init {
 			loadTestProperties();
             final String propFileName = testProps.getProperty(
                 "openexchange.propfile");
-			GlobalConfig.loadConf(propFileName);
             SystemConfig.loadProperties(propFileName);
+			GlobalConfig.loadConf(propFileName);
 			systemPropertiesLoaded = true;
 		}
 	}
