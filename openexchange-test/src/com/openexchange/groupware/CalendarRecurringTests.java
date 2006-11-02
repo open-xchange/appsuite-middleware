@@ -695,7 +695,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject update = new CalendarDataObject();
         update.setContext(so.getContext());
-        update.setTitle("testUpdateSimpleAppointmentToRecurring - Step 2 - Update");
+        update.setTitle("testUpdateSimpleAppointmentToRecurring - Step 2 - Update - Recurring");
         update.setObjectID(object_id);
         update.setRecurrenceType(CalendarObject.DAILY);
         update.setRecurrenceCalculator(1);
@@ -718,6 +718,18 @@ public class CalendarRecurringTests extends TestCase {
             assertEquals("Check correct start time ", c.getTimeInMillis(), rs.getStart());
             c.add(Calendar.DAY_OF_MONTH, 1);
         }        
+        
+        CalendarDataObject update_normal = new CalendarDataObject();
+        update_normal.setContext(so.getContext());
+        update_normal.setTitle("testUpdateSimpleAppointmentToRecurring - Step 3 - Update - Normal");
+        update_normal.setObjectID(object_id);
+        update_normal.setRecurrenceType(CalendarObject.NO_RECURRENCE);        
+        update_normal.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update_normal, folder_id, new Date(SUPER_END));                    
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);                
+        assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
         
     }
    
