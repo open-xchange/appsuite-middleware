@@ -675,4 +675,51 @@ public class CalendarRecurringTests extends TestCase {
         
    }
     
+    public void testUpdateSimpleAppointmentToRecurring() throws Throwable {   
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testUpdateSimpleAppointmentToRecurring - Step 1 - Insert");        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setTitle("testUpdateSimpleAppointmentToRecurring - Step 2 - Update");
+        update.setObjectID(object_id);
+        update.setRecurrenceType(CalendarObject.DAILY);
+        update.setRecurrenceCalculator(1);
+        update.setInterval(1);
+        update.setDays(1);                
+        update.setUntil(cdao.getUntil());
+        update.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);        
+        
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
+        assertTrue("Test object is not null", rss != null);          
+        assertEquals("Testing size ", rss.size(), 11);
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        c.setTimeInMillis(cdao.getStartDate().getTime());
+        for (int a = 0; a < rss.size(); a++) {
+            RecurringResult rs = rss.getRecurringResult(a);
+            assertEquals("Check correct start time ", c.getTimeInMillis(), rs.getStart());
+            c.add(Calendar.DAY_OF_MONTH, 1);
+        }        
+        
+    }
+   
+   
 }
