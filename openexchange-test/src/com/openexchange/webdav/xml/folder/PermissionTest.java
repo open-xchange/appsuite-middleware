@@ -1,14 +1,14 @@
 package com.openexchange.webdav.xml.folder;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 
 public class PermissionTest extends FolderTest {
 	
-	public void dummyTest() {
+	public void testDummy() {
 		
 	}
 	
@@ -34,7 +34,7 @@ public class PermissionTest extends FolderTest {
 			int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 			deleteFolder(getWebConversation(), new int[] { subFolderId1 }, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict permission expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), 1002);
 		}
 
@@ -63,7 +63,7 @@ public class PermissionTest extends FolderTest {
 			int subFolderId1 = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
 			deleteFolder(getWebConversation(), new int[] { subFolderId1 }, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict permission expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), 1002);
 		}
 

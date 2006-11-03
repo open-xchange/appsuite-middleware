@@ -1,12 +1,11 @@
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
-import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends AppointmentTest {
@@ -41,7 +40,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -74,7 +73,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -110,7 +109,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			updateAppointment(getSecondWebConversation(), appointmentObj, appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -146,7 +145,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			updateAppointment(getSecondWebConversation(), appointmentObj, appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -182,7 +181,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			deleteAppointment(getSecondWebConversation(), appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		
@@ -218,7 +217,7 @@ public class PermissionTest extends AppointmentTest {
 		try {
 			deleteAppointment(getSecondWebConversation(), appointmentObjectId, parentFolderId, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
 		}
 		

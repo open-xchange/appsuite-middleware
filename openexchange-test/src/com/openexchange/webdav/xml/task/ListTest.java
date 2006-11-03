@@ -1,7 +1,7 @@
 package com.openexchange.webdav.xml.task;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
@@ -50,7 +50,7 @@ public class ListTest extends TaskTest {
 		try {
 			Task loadTask = loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		
