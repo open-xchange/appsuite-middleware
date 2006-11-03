@@ -10,6 +10,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -331,7 +332,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		} else {
 			contactObj = (ContactObject)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
@@ -386,7 +387,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		} else {
 			contactObj = (ContactObject)response[0].getDataObject();
 			objectId = contactObj.getObjectID();
@@ -453,7 +454,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());		
+			throw new TestException(response[0].getErrorMessage());		
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -580,7 +581,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response" , 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());

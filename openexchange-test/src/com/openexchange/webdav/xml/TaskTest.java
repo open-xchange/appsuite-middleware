@@ -12,6 +12,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -147,7 +148,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		} else {
 			taskObj = (Task)response[0].getDataObject();
 			objectId = taskObj.getObjectID();
@@ -199,7 +200,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		} else {
 			taskObj = (Task)response[0].getDataObject();
 			objectId = taskObj.getObjectID();
@@ -267,7 +268,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.TASK);
 
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -438,7 +439,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		assertEquals("check response" , 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());

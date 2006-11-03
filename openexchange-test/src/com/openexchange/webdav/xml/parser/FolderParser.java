@@ -46,9 +46,9 @@
 package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import java.util.ArrayList;
@@ -139,7 +139,7 @@ public class FolderParser extends FolderChildParser {
 				permissions.add(oclp);
 			}
 		} catch (Exception exc) {
-			throw new OXException(exc);
+			throw new TestException(exc);
 		}
 		
 		folderObj.setPermissions(permissions);

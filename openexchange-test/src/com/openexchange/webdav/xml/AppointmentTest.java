@@ -11,6 +11,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -150,7 +151,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());
@@ -202,7 +203,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		} else {
 			appointmentObj = (AppointmentObject)response[0].getDataObject();
 			objectId = appointmentObj.getObjectID();
@@ -260,7 +261,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 	}
 	
@@ -319,7 +320,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.APPOINTMENT);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 	}
 	
@@ -502,7 +503,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		assertEquals("check response" , 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		assertEquals("check response status", 200, response[0].getStatus());

@@ -37,7 +37,6 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -46,6 +45,7 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceGroup;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.types.Response;
 import java.util.ArrayList;
@@ -74,7 +74,7 @@ public class ResponseParser {
 			if (responseElements.size() == 1) {
 				response = parseGroupUserResponse((Element)responseElements.get(0));
 			} else {
-				throw new OXException("invalid number of response elements in response!");
+				throw new TestException("invalid number of response elements in response!");
 			}
 		} else {
 			response = new Response[responseElements.size()];
@@ -107,7 +107,7 @@ public class ResponseParser {
 				response.setDataObject(parseTaskResponse(eProp));
 				break;
 			default:
-				throw new OXException("invalid module!");
+				throw new TestException("invalid module!");
 		}
 		
 		Element eStatus = ePropstat.getChild("status", webdav);

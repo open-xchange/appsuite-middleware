@@ -38,6 +38,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import org.json.JSONWriter;
 
@@ -556,7 +557,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 
 		if (response.hasError()) {
-			throw new OXException(response.getErrorMessage());
+			throw new TestException(response.getErrorMessage());
 		}
 
 		assertNotNull("timestamp", response.getTimestamp());

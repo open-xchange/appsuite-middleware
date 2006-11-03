@@ -10,6 +10,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -141,11 +142,11 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		assertEquals("check response", 1, response.length);
 		
 		if (response[0].hasError()) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		if (response[0].getStatus() != 200) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 		
 		folderObj = (FolderObject)response[0].getDataObject();
@@ -196,7 +197,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		}
 		
 		if (response[0].getStatus() != 200) {
-			throw new OXException(response[0].getErrorMessage());
+			throw new TestException(response[0].getErrorMessage());
 		}
 	}
 	
@@ -243,7 +244,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 			}
 			
 			if (response[0].getStatus() != 200) {
-				throw new OXException(response[0].getErrorMessage());
+				throw new TestException(response[0].getErrorMessage());
 			}
 		}
 		
@@ -372,7 +373,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		FolderObject[] folderArray = new FolderObject[response.length];
 		for (int a = 0; a < folderArray.length; a++) {
 			if (response[a].hasError()) {
-				throw new OXException(response[a].getErrorMessage());
+				throw new TestException(response[a].getErrorMessage());
 			}
 			
 			folderArray[a] = (FolderObject)response[a].getDataObject();

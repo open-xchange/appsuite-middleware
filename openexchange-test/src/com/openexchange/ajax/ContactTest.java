@@ -23,6 +23,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -674,7 +675,7 @@ public class ContactTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
-			throw new OXException(response.getErrorMessage());
+			throw new TestException(response.getErrorMessage());
 		}
 		
 		assertNotNull("timestamp", response.getTimestamp());
