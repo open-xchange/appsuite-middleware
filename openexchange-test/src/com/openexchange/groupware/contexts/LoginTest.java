@@ -64,10 +64,7 @@ public class LoginTest extends TestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        Init.loadTestProperties();
-        ComfireConfig.properties = new Properties();
-        ComfireConfig.properties.load(new FileInputStream(Init.getTestProperty(
-            "openexchange.propfile")));
+        Init.loadSystemProperties();
     }
 
     public void testLogin() throws Throwable {
