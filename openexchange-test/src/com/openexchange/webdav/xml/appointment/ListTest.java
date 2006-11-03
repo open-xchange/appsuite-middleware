@@ -1,7 +1,7 @@
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
@@ -60,7 +60,7 @@ public class ListTest extends AppointmentTest {
 		try {
 			AppointmentObject loadAppointment = loadAppointment(webCon, (objectId+1000), appointmentFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
-		} catch (OXException exc) {
+		} catch (TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);
 		}
 		
