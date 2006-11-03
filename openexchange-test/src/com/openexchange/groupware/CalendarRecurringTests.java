@@ -97,7 +97,7 @@ public class CalendarRecurringTests extends TestCase {
         DBPool.push(context, readcon);
         return privatefolder;        
     }
-    
+
    public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();      
         assertFalse(cdao.calculateRecurrence());
@@ -732,6 +732,43 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
         
     }
-   
+
+    public void testCreateExceptionFromRecurring() throws Throwable {   
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getStandardFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testCreateExceptionFromRecurring - Step 1 - Insert");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();        
+        Date last = cdao.getLastModified();        
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        update.setTitle("testCreateExceptionFromRecurring - Step 2 - Update (create exception)");
+        update.setRecurrencePosition(3);        
+        
+        csql.updateAppointmentObject(update, folder_id, last);
+
+        
+        
+    }
+    
    
 }
