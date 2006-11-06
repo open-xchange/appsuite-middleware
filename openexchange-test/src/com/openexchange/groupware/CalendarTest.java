@@ -2,6 +2,8 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.reminder.ReminderHandler;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -269,6 +271,12 @@ public class CalendarTest extends TestCase {
         object_id = cdao2.getObjectID();
         CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
         assertEquals("Check Alarm" , 5, testobject2.getAlarm());        
+        
+        csql.deleteAppointmentObject(testobject2, fid, new Date(SUPER_END));
+        
+        ReminderSQLInterface rsql = new ReminderHandler(context);
+        assertTrue("Check if reminder has been deleted", rsql.existsReminder(object_id, userid, Types.APPOINTMENT) == false);
+        
         
     }    
     
