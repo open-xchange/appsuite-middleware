@@ -443,6 +443,8 @@ public class CalendarTest extends TestCase {
             }        
 
             assertTrue("Check that we did not create the second appointment", conflict_cdao.containsObjectID() == false);
+        } else {
+            fail("No conflict!");
         }
         
     }
