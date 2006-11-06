@@ -730,6 +730,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);                
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
+        assertTrue("Check that no recurring id is available", testobject2.getRecurrence() == null);
         
     }
     
