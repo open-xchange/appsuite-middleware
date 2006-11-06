@@ -347,7 +347,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarStandardFolder(userId, session.getContext());
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -405,7 +405,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Rename & Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarStandardFolder(userId, session.getContext());
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -464,7 +464,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Rename & Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarStandardFolder(userId, session.getContext());
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
 				final int secondUserId = resolveUser(Init.getAJAXProperty("seconduser"));
 				fo.reset();
 				fo.setObjectID(fuid);
