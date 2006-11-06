@@ -106,6 +106,14 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     public void testAll() throws Throwable {
         doAll();
     }
+    
+    /**
+     * Tests uploading of multiple Attachments in one request.
+     * @throws Throwable if an error occurs.
+     */
+    public void testMultiple() throws Throwable {
+        doMultiple();
+    }
 
     /**
      * Tests to detach an attachment.

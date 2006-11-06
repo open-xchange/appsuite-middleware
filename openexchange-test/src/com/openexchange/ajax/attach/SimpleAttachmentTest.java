@@ -27,6 +27,10 @@ public class SimpleAttachmentTest extends AbstractAttachmentTest {
 		return 22;
 	}
 	
+	public void testMultiple() throws Exception {
+		doMultiple();
+	}
+	
 	public void testDetach() throws Exception {
 		doDetach();
 	}

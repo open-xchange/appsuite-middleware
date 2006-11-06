@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -182,6 +184,40 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		assertEquals(testFile.length(), data.getLong("file_size"));
 		assertEquals(clean.get(0).getId(), data.getInt("id"));
 	}
+	
+	protected void doMultiple() throws Exception {
+		AttachmentMetadata attachment = new AttachmentImpl();
+		AttachmentMetadata attachment2 = new AttachmentImpl();
+		
+		attachment.setFolderId(folderId);
+		attachment.setAttachedId(attachedId);
+		attachment.setModuleId(moduleId);
+		
+		attachment2.setFolderId(folderId);
+		attachment2.setAttachedId(attachedId);
+		attachment2.setModuleId(moduleId);
+		
+		
+		Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, Arrays.asList(testFile, testFile2));
+		assertNoError(res);
+		
+		attachment.setId(((JSONArray)res.getData()).getInt(0));
+		attachment2.setId(((JSONArray)res.getData()).getInt(1));
+		clean.add(attachment);
+		clean.add(attachment2);
+		
+		assertFilename(clean.get(0), testFile.getName());
+		assertFilename(clean.get(1), testFile2.getName());
+	}
+	
+	protected final void assertFilename(AttachmentMetadata att, String filename) throws MalformedURLException, JSONException, IOException, SAXException {
+		Response res = get(getWebConversation(),sessionId,folderId,attachedId,moduleId, att.getId());
+		assertNoError(res);
+		
+		JSONObject data = (JSONObject) res.getData();
+		
+		assertEquals(filename,data.getString("filename"));
+	}
 		
 	protected void doDocument() throws Exception {
 		upload();
@@ -272,7 +308,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		Response res = attach(getWebConversation(),sessionId,folderId,attachedId,moduleId, testFile);
 		assertNoError(res);
 		
-		attachment.setId((Integer)res.getData());
+		attachment.setId(((JSONArray)res.getData()).getInt(0));
 		clean.add(attachment);
 	}
 	

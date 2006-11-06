@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -29,12 +31,14 @@ public class AttachmentTest extends AbstractAJAXTest {
 
 	protected String sessionId = null;
 	protected File testFile = null;
+	protected File testFile2 = null;
 	
 	protected List<AttachmentMetadata> clean = new ArrayList<AttachmentMetadata>();
 	
 	public void setUp() throws Exception {
 		sessionId = getSessionId();
 		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		testFile2 = new File(Init.getTestProperty("webdavPropertiesFile"));
 	}
 	
 	public void tearDown() throws Exception {
@@ -44,31 +48,39 @@ public class AttachmentTest extends AbstractAJAXTest {
 		clean.clear();
 	}
 	
-	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload) throws JSONException, IOException {
-		return attach(webConv,sessionId,folderId,attachedId,moduleId,upload,null, null);
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads) throws JSONException, IOException {
+		return attach(webConv, sessionId, folderId, attachedId, moduleId, uploads, new HashMap<File,String>(), new HashMap<File,String>());
 	}
 	
-	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, List<File> uploads, Map<File, String> filenames, Map<File, String> mimetypes) throws JSONException, IOException {
 		StringBuffer url = getUrl(sessionId,"attach");
 		
 		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
 		req.setMimeEncoded(true);
 		
+		int index = 0;
 		
-		JSONObject object = new JSONObject();
+		for(File upload : uploads) {
 		
-		object.put("folder", folderId);
-		object.put("attached", attachedId);
-		object.put("module",moduleId);
-		if(filename != null)
-			object.put("filename", filename);
-		if(mimeType != null)
-			object.put("file_mimetype",mimeType);
-		
-		req.setParameter("json",object.toString());
-		if(upload != null) {
-			req.selectFile("file",upload);
+			JSONObject object = new JSONObject();
+			
+			String filename = filenames.get(upload);
+			String mimeType = mimetypes.get(upload);
+			
+			object.put("folder", folderId);
+			object.put("attached", attachedId);
+			object.put("module",moduleId);
+			if(filename != null)
+				object.put("filename", filename);
+			if(mimeType != null)
+				object.put("file_mimetype",mimeType);
+			
+			req.setParameter("json_"+index,object.toString());
+			if(upload != null) {
+				req.selectFile("file_"+index,upload);
+			}
+			
+			index++;
 		}
 		
 		WebResponse resp = webConv.getResource(req);
@@ -80,6 +92,23 @@ public class AttachmentTest extends AbstractAJAXTest {
 //		}
 		
 		return Response.parse(response.toString());
+	}
+	
+	
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId,File upload) throws JSONException, IOException {
+		return attach(webConv,sessionId,folderId,attachedId,moduleId,upload,null, null);
+	}
+	
+	public Response attach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, File upload, String filename, String mimeType) throws JSONException, IOException {
+		Map<File, String> filenames = new HashMap<File,String>();
+		if(null != filename)
+			filenames.put(upload,filename);
+		
+		Map<File, String> mimeTypes = new HashMap<File,String>();
+		if(null != mimeType)
+			filenames.put(upload,mimeType);
+		
+		return attach(webConv,sessionId,folderId,attachedId,moduleId,Arrays.asList(upload), filenames, mimeTypes);
 	}
 
 	public Response detach(WebConversation webConv, String sessionId, int folderId, int attachedId, int moduleId, int[] ids) throws MalformedURLException, JSONException, IOException, SAXException {
