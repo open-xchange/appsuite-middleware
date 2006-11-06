@@ -732,7 +732,7 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
         
     }
-
+    
     public void testCreateExceptionFromRecurring() throws Throwable {   
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -765,7 +765,19 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrencePosition(3);        
         
         csql.updateAppointmentObject(update, folder_id, last);
-
+                
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
+        RecurringResult rs = rss.getRecurringResult(0);
+        
+        assertTrue("Got RecurringResult", rs != null);
+        
+        long exception_date = rs.getNormalized();
+        
+        java.util.Date exceptions[] = testobject.getChangeException();
+        assertTrue("Got exceptions", exceptions != null);
+        
+        assertEquals("Check correct exception calculation", exception_date, exceptions[0].getTime());
         
         
     }
