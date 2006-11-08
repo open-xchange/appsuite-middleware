@@ -120,7 +120,7 @@ public class CalendarTest extends TestCase {
         
         int privatefolder = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
         
-        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder, "Europe/Berlin"));
+        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder));
         long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
