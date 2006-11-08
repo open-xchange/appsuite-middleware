@@ -796,7 +796,6 @@ public class CalendarRecurringTests extends TestCase {
         
         assertEquals("Check correct exception calculation", exception_date, exceptions[0].getTime());
         
-        // Write test for created exception and start/end date
         
         int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
         SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
@@ -814,6 +813,16 @@ public class CalendarRecurringTests extends TestCase {
         }        
         
         assertTrue("Found exception",  found_exception);
+        
+        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END));
+        int counter = 0;
+        while (si.hasNext()) {
+            CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            if (tcdao.getRecurrenceID() == object_id) {
+                counter ++;
+            }
+        }               
+        assertEquals("Check correct number of results" , 2 , counter);
         
     }
     
