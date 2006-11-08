@@ -2,7 +2,10 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.ajax.Resource;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,6 +93,27 @@ public class CalendarTest extends TestCase {
         return new ContextImpl(contextid);
     }
     
+    static final void fillDatesInDao(CalendarDataObject cdao) {
+        long s = System.currentTimeMillis();
+        long cals = s;
+        long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
+        cals = cals- calsmod;
+        long endcalc = 3600000;
+        long mod = s%3600000;
+        s = s - mod;
+        long saves = s;
+        long e = s + endcalc;
+        long savee = e;
+        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
+        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        u = u - mod;
+        
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        
+    }    
+    
     public static int getPrivateFolder() throws Exception {
         int privatefolder = 0;
         Context context = getContext();
@@ -98,7 +122,7 @@ public class CalendarTest extends TestCase {
         DBPool.push(context, readcon);
         return privatefolder;        
     }
-  
+
     public void testWholeDay() throws Throwable { // TODO: Need connection 
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
@@ -125,27 +149,6 @@ public class CalendarTest extends TestCase {
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
         DBPool.push(context, readcon);
-        
-    }
-    
-    static final void fillDatesInDao(CalendarDataObject cdao) {
-        long s = System.currentTimeMillis();
-        long cals = s;
-        long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
-        cals = cals- calsmod;
-        long endcalc = 3600000;
-        long mod = s%3600000;
-        s = s - mod;
-        long saves = s;
-        long e = s + endcalc;
-        long savee = e;
-        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
-        mod = u%CalendarRecurringCollection.MILLI_DAY;
-        u = u - mod;
-        
-        cdao.setStartDate(new Date(s));
-        cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));
         
     }
     
@@ -472,15 +475,19 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
         CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
         assertTrue("Test if we got appointments", si.hasNext());
+        int counter = 0;
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
-            if (cdao.containsRecurrenceID() && cdao.getRecurrencePosition() == 0) {
-                testDelete(cdao);
-            }
+            testDelete(cdao);
+            counter++;
+            
         }
+        System.out.println("DEBUG: deleted : "+counter);
+        si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
+        assertTrue("Check that we deleted them all", !si.hasNext());
         DBPool.push(context, readcon);
     }
     
@@ -489,7 +496,73 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
         CalendarSql csql = new CalendarSql(so);
-        csql.deleteAppointmentObject(cdao, cdao.getEffectiveFolderId(), new Date(SUPER_END));
+        CalendarDataObject deleteit = new CalendarDataObject();
+        deleteit.setContext(cdao.getContext());
+        deleteit.setObjectID(cdao.getObjectID());
+        int fid = cdao.getEffectiveFolderId();
+        try {
+            csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
+        } catch(Exception e) { 
+            e.printStackTrace();
+        }
         DBPool.pushWrite(context, writecon);
     }
+
+    public void testResourceConflictHandling() throws Exception {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testResourceConflictHandling - Step 1 - Insert");
+        
+        
+        Participants p = new Participants();
+        
+        Participant resource = new ResourceParticipant();
+        resource.setIdentifier(100);
+        
+        p.add(resource);
+        
+        cdao.setParticipants(p.getList());
+        
+        CalendarDataObject cdao_conflict = (CalendarDataObject)cdao.clone();
+        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();   
+        
+        assertTrue("Check that the object really exists ", object_id > 0);
+        
+        Date last = cdao.getLastModified();     
+        
+        cdao.setIgnoreConflicts(true);
+        
+        cdao_conflict.setParentFolderID(folder_id);
+        
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao_conflict);
+        
+        assertTrue("Got conflicts ", conflicts != null);
+        boolean found = false;
+        for (int a = 0; a < conflicts.length; a++) {
+            CalendarDataObject tcdao = conflicts[a];
+            if (tcdao.getObjectID() == object_id) {
+                found = true;
+            }
+        }
+        
+        assertTrue("Conflict object not found", found);
+        
+   
+    }
+    
+    
+    
 }
