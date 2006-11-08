@@ -733,7 +733,7 @@ public class CalendarRecurringTests extends TestCase {
         assertTrue("Check that no recurring id is available", testobject2.getRecurrence() == null);
         
     }
-    
+
     public void testCreateExceptionFromRecurring() throws Throwable {   
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -762,24 +762,58 @@ public class CalendarRecurringTests extends TestCase {
         update.setContext(so.getContext());
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
-        update.setTitle("testCreateExceptionFromRecurring - Step 2 - Update (create exception)");
-        update.setRecurrencePosition(3);        
         
-        csql.updateAppointmentObject(update, folder_id, last);
+        
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 3);
+        RecurringResult rs = rss.getRecurringResult(0);
+        long new_start = rs.getStart()+3600000;
+        long new_end = rs.getEnd()+3600000;
+        
+        Date test_new_start_date = new Date(new_start);
+        Date test_new_end_date = new Date(new_end);
+        
+        update.setStartDate(test_new_start_date);
+        update.setEndDate(test_new_end_date);
+        
+        update.setTitle("testCreateExceptionFromRecurring - Step 2 - Update (create exception)");
+        update.setRecurrencePosition(3);
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
                 
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
-        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
-        RecurringResult rs = rss.getRecurringResult(0);
+        RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
+        RecurringResult rs_test = rss.getRecurringResult(0);
         
-        assertTrue("Got RecurringResult", rs != null);
         
-        long exception_date = rs.getNormalized();
+        assertTrue("Got RecurringResult", rs_test != null);
+        assertEquals("Check first calc", rs.getStart(), rs_test.getStart());
+        assertTrue("Got correct exception", 3 == rs_test.getPosition());
+        
+        long exception_date = rs_test.getNormalized();
         
         java.util.Date exceptions[] = testobject.getChangeException();
         assertTrue("Got exceptions", exceptions != null);
         
         assertEquals("Check correct exception calculation", exception_date, exceptions[0].getTime());
         
+        // Write test for created exception and start/end date
+        
+        int cols[] = new int[] { AppointmentObject.TITLE,  AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.OBJECT_ID, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.RECURRENCE_TYPE, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(folder_id, cols, last);
+        
+        boolean found_exception = false;
+        while (si.hasNext()) {
+            CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
+                // found the single exception we have just have created
+                System.out.println("CHECK ID "+object_id + " / "+tcdao.getRecurrenceID() + " / "+tcdao.getRecurrencePosition());
+                found_exception = true;
+                assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
+                assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
+            }
+        }        
+        
+        assertTrue("Found exception",  found_exception);
         
     }
     

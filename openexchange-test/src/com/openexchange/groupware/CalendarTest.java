@@ -120,11 +120,10 @@ public class CalendarTest extends TestCase {
         
         int privatefolder = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
         
-        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder));
+        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder, "Europe/Berlin"));
         long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
-        
         DBPool.push(context, readcon);
         
     }
@@ -212,6 +211,25 @@ public class CalendarTest extends TestCase {
         assertEquals("Check label", 3, testobject.getLabel());
         
     }
+    
+    public void testNoAlarm() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testNoAlarm - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertTrue("Alarm should not be set", !testobject.containsAlarm());
+        
+    }    
     
     
     public void testInsertAndAlarm() throws Throwable {
