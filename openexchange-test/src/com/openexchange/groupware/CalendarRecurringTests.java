@@ -45,7 +45,7 @@ import junit.framework.TestCase;
 public class CalendarRecurringTests extends TestCase {
      
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
-    
+    public static final String TIMEZONE = "Europe/Berlin";
     private static int userid = 11; // bishoph
     public final static int contextid = 1;
     
@@ -99,7 +99,8 @@ public class CalendarRecurringTests extends TestCase {
     }
 
    public void testBasicRecurring() throws Throwable {
-        CalendarDataObject cdao = new CalendarDataObject();      
+        CalendarDataObject cdao = new CalendarDataObject();     
+        cdao.setTimezone(TIMEZONE);
         assertFalse(cdao.calculateRecurrence());
         cdao.setStartDate(new Date(0));
         cdao.setEndDate(new Date(0));
@@ -116,7 +117,8 @@ public class CalendarRecurringTests extends TestCase {
     }
     
     public void testBasicRecurringWithoutUntil() throws Throwable {
-        CalendarDataObject cdao = new CalendarDataObject();      
+        CalendarDataObject cdao = new CalendarDataObject();     
+        cdao.setTimezone(TIMEZONE);
         assertFalse(cdao.calculateRecurrence());
         cdao.setStartDate(new Date(0));
         cdao.setEndDate(new Date(0));        
@@ -139,6 +141,7 @@ public class CalendarRecurringTests extends TestCase {
         long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
         String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u_test));
@@ -146,6 +149,8 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrence(testrecurrence);
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
+                
+                
         long pass_one_start = System.currentTimeMillis();
 
         CalendarRecurringCollection.fillDAO(cdao);
@@ -174,6 +179,7 @@ public class CalendarRecurringTests extends TestCase {
     
     public void testDailyByPosition() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setTitle("Daily Appointment By Position Test");
         CalendarTest.fillDatesInDao(cdao);        
         cdao.setRecurrenceType(CalendarObject.DAILY);
@@ -197,6 +203,7 @@ public class CalendarRecurringTests extends TestCase {
         long u_test = 1150106400000L; // 12.06.2006 10:00 (GMT)
         String testrecurrence = "t|1|i|1|s|"+s+"|e|"+u+"|";
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u_test));
@@ -236,6 +243,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // MONDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -253,6 +261,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // SUNDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -269,6 +278,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // TUESDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -286,6 +296,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // WEDNESDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -302,6 +313,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // THURSDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -318,6 +330,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // FRIDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -334,6 +347,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // SATURDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -350,6 +364,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // MONDAY + THURSDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -371,6 +386,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // SUNDAY + MONDAY
         cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
         cdao.setUntil(new Date(u));
@@ -805,7 +821,7 @@ public class CalendarRecurringTests extends TestCase {
             CalendarDataObject tcdao = (CalendarDataObject)si.next();
             if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
                 // found the single exception we have just have created
-                System.out.println("CHECK ID "+object_id + " / "+tcdao.getRecurrenceID() + " / "+tcdao.getRecurrencePosition());
+                assertTrue("Test if we got a unique ID", tcdao.getRecurrenceID() != tcdao.getObjectID());
                 found_exception = true;
                 assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
                 assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
