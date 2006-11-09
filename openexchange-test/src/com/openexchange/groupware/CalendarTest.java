@@ -482,6 +482,7 @@ public class CalendarTest extends TestCase {
         int counter = 0;
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
+            assertTrue("Check folder ", cdao.getParentFolderID() != 0);
             testDelete(cdao);
             counter++;
             
@@ -508,7 +509,7 @@ public class CalendarTest extends TestCase {
         }
         DBPool.pushWrite(context, writecon);
     }
-
+    
     public void testResourceConflictHandling() throws Exception {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
