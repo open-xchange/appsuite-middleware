@@ -435,6 +435,7 @@ public class CalendarTest extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
         
         CalendarDataObject conflict_cdao = new CalendarDataObject();
 
@@ -557,12 +558,10 @@ public class CalendarTest extends TestCase {
                 found = true;
             }
         }
-        
         assertTrue("Conflict object not found", found);
         
-   
+        csql.deleteAppointmentObject(cdao, folder_id, new Date(SUPER_END));
     }
     
-    
-    
+
 }
