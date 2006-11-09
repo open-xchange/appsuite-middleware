@@ -302,16 +302,77 @@ public class CalendarTest extends TestCase {
     }    
     
     public void testBasicSearch() throws Exception  {
+        Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
-        CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[1];
-        cols[0] = AppointmentObject.TITLE;
-        SearchIterator si = csql.searchAppointments("test", getPrivateFolder(), 0, "ASC", cols);
-        boolean gotresults = si.hasNext();
-        assertTrue("Got real results", gotresults);
-        while (si.hasNext()) {
-            CalendarDataObject cdao = (CalendarDataObject)si.next();
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int folder_id = getPrivateFolder();
+        
+        OXFolderAction ofa = new OXFolderAction(so);
+        OCLPermission oclp = new OCLPermission();
+        oclp.setEntity(userid);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp.setFolderAdmin(true);
+        FolderObject fo = new FolderObject();
+        fo.setFolderName("MyTestFolder");
+        fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PUBLIC);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp });
+        int public_folder_id = 0;
+        try {
+            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            public_folder_id = fo.getObjectID();
+            CalendarSql csql = new CalendarSql(so);
+
+            int cols[] = new int[] { AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.USERS,  AppointmentObject.FOLDER_ID };
+            SearchIterator si = csql.searchAppointments("test", folder_id, 0, "ASC", cols);
+            boolean gotresults = si.hasNext();
+            assertTrue("Got real results by searching \"test\"", gotresults);
+            while (si.hasNext()) {
+                CalendarDataObject tcdao = (CalendarDataObject)si.next();
+                assertTrue("Found only results with something like *test*", tcdao.getTitle().toLowerCase().indexOf("test") != -1);
+                assertTrue("Got real folder id ", tcdao.getParentFolderID() == folder_id);
+            }
+     
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(context);
+            cdao.setTitle("test Public Folder Search - Step 1 - Insert");
+            cdao.setParentFolderID(public_folder_id);
+            cdao.setIgnoreConflicts(true);
+            
+            fillDatesInDao(cdao);
+            cdao.setIgnoreConflicts(true);
+
+            csql.insertAppointmentObject(cdao);
+            int test_folder_id = cdao.getEffectiveFolderId();
+            int object_id = cdao.getObjectID();        
+
+            assertEquals("Test correct folder id", public_folder_id, test_folder_id);
+
+            si = csql.searchAppointments("*", public_folder_id, 0, "ASC", cols);
+            gotresults = si.hasNext();
+            assertTrue("Got real results by searching \"*\"", gotresults);
+            while (si.hasNext()) {
+                CalendarDataObject tcdao = (CalendarDataObject)si.next();
+                assertTrue("Got real folder id ", tcdao.getParentFolderID() == public_folder_id);
+            }              
+            
+        
+        } finally {
+            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
+        
+        
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }
+        
     }
     
     
