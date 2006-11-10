@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class NewTest extends AppointmentTest {
-	
+
 	public void testNewAppointment() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		appointmentObj.setIgnoreConflicts(true);
@@ -27,7 +27,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestNewAppointmentWithAlarm() throws Exception {
+	public void testNewAppointmentWithAlarm() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithAlarm");
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setAlarm(45);
@@ -89,7 +89,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestNewAppointmentWithExternalParticipants() throws Exception {
+	public void testNewAppointmentWithExternalParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithExternalParticipants");
 		appointmentObj.setIgnoreConflicts(true);
 		
