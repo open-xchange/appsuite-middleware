@@ -4,6 +4,7 @@ package com.openexchange.groupware;
 
 import com.openexchange.ajax.Resource;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.reminder.ReminderHandler;
@@ -624,6 +625,55 @@ public class CalendarTest extends TestCase {
         
         csql.deleteAppointmentObject(cdao, folder_id, new Date(SUPER_END));
     }
+
     
+    public void testExternalParticipants() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testExternalParticipants - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        
+        UserParticipant up = new UserParticipant();
+        up.setIdentifier(userid);
+        up.setAlarmMinutes(5);
+        cdao.setUsers(new UserParticipant[] { up });
+        
+        String mail_address = "test@example.org";
+        String display_name = "Externer test user";
+        
+        Participants participants = new Participants();
+        Participant p = new ExternalUserParticipant();
+        p.setEmailAddress(mail_address);
+        p.setDisplayName(display_name);
+        participants.add(p);
+        
+        cdao.setParticipants(participants.getList());        
+        
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);    
+        
+        Participant test_participants[] = testobject.getParticipants();
+        assertTrue("Check return is not null" , test_participants != null);
+        boolean found = false;
+        for (int a = 0; a < test_participants.length; a++) {
+            if (test_participants[a].getType() == Participant.EXTERNAL_USER) {
+                assertEquals("Check display name", display_name, test_participants[a].getDisplayName());
+                assertEquals("Check mail address", mail_address, test_participants[a].getEmailAddress());
+                found = true;
+            }
+        }
+        
+        assertTrue("Got external participant", found);
+        
+    }
 
 }
