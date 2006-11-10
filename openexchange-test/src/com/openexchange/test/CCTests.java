@@ -30,7 +30,7 @@ public class CCTests {
 		tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());		
 		tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());	
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
+//		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
 		
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreWriterTest.class);
