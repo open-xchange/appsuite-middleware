@@ -47,17 +47,15 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import com.sun.java_cup.internal.parser;
 import java.util.List;
 import org.jdom.Element;
 
@@ -226,7 +224,7 @@ public abstract class CalendarParser extends CommonParser {
 		
 		String external = e.getAttributeValue("external", XmlServlet.NS);
 		if (external != null && "true".equals(external)) {
-			participant = new ExternalUserParticipant();
+			participant = new ExternalGroupParticipant();
 			participant.setEmailAddress(getValue(e));
 		} else {
 			participant = new GroupParticipant();
