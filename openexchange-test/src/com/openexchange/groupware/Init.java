@@ -184,6 +184,7 @@ public final class Init {
 			loadTestProperties();
             final String propFileName = testProps.getProperty(
                 "openexchange.propfile");
+            System.setProperty("openexchange.propfile", propFileName); //FIXME 
             SystemConfig.loadProperties(propFileName);
 			GlobalConfig.loadConf(propFileName);
 			systemPropertiesLoaded = true;
@@ -193,7 +194,7 @@ public final class Init {
 	public static void loadServerConf() {
 		if (!serverConfLoaded) {
 			loadSystemProperties();
-			ComfireConfig cf = new ComfireConfig();
+			ComfireConfig cf = new ComfireConfig(); 
 			cf.loadServerConf((String) ComfireConfig.properties
 					.get("SERVERCONF"));
 			serverConfLoaded = true;
