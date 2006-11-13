@@ -361,6 +361,10 @@ public class CalendarTest extends TestCase {
                 assertTrue("Got real folder id ", tcdao.getParentFolderID() == public_folder_id);
             }              
             
+            
+            si = csql.searchAppointments("*.*", public_folder_id, 0, "ASC", cols);
+            gotresults = si.hasNext();
+            assertTrue("Got some results by searching \"*e*\"", !gotresults);
         
         } finally {
             ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
