@@ -543,7 +543,7 @@ public class CalendarTest extends TestCase {
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
         CalendarSql csql = new CalendarSql(so);
         int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
-        SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
+        SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         assertTrue("Test if we got appointments", si.hasNext());
         int counter = 0;
         while (si.hasNext()) {
@@ -554,7 +554,7 @@ public class CalendarTest extends TestCase {
             
         }
         System.out.println("DEBUG: deleted : "+counter);
-        si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols);
+        si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0, null);
         assertTrue("Check that we deleted them all", !si.hasNext());
         DBPool.push(context, readcon);
     }

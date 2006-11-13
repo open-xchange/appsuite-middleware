@@ -830,7 +830,7 @@ public class CalendarRecurringTests extends TestCase {
         
         assertTrue("Found exception",  found_exception);
         
-        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END));
+        si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END), 0, null);
         int counter = 0;
         while (si.hasNext()) {
             CalendarDataObject tcdao = (CalendarDataObject)si.next();
