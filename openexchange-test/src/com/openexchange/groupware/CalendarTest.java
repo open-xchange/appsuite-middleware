@@ -508,7 +508,6 @@ public class CalendarTest extends TestCase {
         conflict_cdao.setTitle("testConflict Step 2 - Insert - Must conflict");
         conflict_cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
         
-        
         conflict_cdao.setContext(so.getContext());
         
         fillDatesInDao(conflict_cdao);
@@ -614,7 +613,7 @@ public class CalendarTest extends TestCase {
         cdao.setIgnoreConflicts(true);
         
         cdao_conflict.setParentFolderID(folder_id);
-        
+ 
         CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao_conflict);
         
         assertTrue("Got conflicts ", conflicts != null);
@@ -626,6 +625,31 @@ public class CalendarTest extends TestCase {
             }
         }
         assertTrue("Conflict object not found", found);
+        
+        Participants p2 = new Participants();
+        Participant resource2 = new ResourceParticipant();
+        resource2.setIdentifier(1001);
+        p2.add(resource2);
+        
+        cdao.setParticipants(p2.getList());        
+        String titel = "testResourceConflictHandling - Step 2 - Update";
+        cdao.setTitle(titel);
+        
+        conflicts = csql.updateAppointmentObject(cdao, folder_id, new Date(SUPER_END));
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        
+        Participant test_participants[] = testobject.getParticipants();
+        assertEquals("Check size after update ", 2, test_participants.length);
+        assertEquals("Check changed titlel", titel, testobject.getTitle());
+        found = false;
+        for (int a = 0; a < test_participants.length; a++) {
+            if (test_participants[a].getIdentifier() == 1001) {
+                found = true;
+            }
+            
+        }
+        assertTrue("Check for updated (new) resource", found);
         
         csql.deleteAppointmentObject(cdao, folder_id, new Date(SUPER_END));
     }
