@@ -98,6 +98,7 @@ public class ListTest extends AppointmentTest {
 		participants[3].setIdentifier(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
+                appointmentObj.setIgnoreConflicts(true);
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
