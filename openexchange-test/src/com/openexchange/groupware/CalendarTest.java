@@ -121,9 +121,27 @@ public class CalendarTest extends TestCase {
         Connection readcon = DBPool.pickup(context);
         privatefolder = new Integer(OXFolderTools.getCalendarDefaultFolder(userid, context, readcon)).intValue();
         DBPool.push(context, readcon);
-        return privatefolder;        
+        return privatefolder;
     }
 
+    void deleteAllAppointments() throws Exception  {
+        Connection readcon = DBPool.pickup(getContext());
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
+        CalendarSql csql = new CalendarSql(so);
+        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+        SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        while (si.hasNext()) {
+            CalendarDataObject cdao = (CalendarDataObject)si.next();
+            testDelete(cdao);
+        }
+        DBPool.push(context, readcon);                
+    }
+    
+    
+    /* ----- test cases -------*/
+    
+    
     public void testWholeDay() throws Throwable { // TODO: Need connection 
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
@@ -186,7 +204,7 @@ public class CalendarTest extends TestCase {
             assertTrue(cdao.containsStartDate());
             assertTrue(cdao.containsEndDate());
             counter++;
-        }        
+        }
         fbr.close();
     }    
     
@@ -703,5 +721,55 @@ public class CalendarTest extends TestCase {
         assertTrue("Got external participant", found);
         
     }
+    
+    public void testComplexConflictHandling() throws Exception  {
+        deleteAllAppointments(); // Clean up !
+        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);                
+        CalendarSql csql = new CalendarSql(so);                
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testComplexConflictHandling - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        
+        cdao.setContext(so.getContext());
+        cdao.setShownAs(AppointmentObject.FREE);
+        fillDatesInDao(cdao);
+        
+        CalendarDataObject cdao_conflict = (CalendarDataObject) cdao.clone();
+        cdao_conflict.setShownAs(AppointmentObject.RESERVED);
+        cdao_conflict.setTitle("testComplexConflictHandling - Step 2 - Insert");
+        
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao);
+        assertTrue("Found no conflicts", conflicts == null);
+        
+        conflicts = csql.insertAppointmentObject(cdao_conflict);           
+        assertTrue("Found no conflicts (free)", conflicts == null);
+        
+        assertTrue("ID check", cdao.getObjectID() != cdao_conflict.getObjectID());
+        
+        cdao.setTitle("testComplexConflictHandling - Step 3 - Update");
+        cdao.setShownAs(AppointmentObject.RESERVED);
+        cdao.setFullTime(true);
+        conflicts = csql.updateAppointmentObject(cdao, fid, new Date(SUPER_END));
+        assertTrue("Found conflicts ", conflicts != null);
+        assertEquals("Check correct result size", 1, conflicts.length);
+        assertEquals("Check conflict results", conflicts[0].getObjectID(), cdao_conflict.getObjectID());
+        cdao.setIgnoreConflicts(true);
+        conflicts = csql.updateAppointmentObject(cdao, fid, new Date(SUPER_END));
+        assertTrue("Found conflicts ", conflicts == null);
+        
+        cdao_conflict.setTitle("testComplexConflictHandling - Step 4 - Update");
+        conflicts = csql.updateAppointmentObject(cdao_conflict, fid, new Date(SUPER_END));
+        assertTrue("Found conflicts ", conflicts != null);
+        assertEquals("Check correct result size", 1, conflicts.length);
+        assertEquals("Check conflict results", conflicts[0].getObjectID(), cdao.getObjectID());        
+        
+        // TODO: Convert cdao_conflict to daily recurring app and check more conflicts
+        
+    }
+    
 
 }
