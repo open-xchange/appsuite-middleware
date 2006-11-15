@@ -200,7 +200,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	// Query methods
 	
 	protected String putS(WebConversation webConv, String url, String body) throws MalformedURLException, IOException, SAXException {
-		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript");
+		PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript; charset=UTF-8");
 		WebResponse resp = webConv.getResponse(m);
 		return resp.getText();
 	}
@@ -237,6 +237,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected String pS(WebConversation webConv, String url, Map<String,String> data) throws MalformedURLException, IOException, SAXException {
 		PostMethodWebRequest m = new PostMethodWebRequest(url);
+		
 		for(String key : data.keySet()) {
 			m.setParameter(key,data.get(key));
 		}
