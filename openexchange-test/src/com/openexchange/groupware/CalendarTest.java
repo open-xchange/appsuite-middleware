@@ -129,7 +129,7 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
         CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
@@ -504,6 +504,128 @@ public class CalendarTest extends TestCase {
 
     }      
     
+    
+    public void testInsertMoveAllDelete() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        CalendarDataObject cdao = new CalendarDataObject();
+
+        cdao.setTitle("testMove - Step 1 - Insert");
+        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        
+        fillDatesInDao(cdao);
+        cdao.setIgnoreConflicts(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int private_folder_id = cdao.getEffectiveFolderId();
+        
+        int object_id = cdao.getObjectID();
+ 
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);
+        
+        OXFolderAction ofa = new OXFolderAction(so);
+        OCLPermission oclp = new OCLPermission();
+        oclp.setEntity(userid);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp.setFolderAdmin(true);
+        FolderObject fo = new FolderObject();
+        fo.setFolderName("MyTestFolder");
+        fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PUBLIC);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp });
+        ofa.createFolder(fo, so, true, readcon, writecon, false);
+        int public_folder_id = fo.getObjectID();
+        CalendarDataObject testobject = null;
+        try {
+            // TODO: "Move" folder to a public folder
+            CalendarDataObject update1 = new CalendarDataObject();
+            update1.setContext(so.getContext());
+            update1.setObjectID(object_id);
+            update1.setParentFolderID(public_folder_id);
+            update1.setTitle("testMove - Step 2 - Update");
+            update1.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
+
+            // TODO: LoadObject by ID and make some tests
+            testobject = csql.getObjectById(object_id, public_folder_id);
+            UserParticipant up[] = testobject.getUsers();
+            for (int a = 0; a < up.length; a++) {
+                assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
+            }
+
+            assertEquals("testMove - Step 2 - Update", update1.getTitle());
+
+            // TODO: Move again to private folder
+
+            CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
+
+            update2.setTitle("testMove - Step 3 - Update");
+            update2.setParentFolderID(private_folder_id);
+            update2.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
+
+            // TODO: LoadObject by ID and make some tests
+
+            CalendarDataObject testobject2 = csql.getObjectById(object_id, private_folder_id);
+
+            assertEquals("Test folder id ", testobject2.getEffectiveFolderId(), private_folder_id);
+
+            UserParticipant up2[] = testobject2.getUsers();
+
+            assertEquals("check length ", up2.length, 1);
+
+            for (int a = 0; a < up2.length; a++) {
+                assertEquals("check that folder id private folder ", up2[a].getPersonalFolderId(), private_folder_id);
+            }        
+
+            // TODO: Move again to public folder and delete complete folder
+
+            CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
+
+            update3.setTitle("testMove - Step 4 - Update");
+            update3.setParentFolderID(public_folder_id);
+            update3.setIgnoreConflicts(true);
+            csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
+            
+            deleteAllAppointments();
+            
+            int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+            SearchIterator si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0));
+            boolean found = false;
+            while (si.hasNext()) {
+                CalendarDataObject tdao = (CalendarDataObject)si.next();
+                System.out.println(">>> "+tdao.getTitle());
+                found = true;
+            }
+            
+            assertTrue("Got no results out of the public folder", found == false);
+            
+            
+        } finally {
+            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        }
+
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }
+                
+        try {
+            testobject = csql.getObjectById(object_id, public_folder_id);
+            throw new Exception("Object not deleted! Test failed!");
+        } catch (Exception not_exist) {
+            // this is normal because the object has been deleted before
+        }
+
+    }          
+    
+    
  
     public void testConflictHandling() throws Exception  {
         Context context = new ContextImpl(contextid);
@@ -586,6 +708,9 @@ public class CalendarTest extends TestCase {
         deleteit.setObjectID(cdao.getObjectID());
         int fid = cdao.getEffectiveFolderId();
         try {
+            if (fid == 0) {
+                int x = 0;
+            }
             csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
         } catch(Exception e) { 
             e.printStackTrace();
