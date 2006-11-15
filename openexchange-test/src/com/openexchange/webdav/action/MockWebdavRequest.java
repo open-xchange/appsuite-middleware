@@ -115,4 +115,8 @@ public class MockWebdavRequest implements WebdavRequest {
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 
+	public WebdavFactory getFactory() throws WebdavException {
+		return factory;
+	}
+
 }
