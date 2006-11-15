@@ -54,6 +54,9 @@ public class CalendarTest extends TestCase {
     
     private static boolean init = false;
     
+    
+    int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+    
     protected void setUp() throws Exception {        
         super.setUp();
         EventConfigImpl event = new EventConfigImpl();
@@ -128,8 +131,7 @@ public class CalendarTest extends TestCase {
         Connection readcon = DBPool.pickup(getContext());
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
-        CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+        CalendarSql csql = new CalendarSql(so);        
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
@@ -344,9 +346,7 @@ public class CalendarTest extends TestCase {
         try {
             ofa.createFolder(fo, so, true, readcon, writecon, false);
             public_folder_id = fo.getObjectID();
-            CalendarSql csql = new CalendarSql(so);
-
-            int cols[] = new int[] { AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.USERS,  AppointmentObject.FOLDER_ID };
+            CalendarSql csql = new CalendarSql(so);            
             SearchIterator si = csql.searchAppointments("test", folder_id, 0, "ASC", cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
@@ -403,7 +403,7 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         CalendarDataObject cdao = new CalendarDataObject();
 
-        cdao.setTitle("testMove - Step 1 - Insert");
+        cdao.setTitle("testInsertMoveAndDeleteAppointments - Step 1 - Insert");
         cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -440,7 +440,7 @@ public class CalendarTest extends TestCase {
             update1.setContext(so.getContext());
             update1.setObjectID(object_id);
             update1.setParentFolderID(public_folder_id);
-            update1.setTitle("testMove - Step 2 - Update");
+            update1.setTitle("testInsertMoveAndDeleteAppointments - Step 2 - Update");
             update1.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
 
@@ -451,13 +451,13 @@ public class CalendarTest extends TestCase {
                 assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
             }
 
-            assertEquals("testMove - Step 2 - Update", update1.getTitle());
+            assertEquals("testInsertMoveAndDeleteAppointments - Step 2 - Update", update1.getTitle());
 
             // TODO: Move again to private folder
 
             CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
 
-            update2.setTitle("testMove - Step 3 - Update");
+            update2.setTitle("testInsertMoveAndDeleteAppointments - Step 3 - Update");
             update2.setParentFolderID(private_folder_id);
             update2.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
@@ -480,7 +480,7 @@ public class CalendarTest extends TestCase {
 
             CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
 
-            update3.setTitle("testMove - Step 4 - Update");
+            update3.setTitle("testInsertMoveAndDeleteAppointments - Step 4 - Update");
             update3.setParentFolderID(public_folder_id);
             update3.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
@@ -509,7 +509,7 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         CalendarDataObject cdao = new CalendarDataObject();
 
-        cdao.setTitle("testMove - Step 1 - Insert");
+        cdao.setTitle("testInsertMoveAllDelete - Step 1 - Insert");
         cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -546,7 +546,7 @@ public class CalendarTest extends TestCase {
             update1.setContext(so.getContext());
             update1.setObjectID(object_id);
             update1.setParentFolderID(public_folder_id);
-            update1.setTitle("testMove - Step 2 - Update");
+            update1.setTitle("testInsertMoveAllDelete - Step 2 - Update");
             update1.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
 
@@ -557,13 +557,13 @@ public class CalendarTest extends TestCase {
                 assertTrue("check that folder id IS NULL", up[a].getPersonalFolderId() == UserParticipant.NO_PFID);
             }
 
-            assertEquals("testMove - Step 2 - Update", update1.getTitle());
+            assertEquals("testInsertMoveAllDelete - Step 2 - Update", update1.getTitle());
 
             // TODO: Move again to private folder
 
             CalendarDataObject update2 = csql.getObjectById(object_id, public_folder_id);
 
-            update2.setTitle("testMove - Step 3 - Update");
+            update2.setTitle("testInsertMoveAllDelete - Step 3 - Update");
             update2.setParentFolderID(private_folder_id);
             update2.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update2, public_folder_id, new Date(SUPER_END));        
@@ -586,14 +586,13 @@ public class CalendarTest extends TestCase {
 
             CalendarDataObject update3 = csql.getObjectById(object_id, private_folder_id);
 
-            update3.setTitle("testMove - Step 4 - Update");
+            update3.setTitle("testInsertMoveAllDelete - Step 4 - Update");
             update3.setParentFolderID(public_folder_id);
             update3.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
             
             deleteAllAppointments();
-            
-            int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+                        
             SearchIterator si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0));
             boolean found = false;
             while (si.hasNext()) {
@@ -603,6 +602,11 @@ public class CalendarTest extends TestCase {
             }
             
             assertTrue("Got no results out of the public folder", found == false);
+            
+            // Magic test
+        
+            si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+            assertTrue("Got results", !si.hasNext());
             
             
         } finally {
@@ -681,7 +685,7 @@ public class CalendarTest extends TestCase {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "testGetAllAppointmentsFromUserInAllFolders");
         CalendarSql csql = new CalendarSql(so);
-        int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.USERS };
+        
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         assertTrue("Test if we got appointments", si.hasNext());
         int counter = 0;
@@ -849,11 +853,15 @@ public class CalendarTest extends TestCase {
     
     public void testComplexConflictHandling() throws Exception  {
         deleteAllAppointments(); // Clean up !
-        
+
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);                
         CalendarSql csql = new CalendarSql(so);                
+        
+        SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
+        assertTrue("Got results", si.hasNext() == false);
+        
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testComplexConflictHandling - Step 1 - Insert");
