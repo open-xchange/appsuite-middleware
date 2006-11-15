@@ -3,7 +3,7 @@ package com.openexchange.webdav.protocol;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.FolderLockManagerImpl;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -13,7 +13,6 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
@@ -24,7 +23,7 @@ public class TestWebdavFactoryBuilder {
 	public static final int DUMMY = 0;
 	public static final int INFO = 1;
 	
-	private static final int mode = DUMMY;
+	private static final int mode = INFO;
 	
 	public static WebdavFactory buildFactory() {
 		switch(mode) {
@@ -40,18 +39,17 @@ public class TestWebdavFactoryBuilder {
 
 	private static WebdavFactory buildInfoFactory() {
 		
-		DBProvider provider = new DBPoolProvider();
-		
 		InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
-		factory.setDatabase(new DatabaseImpl(provider));
-		factory.setFolderLockManager(new FolderLockManagerImpl(provider));
-		factory.setFolderProperties(new PropertyStoreImpl(provider, "oxfolder_property"));
-		factory.setInfoLockManager(new EntityLockManagerImpl(provider, "infostore_lock"));
-		factory.setInfoProperties(new PropertyStoreImpl(provider,"infostore_property"));
-		factory.setProvider(provider);
-		factory.setResolver(new PathResolverImpl(provider, factory.getDatabase()));
+		factory.setDatabase(new DatabaseImpl());
+		factory.setFolderLockManager(new FolderLockManagerImpl());
+		factory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
+		factory.setInfoLockManager(new EntityLockManagerImpl("infostore_lock"));
+		factory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
+		factory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
+		factory.setProvider(new DBPoolProvider());
+		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
 		try {
-			factory.setSessionHolder(new DummySessionHolder("thorben", 1));
+			factory.setSessionHolder(new DummySessionHolder("thorben", 1,5));
 		} catch (LdapException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -64,8 +62,10 @@ public class TestWebdavFactoryBuilder {
 
 		private SessionObject session = null;
 		
-		public DummySessionHolder(String username, int context) throws LdapException, SQLException {
-			Context ctx = new ContextImpl(context);
+		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException {
+			ContextImpl ctx = new ContextImpl(context);
+			ctx.setFilestoreId(filestoreId);
+			ctx.setFileStorageQuota(Long.MAX_VALUE);
 			session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(username)  , ctx,"12345");
 		}
 		
@@ -73,6 +73,20 @@ public class TestWebdavFactoryBuilder {
 			return session;
 		}
 		
+	}
+
+	public static void setUp() throws Exception {
+		if(mode == INFO) {
+			Init.loadTestProperties();
+			Init.loadSystemProperties();
+			Init.loadServerConf();
+			Init.initDB();
+		}
+	}
+	
+	public static void tearDown() throws Exception {
+		if(mode == INFO)
+			Init.stopDB(); 
 	}
 
 }

@@ -4,22 +4,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import junit.framework.TestCase;
+
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
 import com.openexchange.webdav.protocol.WebdavLock.Type;
-import com.openexchange.webdav.protocol.impl.DummyResourceManager;
-
-import junit.framework.TestCase;
 
 public class LockInteractionTest extends TestCase {
 	
 	// TODO make switching classes transparent
 	
-	static protected final WebdavFactory FACTORY = DummyResourceManager.getInstance();
+	static protected WebdavFactory FACTORY = null;
 	static protected final Random RANDOM = new Random();
 	private String testCollection;
 	
 	public void setUp() throws Exception {
+		TestWebdavFactoryBuilder.setUp();
+		FACTORY = TestWebdavFactoryBuilder.buildFactory();
+		FACTORY.beginRequest();
 		testCollection = "/testCollection"+ RANDOM.nextInt();
 		
 		FACTORY.resolveCollection(testCollection).create();
@@ -27,6 +29,8 @@ public class LockInteractionTest extends TestCase {
 	
 	public void tearDown() throws Exception {
 		FACTORY.resolveCollection(testCollection).delete();
+		FACTORY.endRequest(200);
+		TestWebdavFactoryBuilder.tearDown();
 	}
 	
 	private WebdavLock getLock(int depth) {
@@ -114,6 +118,7 @@ public class LockInteractionTest extends TestCase {
 		WebdavResource res = collection.resolveResource("test.txt");
 		res.lock(lock);
 		res = collection.resolveResource("test.txt");
+		assertTrue(res.isLockNull());
 		res.unlock(lock.getToken());
 		
 		res = collection.resolveResource("test.txt");

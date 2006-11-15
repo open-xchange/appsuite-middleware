@@ -92,7 +92,7 @@ public class IfMatchTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("doesntExist");
+		req.setUrl("/doesntExist");
 		req.setHeader("If-Match", "*");
 		
 		AbstractAction action = new WebdavIfMatchAction();
@@ -179,7 +179,7 @@ public class IfMatchTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("doesntExist");
+		req.setUrl("/doesntExist");
 		req.setHeader("If-None-Match", "*");
 		
 		AbstractAction action = new WebdavIfMatchAction();

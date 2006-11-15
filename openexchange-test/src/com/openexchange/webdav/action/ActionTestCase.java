@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.openexchange.webdav.protocol.CollectionTest;
+import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -19,11 +20,14 @@ public abstract class ActionTestCase extends TestCase {
 	
 	protected List<String> clean = new LinkedList<String>();
 	
-	protected WebdavFactory factory = DummyResourceManager.getInstance();
+	protected WebdavFactory factory = null;
 	
 	protected String testCollection = null;
 	
 	public void setUp() throws Exception {
+		TestWebdavFactoryBuilder.setUp();
+		factory = TestWebdavFactoryBuilder.buildFactory();
+		factory.beginRequest();
 		testCollection = "/testCollection"+System.currentTimeMillis();
 		WebdavCollection coll = factory.resolveCollection(testCollection);
 		coll.create();
@@ -37,6 +41,8 @@ public abstract class ActionTestCase extends TestCase {
 		for(String url : clean) {
 			factory.resolveResource(url).delete();
 		}
+		factory.endRequest(200);
+		TestWebdavFactoryBuilder.tearDown();
 	}
 	
 	public String getContent(String url) throws WebdavException, IOException {

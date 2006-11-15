@@ -23,11 +23,21 @@ public class CollectionTest extends ResourceTest {
 	public static final String INDEX3_HTML = "<html><head /><body>GUI Site</body></html>";
 	public static final String INDEX2_HTML = "<html><head /><body>PM Site</body></html>";
 
+	protected List<String> clean = new ArrayList<String>();
+	
+	public void tearDown() throws Exception {
+		for(String path : clean) {
+			FACTORY.resolveResource(path).delete();
+		}
+		super.tearDown();
+	}
+	
 	public void testRoot() throws Exception {
 		
 		List<WebdavResource> children = FACTORY.resolveCollection("/").getChildren();
 		int size = children.size();
 		FACTORY.resolveCollection("/test").create();
+		clean.add("/test");
 		List<WebdavResource> childrenAfter = FACTORY.resolveCollection("/").getChildren();
 		assertEquals(childrenAfter.toString(), size+1, childrenAfter.size());
 		
@@ -159,7 +169,6 @@ public class CollectionTest extends ResourceTest {
 		Date lastModified = dev.getLastModified();
 		Date creationDate = dev.getCreationDate();
 		
-		dev.setDisplayName("myDisplayName");
 		
 		WebdavProperty prop = new WebdavProperty();
 		prop.setName("myvalue");
@@ -173,15 +182,15 @@ public class CollectionTest extends ResourceTest {
 		subList = OXCollections.inject(subList, dev, new DisplayNameCollector());
 		
 		Thread.sleep(1000);
+		String url = dev.getUrl();
 		
 		dev.move(coll.getUrl()+"/dev2");
-		
+		dev = FACTORY.resolveCollection(url);
 		assertFalse(dev.exists());
 		
 		WebdavCollection dev2 = coll.resolveCollection("dev2");
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
-		assertEquals("myDisplayName",dev2.getDisplayName());
 		assertFalse(lastModified.equals(dev2.getLastModified()));
 		assertEquals(creationDate,dev2.getCreationDate());
 		assertEquals("gnaaa!",dev2.getProperty("ox","myvalue").getValue());
@@ -194,7 +203,7 @@ public class CollectionTest extends ResourceTest {
 		assertEquals(lastModified, dev.getLastModified());
 		
 	}
-	
+		
 	public void testCopy() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
@@ -202,8 +211,6 @@ public class CollectionTest extends ResourceTest {
 		
 		Date lastModified = dev.getLastModified();
 		Date creationDate = dev.getCreationDate();
-		
-		dev.setDisplayName("myDisplayName");
 		
 		WebdavProperty prop = new WebdavProperty();
 		prop.setName("myvalue");
@@ -224,7 +231,6 @@ public class CollectionTest extends ResourceTest {
 		WebdavCollection dev2 = coll.resolveCollection("dev2");
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
-		assertEquals("myDisplayName",dev2.getDisplayName());
 		assertFalse(lastModified.equals(dev2.getLastModified()));
 		assertFalse(creationDate.equals(dev2.getCreationDate()));
 		assertEquals("gnaaa!",dev2.getProperty("ox","myvalue").getValue());
@@ -237,7 +243,7 @@ public class CollectionTest extends ResourceTest {
 			resourceManager.resolveCollection(res.getUrl()+"/collection").create();
 			fail();
 		} catch (WebdavException x) {
-			assertEquals(HttpServletResponse.SC_CONFLICT,x.getStatus());
+			assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus());
 		}
 	}
 	
@@ -265,6 +271,7 @@ public class CollectionTest extends ResourceTest {
 		lock.setTimeout(WebdavLock.NEVER);
 		
 		coll.lock(lock);
+		coll.save();
 		
 		Set<String> urls = new HashSet<String>();
 		for(WebdavResource res : coll) {
@@ -273,11 +280,17 @@ public class CollectionTest extends ResourceTest {
 		}
 		
 		coll.unlock(lock.getToken());
+		coll.save();
+		
+		for(WebdavResource res : coll) {
+			assertNull(res.getLock(lock.getToken()));
+		}
 		
 		// Test Depth 1 lock
 		lock.setToken(null);
 		lock.setDepth(1);
 		coll.lock(lock);
+		coll.save();
 		
 		for(WebdavResource res : coll.toIterable(1)){
 			urls.remove(res.getUrl());
@@ -288,10 +301,11 @@ public class CollectionTest extends ResourceTest {
 		
 		for(String url : urls) {
 			WebdavResource res = resourceManager.resolveResource(url);
-			assertEquals(0, res.getLocks().size());
+			assertEquals(res.getUrl()+" is locked!", 0, res.getLocks().size());
 		}
 		
 		coll.unlock(lock.getToken());
+		coll.save();
 	}
 	
 	@Override

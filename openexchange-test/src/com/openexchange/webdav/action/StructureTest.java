@@ -2,6 +2,7 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -131,9 +132,12 @@ public abstract class StructureTest extends ActionTestCase {
 		WebdavAction action = getAction(factory);
 		try {
 			action.perform(req, res);
-			fail("Expected 409 CONFLICT");
+			fail("Expected 409 CONFLICT, 412 PRECONDITION FAILED or 207 MULTISTATUS");
 		} catch (WebdavException x) {
-			assertEquals(HttpServletResponse.SC_CONFLICT, x.getStatus());
+			assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() 
+					|| Protocol.SC_MULTISTATUS == x.getStatus()
+					|| HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus()
+			);
 		}
 	}
 	

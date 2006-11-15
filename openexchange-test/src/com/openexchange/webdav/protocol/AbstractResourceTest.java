@@ -1,8 +1,6 @@
 package com.openexchange.webdav.protocol;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -10,10 +8,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
@@ -22,7 +16,8 @@ public abstract class AbstractResourceTest extends TestCase implements PropertyS
 public static final int SKEW = 1000;
 	
 	protected WebdavFactory resourceManager;
-	protected String testCollection = "/testCollection";
+	
+	protected String testCollection = "/testCollection"+Math.random();
 	
 	protected abstract WebdavFactory getWebdavFactory() throws Exception;
 	protected abstract List<Property> getPropertiesToTest() throws Exception;
@@ -52,7 +47,7 @@ public static final int SKEW = 1000;
 		
 		res.putProperty(prop);
 		res.save();
-		
+	
 		res = resourceManager.resolveResource(res.getUrl());
 		
 		assertEquals(prop, res.getProperty("OXTest","myvalue"));
@@ -122,5 +117,9 @@ public static final int SKEW = 1000;
 			assertTrue(method+" not expected",methodSet.remove(method));
 		}
 		assertTrue(methodSet.toString(),methodSet.isEmpty());
+	}
+	
+	public void throwEx(Exception x) throws WebdavException {
+		throw new WebdavException(x.getMessage(), x, "" ,500 );
 	}
 }
