@@ -1,5 +1,7 @@
 package com.openexchange.groupware.attach;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -70,6 +72,10 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		doNotExists(22,22,22);
 	}
 	
+	public void testUpdate() throws Exception {
+		doUpdate(22,22,22);
+	}
+	
 	public void doNotExists(int folderId, int attachedId, int moduleId) throws Exception{
 		try {
 			attachmentBase.getAttachment(folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(),null);
@@ -80,6 +86,45 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 			t.printStackTrace();
 			fail("Got Wrong Exception: "+t);
 		}
+	}
+	
+	public void doUpdate(int folderId, int attachedId, int moduleId) throws Exception {
+		AttachmentMetadata attachment = getAttachment(testFile,folderId, attachedId,moduleId,true);
+		
+		
+		InputStream in = null;
+		
+		try {
+			attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+			clean.add(attachment);
+		 } finally {
+			 if(in != null)
+				 in.close();
+		 }
+		 assertFalse(0 == attachment.getId());
+		 byte[] data  = "Hallo Welt".getBytes("UTF-8");
+	
+		 attachment.setFilesize(data.length);
+		 Date oldCreationDate = attachment.getCreationDate();
+		 try {
+			attachmentBase.attachToObject(attachment,in = new ByteArrayInputStream(data),MODE.getContext(),MODE.getUser(), null);
+		 } finally {
+			 if(in != null)
+				 in.close();
+		 }
+		 
+		 AttachmentMetadata reload = attachmentBase.getAttachment(folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
+		 
+		 assertFalse(reload.getCreationDate().getTime() == oldCreationDate.getTime());
+		 assertEquals(reload.getFilesize(), data.length);
+		 
+		 ByteArrayOutputStream out = new ByteArrayOutputStream();
+		 in = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
+		 int b;
+		 while((b = in.read()) != -1) {
+			 out.write(b);
+		 }
+		 assertEquals("Hallo Welt", new String(out.toByteArray(), "UTF-8"));
 	}
 
 	public void doAttach(int folderId, int attachedId, int moduleId) throws Exception{
@@ -413,6 +458,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		m.setModuleId(moduleId);
 		m.setRtfFlag(rtfFlag);
 		m.setFolderId(folderId);
+		m.setId(AttachmentBase.NEW);
 	
 		return m;
 	}
