@@ -134,7 +134,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.insertReminder(reminderObj);
 		
 		int counter = 0;
-		SearchIterator it = reminderSql.listReminder(sessionObj.getUserObject().getId(), new Date(0), new Date());
+		SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), new Date());
 		while (it.hasNext()) {
 			ReminderObject r = (ReminderObject)it.next();
 			assertNotNull("check reminder objects in iterator", r);
@@ -151,7 +151,7 @@ public class ReminderTest extends TestCase {
 		reminderSql.insertReminder(reminderObj);
 		
 		int counter = 0;
-		SearchIterator it = reminderSql.listReminder(sessionObj.getUserObject().getId(), new Date(0));
+		SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), new Date(0));
 		while (it.hasNext()) {
 			ReminderObject r = (ReminderObject)it.next();
 			assertNotNull("check reminder objects in iterator", r);
