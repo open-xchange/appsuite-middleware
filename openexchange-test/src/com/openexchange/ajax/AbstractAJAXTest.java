@@ -256,7 +256,6 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected Response gT(WebConversation webConv, String url) throws MalformedURLException, JSONException, IOException, SAXException {
 		String res = gS(webConv, url);
-		//System.out.println("* "+res);
 		if("".equals(res.trim()))
 			return null;
 		return Response.parse(res);

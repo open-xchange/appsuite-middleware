@@ -166,7 +166,7 @@ public class LockTest extends InfostoreAJAXTest {
 	
 	public static void assertLocked(JSONObject o) throws JSONException{
 		long locked = o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName());
-		assertFalse("This may not me 0: "+locked, 0 == locked);
+		assertFalse("This must be != 0: "+locked, 0 == locked);
 	}
 	
 	public static void assertUnlocked(JSONObject o) throws JSONException{
