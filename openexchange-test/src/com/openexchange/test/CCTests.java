@@ -1,5 +1,6 @@
 package com.openexchange.test;
 
+import com.openexchange.ajax.reminder.ReminderAJAXSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -11,7 +12,7 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.ajax.LoginTest.class);
 		tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
 		tests.addTestSuite(com.openexchange.ajax.TasksTest.class);
-		tests.addTestSuite(com.openexchange.ajax.ReminderTest.class);
+		tests.addTest(ReminderAJAXSuite.suite());
 		tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.ConfigMenuTest.class);
 		tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
