@@ -895,7 +895,7 @@ public class FolderTest extends AbstractAJAXTest {
 			FolderObject movedFolderObj = null;
 			movedFolderObj = getFolder(getWebConversation(), getHostName(), getSessionId(), ""+moveFuid, cal, true);
 			assertTrue(movedFolderObj.containsParentFolderID() ? movedFolderObj.getParentFolderID() == parent02 : true);
-			failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { parent01, parent02, moveFuid }, cal.getTimeInMillis(), true);
+			failedIds = deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { parent01, parent02 }, cal.getTimeInMillis(), true);
 			assertFalse((failedIds != null && failedIds.length > 0));
 			printTestEnd("testMoveFolder");
 		} catch (Exception e) {
