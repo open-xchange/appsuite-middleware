@@ -728,6 +728,7 @@ public class CalendarTest extends TestCase {
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone("Europe/Berlin");
         cdao.setContext(so.getContext());
         cdao.setParentFolderID(folder_id);
         
@@ -864,6 +865,7 @@ public class CalendarTest extends TestCase {
         
         
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone("Europe/Berlin");
         cdao.setTitle("testComplexConflictHandling - Step 1 - Insert");
         cdao.setParentFolderID(fid);
         
