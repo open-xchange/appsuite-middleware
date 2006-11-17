@@ -198,7 +198,7 @@ public class CalendarTest extends TestCase {
         CalendarSqlImp calmysql = CalendarSql.getCalendarSqlImplementation();
         PreparedStatement prep = calmysql.getFreeBusy(userid, getContext(), new Date(0), new Date(SUPER_END), readcon);
         ResultSet rs = calmysql.getResultSet(prep);
-        SearchIterator fbr = new FreeBusyResults(rs, getContext(), readcon, prep);   
+        SearchIterator fbr = new FreeBusyResults(rs, prep,  getContext(), readcon);   
         int counter = 0;
         while (fbr.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)fbr.next();            
