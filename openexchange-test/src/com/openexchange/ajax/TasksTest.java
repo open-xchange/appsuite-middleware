@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -61,13 +62,11 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.ajax.container.Response;
-
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
-import java.util.TimeZone;
 
 /**
  * This class tests the AJAX interface of the tasks.
@@ -580,7 +578,7 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace("Created delegated task for confirmation: " + taskId);
 
         confirmTask(getSecondWebConversation(), getHostName(),
-            getSecondSessionId(), folderId2, taskId, CalendarObject.ACCEPT,
+            getSecondSessionId(), folderId2, taskId, Task.ACCEPT,
             "Testconfirmation.");
         LOG.trace("Confirmed task.");
 
@@ -594,7 +592,7 @@ public class TasksTest extends AbstractAJAXTest {
             final JSONObject user = users.getJSONObject(i);
             final int confirm = user.getInt("confirm");
             final int userId = user.getInt("id");
-            if (userId2 == userId && CalendarObject.ACCEPT == confirm) {
+            if (userId2 == userId && Task.ACCEPT == confirm) {
                 confirmed = true;
             }
         }
