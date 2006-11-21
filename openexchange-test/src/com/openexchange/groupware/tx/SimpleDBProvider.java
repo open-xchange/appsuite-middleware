@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.BackendException;
 import com.openexchange.groupware.tx.DBProvider;
 
 public class SimpleDBProvider implements DBProvider {
@@ -19,8 +18,8 @@ public class SimpleDBProvider implements DBProvider {
 		try {
 			return DriverManager.getConnection(url,login,password);
 		} catch (SQLException e) {
-			throw new BackendException(e);
 		}
+		return null;
 	}
 
 	public void releaseReadConnection(Context ctx, Connection con) {
@@ -30,7 +29,6 @@ public class SimpleDBProvider implements DBProvider {
 			if(!con.isClosed())
 				con.close();
 		} catch (SQLException e) {
-			throw new BackendException(e);
 		}
 	}
 

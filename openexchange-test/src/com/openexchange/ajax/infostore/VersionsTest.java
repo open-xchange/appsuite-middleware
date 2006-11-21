@@ -54,6 +54,34 @@ public class VersionsTest extends InfostoreAJAXTest {
 		
 	}
 	
+	public void testUniqueVersions() throws Exception{
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"), upload, "text/plain");
+		assertNoError(res);
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"), upload, "text/plain");
+		assertNoError(res);
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"), upload, "text/plain");
+		assertNoError(res);
+		
+		res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
+		assertNoError(res);
+
+		assureVersions(new Integer[]{1,2,3},res,3);
+		
+		int[] nd = detach(getWebConversation(), getHostName(), sessionId, res.getTimestamp().getTime(), clean.get(0), new int[]{3});
+		assertEquals(0, nd.length);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"), upload, "text/plain");
+		assertNoError(res);
+		
+		res = versions(getWebConversation(),getHostName(), sessionId, clean.get(0), new int[]{Metadata.VERSION, Metadata.CURRENT_VERSION});
+		assertNoError(res);
+
+		assureVersions(new Integer[]{1,2,4},res,4);
+
+		
+	}
+	
 	public static final void assureVersions(Integer[] ids, Response res, Integer current) throws JSONException{
 		Set<Integer> versions = new HashSet<Integer>(Arrays.asList(ids));
 		JSONArray arrayOfarrays = (JSONArray) res.getData();
@@ -61,7 +89,7 @@ public class VersionsTest extends InfostoreAJAXTest {
 		assertEquals(versions.size(), arrayOfarrays.length());
 		for(int i = 0; i < arrayOfarrays.length(); i++) {
 			JSONArray comp = arrayOfarrays.getJSONArray(i);
-			assertTrue(versions.remove(comp.getInt(0)));
+			assertTrue("Didn't expect "+comp.getInt(0), versions.remove(comp.getInt(0)));
 			if(current != null && comp.getInt(0) != current) {
 				assertFalse(comp.getBoolean(1));
 			} else if(current != null){

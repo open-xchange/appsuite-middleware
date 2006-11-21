@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
@@ -40,7 +40,7 @@ public class TestWebdavFactoryBuilder {
 	private static WebdavFactory buildInfoFactory() {
 		
 		InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
-		factory.setDatabase(new DatabaseImpl());
+		factory.setDatabase(new InfostoreFacadeImpl());
 		factory.setFolderLockManager(new FolderLockManagerImpl());
 		factory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
 		factory.setInfoLockManager(new EntityLockManagerImpl("infostore_lock"));

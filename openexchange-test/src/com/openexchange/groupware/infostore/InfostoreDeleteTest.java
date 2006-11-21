@@ -8,8 +8,8 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
@@ -20,13 +20,13 @@ public class InfostoreDeleteTest extends TestCase {
 	
 	SessionObject session = null;
 	DBProvider provider = new DBPoolProvider();
-	Database database;
+	InfostoreFacade database;
 	
 	public void setUp() throws Exception {
 		Init.initDB();
 		Context ctx = ContextStorage.getInstance().getContext(1);
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId("francisco"), ctx, "Blubb");
-		database = new DatabaseImpl(provider);
+		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
 	}
 	
@@ -47,7 +47,7 @@ public class InfostoreDeleteTest extends TestCase {
 				provider.releaseWriteConnection(session.getContext(), con);
 		}
 		
-		metadata = database.getDocumentMetadata(metadata.getId(), Database.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		metadata = database.getDocumentMetadata(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration());
 		assertEquals(session.getContext().getMailadmin(), metadata.getCreatedBy());
 		assertEquals(session.getContext().getMailadmin(), metadata.getModifiedBy());
 	}

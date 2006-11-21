@@ -12,8 +12,8 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -29,7 +29,7 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 public class PathResolverTest extends TestCase {
 
 	private DBProvider provider = new DBPoolProvider();
-	private Database database = new DatabaseImpl(provider);
+	private InfostoreFacade database = new InfostoreFacadeImpl(provider);
 	private PathResolver pathResolver = new PathResolverImpl(provider, database);
 	
 	private int root;
@@ -206,7 +206,7 @@ public class PathResolverTest extends TestCase {
 		DocumentMetadata m = new DocumentMetadataImpl();
 		m.setFolderId(parent);
 		m.setFileName(filename);
-		m.setId(Database.NEW);
+		m.setId(InfostoreFacade.NEW);
 		database.startTransaction();
 		
 		try {

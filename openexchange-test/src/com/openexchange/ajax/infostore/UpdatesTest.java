@@ -1,5 +1,6 @@
 package com.openexchange.ajax.infostore;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,6 +8,7 @@ import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class UpdatesTest extends InfostoreAJAXTest{
@@ -57,6 +59,32 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		}
 		
 		assertTrue(ids.isEmpty());
+	}
+	
+	public void testRemovedVersionForcesUpdate() throws Exception{
+		Response res = all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID});
+		assertNoError(res);
+		long ts = res.getTimestamp().getTime()+2;
+		
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"), upload, "text/plain");
+		assertNoError(res);
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"), upload, "text/plain");
+		assertNoError(res);
+		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 3"), upload, "text/plain");
+		assertNoError(res);
+		
+		int[] nd = detach(getWebConversation(), getHostName(), sessionId, ts, clean.get(0), new int[]{3});
+		assertEquals(0, nd.length);
+		
+		res = updates(getWebConversation(),getHostName(),sessionId,folderId, new int[]{Metadata.TITLE, Metadata.DESCRIPTION}, ts);
+		assertNoError(res);
+		
+		JSONArray modAndDel = (JSONArray) res.getData();
+		
+		
+		assertEquals(1, modAndDel.length());
+		
 	}
 
 }
