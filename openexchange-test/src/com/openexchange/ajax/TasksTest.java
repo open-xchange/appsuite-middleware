@@ -895,7 +895,7 @@ public class TasksTest extends AbstractAJAXTest {
         final int taskId, final int confirm, final String confirmMessage)
         throws IOException, SAXException, JSONException {
         final JSONObject json = new JSONObject();
-        json.put(TaskFields.CONFIRM, confirm);
+        json.put(TaskFields.CONFIRMATION, confirm);
         json.put(TaskFields.FOLDER_ID, folderId);
         json.put(TaskFields.ID, taskId);
         json.put(TaskFields.CONFIRM_MESSAGE, confirmMessage);
