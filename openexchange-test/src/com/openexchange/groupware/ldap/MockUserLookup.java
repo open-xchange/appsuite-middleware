@@ -45,7 +45,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 2");
-		user.setPreferredLanguage("de");
+		user.setPreferredLanguage("de_DE");
 		user.setTimeZone(tz);
 		user.setMail("user2@test.invalid");
 		user.setGroups(new int[]{1,2});
@@ -54,7 +54,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 3");
-		user.setPreferredLanguage("de");
+		user.setPreferredLanguage("de_DE");
 		user.setTimeZone("Pacific/Samoa");
 		user.setMail("user3@test.invalid");
 		user.setGroups(new int[]{1,4});
@@ -63,7 +63,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 4");
-		user.setPreferredLanguage("de");
+		user.setPreferredLanguage("de_DE");
 		user.setTimeZone(tz);
 		user.setMail("user4@test.invalid");
 		user.setGroups(new int[]{1,2,3});
@@ -81,7 +81,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 6");
-		user.setPreferredLanguage("de");
+		user.setPreferredLanguage("de_DE");
 		user.setTimeZone(tz);
 		user.setMail("user6@test.invalid");
 		user.setGroups(new int[]{1,2});
@@ -99,7 +99,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 8");
-		user.setPreferredLanguage("de");
+		user.setPreferredLanguage("de_DE");
 		user.setTimeZone(tz);
 		user.setMail("user8@test.invalid");
 		user.setGroups(new int[]{1,2,3});

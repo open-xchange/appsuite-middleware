@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 import org.json.JSONObject;
 
+import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
@@ -125,6 +126,28 @@ public class NewTest extends InfostoreAJAXTest {
 			System.out.println(x.getMessage());
 			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
 		}
+	}
+	
+	// Bug 3877
+	public void testEnforceFolderType() throws Exception {
+		int folderId = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), sessionId).getObjectID();
+		try {
+			int id = createNew(
+					getWebConversation(),
+					getHostName(),
+					sessionId,
+					m(
+							"folder_id" 		,	((Integer)folderId).toString(),
+							"title"  		,  	"Save to Calendar Folder",
+							"description" 	, 	"This shouldn't work"
+					), null, ""
+				);
+			clean.add(id);
+			fail("Could save infoitem in calendar folder");
+		} catch (Exception x) {
+			assertTrue(true);
+		}
+				
 	}
 
 }

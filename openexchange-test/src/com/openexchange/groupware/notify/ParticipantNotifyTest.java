@@ -69,7 +69,6 @@ public class ParticipantNotifyTest extends TestCase{
 		notify.taskCreated(t,session);
 		
 		msg = notify.getMessages().get(0);
-		
 		participantNames = parseParticipants( msg );
 		
 		assertNames( msg.addresses, "user3@test.invalid" );
@@ -284,7 +283,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 
 	private static int guessLanguage(Message msg) {
-		String[] german = new String[]{"angelegt", "geändert", "entfernt"};
+		String[] german = new String[]{"Aufgabe", "erstellt", "geändert", "entfernt"};
 		for(String g : german) {
 			if(msg.messageTitle.contains(g))
 				return DE;
