@@ -105,7 +105,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setStartDate(new Date(0));
         cdao.setEndDate(new Date(0));
         cdao.setUntil(new Date(0));        
-        cdao.setTitle("Basic Recurring Test");
+        cdao.setTitle("testBasicRecurring");
         cdao.setRecurrenceID(1);
         assertFalse(cdao.calculateRecurrence());
         cdao.setRecurrenceType(CalendarObject.DAILY);        
@@ -115,6 +115,80 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setInterval(1);
         assertTrue(cdao.calculateRecurrence());
     }
+  
+   public void testBasicRecurringWithOccurence() throws Throwable {
+       
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);       
+       
+        CalendarDataObject cdao = new CalendarDataObject();     
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setOccurence(5);
+        assertFalse("test if no until is set", cdao.containsUntil());
+        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 5);
+        test_until = CalendarRecurringCollection.normalizeLong(test_until);
+   
+        cdao.setTitle("testBasicRecurringWithOccurence");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        assertEquals("Check correct until for tis occurence", test_until, cdao.getUntil().getTime());
+        
+        cdao.setParentFolderID(fid);
+        cdao.setIgnoreConflicts(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
+        
+        assertEquals("Check correct occurence vaklue", 5, test_dao.getOccurence());
+        assertFalse("Test that until is not set", test_dao.containsUntil());
+    }   
+   
+   public void testBasicRecurringWithoutUntilAndWithoutOccurence() throws Throwable {
+       
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);       
+       
+        CalendarDataObject cdao = new CalendarDataObject();     
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        assertFalse("test if no until is set", cdao.containsUntil());
+        assertFalse("test if no occurence is set", cdao.containsOccurence());
+        
+        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS());
+        test_until = CalendarRecurringCollection.normalizeLong(test_until);
+        
+        cdao.setTitle("testBasicRecurringWithoutUntilAndWithoutOccurence");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        
+        assertEquals("Check correct until for tis occurence", test_until, cdao.getUntil().getTime());
+        
+        cdao.setParentFolderID(fid);
+        cdao.setIgnoreConflicts(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
+        
+        assertFalse("test if no occurence is set", test_dao.containsOccurence());        
+        assertFalse("Test that until is not set", test_dao.containsUntil());
+    }       
     
     public void testBasicRecurringWithoutUntil() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();     
@@ -841,6 +915,5 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct number of results" , 2 , counter);
         
     }
-    
    
 }
