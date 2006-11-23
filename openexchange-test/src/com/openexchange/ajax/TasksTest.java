@@ -68,6 +68,7 @@ import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -279,6 +280,10 @@ public class TasksTest extends AbstractAJAXTest {
             getWebConversation(), getHostName(), getSessionId(), 2, true,
             ConfigMenuTest.getUserId(getWebConversation(), getHostName(),
                 getSessionId()));
+        ExternalUserParticipant external = new ExternalUserParticipant();
+        external.setEmailAddress("external@external.no");
+        external.setDisplayName("External, External");
+        participants.add(external);
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
@@ -590,7 +595,7 @@ public class TasksTest extends AbstractAJAXTest {
         boolean confirmed = false;
         for (int i = 0; i < users.length(); i++) {
             final JSONObject user = users.getJSONObject(i);
-            final int confirm = user.getInt("confirm");
+            final int confirm = user.getInt("confirmation");
             final int userId = user.getInt("id");
             if (userId2 == userId && Task.ACCEPT == confirm) {
                 confirmed = true;
