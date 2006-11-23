@@ -128,7 +128,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
-        cdao.setOccurence(5);
+        cdao.setOccurrence(5);
         assertFalse("test if no until is set", cdao.containsUntil());
         long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 5);
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
@@ -148,7 +148,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
         
-        assertEquals("Check correct occurence vaklue", 5, test_dao.getOccurence());
+        assertEquals("Check correct occurence vaklue", 5, test_dao.getOccurrence());
         assertFalse("Test that until is not set", test_dao.containsUntil());
     }   
    
@@ -165,7 +165,7 @@ public class CalendarRecurringTests extends TestCase {
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
         assertFalse("test if no until is set", cdao.containsUntil());
-        assertFalse("test if no occurence is set", cdao.containsOccurence());
+        assertFalse("test if no occurence is set", cdao.containsOccurrence());
         
         long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS());
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
@@ -186,7 +186,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
         
-        assertFalse("test if no occurence is set", test_dao.containsOccurence());        
+        assertFalse("test if no occurence is set", test_dao.containsOccurrence());        
         assertFalse("Test that until is not set", test_dao.containsUntil());
     }       
     
