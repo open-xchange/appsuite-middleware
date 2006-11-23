@@ -2,9 +2,10 @@ package com.openexchange.webdav.action;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import com.openexchange.webdav.protocol.CollectionTest;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
@@ -12,9 +13,6 @@ import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.impl.DummyResourceManager;
-
-import junit.framework.TestCase;
 
 public abstract class ActionTestCase extends TestCase {
 	
@@ -28,21 +26,28 @@ public abstract class ActionTestCase extends TestCase {
 		TestWebdavFactoryBuilder.setUp();
 		factory = TestWebdavFactoryBuilder.buildFactory();
 		factory.beginRequest();
-		testCollection = "/testCollection"+System.currentTimeMillis();
-		WebdavCollection coll = factory.resolveCollection(testCollection);
-		coll.create();
-		clean.add(coll.getUrl());
+		try {
+			testCollection = "/testCollection"+System.currentTimeMillis();
+			WebdavCollection coll = factory.resolveCollection(testCollection);
+			coll.create();
+			clean.add(coll.getUrl());
 		
-		CollectionTest.createStructure(coll, factory);
-		
+			CollectionTest.createStructure(coll, factory);
+		} catch (Exception x) {
+			tearDown();
+			throw x;
+		}
 	}
 	
 	public void tearDown() throws Exception {
-		for(String url : clean) {
-			factory.resolveResource(url).delete();
+		try {
+			for(String url : clean) {
+				factory.resolveResource(url).delete();
+			}
+		} finally {
+			factory.endRequest(200);
+			TestWebdavFactoryBuilder.tearDown();
 		}
-		factory.endRequest(200);
-		TestWebdavFactoryBuilder.tearDown();
 	}
 	
 	public String getContent(String url) throws WebdavException, IOException {
