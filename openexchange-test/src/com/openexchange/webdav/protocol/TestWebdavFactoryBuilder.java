@@ -13,6 +13,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
@@ -50,9 +51,7 @@ public class TestWebdavFactoryBuilder {
 		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
 		try {
 			factory.setSessionHolder(new DummySessionHolder("thorben", 1,5));
-		} catch (LdapException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return factory;
@@ -62,7 +61,7 @@ public class TestWebdavFactoryBuilder {
 
 		private SessionObject session = null;
 		
-		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException {
+		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException, DBPoolingException {
 			ContextImpl ctx = new ContextImpl(context);
 			ctx.setFilestoreId(filestoreId);
 			ctx.setFileStorageQuota(Long.MAX_VALUE);
