@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Properties;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.Sessiond;
@@ -36,6 +38,8 @@ public final class Init {
 
 	private static boolean dbInitialized = false;
 
+    private static boolean contextInitialized = false;
+    
 	private static boolean sessiondInit = false;
 
 	private static Properties testProps = null;
@@ -216,6 +220,13 @@ public final class Init {
 		}
 	}
 
+    public synchronized static void initContext() throws ContextException {
+        if (!contextInitialized) {
+            ContextInit.init();
+            contextInitialized = true;
+        }
+    }
+    
 	public static void initSessiond() throws Exception {
 		if (!sessiondInit) {
 			String propfile = ComfireConfig.properties
