@@ -141,7 +141,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 			clean.add(id);
 			fail("Uploaded Large File and got no error");
 		} catch (Exception x) {
-			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
+			assertTrue(true);
 		}
 	}
 	
@@ -172,6 +172,41 @@ public class UpdateTest extends InfostoreAJAXTest {
 		VersionsTest.assureVersions(new Integer[]{1,2,3},res,2);
 	}
 	
+	public void testUpdateCurrentVersionByDefault() throws Exception{
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain"); // V1
+		assertNoError(res);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");// V2
+		assertNoError(res);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("description","New Description"));
+		assertNoError(res);
+		
+		res = get(getWebConversation(), getHostName(), sessionId, id);
+		assertNoError(res);
+		
+		JSONObject document = (JSONObject) res.getData();
+		assertEquals("New Description", document.get("description"));
+	}
 	
-
+	// Bug 3928
+	public void testVersionCommentForNewVersion() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("version_comment","Version Comment"), upload, "text/plain"); // V1
+		assertNoError(res);
+		
+		res = get(getWebConversation(), getHostName(), sessionId, id);
+		assertNoError(res);
+		
+		JSONObject document = (JSONObject)res.getData();
+		assertEquals("Version Comment",document.get("version_comment"));
+	}
+	
 }

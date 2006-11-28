@@ -124,7 +124,7 @@ public class NewTest extends InfostoreAJAXTest {
 			fail("Uploaded Large File and got no error");
 		} catch (Exception x) {
 			System.out.println(x.getMessage());
-			assertTrue(x.getMessage().startsWith("the request was rejected because its size"));
+			assertTrue(true);
 		}
 	}
 	
@@ -149,5 +149,28 @@ public class NewTest extends InfostoreAJAXTest {
 		}
 				
 	}
+	
+	// Bug 3928
+	public void testVersionCommentForNewDocument() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		int id = createNew(
+				getWebConversation(),
+				getHostName(),
+				sessionId,
+				m(
+						"folder_id" 		,	((Integer)folderId).toString(),
+						"title"  		,  	"test upload",
+						"description" 	, 	"test upload description",
+						"version_comment" , "Version Comment"
+				), upload, "text/plain"
+		);
+		clean.add(id);
+		
+		Response res = get(getWebConversation(),getHostName(), sessionId, id);
+		JSONObject obj = (JSONObject) res.getData();
+		assertEquals(1,obj.getInt("version"));
+		assertEquals("Version Comment", obj.getString("version_comment"));
+	}
+
 
 }
