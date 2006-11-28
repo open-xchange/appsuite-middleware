@@ -115,7 +115,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setInterval(1);
         assertTrue(cdao.calculateRecurrence());
     }
-  
+
    public void testBasicRecurringWithOccurence() throws Throwable {
        
         Context context = new ContextImpl(contextid);
@@ -148,10 +148,10 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
         
-        assertEquals("Check correct occurence vaklue", 5, test_dao.getOccurrence());
+        assertEquals("Check correct occurence value", 5, test_dao.getOccurrence());
         assertFalse("Test that until is not set", test_dao.containsUntil());
     }   
-   
+
    public void testBasicRecurringWithoutUntilAndWithoutOccurence() throws Throwable {
        
         Context context = new ContextImpl(contextid);
@@ -915,5 +915,5 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct number of results" , 2 , counter);
         
     }
-   
+
 }
