@@ -44,6 +44,11 @@ public class MockUser implements User {
     private String imapServer;
 
     /**
+     * Login for the IMAP server.
+     */
+    private String imapLogin;
+
+    /**
      * SMTP server.
      */
     private String smtpServer;
@@ -389,4 +394,10 @@ public class MockUser implements User {
         this.contactId = contactId;
     }
 
+    /**
+     * @return the imapLogin
+     */
+    public String getImapLogin() {
+        return imapLogin;
+    }
 }
