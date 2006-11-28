@@ -292,9 +292,9 @@ public class LinkTest extends AbstractAJAXTest {
 		}
 		
 		JSONArray data = (JSONArray)response.getData();
-		JSONArray jo = data.getJSONArray(0);		
+		JSONArray jo = data.optJSONArray(0);		
 		
-		if (jo.getInt(0) != 0 && jo.getInt(1) != 0 && jo.getInt(2) != 0){
+		if (jo != null){
 			fail("json error: DATA MISSMATCH");
 		}
 		
@@ -347,9 +347,9 @@ public class LinkTest extends AbstractAJAXTest {
 		}
 		
 		JSONArray data = (JSONArray)response.getData();
-		JSONArray jo = data.getJSONArray(0);		
+		JSONArray jo = data.optJSONArray(0);		
 		
-		if (jo.getInt(0) != 0 && jo.getInt(1) != 0 && jo.getInt(2) != 0){
+		if (null != jo){
 			fail("json error: DATA MISSMATCH");
 		}
 		
