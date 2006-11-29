@@ -356,7 +356,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put(DataFields.ID, objectId);
-		jsonObj.put(AJAXServlet.PARAMETER_CONFIRM, confirm);
+		jsonObj.put(CalendarFields.CONFIRMATION, confirm);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString()
 		.getBytes());
