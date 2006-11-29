@@ -39,6 +39,7 @@ package com.openexchange.tools.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,4 +89,54 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         assertNotNull("Can't create new file in file storage.", identifier);
     }
+    
+    // Bug 3978
+    public final void testExceptionOnUnavailableFilestore() throws Throwable {
+    	final File tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.delete();
+        final String fileContent = RandomString.generateLetter(100);
+        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
+            .getBytes("UTF-8"));
+        final FileStorage storage = FileStorage.getInstance(tempFile);
+        final String identifier = storage.saveNewFile(baos);
+        rmdir(tempFile);
+        assertFalse(tempFile.exists());
+        try {
+        	storage.getFile(identifier);
+        	fail("Expected IOException");
+        } catch (IOException x) {
+        	assertTrue(true);
+        }
+        
+        try {
+        	storage.saveNewFile(baos);
+            fail("Expected IOException");
+        } catch (IOException x) {
+        	assertTrue(true);
+        }
+    }
+    
+//  Bug 3978
+    public final void testExceptionOnUnknown() throws Throwable {
+    	final File tempFile = File.createTempFile("filestorage", ".tmp");
+        tempFile.delete();
+        final FileStorage storage = FileStorage.getInstance(tempFile);
+        try {
+        	storage.getFile("00/00/01");
+        	fail("Expected IOException");
+        } catch (IOException x) {
+        	assertTrue(true);
+        }
+        
+        
+    }
+
+	private void rmdir(File tempFile) {
+		if(tempFile.isDirectory()) {
+			for(File f : tempFile.listFiles()) {
+				rmdir(f);
+			}
+		} 
+		tempFile.delete();
+	}
 }
