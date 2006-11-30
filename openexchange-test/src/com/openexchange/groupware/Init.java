@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextInit;
@@ -183,19 +184,19 @@ public final class Init {
 		return getTestProperties().getProperty(key);
 	}
 
-	public static void loadSystemProperties() {
+	public static void loadSystemProperties() throws AbstractOXException {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
             final String propFileName = testProps.getProperty(
                 "openexchange.propfile");
             System.setProperty("openexchange.propfile", propFileName); //FIXME 
-            SystemConfig.loadProperties(propFileName);
+            ConfigurationInit.init();
 			GlobalConfig.loadConf(propFileName);
 			systemPropertiesLoaded = true;
 		}
 	}
 
-	public static void loadServerConf() {
+	public static void loadServerConf() throws AbstractOXException {
 		if (!serverConfLoaded) {
 			loadSystemProperties();
 			ComfireConfig cf = new ComfireConfig(); 
@@ -205,7 +206,7 @@ public final class Init {
 		}
 	}
 
-	public synchronized static void initDB() {
+	public synchronized static void initDB() throws AbstractOXException {
 		if (!dbInitialized) {
 			loadServerConf();
 			// new DBPool(0, 0);
