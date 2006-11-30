@@ -140,7 +140,6 @@ public class ConfigMenuTest extends AbstractAJAXTest {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + CONFIG_URL + '/' + path);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setHeaderField("Content-Type", "");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
