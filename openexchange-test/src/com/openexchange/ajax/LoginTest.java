@@ -108,7 +108,6 @@ public class LoginTest extends AbstractAJAXTest {
         req.setParameter("action", "login");
         req.setParameter("name", login);
         req.setParameter("password", password);
-        req.setHeaderField("Content-Type", "");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
@@ -142,7 +141,6 @@ public class LoginTest extends AbstractAJAXTest {
             + hostname + LOGIN_URL);
         req.setParameter(AJAXServlet.PARAMETER_ACTION, "logout");
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setHeaderField("Context-Type", "");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());
@@ -169,32 +167,5 @@ public class LoginTest extends AbstractAJAXTest {
         assertNotNull("Can't get sessionId", sessionId);
         assertTrue("Can't get sessionId", sessionId.length() > 0);
         return sessionId;
-    }
-
-    /**
-     * This method mades a login and returns the sessionId if the login is
-     * successful.
-     * @param conversation WebConversation.
-     * @param hostname hostname of the server running the server.
-     * @param login Login of the user.
-     * @param password Password of the user.
-     * @return the session identifier if the login is successful.
-     * @throws JSONException if parsing of serialized json fails.
-     * @throws SAXException if a SAX error occurs.
-     * @throws IOException if the communication with the server fails.
-     */
-    public static String[] getSessionIdWithUserId(
-        final WebConversation conversation, final String hostname,
-        final String login, final String password) throws IOException,
-        SAXException, JSONException {
-        final JSONObject jslogin = login(conversation, hostname, login,
-            password);
-        final String sessionId = jslogin.getString("session");
-        assertNotNull("Can't get sessionId.", sessionId);
-        assertTrue("Can't get sessionId.", sessionId.length() > 0);
-        final String userId = jslogin.getString("id");
-        assertNotNull("Can't get user identifier.", userId);
-        assertTrue("Can't get user identifier.", userId.length() > 0);
-        return new String[] { sessionId, userId };
     }
 }
