@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.server.ComfireConfig;
@@ -210,6 +211,7 @@ public final class Init {
 		if (!dbInitialized) {
 			loadServerConf();
 			// new DBPool(0, 0);
+            DatabaseInit.init();
 			dbInitialized = true;
 		}
 	}
