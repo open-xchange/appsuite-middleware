@@ -9,7 +9,6 @@ import java.util.Properties;
 
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.database.DatabaseInit;
-import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.sessiond.Sessiond;
@@ -205,7 +204,7 @@ public final class Init {
 		}
 	}
 
-    public synchronized static void initContext() throws ContextException {
+    public synchronized static void initContext() throws AbstractOXException {
         if (!contextInitialized) {
             ContextInit.init();
             contextInitialized = true;

@@ -37,14 +37,10 @@
 
 package com.openexchange.groupware.contexts;
 
-import java.io.FileInputStream;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.server.ComfireConfig;
 
 import junit.framework.TestCase;
 
@@ -76,10 +72,10 @@ public class LoginTest extends TestCase {
             password});
         LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
             + "s");
-        assertTrue("Can't get context identifier.", result[0] != null);
-        assertTrue("Can't get user identifier.", result[1] != null);
-        assertTrue("Can't get context identifier.", result[0].length() != 0);
-        assertTrue("Can't get user identifier.", result[1].length() != 0);
+        assertNotNull("Can't get context identifier.", result[0]);
+        assertNotNull("Can't get user identifier.", result[1]);
+        assertNotSame("Can't get context identifier.", result[0].length(), 0);
+        assertNotSame("Can't get user identifier.", result[1].length(), 0);
         LOG.info("Context identifier: " + result[0]);
         LOG.info("User identifier: " + result[1]);
         if (result.length > 2) {
