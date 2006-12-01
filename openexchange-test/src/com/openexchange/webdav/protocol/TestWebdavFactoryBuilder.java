@@ -78,7 +78,6 @@ public class TestWebdavFactoryBuilder {
 		if(mode == INFO) {
 			Init.loadTestProperties();
 			Init.loadSystemProperties();
-			Init.loadServerConf();
 			Init.initDB();
 		}
 	}

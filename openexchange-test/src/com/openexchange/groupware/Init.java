@@ -8,20 +8,16 @@ import java.util.List;
 import java.util.Properties;
 
 import com.openexchange.configuration.ConfigurationInit;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.server.ComfireConfig;
-import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.Sessiond;
 import com.openexchange.sessiond.SessiondConfigWrapper;
 import com.openexchange.sessiond.SessiondConnector;
-import com.openexchange.tools.conf.GlobalConfig;
 
 /**
  * This class contains methods for initialising tests.
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Init {
@@ -35,8 +31,6 @@ public final class Init {
 	private static boolean infostorePropertiesLoaded = false;
 
 	private static boolean systemPropertiesLoaded = false;
-
-	private static boolean serverConfLoaded = false;
 
 	private static boolean dbInitialized = false;
 
@@ -192,25 +186,14 @@ public final class Init {
                 "openexchange.propfile");
             System.setProperty("openexchange.propfile", propFileName); //FIXME 
             ConfigurationInit.init();
-			GlobalConfig.loadConf(propFileName);
+            ComfireConfig.loadProperties(propFileName);
 			systemPropertiesLoaded = true;
-		}
-	}
-
-	public static void loadServerConf() throws AbstractOXException {
-		if (!serverConfLoaded) {
-			loadSystemProperties();
-			ComfireConfig cf = new ComfireConfig(); 
-			cf.loadServerConf((String) ComfireConfig.properties
-					.get("SERVERCONF"));
-			serverConfLoaded = true;
 		}
 	}
 
 	public synchronized static void initDB() throws AbstractOXException {
 		if (!dbInitialized) {
-			loadServerConf();
-			// new DBPool(0, 0);
+			loadSystemProperties();
             DatabaseInit.init();
 			dbInitialized = true;
 		}
@@ -219,7 +202,6 @@ public final class Init {
 	public synchronized static void stopDB() throws Exception {
 		if (dbInitialized) {
 			dbInitialized = false;
-			// DBPool.releasePool();
 		}
 	}
 

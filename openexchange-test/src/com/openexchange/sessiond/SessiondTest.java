@@ -41,7 +41,6 @@ public class SessiondTest extends TestCase {
 		}
 		
 		Init.loadSystemProperties();
-		Init.loadServerConf();
 		Init.initDB();
         Init.initContext();
 		Init.initSessiond();

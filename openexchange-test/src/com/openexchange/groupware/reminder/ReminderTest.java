@@ -30,7 +30,6 @@ public class ReminderTest extends TestCase {
 		}
 		
 		Init.loadSystemProperties();
-		Init.loadServerConf();
 		Init.initDB();
 		Init.initSessiond();
 		
