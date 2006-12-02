@@ -68,8 +68,7 @@ public class LoginTest extends TestCase {
         final String user = Init.getAJAXProperty("login");
         final String password = Init.getAJAXProperty("password");
         final long start = System.currentTimeMillis();
-        final String[] result = login.handleLoginInfo(new Object[] {user,
-            password});
+        final String[] result = login.handleLoginInfo(user, password);
         LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
             + "s");
         assertNotNull("Can't get context identifier.", result[0]);
