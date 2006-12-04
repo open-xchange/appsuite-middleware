@@ -1,5 +1,7 @@
 package com.openexchange.webdav.action;
 
+import java.io.ByteArrayInputStream;
+
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.Protocol;
@@ -84,8 +86,13 @@ public abstract class StructureTest extends ActionTestCase {
 		final String DEVELOPMENT_URL = testCollection+"/development";
 		final String PM_URL = testCollection+"/pm";
 		
-		factory.resolveCollection(DEVELOPMENT_URL).resolveResource("test.html").create();
-		factory.resolveCollection(PM_URL).resolveResource("test2.html").create();
+		WebdavResource r = factory.resolveCollection(DEVELOPMENT_URL).resolveResource("test.html");
+		r.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
+		r.create(); // FIXME
+		
+		r = factory.resolveCollection(PM_URL).resolveResource("test2.html");
+		r.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
+		r.create(); // FIXME
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
