@@ -45,6 +45,10 @@ public class LockTest extends ActionTestCase {
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
+		WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		r.unlock(lockToken);
+		r.save();
+		
 	}
 	
 	public void testLockOwnerInXML() throws Exception {
@@ -80,6 +84,10 @@ public class LockTest extends ActionTestCase {
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
+		WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		r.unlock(lockToken);
+		r.save();
+	
 	}
 	
 	public void testDepth() throws Exception {
@@ -146,7 +154,12 @@ public class LockTest extends ActionTestCase {
 		WebdavLock lock = factory.resolveResource(INDEX_HTML_URL).getLocks().get(0);
 		
 		assertTrue(3600-lock.getTimeout()<100);
-		
+	
+		WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		String lockToken = r.getLocks().iterator().next().getToken();
+		r.unlock(lockToken);
+		r.save();
+	
 	}
 	
 	public void testLockNull() throws Exception {

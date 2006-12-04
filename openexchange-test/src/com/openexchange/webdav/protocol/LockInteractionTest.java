@@ -1,5 +1,6 @@
 package com.openexchange.webdav.protocol;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -161,11 +162,11 @@ public class LockInteractionTest extends TestCase {
 	
 	public void testTransformLockNullResource() throws Exception {
 		WebdavLock lock = getLock(0);
-		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		WebdavResource res = collection.resolveResource("test.txt");
 		res.lock(lock);
 		res = collection.resolveResource("test.txt");
+		res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
 		res.create();
 		
 		res = collection.resolveResource("test.txt");
@@ -175,6 +176,10 @@ public class LockInteractionTest extends TestCase {
 		
 		assertEquals(1, res.getLocks().size());
 		assertNotNull(res.getLock(lock.getToken()));
+		
+		res.unlock(lock.getToken());
+		res.save();
+		
 	}
 	
 	public void testTransformLockNullCollection() throws Exception {

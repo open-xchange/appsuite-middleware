@@ -276,6 +276,10 @@ public class IfTest extends ActionTestCase {
 			assertFalse(mockAction.wasActivated());
 		}
 		
+		WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		r.unlock(lock.getToken());
+		r.save();
+		
 	}
 	
 	public void testMissingLockTokenDestination() throws Exception {
@@ -307,6 +311,11 @@ public class IfTest extends ActionTestCase {
 			assertEquals(Protocol.SC_LOCKED, x.getStatus());
 			assertFalse(mockAction.wasActivated());
 		}
+		
+		WebdavResource r = factory.resolveResource(INDEX_HTML_URL);
+		r.unlock(lock.getToken());
+		r.save();
+
 	}
 	
 	public void setUp() throws Exception {
