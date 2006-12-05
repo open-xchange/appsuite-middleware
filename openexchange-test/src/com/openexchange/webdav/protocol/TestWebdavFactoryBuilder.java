@@ -2,6 +2,7 @@ package com.openexchange.webdav.protocol;
 
 import java.sql.SQLException;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.ContextImpl;
@@ -61,7 +62,7 @@ public class TestWebdavFactoryBuilder {
 
 		private SessionObject session = null;
 		
-		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException, DBPoolingException {
+		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException, DBPoolingException, OXException {
 			ContextImpl ctx = new ContextImpl(context);
 			ctx.setFilestoreId(filestoreId);
 			ctx.setFileStorageQuota(Long.MAX_VALUE);
