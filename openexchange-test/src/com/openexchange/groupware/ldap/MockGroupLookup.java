@@ -3,6 +3,9 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.ldap.LdapException.Code;
+
 /**
  * MockUserStorage for now contains some testing data relevant to the notification tests.
  * This can be extended for other tests for testing in isolation.
@@ -13,7 +16,8 @@ public class MockGroupLookup {
 	
 	public Group getGroup(int gid) throws LdapException {
 		if(!groups.containsKey(gid))
-			throw new LdapException("Can't find group: "+gid);
+			throw new LdapException(Component.GROUP, Code.GROUP_NOT_FOUND,
+                gid, -1);
 		return groups.get(gid);
 	}
 	
