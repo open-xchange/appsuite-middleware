@@ -47,4 +47,8 @@ public class MockWebdavResponse implements WebdavResponse {
 		return out.toByteArray();
 	}
 
+	public void setContentType(String s) {
+		setHeader("Content-Type", s);
+	}
+
 }
