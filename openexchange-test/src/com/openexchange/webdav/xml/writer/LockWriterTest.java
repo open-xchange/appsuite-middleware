@@ -26,31 +26,31 @@ public class LockWriterTest extends TestCase {
 		lock.setTimeout(WebdavLock.NEVER);
 		lock.setToken("opaquelocktoken:blaaaa");
 		
-		String expect = "<activelock> <locktype><write /></locktype> <lockscope><exclusive/></lockscope> <depth>0</depth> <owner>me</owner> <timeout>Infinite</timeout> <locktoken><href>opaquelocktoken:blaaaa</href></locktoken> </activelock>";
-		String got = writer.lock2xml(lock);
+		String expect = "<blupp xmlns:D=\"DAV:\"> <D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:exclusive/></D:lockscope> <D:depth>0</D:depth> <D:owner>me</D:owner> <D:timeout>Infinite</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
+		String got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
 		
 		assertTrue(xmlCompare.compare(expect,got));
 		
 		lock.setScope(WebdavLock.Scope.SHARED_LITERAL);
 		
-		expect = "<activelock> <locktype><write /></locktype> <lockscope><shared/></lockscope> <depth>0</depth> <owner>me</owner> <timeout>Infinite</timeout> <locktoken><href>opaquelocktoken:blaaaa</href></locktoken> </activelock>";
-		got = writer.lock2xml(lock);
+		expect = "<blupp xmlns:D=\"DAV:\"><D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:shared/></D:lockscope> <D:depth>0</D:depth> <D:owner>me</D:owner> <D:timeout>Infinite</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
+		got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
 		
 		assertTrue(xmlCompare.compare(expect,got));
 		
 
 		lock.setDepth(1);
 		
-		expect = "<activelock> <locktype><write /></locktype> <lockscope><shared/></lockscope> <depth>1</depth> <owner>me</owner> <timeout>Infinite</timeout> <locktoken><href>opaquelocktoken:blaaaa</href></locktoken> </activelock>";
-		got = writer.lock2xml(lock);
+		expect = "<blupp xmlns:D=\"DAV:\"><D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:shared/></D:lockscope> <D:depth>1</D:depth> <D:owner>me</D:owner> <D:timeout>Infinite</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
+		got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
 
 		assertTrue(xmlCompare.compare(expect,got));
 		
 		
 		lock.setDepth(WebdavCollection.INFINITY);
 		
-		expect = "<activelock> <locktype><write /></locktype> <lockscope><shared/></lockscope> <depth>infinity</depth> <owner>me</owner> <timeout>Infinite</timeout> <locktoken><href>opaquelocktoken:blaaaa</href></locktoken> </activelock>";
-		got = writer.lock2xml(lock);
+		expect = "<blupp xmlns:D=\"DAV:\"><D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:shared/></D:lockscope> <D:depth>infinity</D:depth> <D:owner>me</D:owner> <D:timeout>Infinite</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
+		got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
 		
 		assertTrue(xmlCompare.compare(expect,got));
 		

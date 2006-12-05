@@ -40,13 +40,13 @@ public class PropertiesWriterTest extends TestCase {
 		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty("DAV:","getlastmodified");
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -65,13 +65,13 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -92,10 +92,10 @@ public class PropertiesWriterTest extends TestCase {
 		resource.create();
 		
 		
-		PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("http://test.invalid");
+		PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		Set<String> allProps = new HashSet<String>();
 		
@@ -118,10 +118,10 @@ public class PropertiesWriterTest extends TestCase {
 		resource.create();
 		
 		
-		PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("http://test.invalid");
+		PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		Set<String> allProps = new HashSet<String>();
 		
@@ -143,13 +143,13 @@ public class PropertiesWriterTest extends TestCase {
 		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty("DAV:","resourcetype");
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -166,13 +166,13 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("<&>");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty("DAV:","displayname");
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -194,13 +194,13 @@ public class PropertiesWriterTest extends TestCase {
 		resource.putProperty(property);
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty(TEST_NS.getURI(),"test");
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		for(Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat"))
@@ -218,7 +218,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		for(Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat"))
@@ -238,14 +238,14 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("http://test.invalid");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname")
 			.addProperty("OX:", "notExist");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "http://test.invalid/"+testCollection+"test.txt");
+		assertHref(response, "/"+testCollection+"test.txt");
 		
 		int count = 0;
 		int status = 0;
