@@ -15,6 +15,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -350,7 +351,7 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 		
 		@Override
-		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session) {
+		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, State state) {
 			messageCollector.add(new Message(messageTitle,message,name));
 		}
 		
