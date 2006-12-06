@@ -263,6 +263,13 @@ public class MockUser implements User {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public String[] getAliases() {
+        return new String[0];
+    }
+    
+    /**
      * Setter for displayName.
      * @param displayName Display name.
      */
