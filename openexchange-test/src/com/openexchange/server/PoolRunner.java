@@ -54,10 +54,11 @@ public class PoolRunner implements Runnable {
                         con.close();
                     } else if (modrunner % 9 == 0) {
                         con.close();
-                        con = null;
+                        // con = null;
                     }
                 }
                 modrunner++;
+                //System.out.println("Ganz toll!");
                 simpleAction(con);
                 DBPool.push(c, con);
                 current_run++;                
