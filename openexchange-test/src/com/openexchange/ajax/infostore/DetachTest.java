@@ -98,17 +98,18 @@ public class DetachTest extends InfostoreAJAXTest {
 		assertEquals(0,notDetached[0]);
 	}
 	
+	// Bug 3818
 	public void testCopyComments() throws Exception{
 		Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("description","current_description"));
 		assertNoError(res);
 		
-		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+		int[] notDetached = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5,4,3});
 		assertEquals(0, notDetached.length);
 		
 		res = get(getWebConversation(), getHostName(),sessionId, clean.get(0), 0);
 		assertNoError(res);
 		
 		JSONObject document = (JSONObject) res.getData();
-		assertEquals("test knowledge description", document.get("description"));
+		assertEquals("current_description", document.get("description"));
 	}
 }
