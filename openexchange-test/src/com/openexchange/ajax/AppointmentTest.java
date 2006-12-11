@@ -165,6 +165,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj2.getNote());
 		assertEqualsAndNotNull("categories", appointmentObj1.getCategories(),
 				appointmentObj2.getCategories());
+		assertEqualsAndNotNull("delete_exceptions", appointmentObj1.getDeleteException(),
+				appointmentObj2.getDeleteException());
 		
 		assertEqualsAndNotNull("participants are not equals",
 				participants2String(appointmentObj1.getParticipants()),
@@ -411,6 +413,19 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static AppointmentObject[] listAppointment(WebConversation webCon,
 			int[][] objectIdAndFolderId, int[] cols, TimeZone userTimeZone,
 			String host, String session) throws Exception {
+		AppointmentObject[] appointmentArray = new AppointmentObject[objectIdAndFolderId.length];
+		for (int a = 0; a < appointmentArray.length; a++) {
+			appointmentArray[a] = new AppointmentObject();
+			appointmentArray[a].setObjectID(objectIdAndFolderId[a][0]);
+			appointmentArray[a].setParentFolderID(objectIdAndFolderId[a][1]);
+		}
+		
+		return listAppointment(webCon, appointmentArray, cols, userTimeZone, host, session);
+	}
+		
+	public static AppointmentObject[] listAppointment(WebConversation webCon,
+			AppointmentObject[] appointmentArray, int[] cols, TimeZone userTimeZone,
+			String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -422,11 +437,15 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		JSONArray jsonArray = new JSONArray();
 		
-		for (int a = 0; a < objectIdAndFolderId.length; a++) {
-			int i[] = objectIdAndFolderId[a];
+		for (int a = 0; a < appointmentArray.length; a++) {
 			JSONObject jsonObj = new JSONObject();
-			jsonObj.put(DataFields.ID, i[0]);
-			jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, i[1]);
+			jsonObj.put(DataFields.ID, appointmentArray[a].getObjectID());
+			jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, appointmentArray[a].getParentFolderID());
+			
+			if (appointmentArray[a].containsRecurrencePosition()) {
+				jsonObj.put(CalendarFields.RECURRENCE_POSITION, appointmentArray[a].getRecurrencePosition());
+			}
+			
 			jsonArray.put(jsonObj);
 		}
 		
@@ -484,6 +503,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		return appointmentObj;
 	}
+
+	public static AppointmentObject[] listModifiedAppointment(
+			WebConversation webCon, Date start, Date end,
+			Date modified, TimeZone userTimeZone, String host, String session)
+			throws Exception {
+		return listModifiedAppointment(webCon, 0, start, end, modified, userTimeZone, host, session);
+	}
 	
 	public static AppointmentObject[] listModifiedAppointment(
 			WebConversation webCon, int inFolder, Date start, Date end,
@@ -497,7 +523,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
 				AJAXServlet.ACTION_UPDATES);
-		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		if (inFolder != 0) {
+			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		} 
+
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
@@ -537,7 +567,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
 				AJAXServlet.ACTION_UPDATES);
-		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		if (inFolder != 0) {
+			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		} 
+		
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "changed");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
