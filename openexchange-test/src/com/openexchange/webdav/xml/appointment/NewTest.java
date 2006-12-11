@@ -4,12 +4,17 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.Group;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -142,6 +147,70 @@ public class NewTest extends AppointmentTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
+	public void testDailyRecurrenceWithOccurrences() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		int occurrences = 8;
+		
+		Date until = new Date(c.getTimeInMillis() + ((occurrences-1)*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDailyRecurrence");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setOccurrence(occurrences);
+		
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		appointmentObj.setObjectID(objectId);
+		appointmentObj.setUntil(until);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
+	public void _notestAppointmentInPrivateFlagInPublicFolder() throws Exception {
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testAppointmentInPrivateFlagInPublicFolder" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setType(FolderObject.PUBLIC);
+		folderObj.setParentFolderID(2);
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+		
+		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testAppointmentInPrivateFlagInPublicFolder");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(parentFolderId);
+		appointmentObj.setPrivateFlag(true);
+		appointmentObj.setIgnoreConflicts(true);
+
+		try {
+			int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+			deleteAppointment(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+			fail("conflict exception expected!");
+		} catch (TestException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.CONFLICT_STATUS);
+		}
 	}
 }
 
