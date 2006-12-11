@@ -80,7 +80,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		try {
 			attachmentBase.getAttachment(folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(),null);
 			fail("Got Wrong Exception");
-		} catch (OXObjectNotFoundException x) {
+		} catch (OXException x) {
 			assertTrue(true);
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -190,7 +190,6 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		doAttach(folderId, attachedId, moduleId);
 		doAttach(folderId, attachedId, moduleId);
 		doAttach(folderId, attachedId, moduleId);
-		
 		SearchIterator iterator = attachmentBase.getAttachments(folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), null).results();
 		
 		Set<AttachmentMetadata> metadata = new HashSet<AttachmentMetadata>(clean);
@@ -479,7 +478,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		GetSwitch get2 = new GetSwitch(m2);
 		
 		for(AttachmentField field : AttachmentField.VALUES) {
-			
+			if(field == AttachmentField.FILE_ID_LITERAL)
+				continue;
 			Object v1 = field.doSwitch(get1);
 			Object v2 = field.doSwitch(get2);
 			
