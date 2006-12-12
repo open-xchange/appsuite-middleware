@@ -800,6 +800,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 			case AppointmentObject.NOTE:
 				appointmentObj.setNote(jsonArray.getString(pos));
 				break;
+			case AppointmentObject.RECURRENCE_POSITION:
+				appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
+				break;                                
 			case AppointmentObject.PARTICIPANTS:
 				appointmentObj.setParticipants(parseParticipants(jsonArray
 						.getJSONArray(pos)));
