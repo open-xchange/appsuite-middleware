@@ -30,7 +30,7 @@ public class ListTest extends AppointmentTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
+
 	public void testList() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testList");
 		appointmentObj.setIgnoreConflicts(true);
@@ -133,9 +133,9 @@ public class ListTest extends AppointmentTest {
 			LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
 		}
 	}
-	
+
 	public void testListWithRecurrencePosition() throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.RECURRENCE_POSITION };
 		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testListWithRecurrencePosition" + System.currentTimeMillis());
@@ -214,7 +214,7 @@ public class ListTest extends AppointmentTest {
 		
 		assertTrue("not all objects in response", (found1 && found2 && found3));
 		
-		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId1, publicFolderId, PROTOCOL + getHostName(), getSessionId());
 		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 }
