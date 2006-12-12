@@ -134,7 +134,7 @@ public class ListTest extends AppointmentTest {
 		}
 	}
 	
-	public void _notestListWithRecurrencePosition() throws Exception {
+	public void testListWithRecurrencePosition() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
 		
 		FolderObject folderObj = new FolderObject();
@@ -196,7 +196,7 @@ public class ListTest extends AppointmentTest {
 		
 		AppointmentObject[] appointmentArray = AppointmentTest.listAppointment(getWebConversation(), appointmentList, cols, timeZone, getHostName(), getSessionId());
 		
-		assertEquals("3 element expected", 3, appointmentArray.length);
+		assertEquals("3 elements expected", 3, appointmentArray.length);
 		
 		boolean found1 = false;
 		boolean found2 = false;
