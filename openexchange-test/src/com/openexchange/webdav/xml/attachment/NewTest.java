@@ -1,11 +1,14 @@
 package com.openexchange.webdav.xml.attachment;
 
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.FolderTest;
+import java.io.ByteArrayInputStream;
 
 public class NewTest extends AttachmentTest {
 	
@@ -16,8 +19,19 @@ public class NewTest extends AttachmentTest {
 		contactObj.setSurName("testInsertAttachment");
 		contactObj.setParentFolderID(contactFolderId);
 		int objectId = ContactTest.insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		insertAttachment(System.currentTimeMillis() + "test.txt", Types.CONTACT, objectId, contactFolderId,  false);
-	}
-	
+		
+		AttachmentMetadata attachmentObj = new AttachmentImpl();
+		attachmentObj.setFilename(System.currentTimeMillis() + "test.txt");
+		attachmentObj.setModuleId(Types.CONTACT);
+		attachmentObj.setAttachedId(objectId);
+		attachmentObj.setFolderId(contactFolderId);
+		attachmentObj.setRtfFlag(false);
+		attachmentObj.setFileMIMEType(CONTENT_TYPE);
+		
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+		
+		int attachmentId = insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		assertTrue("attachment is 0", attachmentId > 0);
+	}	
 }
 
