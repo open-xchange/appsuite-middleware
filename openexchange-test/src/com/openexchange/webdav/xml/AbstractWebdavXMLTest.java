@@ -21,18 +21,18 @@ import org.jdom.output.XMLOutputter;
 
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	
-	protected int parseResponse(Document response, boolean delete) throws Exception {
+	protected static int parseResponse(Document response, boolean delete) throws Exception {
 		return parseRootElement(response.getRootElement(), delete);
 	}
 	
-	protected int parseRootElement(Element e, boolean delete) throws Exception {
+	protected static int parseRootElement(Element e, boolean delete) throws Exception {
 		assertNotNull("root element (null)", e);
 		assertEquals("root element", "multistatus", e.getName());
 		
 		return parseResponseElement(e.getChild("response", webdav), delete);
 	}
 	
-	protected int parseResponseElement(Element e, boolean delete) throws Exception {
+	protected static int parseResponseElement(Element e, boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "response", e.getName());
 		
@@ -40,7 +40,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return parsePropstatElement(e.getChild("propstat", webdav));
 	}
 	
-	protected void parseHrefElement(Element e, boolean delete) throws Exception {
+	protected static void parseHrefElement(Element e, boolean delete) throws Exception {
 		assertNotNull("response element (null)", e);
 		assertEquals("response element", "href", e.getName());
 		if (!delete) {
@@ -48,7 +48,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		}
 	}
 	
-	protected int parsePropstatElement(Element e) throws Exception {
+	protected static int parsePropstatElement(Element e) throws Exception {
 		assertNotNull("propstat element (null)", e);
 		assertEquals("propstat element", "propstat", e.getName());
 		
@@ -58,27 +58,27 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		return parsePropElement(e.getChild("prop", webdav));
 	}
 	
-	protected int parsePropElement(Element e) throws Exception {
+	protected static int parsePropElement(Element e) throws Exception {
 		assertNotNull("prop element (null)", e);
 		assertEquals("prop element", "prop", e.getName());
 		
 		return parseObjectIdElement(e.getChild(DataFields.OBJECT_ID, XmlServlet.NS));
 	}
 	
-	protected void parseStatusElement(Element e) throws Exception {
+	protected static void parseStatusElement(Element e) throws Exception {
 		assertNotNull("status element (null)", e);
 		assertEquals("status element", "status", e.getName());
 		assertNotNull("status not null", e.getValue());
 		assertEquals("status 200", 200, Integer.parseInt(e.getValue()));
 	}
 	
-	protected void parseResponsedescriptionElement(Element e) throws Exception {
+	protected static void parseResponsedescriptionElement(Element e) throws Exception {
 		assertNotNull("status element (null)", e);
 		assertEquals("status element", "responsedescription", e.getName());
 		assertNotNull("response description not null", e.getValue());
 	}
 	
-	protected int parseObjectIdElement(Element e) throws Exception {
+	protected static int parseObjectIdElement(Element e) throws Exception {
 		assertNotNull("object_id element (null)", e);
 		assertEquals("object_id element", "object_id", e.getName());
 		assertNotNull("object_id null", e.getValue());
