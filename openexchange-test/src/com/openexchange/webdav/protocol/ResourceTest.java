@@ -92,9 +92,7 @@ public class ResourceTest extends AbstractResourceTest{
 		res = resourceManager.resolveResource(testCollection+"/moved");
 		assertTrue(res.exists());
 		
-		assertFalse(lastModified.equals(res.getLastModified()));
-		assertEquals(creationDate, res.getCreationDate());
-		
+		assertFalse(lastModified.equals(res.getLastModified()));		
 		assertEquals("gnaaa!",res.getProperty("ox","myvalue").getValue());
 		InputStream in = null;
 		InputStream in2 = null;

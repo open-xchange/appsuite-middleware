@@ -27,7 +27,7 @@ public class PutTest extends ActionTestCase {
 		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
-		assertEquals(resource.getLength(), new Long(content.getBytes("UTF-8").length));
+		assertEquals(new Long(content.getBytes("UTF-8").length),resource.getLength());
 		assertEquals("text/html", resource.getContentType());
 		assertEquals(content, getContent(INDEX_HTML_URL));
 	}

@@ -1,21 +1,16 @@
 package com.openexchange.test;
 
 import com.openexchange.ajax.reminder.ReminderAJAXSuite;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class CCTests {
+public class CCTests
+ {
 	public static Test suite(){
 			
 		TestSuite tests = new TestSuite();
 		
-		tests.addTestSuite(com.openexchange.ajax.LoginTest.class);
-		tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-		tests.addTestSuite(com.openexchange.ajax.TasksTest.class);
-		tests.addTest(ReminderAJAXSuite.suite());
-		tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-		tests.addTestSuite(com.openexchange.ajax.ConfigMenuTest.class);
-		tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
 		tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.GroupTest.class);
 		tests.addTestSuite(com.openexchange.ajax.ResourceTest.class);
@@ -50,7 +45,6 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
 		
-		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.RemoveAttachmentsActionTest.class);
@@ -63,10 +57,21 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
 		tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
 		
+		tests.addTestSuite(com.openexchange.groupware.infostore.CreateDocumentActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.CreateVersionActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.UpdateDocumentActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
+		
+		
+		
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
 		
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
+		
+		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 		
 		return tests;
 	}
