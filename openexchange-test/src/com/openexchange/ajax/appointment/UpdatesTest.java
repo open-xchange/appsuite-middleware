@@ -52,5 +52,88 @@ public class UpdatesTest extends AppointmentTest {
 		
 		assertTrue("created object not found in response", found);
 	}
+	
+	public void testModifiedWithoutFolderIdExtended() throws Exception {
+		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		Date since = new Date();
+		
+		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdExtended");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId1 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, since, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		assertTrue("no appointment object in response", appointmentArray.length > 0);
+		boolean found1 = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId1) {
+				found1 = true;
+			}
+		}
+		
+		assertTrue("created object not found in response", found1);
+		
+		since = new Date();
+		
+		int objectId2 = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, since, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		assertTrue("no appointment object in response", appointmentArray.length > 0);
+		found1 = false;
+		boolean found2 = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId1) {
+				found1 = true;
+			} else if (appointmentArray[a].getObjectID() == objectId2) {
+				found2 = true;
+			}
+		}
+		
+		assertFalse("invalid object id in reponse", found1);
+		assertTrue("created object not found in response", found2);
+	}
+	
+	public void testModifiedWithoutFolderIdNoResponse() throws Exception {
+		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		
+		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdNoResponse");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		Date since = new Date();
+		
+		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, since, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		boolean found = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				found = true;
+			}
+		}
+		
+		assertFalse("created object found in response", found);
+	}
+	
+	public void testModifiedWithoutFolderIdWithFutureTimestamp() throws Exception {
+		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		
+		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdWithFutureTimestamp");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		Date since = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		
+		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, since, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		assertEquals("unexpected data in response", 0, appointmentArray.length);
+
+	}
 }
 
