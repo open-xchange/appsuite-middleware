@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -77,12 +78,28 @@ public class LockTest extends InfostoreAJAXTest {
 	}
 	
 	public void testLock() throws Exception{
-		Response res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
+		
+		Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
+		Date ts = res.getTimestamp();
+		
+		res = lock(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		
 		res = get(getWebConversation(),getHostName(), sessionId, clean.get(0));
 		assertNoError(res);
 		assertLocked((JSONObject)res.getData());
+		
+		// BUG 4232
+		
+		res = updates(getWebConversation(), getHostName(), sessionId, folderId, new int[]{Metadata.ID}, ts.getTime());
+		
+		JSONArray modAndDel = (JSONArray) res.getData();
+		JSONArray mod = modAndDel.getJSONArray(0);
+		
+		assertEquals(1, mod.length());
+		System.out.println(mod);
+		assertEquals(clean.get(0), (Integer) mod.getInt(0));
+		
 		
 		String sessionId2 = this.getSecondSessionId();
 		
@@ -94,7 +111,8 @@ public class LockTest extends InfostoreAJAXTest {
 		// Object may not be removed
 		int[] notDeleted = delete(getSecondWebConversation(),getHostName(),sessionId2, System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
 		assertEquals(1, notDeleted.length);
-		assertEquals(clean.get(0),(Object) notDeleted[0]);
+		assertEquals(clean.get(0),(Integer) notDeleted[0]);
+		
 		
 		// Versions may not be removed
 		int[] notDetached = detach(getSecondWebConversation(),getHostName(),sessionId2,System.currentTimeMillis(), clean.get(0), new int[]{4});

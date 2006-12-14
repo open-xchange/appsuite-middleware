@@ -111,6 +111,42 @@ public class UpdateTest extends InfostoreAJAXTest {
 		}
 	}
 	
+	public void notestUniqueFilenamesOnUpload() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		assertNoError(res);
+		
+		int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()));
+		
+		clean.add(id2);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,id2,System.currentTimeMillis(),m(), upload, "text/plain");
+		assertTrue(res.hasError());
+	}
+	
+	public void notestUniqueFilenamesOnSwitchVersions() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "theFile.txt"), upload, "text/plain");
+		assertNoError(res);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		assertNoError(res);
+		
+		int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc","filename","theFile.txt","folder_id" ,	((Integer)folderId).toString()),upload,"text/plain");
+		
+		clean.add(id2);
+		
+		res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("title","otherTitle","version","1"));
+		assertTrue(res.hasError());
+		
+	}
+	
 	public void testLargeFileUpload() throws Exception{
 		File largeFile = File.createTempFile("test","bin");
 		largeFile.deleteOnExit();
