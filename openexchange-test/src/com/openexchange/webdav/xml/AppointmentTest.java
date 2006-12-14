@@ -457,6 +457,18 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		return appointmentArray;
 	}
 	
+	public static AppointmentObject loadAppointment(WebConversation webCon, int objectId, int inFolder, Date modified, String host, String login, String password) throws TestException, Exception {
+		AppointmentObject[] appointmentArray = listAppointment(webCon, inFolder, modified, true, false, host, login, password);
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				return appointmentArray[a];
+			}
+		}
+		
+		throw new TestException("object not found");
+	}
+	
 	public static AppointmentObject loadAppointment(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
 		host = appendPrefix(host);
 		
