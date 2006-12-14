@@ -82,6 +82,7 @@ public class MailTest extends AbstractAJAXTest {
 			reader.close();
 			writer.flush();
 			writer.close();
+			tmpFile.deleteOnExit();
 			return tmpFile;
 		} catch (IOException e) {
 			return null;
@@ -89,18 +90,26 @@ public class MailTest extends AbstractAJAXTest {
 	}
 	
 	public static JSONObject sendMail(final WebConversation conversation, final String hostname, final String sessionId,
-			JSONObject mailObj, File[] uploadFileAttachments) throws Exception {
-		return sendMail(conversation, hostname, sessionId, mailObj.toString(), uploadFileAttachments);
+			JSONObject mailObj, File[] uploadFileAttachments, final boolean setCookie) throws Exception {
+		return sendMail(conversation, hostname, sessionId, mailObj.toString(), uploadFileAttachments, setCookie);
 	}
 	
 	public static JSONObject sendMail(final WebConversation conversation, final String hostname, final String sessionId,
-			final String mailObjStr, final File[] uploadFileAttachments) throws Exception {
+			final String mailObjStr, final File[] uploadFileAttachments, final boolean setCookie) throws Exception {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		
 		WebRequest req = null;
 		WebResponse resp = null;
+		
+		if (setCookie) {
+			/*
+			 * Add cookie
+			 */
+			CookieJar cookieJar = new CookieJar();
+			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+		}
 		
 		final PostMethodWebRequest postReq = new PostMethodWebRequest(hostname + MAIL_URL + parameter.getURLParameters());
 		postReq.setMimeEncoded(true);
@@ -124,7 +133,7 @@ public class MailTest extends AbstractAJAXTest {
 		if (!mailObj.has("msgRef") || mailObj.isNull("msgRef")) {
 			mailObj.putOpt("msgRef", msgRef);
 		}
-		return sendMail(conversation, hostname, sessionId, mailObj.toString(), uploadFileAttachments);
+		return sendMail(conversation, hostname, sessionId, mailObj.toString(), uploadFileAttachments, false);
 	}
 	
 	public static JSONObject getForwardMailForDisplay(final WebConversation conversation, final String hostname, final String sessionId,
@@ -174,6 +183,39 @@ public class MailTest extends AbstractAJAXTest {
 		return jResponse;
 	}
 	
+	public static JSONObject getAllMails(final WebConversation conversation, final String hostname,
+			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws Exception {
+		final GetMethodWebRequest getReq = new GetMethodWebRequest(hostname + MAIL_URL);
+		if (setCookie) {
+			/*
+			 * Set cookie cause a request has already been fired before with the same session id.
+			 */
+			CookieJar cookieJar = new CookieJar();
+			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
+		}
+		getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
+		getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_ALL);
+		getReq.setParameter(Mail.PARAMETER_MAILFOLDER, folder);
+		final String colsStr;
+		if (cols != null && cols.length > 0) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(cols[0]);
+			for (int i = 1; i < cols.length; i++) {
+				//sb.append("%2C").append(cols[i]);
+				sb.append(",").append(cols[i]);
+			}
+			colsStr = sb.toString();
+		} else {
+			colsStr = "600,601,602,612,603,607,610,608,611,614,102";
+		}
+		getReq.setParameter(Mail.PARAMETER_COLUMNS, colsStr);
+		getReq.setParameter(Mail.PARAMETER_SORT, "610");
+		getReq.setParameter(Mail.PARAMETER_ORDER, "asc");
+		WebResponse resp = conversation.getResponse(getReq);
+		final JSONObject jResponse = new JSONObject(resp.getText());
+		return jResponse;
+	}
+	
 	private static String getFileContentType(File f) {
 		return new MimetypesFileTypeMap().getContentType(f);
 	}
@@ -198,9 +240,9 @@ public class MailTest extends AbstractAJAXTest {
 			
 			mailObj.put("attachments", attachments);
 			
-			jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null);
+			jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, false);
 			System.out.println("testFail():\nResponse=" + jResp + "\n\n");// something like: {"data":"INBOX/Custom Sent/1"}
-			assertTrue(jResp == null);
+			assertTrue(jResp == null || jResp.has("error"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -226,7 +268,7 @@ public class MailTest extends AbstractAJAXTest {
 				
 				mailObj.put("attachments", attachments);
 				
-				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null);
+				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, false);
 				System.out.println("testSendSimpleMail():\nResponse=" + jResp + "\n\n");// something like: {"data":"INBOX/Custom Sent/1"}
 				assertTrue(jResp != null);
 			} finally {
@@ -266,7 +308,7 @@ public class MailTest extends AbstractAJAXTest {
 				
 				File[] fa = { createTempFile(), createTempFile(), createTempFile() };
 				
-				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa);
+				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa, false);
 				System.out.println("testSendMailWithMultipleAttachment():\nResponse=" + jResp + "\n\n"); // something like: {"data":"INBOX/Custom Sent/1"}
 				assertTrue(jResp != null);
 			} finally {
@@ -308,7 +350,7 @@ public class MailTest extends AbstractAJAXTest {
 				 * Upload files
 				 */
 				File[] fa = { createTempFile(), createTempFile(), createTempFile() };
-				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa);
+				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa, false);
 				mailIdentifer = jResp.getString("data");
 				/*
 				 * Get forward mail for display
@@ -357,7 +399,7 @@ public class MailTest extends AbstractAJAXTest {
 				 * Upload files
 				 */
 				File[] fa = { createTempFile(), createTempFile(), createTempFile() };
-				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa);
+				jResp = sendMail(getWebConversation(), MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, fa, false);
 				mailIdentifer = jResp.getString("data");
 				/*
 				 * Get forward mail for display
@@ -391,7 +433,47 @@ public class MailTest extends AbstractAJAXTest {
 	}
 	
 	public void testGetMails() {
-		assertTrue(true);
+		try {
+			JSONObject jResp = null;
+			try {
+				JSONObject mailObj = new JSONObject();
+				mailObj.put("from", "\"Markus Klein\" <markus@leo.org>");
+				mailObj.put("to", "\"Thorben Betten\" <thorben@leo.org>");
+				mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
+				JSONArray attachments = new JSONArray();
+				/*
+				 * Mail text
+				 */
+				JSONObject attach = new JSONObject();
+				attach.put("content", MAILTEXT);
+				attach.put("content_type", "text/plain");
+				attachments.put(attach);
+				
+				mailObj.put("attachments", attachments);
+				
+				final WebConversation conversation = getWebConversation();
+				/*
+				 * Send mail 10 times
+				 */
+				jResp = sendMail(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, false);
+				for (int i = 2; i <= 10; i++) {
+					jResp = sendMail(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, true);
+				}
+				
+				/*
+				 * Request mails
+				 */
+				jResp = getAllMails(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), "INBOX", null, true);
+				
+				System.out.println("testGetMails():\nResponse=" + jResp + "\n\n");// something like: {"data":"INBOX/Custom Sent/1"}
+				assertTrue(jResp != null);
+			} finally {
+				// NOTHING TO DO HERE
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 	
 	public void testReplyMail() {
