@@ -22,17 +22,25 @@ import java.util.TimeZone;
 public class NewTest extends AppointmentTest {
 
 	public void testNewAppointment() throws Exception {
+		Date modified = new Date();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointment");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testNewAppointmentWithAlarm() throws Exception {
+		Date modified = new Date();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithAlarm");
 		appointmentObj.setIgnoreConflicts(true);
 		appointmentObj.setAlarm(45);
@@ -40,11 +48,16 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 
 	public void testNewAppointmentWithParticipants() throws Exception {
+		Date modified = new Date();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithParticipants");
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -64,11 +77,17 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testNewAppointmentWithUsers() throws Exception {
+		Date modified = new Date();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithUsers");
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -90,6 +109,10 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
@@ -98,6 +121,8 @@ public class NewTest extends AppointmentTest {
      * FIXME the mail addresses are somehow not parsed in server and cause exceptions
 	 */
     public void notestNewAppointmentWithExternalParticipants() throws Exception {
+		Date modified = new Date();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithExternalParticipants");
 		appointmentObj.setIgnoreConflicts(true);
 		
@@ -118,11 +143,17 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
 	public void testDailyRecurrence() throws Exception {
+		Date modified = new Date();
+		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -146,10 +177,16 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testDailyRecurrenceWithOccurrences() throws Exception {
+		Date modified = new Date();
+		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -157,7 +194,7 @@ public class NewTest extends AppointmentTest {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		int occurrences = 8;
+		int occurrences = 5;
 		
 		Date until = new Date(c.getTimeInMillis() + ((occurrences-1)*dayInMillis));
 		
@@ -177,10 +214,16 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setUntil(until);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
 	public void _notestAppointmentInPrivateFlagInPublicFolder() throws Exception {
+		Date modified = new Date();
+		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testAppointmentInPrivateFlagInPublicFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
