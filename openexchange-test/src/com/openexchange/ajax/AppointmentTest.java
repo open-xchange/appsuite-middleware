@@ -503,7 +503,30 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		return appointmentObj;
 	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, Date start, Date end, Date modified, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		
+		return loadAppointment(webCon, objectId, 0, start, end, modified, userTimeZone, host, session);
+	}
 
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, int inFolder, Date start, Date end, Date modified, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		AppointmentObject[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, userTimeZone, host, session);
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				return appointmentArray[a];
+			}
+		}
+		
+		throw new TestException("object not found");
+	}
+	
 	public static AppointmentObject[] listModifiedAppointment(
 			WebConversation webCon, Date start, Date end,
 			Date modified, TimeZone userTimeZone, String host, String session)
@@ -546,8 +569,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-		
+
 		assertNotNull("timestamp", response.getTimestamp());
+		assertTrue("requested timestamp bigger then timestamp in response", response.getTimestamp().getTime() >= modified.getTime());
 		
 		assertEquals(200, resp.getResponseCode());
 		
@@ -739,14 +763,26 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			appointmentArray[a] = new AppointmentObject();
-			parseCols(cols, jsonArray.getJSONArray(a), appointmentArray[a]);
+			parseCols(cols, jsonArray.getJSONArray(a), appointmentArray[a], userTimeZone);
+			
+			if (!appointmentArray[a].getFullTime()) {
+				Date startDate = appointmentArray[a].getStartDate();
+				Date endDate = appointmentArray[a].getEndDate();
+				
+				if (startDate != null && endDate != null) {
+					int startOffset = userTimeZone.getOffset(startDate.getTime());
+					int endOffset = userTimeZone.getOffset(endDate.getTime());
+					appointmentArray[a].setStartDate(new Date(startDate.getTime() - startOffset));
+					appointmentArray[a].setEndDate(new Date(endDate.getTime() - endOffset));
+				} 
+			}
 		}
 		
 		return appointmentArray;
 	}
 	
 	private static void parseCols(int[] cols, JSONArray jsonArray,
-			AppointmentObject appointmentObj) throws Exception {
+			AppointmentObject appointmentObj, TimeZone userTimeZone) throws Exception {
 		if (cols.length != jsonArray.length()) {
 			LOG.debug("expected cols: "
 					+ StringCollection.convertArray2String(cols)
@@ -757,12 +793,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 				jsonArray.length());
 		
 		for (int a = 0; a < cols.length; a++) {
-			parse(a, cols[a], jsonArray, appointmentObj);
+			parse(a, cols[a], jsonArray, appointmentObj, userTimeZone);
 		}
 	}
 	
 	private static void parse(int pos, int field, JSONArray jsonArray,
-			AppointmentObject appointmentObj) throws Exception {
+			AppointmentObject appointmentObj, TimeZone userTimeZone) throws Exception {
 		switch (field) {
 			case AppointmentObject.OBJECT_ID:
 				appointmentObj.setObjectID(jsonArray.getInt(pos));
@@ -802,7 +838,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.RECURRENCE_POSITION:
 				appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
-				break;                                
+				break;
+			case AppointmentObject.TIMEZONE:
+				appointmentObj.setTimezone(jsonArray.getString(pos));
+				break; 
 			case AppointmentObject.PARTICIPANTS:
 				appointmentObj.setParticipants(parseParticipants(jsonArray
 						.getJSONArray(pos)));
