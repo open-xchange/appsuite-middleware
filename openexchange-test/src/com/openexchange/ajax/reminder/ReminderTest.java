@@ -137,5 +137,11 @@ public class ReminderTest extends AbstractAJAXTest {
 			throw new TestException("server error: " + jsonResponse.get(jsonTagError));
 		}
 	}
+	
+	public void compareReminder(ReminderObject reminderObj1, ReminderObject reminderObj2) throws Exception {
+		assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
+		assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
+		// assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
+	}
 }
 
