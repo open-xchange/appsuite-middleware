@@ -178,7 +178,6 @@ public class TasksTest extends AbstractAJAXTest {
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
-        assertFalse(response.getErrorMessage(), response.hasError());
         final Task reload = (Task) response.getData();
         compareAttributes(task, reload);
 
@@ -524,7 +523,9 @@ public class TasksTest extends AbstractAJAXTest {
         response = getUpdatedTasks(getWebConversation(), getHostName(),
             getSessionId(), folderId, columns, 0, null, timestamp);
         array = (JSONArray) response.getData();
-        assertTrue("Can't find " + (tasks.length / 2 + 2) + " updated tasks.",
+        assertTrue("Only found " + array.length()
+            + " updated tasks but should be more than "
+            + (tasks.length / 2 + 2) + ".",
             array.length() >= tasks.length / 2 + 2);
         // Clean up
         timestamp = response.getTimestamp();
@@ -618,6 +619,30 @@ public class TasksTest extends AbstractAJAXTest {
             -1, null);
         assertNotNull("Response contains no data.", response.getData());
         // TODO parse response
+    }
+
+    /**
+     * Creates a task with a reminder and checks if the reminder is stored
+     * correctly.
+     * @throws Throwable if an error occurs.
+     */
+    public void testReminder() throws Throwable {
+        final int folderId = getPrivateTaskFolder();
+
+        final Task task = new Task();
+        task.setTitle("Task to test reminder");
+        task.setParentFolderID(folderId);
+        final long remindTime = System.currentTimeMillis() / 1000 * 1000;
+        final Date remind = new Date(remindTime);
+        task.setAlarm(remind);
+
+        final int taskId = insertTask(getWebConversation(), getHostName(),
+            getSessionId(), task);
+
+        final Response response = getTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, taskId);
+        final Task reload = (Task) response.getData();
+        assertEquals("Missing reminder.", remind, reload.getAlarm());
     }
 
     /**
