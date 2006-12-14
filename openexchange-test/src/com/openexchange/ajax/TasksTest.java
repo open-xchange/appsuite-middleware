@@ -643,6 +643,8 @@ public class TasksTest extends AbstractAJAXTest {
             getSessionId(), folderId, taskId);
         final Task reload = (Task) response.getData();
         assertEquals("Missing reminder.", remind, reload.getAlarm());
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            response.getTimestamp(), folderId, taskId);
     }
 
     /**
