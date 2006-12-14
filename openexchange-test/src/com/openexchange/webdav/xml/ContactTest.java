@@ -150,6 +150,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEqualsAndNotNull("userfield18 is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
 		assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
 		assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
+		assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
 		assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
 		
 		assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
@@ -311,7 +312,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		Element eProp = new Element("prop", webdav);
 		
 		ContactWriter contactWriter = new ContactWriter();
-		contactWriter.addContent2PropElement(eProp, contactObj, false);
+		contactWriter.addContent2PropElement(eProp, contactObj, false, true);
 		
 		Document doc = addProp2Document(eProp);
 		XMLOutputter xo = new XMLOutputter();
@@ -363,7 +364,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		Element eProp = new Element("prop", webdav);
 		
 		ContactWriter appointmentWriter = new ContactWriter();
-		appointmentWriter.addContent2PropElement(eProp, contactObj, false);
+		appointmentWriter.addContent2PropElement(eProp, contactObj, false, true);
 		Element eInFolder = new Element("infolder", XmlServlet.NS);
 		eInFolder.addContent(String.valueOf(inFolder));
 		eProp.addContent(eInFolder);
@@ -429,7 +430,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		Element eProp = new Element("prop", webdav);
 		
 		ContactWriter contactWriter = new ContactWriter();
-		contactWriter.addContent2PropElement(eProp, contactObj, false);
+		contactWriter.addContent2PropElement(eProp, contactObj, false, true);
 		
 		Element eMethod = new Element("method", XmlServlet.NS);
 		eMethod.addContent("DELETE");
