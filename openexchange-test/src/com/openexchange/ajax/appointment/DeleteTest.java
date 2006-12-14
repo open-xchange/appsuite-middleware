@@ -35,7 +35,7 @@ public class DeleteTest extends AppointmentTest {
 		}
     }
 	
-	public void _notestDeleteRecurrenceWithPosition() throws Exception {
+	public void testDeleteRecurrenceWithPosition() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -56,6 +56,7 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
@@ -68,6 +69,7 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrencePosition(changeExceptionPosition);
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
