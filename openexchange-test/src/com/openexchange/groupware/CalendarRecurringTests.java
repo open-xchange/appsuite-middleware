@@ -869,6 +869,7 @@ public class CalendarRecurringTests extends TestCase {
         
         
         csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        assertTrue("Got a new object_id" , object_id != update.getObjectID());
                 
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
