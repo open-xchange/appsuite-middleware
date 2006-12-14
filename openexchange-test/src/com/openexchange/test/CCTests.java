@@ -10,6 +10,15 @@ public class CCTests
 	public static Test suite(){
 			
 		TestSuite tests = new TestSuite();
+
+        tests.addTestSuite(com.openexchange.ajax.LoginTest.class); 	 
+        tests.addTestSuite(com.openexchange.ajax.FolderTest.class); 	 
+        tests.addTestSuite(com.openexchange.ajax.TasksTest.class); 	 
+        tests.addTest(ReminderAJAXSuite.suite()); 	 
+        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite()); 	 
+        tests.addTestSuite(com.openexchange.ajax.ConfigMenuTest.class); 	 
+        tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.appointment.AppointmentBugTestSuite.suite());
 		
 		tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.GroupTest.class);
