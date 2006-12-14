@@ -72,10 +72,16 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setObjectID(newObjectId);
+
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
+		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
+		
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
