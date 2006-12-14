@@ -98,8 +98,6 @@ public class CalendarRecurringTests extends TestCase {
         return privatefolder;        
     }
 
-    /*
-
    public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();     
         cdao.setTimezone(TIMEZONE);
@@ -954,7 +952,27 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
     }
         
-    */
+    public void testWeeklyMonday()  throws Throwable {         
+        RecurringResults m = null;
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();        
+        cdao.setTitle("testWeeklyMonday");
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.MONDAY);
+        CalendarRecurringCollection.fillDAO(cdao);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        for (int a = 0; a < m.size(); a++) {
+            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+            c.setTimeInMillis(m.getRecurringResult(a).getStart());
+            assertEquals("First day check (MONDAY)", Calendar.MONDAY, c.get(Calendar.DAY_OF_WEEK));
+        }
+    }    
+    
+
     
     public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {   
         Context context = new ContextImpl(contextid);
