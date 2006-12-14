@@ -485,7 +485,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestConflictWithResource() throws Exception {
+	public void testConflictWithResource() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testConflictWithResource");
 		appointmentObj.setStartDate(new Date(startTime));
