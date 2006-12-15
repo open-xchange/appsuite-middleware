@@ -205,13 +205,14 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestSpecialCharacters() throws Exception {
+	public void testSpecialCharacters() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testSpecialCharacters - öäü-:,;.#?!§$%&/()=\"<>");
-		appointmentObj.setStartDate(new Date());
-		appointmentObj.setEndDate(new Date());
+		appointmentObj.setStartDate(new Date(startTime));
+		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
