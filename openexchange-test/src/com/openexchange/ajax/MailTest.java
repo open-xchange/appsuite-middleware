@@ -254,8 +254,8 @@ public class MailTest extends AbstractAJAXTest {
 			JSONObject jResp = null;
 			try {
 				JSONObject mailObj = new JSONObject();
-				mailObj.put("from", "Markus Klein <markus@leo.org>");
-				mailObj.put("to", "Thorben Betten <thorben@leo.org>");
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
 				mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
 				JSONArray attachments = new JSONArray();
 				/*
@@ -293,8 +293,8 @@ public class MailTest extends AbstractAJAXTest {
 			JSONObject jResp = null;
 			try {
 				JSONObject mailObj = new JSONObject();
-				mailObj.put("from", "Markus Klein <markus@leo.org>");
-				mailObj.put("to", "Thorben Betten <thorben@leo.org>");
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
 				mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
 				JSONArray attachments = new JSONArray();
 				/*
@@ -334,8 +334,8 @@ public class MailTest extends AbstractAJAXTest {
 			String mailIdentifer = null;
 			try {
 				JSONObject mailObj = new JSONObject();
-				mailObj.put("from", "Markus Klein <markus@leo.org>");
-				mailObj.put("to", "Thorben Betten <thorben@leo.org>");
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
 				mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
 				JSONArray attachments = new JSONArray();
 				/*
@@ -383,8 +383,8 @@ public class MailTest extends AbstractAJAXTest {
 			String mailIdentifer = null;
 			try {
 				JSONObject mailObj = new JSONObject();
-				mailObj.put("from", "Markus Klein <markus@leo.org>");
-				mailObj.put("to", "Thorben Betten <thorben@leo.org>");
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
 				mailObj.put("subject", "JUnit ForwardMe Mail with an attachment: " + SDF.format(new Date()));
 				JSONArray attachments = new JSONArray();
 				/*
@@ -437,9 +437,9 @@ public class MailTest extends AbstractAJAXTest {
 			JSONObject jResp = null;
 			try {
 				JSONObject mailObj = new JSONObject();
-				mailObj.put("from", "\"Markus Klein\" <markus@leo.org>");
-				mailObj.put("to", "\"Thorben Betten\" <thorben@leo.org>");
-				mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
+				mailObj.put("subject", "JUnit testGetMails Test Mail: " + SDF.format(new Date()));
 				JSONArray attachments = new JSONArray();
 				/*
 				 * Mail text
@@ -456,8 +456,12 @@ public class MailTest extends AbstractAJAXTest {
 				 * Send mail 10 times
 				 */
 				jResp = sendMail(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, false);
+				System.out.println("SentMail:"+jResp);
+				assertFalse(jResp.has("error"));
 				for (int i = 2; i <= 10; i++) {
 					jResp = sendMail(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, true);
+					System.out.println("SentMail:"+jResp);
+					assertFalse(jResp.has("error"));
 				}
 				
 				/*
