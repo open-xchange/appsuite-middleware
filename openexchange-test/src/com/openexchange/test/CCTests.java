@@ -30,6 +30,7 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
 
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
+		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentBugTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());	
 		tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());		
