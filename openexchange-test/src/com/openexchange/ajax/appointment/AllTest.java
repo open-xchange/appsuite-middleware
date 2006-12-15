@@ -39,7 +39,7 @@ public class AllTest extends AppointmentTest {
 		AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void testShowFullTimeAppointments() throws Exception {
+	public void _notestShowFullTimeAppointments() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
 		AppointmentObject appointmentObj = createAppointmentObject("testShowFullTimeAppointments");
