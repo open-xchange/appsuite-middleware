@@ -1,0 +1,15 @@
+package com.openexchange.ajax.reminder;
+
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+public class ReminderBugTestSuite extends TestSuite{
+	
+	public static Test suite(){
+		TestSuite tests = new TestSuite();
+		tests.addTestSuite( Bug4342Test.class );
+
+		return tests;
+	}
+}
