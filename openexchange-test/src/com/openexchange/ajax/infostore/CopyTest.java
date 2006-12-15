@@ -68,8 +68,8 @@ public class CopyTest extends InfostoreAJAXTest {
 				), upload, "text/plain"
 		);
 		clean.add(id);
-		
-		int copyId = copy(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m());
+		//FIXME Bug 4120
+		int copyId = copy(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("filename" , "other.properties"));
 		clean.add(copyId);
 		
 		Response res = get(getWebConversation(),getHostName(), sessionId, id);
@@ -80,7 +80,7 @@ public class CopyTest extends InfostoreAJAXTest {
 		assertNoError(res);
 		JSONObject copy = (JSONObject) res.getData();
 		
-		assertEquals(orig.get("filename"), copy.get("filename"));
+		assertEquals("other.properties", copy.get("filename"));
 		assertEquals(orig.get("file_size"), copy.get("file_size"));
 		assertEquals(orig.get("file_mimetype"), copy.get("file_mimetype"));
 		

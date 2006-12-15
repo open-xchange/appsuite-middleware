@@ -1,6 +1,7 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -111,5 +112,26 @@ public class DetachTest extends InfostoreAJAXTest {
 		
 		JSONObject document = (JSONObject) res.getData();
 		assertEquals("current_description", document.get("description"));
+	}
+	
+//	Bug 4120
+	public void testUniqueFilenames() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m("filename" , "blupp.properties"));
+		assertNoError(res);
+		
+		int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
+		clean.add(id2);
+		
+		try {
+			int[] nd = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+			fail("Expected Exception.");
+		} catch (IOException x) {
+			assertTrue(true);
+		}
 	}
 }

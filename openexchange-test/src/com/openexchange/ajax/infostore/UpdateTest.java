@@ -111,7 +111,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 		}
 	}
 	
-	public void notestUniqueFilenamesOnUpload() throws Exception {
+	//Bug 4120
+	public void testUniqueFilenamesOnUpload() throws Exception {
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
@@ -127,7 +128,8 @@ public class UpdateTest extends InfostoreAJAXTest {
 		assertTrue(res.hasError());
 	}
 	
-	public void notestUniqueFilenamesOnSwitchVersions() throws Exception {
+	//Bug 4120
+	public void testUniqueFilenamesOnSwitchVersions() throws Exception {
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);

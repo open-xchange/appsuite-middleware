@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.json.JSONObject;
@@ -172,5 +173,21 @@ public class NewTest extends InfostoreAJAXTest {
 		assertEquals("Version Comment", obj.getString("version_comment"));
 	}
 
-
+//	Bug 4120
+	public void testUniqueFilenamesOnUpload() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id,System.currentTimeMillis(),m(), upload, "text/plain");
+		assertNoError(res);
+		
+		try {
+			int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
+			clean.add(id2);
+			fail("Excepted exception");
+		} catch (IOException x) {
+			assertTrue(true);
+		}
+	}
 }
