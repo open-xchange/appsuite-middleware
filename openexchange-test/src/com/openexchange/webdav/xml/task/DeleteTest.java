@@ -8,6 +8,10 @@ import java.util.Date;
 
 public class DeleteTest extends TaskTest {
 	
+	public DeleteTest(String name) {
+		super(name);
+	}
+	
 	public void testDelete() throws Exception {
 		Task taskObj = createTask("testDelete");
 		int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);

@@ -6,6 +6,10 @@ import com.openexchange.webdav.xml.TaskTest;
 
 public class ConfirmTest extends TaskTest {
 	
+	public ConfirmTest(String name) {
+		super(name);
+	}
+	
 	public void testDummy() {
 		
 	}

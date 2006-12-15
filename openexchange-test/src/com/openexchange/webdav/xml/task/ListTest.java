@@ -8,6 +8,10 @@ import java.util.Date;
 
 public class ListTest extends TaskTest {
 	
+	public ListTest(String name) {
+		super(name);
+	}
+	
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		

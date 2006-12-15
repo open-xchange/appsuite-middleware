@@ -23,6 +23,10 @@ public class ICalTest extends AbstractWebdavTest {
 	
 	private static final String ICAL_URL = "/servlet/webdav.ical";
 	
+	public ICalTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

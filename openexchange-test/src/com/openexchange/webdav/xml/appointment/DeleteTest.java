@@ -10,6 +10,10 @@ import java.util.TimeZone;
 
 public class DeleteTest extends AppointmentTest {
 	
+	public DeleteTest(String name) {
+		super(name);
+	}
+	
 	public void testDelete() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testDelete");
 		appointmentObj.setIgnoreConflicts(true);

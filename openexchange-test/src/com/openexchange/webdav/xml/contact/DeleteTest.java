@@ -8,6 +8,10 @@ import java.util.Date;
 
 public class DeleteTest extends ContactTest {
 	
+	public DeleteTest(String name) {
+		super(name);
+	}
+	
 	public void testDelete() throws Exception {
 		ContactObject contactObj = createContactObject("testDelete");
 		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);

@@ -12,6 +12,10 @@ import java.io.ByteArrayInputStream;
 
 public class DeleteTest extends AttachmentTest {
 	
+	public DeleteTest(String name) {
+		super(name);
+	}
+	
 	public void testDeleteAttachment() throws Exception {
 		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		int contactFolderId = folderObj.getObjectID();

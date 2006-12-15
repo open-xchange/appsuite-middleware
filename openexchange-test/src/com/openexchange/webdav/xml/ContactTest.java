@@ -36,6 +36,10 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	
 	private long dateTime = 0;
 	
+	public ContactTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		

@@ -10,6 +10,10 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public class PermissionTest extends ContactTest {
 	
+	public PermissionTest(String name) {
+		super(name);
+	}
+	
 	public void testDummy() {
 		
 	}

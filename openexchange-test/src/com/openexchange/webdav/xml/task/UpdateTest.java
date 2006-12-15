@@ -11,6 +11,10 @@ import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class UpdateTest extends TaskTest {
+
+	public UpdateTest(String name) {
+		super(name);
+	}
 	
 	public void testUpdateTask() throws Exception {
 		Task taskObj = createTask("testUpdateTask");

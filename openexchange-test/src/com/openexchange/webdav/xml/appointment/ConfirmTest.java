@@ -8,6 +8,10 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class ConfirmTest extends AppointmentTest {
 	
+	public ConfirmTest(String name) {
+		super(name);
+	}
+
 	public void setUp() throws Exception {
 		super.setUp();
 	}

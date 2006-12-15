@@ -51,6 +51,10 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	
 	private static final String TASK_URL = "/servlet/webdav.tasks";
 	
+	public TaskTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		

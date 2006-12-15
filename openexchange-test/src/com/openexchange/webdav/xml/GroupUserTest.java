@@ -29,6 +29,10 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 	
+	public GroupUserTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

@@ -8,6 +8,10 @@ import java.util.Date;
 
 public class UpdateTest extends FolderTest {
 	
+	public UpdateTest(String name) {
+		super(name);
+	}
+	
 	public void testRenameFolder() throws Exception {
 		FolderObject folderObj = createFolderObject(userId, "testInsertRenameFolder", FolderObject.TASK, true);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);

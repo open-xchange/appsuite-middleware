@@ -43,6 +43,10 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	
 	protected String groupParticipant = null;
 	
+	public FolderTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		

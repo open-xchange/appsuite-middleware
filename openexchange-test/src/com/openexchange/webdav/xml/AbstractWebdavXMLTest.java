@@ -21,6 +21,10 @@ import org.jdom.output.XMLOutputter;
 
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	
+	public AbstractWebdavXMLTest(String name) {
+		super(name);
+	}
+	
 	protected static int parseResponse(Document response, boolean delete) throws Exception {
 		return parseRootElement(response.getRootElement(), delete);
 	}

@@ -53,6 +53,10 @@ public abstract class AbstractWebdavTest extends TestCase {
 	
 	public static final String AUTHORIZATION = "authorization";
 	
+	public AbstractWebdavTest(String name) {
+		super(name);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

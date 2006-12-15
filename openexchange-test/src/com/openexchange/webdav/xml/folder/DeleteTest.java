@@ -5,6 +5,10 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class DeleteTest extends FolderTest {
 	
+	public DeleteTest(String name) {
+		super(name);
+	}
+	
 	public void _notestDeleteFolder() throws Exception {
 		FolderObject folderObj = createFolderObject(userId, "testDeleteFolder1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);

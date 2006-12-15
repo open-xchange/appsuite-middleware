@@ -5,6 +5,10 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class NewTest extends FolderTest {
 	
+	public NewTest(String name) {
+		super(name);
+	}
+	
 	public void testInsertPrivateFolderCalendar() throws Exception {
 		FolderObject folderObj = createFolderObject(userId, "testInsertPrivateFolderCalendar", FolderObject.CALENDAR, false);
 		int objectId = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);

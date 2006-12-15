@@ -16,6 +16,10 @@ import java.util.TimeZone;
 
 public class UpdateTest extends AppointmentTest {
 	
+	public UpdateTest(String name) {
+		super(name);
+	}
+	
 	public void testUpdate() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testUpdateAppointment");
 		appointmentObj.setIgnoreConflicts(true);
@@ -130,7 +134,7 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
 	
-	public void _notestUpdateRecurrenceWithDatePosition() throws Exception {
+	public void testUpdateRecurrenceWithDatePosition() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -151,6 +155,7 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), login, password);
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
@@ -163,6 +168,7 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrenceDatePosition(new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis));
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);

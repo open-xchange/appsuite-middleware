@@ -12,6 +12,10 @@ import java.io.ByteArrayInputStream;
 
 public class NewTest extends AttachmentTest {
 	
+	public NewTest(String name) {
+		super(name);
+	}
+	
 	public void testInsertAttachment() throws Exception {
 		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
 		int contactFolderId = folderObj.getObjectID();

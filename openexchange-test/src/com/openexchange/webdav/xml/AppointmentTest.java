@@ -57,6 +57,10 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	
 	private static final String APPOINTMENT_URL = "/servlet/webdav.calendar";
 	
+	public AppointmentTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 		

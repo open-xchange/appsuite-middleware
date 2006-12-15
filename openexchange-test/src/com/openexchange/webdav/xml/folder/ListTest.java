@@ -9,6 +9,10 @@ import java.util.Date;
 
 public class ListTest extends FolderTest {
 	
+	public ListTest(String name) {
+		super(name);
+	}
+	
 	public void testDummy() {
 		
 	}

@@ -20,6 +20,10 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class NewTest extends AppointmentTest {
+	
+	public NewTest(String name) {
+		super(name);
+	}
 
 	public void testNewAppointment() throws Exception {
 		Date modified = new Date();

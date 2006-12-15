@@ -7,6 +7,10 @@ import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class ListTest extends ContactTest {
+	
+	public ListTest(String name) {
+		super(name);
+	}
 
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();

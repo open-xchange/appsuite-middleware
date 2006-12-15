@@ -34,6 +34,10 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 	-4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0,
 	1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
 	
+	public AttachmentTest(String name) {
+		super(name);
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

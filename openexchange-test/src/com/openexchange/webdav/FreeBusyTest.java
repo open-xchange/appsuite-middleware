@@ -18,6 +18,10 @@ public class FreeBusyTest extends AbstractWebdavTest {
 	
 	private static final String FREEBUSY_URL = "/servlet/webdav.freebusy";
 	
+	public FreeBusyTest(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -37,7 +41,7 @@ public class FreeBusyTest extends AbstractWebdavTest {
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 		parameter.setParameter("username", getLogin());
-		parameter.setParameter("server", "prototyp.de");
+		parameter.setParameter("server", "open-xchange.tux");
         
         WebRequest req = new GetMethodWebRequest(PROTOCOL + getHostName() + FREEBUSY_URL + parameter.getURLParameters());
         WebResponse resp = webCon.getResponse(req);

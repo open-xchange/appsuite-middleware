@@ -13,6 +13,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class ListTest extends AttachmentTest {
+	
+	public ListTest(String name) {
+		super(name);
+	}
 
 	public void testLoadAttachment() throws Exception {
 		FolderObject folderObj = FolderTest.getContactDefaultFolder(webCon, PROTOCOL + hostName, login, password);
