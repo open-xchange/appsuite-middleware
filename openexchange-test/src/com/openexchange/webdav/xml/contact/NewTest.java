@@ -27,7 +27,7 @@ public class NewTest extends ContactTest {
 		compareObject(contactObj, loadContact);		
 	}
 	
-	public void testNewContactWithAttachment() throws Exception {
+	public void _noestNewContactWithAttachment() throws Exception {
 		ContactObject contactObj = createContactObject("testNewContactWithAttachment");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		contactObj.setNumberOfAttachments(2);
