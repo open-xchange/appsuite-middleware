@@ -205,7 +205,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void testSpecialCharacters() throws Exception {
+	public void _notestSpecialCharacters() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testSpecialCharacters - öäü-:,;.#?!§$%&/()=\"<>");
 		appointmentObj.setStartDate(new Date(startTime));
