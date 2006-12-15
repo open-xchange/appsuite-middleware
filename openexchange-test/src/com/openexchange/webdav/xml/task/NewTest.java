@@ -1,16 +1,24 @@
 package com.openexchange.webdav.xml.task;
 
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.TaskTest;
+import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
 public class NewTest extends TaskTest {
+	
+	public NewTest(String name) {
+		super(name);
+	}
 	
 	public void testNewTask() throws Exception {
 		Task taskObj = createTask("testNewTask");
@@ -62,6 +70,35 @@ public class NewTest extends TaskTest {
 		taskObj.setUsers(users);
 		
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+	}
+	
+	public void testTaskWithPrivateFlagInPublicFolder() throws Exception {
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testTaskWithPrivateFlagInPublicFolder" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.TASK);
+		folderObj.setType(FolderObject.PUBLIC);
+		folderObj.setParentFolderID(2);
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+		
+		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		Task taskObj = new Task();
+		taskObj.setTitle("testTaskWithPrivateFlagInPublicFolder");
+		taskObj.setPrivateFlag(true);
+		taskObj.setParentFolderID(parentFolderId);
+
+		try {
+			int objectId = insertTask(getWebConversation(), taskObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+			deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+			fail("conflict exception expected!");
+		} catch (TestException exc) {
+			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
+		}
 	}
 }
 
