@@ -134,7 +134,7 @@ public class ListTest extends AppointmentTest {
 		}
 	}
 
-	public void _notestListWithRecurrencePosition() throws Exception {
+	public void testListWithRecurrencePosition() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID, AppointmentObject.TITLE, AppointmentObject.CREATED_BY, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.RECURRENCE_POSITION };
 		
 		FolderObject folderObj = new FolderObject();
