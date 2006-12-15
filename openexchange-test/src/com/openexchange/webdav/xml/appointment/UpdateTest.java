@@ -171,12 +171,14 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
+		appointmentObj.setObjectID(newObjectId);
+
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, PROTOCOL + getHostName(), login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(getWebConversation(), new int[][] { { objectId }, { appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
+		deleteAppointment(getWebConversation(), new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + getHostName(), login, password);
 	}
 }
 
