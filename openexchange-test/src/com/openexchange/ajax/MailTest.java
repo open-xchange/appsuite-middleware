@@ -480,6 +480,57 @@ public class MailTest extends AbstractAJAXTest {
 		}
 	}
 	
+	public void testGetMsgSrc() {
+		try {
+			JSONObject jResp = null;
+			try {
+				JSONObject mailObj = new JSONObject();
+				mailObj.put("from", getSeconduser());
+				mailObj.put("to", getLogin());
+				mailObj.put("subject", "JUnit Source Test Mail: " + SDF.format(new Date()));
+				JSONArray attachments = new JSONArray();
+				/*
+				 * Mail text
+				 */
+				JSONObject attach = new JSONObject();
+				attach.put("content", MAILTEXT);
+				attach.put("content_type", "text/plain");
+				attachments.put(attach);
+				
+				mailObj.put("attachments", attachments);
+				
+				final WebConversation conversation = getWebConversation();
+				/*
+				 * Send mail 10 times
+				 */
+				jResp = sendMail(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), mailObj, null, false);
+				System.out.println("SentMail:"+jResp);
+				assertFalse(jResp.has("error"));
+				
+				String mailidentifier = jResp.getString("data");
+				final GetMethodWebRequest getReq = new GetMethodWebRequest(MailTest.PROTOCOL + getHostName() + MAIL_URL);
+				/*
+				 * Set cookie cause a request has already been fired before with the same session id.
+				 */
+				CookieJar cookieJar = new CookieJar();
+				cookieJar.putCookie(Login.cookiePrefix + getSessionId(), getSessionId());
+				getReq.setParameter(Mail.PARAMETER_SESSION, getSessionId());
+				getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_GET);
+				getReq.setParameter(Mail.PARAMETER_ID, mailidentifier);
+				getReq.setParameter(Mail.PARAMETER_SHOW_SRC, "true");
+				WebResponse resp = conversation.getResponse(getReq);
+				jResp = new JSONObject(resp.getText());
+				assertFalse(jResp.has("error"));
+				System.out.println(jResp.getString("data"));
+			} finally {
+				// NOTHING TO DO HERE
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
 	public void testReplyMail() {
 		assertTrue(true);
 	}
