@@ -337,8 +337,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		
 		WebResponse resp = webConv.getResponse(m);
-		
-		return new Integer(new JSONObject(resp.getText()).getInt("data"));
+		Response res = Response.parse(resp.getText());
+		if(res.hasError())
+			throw new JSONException(res.getErrorMessage());
+		return (Integer) res.getData();
 	}
 
 	public int[] delete(WebConversation webConv, String hostname, String sessionId, long timestamp, int[][] ids) throws MalformedURLException, JSONException, IOException, SAXException {
@@ -492,7 +494,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 			obj.put(attr, modified.get(attr));
 		}
 		
-		return (Integer)putT(webConv,url.toString(), obj.toString()).getData();
+		Response res = putT(webConv,url.toString(), obj.toString());
+		if(res.hasError())
+			throw new JSONException(res.getErrorMessage());
+		return (Integer) res.getData();
 	}
 	
 	public Response lock(WebConversation webConv, String hostname, String sessionId, int id, long timeDiff) throws MalformedURLException, JSONException, IOException, SAXException {

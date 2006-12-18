@@ -2,14 +2,17 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.TaskAttachmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.container.FolderObject;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 	
@@ -54,6 +57,23 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		}
 	}
 	
+	//Bug 4269
+	public void testVirtualFolder() throws Exception {
+		AttachmentMetadata attachment = attachmentTest.getAttachment(0);
+		try {
+			int id = saveAs(getWebConversation(), getHostName(), sessionId,attachment.getFolderId(), attachment.getAttachedId(),attachment.getModuleId(), attachment.getId(), m(
+					"folder_id"			,		""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
+					"title"				,		"My Attachment",
+					"description"		,		"An attachment cum InfoItem"
+			));
+			
+			clean.add(id);
+			fail("Expected IOException when trying to save attachment in virtual infostore folder");
+		} catch (JSONException x) {
+			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
+		}
+		
+	}
 	
 	public void setUp() throws Exception{
 		attachmentTest.setUp();

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 
@@ -245,6 +246,13 @@ public class UpdateTest extends InfostoreAJAXTest {
 		
 		JSONObject document = (JSONObject)res.getData();
 		assertEquals("Version Comment",document.get("version_comment"));
+	}
+	
+	// Bug 4269
+	public void testVirtualFolder() throws Exception {
+		Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), System.currentTimeMillis(), m("folder_id", ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+		assertTrue(res.hasError());
+		assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("virt"));
 	}
 	
 }

@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class UpdatesTest extends InfostoreAJAXTest{
@@ -87,4 +88,11 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		
 	}
 
+	//Bug 4269
+	public void testVirtualFolder() throws Exception {
+		Response res = updates(getWebConversation(), getHostName(), sessionId, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, new int[]{Metadata.ID}, 0);
+		assertNoError(res);
+		JSONArray modAndDel = (JSONArray) res.getData();
+		assertEquals(0, modAndDel.length());
+	}
 }

@@ -7,12 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 
 
 public class NewTest extends InfostoreAJAXTest {
@@ -188,6 +190,16 @@ public class NewTest extends InfostoreAJAXTest {
 			fail("Excepted exception");
 		} catch (IOException x) {
 			assertTrue(true);
+		}
+	}
+
+	//Bug 4269
+	public void testVirtualFolder() throws Exception {
+		try {
+			createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+			fail("Expected exception because we can't create a document in this virtual folder");
+		} catch (JSONException x) {
+			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 	}
 }

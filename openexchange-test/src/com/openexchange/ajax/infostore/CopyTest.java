@@ -2,17 +2,20 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class CopyTest extends InfostoreAJAXTest {
@@ -143,5 +146,17 @@ public class CopyTest extends InfostoreAJAXTest {
 		
 		assertEquals(upload.getName(),copy.get("filename"));
 		assertEquals("text/plain", copy.get("file_mimetype"));
+	}
+
+	//Bug 4269
+	public void testVirtualFolder() throws Exception{
+		try {
+			int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+			clean.add(id);	
+			fail("Expected IOException");
+		} catch (JSONException x) {
+			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
+		}
+		
 	}
 }
