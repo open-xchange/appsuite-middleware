@@ -376,7 +376,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, String host, String session)
-		throws Exception {
+	throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -388,7 +388,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		if (!showAll) {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		} 
+		}
 		
 		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters());
@@ -422,7 +422,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		return listAppointment(webCon, appointmentArray, cols, userTimeZone, host, session);
 	}
-		
+	
 	public static AppointmentObject[] listAppointment(WebConversation webCon,
 			AppointmentObject[] appointmentArray, int[] cols, TimeZone userTimeZone,
 			String host, String session) throws Exception {
@@ -505,18 +505,36 @@ public class AppointmentTest extends AbstractAJAXTest {
 	}
 	
 	public static AppointmentObject loadAppointment(WebConversation webCon,
-			int objectId, Date start, Date end, Date modified, TimeZone userTimeZone, String host,
+			int objectId, Date start, Date end, int[] cols, TimeZone userTimeZone, String host,
 			String session) throws Exception {
 		
 		
-		return loadAppointment(webCon, objectId, 0, start, end, modified, userTimeZone, host, session);
+		return loadAppointment(webCon, objectId, 0, start, end, cols, userTimeZone, host, session);
 	}
-
+	
 	public static AppointmentObject loadAppointment(WebConversation webCon,
-			int objectId, int inFolder, Date start, Date end, Date modified, TimeZone userTimeZone, String host,
+			int objectId, Date start, Date end, Date modified, int[] cols, TimeZone userTimeZone, String host,
 			String session) throws Exception {
 		
-		AppointmentObject[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, userTimeZone, host, session);
+		
+		return loadAppointment(webCon, objectId, 0, start, end, modified, cols, userTimeZone, host, session);
+	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, Date start, Date end, Date modified, int recurrencePosition, int[] cols, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		
+		return loadAppointment(webCon, objectId, 0, start, end, modified, recurrencePosition, cols, userTimeZone, host, session);
+	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, int inFolder, Date start, Date end, int[] cols, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		boolean showAll = (inFolder == 0);
+		
+		AppointmentObject[] appointmentArray = listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, host, session);
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (appointmentArray[a].getObjectID() == objectId) {
@@ -527,20 +545,48 @@ public class AppointmentTest extends AbstractAJAXTest {
 		throw new TestException("object not found");
 	}
 	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, int inFolder, Date start, Date end, Date modified, int[] cols, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		AppointmentObject[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, host, session);
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				return appointmentArray[a];
+			}
+		}
+		
+		throw new TestException("object not found");
+	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, int inFolder, Date start, Date end, Date modified, int recurrencePosition, int[] cols, TimeZone userTimeZone, String host,
+			String session) throws Exception {
+		
+		AppointmentObject[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, host, session);
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId && appointmentArray[a].getRecurrencePosition() == recurrencePosition) {
+				return appointmentArray[a];
+			}
+		}
+		
+		throw new TestException("object not found");
+	}
+	
 	public static AppointmentObject[] listModifiedAppointment(
 			WebConversation webCon, Date start, Date end,
-			Date modified, TimeZone userTimeZone, String host, String session)
+			Date modified, int[] cols, TimeZone userTimeZone, String host, String session)
 			throws Exception {
-		return listModifiedAppointment(webCon, 0, start, end, modified, userTimeZone, host, session);
+		return listModifiedAppointment(webCon, 0, start, end, modified, cols, userTimeZone, host, session);
 	}
 	
 	public static AppointmentObject[] listModifiedAppointment(
 			WebConversation webCon, int inFolder, Date start, Date end,
-			Date modified, TimeZone userTimeZone, String host, String session)
+			Date modified, int[] cols, TimeZone userTimeZone, String host, String session)
 			throws Exception {
 		host = appendPrefix(host);
-		
-		final int[] cols = new int[] { AppointmentObject.OBJECT_ID };
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -549,8 +595,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		if (inFolder != 0) {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		} 
-
+		}
+		
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
@@ -569,7 +615,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		if (response.hasError()) {
 			fail("json error: " + response.getErrorMessage());
 		}
-
+		
 		assertNotNull("timestamp", response.getTimestamp());
 		assertTrue("requested timestamp bigger then timestamp in response", response.getTimestamp().getTime() >= modified.getTime());
 		
@@ -594,7 +640,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		if (inFolder != 0) {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-		} 
+		}
 		
 		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "changed");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
@@ -774,7 +820,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 					int endOffset = userTimeZone.getOffset(endDate.getTime());
 					appointmentArray[a].setStartDate(new Date(startDate.getTime() - startOffset));
 					appointmentArray[a].setEndDate(new Date(endDate.getTime() - endOffset));
-				} 
+				}
 			}
 		}
 		
@@ -841,7 +887,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.TIMEZONE:
 				appointmentObj.setTimezone(jsonArray.getString(pos));
-				break; 
+				break;
 			case AppointmentObject.PARTICIPANTS:
 				appointmentObj.setParticipants(parseParticipants(jsonArray
 						.getJSONArray(pos)));
