@@ -40,7 +40,7 @@ public class PropertiesWriterTest extends TestCase {
 		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty("DAV:","getlastmodified");
 		
@@ -65,7 +65,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname");
@@ -92,7 +92,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.create();
 		
 		
-		PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("");
+		PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("","UTF-8");
 		Element response = marshaller.marshal(resource).get(0);
 		
 		assertHref(response, "/"+testCollection+"test.txt");
@@ -118,7 +118,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.create();
 		
 		
-		PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("");
+		PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("","UTF-8");
 		Element response = marshaller.marshal(resource).get(0);
 		
 		assertHref(response, "/"+testCollection+"test.txt");
@@ -143,7 +143,7 @@ public class PropertiesWriterTest extends TestCase {
 		WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty("DAV:","resourcetype");
 		
@@ -166,7 +166,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("<&>");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty("DAV:","displayname");
 		
@@ -194,7 +194,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.putProperty(property);
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty(TEST_NS.getURI(),"test");
 		
@@ -238,7 +238,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 		
-		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("");
+		PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname")

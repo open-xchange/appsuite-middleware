@@ -119,4 +119,9 @@ public class MockWebdavRequest implements WebdavRequest {
 		return factory;
 	}
 
+	
+	public String getCharset() {
+		return "UTF-8";
+	}
+
 }
