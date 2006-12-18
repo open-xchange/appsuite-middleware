@@ -45,6 +45,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskException.Detail;
 
 /**
@@ -71,7 +72,7 @@ public class TaskSearchJSONWriter {
         throws TaskException, JSONException {
         final Date[] range = search.getRange();
         if (range != null && range.length != 2) {
-            throw new TaskException("Invalid date range.", Detail.OTHER);
+            throw new TaskException(Code.WRONG_DATE_RANGE, range.length);
         }
         final JSONObject json = new JSONObject();
         if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
