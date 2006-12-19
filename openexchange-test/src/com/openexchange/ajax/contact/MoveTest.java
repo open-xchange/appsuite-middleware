@@ -40,7 +40,7 @@ public class MoveTest extends ContactTest {
 		compareObject(contactObj, loadContact);
 		
 		deleteContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
-		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
+		//com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}	
 	
 	public void testMove2PublicFolder() throws Exception {
@@ -62,7 +62,7 @@ public class MoveTest extends ContactTest {
 		compareObject(contactObj, loadContact);
 		
 		deleteContact(getWebConversation(), objectId, targetFolder, PROTOCOL + getHostName(), getSessionId());
-		com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
+		//com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolder }, PROTOCOL + getHostName(), login, password);
 	}
 }
 
