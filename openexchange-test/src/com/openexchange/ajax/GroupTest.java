@@ -41,7 +41,7 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public void testSearchGroupUsers() throws Exception {
-		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "users", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
 	}
 	
