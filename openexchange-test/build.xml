@@ -32,6 +32,8 @@
 		<pathelement location="${lib}/jcs-1.2.7.9.2.jar" />
 		<pathelement location="${lib}/concurrent.jar" />
   		<pathelement location="${lib}/jakarta-slide-webdavlib-2.1.jar" />
+  		<pathelement location="${lib}/junitperf-1.9.1.jar" />
+  	  		
 	</path>
 
   <target name="init">
