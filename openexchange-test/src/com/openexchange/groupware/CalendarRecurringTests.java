@@ -97,7 +97,7 @@ public class CalendarRecurringTests extends TestCase {
         DBPool.push(context, readcon);
         return privatefolder;        
     }
-
+    
    public void testBasicRecurring() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();     
         cdao.setTimezone(TIMEZONE);
@@ -916,42 +916,6 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct number of results" , 2 , counter);
         
     }
-
-
-    
-    public void testWeeklyDifferentInterval()  throws Throwable { 
-        
-        long s = 1149501600000L; // 05.06.2006 12:00 (GMT)
-        long e = 1149505200000L; // 05.06.2006 13:00 (GMT)
-        
-        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        c.setTimeInMillis(s);
-        
-        RecurringResults m = null;
-        // SUNDAY + MONDAY
-        CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setTimezone(TIMEZONE);
-        cdao.setStartDate(new Date(s));
-        cdao.setEndDate(new Date(e));
-        cdao.setOccurrence(10);
-        
-        cdao.setTitle("Weekly Appointment Test");
-        cdao.setRecurrenceID(1);
-        cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(2);        
-        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
-        CalendarRecurringCollection.fillDAO(cdao);
-        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-
-        //assertEquals("Check calculation", 10, m.size()); // TODO!!!
-        
-        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
-        c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
-        assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);
-        c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
-        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
-    }
         
     public void testWeeklyMonday()  throws Throwable {         
         RecurringResults m = null;
@@ -1068,5 +1032,39 @@ public class CalendarRecurringTests extends TestCase {
         
     }        
     
+
+    public void testWeeklyDifferentInterval()  throws Throwable { 
+        
+        long s = 1149501600000L; // 05.06.2006 12:00 (GMT)
+        long e = 1149505200000L; // 05.06.2006 13:00 (GMT)
+        
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        c.setTimeInMillis(s);
+        
+        RecurringResults m = null;
+        // SUNDAY + MONDAY
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setOccurrence(10);
+        
+        cdao.setTitle("Weekly Appointment Test");
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(2);        
+        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
+        CalendarRecurringCollection.fillDAO(cdao);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+
+        assertEquals("Check calculation", 10, m.size()); // BUG 4467 !!! 
+        
+        c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
+        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
+        c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
+        assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);
+        c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
+        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
+    }
     
 }
