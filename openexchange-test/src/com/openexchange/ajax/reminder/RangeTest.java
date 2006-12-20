@@ -46,7 +46,7 @@ public class RangeTest extends ReminderTest {
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		final String target = String.valueOf(targetId);
-		ReminderObject[] reminderObj = listReminder(getWebConversation(), new Date(endTime), getHostName(), getSessionId());
+		ReminderObject[] reminderObj = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
 		int pos = -1;
 		for (int a = 0; a < reminderObj.length; a++) {
