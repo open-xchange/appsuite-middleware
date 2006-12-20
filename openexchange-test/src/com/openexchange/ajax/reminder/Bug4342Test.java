@@ -54,7 +54,7 @@ public class Bug4342Test extends ReminderTest {
 		reminderObj.setFolder(String.valueOf(folderId));
 		reminderObj.setDate(new Date(startTime-(45*60*1000)));
 		
-		ReminderObject[] reminderArray = listReminder(getWebConversation(), new Date(endTime), getHostName(), getSessionId());
+		ReminderObject[] reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
 		int pos = -1;
 		for (int a = 0; a < reminderArray.length; a++) {
@@ -68,9 +68,11 @@ public class Bug4342Test extends ReminderTest {
 		appointmentObj.removeParentFolderID();
 		appointmentObj.setAlarm(30);
 		
+		reminderObj.setDate(new Date(startTime-(30*60*1000)));
+		
 		AppointmentTest.updateAppointment(getWebConversation(), appointmentObj, targetId, folderId, timeZone, getHostName(), getSessionId());
 		
-		reminderArray = listReminder(getWebConversation(), new Date(endTime), getHostName(), getSessionId());
+		reminderArray = listReminder(getWebConversation(), new Date(endTime), timeZone, getHostName(), getSessionId());
 
 		pos = -1;
 		for (int a = 0; a < reminderArray.length; a++) {
