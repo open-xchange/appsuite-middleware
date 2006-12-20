@@ -63,8 +63,8 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
         final Task task = new Task();
         task.setTitle("AttachmentTest");
         task.setParentFolderID(folderId);
-        final int taskId = TasksTest.insertTask(getWebConversation(),
-            getHostName(), sessionId, task);
+        final int taskId = TasksTest.extractInsertId(TasksTest.insertTask(
+            getWebConversation(), getHostName(), sessionId, task));
         return taskId;
     }
 

@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.tools.RandomString;
 import com.openexchange.tools.URLParameter;
 
 /**
@@ -173,8 +174,8 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -198,8 +199,8 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -225,8 +226,8 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -286,8 +287,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
         LOG.trace("Created delegated task: " + taskId);
 
         final Response response = getTask(getWebConversation(), getHostName(),
@@ -331,8 +332,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         LOG.trace("Creating delegated task with participants: "
             + firstParticipants);
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
         LOG.trace("Created delegated task: " + taskId);
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -394,8 +395,8 @@ public class TasksTest extends AbstractAJAXTest {
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
 
         Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -426,8 +427,8 @@ public class TasksTest extends AbstractAJAXTest {
         int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
-            tasks[i][1] = insertTask(getWebConversation(), getHostName(),
-                getSessionId(), task);
+            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
+                getHostName(), getSessionId(), task));
             tasks[i][0] = folderId;
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -455,8 +456,8 @@ public class TasksTest extends AbstractAJAXTest {
         int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
-            tasks[i][1] = insertTask(getWebConversation(), getHostName(),
-                getSessionId(), task);
+            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
+                getHostName(), getSessionId(), task));
             tasks[i][0] = folderId;
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -481,8 +482,8 @@ public class TasksTest extends AbstractAJAXTest {
         int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
-            tasks[i][1] = insertTask(getWebConversation(), getHostName(),
-                getSessionId(), task);
+            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
+                getHostName(), getSessionId(), task));
             tasks[i][0] = folderId;
         }
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -543,8 +544,8 @@ public class TasksTest extends AbstractAJAXTest {
         int[][] tasks = new int[10][2];
         for (int i = 0; i < tasks.length; i++) {
             task.setTitle("Task " + (i + 1));
-            tasks[i][1] = insertTask(getWebConversation(), getHostName(),
-                getSessionId(), task);
+            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
+                getHostName(), getSessionId(), task));
             tasks[i][0] = folderId;
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
@@ -579,8 +580,8 @@ public class TasksTest extends AbstractAJAXTest {
         task.setParticipants(participants);
         task.setParentFolderID(folderId);
 
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
         LOG.trace("Created delegated task for confirmation: " + taskId);
 
         confirmTask(getSecondWebConversation(), getHostName(),
@@ -636,8 +637,8 @@ public class TasksTest extends AbstractAJAXTest {
         final Date remind = new Date(remindTime);
         task.setAlarm(remind);
 
-        final int taskId = insertTask(getWebConversation(), getHostName(),
-            getSessionId(), task);
+        final int taskId = extractInsertId(insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task));
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
@@ -648,17 +649,55 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
+     * Creates a task with a to long title and checks if the data truncation
+     * is detected.
+     * @throws Throwable if an error occurs.
+     */
+    public void testTruncation() throws Throwable {
+        final int folderId = getPrivateTaskFolder();
+        final Task task = new Task();
+        // Title length in database is 128.
+        task.setTitle(RandomString.generateFixLetter(200));
+        task.setParentFolderID(folderId);
+        final Response response = insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task);
+        assertTrue("Server did not detect truncated data.",
+            response.hasError());
+    }
+
+    /**
+     * Extracts the identifier of an inserted task. This method can only be used
+     * with the reponse of the method
+     * {@link #insertTask(WebConversation, String, String, Task)}.
+     * @param response Response object after inserting a task.
+     * @return the identifier of the new inserted task.
+     * @throws JSONException if the respone object doesn't contain the task
+     * identifier.
+     */
+    public static int extractInsertId(final Response response)
+        throws JSONException {
+        assertFalse(response.getErrorMessage(), response.hasError());
+        final JSONObject data = (JSONObject) response.getData();
+        if (!data.has(TaskFields.ID)) {
+            fail(response.getErrorMessage());
+        }
+        final int taskId = data.getInt(TaskFields.ID);
+        assertTrue("Problem while inserting task", taskId > 0);
+        return taskId;
+    }
+
+    /**
      * This method implements storing of a task through the AJAX interface.
      * @param conversation WebConversation.
      * @param hostName Host name of the server.
      * @param sessionId Session identifier of the user.
      * @param task Task to store.
-     * @return the unique identifer of the task.
+     * @return the reponse object of inserting the task.
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
      */
-    public static int insertTask(final WebConversation conversation,
+    public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
         throws JSONException, IOException, SAXException {
         LOG.trace("Inserting task.");
@@ -687,15 +726,7 @@ public class TasksTest extends AbstractAJAXTest {
             resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        final JSONObject data = (JSONObject) response.getData();
-        if (!data.has(TaskFields.ID)) {
-            fail(response.getErrorMessage());
-        }
-        final int taskId = data.getInt(TaskFields.ID);
-        assertTrue("Problem while inserting task", taskId > 0);
-        return taskId;
+        return Response.parse(body);
     }
 
     public static void updateTask(final WebConversation conversation,

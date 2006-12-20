@@ -55,12 +55,16 @@ public class RandomString {
         super();
     }
 
-    public static String generateLetter(final int maxLength) {
-        char[] value = new char[rand.nextInt(maxLength) + 1];
+    public static String generateFixLetter(final int length) {
+        char[] value = new char[length];
         for (int i = 0; i < value.length; i++) {
             value[i] = letter[rand.nextInt(letter.length)];
         }
         return new String(value);
+    }
+    
+    public static String generateLetter(final int maxLength) {
+        return new String(generateFixLetter(rand.nextInt(maxLength) + 1));
     }
 
     static {
