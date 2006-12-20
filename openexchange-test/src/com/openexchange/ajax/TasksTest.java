@@ -360,8 +360,8 @@ public class TasksTest extends AbstractAJAXTest {
         updatedTask.setParticipants(secondParticipants);
         LOG.trace("Updating delegated task with participants: "
             + secondParticipants);
-        updateTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, updatedTask, lastModified);
+        failOnError(updateTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, updatedTask, lastModified));
         response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         lastModified = response.getTimestamp();
@@ -406,8 +406,8 @@ public class TasksTest extends AbstractAJAXTest {
 
         task.setObjectID(taskId);
         task.setTitle(updatedTitle);
-        updateTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, task, lastModified);
+        failOnError(updateTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, task, lastModified));
 
         response = getTask(getWebConversation(), getHostName(), getSessionId(),
             folderId, taskId);
@@ -504,8 +504,8 @@ public class TasksTest extends AbstractAJAXTest {
         for (int i = 0; i < tasks.length / 2; i++) {
             task.setTitle("UpdatedTask " + (i + 1));
             task.setObjectID(tasks[i][1]);
-            updateTask(getWebConversation(), getHostName(), getSessionId(),
-                folderId, task, timestamp);
+            failOnError(updateTask(getWebConversation(), getHostName(),
+                getSessionId(), folderId, task, timestamp));
         }
         // And delete 2
         final int[][] deltasks = new int[2][2];
@@ -666,6 +666,36 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
+     * Creates a task with a field set. Then it updates the task with
+     * <code>null</code> in that field. Server should not get an error on this.
+     * @throws Throwable if an error occurs.
+     */
+    public void testInternalEqualError() throws Throwable {
+        final int folderId = getPrivateTaskFolder();
+        final Task task = new Task();
+        task.setTitle("Title to remove on update");
+        task.setNote("Not to remove on update");
+        task.setParentFolderID(folderId);
+        Response response = insertTask(getWebConversation(),
+            getHostName(), getSessionId(), task);
+        task.setObjectID(extractInsertId(response));
+        response = getTask(getWebConversation(), getHostName(), getSessionId(),
+            folderId, task.getObjectID());
+        Date lastModified = extractTimestamp(response);
+        final JSONObject json = new JSONObject();
+        json.put(TaskFields.FOLDER_ID, folderId);
+        json.put(TaskFields.ID, task.getObjectID());
+        json.put(TaskFields.TITLE, JSONObject.NULL);
+        json.put(TaskFields.NOTE, JSONObject.NULL);
+        response = updateTask(getWebConversation(), getHostName(),
+            getSessionId(), folderId, task.getObjectID(), json, lastModified);
+        failOnError(response);
+        lastModified = extractTimestamp(response);
+        deleteTask(getWebConversation(), getHostName(), getSessionId(),
+            lastModified, folderId, task.getObjectID());
+    }
+
+    /**
      * Extracts the identifier of an inserted task. This method can only be used
      * with the reponse of the method
      * {@link #insertTask(WebConversation, String, String, Task)}.
@@ -684,6 +714,21 @@ public class TasksTest extends AbstractAJAXTest {
         final int taskId = data.getInt(TaskFields.ID);
         assertTrue("Problem while inserting task", taskId > 0);
         return taskId;
+    }
+
+    /**
+     * @param response response object of an update or some other request that
+     * returns a timestamp.
+     * @return the timestamp of the response.
+     */
+    public static Date extractTimestamp(final Response response) {
+        final Date retval = response.getTimestamp();
+        assertNotNull("Timestamp is missing.", retval);
+        return retval;
+    }
+
+    public static void failOnError(final Response response) {
+        assertFalse(response.getErrorMessage(), response.hasError());
     }
 
     /**
@@ -729,19 +774,29 @@ public class TasksTest extends AbstractAJAXTest {
         return Response.parse(body);
     }
 
-    public static void updateTask(final WebConversation conversation,
+    public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException {
-        LOG.trace("Updating task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-		TimeZone tz = ConfigMenuTest.getTimeZone(conversation, hostName,
-            sessionId);
-        final TaskWriter taskW = new TaskWriter(printW, tz);
+        final TimeZone timeZone = ConfigMenuTest.getTimeZone(conversation,
+            hostName, sessionId);
+        final TaskWriter taskW = new TaskWriter(printW, timeZone);
         taskW.writeTask(task);
         printW.flush();
-        final String object = stringW.toString();
+        return updateTask(conversation, hostName, sessionId, folderId,
+            task.getObjectID(), new JSONObject(stringW.toString()),
+            lastModified);
+    }
+
+    public static Response updateTask(final WebConversation conversation,
+        final String hostName, final String sessionId, final int folderId,
+        final int taskId,
+        final JSONObject json, final Date lastModified) throws JSONException,
+        IOException, SAXException {
+        LOG.trace("Updating task.");
+        final String object = json.toString();
         LOG.trace(object);
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
             .getBytes(ENCODING));
@@ -752,7 +807,7 @@ public class TasksTest extends AbstractAJAXTest {
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER,
             String.valueOf(folderId));
         parameter.setParameter(AJAXServlet.PARAMETER_ID,
-            String.valueOf(task.getObjectID()));
+            String.valueOf(taskId));
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
             String.valueOf(lastModified.getTime()));
         final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
@@ -763,8 +818,7 @@ public class TasksTest extends AbstractAJAXTest {
             resp.getResponseCode());
         final String body = resp.getText();
         LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
+        return Response.parse(body);
     }
 
     public static Response getTask(final WebConversation conversation,
