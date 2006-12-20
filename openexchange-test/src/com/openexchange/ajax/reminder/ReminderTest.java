@@ -18,6 +18,7 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
+import java.util.TimeZone;
 import org.json.JSONArray;
 
 public class ReminderTest extends AbstractAJAXTest {
@@ -32,7 +33,7 @@ public class ReminderTest extends AbstractAJAXTest {
 		
 	}
 	
-	public static ReminderObject[] listReminder(WebConversation webConversation, Date end, String host, String sessionId) throws Exception, TestException {
+	public static ReminderObject[] listReminder(WebConversation webConversation, Date end, TimeZone timeZone, String host, String sessionId) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		URLParameter parameter = new URLParameter();
@@ -64,7 +65,7 @@ public class ReminderTest extends AbstractAJAXTest {
 			reminderObj[a].setObjectId(DataParser.parseInt(jsonReminder, ReminderFields.ID));
 			reminderObj[a].setTargetId(DataParser.parseInt(jsonReminder, ReminderFields.TARGET_ID));
 			reminderObj[a].setFolder(DataParser.parseString(jsonReminder, ReminderFields.FOLDER));
-			reminderObj[a].setDate(DataParser.parseDate(jsonReminder, ReminderFields.ALARM));
+			reminderObj[a].setDate(DataParser.parseTime(jsonReminder, ReminderFields.ALARM, timeZone));
 			reminderObj[a].setLastModified(DataParser.parseDate(jsonReminder, ReminderFields.LAST_MODIFIED));
 			reminderObj[a].setUser(DataParser.parseInt(jsonReminder, ReminderFields.USER_ID));
 			reminderObj[a].setRecurrenceAppointment(DataParser.parseBoolean(jsonReminder, ReminderFields.RECURRENCE_APPOINTMENT));
@@ -141,7 +142,7 @@ public class ReminderTest extends AbstractAJAXTest {
 	public void compareReminder(ReminderObject reminderObj1, ReminderObject reminderObj2) throws Exception {
 		assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
 		assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
-		// assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
+		assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
 	}
 }
 
