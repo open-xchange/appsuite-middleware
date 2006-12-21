@@ -1031,7 +1031,6 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct number of results" , 2 , counter);
         
     }        
-    
 
     public void testWeeklyDifferentInterval()  throws Throwable { 
         
@@ -1056,8 +1055,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-
-        assertEquals("Check calculation", 10, m.size()); // BUG 4467 !!! 
         
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
@@ -1065,6 +1062,6 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);
         c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
-    }
+    }           
     
 }
