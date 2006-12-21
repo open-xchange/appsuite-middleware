@@ -534,6 +534,7 @@ public class CalendarTest extends TestCase {
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
         ofa.createFolder(fo, so, true, readcon, writecon, false);
+        
         int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
         try {
