@@ -200,7 +200,7 @@ public class NewTest extends AppointmentTest {
 		
 		int occurrences = 5;
 		
-		Date until = new Date(c.getTimeInMillis() + ((occurrences-1)*dayInMillis));
+		Date until = new Date(c.getTimeInMillis() + ((occurrences)*dayInMillis));
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDailyRecurrence");
