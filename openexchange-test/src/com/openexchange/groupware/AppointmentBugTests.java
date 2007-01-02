@@ -377,10 +377,52 @@ public class AppointmentBugTests extends TestCase {
     /*
      Edit of an appointment in a shared folder failed although it has been previously
      created by the same user:
-    */
+    
     public void testBug4557() throws Throwable {
         // mjst be written
         fail();
     }    
+    */
+     
+    /*
+    Steps:
+    1. Create an appointment 
+       "Send customer invoices", 11:00 - 12:00
+    2. Series
+       Monthly, Each 30th of the month,
+       starting 30.12.2006, ending 30.12.2007
+    3. Save the appointment
+    4. Check the Calendar, Month view
+
+    Results:
+    Appointments initially get displayed, but always on the 1st of the following months     
+    */
+    public void testBug4473() throws Throwable {
+        RecurringResults m = null;
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        long test_start_date = 1167472800000L; // 30.12.2006 11:00
+        long test_end_date = 1167476400000L; // 30.12.2006 12:00
+        long test_until = 1293706800000L; // 30.12.2010 12:00:00 
+        int check_day = 30;
+        cdao.setStartDate(new Date(test_start_date));
+        cdao.setEndDate(new Date(test_end_date));
+        cdao.setUntil(new Date(test_until));
+        cdao.setTitle("testBug4473");
+        cdao.setRecurrenceID(1);
+        cdao.setRecurrenceType(CalendarObject.MONTHLY);
+        cdao.setDayInMonth(check_day);
+        //cdao.setDays(0);
+        cdao.setInterval(1);        
+        CalendarRecurringCollection.fillDAO(cdao);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rs = m.getRecurringResult(a);
+            Calendar test = Calendar.getInstance();
+            test.setTime(new Date(rs.getStart()));
+            assertEquals("Check day of month", check_day, test.get(Calendar.DAY_OF_MONTH));
+        }
+        
+    }     
     
 }
