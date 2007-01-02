@@ -15,6 +15,7 @@ import com.openexchange.groupware.tx.UndoableAction;
 public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTest {
 
 	private MockAttachmentListener listener = new MockAttachmentListener();
+	private MockDBProvider provider = new MockDBProvider();
 	
 	@Override
 	protected UndoableAction getAction() throws Exception {
@@ -23,7 +24,7 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 		fireAttached.setContext(getContext());
 		fireAttached.setUser(getUser());
 		fireAttached.setUserConfiguration(null);
-		fireAttached.setWriteConnection(null);
+		fireAttached.setProvider(provider);
 		List<AttachmentListener> listeners = new ArrayList<AttachmentListener>();
 		listeners.add(listener);
 		fireAttached.setAttachmentListeners(listeners);
@@ -50,6 +51,9 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 		assertTrue(attachmentSet.isEmpty());
 		
 		listener.clear();
+		
+		assertTrue(provider.getStatus(), provider.allOK());
+		assertTrue(provider.getStatus(), provider.called());
 	}
 
 	@Override
@@ -62,6 +66,8 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 			assertTrue(ids.remove(id));
 		}
 		assertTrue(ids.isEmpty());
+		assertTrue(provider.allOK());
+		assertTrue(provider.called());
 	}	
 
 }
