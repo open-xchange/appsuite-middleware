@@ -147,26 +147,40 @@ public class AppointmentBugTests extends TestCase {
      5.  Check entries in OX6 Calendar
     */     
     public void testBug4467() throws Throwable { 
+        
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");                
+        
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
         cdao.setTimezone(TIMEZONE);
+        cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
         cdao.setOccurrence(10);
         cdao.setTitle("testBug4467");
-        cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
         cdao.setInterval(1);        
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         /*
+        // debug
         for (int a = 0; a < m.size(); a++) {
             RecurringResult rs = m.getRecurringResult(a);
             System.out.println(new Date(rs.getStart()));
         }
         */
         assertEquals("Check calculation", 10, m.size());
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();                
+        CalendarDataObject check_cdao = csql.getObjectById(object_id, fid);
+        assertEquals("Check calculated rec_string and loaded rec_string", cdao.getRecurrence(), check_cdao.getRecurrence());
+        assertEquals("Check calculated occurrence and loaded occurrence", cdao.getOccurrence(), check_cdao.getOccurrence());
+        assertEquals("Check calculated until and loaded until", cdao.getUntil(), check_cdao.getUntil());
+        
     }
 
     /*
