@@ -1,7 +1,6 @@
 
 package com.openexchange.groupware;
 
-
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -130,7 +129,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.removeUntil();
         cdao.setOccurrence(5);
         assertFalse("test if no until is set", cdao.containsUntil());
-        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 4);
+        long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 5);
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
    
         cdao.setTitle("testBasicRecurringWithOccurence");
@@ -149,6 +148,15 @@ public class CalendarRecurringTests extends TestCase {
         CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
         
         assertEquals("Check correct occurence value", 5, test_dao.getOccurrence());
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        /*
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);        
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rs = m.getRecurringResult(a);
+            System.out.println(">>> "+new Date(rs.getStart()));
+        }        
+        */
         //assertFalse("Test that until is not set", test_dao.containsUntil());
     }   
 

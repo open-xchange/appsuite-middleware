@@ -157,13 +157,18 @@ public class AppointmentBugTests extends TestCase {
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
         cdao.setInterval(1);        
-        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.FRIDAY);
+        cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        /*
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rs = m.getRecurringResult(a);
+            System.out.println(new Date(rs.getStart()));
+        }
+        */
         assertEquals("Check calculation", 10, m.size());
-
     }
-         
+
     /*
      1. Create a recurring whole-day appointment in Outlook (with Outlook OXtender)
      2. Set the recurrence to "every day, for 2 days" and save the appointment
@@ -373,16 +378,6 @@ public class AppointmentBugTests extends TestCase {
         assertTrue("Test Resource", check_Resource);
         
     }
-    
-    /*
-     Edit of an appointment in a shared folder failed although it has been previously
-     created by the same user:
-    
-    public void testBug4557() throws Throwable {
-        // mjst be written
-        fail();
-    }    
-    */
      
     /*
     Steps:
