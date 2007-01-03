@@ -68,7 +68,7 @@ public class Bug4392Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		appointmentObj.setUntil(new Date(calendar.getTimeInMillis() + ((occurrences-1) * dayInMillis)));
+		appointmentObj.setUntil(new Date(calendar.getTimeInMillis() + ((occurrences) * dayInMillis)));
 		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
