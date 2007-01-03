@@ -780,8 +780,8 @@ public class TasksTest extends AbstractAJAXTest {
         IOException, SAXException {
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-        final TimeZone timeZone = ConfigMenuTest.getTimeZone(conversation,
-            hostName, sessionId);
+        final TimeZone timeZone = getUserTimeZone(conversation, hostName,
+            sessionId);
         final TaskWriter taskW = new TaskWriter(printW, timeZone);
         taskW.writeTask(task);
         printW.flush();
@@ -841,7 +841,9 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         final Task task = new Task();
-        new TaskParser().parse(task, (JSONObject) response.getData());
+        final TimeZone timeZone = getUserTimeZone(conversation, hostName,
+            sessionId);
+        new TaskParser(timeZone).parse(task, (JSONObject) response.getData());
         response.setData(task);
         return response;
     }
@@ -1087,10 +1089,16 @@ public class TasksTest extends AbstractAJAXTest {
         return response;
     }
 
+    public static TimeZone getUserTimeZone(final WebConversation conversation,
+        final String hostName, final String sessionId) throws IOException,
+        SAXException, JSONException {
+        return ConfigMenuTest.getTimeZone(conversation, hostName, sessionId);
+    }
+
     private int privateTaskFolder = 0;
 
     public int getPrivateTaskFolder() throws IOException, SAXException,
-        JSONException, OXException, Exception {
+        JSONException, OXException {
         if (0 == privateTaskFolder) {
             privateTaskFolder = getPrivateTaskFolder(getWebConversation(),
                 getHostName(), getSessionId());
