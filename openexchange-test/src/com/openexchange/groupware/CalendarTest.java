@@ -128,9 +128,6 @@ public class CalendarTest extends TestCase {
     
     /* ----- test cases -------*/
     
-    /*
-    
-    
     void deleteAllAppointments() throws Exception  {
         Connection readcon = DBPool.pickup(getContext());
         Context context = new ContextImpl(contextid);
@@ -905,7 +902,7 @@ public class CalendarTest extends TestCase {
         // TODO: Convert cdao_conflict to daily recurring app and check more conflicts
         
     }
-*/    
+  
 
     public void testConfirmation() throws Throwable {
         Context context = new ContextImpl(contextid);
