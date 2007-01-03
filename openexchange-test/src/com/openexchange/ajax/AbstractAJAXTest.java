@@ -136,9 +136,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	/**
 	 * @return Returns the sessionId.
-	 * @throws Exception if an error occurs while authenticating.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws IOException if the communication with the server fails.
 	 */
-	protected String getSessionId() throws Exception {
+	protected String getSessionId() throws IOException, SAXException,
+        JSONException {
 		if (null == sessionId) {
 			sessionId = LoginTest.getSessionId(getWebConversation(),
 					getHostName(), getLogin(), getPassword());
