@@ -128,6 +128,9 @@ public class CalendarTest extends TestCase {
     
     /* ----- test cases -------*/
     
+    /*
+    
+    
     void deleteAllAppointments() throws Exception  {
         Connection readcon = DBPool.pickup(getContext());
         Context context = new ContextImpl(contextid);
@@ -902,6 +905,7 @@ public class CalendarTest extends TestCase {
         // TODO: Convert cdao_conflict to daily recurring app and check more conflicts
         
     }
+*/    
 
     public void testConfirmation() throws Throwable {
         Context context = new ContextImpl(contextid);
@@ -918,11 +922,13 @@ public class CalendarTest extends TestCase {
         UserParticipant userparticipants = new UserParticipant();
         userparticipants.setIdentifier(userid);
         userparticipants.setConfirm(AppointmentObject.ACCEPT);
+        String check_confirm_message = "Check this";
+        userparticipants.setConfirmMessage(check_confirm_message);
         cdao.setUsers(new UserParticipant[] { userparticipants });
         
         assertEquals("Check id" , userid, userparticipants.getIdentifier());
         assertEquals("Check confirm state" , AppointmentObject.ACCEPT, userparticipants.getConfirm());
-        
+        assertEquals("Check confirm message", check_confirm_message, userparticipants.getConfirmMessage());
         
         Participants participants = new Participants();
         
@@ -958,6 +964,7 @@ public class CalendarTest extends TestCase {
         for (int a = 0; a < up.length; a++) {
             if (up[a].getIdentifier() == userid) {
                 assertEquals("Check confirm state (2)" , AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm message", check_confirm_message, up[a].getConfirmMessage());
                 found = true;
             }
         }
