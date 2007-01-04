@@ -6,6 +6,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.server.OCLPermission;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -477,5 +478,108 @@ public class AppointmentBugTests extends TestCase {
         m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
         assertEquals("Check size of calulated results", 2, m.size());
     }   
-    
+ 
+    /*
+    User A:
+    1. Share the personal calendar folder to User B with Level 6 permissions
+    User B:
+    2. Access the shared calendar via Outlook (with Outlook OXtender)
+    3. Create a new appointment in the shared calendar of User A
+    4. Select the appointment in the shared calendar and move it to another timefram
+    -> A Exception is shown in Outlook OXtenders debug log and occurs in
+    open-xchange.log (see attachment)
+     */    
+    public void testBug4717() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        OXFolderAction ofa = new OXFolderAction(so);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        fo.setFolderName("testSharedFolder4717");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarSql csql2 = new CalendarSql(so2);
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(shared_folder_id);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug4717 - created by "+user2);
+            cdao.setIgnoreConflicts(true);
+            
+            csql2.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject udao = new CalendarDataObject();
+            udao.setContext(so.getContext());
+            udao.setObjectID(object_id);
+            udao.setStartDate(new Date(cdao.getStartDate().getTime()+3600000)); // move 1 h
+            udao.setEndDate(new Date(cdao.getEndDate().getTime()+3600000)); // move 1 h
+            udao.setTitle("testBug4717 - updated by "+user2);
+            
+            Participants participants = new Participants();
+            Participant p = new UserParticipant();
+            p.setIdentifier(userid);
+            participants.add(p);            
+            
+            Participant p2 = new UserParticipant();
+            p2.setIdentifier(uid2);
+            participants.add(p2);            
+            udao.setParticipants(participants.getList());
+            udao.setUsers(participants.getUsers());
+            udao.setIgnoreConflicts(true);
+            csql2.updateAppointmentObject(udao, shared_folder_id, cdao.getLastModified());
+            
+            
+            CalendarDataObject testobject = csql2.getObjectById(object_id, shared_folder_id);
+            UserParticipant up[] = testobject.getUsers();
+            assertTrue("UserParticipant not null", up != null);
+            assertEquals("Check that we got two participants ", 2, up.length);
+            
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                } else {
+                    fail("Folder was not created.");
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }        
+        
+        
+        
+    }
 }
