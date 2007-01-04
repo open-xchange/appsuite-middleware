@@ -194,6 +194,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTimezone(TIMEZONE);
         cdao.setTitle("testBug4377");
         CalendarTest.fillDatesInDao(cdao);
+        cdao.setEndDate(cdao.getStartDate());
         cdao.setFullTime(true);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.DAILY);
@@ -433,5 +434,48 @@ public class AppointmentBugTests extends TestCase {
         }
         
     }     
+ 
+    
+    /*
+    1. Create a new appointment in the OX6 GUI (whole day, recurring every day for 2
+    days)
+    2. Save the appointment and verify the calendar views
+
+    -> The appointment is shown on every day starting at the given start date of the
+    recurring whole-day appointment. In the correct case this appointment should
+    only be shown on two days at all. I suppose this is a GUI bug because most
+    recurring whole-day appointments work with Outlook OXtender 6 and are
+    communicated correctly by the server.    
+    */
+    public void testBug4766() throws Throwable {
+        RecurringResults m = null;
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testBug4766");
+        cdao.setFullTime(true);
+        cdao.setRecurrenceType(CalendarDataObject.DAILY);
+        cdao.setInterval(1);
+        cdao.setOccurrence(2);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Check size of calulated results", 2, m.size());        
+        
+        CalendarSql csql = new CalendarSql(so);                
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        CalendarRecurringCollection.fillDAO(testobject);
+        m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
+        assertEquals("Check size of calulated results", 2, m.size());
+    }   
     
 }
