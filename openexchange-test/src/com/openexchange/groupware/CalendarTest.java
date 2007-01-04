@@ -982,40 +982,35 @@ public class CalendarTest extends TestCase {
         
         Connection readcon = DBPool.pickup(context);
         Connection writecon = DBPool.pickupWriteable(context);        
-
-        int fid = getPrivateFolder();
         
+        int fid = getPrivateFolder();
         OXFolderAction ofa = new OXFolderAction(so);
-                
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
         oclp1.setEntity(userid);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
-        
         OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        
         fo.setFolderName("testSharedFolder");
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
-        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });        
-
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
         int shared_folder_id = 0;
         try {
             ofa.createFolder(fo, so, true, readcon, writecon, false);
-            shared_folder_id = fo.getObjectID();        
-
+            shared_folder_id = fo.getObjectID();       
+            
             CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(so.getContext());
             cdao.setParentFolderID(shared_folder_id);
             fillDatesInDao(cdao);
             cdao.setTitle("testSharedFolder");
             cdao.setIgnoreConflicts(true);
-            
             CalendarSql csql = new CalendarSql(so);
             csql.insertAppointmentObject(cdao);        
             int object_id = cdao.getObjectID();    
@@ -1029,17 +1024,13 @@ public class CalendarTest extends TestCase {
                     found = true;
                 }
             }            
-            
-            assertTrue("User2 got object in shared folder created by user1 ", found);
-            
+            assertTrue("User2 got object in shared folder created by user1 ", found);            
             
             CalendarDataObject ddao = new CalendarDataObject();
             ddao.setContext(so.getContext());
             ddao.setObjectID(object_id);
             csql.deleteAppointmentObject(ddao, shared_folder_id, cdao.getLastModified());
-            
             boolean found_deleted = false;        
-                    
             si = csql2.getDeletedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
             while (si.hasNext()) {
                 CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1047,9 +1038,7 @@ public class CalendarTest extends TestCase {
                 found_deleted = true;
                 }
             }                        
-            
             assertTrue("User2 got no object in shared folder created by user1 ", found_deleted);
-            
             
         } finally {
             try {
@@ -1063,17 +1052,12 @@ public class CalendarTest extends TestCase {
                 fail("Error deleting folder object.");
             }
         }
-
         try {
             DBPool.push(context, readcon);
             DBPool.pushWrite(context, writecon);        
         } catch(Exception ignore) { 
             ignore.printStackTrace();
         }            
-        
-        
-        
-        
     }
     
 }
