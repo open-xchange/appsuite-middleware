@@ -970,6 +970,110 @@ public class CalendarTest extends TestCase {
         
         //csql.deleteAppointmentObject(testobject, fid, new Date(SUPER_END));
         
-    }        
+    }
+    
+    public void testSharedFolder() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
 
+        int fid = getPrivateFolder();
+        
+        OXFolderAction ofa = new OXFolderAction(so);
+                
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        
+        OCLPermission oclp2 = new OCLPermission();
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        
+        fo.setFolderName("testSharedFolder");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });        
+
+        int shared_folder_id = 0;
+        try {
+            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            shared_folder_id = fo.getObjectID();        
+
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(shared_folder_id);
+            fillDatesInDao(cdao);
+            cdao.setTitle("testSharedFolder");
+            cdao.setIgnoreConflicts(true);
+            
+            CalendarSql csql = new CalendarSql(so);
+            csql.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();    
+            
+            CalendarSql csql2 = new CalendarSql(so2);
+            SearchIterator si = csql2.getModifiedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
+            boolean found = false;
+            while (si.hasNext()) {
+                CalendarDataObject tdao = (CalendarDataObject)si.next();
+                if (object_id == cdao.getObjectID()) {
+                    found = true;
+                }
+            }            
+            
+            assertTrue("User2 got object in shared folder created by user1 ", found);
+            
+            
+            CalendarDataObject ddao = new CalendarDataObject();
+            ddao.setContext(so.getContext());
+            ddao.setObjectID(object_id);
+            csql.deleteAppointmentObject(ddao, shared_folder_id, cdao.getLastModified());
+            
+            boolean found_deleted = false;        
+                    
+            si = csql2.getDeletedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
+            while (si.hasNext()) {
+                CalendarDataObject tdao = (CalendarDataObject)si.next();
+                if (object_id == cdao.getObjectID()) {
+                found_deleted = true;
+                }
+            }                        
+            
+            assertTrue("User2 got no object in shared folder created by user1 ", found_deleted);
+            
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                } else {
+                    fail("Folder was not created.");
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }            
+        
+        
+        
+        
+    }
+    
 }
