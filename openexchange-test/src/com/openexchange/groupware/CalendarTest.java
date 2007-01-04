@@ -858,7 +858,7 @@ public class CalendarTest extends TestCase {
         CalendarSql csql = new CalendarSql(so);                
         
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
-        assertTrue("Got results", si.hasNext() == false);
+        assertTrue("Got no results", si.hasNext() == false);
         
         
         CalendarDataObject cdao = new CalendarDataObject();
