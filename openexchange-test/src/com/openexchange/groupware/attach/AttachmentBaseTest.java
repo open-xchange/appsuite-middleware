@@ -621,12 +621,14 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
 		private AttachmentEvent e;
 
-		public void attached(AttachmentEvent e) throws Exception {
+		public long attached(AttachmentEvent e) throws Exception {
 			this.e = e;
+			return System.currentTimeMillis();
 		}
 
-		public void detached(AttachmentEvent e) throws Exception {
+		public long detached(AttachmentEvent e) throws Exception {
 			this.e = e;
+			return System.currentTimeMillis();
 		}
 		
 		public AttachmentEvent getEvent() {

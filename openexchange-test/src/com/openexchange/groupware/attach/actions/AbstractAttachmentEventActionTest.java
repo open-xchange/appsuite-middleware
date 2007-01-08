@@ -31,16 +31,18 @@ public abstract class AbstractAttachmentEventActionTest extends
 		Set<Integer> detached = new HashSet<Integer>();
 		
 		
-		public void attached(AttachmentEvent e) throws Exception{
+		public long attached(AttachmentEvent e) throws Exception{
 			attached.add(e.getAttachment());
 			e.getWriteConnection();
+			return System.currentTimeMillis();
 		}
 		
-		public void detached(AttachmentEvent e) throws Exception{
+		public long detached(AttachmentEvent e) throws Exception{
 			for(int id : e.getDetached()) {
 				detached.add(id);
 			}
 			e.getWriteConnection();
+			return System.currentTimeMillis();
 		}
 		
 		public List<AttachmentMetadata> getAttached(){
