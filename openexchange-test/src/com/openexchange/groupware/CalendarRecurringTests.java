@@ -150,13 +150,13 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct occurence value", 5, test_dao.getOccurrence());
         
         CalendarRecurringCollection.fillDAO(cdao);
-        /*
-        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);        
-        for (int a = 0; a < m.size(); a++) {
-            RecurringResult rs = m.getRecurringResult(a);
-            System.out.println(">>> "+new Date(rs.getStart()));
-        }        
-        */
+        
+        //RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);        
+        //for (int a = 0; a < m.size(); a++) {
+        //    RecurringResult rs = m.getRecurringResult(a);
+        //    System.out.println(">>> "+new Date(rs.getStart()));
+        //}        
+        
         //assertFalse("Test that until is not set", test_dao.containsUntil());
     }   
 
@@ -1071,5 +1071,40 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
     }           
+    
+    public void testCorrectUntitCalculation()  throws Throwable { 
+        RecurringResults m = null;
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testCorrectUntitCalculation");
+        cdao.setRecurrenceType(CalendarObject.WEEKLY);
+        cdao.setInterval(1);        
+        cdao.setDays(AppointmentObject.WEDNESDAY);
+        CalendarRecurringCollection.fillDAO(cdao);
+        
+        long check_until = CalendarRecurringCollection.normalizeLong( (cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR *  CalendarRecurringCollection.getMAX_END_YEARS())) );
+        
+        assertEquals("Check correct until for !yearly " , check_until , cdao.getUntil().getTime());
+        
+        CalendarDataObject cdao2 = new CalendarDataObject();
+        cdao2.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao2);
+        cdao2.removeUntil();
+        cdao2.setTitle("testCorrectUntitCalculation yearly");
+        cdao2.setRecurrenceType(CalendarObject.YEARLY);
+        cdao2.setInterval(1);        
+        cdao2.setMonth(Calendar.AUGUST);
+        cdao2.setDayInMonth(20);
+        CalendarRecurringCollection.fillDAO(cdao);
+        
+        long check_until2 = CalendarRecurringCollection.normalizeLong( (cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR *  99)) );
+        
+        assertEquals("Check correct until for yearly " , check_until2 , cdao2.getUntil().getTime());        
+        
+        
+    }    
+    
     
 }
