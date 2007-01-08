@@ -4,6 +4,8 @@ package com.openexchange.groupware;
 
 import com.openexchange.ajax.Resource;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.calendar.RecurringResult;
+import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -11,8 +13,10 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -1059,5 +1063,116 @@ public class CalendarTest extends TestCase {
             ignore.printStackTrace();
         }            
     }
+    
+    
+    public void testHasAppointmentsBetween() throws Throwable {
+        
+        deleteAllAppointments();
+        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        int fid = getPrivateFolder();        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setTitle("testHasAppointmentsBetween - Normal app");
+        cdao.setParentFolderID(fid);
+        cdao.setIgnoreConflicts(true);
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        
+        RecurringResults m = null;
+        CalendarDataObject cdao2 = new CalendarDataObject();
+        cdao2.setContext(so.getContext());
+        cdao2.setParentFolderID(fid);
+        cdao2.setTimezone(CalendarRecurringTests.TIMEZONE);
+        fillDatesInDao(cdao2);
+        cdao2.removeUntil();        
+        cdao2.setTitle("testHasAppointmentsBetween - Rec app");
+        cdao2.setRecurrenceType(CalendarDataObject.WEEKLY);
+        cdao2.setInterval(1);        
+        cdao2.setDays(AppointmentObject.FRIDAY);        
+        
+        csql.insertAppointmentObject(cdao2);
+        int object_id2 = cdao2.getObjectID();
+        
+        CalendarDataObject calculation = new CalendarDataObject();
+        fillDatesInDao(calculation);
+        
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone(CalendarRecurringTests.TIMEZONE));
+        c.setTimeInMillis(calculation.getStartDate().getTime());
+        
+        int month = c.get(Calendar.MONTH);
+        int year = c.get(Calendar.YEAR);
+        
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.MONTH, month);
+        c.set(Calendar.YEAR, year);
+        
+        long range_start = CalendarRecurringCollection.normalizeLong(c.getTimeInMillis());
+        
+        int calc_length = c.getMaximum(Calendar.DAY_OF_MONTH);
+        
+        c.add(Calendar.DAY_OF_MONTH, calc_length);
+        
+        long range_end = CalendarRecurringCollection.normalizeLong(c.getTimeInMillis());
+        
+        boolean check_array[] = new boolean[calc_length];
+        
+        int pos = (int)((cdao.getStartDate().getTime()-range_start)/CalendarRecurringCollection.MILLI_DAY);
+        int len = (int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY);
+        //System.out.println("pos = "+pos + " len = "+len);
+        for (int a = pos; a <= pos+len; a++) {
+            check_array[a] = true;
+        }
+        
+        m = CalendarRecurringCollection.calculateRecurring(cdao2, 0, 0, 0);
+        for (int a  = 0; a < m.size(); a++) {
+            RecurringResult rr = m.getRecurringResult(a);
+            pos = (int)((rr.getStart()-range_start)/CalendarRecurringCollection.MILLI_DAY);
+            len = (int)((rr.getEnd()-rr.getStart())/CalendarRecurringCollection.MILLI_DAY);
+            //System.out.println("pos = "+pos + " len = "+len);
+            for (int b = pos; b <= pos+len; b++) {
+                if (b < check_array.length) {
+                    check_array[b] = true;
+                }
+            }            
+        }
+        
+        
+        boolean test_array[] = csql.hasAppointmentsBetween(new Date(range_start), new Date(range_end));
+        
+        /*
+        for (int a  = 0; a < check_array.length; a++) {
+            if (check_array[a]) {
+                System.out.print("1");
+            } else {
+                System.out.print("0");
+            }
+        }
+        System.out.println("\n");
+        for (int a  = 0; a < test_array.length; a++) {
+            if (test_array[a]) {
+                System.out.print("1");
+            } else {
+                System.out.print("0");
+            }
+        }
+        System.out.println("\n");
+        */
+        
+        assertEquals("Check arrays (length)", check_array.length, test_array.length);
+        
+        for (int a = 0; a < check_array.length; a++) {
+            assertEquals("Check arrays (position "+a+")", check_array[a], test_array[a]);
+        }
+        
+        
+        
+        
+    }
+    
     
 }
