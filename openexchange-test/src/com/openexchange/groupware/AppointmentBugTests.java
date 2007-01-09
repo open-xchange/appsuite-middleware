@@ -577,9 +577,49 @@ public class AppointmentBugTests extends TestCase {
             DBPool.pushWrite(context, writecon);        
         } catch(Exception ignore) { 
             ignore.printStackTrace();
-        }        
+        }                
+    }
+    
+    /*
+    after creating a not ending series appointment every first Monday every month,
+    only the first appointment can be seen in the calendar.
+     */
+    
+    public void testBug4838() throws Throwable {
+        RecurringResults m = null;
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
         
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testBug4838");
+        cdao.setRecurrenceType(CalendarDataObject.MONTHLY);
+        cdao.setInterval(1);
+        cdao.setDays(CalendarDataObject.MONDAY);
+        cdao.setDayInMonth(1);
+        cdao.setIgnoreConflicts(true);
         
+        CalendarSql csql = new CalendarSql(so);                
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
+        assertTrue("Calculated results are > 0 ", m.size() > 1);
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rr = m.getRecurringResult(a);
+            Calendar test = Calendar.getInstance();
+            test.setFirstDayOfWeek(Calendar.MONDAY);
+            Date date = new Date(rr.getStart());
+            test.setTime(date);
+            assertEquals("Check day of month", Calendar.MONDAY, test.get(Calendar.DAY_OF_WEEK));
+        }
         
     }
+    
 }
