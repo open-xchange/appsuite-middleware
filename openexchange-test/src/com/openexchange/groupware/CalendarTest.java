@@ -210,6 +210,42 @@ public class CalendarTest extends TestCase {
         
     }
     
+    public void testMultiSpanWholeDay() throws Throwable {
+        int wanted_length = 3;
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testMultiSpanWholeDay - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        cdao.setFullTime(true);
+        cdao.setGlobalFolderID(fid);
+        fillDatesInDao(cdao);
+        cdao.removeUntil();
+        long start_date_long = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime());
+        long end_date_long = (start_date_long + (CalendarRecurringCollection.MILLI_DAY * wanted_length));
+        Date start_date = new Date(start_date_long);
+        Date end_date = new Date(end_date_long);
+        cdao.setStartDate(start_date);
+        cdao.setEndDate(end_date);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();    
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        long check_start = cdao.getStartDate().getTime();
+        long check_end = cdao.getEndDate().getTime();
+        
+        int test_length = (int)((check_end-check_start)/1000/60/60/24);
+        
+        assertEquals("Check app length ", wanted_length, test_length);
+
+        
+    }    
+    
     public void testfillUserParticipantsWithoutGroups() throws Exception  {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
