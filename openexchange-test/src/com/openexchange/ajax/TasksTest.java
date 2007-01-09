@@ -462,7 +462,7 @@ public class TasksTest extends AbstractTaskTest {
     }
 
     public void testUpdates() throws Throwable {
-        final int folderId = getPrivateTaskFolder(getWebConversation(),
+        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
