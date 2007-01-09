@@ -3,6 +3,7 @@ package com.openexchange.groupware;
 
 
 import com.openexchange.ajax.Resource;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -171,6 +172,41 @@ public class CalendarTest extends TestCase {
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
         DBPool.push(context, readcon);
+        
+    }
+    
+    
+    public void testWholeDayWithDB() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testWholeDayWithDB - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        cdao.setFullTime(true);
+        cdao.setGlobalFolderID(fid);
+        fillDatesInDao(cdao);
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();    
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        long check_start = cdao.getStartDate().getTime();
+        long check_end = cdao.getEndDate().getTime();
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setTitle("testWholeDayWithDB - Step 1 - Update");
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);
+        assertTrue("Contains fulltime ", testobject_update.getFullTime());
+        assertEquals("Check start time ", check_start, testobject_update.getStartDate().getTime());
+        assertEquals("Check end time ", check_end, testobject_update.getEndDate().getTime());
         
     }
     
@@ -473,7 +509,7 @@ public class CalendarTest extends TestCase {
 
             for (int a = 0; a < up2.length; a++) {
                 assertEquals("check that folder id private folder ", up2[a].getPersonalFolderId(), private_folder_id);
-            }        
+            }       
 
             // TODO: Move again to public folder and delete complete folder
 
@@ -1201,5 +1237,77 @@ public class CalendarTest extends TestCase {
         assertEquals("Check correct alarm value", 15, testobject.getAlarm());                
         
     }  
-    
+   
+    public void testInsertMoveAndDeleteAppointmentsWithPrivateFlag() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        CalendarDataObject cdao = new CalendarDataObject();
+
+        cdao.setTitle("testInsertMoveAndDeleteAppointmentsWithPrivateFlag - Step 1 - Insert");
+        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        
+        fillDatesInDao(cdao);
+        cdao.setIgnoreConflicts(true);
+        cdao.setPrivateFlag(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int private_folder_id = cdao.getEffectiveFolderId();
+        
+        int object_id = cdao.getObjectID();
+ 
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);
+        
+        OXFolderAction ofa = new OXFolderAction(so);
+        OCLPermission oclp = new OCLPermission();
+        oclp.setEntity(userid);
+        oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp.setFolderAdmin(true);
+        FolderObject fo = new FolderObject();
+        fo.setFolderName("testInsertMoveAndDeleteAppointmentsWithPrivateFlagFolder");
+        fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PUBLIC);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp });
+        ofa.createFolder(fo, so, true, readcon, writecon, false);
+        int public_folder_id = fo.getObjectID();
+        CalendarDataObject testobject = null;
+        try {
+            // TODO: "Move" object to a public folder
+            CalendarDataObject update1 = new CalendarDataObject();
+            update1.setContext(so.getContext());
+            update1.setObjectID(object_id);
+            update1.setParentFolderID(public_folder_id);
+            update1.setTitle("testInsertMoveAndDeleteAppointments - Step 2 - Update");
+            update1.setIgnoreConflicts(true);
+            try {
+                csql.updateAppointmentObject(update1, private_folder_id, new Date(SUPER_END));
+                fail("Move from a private folder with private flag should not be possibe!");
+            } catch(OXPermissionException e) {
+                // Very good if we get an error
+            }
+            
+        } finally {
+            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        }
+
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }
+                
+        try {
+            testobject = csql.getObjectById(object_id, public_folder_id);
+            throw new Exception("Object not deleted! Test failed!");
+        } catch (Exception not_exist) {
+            // this is normal because the object has been deleted before
+        }
+
+    }         
+   
+   
 }
