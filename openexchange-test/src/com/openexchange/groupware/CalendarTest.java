@@ -256,7 +256,6 @@ public class CalendarTest extends TestCase {
         assertTrue("Alarm should not be set", !testobject.containsAlarm());
         
     }    
-    
 
     public void testInsertAndAlarm() throws Throwable {
         Context context = new ContextImpl(contextid);
@@ -1143,25 +1142,7 @@ public class CalendarTest extends TestCase {
         
         
         boolean test_array[] = csql.hasAppointmentsBetween(new Date(range_start), new Date(range_end));
-        
-        /*
-        for (int a  = 0; a < check_array.length; a++) {
-            if (check_array[a]) {
-                System.out.print("1");
-            } else {
-                System.out.print("0");
-            }
-        }
-        System.out.println("\n");
-        for (int a  = 0; a < test_array.length; a++) {
-            if (test_array[a]) {
-                System.out.print("1");
-            } else {
-                System.out.print("0");
-            }
-        }
-        System.out.println("\n");
-        */
+       
         
         assertEquals("Check arrays (length)", check_array.length, test_array.length);
         
@@ -1169,10 +1150,56 @@ public class CalendarTest extends TestCase {
             assertEquals("Check arrays (position "+a+")", check_array[a], test_array[a]);
         }
         
-        
-        
-        
     }
+
     
+   public void testInsertUpdateAlarm() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testInsertUpdateAlarm - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        cdao.setAlarm(15);
+        cdao.setAlarmFlag(true);
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertTrue("Check alarm", testobject.containsAlarm());
+        assertEquals("Check correct alarm value", 15, testobject.getAlarm());
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setTitle("testInsertUpdateAlarm - Step 2 - Update");
+        update.setObjectID(object_id);
+        update.setContext(so.getContext());
+        update.setIgnoreConflicts(true);
+        csql.updateAppointmentObject(update, fid, testobject.getLastModified());
+        
+        testobject = csql.getObjectById(object_id, fid);
+        assertTrue("Check alarm", testobject.containsAlarm());
+        assertEquals("Check correct alarm value", 15, testobject.getAlarm());        
+        
+        CalendarDataObject update2 = new CalendarDataObject();
+        update2.setTitle("testInsertUpdateAlarm - Step 3 - Update");
+        update2.setObjectID(object_id);
+        update2.setContext(so.getContext());
+        update2.setIgnoreConflicts(true);
+        
+        UserParticipant up = new UserParticipant();
+        up.setIdentifier(userid);
+        update2.setUsers(new UserParticipant[] { up });        
+        
+        csql.updateAppointmentObject(update2, fid, testobject.getLastModified());
+        
+        testobject = csql.getObjectById(object_id, fid);
+        assertTrue("Check alarm", testobject.containsAlarm());
+        assertEquals("Check correct alarm value", 15, testobject.getAlarm());                
+        
+    }  
     
 }
