@@ -621,4 +621,49 @@ public class AppointmentBugTests extends TestCase {
         
     }
     
+    /*
+    Changing the recurrence of a weekly appointment to daily appointment removes all
+    recurrence information. 
+     */
+    
+    public void testBug5010() throws Throwable {
+        RecurringResults m = null;
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setTitle("testBug5010");
+        cdao.setRecurrenceType(CalendarDataObject.WEEKLY);
+        cdao.setInterval(1);
+        cdao.setDays(CalendarDataObject.MONDAY);
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);                
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        assertEquals("Check rec type ", CalendarDataObject.WEEKLY, testobject.getRecurrenceType());
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setRecurrenceType(CalendarDataObject.DAILY);
+        update.setInterval(1);
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
+        
+        assertTrue("Check that the recurring has been changed ", testobject.getRecurrenceType() != testobject2.getRecurrenceType());
+        
+        assertEquals("Check rec type ", CalendarDataObject.DAILY, testobject2.getRecurrenceType());
+        
+    }    
+    
 }
