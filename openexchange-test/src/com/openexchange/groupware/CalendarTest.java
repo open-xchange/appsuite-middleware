@@ -143,6 +143,7 @@ public class CalendarTest extends TestCase {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
             testDelete(cdao);
         }
+        si.close();
         DBPool.push(context, readcon);                
     }
     
@@ -426,7 +427,7 @@ public class CalendarTest extends TestCase {
                 assertTrue("Found only results with something like *test*", tcdao.getTitle().toLowerCase().indexOf("test") != -1);
                 assertTrue("Got real folder id ", tcdao.getParentFolderID() == folder_id);
             }
-     
+            si.close();
             CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(context);
             cdao.setTitle("test Public Folder Search - Step 1 - Insert");
@@ -449,12 +450,12 @@ public class CalendarTest extends TestCase {
                 CalendarDataObject tcdao = (CalendarDataObject)si.next();
                 assertTrue("Got real folder id ", tcdao.getParentFolderID() == public_folder_id);
             }              
-            
+            si.close();
             
             si = csql.searchAppointments("*.*", public_folder_id, 0, "ASC", cols);
             gotresults = si.hasNext();
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
-        
+            si.close();
         } finally {
             ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
@@ -672,7 +673,7 @@ public class CalendarTest extends TestCase {
                 System.out.println(">>> "+tdao.getTitle());
                 found = true;
             }
-            
+            si.close();
             assertTrue("Got no results out of the public folder", found == false);
             
             // Magic test
@@ -680,7 +681,7 @@ public class CalendarTest extends TestCase {
             si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
             assertTrue("Got results", !si.hasNext());
             
-            
+            si.close();
         } finally {
             ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
@@ -768,6 +769,7 @@ public class CalendarTest extends TestCase {
             counter++;
             
         }
+        si.close();
         System.out.println("DEBUG: deleted : "+counter);
         si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0, null);
         assertTrue("Check that we deleted them all", !si.hasNext());
@@ -934,7 +936,7 @@ public class CalendarTest extends TestCase {
         
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         assertTrue("Got no results", si.hasNext() == false);
-        
+        si.close();
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone("Europe/Berlin");
@@ -1098,7 +1100,8 @@ public class CalendarTest extends TestCase {
                 if (object_id == cdao.getObjectID()) {
                     found = true;
                 }
-            }            
+            }          
+            si.close();
             assertTrue("User2 got object in shared folder created by user1 ", found);            
             
             CalendarDataObject ddao = new CalendarDataObject();
@@ -1112,7 +1115,8 @@ public class CalendarTest extends TestCase {
                 if (object_id == cdao.getObjectID()) {
                 found_deleted = true;
                 }
-            }                        
+            }       
+            si.close();
             assertTrue("User2 got no object in shared folder created by user1 ", found_deleted);
             
         } finally {

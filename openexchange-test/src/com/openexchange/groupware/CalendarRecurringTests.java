@@ -671,7 +671,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertEquals("Check master recurrence position", 0, tcdao.getRecurrencePosition());
             }
         }
-        
+        si.close();
         assertTrue("Found created exception ", found_exception);
         
         // delete whole sequence incl. all exceptions
@@ -910,7 +910,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
         }        
-        
+        si.close();
         assertTrue("Found exception",  found_exception);
         
         si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END), 0, null);
@@ -920,7 +920,8 @@ public class CalendarRecurringTests extends TestCase {
             if (tcdao.getRecurrenceID() == object_id) {
                 counter ++;
             }
-        }               
+        }          
+        si.close();
         assertEquals("Check correct number of results" , 2 , counter);
         
     }
@@ -1025,7 +1026,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
         }        
-        
+        si.close();
         assertTrue("Found exception",  found_exception);
         
         si = csql.getAppointmentsBetweenInFolder(folder_id, cols, new Date(0), new Date(SUPER_END), 0, null);
@@ -1035,7 +1036,8 @@ public class CalendarRecurringTests extends TestCase {
             if (tcdao.getRecurrenceID() == object_id) {
                 counter ++;
             }
-        }               
+        }          
+        si.close();
         assertEquals("Check correct number of results" , 2 , counter);
         
     }        

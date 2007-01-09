@@ -105,6 +105,7 @@ public class AppointmentBugTests extends TestCase {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
             testDelete(cdao);
         }
+        si.close();
         DBPool.push(context, readcon);                
     }    
     
@@ -564,9 +565,7 @@ public class AppointmentBugTests extends TestCase {
             try {
                 if (shared_folder_id > 0) {
                     ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
-                } else {
-                    fail("Folder was not created.");
-                }
+                } 
             } catch(Exception e) {
                 e.printStackTrace();
                 fail("Error deleting folder object.");
