@@ -22,7 +22,7 @@ import com.openexchange.sessiond.SessionObjectWrapper;
  */
 public class AppointmentAttachmentTest extends TestCase {
     
-    private int userid = 0;
+    private int userid = 11;
     private Context context;
     
     protected void setUp() throws Exception {        
@@ -40,14 +40,18 @@ public class AppointmentAttachmentTest extends TestCase {
     public void testAttachAndDetachToAppointment() throws Exception {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
-        cdao.setTitle("Attachment Test");
+        cdao.setTitle("testAttachAndDetachToAppointment");
         cdao.setParentFolderID(CalendarTest.getPrivateFolder());
         CalendarTest.fillDatesInDao(cdao);
         SessionObject sessionobject = SessionObjectWrapper.createSessionObject(userid, context, "AttachmentTestId");
         CalendarSql csql = new CalendarSql(sessionobject);
-        csql.insertAppointmentObject(cdao);
+        cdao.setIgnoreConflicts(true);
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao);
         int oid = cdao.getObjectID();
         
+        assertTrue("Got no object_id", oid != 0);
+        assertTrue("Got no conflicts ", conflicts == null);
+        
         csql.attachmentAction(oid, userid, context, true);
         csql.attachmentAction(oid, userid, context, true);
         csql.attachmentAction(oid, userid, context, true);
@@ -58,8 +62,11 @@ public class AppointmentAttachmentTest extends TestCase {
         csql.attachmentAction(oid, userid, context, false);
         csql.attachmentAction(oid, userid, context, false);
         
+        long last_modified = 0;
         try {
-            csql.attachmentAction(oid, userid, context, false);
+            long check_modified = System.currentTimeMillis();
+            last_modified = csql.attachmentAction(oid, userid, context, false);
+            assertTrue("Check for last_modified ", last_modified >= check_modified);
         } catch(Exception e) {
             return; 
         }
