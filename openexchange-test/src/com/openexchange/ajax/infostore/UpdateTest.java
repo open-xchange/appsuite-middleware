@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
@@ -254,5 +255,11 @@ public class UpdateTest extends InfostoreAJAXTest {
 		assertTrue(res.hasError());
 		assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("virt"));
 	}
+	
+//	Bug 5053
+	public void testInvalidUrl() throws Exception {
+		Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), System.currentTimeMillis(), m("url", "www.suse.de"));
+		assertTrue(res.hasError());
+	}	
 	
 }

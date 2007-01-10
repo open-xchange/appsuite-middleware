@@ -44,7 +44,7 @@ public class WebdavClientTest extends TestCase {
 	}
 	
 	protected WebdavResource getResource(String url, String login, String password) throws HttpException, IOException{
-		HttpURL httpUrl = new HttpURL("http://"+hostname+"/servlet/webdav.infostore"+url);
+		HttpURL httpUrl = new HttpURL("http://"+hostname+"/servlet/webdav.infostore/"+url);
 		httpUrl.setUserinfo(login, password);
 		WebdavResource res = new WebdavResource(httpUrl, 0, WebdavResource.NOACTION);
 		return res;

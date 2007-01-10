@@ -202,4 +202,17 @@ public class NewTest extends InfostoreAJAXTest {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 	}
+	
+	
+	//Bug 5053
+	public void testInvalidUrl() throws Exception {
+		try {
+			clean.add(
+					createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+folderId, "title" , "test5053", "url", "www.suse.de"))
+			);
+			fail("Expected exception because we can't create a document in this virtual folder");
+		} catch (JSONException x) {
+			assertTrue(true);
+		}
+	}
 }
