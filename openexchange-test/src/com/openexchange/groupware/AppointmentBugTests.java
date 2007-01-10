@@ -148,7 +148,7 @@ public class AppointmentBugTests extends TestCase {
      4.  Check the entries in the month view
      5.  Check entries in OX6 Calendar
     */     
-    public void testBug4467() throws Throwable { 
+    public void _testBug4467() throws Throwable { 
         
         int fid = getPrivateFolder(userid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");                
@@ -190,7 +190,7 @@ public class AppointmentBugTests extends TestCase {
      2. Set the recurrence to "every day, for 2 days" and save the appointment
      3. Verify the appointment in OX6 GUI in the different appointment views
     */
-    public void testBug4377() throws Throwable { 
+    public void _testBug4377() throws Throwable { 
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
         cdao.setTimezone(TIMEZONE);
@@ -219,7 +219,7 @@ public class AppointmentBugTests extends TestCase {
      3. Check that User B does not have the appointment anymore in his own calendar
      4. Check that original appointment has only one participant left (User A)
     */     
-    public void testBug4497() throws Throwable {
+    public void _testBug4497() throws Throwable {
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         int userid2 = resolveUser(user2);        
         int fid = getPrivateFolder(userid);
@@ -275,7 +275,7 @@ public class AppointmentBugTests extends TestCase {
      (wöchentlich). FYI: I did not change the defaults, so it was an the same day and
      recurred every 4 weeks.
     */
-    public void testBug4276() throws Throwable {
+    public void _testBug4276() throws Throwable {
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         int userid2 = resolveUser(user2);        
         int fid = getPrivateFolder(userid);
@@ -321,7 +321,7 @@ public class AppointmentBugTests extends TestCase {
      when i open a multi participant appt and add one resource to the appt, the
      following error is thrown:
     */
-    public void testBug4119() throws Throwable {
+    public void _testBug4119() throws Throwable {
         
         // Clean up appointments
         deleteAllAppointments();
@@ -409,7 +409,7 @@ public class AppointmentBugTests extends TestCase {
     Results:
     Appointments initially get displayed, but always on the 1st of the following months     
     */
-    public void testBug4473() throws Throwable {
+    public void _testBug4473() throws Throwable {
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -449,7 +449,7 @@ public class AppointmentBugTests extends TestCase {
     recurring whole-day appointments work with Outlook OXtender 6 and are
     communicated correctly by the server.    
     */
-    public void testBug4766() throws Throwable {
+    public void _testBug4766() throws Throwable {
         RecurringResults m = null;
         int fid = getPrivateFolder(userid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
@@ -490,7 +490,7 @@ public class AppointmentBugTests extends TestCase {
     -> A Exception is shown in Outlook OXtenders debug log and occurs in
     open-xchange.log (see attachment)
      */    
-    public void testBug4717() throws Throwable {
+    public void _testBug4717() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         
@@ -584,7 +584,7 @@ public class AppointmentBugTests extends TestCase {
     only the first appointment can be seen in the calendar.
      */
     
-    public void testBug4838() throws Throwable {
+    public void _testBug4838() throws Throwable {
         RecurringResults m = null;
         int fid = getPrivateFolder(userid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
@@ -626,7 +626,7 @@ public class AppointmentBugTests extends TestCase {
     recurrence information. 
      */
     
-    public void testBug5010() throws Throwable {
+    public void _testBug5010() throws Throwable {
         RecurringResults m = null;
         int fid = getPrivateFolder(userid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
@@ -665,5 +665,52 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check rec type ", CalendarDataObject.DAILY, testobject2.getRecurrenceType());
         
     }    
+
+    /*
+    Create a new appointment and make it occur every 2 days. Save it. Go to
+    "bearbeiten" and change it to every 3 days. Save. See that it does not change.
+     */
+    
+    public void testBug5012() throws Throwable {   
+        RecurringResults m = null;
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setTitle("testBug5012");
+        cdao.setRecurrenceType(CalendarDataObject.DAILY);
+        cdao.setInterval(1);
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);                
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setStartDate(cdao.getStartDate());
+        update.setEndDate(cdao.getEndDate());
+        update.setRecurrenceType(CalendarDataObject.DAILY);
+        update.setInterval(2);
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
+        
+        assertEquals("Check that the sequence type is identical ", testobject.getRecurrenceType(), testobject2.getRecurrenceType());
+        assertTrue("Check that the interval has been changed", testobject.getInterval() != testobject2.getInterval());
+        
+        
+    } 
+    
     
 }
