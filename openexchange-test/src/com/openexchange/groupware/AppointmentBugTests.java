@@ -534,11 +534,15 @@ public class AppointmentBugTests extends TestCase {
             csql2.insertAppointmentObject(cdao);        
             int object_id = cdao.getObjectID();
             
+            CalendarDataObject original_object = csql2.getObjectById(object_id, shared_folder_id);
+            
             CalendarDataObject udao = new CalendarDataObject();
             udao.setContext(so.getContext());
             udao.setObjectID(object_id);
-            udao.setStartDate(new Date(cdao.getStartDate().getTime()+3600000)); // move 1 h
-            udao.setEndDate(new Date(cdao.getEndDate().getTime()+3600000)); // move 1 h
+            Date check_start_date = new Date(cdao.getStartDate().getTime()+3600000); // move 1 h
+            Date check_end_date = new Date(cdao.getEndDate().getTime()+3600000); // move 1 h
+            udao.setStartDate(check_start_date); 
+            udao.setEndDate(check_end_date); 
             udao.setTitle("testBug4717 - updated by "+user2);
             
             Participants participants = new Participants();
@@ -552,14 +556,29 @@ public class AppointmentBugTests extends TestCase {
             udao.setParticipants(participants.getList());
             udao.setUsers(participants.getUsers());
             udao.setIgnoreConflicts(true);
-            csql2.updateAppointmentObject(udao, shared_folder_id, cdao.getLastModified());
-            
+
+            csql2.updateAppointmentObject(udao, shared_folder_id, cdao.getLastModified());            
             
             CalendarDataObject testobject = csql2.getObjectById(object_id, shared_folder_id);
             UserParticipant up[] = testobject.getUsers();
             assertTrue("UserParticipant not null", up != null);
             assertEquals("Check that we got two participants ", 2, up.length);
+            assertEquals("Check start date" , check_start_date, testobject.getStartDate());
+            assertEquals("Check end date" , check_end_date, testobject.getEndDate());
             
+            CalendarDataObject second_update = new CalendarDataObject();
+            second_update.setContext(so.getContext());
+            second_update.setObjectID(object_id);
+            second_update.setStartDate(original_object.getStartDate()); // back to origin time
+            second_update.setEndDate(original_object.getEndDate()); // back to origin time
+            second_update.setTitle("testBug4717 - updated (2) by "+user2);            
+            second_update.setIgnoreConflicts(true);            
+            
+            csql2.updateAppointmentObject(second_update, shared_folder_id, testobject.getLastModified());
+            
+            CalendarDataObject testobject2 = csql2.getObjectById(object_id, shared_folder_id);            
+            assertEquals("Check start date" , cdao.getStartDate(), testobject2.getStartDate());
+            assertEquals("Check end date" , cdao.getEndDate(), testobject2.getEndDate());            
             
         } finally {
             try {
