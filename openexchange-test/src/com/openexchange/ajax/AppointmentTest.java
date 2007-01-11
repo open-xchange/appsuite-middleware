@@ -681,6 +681,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 			String searchpattern, int inFolder, int[] cols,
 			TimeZone userTimeZone, String host, String session)
 			throws Exception {
+		return searchAppointment(webCon, searchpattern, inFolder, null, null, cols, userTimeZone, host, session);
+	}
+	
+	public static AppointmentObject[] searchAppointment(WebConversation webCon,
+			String searchpattern, int inFolder, Date start, Date end, int[] cols,
+			TimeZone userTimeZone, String host, String session)
+			throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -689,6 +696,14 @@ public class AppointmentTest extends AbstractAJAXTest {
 				AJAXServlet.ACTION_SEARCH);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
 				.colsArray2String(cols));
+		
+		if (start != null) {
+			parameter.setParameter(AJAXServlet.PARAMETER_START, start);
+		}
+
+		if (end != null) {
+			parameter.setParameter(AJAXServlet.PARAMETER_END, end);
+		}
 		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
