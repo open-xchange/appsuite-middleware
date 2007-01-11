@@ -325,8 +325,31 @@ public class CalendarTest extends TestCase {
         CalendarSql csql = new CalendarSql(so);        
         csql.insertAppointmentObject(cdao);        
         int object_id = cdao.getObjectID();
+        
         CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         assertTrue("Alarm should not be set", !testobject.containsAlarm());
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setTitle("testNoAlarm - Step 2 - Update");
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
+        assertTrue("Alarm should not be set", !testobject2.containsAlarm());        
+        
+        CalendarDataObject update2 = (CalendarDataObject)testobject2.clone();
+        update2.setContext(so.getContext());
+        update2.setObjectID(object_id);
+        update2.setTitle("testNoAlarm - Step 3 - Update 2");
+        
+        csql.updateAppointmentObject(update2, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject3 = csql.getObjectById(object_id, fid);
+        assertTrue("Alarm should not be set", !testobject3.containsAlarm());
+        
+        
         
     }    
 
