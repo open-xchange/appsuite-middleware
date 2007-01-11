@@ -11,6 +11,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -349,9 +350,58 @@ public class CalendarTest extends TestCase {
         CalendarDataObject testobject3 = csql.getObjectById(object_id, fid);
         assertTrue("Alarm should not be set", !testobject3.containsAlarm());
         
+    }
+    
+    public void testAlarmAndUpdate() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("testAlarmAndUpdate - Step 1 - Insert");
+        cdao.setParentFolderID(fid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        cdao.setAlarm(15);
+        fillDatesInDao(cdao);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertTrue("Alarm should be set", testobject.containsAlarm());
+        assertEquals("Test correct alarm value", 15, testobject.getAlarm());
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setTitle("testAlarmAndUpdate - Step 2 - Update");
+        update.setIgnoreConflicts(true);
+         
+        Participants participants = new Participants();
+        Participant p = new UserParticipant();
+        p.setIdentifier(userid);
+        participants.add(p);        
+        UserParticipant up = new UserParticipant();
+        up.setIdentifier(userid);
+        
+        update.setUsers(new UserParticipant[] { up });        
+        update.setParticipants(participants.getList());
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
+        assertTrue("Alarm should be set", testobject2.containsAlarm());
+        assertEquals("Test correct alarm value", 15, testobject2.getAlarm());
+        
+        ReminderSQLInterface rsql = new ReminderHandler(so);
+        ReminderObject ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT);
+        long check_date = new Date((testobject2.getStartDate().getTime() - (15*60*1000))).getTime();
+        assertEquals("Check correct alam in reminder object" , check_date, ro.getDate().getTime());
         
         
     }    
+    
 
     public void testInsertAndAlarm() throws Throwable {
         Context context = new ContextImpl(contextid);
@@ -1130,7 +1180,7 @@ public class CalendarTest extends TestCase {
             CalendarDataObject ddao = new CalendarDataObject();
             ddao.setContext(so.getContext());
             ddao.setObjectID(object_id);
-            csql.deleteAppointmentObject(ddao, shared_folder_id, cdao.getLastModified());
+            csql.deleteAppointmentObject(ddao, shared_folder_id, new Date(SUPER_END));
             boolean found_deleted = false;        
             si = csql2.getDeletedAppointmentsInFolder(shared_folder_id, cols, new Date(0));
             while (si.hasNext()) {
