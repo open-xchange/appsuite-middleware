@@ -98,7 +98,7 @@ public class UpdateTest extends ContactTest {
 	}
 	
 	public void testUpdateContactWithImage() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactWithImage");
+		ContactObject contactObj = createContactObject("testUpdateContactWithImageUpdate");
 		int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
 		contactObj.setImage1(image);

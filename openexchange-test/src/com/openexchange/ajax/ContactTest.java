@@ -97,7 +97,6 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject.INSTANT_MESSENGER1,
 		ContactObject.INSTANT_MESSENGER2,
 		ContactObject.IMAGE1,
-		ContactObject.NUMBER_OF_IMAGES,
 		ContactObject.LINKS,
 		ContactObject.MANAGER_NAME,
 		ContactObject.MARITAL_STATUS,
@@ -992,9 +991,11 @@ public class ContactTest extends AbstractAJAXTest {
 			case ContactObject.IMAGE1:
 				contactObj.setImage1(jsonArray.getString(pos).getBytes());
 				break;
+				/* NO LONGER PRESENT
 			case ContactObject.NUMBER_OF_IMAGES:
 				contactObj.setNumberOfImages(jsonArray.getInt(pos));
 				break;
+				*/
 			case ContactObject.INFO:
 				contactObj.setInfo(jsonArray.getString(pos));
 				break;
