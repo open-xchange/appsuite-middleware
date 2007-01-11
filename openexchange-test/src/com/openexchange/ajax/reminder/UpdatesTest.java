@@ -1,8 +1,8 @@
 package com.openexchange.ajax.reminder;
 
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.ConfigMenuTest;
 import com.openexchange.ajax.FolderTest;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -22,8 +22,8 @@ public class UpdatesTest extends ReminderTest {
 	}
 	
 	public void testRange() throws Exception {	
-		final int userId = ConfigMenuTest.getUserId(getWebConversation(), getHostName(), getSessionId());
-		final TimeZone timeZone = ConfigMenuTest.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
+		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);

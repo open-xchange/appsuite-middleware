@@ -19,6 +19,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -93,7 +94,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 			appointmentFolderId = folderObj.getObjectID();
 			userId = folderObj.getCreatedBy();
 			
-			timeZone = ConfigMenuTest.getTimeZone(getWebConversation(),
+			timeZone = ConfigTools.getTimeZone(getWebConversation(),
 					getHostName(), getSessionId());
 			
 			LOG.debug(new StringBuilder().append("use timezone: ").append(

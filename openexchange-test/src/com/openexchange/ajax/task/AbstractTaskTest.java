@@ -87,7 +87,7 @@ public abstract class AbstractTaskTest extends AbstractAJAXTest {
     protected int getPrivateTaskFolder() throws IOException, SAXException,
         JSONException, OXException {
         if (0 == privateTaskFolder) {
-            privateTaskFolder = Tools.getPrivateTaskFolder(getWebConversation(),
+            privateTaskFolder = TaskTools.getPrivateTaskFolder(getWebConversation(),
                 getHostName(), getSessionId());
         }
         return privateTaskFolder;

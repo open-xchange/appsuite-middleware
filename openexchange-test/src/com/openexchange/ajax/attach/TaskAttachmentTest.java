@@ -53,7 +53,7 @@ import java.util.Date;
 
 import com.openexchange.ajax.TasksTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.Tools;
+import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.tasks.Task;
 
@@ -76,7 +76,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
         final Task task = new Task();
         task.setTitle("AttachmentTest");
         task.setParentFolderID(folderId);
-        final int taskId = Tools.extractInsertId(Tools.insertTask(
+        final int taskId = TaskTools.extractInsertId(TaskTools.insertTask(
             getWebConversation(), getHostName(), sessionId, task));
         return taskId;
     }
@@ -87,7 +87,7 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     @Override
     public int getExclusiveWritableFolder(final String sessionId)
         throws Exception {
-        return Tools.getPrivateTaskFolder(getWebConversation(),
+        return TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), sessionId);
     }
 
@@ -105,10 +105,10 @@ public class TaskAttachmentTest extends AbstractAttachmentTest {
     @Override
     public void removeAttachable(final int folder, final int taskId,
         final String sessionId) throws Exception {
-        final Response response = Tools.getTask(getWebConversation(),
+        final Response response = TaskTools.getTask(getWebConversation(),
             getHostName(), sessionId, folderId, taskId);
         final Date lastModified = response.getTimestamp();
-        Tools.deleteTask(getWebConversation(), getHostName(), sessionId,
+        TaskTools.deleteTask(getWebConversation(), getHostName(), sessionId,
             lastModified, folder, taskId);
     }
 

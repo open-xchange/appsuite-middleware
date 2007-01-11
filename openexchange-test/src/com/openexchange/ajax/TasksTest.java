@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.task.Tools.*;
+import static com.openexchange.ajax.task.TaskTools.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,10 +63,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.meterware.httpunit.WebConversation;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.task.AbstractTaskTest;
-import com.openexchange.ajax.task.Tools;
+import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -99,7 +100,7 @@ public class TasksTest extends AbstractTaskTest {
      * @throws Throwable if an error occurs.
      */
     public void testCountPrivateFolder() throws Throwable {
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         final int number = countTasks(getWebConversation(), getHostName(),
@@ -157,7 +158,7 @@ public class TasksTest extends AbstractTaskTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
@@ -182,7 +183,7 @@ public class TasksTest extends AbstractTaskTest {
         task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
         task.setNote("\uC11C\uC601\uC9C4");
 
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
@@ -209,7 +210,7 @@ public class TasksTest extends AbstractTaskTest {
         task.setActualCosts(1f);
         task.setTargetCosts(1f);
 
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
@@ -260,12 +261,12 @@ public class TasksTest extends AbstractTaskTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 2, true,
-            ConfigMenuTest.getUserId(getWebConversation(), getHostName(),
+            ConfigTools.getUserId(getWebConversation(), getHostName(),
                 getSessionId()));
         ExternalUserParticipant external = new ExternalUserParticipant();
         external.setEmailAddress("external@external.no");
@@ -300,7 +301,7 @@ public class TasksTest extends AbstractTaskTest {
     public void testUpdateDelegatedTask() throws Throwable {
         final List<Participant> participants = getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 4, true,
-            ConfigMenuTest.getUserId(getWebConversation(), getHostName(),
+            ConfigTools.getUserId(getWebConversation(), getHostName(),
                 getSessionId()));
         final List<Participant> firstParticipants =
             new ArrayList<Participant>();
@@ -312,7 +313,7 @@ public class TasksTest extends AbstractTaskTest {
 
         final Task task = new Task();
         task.setTitle("Private delegated task");
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         task.setParentFolderID(folderId);
         task.setParticipants(firstParticipants);
@@ -378,7 +379,7 @@ public class TasksTest extends AbstractTaskTest {
         final Task task = new Task();
         task.setTitle(title);
 
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
@@ -407,7 +408,7 @@ public class TasksTest extends AbstractTaskTest {
     }
 
     public void testAll() throws Throwable {
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
@@ -436,7 +437,7 @@ public class TasksTest extends AbstractTaskTest {
      * @throws Throwable if an error occurs.
      */
     public void testAllWithOrder() throws Throwable {
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
@@ -462,7 +463,7 @@ public class TasksTest extends AbstractTaskTest {
     }
 
     public void testUpdates() throws Throwable {
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
@@ -524,7 +525,7 @@ public class TasksTest extends AbstractTaskTest {
     }
 
     public void testTaskList() throws Throwable {
-        final int folderId = Tools.getPrivateTaskFolder(getWebConversation(),
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
         final Task task = new Task();
         task.setParentFolderID(folderId);
@@ -554,9 +555,9 @@ public class TasksTest extends AbstractTaskTest {
         final Task task = new Task();
         task.setTitle("Task to test confirmation");
 
-        final int folderId2 = Tools.getPrivateTaskFolder(getSecondWebConversation(),
+        final int folderId2 = TaskTools.getPrivateTaskFolder(getSecondWebConversation(),
             getHostName(), getSecondSessionId());
-        final int userId2 = ConfigMenuTest.getUserId(getSecondWebConversation(),
+        final int userId2 = ConfigTools.getUserId(getSecondWebConversation(),
             getHostName(), getSecondSessionId());
 
         final List<UserParticipant> participants =

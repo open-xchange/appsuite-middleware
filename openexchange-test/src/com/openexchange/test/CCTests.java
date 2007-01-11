@@ -64,7 +64,7 @@ public class CCTests
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class); 	 
         tests.addTest(ReminderAJAXSuite.suite()); 	 
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite()); 	 
-        tests.addTestSuite(com.openexchange.ajax.ConfigMenuTest.class); 	 
+        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite()); 	 
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentBugTestSuite.suite());
 		
@@ -76,7 +76,7 @@ public class CCTests
 
 		tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
-        tests.addTest(com.openexchange.ajax.task.TaskTests.suite());
+        tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
 
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentBugTestSuite.suite());

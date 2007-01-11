@@ -74,9 +74,9 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.ConfigMenuTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.TaskSearchJSONWriter;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.TaskParser;
@@ -93,12 +93,12 @@ import com.openexchange.tools.URLParameter;
  * server.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Tools extends Assert {
+public final class TaskTools extends Assert {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Tools.class);
+    private static final Log LOG = LogFactory.getLog(TaskTools.class);
 
     /**
      * To use character encoding.
@@ -113,7 +113,7 @@ public final class Tools extends Assert {
     /**
      * Prevent instanciation.
      */
-    private Tools() {
+    private TaskTools() {
         super();
     }
 
@@ -150,7 +150,7 @@ public final class Tools extends Assert {
         LOG.trace("Inserting task.");
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-        final TimeZone timezone = ConfigMenuTest.getTimeZone(conversation,
+        final TimeZone timezone = ConfigTools.getTimeZone(conversation,
             hostName, sessionId);
         final TaskWriter taskW = new TaskWriter(printW, timezone);
         taskW.writeTask(task);
@@ -226,7 +226,7 @@ public final class Tools extends Assert {
     public static TimeZone getUserTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException {
-        return ConfigMenuTest.getTimeZone(conversation, hostName, sessionId);
+        return ConfigTools.getTimeZone(conversation, hostName, sessionId);
     }
 
     public static Response getTask(final WebConversation conversation,
@@ -321,13 +321,13 @@ public final class Tools extends Assert {
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder columnSB = new StringBuilder();
         for (int i : columns) {
-            sb.append(i);
-            sb.append(',');
+            columnSB.append(i);
+            columnSB.append(',');
         }
-        sb.delete(sb.length() - 1, sb.length());
-        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
+        columnSB.delete(columnSB.length() - 1, columnSB.length());
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columnSB.toString());
         if (null != order) {
             req.setParameter(AJAXServlet.PARAMETER_SORT, String.valueOf(sort));
             req.setParameter(AJAXServlet.PARAMETER_ORDER, order);
@@ -355,13 +355,13 @@ public final class Tools extends Assert {
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
             String.valueOf(folderId));
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder columnSB = new StringBuilder();
         for (int i : columns) {
-            sb.append(i);
-            sb.append(',');
+            columnSB.append(i);
+            columnSB.append(',');
         }
-        sb.delete(sb.length() - 1, sb.length());
-        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, sb.toString());
+        columnSB.delete(columnSB.length() - 1, columnSB.length());
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columnSB.toString());
         if (null != order) {
             req.setParameter(AJAXServlet.PARAMETER_SORT, String.valueOf(sort));
             req.setParameter(AJAXServlet.PARAMETER_ORDER, order);

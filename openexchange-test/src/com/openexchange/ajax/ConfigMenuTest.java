@@ -37,25 +37,12 @@
 
 package com.openexchange.ajax;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.TimeZone;
-
-import javax.servlet.http.HttpServletResponse;
+import static com.openexchange.ajax.config.ConfigTools.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.tools.URLParameter;
 
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
@@ -68,11 +55,6 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
-
-    /**
-     * URL of the AJAX config interface.
-     */
-    private static final String CONFIG_URL = "/ajax/config/";
 
     /**
      * Default constructor.
@@ -89,6 +71,7 @@ public class ConfigMenuTest extends AbstractAJAXTest {
     public void testReadSettings() throws Throwable {
         final String value = readSetting(getWebConversation(), getHostName(),
             getSessionId(), "");
+        LOG.info("Settings: " + value);
         assertTrue("Got no value from server.", value.length() > 0);
     }
 
@@ -118,96 +101,5 @@ public class ConfigMenuTest extends AbstractAJAXTest {
             getSessionId());
         LOG.trace("UserId: " + userId);
         assertTrue("No valid user identifier", userId > 0);
-    }
-
-    /**
-     * Reads a configuration setting. A tree of configuration settings can also
-     * be read. This tree will be returned as a string in JSON.
-     * @param conversation web conversation.
-     * @param hostName host name of the server.
-     * @param sessionId session identifier of the user.
-     * @param path path to the setting.
-     * @return the value of the setting or a string with the tree of settings in
-     * JSON.
-     * @throws SAXException if parsing of the response fails.
-     * @throws IOException if getting the response fails.
-     * @throws JSONException if parsing the response fails.
-     */
-    public static String readSetting(final WebConversation conversation,
-        final String hostName, final String sessionId, final String path)
-        throws IOException, SAXException, JSONException {
-        LOG.trace("Reading setting.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
-            + CONFIG_URL + '/' + path);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: \"" + body + "\"");
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        return response.getData().toString();
-    }
-
-    /**
-     * Stores a configuration setting.
-     * @param conversation web conversation.
-     * @param hostName host name of the server.
-     * @param sessionId session identifier of the user.
-     * @param path path to the setting.
-     * @param value the value to write.
-     * @throws Throwable if an error occurs.
-     */
-    public static void storeSetting(final WebConversation conversation,
-        final String hostName, final String sessionId, final String path,
-        final String value) throws Throwable {
-        LOG.trace("Storing setting.");
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostName
-            + CONFIG_URL + '/' + path + parameter.getURLParameters(),
-            new ByteArrayInputStream(value.getBytes("UTF-8")),
-            "application/octet-stream");
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        LOG.trace("Setting stored.");
-    }
-
-    /**
-     * Reads the unique identifier of the user.
-     * @param conversation web conversation.
-     * @param hostName host name of the server.
-     * @param sessionId session identifier of the user.
-     * @return the unique identifier of the user.
-     * @throws SAXException if parsing of the response fails.
-     * @throws IOException if getting the response fails.
-     * @throws JSONException if parsing the response fails.
-     */
-    public static int getUserId(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException {
-        final String value = readSetting(conversation, hostName, sessionId,
-            "identifier");
-        return Integer.parseInt(value);
-    }
-
-    /**
-     * Reads the time zone of the user.
-     * @param conversation web conversation.
-     * @param hostName host name of the server.
-     * @param sessionId session identifier of the user.
-     * @return the time zone configured by the user.
-     * @throws SAXException if parsing of the response fails.
-     * @throws IOException if getting the response fails.
-     * @throws JSONException if parsing the response fails.
-     */
-    public static TimeZone getTimeZone(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException {
-        final String value = readSetting(conversation, hostName, sessionId,
-            "timezone");
-        return TimeZone.getTimeZone(value);
     }
 }

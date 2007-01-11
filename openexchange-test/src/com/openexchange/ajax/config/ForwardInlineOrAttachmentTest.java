@@ -47,27 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.config;
 
-import com.openexchange.ajax.TasksTest;
+import static com.openexchange.ajax.config.ConfigTools.readSetting;
+import static com.openexchange.ajax.config.ConfigTools.storeSetting;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.AbstractAJAXTest;
 
 /**
- * Suite for all task tests.
+ * Tests if forwarding configuration parameter correctly stores the values
+ * "Inline" or "Attachment".
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TaskTests {
+public class ForwardInlineOrAttachmentTest extends AbstractAJAXTest {
 
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * Path to the configuration parameter.
      */
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    private static final String PATH = "mail/forwardmessage";
+
+    /**
+     * Inline value.
+     */
+    private static final String INLINE = "Inline";
+
+    /**
+     * Attachment value.
+     */
+    private static final String ATTACHMENT = "Attachment";
+
+    /**
+     * Default constructor.
+     * @param name Name of the test.
+     */
+    public ForwardInlineOrAttachmentTest(final String name) {
+        super(name);
+    }
+
+    /**
+     * Tests if the forward configuration parameter is stored correctly.
+     */
+    public void testForwardParameter() throws Throwable {
+        final String forward = readSetting(getWebConversation(), getHostName(),
+            getSessionId(), PATH);
+        for (String testString : new String[] { INLINE, ATTACHMENT, forward }) {
+            storeSetting(getWebConversation(), getHostName(), getSessionId(),
+                PATH, testString);
+            assertEquals("Written setting isn't returned from server.",
+                testString, readSetting(getWebConversation(), getHostName(),
+                    getSessionId(), PATH));
+        }
     }
 }

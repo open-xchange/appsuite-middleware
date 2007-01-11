@@ -49,58 +49,32 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+import com.openexchange.ajax.TasksTest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * @author marcus
- *
+ * Suite for all task tests.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest {
+public final class TaskTestSuite {
 
     /**
-     * Logger.
+     * Prevent instanciation.
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
+    private TaskTestSuite() {
+        super();
+    }
     
     /**
-     * Default constructor.
-     * @param name Name of the test.
+     * Generates the task test suite.
+     * @return the task tests suite.
      */
-    public TruncationTest(final String name) {
-        super(name);
-    }
-
-    /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
-     */
-    public void testTruncation() throws Throwable {
-        final int folderId = getPrivateTaskFolder();
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        task.setParentFolderID(folderId);
-        final Response response = insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task);
-        assertTrue("Server did not detect truncated data.",
-            response.hasError());
-        assertTrue("Array of truncated attribute identifier is empty.",
-            response.getException().getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getException().getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(TruncationTest.class);
+        tests.addTestSuite(TasksTest.class);
+        return tests;
     }
 }
