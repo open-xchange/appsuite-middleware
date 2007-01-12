@@ -830,5 +830,67 @@ public class AppointmentBugTests extends TestCase {
         }                
     }
     
+    /*
+    1. As User A: Create a new appointment and invite User B
+    2. As User B: Verify the appointment in the calendar
+    -> The appointment is shown to User B, OK
+    3. As User B: Delete the appointment from the personal calendar
+    4. As User A: Verify the appointment participants.
+    */
+    public void testBug5144() throws Throwable {
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int userid2 = resolveUser(user2);        
+        int fid = getPrivateFolder(userid);
+        int fid2 = getPrivateFolder(userid2);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug5144");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);
+        
+        UserParticipant userA = new UserParticipant();
+        userA.setIdentifier(userid);
+       
+        UserParticipant userB = new UserParticipant();
+        userB.setIdentifier(userid2);        
+        
+        cdao.setUsers(new UserParticipant[] { userA, userB });        
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject delete = new CalendarDataObject();
+        delete.setContext(so2.getContext());
+        delete.setObjectID(object_id);
+          
+        csql2.deleteAppointmentObject(delete, fid2, cdao.getLastModified());
+        
+        try {
+            CalendarDataObject testobject = csql2.getObjectById(object_id, fid2);
+            fail("User should get an OXPermissionException ");
+        } catch(OXPermissionException ope) {
+            // Excellent
+        }
+     
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        UserParticipant up[] = testobject.getUsers();
+        Participant p[] = testobject.getParticipants();
+        
+        assertEquals("Check that only one userparticipant exists", 1, up.length);
+        assertEquals("Check that only one participant exists", 1, p.length);
+        
+        
+        
+        
+        
+        
+    }
     
 }
