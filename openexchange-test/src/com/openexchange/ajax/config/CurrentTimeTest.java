@@ -49,33 +49,63 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.ajax.ConfigMenuTest;
+import static com.openexchange.ajax.config.ConfigTools.getTimeZone;
+import static com.openexchange.ajax.config.ConfigTools.readSetting;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.AbstractAJAXTest;
 
 /**
- * Suite for all config tests.
+ * Test if the current time is sent successfully by the server.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigTestSuite {
+public class CurrentTimeTest extends AbstractAJAXTest {
 
     /**
-     * Prevent instanciation.
+     * Logger.
      */
-    private ConfigTestSuite() {
-        super();
-    }
-    
+    private static final Log LOG = LogFactory.getLog(CurrentTimeTest.class);
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * Maximum time difference between server and client. This test fails if
+     * a greater difference is detected.
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(CurrentTimeTest.class);
-        return tests;
+    private static final long MAX_DIFFERENCE = 1000;
+
+    /**
+     * Path to the configuration parameter.
+     */
+    private static final String PATH = "currentTime";
+
+    /**
+     * Default constructor.
+     * @param name Name of the test.
+     */
+    public CurrentTimeTest(final String name) {
+        super(name);
+    }
+
+    /**
+     * Tests if the current time is sent by the server through the configuration
+     * interface.
+     */
+    public void testCurrentTime() throws Throwable {
+        final TimeZone zone = getTimeZone(getWebConversation(), getHostName(),
+            getSessionId());
+        final String sTime = readSetting(getWebConversation(), getHostName(),
+            getSessionId(), PATH);
+        long serverTime = Long.parseLong(sTime);
+        serverTime -= zone.getOffset(serverTime);
+        final long localTime = System.currentTimeMillis();
+        LOG.info("Local time: " + System.currentTimeMillis() + " Server time: "
+            + serverTime);
+        final long difference = Math.abs(localTime - serverTime);
+        LOG.info("Time difference: " + difference);
+        assertTrue("Too big time difference: ",
+            difference < MAX_DIFFERENCE);
     }
 }
