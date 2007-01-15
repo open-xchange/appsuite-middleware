@@ -80,7 +80,7 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setLocation("Location");
 		appointmentObj.setShownAs(AppointmentObject.FREE);
 		appointmentObj.setParentFolderID(appointmentFolderId);
-		appointmentObj.setPrivateFlag(true);
+		//appointmentObj.setPrivateFlag(true); // Currently not supported!
 		appointmentObj.setFullTime(true);
 		appointmentObj.setLabel(2);
 		appointmentObj.setNote("note");
