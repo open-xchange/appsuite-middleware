@@ -630,13 +630,18 @@ public class AppointmentBugTests extends TestCase {
         
         m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
         assertTrue("Calculated results are > 0 ", m.size() > 1);
+        int last_month = 0;
         for (int a = 0; a < m.size(); a++) {
             RecurringResult rr = m.getRecurringResult(a);
             Calendar test = Calendar.getInstance();
             test.setFirstDayOfWeek(Calendar.MONDAY);
             Date date = new Date(rr.getStart());
             test.setTime(date);
-            assertEquals("Check day of month", Calendar.MONDAY, test.get(Calendar.DAY_OF_WEEK));
+            if (a > 0 && last_month != 11) {
+                assertEquals("Compare month", last_month+1, test.get(Calendar.MONTH));
+            }
+            assertEquals("Check day of month", Calendar.MONDAY, test.get(Calendar.DAY_OF_WEEK));            
+            last_month = test.get(Calendar.MONTH);
         }
         
     }
@@ -886,11 +891,6 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check that only one userparticipant exists", 1, up.length);
         assertEquals("Check that only one participant exists", 1, p.length);
         
-        
-        
-        
-        
-        
-    }
+     }
     
 }
