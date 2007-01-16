@@ -932,7 +932,8 @@ public class AppointmentBugTests extends TestCase {
             test.setFirstDayOfWeek(Calendar.MONDAY);
             Date date = new Date(rr.getStart());
             test.setTime(date);
-            System.out.println(">>> "+date);
+            assertEquals("Test that the day is a TUESDAY", Calendar.TUESDAY, test.get(Calendar.DAY_OF_WEEK));
+            assertEquals("Test that the month is JAN", Calendar.JANUARY, test.get(Calendar.MONTH));
         }
         
     }    
