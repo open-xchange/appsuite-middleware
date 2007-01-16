@@ -892,5 +892,171 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check that only one participant exists", 1, p.length);
         
      }
+
+    /*
+    A yearly recurring event can be set to the "first Tuesday in january".
+    If so, it happens on the first Tuesday in february(!) in the year 2009 (!)
+    The date is ok in 2008 and 2010.
+     */
+    public void testBug5202() throws Throwable {
+        RecurringResults m = null;
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");        
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testBug5202");
+        cdao.setRecurrenceType(CalendarDataObject.YEARLY);
+        cdao.setInterval(1);
+        cdao.setDays(CalendarDataObject.TUESDAY);
+        cdao.setMonth(Calendar.JANUARY);
+        cdao.setDayInMonth(1);
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);                
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
+        assertTrue("Calculated results are > 0 ", m.size() > 1);
+
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rr = m.getRecurringResult(a);
+            Calendar test = Calendar.getInstance();
+            test.setFirstDayOfWeek(Calendar.MONDAY);
+            Date date = new Date(rr.getStart());
+            test.setTime(date);
+            System.out.println(">>> "+date);
+        }
+        
+    }    
+
+    
+    /*
+    User A:
+    1. RMB the personal calendar -> "Properties"
+    2. Click "Rights" and add User B
+    3. Assign the following rights and save the folder permissions:
+
+    Rechtevergabe: None
+    Ordnerrechte: Objekte anlegen
+    Leserechte: Alle
+    Schreibrechte: Alle
+    Löschrechte: Keine
+
+    4. Create a new appointment with title "foobar" in the personal calendar which
+    is now shared to User B
+
+    User B:
+    5. Select the shared calendar of User A
+    6. Select "foobar" in the shared calendar and click "Appointment" -> "Edit" in
+    the panel
+    7. Change the title to "foobar2" and save the appointment
+
+    8. Verify the calendar as User A and User B
+    -> "foobar" has been deleted from the personal folder of User A and now exists
+    in the personal folder of User B. This must not be possible because User B has
+    no delete rights to the shared calendar of User A.
+     */
+    public void testBug5194() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        OXFolderAction ofa = new OXFolderAction(so);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS);
+        fo.setFolderName("testSharedFolder5194");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarSql csql = new CalendarSql(so);
+            CalendarSql csql2 = new CalendarSql(so2);
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(shared_folder_id);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug5194 - created by "+user2);
+            cdao.setIgnoreConflicts(true);
+            csql.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject testobject = csql2.getObjectById(object_id, shared_folder_id);
+            
+            UserParticipant up[] = testobject.getUsers();
+            assertEquals("Check that only user 1 is participant", 1, up.length);
+            assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
+            
+            CalendarDataObject update = new CalendarDataObject();
+            update.setContext(so2.getContext());
+            update.setObjectID(object_id);
+            update.setTitle("testBug5194 - updated by "+user2);
+            
+            csql2.updateAppointmentObject(update, shared_folder_id, testobject.getLastModified());
+            
+            
+            CalendarDataObject testobject2 = csql.getObjectById(object_id, shared_folder_id);
+            assertEquals("Check folder for user 1", shared_folder_id, testobject.getParentFolderID());
+            
+            
+            up = testobject2.getUsers();
+            assertEquals("Check that only user 1 is participant", 1, up.length);
+            assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
+            assertEquals("Check correct folder", shared_folder_id, testobject2.getParentFolderID());
+            
+            
+            CalendarDataObject testobject3 = csql2.getObjectById(object_id, shared_folder_id);
+            up = testobject2.getUsers();
+            assertEquals("Check that only user 1 is participant", 1, up.length);
+            assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
+            assertEquals("Check correct folder", shared_folder_id, testobject2.getParentFolderID());            
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }                
+    }    
+    
+    
     
 }
