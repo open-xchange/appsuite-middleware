@@ -89,5 +89,44 @@ public class DeleteTest extends AppointmentTest {
 		
 		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + hostName, login, password);
 	}
+	
+	public void testDeleteRecurrenceWithDeleteExceptions() throws Exception {
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		Date until = new Date(c.getTimeInMillis() + (15*dayInMillis));
+		
+		int changeExceptionPosition = 3;
+		
+		Date modified = new Date();
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDeleteRecurrenceWithDeleteExceptions");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		appointmentObj.setObjectID(objectId);
+		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, modified, PROTOCOL + hostName, login, password);
+		compareObject(appointmentObj, loadAppointment);
+		
+		appointmentObj.setDeleteExceptions(new Date[] { new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis) } );
+		
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
+		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + hostName, login, password);
+	}
 }
 
