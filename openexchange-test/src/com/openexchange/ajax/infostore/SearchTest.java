@@ -114,6 +114,16 @@ public class SearchTest extends InfostoreAJAXTest {
 			
 	}
 	
+	public void testLimit() throws Exception {
+		Response res = search(getWebConversation(), getHostName(), sessionId,"5", COLS, -1, Metadata.DESCRIPTION, "ASC",1);
+		assertNoError(res);
+		
+		JSONArray arrayOfarrays = (JSONArray) res.getData();
+		assertEquals(1, arrayOfarrays.length());
+		assertTitle(0,arrayOfarrays, "Test 5");
+			
+	}
+	
 	public void testSort() throws Exception {
 		Response res = search(getWebConversation(), getHostName(), sessionId,"5", COLS, -1, Metadata.DESCRIPTION, "ASC", -1, -1);
 		assertNoError(res);

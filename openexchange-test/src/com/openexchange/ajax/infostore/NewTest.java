@@ -210,7 +210,7 @@ public class NewTest extends InfostoreAJAXTest {
 			clean.add(
 					createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+folderId, "title" , "test5053", "url", "www.suse.de"))
 			);
-			fail("Expected exception because we can't create a document in this virtual folder");
+			fail("Expected exception because of invalid url");
 		} catch (JSONException x) {
 			assertTrue(true);
 		}

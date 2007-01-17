@@ -563,6 +563,34 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return putT(webConv,url.toString(), queryObject.toString());
 	}
 	
+	public Response search(WebConversation webConv, String hostname, String sessionId, String query, int[] columns, int folderId, int sort, String order, int limit) throws MalformedURLException, JSONException, IOException, SAXException {
+		StringBuffer url = getUrl(sessionId,"search", hostname);
+		url.append("&columns=");
+		for(int c : columns) {
+			url.append(c);
+			url.append(",");
+		}
+		url.setLength(url.length()-1);
+		if(folderId != -1) {
+			url.append("&folder=");
+			url.append(folderId);
+		}
+		
+		if(sort != -1) {
+			url.append("&sort=");
+			url.append(sort);
+			
+			url.append("&order=");
+			url.append(order);
+			
+			url.append("&limit=");
+			url.append(limit);
+		}
+		JSONObject queryObject = new JSONObject();
+		queryObject.put("pattern",query);
+		return putT(webConv,url.toString(), queryObject.toString());
+	}
+	
 	protected StringBuffer getUrl(String sessionId, String action, String hostname) {
 		StringBuffer url = new StringBuffer("http://");
 		url.append((hostname == null) ? getHostName() : hostname );
