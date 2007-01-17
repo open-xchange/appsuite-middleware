@@ -1058,7 +1058,9 @@ public class AppointmentBugTests extends TestCase {
             ignore.printStackTrace();
         }                
     }    
-    
+    /*
+     Whole day apps should be visible in all views
+    */
     public void testBug5222AND5171() throws Throwable {    
         deleteAllAppointments();        
         Context context = new ContextImpl(contextid);
@@ -1138,6 +1140,58 @@ public class AppointmentBugTests extends TestCase {
         assertTrue("Found no appointment (testBug5222)", found);
         
     }
+    
+    /*
+    Recurring multi-whole-day appointments are shown only on one day
+    Create a new appointment, whole-day, spaning 2 days (22.01.2007 - 24.01.2007)
+    */
+    public void testBug4987() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        int fid = getPrivateFolder(userid);
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        long start = cdao.getStartDate().getTime();
+        start = CalendarRecurringCollection.normalizeLong(start);
+        long end = (start + (CalendarRecurringCollection.MILLI_DAY * 2));
+        
+        int calculator = (int)((end-start)/CalendarRecurringCollection.MILLI_DAY);
+        assertEquals("Check Calculator result ", 2, calculator);
+        
+        cdao.setStartDate(new Date(start));
+        cdao.setEndDate(new Date(end));
+        cdao.setFullTime(true);
+        cdao.removeUntil();
+        cdao.setTitle("testBug4987");        
+        cdao.setRecurrenceType(CalendarDataObject.DAILY);
+        cdao.setInterval(3);
+        
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
+        assertTrue("Calculated results are > 0 ", m.size() > 0);
+        assertTrue("Fulltime is set", testobject.getFullTime());
+        assertEquals("Check that the ", calculator, testobject.getRecurrenceCalculator());
+        
+        for (int a = 0; a < m.size(); a++) {        
+            RecurringResult rr = m.getRecurringResult(a);
+            long check_start = rr.getStart();
+            long check_end = rr.getEnd();
+            int check_calculator = (int)((check_end-check_start)/CalendarRecurringCollection.MILLI_DAY);
+            assertEquals("Check calculated results", calculator, check_calculator);
+            //System.out.println(">>>> "+new Date(check_start) + " ---- "+new Date(check_end));
+        }
+        
+    }
+    
+    
     
     
 }
