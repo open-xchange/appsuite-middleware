@@ -5,6 +5,7 @@ package com.openexchange.groupware;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.server.OCLPermission;
@@ -50,7 +51,7 @@ import junit.framework.TestCase;
 
 public class AppointmentBugTests extends TestCase {
      
-    int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+    int cols[] = new int[] { AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     private static int userid = 11; // bishoph
@@ -1058,6 +1059,85 @@ public class AppointmentBugTests extends TestCase {
         }                
     }    
     
+    public void testBug5222AND5171() throws Throwable {    
+        deleteAllAppointments();        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        int fid = getPrivateFolder(userid);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug5171");
+        cdao.setStartDate(new Date(1168426800000L)); // 01.2007 12:00
+        cdao.setEndDate(new Date(1170154800000L)); // 30.01.2007 12:00
+        cdao.setFullTime(true);
+        cdao.setIgnoreConflicts(true);
+        
+        
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        assertEquals("Check object_id", object_id, testobject.getObjectID());
+        
+        
+        long range_start = 1168815600000L; // 15.01.2007 00:00
+        long range_end = 1169420400000L; // 22.01.2007 00:00
+        
+        SearchIterator si = csql.getAppointmentsBetweenInFolder(fid, cols, new Date(range_start), new Date(range_end), 0, null);
+        boolean found = false;
+        while (si.hasNext()) {
+            CalendarDataObject temp = (CalendarDataObject)si.next();
+            if (temp.getObjectID() == object_id) {
+                assertTrue("Fulltime is set to true", temp.getFullTime());
+                if (CalendarCommonCollection.inBetween(temp.getStartDate().getTime(), temp.getEndDate().getTime(), range_start, range_end)) {
+                    found = true;
+                }
+                
+            }
+        }
+        assertTrue("Found no appointment (testBug5141)", found);   
+        
+        
+        CalendarDataObject cdao2 = new CalendarDataObject();
+        cdao2.setContext(so.getContext());
+        cdao2.setParentFolderID(fid);
+        cdao2.setTitle("testBug5222");
+        CalendarTest.fillDatesInDao(cdao2);
+        cdao2.removeUntil();
+        cdao2.setFullTime(true);
+        cdao2.setIgnoreConflicts(true);
+        
+        
+        csql.insertAppointmentObject(cdao2);
+        int object_id2 = cdao2.getObjectID();        
+        
+        testobject = csql.getObjectById(object_id2, fid);
+        assertEquals("Check object_id2", object_id2, testobject.getObjectID());        
+        
+        range_start = CalendarRecurringCollection.normalizeLong(cdao2.getStartDate().getTime());
+        range_end = range_start + CalendarRecurringCollection.MILLI_DAY;
+        
+        si = csql.getAppointmentsBetweenInFolder(fid, cols, new Date(range_start), new Date(range_end), 0, null);
+        
+        found = false;
+        while (si.hasNext()) {
+            CalendarDataObject temp = (CalendarDataObject)si.next();
+            if (temp.getObjectID() == object_id2) {
+                assertTrue("Fulltime is set to true", temp.getFullTime());
+                if (CalendarCommonCollection.inBetween(temp.getStartDate().getTime(), temp.getEndDate().getTime(), range_start, range_end)) {
+                    found = true;
+                }
+                
+            }
+        }
+        
+        assertTrue("Found no appointment (testBug5222)", found);
+        
+    }
     
     
 }
