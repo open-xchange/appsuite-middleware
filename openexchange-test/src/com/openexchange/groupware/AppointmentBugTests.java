@@ -1,6 +1,4 @@
-
 package com.openexchange.groupware;
-
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
@@ -1190,8 +1188,57 @@ public class AppointmentBugTests extends TestCase {
         }
         
     }
-    
-    
+     
+    public void testBug5306() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        int fid = getPrivateFolder(userid);
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);                
+        cdao.removeUntil();
+        int OCCURRENCE_TEST = 6;
+        cdao.setOccurrence(OCCURRENCE_TEST);
+        CalendarRecurringCollection.fillDAO(cdao);
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Calculated results is correct", OCCURRENCE_TEST, m.size());
+        
+        long super_start_test = CalendarRecurringCollection.normalizeLong(m.getRecurringResult(m.size()-1).getStart());
+        long super_end_test = super_start_test + CalendarRecurringCollection.MILLI_DAY;
+        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, super_start_test, super_end_test, 0);
+        
+        assertEquals("Calculated results is correct", 1, m.size());        
+
+        Calendar calc = Calendar.getInstance();        
+        calc.setFirstDayOfWeek(Calendar.MONDAY);
+        calc.setTime(cdao.getStartDate());
+        calc.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        
+        long check_week_start = calc.getTimeInMillis();
+        calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        long check_week_end = calc.getTimeInMillis();
+
+        m = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
+        int sub_value = m.size();        
+        
+        calc.setTimeInMillis(check_week_start);
+        calc.add(Calendar.WEEK_OF_YEAR, 1);
+        check_week_start = calc.getTimeInMillis();
+        calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        check_week_end = calc.getTimeInMillis();
+        
+        m = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
+        int rest_value = m.size();        
+        
+        assertEquals("Calculated results is correct", OCCURRENCE_TEST, sub_value+rest_value);
+        
+    }
     
     
 }
