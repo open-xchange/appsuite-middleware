@@ -119,6 +119,7 @@ public class LoginTest extends AbstractAJAXTest {
             LOG.error("Can't parse this body to JSON: \"" + body + '\"');
             throw e;
         }
+        assertFalse(json.optString("error"), json.has("error"));
         assertTrue("Session ID is missing: " + body, json.has(
             Login.PARAMETER_SESSION));
         assertTrue("Random is missing: " + body, json.has(Login._random));
