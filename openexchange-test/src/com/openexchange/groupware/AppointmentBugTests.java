@@ -1214,7 +1214,18 @@ public class AppointmentBugTests extends TestCase {
         m = CalendarRecurringCollection.calculateRecurring(cdao, super_start_test, super_end_test, 0);
         
         assertEquals("Calculated results is correct", 1, m.size());        
-
+        assertTrue("Occurrence is set", cdao.containsOccurrence());
+        
+        super_start_test = super_start_test+CalendarRecurringCollection.MILLI_DAY;
+        super_end_test = super_end_test+CalendarRecurringCollection.MILLI_DAY;
+        
+        Date s = new Date(super_start_test);
+        Date e = new Date(super_end_test);
+        
+        RecurringResults m2 = CalendarRecurringCollection.calculateRecurring(cdao, super_start_test, super_end_test, 0);
+        
+        assertTrue("Should not got results", m2 == null || m2.getRecurringResult(0) == null);
+        
         Calendar calc = Calendar.getInstance();        
         calc.setFirstDayOfWeek(Calendar.MONDAY);
         calc.setTime(cdao.getStartDate());
@@ -1224,8 +1235,8 @@ public class AppointmentBugTests extends TestCase {
         calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         long check_week_end = calc.getTimeInMillis();
 
-        m = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
-        int sub_value = m.size();        
+        RecurringResults m3 = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
+        int sub_value = m3.size();        
         
         calc.setTimeInMillis(check_week_start);
         calc.add(Calendar.WEEK_OF_YEAR, 1);
@@ -1233,8 +1244,8 @@ public class AppointmentBugTests extends TestCase {
         calc.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         check_week_end = calc.getTimeInMillis();
         
-        m = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
-        int rest_value = m.size();        
+        RecurringResults m4 = CalendarRecurringCollection.calculateRecurring(cdao, check_week_start, check_week_end, 0);
+        int rest_value = m4.size();        
         
         assertEquals("Calculated results is correct", OCCURRENCE_TEST, sub_value+rest_value);
         
