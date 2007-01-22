@@ -23,8 +23,8 @@ public class PoolRunner implements Runnable {
     private Thread run;
     private int current_run = 0;
     
-    public static final int TEST_RUNS = 20;
-    public static final int WAIT_TIME = 20;
+    public static final int TEST_RUNS = 200;
+    public static final int WAIT_TIME = 10;
     public static final String TEST_QUERY = "SELECT 1 as test";
     
     private boolean isrunning = true;
@@ -61,6 +61,7 @@ public class PoolRunner implements Runnable {
                 //System.out.println("Ganz toll!");
                 simpleAction(con);
                 DBPool.push(c, con);
+                
                 current_run++;                
             } catch(Exception e) {
                 e.printStackTrace();
