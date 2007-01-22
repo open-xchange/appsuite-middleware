@@ -431,7 +431,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder");
+        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -520,7 +520,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder");
+        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
@@ -626,7 +626,7 @@ public class CalendarTest extends TestCase {
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp.setFolderAdmin(true);
         FolderObject fo = new FolderObject();
-        fo.setFolderName("MyTestFolder");
+        fo.setFolderName("MyTestFolder"+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
