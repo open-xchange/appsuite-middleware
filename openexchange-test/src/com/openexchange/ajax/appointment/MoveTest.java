@@ -28,7 +28,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		// appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
@@ -55,7 +55,7 @@ public class MoveTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
-		// appointmentObj.setShownAs(AppointmentObject.RESERVED);
+		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
