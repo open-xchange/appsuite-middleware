@@ -135,9 +135,10 @@ public class AlwaysTest extends AbstractAJAXTest {
             final JSONArray mailInfo = array
                 .getJSONArray(rand.nextInt(array.length()));
             final String mailId = mailInfo.getString(0);
+            LOG.trace("Getting mail: " + mailId);
             final Response mailResponse = MailTest.getMail(getWebConversation(),
                 getHostName(), getSessionId(), mailId);
-            LOG.trace(mailResponse.getData());
+            assertFalse(mailResponse.getErrorMessage(), mailResponse.hasError());
         }
         final List<FolderObject> list = FolderTest.getSubfolders(
             getWebConversation(), getHostName(), getSessionId(),
