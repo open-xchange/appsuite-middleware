@@ -205,7 +205,7 @@ public class CalendarTest extends TestCase {
         update.setObjectID(object_id);
         update.setTitle("testWholeDayWithDB - Step 1 - Update");
         
-        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
         
         CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);
         assertTrue("Contains fulltime ", testobject_update.getFullTime());
