@@ -13,9 +13,12 @@ import java.util.Date;
 import java.util.Locale;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -24,6 +27,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieJar;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.tools.URLParameter;
 
 public class MailTest extends AbstractAJAXTest {
@@ -184,8 +188,8 @@ public class MailTest extends AbstractAJAXTest {
 	}
 	
 	public static JSONObject getAllMails(final WebConversation conversation, final String hostname,
-			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws Exception {
-		final GetMethodWebRequest getReq = new GetMethodWebRequest(hostname + MAIL_URL);
+			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException, SAXException, JSONException {
+		final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL + hostname + MAIL_URL);
 		if (setCookie) {
 			/*
 			 * Set cookie cause a request has already been fired before with the same session id.
@@ -215,7 +219,24 @@ public class MailTest extends AbstractAJAXTest {
 		final JSONObject jResponse = new JSONObject(resp.getText());
 		return jResponse;
 	}
-	
+
+    public static Response getMail(final WebConversation conversation,
+        final String hostName, final String sessionId, final String mailId)
+        throws IOException, SAXException, JSONException {
+        final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL
+            + hostName + MAIL_URL);
+        getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
+        getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_GET);
+        getReq.setParameter(Mail.PARAMETER_ID, mailId);
+        final WebResponse resp = conversation.getResponse(getReq);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+        final String body = resp.getText();
+        final Response response = Response.parse(body);
+        assertFalse(response.getErrorMessage(), response.hasError());
+        return response;
+    }
+
 	private static String getFileContentType(File f) {
 		return new MimetypesFileTypeMap().getContentType(f);
 	}
@@ -467,7 +488,7 @@ public class MailTest extends AbstractAJAXTest {
 				/*
 				 * Request mails
 				 */
-				jResp = getAllMails(conversation, MailTest.PROTOCOL + getHostName(), getSessionId(), "INBOX", null, true);
+				jResp = getAllMails(conversation, getHostName(), getSessionId(), "INBOX", null, true);
 				
 				System.out.println("testGetMails():\nResponse=" + jResp + "\n\n");// something like: {"data":"INBOX/Custom Sent/1"}
 				assertTrue(jResp != null);
