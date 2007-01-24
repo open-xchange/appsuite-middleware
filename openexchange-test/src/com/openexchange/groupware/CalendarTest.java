@@ -4,6 +4,7 @@ package com.openexchange.groupware;
 
 import com.openexchange.ajax.Resource;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -15,6 +16,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -1440,6 +1442,50 @@ public class CalendarTest extends TestCase {
         
         
     } 
+
+    public void testDataTuncationException() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        CalendarDataObject cdao = new CalendarDataObject();
+        StringBuilder sb = new StringBuilder("testDataTuncationException ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        sb.append("extrem long test to force an error message and in detail a DataTruncation Exception! ");
+        cdao.setTitle(sb.toString());
+        cdao.setParentFolderID(fid);
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);
+        fillDatesInDao(cdao);
+        CalendarSql csql = new CalendarSql(so);        
+        int object_id = 0;
+        try {
+            csql.insertAppointmentObject(cdao);
+            object_id = cdao.getObjectID();        
+        } catch(OXException oxe) {
+            int ids[] = oxe.getTruncatedIds();
+            if (ids.length == 0) {
+                fail("Got no TruncatedIds ");
+            }
+        } catch(Exception e) {
+            fail("Wrong exception!");
+        }
+        
+        if (object_id > 0) {
+            fail("Test not executed correctly");
+        }
+        
+    }
     
    
 }
