@@ -87,6 +87,8 @@ public class TruncationTest extends AbstractTaskTest {
         final Task task = new Task();
         // Title length in database is 128.
         task.setTitle(RandomString.generateFixLetter(200));
+        // Trip meter length in database is 255.
+        task.setTripMeter(RandomString.generateFixLetter(300));
         task.setParentFolderID(folderId);
         final Response response = insertTask(getWebConversation(),
             getHostName(), getSessionId(), task);
