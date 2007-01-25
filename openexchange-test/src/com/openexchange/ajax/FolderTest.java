@@ -38,7 +38,7 @@ public class FolderTest extends AbstractAJAXTest {
 		super(name);
 	}
 	
-	private static final String FOLDER_URL = "/ajax/folders";
+	public static final String FOLDER_URL = "/ajax/folders";
 	
 	private static final String URL_ENCODED_COMMA = "%2C";
 	
