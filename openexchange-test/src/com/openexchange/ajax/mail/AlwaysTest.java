@@ -97,6 +97,14 @@ public class AlwaysTest extends AbstractAJAXTest {
     private static final Random rand = new Random(System.currentTimeMillis());
 
     /**
+     * Number of mails to read in each mail folder.<ul>
+     * <li><code>-1</code> list all mails
+     * <li><code>0</code> list no mails
+     * </ul>
+     */
+    private final static int MAX = 1;
+    
+    /**
      * This attributes of mails are requested when a mail folder is listed.
      */
     private static final int[] listAttributes = new int[] {
@@ -116,16 +124,13 @@ public class AlwaysTest extends AbstractAJAXTest {
         super(name);
     }
 
-    private final static int MAX = 1;
-    
     public void testFolderListing() throws Throwable {
         final FolderObject imapRoot = getIMAPRootFolder();
         recListFolder(imapRoot.getFullName(), "");
     }
 
     public void recListFolder(final String folderId, final String rights)
-        throws IOException,
-        SAXException, JSONException, OXException {
+        throws IOException, SAXException, JSONException, OXException {
         LOG.trace("Listing " + folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
@@ -166,9 +171,10 @@ public class AlwaysTest extends AbstractAJAXTest {
         }
     }
 
-    public Map<String, String> getIMAPRights(final WebConversation conversation,
-        final String hostName, final String sessionId, final String parent)
-        throws IOException, SAXException, JSONException {
+    public static Map<String, String> getIMAPRights(
+        final WebConversation conversation, final String hostName,
+        final String sessionId, final String parent) throws IOException,
+        SAXException, JSONException {
         final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
             + FolderTest.FOLDER_URL);
         req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
