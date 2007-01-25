@@ -50,8 +50,13 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,12 +66,12 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.meterware.httpunit.cookies.CookieJar;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.Login;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.MailTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.api2.OXException;
@@ -111,43 +116,82 @@ public class AlwaysTest extends AbstractAJAXTest {
         super(name);
     }
 
+    private final static int MAX = 1;
+    
     public void testFolderListing() throws Throwable {
         final FolderObject imapRoot = getIMAPRootFolder();
-        final List<FolderObject> list = FolderTest.getSubfolders(
+        recListFolder(imapRoot.getFullName(), "");
+    }
+
+    public void recListFolder(final String folderId, final String rights)
+        throws IOException,
+        SAXException, JSONException, OXException {
+        LOG.trace("Listing " + folderId);
+        if (rights.length() > 0) {
+            listMails(folderId, MAX);
+        }
+        final Map<String, String> subRights = getIMAPRights(
             getWebConversation(), getHostName(), getSessionId(),
-            imapRoot.getFullName(), false);
-        for (FolderObject fo : list) {
-            recListFolder(fo);
+            folderId);
+        for (Entry<String, String> entry : subRights.entrySet()) {
+            recListFolder(entry.getKey(), entry.getValue());
         }
     }
 
-    public void recListFolder(final FolderObject folder) throws IOException,
-        SAXException, JSONException, OXException {
-        LOG.trace("Listing " + folder.getFullName());
+    /**
+     * @param folder
+     * @param max
+     * @throws IOException
+     * @throws SAXException
+     * @throws JSONException
+     */
+    private void listMails(final String folderId, final int max)
+        throws IOException, SAXException, JSONException {
         final JSONObject json = MailTest.getAllMails(getWebConversation(),
-            getHostName(), getSessionId(), folder.getFullName(), listAttributes,
+            getHostName(), getSessionId(), folderId, listAttributes,
             false);
         final Response response = Response.parse(json.toString());
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONArray array = (JSONArray) response.getData();
-        final int count = Math.min(100, array.length());
+        final int count = max == -1 ? array.length() : Math.min(max, array
+            .length());
         for (int i = 0; i < count; i++) {
-            final JSONArray mailInfo = array
-                .getJSONArray(rand.nextInt(array.length()));
+            final int pos = max == -1 ? i : rand.nextInt(array.length());
+            final JSONArray mailInfo = array.getJSONArray(pos);
             final String mailId = mailInfo.getString(0);
             LOG.trace("Getting mail: " + mailId);
             final Response mailResponse = MailTest.getMail(getWebConversation(),
                 getHostName(), getSessionId(), mailId);
             assertFalse(mailResponse.getErrorMessage(), mailResponse.hasError());
         }
-        final List<FolderObject> list = FolderTest.getSubfolders(
-            getWebConversation(), getHostName(), getSessionId(),
-            folder.getFullName(), false);
-        for (FolderObject sub : list) {
-            recListFolder(sub);
-        }
     }
-    
+
+    public Map<String, String> getIMAPRights(final WebConversation conversation,
+        final String hostName, final String sessionId, final String parent)
+        throws IOException, SAXException, JSONException {
+        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
+            + FolderTest.FOLDER_URL);
+        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+        req.setParameter("parent", parent);
+        final String columns = String.valueOf(FolderObject.OBJECT_ID) + ','
+            + FolderObject.OWN_RIGHTS;
+        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+        final WebResponse resp = conversation.getResponse(req);
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+        final String body = resp.getText();
+        LOG.trace("Response body: " + body);
+        final Response response = Response.parse(body);
+        final JSONArray array = (JSONArray) response.getData();
+        final Map<String, String> retval = new HashMap<String, String>();
+        for (int i = 0; i < array.length(); i++) {
+            final JSONArray folder = array.getJSONArray(i);
+            retval.put(folder.getString(0), folder.getString(1));
+        }
+        return retval;
+    }
+
     public FolderObject getIMAPRootFolder() throws OXException, IOException,
         SAXException, JSONException {
         final List<FolderObject> list = FolderTest.getSubfolders(
