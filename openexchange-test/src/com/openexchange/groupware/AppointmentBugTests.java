@@ -272,7 +272,7 @@ public class AppointmentBugTests extends TestCase {
     /*
      Create an appointment (Termin) with another participant (Teilnehmer). Save the
      appointment. Select it and edit (bearbeiten) it. Modify it to occur weekly
-     (wöchentlich). FYI: I did not change the defaults, so it was an the same day and
+     (woechentlich). FYI: I did not change the defaults, so it was an the same day and
      recurred every 4 weeks.
     */
     public void testBug4276() throws Throwable {
@@ -948,7 +948,7 @@ public class AppointmentBugTests extends TestCase {
     Ordnerrechte: Objekte anlegen
     Leserechte: Alle
     Schreibrechte: Alle
-    Löschrechte: Keine
+    Loeschrechte: Keine
 
     4. Create a new appointment with title "foobar" in the personal calendar which
     is now shared to User B
