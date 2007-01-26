@@ -125,7 +125,7 @@ public class FreeBusyTest extends AppointmentTest {
 			}
 		}
 		
-		assertFalse("appointment with id " + objectId + " was found in free busy response!", found);
+		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
@@ -158,7 +158,7 @@ public class FreeBusyTest extends AppointmentTest {
 			}
 		}
 		
-		assertFalse("appointment with id " + objectId + " was found in free busy response!", found);
+		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
