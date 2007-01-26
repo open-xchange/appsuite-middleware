@@ -188,6 +188,13 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	
+	public void testPermissions() throws Exception {
+		String sessionId2 = this.getSecondSessionId();
+		Response res = search(getSecondWebConversation(), getHostName(), sessionId2, "*", COLS);
+		assertTitles(res);
+	}
+	
+	
 	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
 		JSONArray entry = results.getJSONArray(index);
 		assertEquals(title,entry.getString(0));
