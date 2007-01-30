@@ -8,7 +8,7 @@ import com.openexchange.groupware.ldap.LdapException.Code;
 
 /**
  * MockUserStorage for now contains some testing data relevant to the notification tests.
- * This can be extended for other tests for testing in isolation.
+ * This can be exten_USded for other tests for testing in isolation.
  */
 public class MockUserLookup {
 	
@@ -31,7 +31,7 @@ public class MockUserLookup {
 		MockUser user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("The Mailadmin");
-		user.setPreferredLanguage("en");
+		user.setPreferredLanguage("en_US");
 		user.setTimeZone(tz);
 		user.setMail("mailadmin@test.invalid");
 		user.setGroups(new int[]{1});
@@ -40,7 +40,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 1");
-		user.setPreferredLanguage("en");
+		user.setPreferredLanguage("en_US");
 		user.setTimeZone(tz);
 		user.setMail("user1@test.invalid");
 		user.setGroups(new int[]{1,4});
@@ -76,7 +76,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 5");
-		user.setPreferredLanguage("en");
+		user.setPreferredLanguage("en_US");
 		user.setTimeZone(tz);
 		user.setMail("user5@test.invalid");
 		user.setGroups(new int[]{1,3,4});
@@ -94,7 +94,7 @@ public class MockUserLookup {
 		user = new MockUser();
 		user.setId(++i);
 		user.setDisplayName("User 7");
-		user.setPreferredLanguage("en");
+		user.setPreferredLanguage("en_US");
 		user.setTimeZone(tz);
 		user.setMail("user7@test.invalid");
 		user.setGroups(new int[]{1,4});
