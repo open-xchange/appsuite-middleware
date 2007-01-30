@@ -34,8 +34,4 @@ public class SearchTest extends ContactTest {
 		ContactObject[] contactArray = searchContact(getWebConversation(), "M", contactFolderId, new int[] { ContactObject.INTERNAL_USERID }, true, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("contact array size < 2", contactArray.length >= 2);
 	}
-	
-	public void _notestExtendedSearch() throws Exception {
-		fail("not implemented yet!");
-	}
 }
