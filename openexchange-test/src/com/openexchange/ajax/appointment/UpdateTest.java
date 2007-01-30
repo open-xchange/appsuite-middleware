@@ -75,7 +75,7 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestUpdateRecurrenceWithPosition() throws Exception {
+	public void testUpdateRecurrenceWithPosition() throws Exception {
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -101,19 +101,24 @@ public class UpdateTest extends AppointmentTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		compareObject(appointmentObj, loadAppointment, startTime, endTime);
 		
+		long newStartTime = startTime + 60*60*1000;
+		long newEndTime = endTime + 60*60*1000;
+		
 		appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testUpdateRecurrence - exception");
-		appointmentObj.setStartDate(new Date(startTime + 60*60*1000));
-		appointmentObj.setEndDate(new Date(endTime + 60*60*1000));
+		appointmentObj.setStartDate(new Date(newStartTime));
+		appointmentObj.setEndDate(new Date(newEndTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setRecurrencePosition(changeExceptionPosition);
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int newObjectId = updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 		assertFalse("object id of the update is equals with the old object id", newObjectId == objectId);
+		appointmentObj.setObjectID(newObjectId);
 		
 		loadAppointment = loadAppointment(getWebConversation(), newObjectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
-		compareObject(appointmentObj, loadAppointment, startTime, endTime);
+		compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
