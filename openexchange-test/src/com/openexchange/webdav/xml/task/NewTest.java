@@ -25,20 +25,19 @@ public class NewTest extends TaskTest {
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 	}
 	
-	public void _notestNewTaskWithParticipants() throws Exception {
+	public void testNewTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testNewTaskWithParticipants");
 		
-		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
-		assertTrue("user participant not found", userParticipantId != -1);
-		Group[] groupArray = GroupUserTest.searchGroup(webCon, groupParticipant, new Date(0), PROTOCOL + hostName, login, password);
-		assertTrue("group array size is not > 0", groupArray.length > 0);
-		int groupParticipantId = groupArray[0].getIdentifier();
+		int userParticipantId2 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant2, getPassword());
+		assertTrue("user participant not found", userParticipantId2 != -1);
+		int userParticipantId3 = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), userParticipant3, getPassword());
+		assertTrue("user participant not found", userParticipantId3 != -1);
 		
-		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
 		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userParticipantId);
-		participants[1] = new GroupParticipant();
-		participants[1].setIdentifier(groupParticipantId);
+		participants[0].setIdentifier(userParticipantId2);
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userParticipantId3);
 		
 		taskObj.setParticipants(participants);
 		
