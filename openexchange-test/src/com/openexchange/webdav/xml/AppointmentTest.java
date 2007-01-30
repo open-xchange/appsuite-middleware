@@ -8,6 +8,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -346,19 +347,19 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		Element eConfirm = new Element("confirm", XmlServlet.NS);
 		switch (confirm) {
-			case AppointmentObject.ACCEPT:
-				eConfirm.addContent("accept");
-				break;
-			case AppointmentObject.DECLINE:
-				eConfirm.addContent("decline");
-				break;
-			case AppointmentObject.NONE:
+			case CalendarObject.NONE:
 				eConfirm.addContent("none");
 				break;
+			case CalendarObject.ACCEPT:
+				eConfirm.addContent("accept");
+				break;
+			case CalendarObject.DECLINE:
+				eConfirm.addContent("decline");
+				break;
 			default:
-				throw new Exception("invalid confirm value: " + confirm);
+				eConfirm.addContent("invalid");
+				break;
 		}
-		
 		
 		eProp.addContent(eConfirm);
 		
