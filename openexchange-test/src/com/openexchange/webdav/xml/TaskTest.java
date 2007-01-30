@@ -8,6 +8,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -294,7 +295,21 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		eProp.addContent(eMethod);
 		
 		Element eConfirm = new Element("confirm", XmlServlet.NS);
-		eConfirm.addContent("decline");
+		switch (confirm) {
+			case CalendarObject.NONE:
+				eConfirm.addContent("none");
+				break;
+			case CalendarObject.ACCEPT:
+				eConfirm.addContent("accept");
+				break;
+			case CalendarObject.DECLINE:
+				eConfirm.addContent("decline");
+				break;
+			default:
+				eConfirm.addContent("invalid");
+				break;
+		}
+		
 		eProp.addContent(eConfirm);
 		
 		Document doc = addProp2Document(eProp);
