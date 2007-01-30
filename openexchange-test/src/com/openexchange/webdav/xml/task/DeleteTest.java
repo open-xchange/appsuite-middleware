@@ -22,7 +22,7 @@ public class DeleteTest extends TaskTest {
 		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 	}
 	
-	public void _notestDeleteConcurentConflict() throws Exception {
+	public void testDeleteConcurentConflict() throws Exception {
 		Task appointmentObj = createTask("testUpdateTaskConcurentConflict");
 		int objectId = insertTask(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
