@@ -207,7 +207,7 @@ public class NewTest extends AppointmentTest {
 	
 	public void testSpecialCharacters() throws Exception {
 		AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testSpecialCharacters - öäü-:,;.#?!§$%&/()=\"<>");
+		appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
