@@ -18,7 +18,7 @@ public class PermissionTest extends TaskTest {
 		
 	}
 	
-	public void _notestInsertTaskInPrivateFolderWithoutPermission() throws Exception {
+	public void testInsertTaskInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -49,7 +49,7 @@ public class PermissionTest extends TaskTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestInsertTaskInPublicFolderWithoutPermission() throws Exception {
+	public void testInsertTaskInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -80,7 +80,7 @@ public class PermissionTest extends TaskTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateTaskInPrivateFolderWithoutPermission() throws Exception {
+	public void testUpdateTaskInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -114,7 +114,7 @@ public class PermissionTest extends TaskTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestUpdateTaskInPublicFolderWithoutPermission() throws Exception {
+	public void testUpdateTaskInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testUpdateTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -148,7 +148,7 @@ public class PermissionTest extends TaskTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestDeleteTaskInPrivateFolderWithoutPermission() throws Exception {
+	public void testDeleteTaskInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteTaskInPrivateFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -182,7 +182,7 @@ public class PermissionTest extends TaskTest {
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestDeleteTaskInPublicFolderWithoutPermission() throws Exception {
+	public void testDeleteTaskInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteTaskInPublicFolderWithoutPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
