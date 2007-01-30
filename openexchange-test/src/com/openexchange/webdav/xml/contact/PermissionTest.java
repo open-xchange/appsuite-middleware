@@ -79,7 +79,7 @@ public class PermissionTest extends ContactTest {
 	public void testUpdateContactInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertContactInPrivateFolderWithoutPermission" + System.currentTimeMillis());
-		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setModule(FolderObject.CONTACT);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
@@ -111,7 +111,7 @@ public class PermissionTest extends ContactTest {
 	public void testUpdateContactInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testUpdateContactInPublicFolderWithoutPermission" + System.currentTimeMillis());
-		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setModule(FolderObject.CONTACT);
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
@@ -143,7 +143,7 @@ public class PermissionTest extends ContactTest {
 	public void testDeleteContactInPrivateFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteContactInPrivateFolderWithoutPermission" + System.currentTimeMillis());
-		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setModule(FolderObject.CONTACT);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
@@ -175,7 +175,7 @@ public class PermissionTest extends ContactTest {
 	public void testDeleteContactInPublicFolderWithoutPermission() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testDeleteContactInPublicFolderWithoutPermission" + System.currentTimeMillis());
-		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setModule(FolderObject.CONTACT);
 		folderObj.setType(FolderObject.PUBLIC);
 		folderObj.setParentFolderID(2);
 		
