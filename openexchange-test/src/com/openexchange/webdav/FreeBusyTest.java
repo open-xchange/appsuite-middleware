@@ -48,17 +48,5 @@ public class FreeBusyTest extends AbstractWebdavTest {
         
         assertEquals(200, resp.getResponseCode());
 	}
-	
-	public void _notestStatusAbsent() throws Exception {
-		
-	}
-	
-	public void _notestStatusFree() throws Exception {
-		
-	}
-	
-	public void _notestResource() throws Exception {
-		
-	}
 }
 
