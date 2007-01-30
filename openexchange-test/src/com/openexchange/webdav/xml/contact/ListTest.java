@@ -53,7 +53,7 @@ public class ListTest extends ContactTest {
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestObjectNotFound() throws Exception {
+	public void testObjectNotFound() throws Exception {
 		ContactObject contactObj = createContactObject("testObjectNotFound");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
