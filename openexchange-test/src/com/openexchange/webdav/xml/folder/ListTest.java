@@ -17,7 +17,7 @@ public class ListTest extends FolderTest {
 		
 	}
 	
-	public void _notestPropFindWithModified() throws Exception {
+	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
 		FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
@@ -30,7 +30,7 @@ public class ListTest extends FolderTest {
 		assertTrue("expected response size is < 2", folderArray.length >= 2);
 	}
 	
-	public void _notestPropFindWithDeleted() throws Exception {
+	public void testPropFindWithDeleted() throws Exception {
 		Date modified = new Date();
 		
 		FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
@@ -47,9 +47,9 @@ public class ListTest extends FolderTest {
 		assertTrue("expected response size is < 2", folderArray.length >= 2);
 	}
 	
-	public void _notestPropFindWithObjectIdOnPrivateFolder() throws Exception {
+	public void testPropFindWithObjectIdOnPrivateFolder() throws Exception {
 		FolderObject folderObj = new FolderObject();
-		folderObj.setFolderName("testPropFindWithObjectIdOnPrivateFolderWithoutPermission" + System.currentTimeMillis());
+		folderObj.setFolderName("testPropFindWithObjectIdOnPrivateFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
@@ -67,7 +67,7 @@ public class ListTest extends FolderTest {
 		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestPropFindWithObjectIdOnPublicFolder() throws Exception {
+	public void testPropFindWithObjectIdOnPublicFolder() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testPropFindWithObjectIdOnPublicFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
@@ -87,7 +87,7 @@ public class ListTest extends FolderTest {
 		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestObjectNotFound() throws Exception {
+	public void testObjectNotFound() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testObjectNotFound" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.TASK);
