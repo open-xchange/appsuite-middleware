@@ -87,6 +87,8 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 //		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
 		
+		
+		tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreWriterTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.JSONSimpleRequestTest.class);
@@ -110,6 +112,7 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.FireAttachedEventActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.FireDetachedEventActionTest.class);
 		
+		tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreDeleteTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
