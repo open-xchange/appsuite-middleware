@@ -9,7 +9,7 @@ public class DeleteTest extends FolderTest {
 		super(name);
 	}
 	
-	public void _notestDeleteFolder() throws Exception {
+	public void testDeleteFolder() throws Exception {
 		FolderObject folderObj = createFolderObject(userId, "testDeleteFolder1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj = createFolderObject(userId, "testDeleteFolder2", FolderObject.CALENDAR, false);
