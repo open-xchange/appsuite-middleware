@@ -11,7 +11,6 @@ public class AttachmentWebdavSuite extends TestSuite{
 		tests.addTestSuite( DeleteTest.class );
 		tests.addTestSuite( ListTest.class );
 		tests.addTestSuite( NewTest.class );
-		tests.addTestSuite( UpdateTest.class );
 		
 		return tests;
 	}
