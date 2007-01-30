@@ -96,7 +96,7 @@ public class NewTest extends TaskTest {
 			deleteTask(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
 		} catch (TestException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
+			assertExceptionMessage(exc.getMessage(), XmlServlet.USER_INPUT_STATUS);
 		}
 	}
 }
