@@ -46,7 +46,7 @@ public class NewTest extends ContactTest {
 		int objectId = createContactWithLinks("testNewWithLinks", link1, link2);
 	}
 	
-	public void _notestNewContactWithAttachment() throws Exception {
+	public void testNewContactWithAttachment() throws Exception {
 		ContactObject contactObj = createContactObject("testNewContactWithAttachment");
 		int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
 		contactObj.setNumberOfAttachments(2);
