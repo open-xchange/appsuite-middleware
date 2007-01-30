@@ -225,7 +225,7 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestAppointmentInPrivateFlagInPublicFolder() throws Exception {
+	public void testAppointmentInPrivateFlagInPublicFolder() throws Exception {
 		Date modified = new Date();
 		
 		FolderObject folderObj = new FolderObject();
@@ -256,8 +256,9 @@ public class NewTest extends AppointmentTest {
 			deleteAppointment(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
 		} catch (TestException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.CONFLICT_STATUS);
+			assertExceptionMessage(exc.getMessage(), XmlServlet.USER_INPUT_STATUS);
 		}
+		
+		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword());
 	}
 }
-
