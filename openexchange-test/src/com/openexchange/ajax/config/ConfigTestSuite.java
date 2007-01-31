@@ -76,6 +76,7 @@ public class ConfigTestSuite {
         tests.addTestSuite(ConfigMenuTest.class);
         tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
         tests.addTestSuite(CurrentTimeTest.class);
+        tests.addTestSuite(BugTests.class);
         return tests;
     }
 }
