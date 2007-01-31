@@ -3,6 +3,7 @@ package com.openexchange.ajax;
 import com.openexchange.tools.StringCollection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
@@ -194,7 +195,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		int objectId = 0;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
+		OutputStreamWriter pw = new OutputStreamWriter(baos, "UTF-8");
 		JSONWriter jsonWriter = new JSONWriter(pw);
 		
 		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter,
