@@ -19,13 +19,16 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockGroupLookup;
+import com.openexchange.groupware.ldap.MockResourceLookup;
 import com.openexchange.groupware.ldap.MockUserLookup;
+import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.tasks.Task;
@@ -36,6 +39,8 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	private static final MockGroupLookup GROUP_STORAGE = new MockGroupLookup();
 	private static final MockUserLookup USER_STORAGE = new MockUserLookup();
+	private static final MockResourceLookup RESOURCE_STORAGE = new MockResourceLookup();
+	
 	private static final UserConfigurationFactory USER_CONFIGS = new UserConfigurationFactory();
 	
 	
@@ -50,7 +55,7 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	
 	public void testSimple() throws Exception{
-		Participant[] participants = getParticipants(U(2),G(),S());
+		Participant[] participants = getParticipants(U(2),G(),S(), R());
 		Task t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -65,7 +70,7 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		notify.clearMessages();
 		
-		participants = getParticipants(U(4), G(),S());
+		participants = getParticipants(U(4), G(),S(), R());
 		t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -82,7 +87,7 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	
 	public void testExternal() throws Exception{
-		Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"));
+		Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"), R());
 		Task t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -96,7 +101,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 	
 	public void testNoSend() throws Exception{
-		Participant[] participants = getParticipants(U(6,2),G(),S());
+		Participant[] participants = getParticipants(U(6,2),G(),S(), R());
 		Task t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -111,7 +116,7 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		notify.clearMessages();
 		
-		participants = getParticipants(U(), G(1),S());
+		participants = getParticipants(U(), G(1),S(), R());
 		t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -144,7 +149,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 	
 	public void testResolveGroup() throws Exception{
-		Participant[] participants = getParticipants(U(),G(2),S());
+		Participant[] participants = getParticipants(U(),G(2),S(), R());
 		Task t = getTask(participants);
 		t.setUsers((UserParticipant[])null); // If the user participants are not set, fall back to resolving groups in ParticipantNotify
 		notify.taskCreated(t,session);
@@ -159,7 +164,7 @@ public class ParticipantNotifyTest extends TestCase{
 	}
 
 	public void testNoSendDouble() throws Exception{
-		Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"));
+		Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"), R());
 		Task t = getTask(participants);
 		
 		notify.taskCreated(t,session);
@@ -170,6 +175,16 @@ public class ParticipantNotifyTest extends TestCase{
 		assertAddresses( notify.getMessages(), "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
 		assertLanguage( DE , msg );
 		assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
+	}
+	
+	public void testResources() throws Exception {
+		Participant[] participants = getParticipants(U(2),G(),S(),R(1));
+		
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		assertAddresses(notify.getMessages(), "user1@test.invalid","resource_admin1@test.invalid");
 	}
 	
 	public static final void assertLanguage(int lang, Message msg) {
@@ -218,7 +233,7 @@ public class ParticipantNotifyTest extends TestCase{
 			case Participant.GROUP :
 				int[] memberIds = G(p.getIdentifier())[0].getMember();
 				User[] asUsers = U(memberIds);
-				Participant[] userParticipantsFromGroup = getParticipants(asUsers, G(), S());
+				Participant[] userParticipantsFromGroup = getParticipants(asUsers, G(), S(), R());
 				for(Participant up : userParticipantsFromGroup) {
 					userParticipants.add((UserParticipant)up);
 				}
@@ -253,8 +268,17 @@ public class ParticipantNotifyTest extends TestCase{
 		return strings;
 	}
 	
-	public static final Participant[] getParticipants(User[] users, Group[] groups, String[] external) {
-		Participant[] participants = new Participant[users.length+groups.length+external.length];
+	public static final Resource[] R(int...ids) throws LdapException {
+		Resource[] resources = new Resource[ids.length];
+		int i = 0;
+		for(int id : ids) {
+			resources[i++] = RESOURCE_STORAGE.getResource(id);
+		}
+		return resources;
+	}
+	
+	public static final Participant[] getParticipants(User[] users, Group[] groups, String[] external, Resource[] resources) {
+		Participant[] participants = new Participant[users.length+groups.length+external.length+resources.length];
 		
 		int i = 0;
 		
@@ -278,6 +302,13 @@ public class ParticipantNotifyTest extends TestCase{
 			Participant p = new ExternalUserParticipant();
 			p.setDisplayName(externalMail);
 			p.setEmailAddress(externalMail);
+			participants[i++] = p;
+		}
+		
+		for(Resource resource : resources) {
+			Participant p = new ResourceParticipant();
+			p.setIdentifier(resource.getIdentifier());
+			p.setDisplayName(resource.getDisplayName());
 			participants[i++] = p;
 		}
 		
@@ -370,6 +401,10 @@ public class ParticipantNotifyTest extends TestCase{
 			return U(ids);
 		}
 
+		protected Resource[] resolveResources(Context ctx, int...ids) throws LdapException{
+			return R(ids);
+		}
+		
 		public List<Message> getMessages(){
 			return messageCollector;
 		}
