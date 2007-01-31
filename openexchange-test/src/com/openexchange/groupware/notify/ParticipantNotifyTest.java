@@ -136,10 +136,10 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		if (Locale.getDefault().getLanguage().equalsIgnoreCase("de")) {
 			assertNames(deAddresses, "user2@test.invalid","user3@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid","user9@test.invalid");
-			assertNames(enAddresses, "mailadmin@test.invalid", "user1@test.invalid", "user7@test.invalid");	
+			assertNames(enAddresses, "mailadmin@test.invalid", "user1@test.invalid", "user7@test.invalid", "user5@test.invalid");	
 		} else {
-			assertNames(enAddresses, "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user3@test.invalid", "user8@test.invalid");
-			assertNames(deAddresses, "mailadmin@test.invalid", "user1@test.invalid","user7@test.invalid","user9@test.invalid");	
+			assertNames(deAddresses, "user2@test.invalid","user3@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
+			assertNames(enAddresses, "mailadmin@test.invalid", "user1@test.invalid", "user7@test.invalid", "user5@test.invalid","user9@test.invalid");	
 		}
 	}
 	
