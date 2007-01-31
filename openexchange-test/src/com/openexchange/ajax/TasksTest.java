@@ -139,7 +139,7 @@ public class TasksTest extends AbstractTaskTest {
         final Task task = new Task();
         task.setTitle("Private task");
         task.setPrivateFlag(false);
-        final Date lastModified = new Date();
+        Date lastModified = new Date();
         task.setCreationDate(new Date());
         task.setLastModified(lastModified);
         task.setStartDate(new Date(1133964000000l));
@@ -158,8 +158,8 @@ public class TasksTest extends AbstractTaskTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
+        final int folderId = TaskTools.getPrivateTaskFolder(
+            getWebConversation(), getHostName(), getSessionId());
 
         task.setParentFolderID(folderId);
         final int taskId = extractInsertId(insertTask(getWebConversation(),
@@ -169,6 +169,7 @@ public class TasksTest extends AbstractTaskTest {
             getSessionId(), folderId, taskId);
         final Task reload = (Task) response.getData();
         compareAttributes(task, reload);
+        lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
             lastModified, folderId, taskId);
@@ -243,7 +244,7 @@ public class TasksTest extends AbstractTaskTest {
         task.setTitle("Private delegated task");
         task.setPrivateFlag(false);
         task.setCreationDate(new Date());
-        final Date lastModified = new Date();
+        Date lastModified = new Date();
         task.setLastModified(lastModified);
         task.setStartDate(new Date(1133964000000l));
         task.setEndDate(new Date(1133967600000l));
@@ -293,6 +294,7 @@ public class TasksTest extends AbstractTaskTest {
                 fail("Storing participant in delegated task failed.");
             }
         }
+        lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
             lastModified, folderId, taskId);
