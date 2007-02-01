@@ -104,7 +104,6 @@ public class GetTest extends ActionTestCase {
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		byte[] all = getBytes(INDEX_HTML_URL, 0, 10);
 		byte[] expect = new byte[]{all[0], all[10]};
-		for(byte b : all ) { System.out.println(b); }
 		rangeTest(INDEX_HTML_URL, "0-0,-1", expect);
 		
 	}
@@ -124,7 +123,7 @@ public class GetTest extends ActionTestCase {
 		assertEquals(HttpServletResponse.SC_PARTIAL_CONTENT, res.getStatus());
 		
 		byte[] bytes = res.getResponseBytes();
-		
+		assertEquals(expect.length+"", res.getHeader("Content-Length"));
 		assertEquals(expect.length, bytes.length);
 		for(int i = 0; i < expect.length; i++) {
 			assertEquals(expect[i], bytes[i]);
