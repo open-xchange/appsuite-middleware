@@ -1,8 +1,13 @@
 package com.openexchange.webdav.xml.appointment;
 
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.server.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.FolderTest;
+import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
 
@@ -27,6 +32,100 @@ public class ListTest extends AppointmentTest {
 		int[][] objectIdAndFolderId = { {objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 		
+	}
+	
+	public void testPropFindInPublicFolder() throws Exception {
+		Date modified = new Date();
+		
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testPropFindInPublicFolder" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setType(FolderObject.PRIVATE);
+		folderObj.setParentFolderID(1);
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+		
+		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testPropFindInPublicFolder");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(parentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
+		
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
+		
+		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+		
+		boolean found = true;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId == appointmentArray[a].getObjectID()) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("object not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword());
+	}
+	
+	public void testPropFindInPublicFolderWithGroupPermission() throws Exception {
+		Date modified = new Date();
+		
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testPropFindInPublicFolderWithGroupPermission" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.CALENDAR);
+		folderObj.setType(FolderObject.PRIVATE);
+		folderObj.setParentFolderID(1);
+		
+		Group[] group = GroupUserTest.searchGroup(getWebConversation(), "users", new Date(0), getHostName(), getLogin(), getPassword());
+		assertTrue("group users not found", group.length > 0);
+		
+		int usersGroupId = group[0].getIdentifier();
+		
+		OCLPermission[] permission = new OCLPermission[] { 
+			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+			FolderTest.createPermission( usersGroupId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+		
+		final int parentFolderId = FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testPropFindInPublicFolderWithGroupPermission");
+		appointmentObj.setStartDate(startTime);
+		appointmentObj.setEndDate(endTime);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(parentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
+		
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
+		
+		AppointmentObject[] appointmentArray = listAppointment(getSecondWebConversation(), appointmentFolderId, modified, true, false, PROTOCOL + hostName, getSecondLogin(), getPassword());
+		
+		boolean found = true;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId == appointmentArray[a].getObjectID()) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("object not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword());
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
