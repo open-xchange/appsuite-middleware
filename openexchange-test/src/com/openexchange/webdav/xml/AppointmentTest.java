@@ -458,6 +458,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 			}
 			
 			appointmentArray[a] = (AppointmentObject)response[a].getDataObject();
+			assertNotNull("last modified is null", appointmentArray[a].getLastModified());
 		}
 		
 		return appointmentArray;

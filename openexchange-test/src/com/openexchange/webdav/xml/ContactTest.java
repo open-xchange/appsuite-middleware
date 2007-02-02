@@ -528,16 +528,17 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		bais = new ByteArrayInputStream(responseByte);
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
 		
-		ContactObject[] appointmentArray = new ContactObject[response.length];
-		for (int a = 0; a < appointmentArray.length; a++) {
+		ContactObject[] contactArray = new ContactObject[response.length];
+		for (int a = 0; a < contactArray.length; a++) {
 			if (response[a].hasError()) {
 				fail("xml error: " + response[a].getErrorMessage());
 			}
 			
-			appointmentArray[a] = (ContactObject)response[a].getDataObject();
+			contactArray[a] = (ContactObject)response[a].getDataObject();
+			assertNotNull("last modified is null", contactArray[a].getLastModified());
 		}
 		
-		return appointmentArray;
+		return contactArray;
 	}
 	
 	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {

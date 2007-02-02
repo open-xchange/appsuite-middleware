@@ -407,6 +407,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 			}
 			
 			taskArray[a] = (Task)response[a].getDataObject();
+			assertNotNull("last modified is null", taskArray[a].getLastModified());
 		}
 		
 		return taskArray;
