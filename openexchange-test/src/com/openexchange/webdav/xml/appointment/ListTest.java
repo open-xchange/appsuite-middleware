@@ -87,10 +87,8 @@ public class ListTest extends AppointmentTest {
 		folderObj.setType(FolderObject.PRIVATE);
 		folderObj.setParentFolderID(1);
 		
-		Group[] group = GroupUserTest.searchGroup(getWebConversation(), "users", new Date(0), getHostName(), getLogin(), getPassword());
-		assertTrue("group users not found", group.length > 0);
 		
-		int usersGroupId = group[0].getIdentifier();
+		int usersGroupId = 1; // Users
 		
 		OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
