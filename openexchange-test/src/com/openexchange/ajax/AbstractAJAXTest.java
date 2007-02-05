@@ -52,6 +52,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 	
+	private static final Map<String, String> testArgsMap = new HashMap<String, String>();
+	
 	private String hostName = null;
 	
 	private WebConversation webConversation = null;
@@ -344,5 +346,17 @@ public abstract class AbstractAJAXTest extends TestCase {
 			return host;
 		}
 		return "http://" + host;
+	}
+	
+	public static final boolean containsTestArg(final String arg) {
+		return testArgsMap.containsKey(arg);
+	}
+	
+	public static final String getTestArg(final String arg) {
+		return testArgsMap.get(arg);
+	}
+	
+	public static final void putTestArg(final String arg, final String value) {
+		testArgsMap.put(arg, value);
 	}
 }
