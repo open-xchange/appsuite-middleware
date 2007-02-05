@@ -94,6 +94,22 @@ public abstract class AbstractAJAXTest extends TestCase {
 		return ajaxProps;
 	}
 	
+	public int getLoginId() {
+		try {
+			return Integer.parseInt(getAJAXProperty("loginId"));
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
+	public int getSecondId() {
+		try {
+			return Integer.parseInt(getAJAXProperty("secondId"));
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
 	/**
 	 * @return Returns the hostname.
 	 */
