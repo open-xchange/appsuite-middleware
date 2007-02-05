@@ -10,7 +10,7 @@ public class FolderTestRunner {
 
 	public static Test createFolderTestSuite() {
 		TestSuite testSuite = new TestSuite();
-		testSuite.addTest(new FolderTest("testSharedFolder"));
+		testSuite.addTest(new FolderTest("testGetUserId"));
 		return testSuite;
 	}
 	
