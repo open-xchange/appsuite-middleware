@@ -4,9 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -41,9 +39,10 @@ public class LockTest extends InfostoreAJAXTest {
 		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
-		FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId());
-		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), getLogin(), false,
-		myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, null, true);
+		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		FolderObject myInfostore = FolderTest.getMyInfostoreFolder(getWebConversation(), getHostName(), getSessionId(), userId);
+		folderId = FolderTest.insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
+		myInfostore.getObjectID(), "NewInfostoreFolder"+System.currentTimeMillis(), "infostore", FolderObject.PUBLIC, -1, true);
 		updateFolder(getWebConversation(),getHostName(),sessionId,getLogin(),getSeconduser(),folderId,System.currentTimeMillis(),false);
 		
 		//folderId=228;

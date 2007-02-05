@@ -40,7 +40,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public void setUp() throws Exception {
 		this.sessionId = getSessionId();
-		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId).getObjectID();
+		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
 		
 		Map<String,String> create = m(
 			"folder_id" 		,	((Integer)folderId).toString(),
