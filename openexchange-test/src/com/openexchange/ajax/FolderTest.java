@@ -70,7 +70,7 @@ public class FolderTest extends AbstractAJAXTest {
 
 	private static final int[] mapping_01 = { 0, 2, 4, -1, 8 };
 	
-	private static final int getUserId(final WebConversation conversation,
+	public static final int getUserId(final WebConversation conversation,
 			final String hostname, final String entityArg, final String password) throws JSONException, MalformedURLException, IOException,
 			SAXException {
 		final String arg = new StringBuilder(20).append(entityArg).append("_id").toString();

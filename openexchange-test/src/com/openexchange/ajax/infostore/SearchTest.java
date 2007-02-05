@@ -26,7 +26,8 @@ public class SearchTest extends InfostoreAJAXTest {
 	public void setUp() throws Exception{
 		
 		this.sessionId = getSessionId();
-		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId).getObjectID();
+		int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());
+		this.folderId = FolderTest.getMyInfostoreFolder(getWebConversation(),getHostName(),sessionId,userId).getObjectID();
 		
 		all = new String[26];
 		
