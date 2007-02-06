@@ -330,7 +330,6 @@ public class ConflictTest extends AppointmentTest {
 		appointmentObj.setEndDate(new Date(endTime-7200000));
 		
 		AppointmentObject[] appointmentConflicts = insertAppointmentReturnConflicts(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
-		assertNotNull("conflicts expected!", appointmentConflicts);
 		
 		boolean found = false;
 		
