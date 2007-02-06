@@ -9,6 +9,7 @@ public class ReminderBugTestSuite extends TestSuite{
 	public static Test suite(){
 		TestSuite tests = new TestSuite();
 		tests.addTestSuite( Bug4342Test.class );
+		tests.addTestSuite( Bug5128Test.class );
 
 		return tests;
 	}
