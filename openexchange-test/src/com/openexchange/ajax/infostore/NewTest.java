@@ -202,4 +202,23 @@ public class NewTest extends InfostoreAJAXTest {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 	}
+	
+	
+	public void testTitleFromFilename() throws Exception {
+		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		int id = createNew(
+				getWebConversation(),
+				getHostName(),
+				sessionId,
+				m(
+						"folder_id" 		,	((Integer)folderId).toString()
+				), upload, "text/plain"
+		);
+		clean.add(id);
+		
+		Response res = get(getWebConversation(),getHostName(), sessionId, id);
+		JSONObject obj = (JSONObject) res.getData();
+		
+		assertEquals(upload.getName(),obj.getString("title"));
+	}
 }
