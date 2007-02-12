@@ -61,6 +61,7 @@ public class ParticipantNotifyTest extends TestCase{
 		notify.taskCreated(t,session);
 		
 		Message msg = notify.getMessages().get(0);
+		
 		String[] participantNames = parseParticipants( msg );
 		
 		assertNames( msg.addresses, "user1@test.invalid" );
@@ -183,7 +184,6 @@ public class ParticipantNotifyTest extends TestCase{
 		Task t = getTask(participants);
 		
 		notify.taskCreated(t,session);
-		
 		assertAddresses(notify.getMessages(), "user1@test.invalid","resource_admin1@test.invalid");
 	}
 	
@@ -334,8 +334,8 @@ public class ParticipantNotifyTest extends TestCase{
 	private String[] parseParticipants(Message msg) {
 		int language = guessLanguage(msg);
 		switch(language) {
-		case DE: return getLines(msg,"Teilnehmer:","Ressourcen:");
-		case EN: return getLines(msg,"Participants:", "Resources:");
+		case DE: return getLines(msg,"Teilnehmer","Ressourcen");
+		case EN: return getLines(msg,"Participants", "Resources");
 		default: return null;
 		}
 	}
@@ -355,16 +355,16 @@ public class ParticipantNotifyTest extends TestCase{
 		String[] allLines = msg.message.split("\n");
 		for(String line : allLines) {
 			line = line.trim();
-			if(line.equals(to)) {
+			if(line.startsWith(to)) {
 				break;
 			}
 			
 			if(collect) {
-				if(!"".equals(line))
+				if(!"".equals(line)&&!line.matches("=+"))
 					collector.add(line);
 			}
 			
-			if(line.equals(from)) {
+			if(line.startsWith(from)) {
 				collect = true;
 			}
 			
