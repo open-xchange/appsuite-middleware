@@ -134,8 +134,27 @@ public class CalendarTest extends TestCase {
         return privatefolder;
     }
     
-    /* ----- test cases -------*/
     
+    private void testDelete(CalendarDataObject cdao) throws Exception {        
+        Connection writecon = DBPool.pickupWriteable(getContext());
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
+        CalendarSql csql = new CalendarSql(so);
+        CalendarDataObject deleteit = new CalendarDataObject();
+        deleteit.setContext(cdao.getContext());
+        deleteit.setObjectID(cdao.getObjectID());
+        int fid = cdao.getEffectiveFolderId();
+        try {
+            if (fid == 0) {
+                int x = 0;
+            }
+            csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
+        } catch(Exception e) { 
+            e.printStackTrace();
+        }
+        DBPool.pushWrite(context, writecon);
+    }    
+
     void deleteAllAppointments() throws Exception  {
         Connection readcon = DBPool.pickup(getContext());
         Context context = new ContextImpl(contextid);
@@ -144,11 +163,13 @@ public class CalendarTest extends TestCase {
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
-            testDelete(cdao);
+        testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);                
     }
+    
+    /* ----- test cases -------*/   
     
     public void testWholeDay() throws Throwable { // TODO: Need connection 
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
@@ -600,6 +621,7 @@ public class CalendarTest extends TestCase {
 
     }      
     
+
     
     public void testInsertMoveAllDelete() throws Throwable {
         Context context = new ContextImpl(contextid);
@@ -725,8 +747,6 @@ public class CalendarTest extends TestCase {
         }
 
     }          
-    
-    
  
     public void testConflictHandling() throws Exception  {
         Context context = new ContextImpl(contextid);
@@ -800,25 +820,6 @@ public class CalendarTest extends TestCase {
         DBPool.push(context, readcon);
     }
     
-    private void testDelete(CalendarDataObject cdao) throws Exception {        
-        Connection writecon = DBPool.pickupWriteable(getContext());
-        Context context = new ContextImpl(contextid);
-        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "delete test");
-        CalendarSql csql = new CalendarSql(so);
-        CalendarDataObject deleteit = new CalendarDataObject();
-        deleteit.setContext(cdao.getContext());
-        deleteit.setObjectID(cdao.getObjectID());
-        int fid = cdao.getEffectiveFolderId();
-        try {
-            if (fid == 0) {
-                int x = 0;
-            }
-            csql.deleteAppointmentObject(deleteit, fid, new Date(SUPER_END));
-        } catch(Exception e) { 
-            e.printStackTrace();
-        }
-        DBPool.pushWrite(context, writecon);
-    }
     
     public void testResourceConflictHandling() throws Exception {
         Context context = new ContextImpl(contextid);
@@ -1513,6 +1514,5 @@ public class CalendarTest extends TestCase {
  
         
     }    
-    
    
 }
