@@ -1,0 +1,303 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:62
+msgid "Private Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:64
+msgid "Public Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:66
+msgid "Shared Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:68
+msgid "System"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:70
+msgid "Global Address Book"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:72
+msgid "Internal Users"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:74
+msgid "OX Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:76
+msgid "Projects"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:78
+msgid "Infostore"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:80
+msgid "Userstore"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:82
+msgid "Other Task Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:84
+msgid "Other Calendar Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:86
+msgid "Other Contact Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:88
+msgid "Other Infostore Folders"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:90
+msgid "My Infostore Folder"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "All Groups and Users"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Tasks"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:96
+msgid "Calendar"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/FolderStrings.java:98
+msgid "Contacts"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:62
+msgid ""
+"Reporting-UA: OPEN-XCHANGE - WebMail\n"
+"Final-Recipient: rfc822; #FROM#\n"
+"Original-Message-ID: #MSG ID#\n"
+"Disposition: manual-action/MDN-sent-manually; displayed\n"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:64
+msgid "Read Acknowledgement"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:66
+msgid "Receipt Acknowledgement"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:68
+msgid "On #DATE# at #TIME# #SENDER# wrote:"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:70
+msgid "Fwd: "
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:72
+msgid ""
+"---------- Original Message ----------\n"
+"From: #FROM#\n"
+"To: #TO#\n"
+"Date: #DATE# at #TIME#\n"
+"Subject: #SUBJECT#"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/MailStrings.java:74
+msgid "[No Subject]"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:54
+msgid ""
+"A new appointment was created by [created_by].\n"
+"\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"Location:    [location]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:82
+msgid ""
+"A new task was created by [created_by].\n"
+"\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:109
+msgid ""
+"This appointment was deleted by [changed_by].\n"
+"\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:123
+msgid ""
+"This task was deleted by [changed_by].\n"
+"\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:137
+msgid ""
+"This appointment was changed by [changed_by].\n"
+"\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"Location:    [location]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:165
+msgid ""
+"This task was changed by [changed_by].\n"
+"\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by:  [created_by]\n"
+"Title:       [title]\n"
+"\n"
+"Start date:  [start]\n"
+"End date:    [end]\n"
+"\n"
+"Description:\n"
+"[description]\n"
+"\n"
+"\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:191
+msgid "A new appointment was created"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:192
+msgid "An appointment was changed"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:193
+msgid "An appointment was removed"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:194
+msgid "A new task was created"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:195
+msgid "A task was changed"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:196
+msgid "A task was removed"
+msgstr ""
+
+#: com/openexchange/groupware/i18n/Notifications.java:197
+msgid "No resources were scheduled."
+msgstr ""

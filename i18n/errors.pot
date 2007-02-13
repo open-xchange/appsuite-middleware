@@ -1,0 +1,1618 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "%s attachment could not be save due to an unsupported MIME type %s"
+msgstr ""
+
+msgid "%s is not initialized."
+msgstr ""
+
+msgid "A DBPool error occured: %s"
+msgstr ""
+
+msgid "A DBPooling error occured"
+msgstr ""
+
+msgid "A JSON error occured: %s"
+msgstr ""
+
+msgid "A LDAP error occurred in context %s"
+msgstr ""
+
+msgid "A SQL error occured"
+msgstr ""
+
+msgid "A SQL error occured in context %s"
+msgstr ""
+
+msgid "A SQL error occured while reading schema version information: %1$s."
+msgstr ""
+
+msgid "A SQL error occured: %s"
+msgstr ""
+
+msgid "A duplicate folder exists in parent folder %s in context %s"
+msgstr ""
+
+msgid "A folder named %s already exists"
+msgstr ""
+
+msgid "A group must not hold admin permission on a private folder"
+msgstr ""
+
+msgid "A messaging error occured: %s"
+msgstr ""
+
+msgid "A protocol exception occured during execution of an IMAP request: %s"
+msgstr ""
+
+msgid ""
+"A source folder of module %s must not be moved to a target folder of module %"
+"s"
+msgstr ""
+
+msgid "AJP Connection is not set to status \"ASSIGNED\""
+msgstr ""
+
+msgid "Account \"%s\" is locked."
+msgstr ""
+
+msgid "Account \"%s\" is not ready yet."
+msgstr ""
+
+msgid "Action %s is not supported by %s"
+msgstr ""
+
+msgid "Action type not supported : %d"
+msgstr ""
+
+msgid "An Error Occured: Object ID is -1"
+msgstr ""
+
+msgid ""
+"An Error occured during the load of Folder Objects by a extended search. "
+"Context %1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured during the load of Folder Objects by a simple search. "
+"Context %1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured during the load of Folder Objects. Context %1$d Folder %2$d "
+"User %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured during the load of deleted Objects from a Folder. Context %1"
+"$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured during the load of modified Objects from a Folder. Context %"
+"1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured. Unable to delete some links from this Objects. Object %1$d "
+"Folder %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured. Unable to load some links for this Objects. 1. Object %1$d "
+"2. Object %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"An Error occured. Unable to save this linking between those two Objects.1. "
+"Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+msgstr ""
+
+msgid "An I/O error occured: %s"
+msgstr ""
+
+msgid "An IOError occurred: %s"
+msgstr ""
+
+msgid "An attempt was made to open a read-only folder with read-write: %s"
+msgstr ""
+
+msgid "An error occurred attaching to the given object."
+msgstr ""
+
+msgid "Attachments must contain a file."
+msgstr ""
+
+msgid "Attribute \"%s\" is not set in FolderObject instance %s in context %s"
+msgstr ""
+
+msgid "Bad JSON value %s in key %s"
+msgstr ""
+
+msgid "Both %s and %s must not be present in message's JSON representation"
+msgstr ""
+
+msgid "Cache %s could not be initialized due to following error: %s"
+msgstr ""
+
+msgid "CalendarOperation: Context not set."
+msgstr ""
+
+msgid "Caller does not allow to fetch a connection from pool in context %s"
+msgstr ""
+
+msgid "Can't add external participant without email address."
+msgstr ""
+
+msgid "Can't build distinguished name from %s."
+msgstr ""
+
+msgid "Can't close database connection"
+msgstr ""
+
+msgid "Can't create private task in public/shared folder %1$d."
+msgstr ""
+
+msgid "Can't find context %d."
+msgstr ""
+
+msgid "Can't find folder of task participant."
+msgstr ""
+
+msgid "Can't find group with identifier %1$s in context %2$d."
+msgstr ""
+
+msgid "Can't find property %s."
+msgstr ""
+
+msgid "Can't find resource group with identifier %d."
+msgstr ""
+
+msgid "Can't find resource with identifier %d."
+msgstr ""
+
+msgid "Can't find task %d in context %d."
+msgstr ""
+
+msgid "Can't find user with email %s."
+msgstr ""
+
+msgid "Can't find user with identifier %1$s in context %2$d."
+msgstr ""
+
+msgid "Can't get connection to config DB."
+msgstr ""
+
+msgid "Can't get connection to database %d."
+msgstr ""
+
+msgid "Can't get connection to database."
+msgstr ""
+
+msgid "Can't get database connection."
+msgstr ""
+
+msgid "Can't get information for pool %d."
+msgstr ""
+
+msgid "Can't instanciate class %1$s."
+msgstr ""
+
+msgid "Can't load class \"%s\"."
+msgstr ""
+
+msgid "Can't put object %s into cache."
+msgstr ""
+
+msgid "Can't read file \"%s\"."
+msgstr ""
+
+msgid "Can't resolve mailadmin for context %d."
+msgstr ""
+
+msgid "Can't return connection to pool %d."
+msgstr ""
+
+msgid "Can't send event to event system."
+msgstr ""
+
+msgid "Can't set schema in database connection."
+msgstr ""
+
+msgid "Cannot decrease number of attachments below zero."
+msgstr ""
+
+msgid "Cannot find file store location."
+msgstr ""
+
+msgid "Cannot generate ID for new attachment: %s"
+msgstr ""
+
+msgid "Cannot instanciate class %s."
+msgstr ""
+
+msgid "Cannot pre-fetch results."
+msgstr ""
+
+msgid "Cannot reach the file store so I cannot remove the documents."
+msgstr ""
+
+msgid ""
+"Cannot remove file. Database and file store are probably inconsistent. "
+"Please contact an administrator to run the recovery tool."
+msgstr ""
+
+msgid ""
+"Changes done to the object this attachment was added to could not be undone. "
+"Your database is probably inconsistent, run the consistency tool."
+msgstr ""
+
+msgid ""
+"Changes were made to the object of this attachment and cannot be undone. "
+"Your database is probably inconsistent, run the consistency tool."
+msgstr ""
+
+msgid "Class %1$s can not be found."
+msgstr ""
+
+msgid "Class %1$s can not be loaded."
+msgstr ""
+
+msgid "Class %s can not be loaded."
+msgstr ""
+
+msgid "Configuration for user %s could not found in context %d"
+msgstr ""
+
+msgid "Connection is broken due to a socket exception on remote server: %s"
+msgstr ""
+
+msgid ""
+"Connection was refused or timed out while attempting to connect to remote "
+"server: %s"
+msgstr ""
+
+msgid "Connection was reset"
+msgstr ""
+
+msgid "Contact not found! Context %1$d"
+msgstr ""
+
+msgid "Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s"
+msgstr ""
+
+msgid ""
+"Corrupt AJP package #%d: First two bytes do not indicate a package from "
+"server to container: %s %s"
+msgstr ""
+
+msgid ";"
+msgstr ""
+
+msgid "Could not access file store."
+msgstr ""
+
+msgid "Could not bind connection to local port %s"
+msgstr ""
+
+msgid "Could not create a PartModifier instance from name %s"
+msgstr ""
+
+msgid "Could not delete DocumentMetadata %d. Please try again."
+msgstr ""
+
+msgid "Could not delete all objects."
+msgstr ""
+
+msgid "Could not delete attachment."
+msgstr ""
+
+msgid "Could not delete file from file store."
+msgstr ""
+
+msgid ""
+"Could not fetch result from result set. Probably the database may be busy or "
+"not running. Please try again."
+msgstr ""
+
+msgid ""
+"Could not find an attachment with the file_id %s. Either the file is "
+"orphaned or belongs to another module."
+msgstr ""
+
+msgid "Could not generate new ID."
+msgstr ""
+
+msgid "Could not iterate result"
+msgstr ""
+
+msgid "Could not load context."
+msgstr ""
+
+msgid "Could not load documents to check the permissions"
+msgstr ""
+
+msgid "Could not remove file from file store."
+msgstr ""
+
+msgid "Could not remove file. %s"
+msgstr ""
+
+msgid "Could not retrieve file: %s"
+msgstr ""
+
+msgid "Could not save file to the file store."
+msgstr ""
+
+msgid "Couldn't reach the filestore: %s"
+msgstr ""
+
+msgid "Counting tasks did not return a result."
+msgstr ""
+
+msgid "Creator can't be participant."
+msgstr ""
+
+msgid ""
+"Critical Error Occured. This folder contains a contact with no id. Context %1"
+"$d Folder %2$d"
+msgstr ""
+
+msgid "Database can't be reached."
+msgstr ""
+
+msgid "Database down."
+msgstr ""
+
+msgid "Date range in search must contain 2 and not %d values."
+msgstr ""
+
+msgid "Default folder %s cannot be deleted"
+msgstr ""
+
+msgid "Default folder %s cannot be renamed in context %s"
+msgstr ""
+
+msgid "Default folder %s cannot be updated"
+msgstr ""
+
+msgid "Deletion of folder %s failed"
+msgstr ""
+
+msgid "Deletion of message %s failed"
+msgstr ""
+
+msgid ""
+"Delivered sequence id %s from database is less than allowed min folder id of "
+"%s in context %s"
+msgstr ""
+
+msgid "Draft message could not be edited in read-only mail folder %s"
+msgstr ""
+
+msgid "Driver class missing."
+msgstr ""
+
+msgid "ERROR: Private flag and participants are not supported."
+msgstr ""
+
+msgid "ERROR: Private flag is only allowed inside of a private folder."
+msgstr ""
+
+msgid "ERROR: Unsupported label value %d"
+msgstr ""
+
+msgid "ERROR: Unsupported private flag value %d"
+msgstr ""
+
+msgid "ERROR:: Unsupported \"shown as\"  value %d"
+msgstr ""
+
+msgid ""
+"Effective permission of Folder %s could not determined for user %s in "
+"context %s"
+msgstr ""
+
+msgid "Either key %s or key %s is mssing in message's JSON representation"
+msgstr ""
+
+msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
+msgstr ""
+
+msgid "Encoding %s can't be used."
+msgstr ""
+
+msgid "End date is before start date"
+msgstr ""
+
+msgid "Error in SQL Update"
+msgstr ""
+
+msgid "Error while inserting task: %s."
+msgstr ""
+
+msgid ""
+"Error: Got an UserParticipant object with a private folder id < 1 : "
+"Identifier = %d"
+msgstr ""
+
+msgid ""
+"Error: Got an UserParticipant object with a private folder id in a public "
+"folder : Identifier = %d"
+msgstr ""
+
+msgid ""
+"Error: Got an UserParticipant object with an identifier < 1 Identifier:"
+"Folder_Type = %d:%d"
+msgstr ""
+
+msgid "Exception while parsing JSON."
+msgstr ""
+
+msgid "Exception while writing JSON."
+msgstr ""
+
+msgid "FATAL: CalendarFolderObject not initialized!"
+msgstr ""
+
+msgid "FATAL: Would create an object without participants"
+msgstr ""
+
+msgid ""
+"FATAL:: Can not resolve recurrence position because we got neither the "
+"recurring position nor a recurring date position"
+msgstr ""
+
+msgid "Fatal error. (DAILY) Missing or wrong value interval : %d"
+msgstr ""
+
+msgid "Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d"
+msgstr ""
+
+msgid "Fatal error. (MONTHLY) Missing or wrong value Month : %d"
+msgstr ""
+
+msgid "Fatal error. (MONTHLY2) Missing or wrong DayInMonthvalue day : %d"
+msgstr ""
+
+msgid "Fatal error. (MONTHLY2) Missing or wrong value day : %d"
+msgstr ""
+
+msgid "Fatal error. (WEEKLY) Missing or wrong value interval : %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY) Missing or wrong value DayInMonth : %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY) Missing or wrong value month : %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY2) Missing or wrong day_or_type : %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY2) Missing or wrong interval : %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
+msgstr ""
+
+msgid "File \"%s\" does not exist."
+msgstr ""
+
+msgid "File \"%s\" is not readable."
+msgstr ""
+
+msgid "File upload failed: %s"
+msgstr ""
+
+msgid "Filename for property file is not defined."
+msgstr ""
+
+msgid ""
+"Files attached to InfoStore items must have unique names. Filename: %s. The "
+"other document with this file name is %s."
+msgstr ""
+
+msgid "Folder %1$s (%2$d) is not a task folder."
+msgstr ""
+
+msgid "Folder %d for task %d cannot be found."
+msgstr ""
+
+msgid "Folder %d has two subfolders named %s. Your database is not consistent."
+msgstr ""
+
+msgid "Folder %s cannot be deleted"
+msgstr ""
+
+msgid "Folder %s cannot be updated"
+msgstr ""
+
+msgid "Folder %s could not be loaded in context %s"
+msgstr ""
+
+msgid "Folder %s could not be put into cache in context %s"
+msgstr ""
+
+msgid "Folder %s could not be removed from folder cache"
+msgstr ""
+
+msgid "Folder %s could not be updated in context %s"
+msgstr ""
+
+msgid "Folder %s does not allow subfolders."
+msgstr ""
+
+msgid "Folder %s does not exist in context %s"
+msgstr ""
+
+msgid "Folder %s does not hold messages"
+msgstr ""
+
+msgid "Folder %s has been modified after last sync timestamp in context %s"
+msgstr ""
+
+msgid "Folder %s must not be moved to one of its subfolders in context %s"
+msgstr ""
+
+msgid "Folder %s not visible to user %s in context %s"
+msgstr ""
+
+msgid ""
+"Folder cache (region name = %s) could not be initialized due to following "
+"reason: %s"
+msgstr ""
+
+msgid "Folder cache has not been enabled in config file %s"
+msgstr ""
+
+msgid "Folder is closed: %s"
+msgstr ""
+
+msgid "Folder is not of type Calendar"
+msgstr ""
+
+msgid "Folder not found: %s"
+msgstr ""
+
+msgid "Folder read-only check failed"
+msgstr ""
+
+msgid "Folder type \"SHARED\" is not allowed in this situation."
+msgstr ""
+
+msgid "Folder type unresolvable !"
+msgstr ""
+
+msgid "For finished tasks the percentage must be 100 and not %d."
+msgstr ""
+
+msgid ""
+"For tasks which are not started the percentage done must be 0 and not %d."
+msgstr ""
+
+msgid "Found resource groups with same identifier %d."
+msgstr ""
+
+msgid "Found resources with same identifier %d."
+msgstr ""
+
+msgid "Found two user with same identifier %1$s in context %2$d."
+msgstr ""
+
+msgid "FreeBusyResults calculation problem with oid: %d"
+msgstr ""
+
+msgid "Got a -1 ID from IDGenerator"
+msgstr ""
+
+msgid ""
+"Got the wrong folder identification. You do not have the appropriate "
+"permissions to modify this object."
+msgstr ""
+
+msgid ""
+"Got the wrong shared folder identification. You do not have the appropriate "
+"permissions to modify this object."
+msgstr ""
+
+msgid "Hash algorithm %s isn't found."
+msgstr ""
+
+msgid "Header \"content-type\" does not indicate multipart content"
+msgstr ""
+
+msgid "I/O error while writing to Writer Object: %s"
+msgstr ""
+
+msgid "IMAP Property error: %s"
+msgstr ""
+
+msgid "IMAP default folder %s could not be created"
+msgstr ""
+
+msgid ""
+"IMAP search failed due to following reason: %s Switching to application-"
+"based search"
+msgstr ""
+
+msgid ""
+"IMAP sort failed due to following reason: %s Switching to application-based "
+"sorting"
+msgstr ""
+
+msgid "Illegal Argument: Document %d contains no file"
+msgstr ""
+
+msgid "Illegal write attempt: %s"
+msgstr ""
+
+msgid "Incorrect SQL Query."
+msgstr ""
+
+msgid "Incorrect SQL Query: %s"
+msgstr ""
+
+msgid "Insert expected but the objectid is already given. Aborting action"
+msgstr ""
+
+msgid "Instanciating the class failed."
+msgstr ""
+
+msgid "Insufficient read rights for this folder!"
+msgstr ""
+
+msgid "Insufficient rights to attach/detach an attachment to this folder!"
+msgstr ""
+
+msgid ""
+"Insufficient write rights for this folder. Unable to attach Document. "
+"Context %4$d Folder %1$d Object %2$d User %3$d"
+msgstr ""
+
+msgid "Integer value exceeds max allowed value (65535): %d"
+msgstr ""
+
+msgid "Internal error: %s"
+msgstr ""
+
+msgid "Invalid Content-Type value: %s"
+msgstr ""
+
+msgid "Invalid SQL Query : %s"
+msgstr ""
+
+msgid "Invalid SQL Query: %s"
+msgstr ""
+
+msgid "Invalid SQL: '%s'"
+msgstr ""
+
+msgid "Invalid attachment %s: %s"
+msgstr ""
+
+msgid "Invalid constructor argument. Instance of %s not supported"
+msgstr ""
+
+msgid "Invalid content-type header value: %s"
+msgstr ""
+
+msgid "Invalid cookie."
+msgstr ""
+
+msgid "Invalid credentials."
+msgstr ""
+
+msgid "Invalid email address %s"
+msgstr ""
+
+msgid "Invalid entity id %s detected in permissions of folder %s in context %s"
+msgstr ""
+
+msgid "Invalid integer value %s"
+msgstr ""
+
+msgid "Invalid method on a expunged message: %s"
+msgstr ""
+
+msgid "Invalid object ID %s"
+msgstr ""
+
+msgid "Invalid parameter: %s"
+msgstr ""
+
+msgid "Invalid permission values: fp=%d orp=%d owp=%d odp=%d"
+msgstr ""
+
+msgid "Invalid request. Folder is shared!"
+msgstr ""
+
+msgid "Invalid search expression: %s"
+msgstr ""
+
+msgid "Invalid task state %d."
+msgstr ""
+
+msgid "Invalid unique message identifier: %s"
+msgstr ""
+
+msgid "Mail folder \"%s\" could not be created"
+msgstr ""
+
+msgid "Mandatory field last name is not set."
+msgstr ""
+
+msgid "Mandatory field mail address for external participants"
+msgstr ""
+
+msgid "Mapping for %d not implemented"
+msgstr ""
+
+msgid "Message %s could not be found in folder %s"
+msgstr ""
+
+msgid "Message could not be moved to trash folder"
+msgstr ""
+
+msgid "Message could not be moved to trash folder. Quota exceeded"
+msgstr ""
+
+msgid "Message could not be sent"
+msgstr ""
+
+msgid "Message could not be sent to the following recipients: %s"
+msgstr ""
+
+msgid ""
+"Message has been successfully sent, but a copy was not placed in your sent "
+"folder due to exceeded quota."
+msgstr ""
+
+msgid "Method not supported: %s"
+msgstr ""
+
+msgid "Missing %s folder in mail move operation"
+msgstr ""
+
+msgid "Missing affiliation id"
+msgstr ""
+
+msgid "Missing data for spell check"
+msgstr ""
+
+msgid "Missing default %s folder in user mail settings"
+msgstr ""
+
+msgid "Missing field %s in folder %s in context %s"
+msgstr ""
+
+msgid "Missing field %s in message %s"
+msgstr ""
+
+msgid "Missing folder id for creating task."
+msgstr ""
+
+msgid "Missing header %s in message %s"
+msgstr ""
+
+msgid "Missing key %s in message's JSON representation"
+msgstr ""
+
+msgid "Missing parameter %s"
+msgstr ""
+
+msgid "Missing parameter: %s"
+msgstr ""
+
+msgid "Missing payload data in client's body chunk package"
+msgstr ""
+
+msgid "Missing property %1$s in server.properties."
+msgstr ""
+
+msgid "Missing property AJP_JVM_ROUTE in file \"ajp.properties\""
+msgstr ""
+
+msgid "Missing start date, unable to calculate recurring!"
+msgstr ""
+
+msgid "Missing the following field: %s"
+msgstr ""
+
+msgid "Missing upload image."
+msgstr ""
+
+msgid "Missing user default email address in mail settings"
+msgstr ""
+
+msgid "Missing value in key %s in message's JSON representation"
+msgstr ""
+
+msgid "Module %s is unknown in context %s"
+msgstr ""
+
+msgid "Move not allowed from shared folders"
+msgstr ""
+
+msgid "Move not supported: Source:Destination %d:%d"
+msgstr ""
+
+msgid ""
+"Move/Copy failed. New message with UID %d could not be found in destination "
+"folder %s"
+msgstr ""
+
+msgid "Moving a private flag to a public folder is not allowed!"
+msgstr ""
+
+msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
+msgstr ""
+
+msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
+msgstr ""
+
+msgid "No admin permission found"
+msgstr ""
+
+msgid "No admin user found in context %s"
+msgstr ""
+
+msgid "No attachment was found with id %s in message %s"
+msgstr ""
+
+msgid "No attribute name could be found for code: %d"
+msgstr ""
+
+msgid ""
+"No data provided from web server: input stream returned \"-1\" while reading "
+"AJP magic bytes in package #%d"
+msgstr ""
+
+msgid "No default folder could be found in module %s for user %s in context %s"
+msgstr ""
+
+msgid "No route to host: server (%s) cannot be reached"
+msgstr ""
+
+msgid "No row found in table update."
+msgstr ""
+
+msgid "No send address could be found for user %s in user configuration"
+msgstr ""
+
+msgid ""
+"Not allowed to change parent id of folder %s through an update call. Use "
+"move method instead"
+msgstr ""
+
+msgid "Not allowed to move default folder %s in context %s"
+msgstr ""
+
+msgid "Not yet supported!"
+msgstr ""
+
+msgid "Null is returned to connection pool."
+msgstr ""
+
+msgid ""
+"Number of  documents attached to this contact is below zero. You can not "
+"remove any more attachments."
+msgstr ""
+
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+
+msgid "Object not found. %s"
+msgstr ""
+
+msgid ""
+"One or more fields contain too much information. Field: %1$d Character "
+"Limit: %2$d Sent %3$d"
+msgstr ""
+
+msgid ""
+"One or more fields contain too much information. Fields: %1$s Character "
+"Limit: %2$d Sent %3$d"
+msgstr ""
+
+msgid "Only folder owner may hold admin permission on a private folder"
+msgstr ""
+
+msgid "Only one admin permission is allowed on a private folder"
+msgstr ""
+
+msgid "Only the task creator is allowed to set private flag."
+msgstr ""
+
+msgid "Operation not allowed on a closed SearchIterator"
+msgstr ""
+
+msgid "Operation not executeable on folder %s in context %s"
+msgstr ""
+
+msgid "Parameter %s does not match JSON key %s"
+msgstr ""
+
+msgid ""
+"Parent folder %s does not allow folder's module setting (%s) in context %s"
+msgstr ""
+
+msgid "Parent folder %s does not allow folder's type setting %s in context %s"
+msgstr ""
+
+msgid "Participant %d for task %d is not found."
+msgstr ""
+
+msgid "Per-File Upload Quota (%d) exceeded for file %s (size=%d)"
+msgstr ""
+
+msgid "Percent is %d but must be between 0 and 100."
+msgstr ""
+
+msgid "Port %s was unreachable on remote server"
+msgstr ""
+
+msgid "Private flagged tasks can't be delegated."
+msgstr ""
+
+msgid "Private folder %s can only be moved to a private folder in context %s"
+msgstr ""
+
+msgid "Problem putting/removing an object into/from the cache."
+msgstr ""
+
+msgid "Problem setting auto commit to true."
+msgstr ""
+
+msgid "Problem while communicating with external authorization."
+msgstr ""
+
+msgid "Problem with executing SQL: %s"
+msgstr ""
+
+msgid "Property \"%s\" is not defined."
+msgstr ""
+
+msgid "Public folder %s can only be moved to a public folder in context %s"
+msgstr ""
+
+msgid "Put into cache failed."
+msgstr ""
+
+msgid "Remove on cache failed"
+msgstr ""
+
+msgid ""
+"Request rejected because its size (%d) exceeds the maximum configured size "
+"of %d"
+msgstr ""
+
+msgid "Required  value \"Start Date\" was not supplied."
+msgstr ""
+
+msgid "Required value \"End Date\" was not supplied."
+msgstr ""
+
+msgid "Required value \"Title\" was not supplied."
+msgstr ""
+
+msgid "Resolving database for context %1$d and server %2$d not possible!"
+msgstr ""
+
+msgid "Response package exceeds max package size value of 8192k: %s"
+msgstr ""
+
+msgid "SQL Problem: \"%s\""
+msgstr ""
+
+msgid "SQL Problem: \"%s\"."
+msgstr ""
+
+msgid "SQL problem while deleting task: %s."
+msgstr ""
+
+msgid "SQL problem while listing tasks: %s."
+msgstr ""
+
+msgid "SQL problem while updating task: %s."
+msgstr ""
+
+msgid "SearchIterator NULL"
+msgstr ""
+
+msgid "Server name is not defined."
+msgstr ""
+
+msgid "Session attempts to instantiate a provider that doesn't exist: %s"
+msgstr ""
+
+msgid "SessionObject not initialized"
+msgstr ""
+
+msgid "Setting \"%1$s\" is not a leaf one."
+msgstr ""
+
+msgid "Shared folder %s MUST NOT be updated in context %s"
+msgstr ""
+
+msgid "Shared folder %s cannot be moved in context %s"
+msgstr ""
+
+msgid "Shared folder %s cannot be target of move operation in context %s"
+msgstr ""
+
+msgid "Shared folder owner not given !"
+msgstr ""
+
+msgid "Socket closed by web server"
+msgstr ""
+
+msgid "Some fields have values, that are too long"
+msgstr ""
+
+msgid "Specified folder name is too long"
+msgstr ""
+
+msgid "Start date %1$s must be before end date %2$s."
+msgstr ""
+
+msgid "Store already closed: %s"
+msgstr ""
+
+msgid "String Parse Exception: No ending 0x00 found"
+msgstr ""
+
+msgid "System folder %s cannot be moved in context %s"
+msgstr ""
+
+msgid "Target and source folder cannot be equal in context %s"
+msgstr ""
+
+msgid "Target folder %s contains a duplicate folder in context %s"
+msgstr ""
+
+msgid "Task with private flags cannot be moved to public folder %1$s (%2$d)."
+msgstr ""
+
+msgid "Tasks are disable for you (%d)."
+msgstr ""
+
+msgid ""
+"The Application was unable to validate a given email address from this "
+"contact: %s"
+msgstr ""
+
+msgid "The IP address of host \"%s\" could not be determined"
+msgstr ""
+
+msgid ""
+"The Object could not be detached because the update to an underlying object "
+"failed."
+msgstr ""
+
+msgid ""
+"The Object you requested can not be found. Try again. Context %1$d Folder %2"
+"$d User %3$d Object %4$d"
+msgstr ""
+
+msgid "The attachment you requested no longer exists. Please refresh the view."
+msgstr ""
+
+msgid "The attribute %1$s has been truncated."
+msgstr ""
+
+msgid "The default element attributes could not be retrieved"
+msgstr ""
+
+msgid ""
+"The document could not be updated because it was modified. Reload the view."
+msgstr ""
+
+msgid ""
+"The document was updated in between do and undo. The Database is now "
+"probably inconsistent."
+msgstr ""
+
+msgid ""
+"The document was updated in between do and undo. The Database is now "
+"probalby inconsistent."
+msgstr ""
+
+msgid "The document you requested doesn't exist."
+msgstr ""
+
+msgid "The file could not be retrieved."
+msgstr ""
+
+msgid "The file store could not be reached."
+msgstr ""
+
+msgid "The file store could not be reched"
+msgstr ""
+
+msgid "The folder %d is not an Infostore Folder"
+msgstr ""
+
+msgid ""
+"The image you tried to attach is not a valid picture. It may be broken or is "
+"not a valid file."
+msgstr ""
+
+msgid ""
+"The message to send contains an invalid attachment %s: neither content nor "
+"attachment's filename is set"
+msgstr ""
+
+msgid "The object has been changed in the meantime."
+msgstr ""
+
+msgid "The object has changed on server side since it was last fetched."
+msgstr ""
+
+msgid ""
+"The object has changed on server side since it was last fetched. Context %1"
+"$d Folder %2$d User %3$d Object %4$d"
+msgstr ""
+
+msgid "The requested item does not exist."
+msgstr ""
+
+msgid "The required  value \"days\" is missing or wrong"
+msgstr ""
+
+msgid "The required value \"interval\" is missing or wrong"
+msgstr ""
+
+msgid ""
+"The task has been changed in the meantime. Task changing date: %1$d, your "
+"task changing date: %2$d."
+msgstr ""
+
+msgid "There are no recipient(s) for the new message."
+msgstr ""
+
+msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
+msgstr ""
+
+msgid "This document is locked."
+msgstr ""
+
+msgid ""
+"This folder is a virtual folder used for displaying folders other users "
+"share with you. It cannot contain documents."
+msgstr ""
+
+msgid ""
+"This gif Image is to large. It can not be scaled and will not be accepted"
+msgstr ""
+
+msgid "This method is not implemented."
+msgstr ""
+
+msgid ""
+"This transaction could not be fully undone. Some components are probably not "
+"consistent anymore. Run the recovery tool!"
+msgstr ""
+
+msgid "Too few (%d) login attributes."
+msgstr ""
+
+msgid "Tried to delete %1$d folders but only %2$d were deleted."
+msgstr ""
+
+msgid "Tried to delete %1$d participants but only %2$d were deleted."
+msgstr ""
+
+msgid "UNKNOWN EXCEPTION"
+msgstr ""
+
+msgid "URL \"%s\" provided by OxAdapter is malformed."
+msgstr ""
+
+msgid ""
+"Unable fetch the number of elements in this Folder. Context %1$d Folder %2$d "
+"User %3$d"
+msgstr ""
+
+msgid "Unable to Insert Contacts! Context: %d"
+msgstr ""
+
+msgid "Unable to Load Linked Contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid ""
+"Unable to create a link between these two Objects. Insufficient Rights. 1. "
+"Object %1$d 2. Object %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"Unable to create a link between these two Objects. Insufficient Rights. 1. "
+"Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+msgstr ""
+
+msgid ""
+"Unable to create a link between these two Objects. Insufficient Rights. "
+"Object %1$d Folder %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"Unable to create a link between these two objects. This link already exists. "
+"1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+msgstr ""
+
+msgid "Unable to create exception, recurring position can not be calculated !"
+msgstr ""
+
+msgid ""
+"Unable to delete Contact Object. Context %1$d Folder %2$d User %3$d Object %4"
+"$d"
+msgstr ""
+
+msgid "Unable to delete Contact: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to delete Contacts from User. Context %1$d User %2$d"
+msgstr ""
+
+msgid "Unable to delete Contacts from this folder. Context %1$d Folder %2$d"
+msgstr ""
+
+msgid "Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to delete all links from this Objects. Object %1$d Context %2$d"
+msgstr ""
+
+msgid ""
+"Unable to delete contacts from user because this is a non-contact folder. "
+"Context %1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"Unable to delete this Contact. Object not found. Context %1$d Folder %2$d "
+"User %3$d Object %4$d"
+msgstr ""
+
+msgid "Unable to initialize Event queue"
+msgstr ""
+
+msgid "Unable to insert Contact. Context: %d"
+msgstr ""
+
+msgid "Unable to load Contact Image : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to load Contact: Context %1$d"
+msgstr ""
+
+msgid "Unable to load Dristributionlist : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to load Objects. Context %1$d User %2$d"
+msgstr ""
+
+msgid ""
+"Unable to load all links from this Objects. Object %1$d Folder %2$d User %3"
+"$d Context %4$d"
+msgstr ""
+
+msgid ""
+"Unable to perform Contact Folder check for readable content: Context %1$d "
+"Folder %2$d"
+msgstr ""
+
+msgid "Unable to pickup a connection from the DBPool"
+msgstr ""
+
+msgid "Unable to remove Participant %d"
+msgstr ""
+
+msgid "Unable to remove Participant because this participant is the last one"
+msgstr ""
+
+msgid "Unable to save Contact Image: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to save Dristributionlist : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to save Linking between Contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to save contact image. The image appears to be broken."
+msgstr ""
+
+msgid "Unable to scale Image down."
+msgstr ""
+
+msgid ""
+"Unable to scale the contact image. This is a not supported file type or it "
+"is too large! Your mime type is %1$s and your image size is %2$d The max. "
+"allowed image size is %3$d"
+msgstr ""
+
+msgid ""
+"Unable to syncronice the old contact with the new changes: Context %1$d "
+"Object %2$d"
+msgstr ""
+
+msgid "Unable to trigger Object Events: Context %1$d Folder %2$d"
+msgstr ""
+
+msgid "Unable to trigger Object Events: Context %1$d User %2$d"
+msgstr ""
+
+msgid "Unable to update Contact Image: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to update Contact. Context %1$d Object %2$d"
+msgstr ""
+
+msgid "Unable to update Dristributionlist : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to update contact image. The image appears to be broken."
+msgstr ""
+
+msgid "Unexpected SQL Error!"
+msgstr ""
+
+msgid "Unexpected exception %d!"
+msgstr ""
+
+msgid ""
+"Unexpected state for deleting a virtual appointment (exception). uid:oid:"
+"position %d:%d:%d"
+msgstr ""
+
+msgid "Unknown (IMAP) folder open mode %d"
+msgstr ""
+
+msgid "Unknown AJAX action: %s."
+msgstr ""
+
+msgid "Unknown Problem: \"%s\"."
+msgstr ""
+
+msgid "Unknown Request Prefix Code: %s"
+msgstr ""
+
+msgid "Unknown action value: %s"
+msgstr ""
+
+msgid "Unknown action: %s"
+msgstr ""
+
+msgid "Unknown color label: %s"
+msgstr ""
+
+msgid "Unknown field: %d"
+msgstr ""
+
+msgid "Unknown or unsupported action: %s"
+msgstr ""
+
+msgid "Unknown parameter container type %d"
+msgstr ""
+
+msgid "Unknown parameter container type: %d"
+msgstr ""
+
+msgid "Unknown recurrence type %d."
+msgstr ""
+
+msgid "Unknown setting path %1$d."
+msgstr ""
+
+msgid "Unknown task attribute %d."
+msgstr ""
+
+msgid "Unparseable header field %s in forward request package"
+msgstr ""
+
+msgid "Unsupported MIME type %s"
+msgstr ""
+
+msgid "Unsupported encoding: %s"
+msgstr ""
+
+msgid "Unsupported type detected : %d"
+msgstr ""
+
+msgid "Update expected but no objectid is given. Aborting action"
+msgstr ""
+
+msgid "Update of folder %s failed"
+msgstr ""
+
+msgid "Upload Quota (%d) exceeded"
+msgstr ""
+
+msgid ""
+"User %s has no access on shared folder %s in context %s due to user "
+"configuration"
+msgstr ""
+
+msgid "User %s has no access to mail folder %s"
+msgstr ""
+
+msgid ""
+"User %s has no access to module %s in context %s due to user configuration"
+msgstr ""
+
+msgid "User %s has no admin access to folder %s in context %s"
+msgstr ""
+
+msgid "User %s has no administer access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no create access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no create-subfolder permission on folder %s in context %s"
+msgstr ""
+
+msgid "User %s has no delete access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no insert access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no keep-seen access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no lookup access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no mail module access due to user configuration"
+msgstr ""
+
+msgid "User %s has no read access to mail folder %s"
+msgstr ""
+
+msgid "User %s has no write access on IMAP-Folder %s"
+msgstr ""
+
+msgid ""
+"User %s has no write access on public folder %s in context %s due to user "
+"configuration"
+msgstr ""
+
+msgid "User %s has no write permission on folder %s in context %s"
+msgstr ""
+
+msgid ""
+"User %s is not allowed to delete all contained objects in folder %s in "
+"context %s"
+msgstr ""
+
+msgid "User %s is not allowed to delete default folder %s in context %s"
+msgstr ""
+
+msgid "User %s is not allowed to delete shared folder %s in context %s"
+msgstr ""
+
+msgid ""
+"User %s is not allowed to move all subfolders of folder %s in context %s"
+msgstr ""
+
+msgid "User's %s dictionary could not be loaded in context %d"
+msgstr ""
+
+msgid "Value for the recurrence is missing: %d."
+msgstr ""
+
+msgid "Versit object could not be saved"
+msgstr ""
+
+msgid "Word contains illegal comma character(s): %s"
+msgstr ""
+
+msgid "Writing the setting %1$s is not permitted."
+msgstr ""
+
+msgid "Wrong message %sheader: %s"
+msgstr ""
+
+msgid "Wrong or missing login data to access server (%s)"
+msgstr ""
+
+msgid "You are not allowed to create objects in the target folder."
+msgstr ""
+
+msgid "You are not allowed to create tasks in folder %1$s (%2$d)."
+msgstr ""
+
+msgid "You are not allowed to delegate tasks."
+msgstr ""
+
+msgid "You are not allowed to delete the task."
+msgstr ""
+
+msgid "You are not allowed to edit tasks in folder %1$s (%2$d)."
+msgstr ""
+
+msgid ""
+"You are not allowed to mark this contact as private contact: Context %1$d "
+"Object %2$d"
+msgstr ""
+
+msgid "You are not allowed to read the contents of folder %1$s (%2$d)."
+msgstr ""
+
+msgid "You are not allowed to see a private task in shared folder %1$s (%2$d)."
+msgstr ""
+
+msgid ""
+"You are not allowed to store this contact in a non-contact folder:: Folder "
+"id %1$d in Context %2$d with User %3$d"
+msgstr ""
+
+msgid "You are not allowed to update this item."
+msgstr ""
+
+msgid "You cannot unlock this document."
+msgstr ""
+
+msgid ""
+"You do not have permission to delete objects from Folder %1$d in Context %2"
+"$d with User %3$d"
+msgstr ""
+
+msgid ""
+"You do not have permission to store objects in Folder %1$d in Context %2$d "
+"with User %3$d"
+msgstr ""
+
+msgid "You do not have sufficient permission to delete this version."
+msgstr ""
+
+msgid ""
+"You do not have sufficient permissions to create objects in this folder."
+msgstr ""
+
+msgid "You do not have sufficient read permissions."
+msgstr ""
+
+msgid "You do not have the appropriate permissions to modify this object."
+msgstr ""
+
+msgid "You do not have the appropriate permissions to move this object."
+msgstr ""
+
+msgid "You do not have the appropriate permissions to read this object"
+msgstr ""
+
+msgid "You do not have the necessary permissions"
+msgstr ""
+
+msgid "You need write permissions to lock a document."
+msgstr ""
+
+msgid "You need write permissions to unlock a document."
+msgstr ""
+
+msgid "Your database is currently updated."
+msgstr ""
+
+msgid "clientLastModified IS NULL. Abort action!"
+msgstr ""

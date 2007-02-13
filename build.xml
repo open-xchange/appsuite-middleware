@@ -1,0 +1,659 @@
+<project name="openexchange" default="build" basedir=".">
+	
+
+    <property name="destdir" value=""/>
+	<property name="build.dir" location="build" />
+	<property name="src.dir" location="src" />
+	
+	<property name="lib.dir" location="lib" />
+	<property name="prefix" location="/opt/open-xchange" />
+	<property name="lib.install.dir" value="${prefix}/lib" />
+	<property name="lib.install.copy.dir" location="${destdir}${lib.install.dir}" />
+	
+	
+	<property name="var.dir" location="var" />
+	<property name="var.install.dir" value="/var" />
+	
+	<property name="i18n.dir" location="i18n" />
+
+	<property name="log.dir" location="/var/log/open-xchange" />
+	<property name="log.install.dir" value="/var/log/open-xchange" />
+	<property name="log.install.copy.dir" location="${destdir}${log.install.dir}" />
+	
+	<property name="conf.dir.consistency" location="conf/consistency" />
+	<property name="conf.dir" location="conf/groupware" />
+	<property name="conf.install.dir" value="${prefix}/etc/groupware" />
+	<property name="conf.install.dir.consistency" value="${prefix}/etc/consistency" />
+	<property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}" />
+	<property name="conf.install.copy.dir.consistency" location="${destdir}${conf.install.dir.consistency}" />
+	
+	<property name="bin.dir" location="sbin" />
+	<property name="bin.install.dir" value="${prefix}/sbin/" />
+	<property name="bin.install.copy.dir" location="${destdir}${bin.install.dir}" />
+	
+	<property name="deb.optargs" value="" />
+	<property name="project.name" value="openexchange" />
+	<property name="pkg.name" value="open-xchange" />
+        <property file="PVERSION"/>
+	<property file="VERSION"/>
+	<property name="distribution" value="debian"/>
+
+
+	<!-- JAR NAMES -->
+	
+	
+	<property name="jsdkjar" value="jsdk.jar" />
+	<property name="jdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
+	<!--property name="jdbcjar" value="mysql.jar" /-->
+		
+	<property name="mailjar" value="mail.jar" />
+	<property name="activationjar" value="activation.jar" />
+	<property name="jdomjar" value="jdom.jar" />
+	<property name="jcsjar" value="jcs-1.2.7.9.2.jar" />
+	<property name="concurrentjar" value="concurrent.jar" />
+	<property name="loggingjar" value="commons-logging.jar" />
+	<property name="jsonjar" value="json.jar" />
+	<property name="fileuploadjar" value="commons-fileupload.jar" />
+	<property name="iojar" value="commons-io.jar" />
+	<property name="webdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
+	<property name="httpclientjar" value="commons-httpclient-2.0.2.jar" />
+	<property name="jettyjar" value="org.mortbay.jetty.jar" />
+    <property name="jbossclientjar" value="jbossall-client.jar" />
+    <property name="oxadapterjar" value="openXchange-login-Client.jar" />
+	<property name="tnefjar" value="tnef.jar" />
+		
+	
+	<!-- Replacements -->
+	
+	
+	<property name="version"  value="${ox_major}.${ox_minor}.${ox_patch}"/>
+	<property name="ox_descr" value="" />
+	<property name="ox_codename" value="" />
+	<property name="ox_name" value="" />
+	<property name="ox_buildnumber" value="${pversion}" />
+	<property name="ox_webmail_signature" value="" />
+	
+	<property name="db" value="openexchange_test" />
+	<property name="configdb" value="configdb_test" />
+ 	
+	<property name="dbhost" value="localhost" />
+	<property name="dburl" value="jdbc:mysql://${dbhost}/${configdb}" />
+	<property name="dbuser" value= "openexchange" />
+  	<property name="dbpass"	value="secret" />
+  	<property name="dbdriver" value="com.mysql.jdbc.Driver" />
+	
+	<property name="server.name" value="dev129" />
+	
+	<property name="java" value="java" />
+	<property name="java.home" value="\$JAVA_HOME" />
+
+	<!-- I18n -->
+
+	<property name="xgettext" value="xgettext" />
+	<fileset id="i18n.sources" dir="${src.dir}">
+		<include name="com/openexchange/groupware/i18n/*.java" />
+	</fileset>
+
+	<property name="msgfmt" value="msgfmt" />
+	<fileset id="i18n.pos" dir="${i18n.dir}">
+		<include name="**/*.po" />
+	</fileset>
+
+	<property name="java_apt" value="apt" />
+
+	<path id="project.classpath"> 
+		<pathelement location="${lib.dir}/${jsdkjar}"/>
+		<pathelement location="${lib.dir}/${jdbcjar}"/>
+		<pathelement location="${lib.dir}/${mailjar}"/>
+		<pathelement location="${lib.dir}/${activationjar}"/>
+		<pathelement location="${lib.dir}/${jdomjar}"/>
+		<pathelement location="${lib.dir}/${jcsjar}"/>
+		<pathelement location="${lib.dir}/${concurrentjar}"/>
+		<pathelement location="${lib.dir}/${loggingjar}"/>
+		<pathelement location="${lib.dir}/${jsonjar}"/>
+		<pathelement location="${lib.dir}/${fileuploadjar}"/>
+		<pathelement location="${lib.dir}/${iojar}"/>
+		<pathelement location="${lib.dir}/${webdavjar}"/>
+		<pathelement location="${lib.dir}/${httpclientjar}"/>
+		<pathelement location="${lib.dir}/${jettyjar}" />
+        <pathelement location="${lib.dir}/${jbossclientjar}" />
+        <pathelement location="${lib.dir}/${oxadapterjar}" />
+		<pathelement location="${lib.dir}/${tnefjar}" />
+	</path>
+	
+	<target name="prepare">
+		<mkdir dir="${build.dir}"/>
+	</target> 
+	
+	<target name="compile" depends="prepare, patchVersionJava"> 
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" encoding="ISO8859-1"> 
+			<classpath refid="project.classpath" /> 
+		</javac> 
+	</target>
+	
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${var.dir}" />
+		
+		<delete file="${src.dir}/com/openexchange/server/Version.java" />
+		<delete file="${conf.dir}/system.properties" />
+		<delete file="${conf.dir}/event.properties" />
+		<delete file="${conf.dir}/sessiond.properties" />
+		<delete file="${bin.dir}/open-xchange-groupware" />
+		<delete>
+		    <fileset dir="." includes="*-stamp"/>
+		</delete>
+		<delete dir="debian/${project.name}"/>
+		<delete dir="debian/${pkg.name}"/>
+		<delete dir="debian/${project.name}-libs"/>
+		<delete dir="debian/${pkg.name}-libs"/>
+		<delete dir="debian/${project.name}-${version}"/>
+		<delete file="debian/${project.name}-${version}.tar.bz2"/>
+		<delete file="debian/files"/>
+	</target>
+	
+	<target name="templates">
+		<antcall target="patchTemplates">
+			<!-- conf var log lib bin -->
+			<param name="conf.subst.patch" value="${conf.dir}" />
+			<param name="var.subst.patch" value="${var.dir}" />
+			<param name="log.subst.patch" value="${log.dir}" />
+			<param name="lib.subst.patch" value="${lib.dir}" />
+			<param name="bin.subst.patch" value="${bin.dir}" />
+		</antcall>
+	</target>
+	
+	<target name="patchTemplates" depends="patchSystemProperties, patchEventProperties, patchSessiondProperties, patchGroupwareStart, patchCacheCCF, patchPushProperties, patchScriptConf, patchFileLoggingProperties, patchConsistencyStart, patchConsistencyScriptConf, patchConsistencyFileLoggingProperties" />
+	
+	<target name="build" depends=" create-lang-jar, jar, compile" />
+	
+	<fileset dir="lib" id="server-jars">
+		<include name="ox_server.jar"/>
+		<include name="ox_languages.jar"/>
+	</fileset>
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="lib"/>
+		<jar jarfile="lib/ox_server.jar" 
+			basedir="${build.dir}"
+			includes="**" />
+
+		<copy todir="${build.dir}/META-INF">
+			<fileset file="${src.dir}/META-INF/mime.types"/>
+		</copy>	
+	</target>
+	
+	<!-- Templates -->
+	
+	<target name="patchVersionJava">
+		<copy file="${src.dir}/com/openexchange/server/Version.java.in" tofile="${src.dir}/com/openexchange/server/Version.java" overwrite="yes" />
+		<replace file="${src.dir}/com/openexchange/server/Version.java">
+			<replacefilter token="@ox_major@" value="${ox_major}" />
+            <replacefilter token="@ox_minor@" value="${ox_minor}" />
+            <replacefilter token="@ox_patch@" value="${ox_patch}" />
+            <replacefilter token="@ox_buildnumber@" value="${ox_buildnumber}" />
+            <replacefilter token="@ox_webmail_signature@" value="${ox_webmail_signature}" />
+            <replacefilter token="@ox_descr@" value="${ox_descr}" />
+            <replacefilter token="@ox_codename@" value="${ox_codename}" />
+            <replacefilter token="@ox_name@" value="${ox_name}" />
+		</replace>
+	</target>
+	
+	<target name="patchFileLoggingProperties">
+		<copy file="${conf.dir}/file-logging.properties.in" tofile="${conf.dir}/file-logging.properties" overwrite="yes" />
+		<replace file="${conf.dir}/file-logging.properties">
+			<replacefilter token="@serverlogfile@" value="${log.dir}/open-xchange.log" />
+	        <replacefilter token="@ox_minor@" value="${ox_minor}" />
+	        <replacefilter token="@ox_patch@" value="${ox_patch}" />
+	        <replacefilter token="@ox_buildnumber@" value="${ox_buildnumber}" />
+	        <replacefilter token="@ox_webmail_signature@" value="${ox_webmail_signature}" />
+	        <replacefilter token="@ox_descr@" value="${ox_descr}" />
+	        <replacefilter token="@ox_codename@" value="${ox_codename}" />
+	        <replacefilter token="@ox_name@" value="${ox_name}" />
+		</replace>
+	</target>
+	
+	<target name="patchSystemProperties">
+		<copy file="${conf.dir}/system.properties.in" tofile="${conf.dir}/system.properties" overwrite="true"/>
+		<replace file="${conf.dir}/system.properties">
+			<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}" />
+		  	<replacefilter token="@oxgroupwarenasiconfdir@" value= "${conf.subst.patch}" />
+		  	<replacefilter token="@oxlocalstatedir@" value="${var.subst.patch}" />
+		  	<replacefilter token="@webdavlogfile@" value="${log.subst.patch}/webdav.log" />
+			<replacefilter token="@groupwareport@" value="44444" /> <!-- fixme -->
+			<replacefilter token="@SSL@" value="YES" />
+			<replacefilter token="@sesiondport@" value="33333" />
+			<replacefilter token="@templates@" value="${template.install.dir}" />
+		</replace>
+	</target>
+	
+	<target name="patchScriptConf">
+		<copy file="${conf.dir}/ox-scriptconf.sh.in" tofile="${conf.dir}/ox-scriptconf.sh" overwrite="true"/>
+		<replace file="${conf.dir}/ox-scriptconf.sh">
+			<replacefilter token="@systemproperties@" value="${conf.subst.patch}/system.properties"/>
+		  	<replacefilter token="@loggingproperties@" value= "${conf.subst.patch}/file-logging.properties"/>
+		</replace>
+	</target>
+
+	<target name="patchConfigDBProperties">
+		<replaceregexp byline="true">
+			<regexp pattern="readUrl=.*" />
+			<substitution expression="readUrl=jdbc:mysql://${dbhost}/${configdb}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		<replaceregexp byline="true">
+			<regexp pattern="writeUrl=.*" />
+			<substitution expression="writeUrl=jdbc:mysql://${dbhost}/${configdb}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true">
+			<regexp pattern="readDriverClass=.*" />
+			<substitution expression="readDriverClass=${dbdriver}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		<replaceregexp byline="true">
+			<regexp pattern="writeDriverClass=.*" />
+			<substitution expression="writeDriverClass=${dbdriver}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true">
+			<regexp pattern="readProperty.1=.*" />
+			<substitution expression="readProperty.1=user=${dbuser}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		<replaceregexp byline="true">
+			<regexp pattern="writeProperty.1=.*" />
+			<substitution expression="writeProperty.1=user=${dbuser}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+			
+		<replaceregexp byline="true">
+			<regexp pattern="readProperty.2=.*" />
+			<substitution expression="readProperty.2=password=${dbpass}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		<replaceregexp byline="true">
+			<regexp pattern="writeProperty.2=.*" />
+			<substitution expression="writeProperty.2=password=${dbpass}" />
+			<fileset dir="${conf.dir}">
+				<include name="configdb.properties" />
+			</fileset>
+		</replaceregexp>
+		
+		
+    </target>
+
+	<target name="patchEventProperties">
+		<copy file="${conf.dir}/event.properties.in" tofile="${conf.dir}/event.properties" overwrite="true"/>
+	</target>
+	
+	<target name="patchPushProperties">
+		<copy file="${conf.dir}/push.properties.in" tofile="${conf.dir}/push.properties" overwrite="true"/>
+	</target>
+	
+	<target name="patchSessiondProperties">
+		<copy file="${conf.dir}/sessiond.properties.in" tofile="${conf.dir}/sessiond.properties" overwrite="true"/>
+		<replace file="${conf.dir}/sessiond.properties">
+			<replacefilter token="@sesiondport@" value="33333" />
+		</replace>
+	</target>
+	
+	<target name="patchCacheCCF">
+		<copy file="${conf.dir}/cache.ccf.in" tofile="${conf.dir}/cache.ccf" overwrite="true"/>
+		<replace file="${conf.dir}/cache.ccf">
+			<replacefilter token="@cache.dir@" value="${var.subst.patch}/cache/open-xchange" />
+		</replace>
+	</target>
+	
+	<target name="patchGroupwareStart">
+	  	<copy file="${bin.dir}/open-xchange-groupware.in" tofile="${bin.dir}/open-xchange-groupware" overwrite="true"/>
+		<replace file="${bin.dir}/open-xchange-groupware">
+	  		<replacefilter token="@prefix@" value="${prefix}"/>
+	  		<replacefilter token="@JAVA_HOME@"	value="${java.home}"/>
+	  		<replacefilter token="@JAVA@"	value="${java}"/>
+	  		<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+	  		<replacefilter token="@oxlibdir@"	value="${lib.subst.patch}"/>
+	  		<replacefilter token="@oxfunctions@" value="${prefix}/etc/oxfunctions.sh"/>
+	  		<replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
+	  		<replacefilter token="@jdbcjar@"	value="${lib.subst.patch}/${jdbcjar}"/>
+	  		<replacefilter token="@mailjar@"	value="${lib.subst.patch}/${mailjar}"/>
+	  		<replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
+			<replacefilter token="@tnefjar@" value="${lib.subst.patch}/${tnefjar}"/>
+	  		<replacefilter token="@jdomjar@"	value="${lib.subst.patch}/${jdomjar}"/>
+	  		<replacefilter token="@jsdkjar@"	value="${lib.subst.patch}/${jsdkjar}"/>
+			<replacefilter token="@jettyjar@"	value="${lib.subst.patch}/${jettyjar}"/>
+	  		<replacefilter token="@jcsjar@"	value="${lib.subst.patch}/${jcsjar}"/>
+	  		<replacefilter token="@concurrentjar@"	value="${lib.subst.patch}/${concurrentjar}"/>
+	  		<replacefilter token="@loggingjar@"	value="${lib.subst.patch}/${loggingjar}"/>
+	  		<replacefilter token="@jsonjar@"	value="${lib.subst.patch}/${jsonjar}"/>
+	  		<replacefilter token="@fileuploadjar@" value="${lib.subst.patch}/${fileuploadjar}"/>
+	  		<replacefilter token="@iojar@" value="${lib.subst.patch}/${iojar}" />
+	  		<replacefilter token="@webdavjar@" value="${lib.subst.patch}/${webdavjar}" />
+	  		<replacefilter token="@httpclientjar@" value="${lib.subst.patch}/${httpclientjar}" />
+			<replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
+			<replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
+	  		<replacefilter token="@oxgroupwarelibdir@"	value="${lib.subst.patch}"/>
+		  	<replacefilter token="@consolelogfile@" value= "${log.dir}/open-xchange-console.log"/>
+	  	</replace>
+	</target>
+	
+	<target name="patchConsistencyStart">
+	  	<copy file="${bin.dir}/checkConsistency.in" tofile="${bin.dir}/checkConsistency" overwrite="true"/>
+		<replace file="${bin.dir}/checkConsistency">
+	  		<replacefilter token="@prefix@" value="${prefix}"/>
+	  		<replacefilter token="@JAVA_HOME@" value="${java.home}"/>
+	  		<replacefilter token="@JAVA@" value="${java}"/>
+	  		<replacefilter token="@oxlibdir@" value="${lib.subst.patch}"/>
+	  		<replacefilter token="@oxfunctions@" value="${prefix}/etc/oxfunctions.sh"/>
+	  		<replacefilter token="@oxscriptconf@" value="${consistency.conf.subst.patch}/ox-scriptconf.sh"/>
+	  		<replacefilter token="@jdbcjar@"	value="${lib.subst.patch}/${jdbcjar}"/>
+	  		<replacefilter token="@mailjar@"	value="${lib.subst.patch}/${mailjar}"/>
+	  		<replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
+	  		<replacefilter token="@jdomjar@"	value="${lib.subst.patch}/${jdomjar}"/>
+	  		<replacefilter token="@jsdkjar@"	value="${lib.subst.patch}/${jsdkjar}"/>
+			<replacefilter token="@jettyjar@"	value="${lib.subst.patch}/${jettyjar}"/>
+	  		<replacefilter token="@jcsjar@"	value="${lib.subst.patch}/${jcsjar}"/>
+	  		<replacefilter token="@concurrentjar@"	value="${lib.subst.patch}/${concurrentjar}"/>
+	  		<replacefilter token="@loggingjar@"	value="${lib.subst.patch}/${loggingjar}"/>
+	  		<replacefilter token="@jsonjar@"	value="${lib.subst.patch}/${jsonjar}"/>
+	  		<replacefilter token="@fileuploadjar@" value="${lib.subst.patch}/${fileuploadjar}"/>
+	  		<replacefilter token="@iojar@" value="${lib.subst.patch}/${iojar}" />
+	  		<replacefilter token="@webdavjar@" value="${lib.subst.patch}/${webdavjar}" />
+	  		<replacefilter token="@httpclientjar@" value="${lib.subst.patch}/${httpclientjar}" />
+			<replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
+			<replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
+	  		<replacefilter token="@oxgroupwarelibdir@"	value="${lib.subst.patch}"/>
+		  	<replacefilter token="@consolelogfile@" value= "${log.dir}/open-xchange-console.log"/>
+		</replace>
+	</target>
+
+	
+	<target name="patchConsistencyFileLoggingProperties">
+		<copy file="${conf.dir.consistency}/file-logging.properties.in" tofile="${conf.dir.consistency}/file-logging.properties" overwrite="yes" />
+		<replace file="${conf.dir.consistency}/file-logging.properties">
+			<replacefilter token="@serverlogfile@" value="${log.dir}/consistency.log" />
+	        <replacefilter token="@ox_minor@" value="${ox_minor}" />
+	        <replacefilter token="@ox_patch@" value="${ox_patch}" />
+	        <replacefilter token="@ox_buildnumber@" value="${ox_buildnumber}" />
+	        <replacefilter token="@ox_webmail_signature@" value="${ox_webmail_signature}" />
+	        <replacefilter token="@ox_descr@" value="${ox_descr}" />
+	        <replacefilter token="@ox_codename@" value="${ox_codename}" />
+	        <replacefilter token="@ox_name@" value="${ox_name}" />
+		</replace>
+	</target>
+
+	<target name="patchConsistencyScriptConf">
+		<copy file="${conf.dir.consistency}/ox-scriptconf.sh.in" tofile="${conf.dir.consistency}/ox-scriptconf.sh" overwrite="true"/>
+		<replace file="${conf.dir.consistency}/ox-scriptconf.sh">
+			<replacefilter token="@systemproperties@" value="${conf.subst.patch}/system.properties"/>
+		  	<replacefilter token="@loggingproperties@" value= "${consistency.conf.subst.patch}/file-logging.properties"/>
+		</replace>
+	</target>
+
+	<!-- Create environment -->
+	
+	<target name="createEnvironment" depends="templates" />
+	
+	<target name="recreateDB">
+		<exec dir="cc-build" executable="sh" failonerror="true">
+			<arg line="initdb.sh ${dbhost} ${db} ${configdb}" />
+		</exec>
+	</target>
+	
+	<!-- EFA-AG Tests -->
+	
+	<target name="efa-smokeTest">
+		
+	</target>
+
+	<target name="dist">
+		<delete dir="debian/${project.name}-${version}"/>
+		<mkdir dir="debian/${project.name}-${version}"/>
+		  <copy todir="debian/${project.name}-${version}">
+		    <fileset dir=".">
+		      <exclude name="**debian/**"/>
+		      <exclude name="**CVS/**"/>
+		    </fileset>
+		  </copy>
+		<tar destfile="debian/${project.name}-${version}.tar.bz2"
+			basedir="debian"
+			includes="${project.name}-${version}/"
+			compression="bzip2"/>
+	</target>
+	
+	<target name="deb" depends="clean">
+		<exec executable="dpkg-buildpackage">
+		  <arg line="-rfakeroot -uc -us ${deb.optargs}" />
+		</exec>
+		<antcall target="clean"></antcall>
+	</target>
+	
+	<target name="install" depends="build, templates-install, build-structure">
+    	<copy todir="${destdir}/" overwrite="true">
+    		<fileset dir="system"/>
+			<mapper type="glob" from="*.${distribution}" to="*"/>
+		</copy>
+    	<chmod perm="755" file="${destdir}/etc/init.d/open-xchange-groupware"/>
+		<chmod perm="755" file="${bin.install.copy.dir}/checkConsistency"/>
+	</target>
+	
+	<target name="build-structure">
+		<mkdir dir="${lib.install.copy.dir}" />
+		<copy todir="${lib.install.copy.dir}" overwrite="true">
+			<fileset refid="server-jars" />
+		</copy>
+		<mkdir dir="${log.install.copy.dir}" />
+
+		<mkdir dir="${conf.install.copy.dir.consistency}" />
+		<copy todir="${conf.install.copy.dir.consistency}" overwrite="true">
+			<fileset dir="${conf.dir.consistency}" excludes="*.in" /> 
+		</copy>
+		
+		<mkdir dir="${conf.install.copy.dir}" />
+		<copy todir="${conf.install.copy.dir}" overwrite="true">
+			<fileset dir="${conf.dir}" excludes="*.in" /> 
+		</copy>
+		
+		<mkdir dir="${bin.install.copy.dir}"/>
+		<copy todir="${bin.install.copy.dir}" overwrite="true">
+			<fileset dir="${bin.dir}" excludes="*.in"/>
+		</copy>
+		<chmod perm="755" file="${bin.install.copy.dir}/open-xchange-groupware"/>
+	</target>
+	
+	<target name="templates-install">
+		<antcall target="patchTemplates">
+			<param name="lib.subst.patch" value="${lib.install.dir}" />
+			<param name="var.subst.patch" value="${var.install.dir}" />
+			<param name="log.subst.patch" value="${log.install.dir}" />
+			<param name="conf.subst.patch" value="${conf.install.dir}" />
+			<param name="consistency.conf.subst.patch" value="${conf.install.dir.consistency}" />
+			<param name="bin.subst.patch" value="${bin.install.dir}" />
+		</antcall>
+	</target>
+
+	<target name="all-i18n" depends="create-pot,create-codes-csv,create-lang-jar" />
+
+	<target name="check-i18n-executables">
+		<exec executable="${xgettext}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_xgettext">
+			<arg value="--help" />
+		</exec>
+		<condition property="exists_xgettext">
+			<equals arg1="0" arg2="${result_xgettext}" />
+		</condition>
+		<exec executable="${msgfmt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_msgmft">
+			<arg value="--help" />
+		</exec>
+		<condition property="exists_msgfmt">
+			<equals arg1="0" arg2="${result_msgmft}" />
+		</condition>
+		<exec executable="${java_apt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_apt">
+			<arg value="-help" />
+		</exec>
+		<condition property="exists_apt">
+			<equals arg1="0" arg2="${result_apt}" />
+		</condition>
+		<antcall target="show-missing-executables" />
+	</target>
+
+	<target name="show-missing-executables" depends="show_missing_xgettext,show_missing_msgfmt,show_missing_apt" />
+	
+	<target name="show_missing_xgettext" unless="exists_xgettext">
+		<echo message="xgettext can't be found. POT files won't be generated." />
+    </target>
+
+	<target name="show_missing_msgfmt" unless="exists_msgfmt">
+		<echo message="msgfmt can't be found. Language Bundle won't be generated." />
+	</target>
+				
+	<target name="show_missing_apt" unless="exists_apt">
+		<echo message="apt can't be found. Error codes cannot be read from server code." />
+	</target>
+				
+	<target name="create-pot" depends="create-server-pot,create-error-pot" />
+
+	<target name="create-server-pot" depends="check-i18n-executables" if="exists_xgettext">
+		<echo message="Generating ${i18n.dir}/server.pot" />
+		<apply executable="${xgettext}" dir="${src.dir}" parallel="true" verbose="true" relative="true">
+			<arg value="-a" />
+			<arg value="--language=Java" />
+			<arg value="--output-dir=${i18n.dir}" />
+			<arg value="--output=server.pot"/>
+			<fileset refid="i18n.sources" />
+		</apply>
+		<!-- remove date and source files to make server.pot less changing -->
+		<replaceregexp file="${i18n.dir}/server.pot" match="&quot;POT-Creation-Date:(.*)&quot;\n" replace="" flags="g"/>
+		<!--
+		<replaceregexp file="${i18n.dir}/server.pot" match="#:(.*)\n" replace="" flags="g"/>
+		-->
+	</target>
+
+	<target name="create-error-pot" depends="compile,check-i18n-executables,create-ser" if="exists_xgettext">
+		<echo message="Generating ${i18n.dir}/errors.pot" />
+		<java classname="ProcessErrorCodes">
+			<classpath>
+				<pathelement location="${build.dir}" />
+				<path refid="project.classpath" />
+			</classpath>
+			<sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JavaMessageCatalogBuilder" />
+			<sysproperty key="output" value="${i18n.dir}/GUIMessages.java" />
+			<arg value="${i18n.dir}/codes.ser" />
+			<arg value="${i18n.dir}/codesAnnotation.ser" />
+		</java>
+		<apply executable="${xgettext}" dir="${i18n.dir}" parallel="true" verbose="true" relative="true">
+			<arg value="-a" />
+			<arg value="--language=Java" />
+			<arg value="--output=errors.pot"/>
+			<fileset dir="${i18n.dir}">
+				<filename name="GUIMessages.java" />
+			</fileset>
+		</apply>
+		<!-- remove date and source files to make errors.pot less changing -->
+		<replaceregexp file="${i18n.dir}/errors.pot" match="&quot;POT-Creation-Date:(.*)&quot;\n" replace="" flags="g"/>
+		<replaceregexp file="${i18n.dir}/errors.pot" match="#:(.*)\n" replace="" flags="g"/>
+		<delete file="${i18n.dir}/GUIMessages.java" />
+	</target>
+
+	<target name="create-ser" depends="create-annotations-ser,create-codes-ser" />
+
+	<target name="create-codes-ser" depends="jar">
+		<echo message="Creating ${i18n.dir}/codes.ser" />
+		<java classname="ListErrorCodes">
+			<classpath>
+				<pathelement location="lib/ox_server.jar" />
+				<path refid="project.classpath" />
+			</classpath>
+			<sysproperty key="com.openexchange.tools.exceptions.SerializationProcessor.file" value="${i18n.dir}/codes.ser" />
+			<arg value="lib/ox_server.jar" />
+			<arg value="com.openexchange.tools.exceptions.SerializationProcessor"/>
+		</java>
+	</target>
+
+	<target name="create-annotations-ser" depends="check-i18n-executables,jar" if="exists_apt" >
+		<echo message="Creating ${i18n.dir}/codesAnnotation.ser" />
+		<apply executable="${java_apt}" dir="${basedir}" parallel="true" verbose="true" relative="false">
+			<arg value="-classpath" />
+			<arg value="lib/ox_server.jar" />
+			<arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
+			<arg value="-factory" />
+			<arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
+			<fileset dir="${src.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+		</apply>
+	    <!--
+		<java classname="com.sun.tools.apt.Main">
+			<classpath>
+				<pathelement location="lib/ox_server.jar"/>
+				<path refid="project.classpath" />
+			</classpath>
+			<arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
+			<arg value="-factory" />
+			<arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
+			<arg value="${src.dir}/**/*.java" />
+		</java>
+		-->
+		<move file="codes.ser" tofile="${i18n.dir}/codesAnnotation.ser" />
+	</target>
+
+	<target name="create-codes-csv" depends="create-ser">
+		<echo message="Creating ${i18n.dir}/codes.csv" />
+		<java classname="ProcessErrorCodes">
+			<classpath>
+				<pathelement location="${build.dir}" />
+				<pathelement location="../openexchange-common/jars/commons-logging.jar" />
+			</classpath>
+			<sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.CSVProcessor" />
+			<sysproperty key="com.openexchange.tools.exceptions.CSVProcessor.file" value="${i18n.dir}/codes.csv" />
+			<arg value="${i18n.dir}/codes.ser" />
+			<arg value="${i18n.dir}/codesAnnotation.ser" />
+		</java>
+	</target>
+
+	<target name="create-lang-jar" depends="check-i18n-executables" if="exists_msgfmt">
+		<!-- FIXME Discover Files and languages dynamically -->
+		<mkdir dir="${build.dir}" />
+		<exec executable="${msgfmt}" dir="${basedir}">
+			<arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
+		</exec>
+		<exec executable="${msgfmt}" dir="${basedir}">
+			<arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
+		</exec>
+		<mkdir dir="lib"/>
+		<jar jarfile="lib/ox_languages.jar" 
+			basedir="${build.dir}"
+			includes="com/openexchange/groupware/i18n/ServerMessages*" />
+	</target>
+
+	<target name="create-gui-js" depends="compile,create-ser">
+		<echo message="Creating ${i18n.dir}/codes.js" />
+		<java classname="ProcessErrorCodes">
+			<classpath>
+				<pathelement location="${build.dir}" />
+				<path refid="project.classpath" />
+			</classpath>
+			<sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JSProcessor" />
+			<sysproperty key="filename" value="${i18n.dir}/codes" />
+			<sysproperty key="includeCategories" value="user_input, permission, external_resource_full, user_configuration, try_again, truncated, concurrent_modification" />
+			<arg value="${i18n.dir}/codes.ser" />
+			<arg value="${i18n.dir}/codesAnnotation.ser" />
+		</java>
+	</target>
+
+</project> 

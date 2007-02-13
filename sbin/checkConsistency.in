@@ -1,0 +1,47 @@
+#!/bin/bash
+
+OXFUNCTIONS=@oxfunctions@
+OXCONFIG=@oxscriptconf@
+OXPREFIX=@prefix@
+CONSOLELOG=@consolelogfile@
+
+test -f $OXFUNCTIONS || {
+	echo "missing common shell functions file"
+	exit 1
+}
+
+. $OXFUNCTIONS
+
+test -f $OXCONFIG && . $OXCONFIG
+
+ox_set_JAVA_BIN
+
+JAVA_OPTS="-ms20M -mx280M \
+-Dopenexchange.propfile=$SYSTEMPROPERTIES \
+-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
+-Djava.library.path=@oxlibdir@"
+
+CLASSPATH="-classpath \
+@jdbcjar@:\
+@mailjar@:\
+@activationjar@:\
+@jdomjar@:\
+@jsdkjar@:\
+@jcsjar@:\
+@concurrentjar@:\
+@loggingjar@:\
+@jsonjar@:\
+@fileuploadjar@:\
+@iojar@:\
+@webdavjar@:\
+@httpclientjar@:\
+@jbossclientjar@:\
+@oxadapterjar@:\
+@oxgroupwarelibdir@/ox_server.jar:\
+@oxgroupwarelibdir@/ox_languages.jar:"
+
+pushd $OXPREFIX
+
+umask 066
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH Consistency 2>&1 > $CONSOLELOG
+

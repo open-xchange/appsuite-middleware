@@ -1,0 +1,4 @@
+
+SYSTEMPROPERTIES=@systemproperties@
+LOGGINGPROPERTIES=@loggingproperties@
+
