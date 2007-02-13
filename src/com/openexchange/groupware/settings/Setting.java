@@ -1,0 +1,308 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+
+
+package com.openexchange.groupware.settings;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+/**
+ * This class represents a single setting.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class Setting implements Cloneable {
+
+    /**
+     * Unique identifier of this setting.
+     */
+    private int id;
+
+    /**
+     * States if this setting is a gui only setting or a setting that is shared
+     * between server and gui.
+     */
+    private final boolean shared;
+
+    /**
+     * Name of this setting.
+     */
+    private final String name;
+
+    /**
+     * Single value of this setting.
+     */
+    private Object singleValue;
+
+    /**
+     * Multi value of this setting.
+     */
+    private ArrayList<Object> multiValue;
+
+    /**
+     * Stores the sub elements.
+     */
+    private Map<String, Setting> elements;
+
+    /**
+     * Default constructor.
+     * @param name Name.
+     * @param shared <code>true</code> if this setting is used in server and gui
+     * and <code>false</code> if the setting is only used in gui.
+     */
+    public Setting(final String name, final boolean shared) {
+        super();
+        this.name = name;
+        this.shared = shared;
+    }
+
+    /**
+     * @return the multi value.
+     */
+    public Object[] getMultiValue() {
+        Object[] retval;
+        synchronized (this) {
+            if (null == multiValue || 0 == multiValue.size()) {
+                retval = null;
+            } else {
+                retval = multiValue.toArray(new Object[multiValue.size()]);
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * @return the single value.
+     */
+    public Object getSingleValue() {
+        return singleValue;
+    }
+
+    /**
+     * @param value The value to set.
+     */
+    public void setSingleValue(final Object value) {
+        this.singleValue = value;
+    }
+
+    /**
+     * @param value Value to add.
+     */
+    public void addMultiValue(final Object value) {
+        if (null != value) {
+            synchronized (this) {
+                if (null == multiValue) {
+                    multiValue = new ArrayList<Object>();
+                }
+                multiValue.add(value);
+            }
+        }
+    }
+
+    /**
+     * @return Returns the name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object clone() throws CloneNotSupportedException {
+        final Setting setting = (Setting) super.clone();
+        setting.singleValue = singleValue;
+        if (null != multiValue) {
+            setting.multiValue = new ArrayList<Object>(multiValue.size());
+            setting.multiValue.addAll(multiValue);
+        }
+        if (null != elements) {
+            setting.elements = new HashMap<String, Setting>(elements.size());
+            for (Setting element : elements.values()) {
+                setting.elements.put(element.getName(),
+                    (Setting) element.clone());
+            }
+        }
+        return setting;
+    }
+
+    /**
+     * Returns the sub setting that has the given name.
+     * @param subName Name of the sub setting.
+     * @return the sub setting or <code>null</code> if it doesn't exist.
+     */
+    public Setting getElement(final String subName) {
+        Setting element = null;
+        if (null != elements) {
+            element = elements.get(subName);
+        }
+        return element;
+    }
+
+    /**
+     * @return Returns the id.
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id The id to set.
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    /**
+     * @return Returns the leaf.
+     */
+    public boolean isLeaf() {
+        return null == elements;
+    }
+
+    /**
+     * Adds a sub element to this element.
+     * @param child sub element to add.
+     */
+    public void addElement(final Setting child) {
+        if (null == elements) {
+            elements = new HashMap<String, Setting>();
+        }
+        elements.put(child.getName(), child);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        final StringBuilder out = new StringBuilder();
+        out.append(name);
+        out.append('=');
+        if (null == elements) {
+            if (null != multiValue && multiValue.size() > 0) {
+                out.append(multiValue);
+            } else {
+                out.append(singleValue);
+            }
+        } else {
+            out.append('(');
+            final Iterator iter = elements.values().iterator();
+            while (iter.hasNext()) {
+                out.append(iter.next().toString());
+                if (iter.hasNext()) {
+                    out.append(',');
+                }
+            }
+            out.append(')');
+        }
+        return out.toString();
+    }
+
+    /**
+     * @return the sub elements of this element.
+     */
+    public Setting[] getElements() {
+        Setting[] retval;
+        if (null == elements) {
+            retval = new Setting[0];
+        } else {
+            retval = elements.values().toArray(new Setting[elements.size()]);
+        }
+        return retval;
+    }
+
+    /**
+     * @return <code>true</code> if this setting is used in server and gui and
+     * <code>false</code> if the setting is only used in gui.
+     */
+    public boolean isShared() {
+        return shared;
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof Setting)) {
+            return false;
+        }
+        final Setting other = (Setting) obj;
+        if (id != other.id || !name.equals(other.name)) {
+            return false;
+        }
+        if (singleValue != null && !singleValue.equals(other.singleValue)) {
+            return false;
+        }
+        if (multiValue != null && !multiValue.equals(other.multiValue)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int retval = id ^ name.hashCode();
+        if (singleValue != null) {
+            retval ^= singleValue.hashCode();
+        }
+        if (multiValue != null) {
+            retval ^= multiValue.hashCode();
+        }
+        if (shared) {
+            retval ^= Boolean.valueOf(shared).hashCode();
+        }
+        return retval;
+    }
+}

@@ -1,0 +1,211 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.request;
+
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.writer.ResourceWriter;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.ResourceStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.AjaxException;
+
+import java.io.Writer;
+import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
+public class ResourceRequest {
+	
+	private SessionObject sessionObj = null;
+	
+	private Date timestamp;
+	
+	private JSONWriter jsonWriter = null;
+	
+	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
+	
+	public ResourceRequest(SessionObject sessionObj, Writer w) {
+		this.sessionObj = sessionObj;
+		this.jsonWriter = new JSONWriter(w);
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+	
+	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException {
+		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+			actionList(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+			actionGet(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
+			actionSearch(jsonObject);
+		} else {
+			throw new AjaxException(AjaxException.Code.UnknownAction, action);
+		}
+	}
+	
+	public void actionList(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+		timestamp = new Date(0);
+		
+		Date lastModified = null;
+		
+		jsonWriter.array();
+
+		try {
+			JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
+
+			UserStorage userStorage = null;
+			ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+			
+			for (int a = 0; a < jsonArray.length(); a++) {
+				JSONObject jData = jsonArray.getJSONObject(a);
+				final int id = DataParser.checkInt(jData, DataFields.ID);
+				com.openexchange.groupware.ldap.Resource r = null;
+				
+				try {
+					r = resourceStorage.getResource(id);
+				} catch (LdapException exc) {
+					LOG.debug("resource not found try to find id in user table", exc);
+				}
+				
+				if (r == null) {
+					if (userStorage == null) {
+						userStorage = UserStorage.getInstance(sessionObj.getContext());
+					}
+					
+					User u = userStorage.getUser(id);
+					
+					r = new com.openexchange.groupware.ldap.Resource();
+					r.setIdentifier(u.getId());
+					r.setDisplayName(u.getDisplayName());
+					r.setLastModified(new Date(0));
+				} 
+				
+				ResourceWriter resourceWriter = new ResourceWriter(jsonWriter);
+				resourceWriter.writeResource(r);
+				
+				lastModified = r.getLastModified();
+				
+				if (timestamp.getTime() < lastModified.getTime()) {
+					timestamp = lastModified;
+				}
+			}
+		} finally {
+			jsonWriter.endArray();
+		}
+	}
+
+	public void actionGet(JSONObject jsonObj) throws LdapException, OXMandatoryFieldException, JSONException {
+		
+		timestamp = new Date(0);
+		
+		ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id);
+		
+		ResourceWriter resourceWriter = new ResourceWriter(jsonWriter);
+		resourceWriter.writeResource(r);
+		
+		timestamp = r.getLastModified();
+	}
+	
+	public void actionSearch(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, LdapException {
+		timestamp = new Date(0);
+		
+		SearchIterator it = null;
+		boolean openobject = false;
+
+		jsonWriter.array();
+		
+		try {
+			JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+			String searchpattern = null;
+			
+			if (jData.has("pattern")) {
+				searchpattern = jData.getString("pattern");
+			}
+
+			ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+			com.openexchange.groupware.ldap.Resource[] resources = resourceStorage.searchResources(searchpattern);
+			
+			ResourceWriter resourceWriter = new ResourceWriter(jsonWriter);
+			
+			for (int a = 0; a < resources.length; a++) {
+				jsonWriter.object();
+				openobject = true;
+				resourceWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, resources[a].getDisplayName());
+				resourceWriter.writeParameter(ParticipantsFields.ID, resources[a].getIdentifier());
+				jsonWriter.endObject();
+				openobject = false;
+			}
+		} finally {
+			if (it != null) {
+				it.close();
+			}
+			if (openobject) {
+				jsonWriter.endObject();
+			}
+			jsonWriter.endArray();
+		}
+	}
+}

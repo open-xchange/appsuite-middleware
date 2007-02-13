@@ -1,0 +1,418 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.infostore.search.impl;
+
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.container.FolderObject;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.SearchEngine;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.DBService;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.groupware.infostore.Classes;
+
+
+/**
+ * SearchEngineImpl
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ */
+
+@OXExceptionSource(
+		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_SEARCH_IMPL_SEARCHENGINEIMPL,
+		component=Component.INFOSTORE
+)
+public class SearchEngineImpl extends DBService implements SearchEngine {	
+	
+	private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
+	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(SearchEngineImpl.class);
+	
+	// private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
+	
+	private static final String[] SEARCH_FIELDS = new String[] {
+		"infostore_document.title",
+		"infostore_document.url",
+		"infostore_document.description",
+		"infostore_document.categories",
+		"infostore_document.filename",
+		"infostore_document.file_version_comment"
+	};
+
+	public SearchEngineImpl() { 
+		super(null);
+	}
+	
+	public SearchEngineImpl(DBProvider provider) {
+		super(provider);
+	}
+	
+	
+	@OXThrowsMultiple(
+			category={Category.PROGRAMMING_ERROR, Category.TRY_AGAIN}, 
+			
+			desc={"Indicates a faulty SQL Query. Only R&D can fix this", "Thrown when a result can't be prefetched. This indicates a problem with the DB Connection. Have a look at the underlying SQLException"}, 
+			
+			exceptionId={0,1}, 
+			
+			msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
+	)
+	public SearchIterator search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+		StringBuffer SQL_QUERY = new StringBuffer();
+		SQL_QUERY.append(getResultFieldsSelect(cols));
+		SQL_QUERY.append(" FROM infostore JOIN infostore_document JOIN oxfolder_tree JOIN oxfolder_permissions ON oxfolder_tree.fuid = oxfolder_permissions.fuid AND infostore.folder_id = oxfolder_tree.fuid AND infostore.cid=");
+		SQL_QUERY.append(ctx.getContextId());
+		SQL_QUERY.append(" AND infostore_document.cid=");
+		SQL_QUERY.append(ctx.getContextId());
+		SQL_QUERY.append(" AND oxfolder_tree.cid = ");
+		SQL_QUERY.append(ctx.getContextId());
+		SQL_QUERY.append(" AND oxfolder_permissions.cid = ");
+		SQL_QUERY.append(ctx.getContextId());
+		SQL_QUERY.append(" AND ((oxfolder_tree.permission_flag = ");
+		SQL_QUERY.append(FolderObject.PUBLIC_PERMISSION);
+		SQL_QUERY.append(" OR (oxfolder_tree.permission_flag = ");
+		SQL_QUERY.append(FolderObject.PRIVATE_PERMISSION);
+		SQL_QUERY.append(" AND oxfolder_tree.created_from = ");
+		SQL_QUERY.append(user.getId());
+		SQL_QUERY.append(")) OR ((oxfolder_permissions.admin_flag = 1 AND oxfolder_permissions.permission_id = ");
+		SQL_QUERY.append(user.getId());
+		SQL_QUERY.append(") OR (oxfolder_permissions.orp > ");
+		SQL_QUERY.append(OCLPermission.NO_PERMISSIONS);
+		SQL_QUERY.append(" AND oxfolder_permissions.permission_id IN ");
+		SQL_QUERY.append(StringCollection.getSqlInString(user.getId(), userConfig.getGroups()));
+		SQL_QUERY.append(")))");
+		if ((folderId != NO_FOLDER) && (folderId != NOT_SET)) {
+			SQL_QUERY.append(" AND infostore.folder_id=");
+			SQL_QUERY.append(folderId);
+		}
+		SQL_QUERY.append(" AND infostore.id=infostore_document.infostore_id AND infostore.version=infostore_document.version_number");
+		
+		query = query.replace('*', '%');
+		query = query.replace('?', '_');
+		query = query.replaceAll("'", "\\\\'");
+
+		StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
+		for (String currentField : SEARCH_FIELDS) {
+			if (SQL_QUERY_OBJECTS.length() > 0)
+				SQL_QUERY_OBJECTS.append(" OR ");
+			
+			if (query.indexOf("%") != -1) {
+				SQL_QUERY_OBJECTS.append(currentField);
+				SQL_QUERY_OBJECTS.append(" LIKE ('");
+				SQL_QUERY_OBJECTS.append(query);
+				SQL_QUERY_OBJECTS.append("')");
+			} else {
+				SQL_QUERY_OBJECTS.append(currentField);
+				SQL_QUERY_OBJECTS.append(" LIKE ('%");
+				SQL_QUERY_OBJECTS.append(query);
+				SQL_QUERY_OBJECTS.append("%')");
+			}
+		}
+		if (SQL_QUERY_OBJECTS.length() > 0) {
+			SQL_QUERY.append(" AND (");
+			SQL_QUERY.append(SQL_QUERY_OBJECTS);
+			SQL_QUERY.append(") ");
+		}
+		
+		if (sortedBy != null && dir != NOT_SET) {
+			String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
+			if ((orderColumn != null) && (orderColumn[0] != null)) {
+				if (dir == DESC) {
+					SQL_QUERY.append(" ORDER BY ");
+					SQL_QUERY.append(orderColumn[0]);
+					SQL_QUERY.append(" DESC");
+				} else if (dir == ASC) {
+					SQL_QUERY.append(" ORDER BY ");
+					SQL_QUERY.append(orderColumn[0]);
+					SQL_QUERY.append(" ASC");
+				}				
+			}
+		}
+		
+		if ((start != NOT_SET) && (end != NOT_SET)) {
+			if (end >= start) {
+				SQL_QUERY.append(" LIMIT ");
+				SQL_QUERY.append(start);
+				SQL_QUERY.append(", ");
+				SQL_QUERY.append(((end+1)-start));
+			}
+		} else {
+			if (start != NOT_SET) {
+				SQL_QUERY.append(" LIMIT ");
+				SQL_QUERY.append(start);
+				SQL_QUERY.append(",200");
+			}
+			if (end != NOT_SET) {
+				SQL_QUERY.append(" LIMIT ");
+				SQL_QUERY.append(end+1);
+			}
+		}
+		Connection con = getReadConnection(ctx);
+		Statement stmt = null;
+		try {
+			stmt = con.createStatement();
+			return new InfostoreSearchIterator(stmt.executeQuery(SQL_QUERY.toString()), this, cols, ctx, con, stmt);
+		} catch (SQLException e) {
+			LOG.error("",e);
+			throw EXCEPTIONS.create(0,e,SQL_QUERY.toString());
+		} catch (SearchIteratorException e) {
+			LOG.error("",e);
+			throw EXCEPTIONS.create(1,e);
+		}
+	}
+
+	public void index(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws OXException { }
+	
+	public void unIndex0r(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException { }
+	
+	private String[] switchMetadata2DBColumns(Metadata[] columns) {
+		List<String> retval = new ArrayList<String>();
+		for (Metadata current : columns) {
+			Metadata2DBSwitch : switch(current.getId()) {
+			default : break Metadata2DBSwitch;
+			case Metadata.LAST_MODIFIED : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
+			case Metadata.CREATION_DATE : retval.add("infostore.creating_date"); break Metadata2DBSwitch;
+			case Metadata.MODIFIED_BY : retval.add("infostore.changed_by"); break Metadata2DBSwitch;
+			case Metadata.FOLDER_ID : retval.add("infostore.folder_id"); break Metadata2DBSwitch;
+			case Metadata.TITLE : retval.add("infostore_document.title"); break Metadata2DBSwitch;
+			case Metadata.VERSION : retval.add("infostore.version"); break Metadata2DBSwitch;
+			case Metadata.CONTENT : retval.add("infostore_document.description"); break Metadata2DBSwitch;
+			case Metadata.FILENAME : retval.add("infostore_document.filename"); break Metadata2DBSwitch;
+			case Metadata.SEQUENCE_NUMBER : retval.add("infostore.id"); break Metadata2DBSwitch;
+			case Metadata.ID : retval.add("infostore.id"); break Metadata2DBSwitch;
+			case Metadata.FILE_SIZE : retval.add("infostore_document.file_size"); break Metadata2DBSwitch;
+			case Metadata.FILE_MIMETYPE : retval.add("infostore_document.file_mimetype"); break Metadata2DBSwitch;
+			case Metadata.DESCRIPTION : retval.add("infostore_document.description"); break Metadata2DBSwitch;
+			case Metadata.LOCKED_UNTIL : retval.add("infostore.locked_until"); break Metadata2DBSwitch;
+			case Metadata.URL : retval.add("infostore_document.url"); break Metadata2DBSwitch;
+			case Metadata.CREATED_BY : retval.add("infostore.created_by"); break Metadata2DBSwitch;
+			case Metadata.CATEGORIES : retval.add("infostore_document.categories"); break Metadata2DBSwitch;
+			case Metadata.FILE_MD5SUM : retval.add("infostore_document.file_md5sum"); break Metadata2DBSwitch;
+			case Metadata.VERSION_COMMENT : retval.add("infostore_document.file_version_comment"); break Metadata2DBSwitch;
+			case Metadata.COLOR_LABEL : retval.add("infostore.color_label"); break Metadata2DBSwitch;
+			}
+		}
+		return(retval.toArray(new String[0]));
+	}
+	
+	private String getResultFieldsSelect(Metadata[] RESULT_FIELDS) {
+		String[] DB_RESULT_FIELDS = switchMetadata2DBColumns(RESULT_FIELDS);
+		
+		StringBuilder selectFields = new StringBuilder();
+		boolean id = false;
+		for (String currentField : DB_RESULT_FIELDS) {
+			if(currentField.equals("infostore.id")){
+				currentField = "distinct infostore.id";
+				id = true;
+			}
+			selectFields.append(currentField);
+			selectFields.append(", ");
+		}
+		if (!id) {
+			selectFields.append("distinct infostore.id,");
+		}
+		
+		String retval = "";
+		if (selectFields.length() > 0) {
+			retval = "SELECT " + selectFields.toString();
+			retval = retval.substring(0, retval.lastIndexOf(", "));
+		}
+		return retval;
+	}
+	
+	public static class InfostoreSearchIterator implements SearchIterator {
+
+		private Object next;
+		private ResultSet rs ;
+		private Metadata[] columns;
+		private SearchEngineImpl s;
+		private Context ctx;
+		private Connection readCon;
+		private Statement stmt;
+		
+		public InfostoreSearchIterator(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws SearchIteratorException {
+			this.rs = rs;
+			this.s = s;
+			this.columns = columns;
+			this.ctx = ctx;
+			this.readCon = readCon;
+			this.stmt = stmt;
+			try {
+				if (rs.next()) {
+					next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+				} else {
+					close();
+				}
+			} catch (Exception e) {
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,e,Component.INFOSTORE);
+			}
+		}
+		
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		public Object next() throws SearchIteratorException {
+			try {
+				Object retval = null;
+				retval = next;
+				if (rs.next()) {
+					next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);;
+					NextObject: while (next == null) {
+						if (rs.next()) {
+							next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+						} else {
+							break NextObject;
+						}
+					}
+					if (next == null) {
+						close();
+					}
+				} else {
+					close();
+				}
+				return retval;
+			} catch (Exception exc) {
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,exc,Component.INFOSTORE);
+			}
+		}
+
+		public void close() throws SearchIteratorException {
+			next = null;
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				rs = null;
+			} catch (SQLException e) {
+				LOG.debug("",e);
+			}
+			
+			try {
+				if( stmt != null ) {
+					stmt.close();
+				}
+				stmt = null;
+			} catch (SQLException e) {
+				LOG.debug("",e);
+			}
+			
+			s.releaseReadConnection(ctx, readCon);
+		}
+		
+		public int size() {
+			throw new UnsupportedOperationException("Mehtod size() not implemented");
+		}
+		
+		public boolean hasSize() {
+			return false;
+		}
+		
+		private DocumentMetadataImpl fillDocumentMetadata(DocumentMetadataImpl retval, Metadata[] columns, ResultSet result) throws SQLException {
+			for (int i = 0; i < columns.length; i++) {
+				FillDocumentMetadata : switch(columns[i].getId()) {
+				default : break FillDocumentMetadata;
+				case Metadata.LAST_MODIFIED : retval.setLastModified(new Date(result.getLong(i+1))); break FillDocumentMetadata;
+				case Metadata.CREATION_DATE : retval.setCreationDate(new Date(result.getLong(i+1))); break FillDocumentMetadata;
+				case Metadata.MODIFIED_BY : retval.setModifiedBy(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.FOLDER_ID : retval.setFolderId(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.TITLE : retval.setTitle(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.VERSION : retval.setVersion(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.CONTENT : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.FILENAME : retval.setFileName(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.SEQUENCE_NUMBER : retval.setId(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.ID : retval.setId(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.FILE_SIZE : retval.setFileSize(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.FILE_MIMETYPE : retval.setFileMIMEType(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.DESCRIPTION : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.LOCKED_UNTIL : 
+					retval.setLockedUntil(new Date(result.getLong(i+1)));
+					if (result.wasNull())
+						retval.setLockedUntil(null);
+					break FillDocumentMetadata;
+				case Metadata.URL : retval.setURL(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.CREATED_BY : retval.setCreatedBy(result.getInt(i+1)); break FillDocumentMetadata;
+				case Metadata.CATEGORIES : retval.setCategories(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.FILE_MD5SUM : retval.setFileMD5Sum(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.VERSION_COMMENT : retval.setVersionComment(result.getString(i+1)); break FillDocumentMetadata;
+				case Metadata.COLOR_LABEL : retval.setColorLabel(result.getInt(i+1)); break FillDocumentMetadata;
+				}
+			}
+			retval.setIsCurrentVersion(true);
+			
+			return retval;
+		}
+
+	}
+	
+}

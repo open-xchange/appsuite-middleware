@@ -1,0 +1,644 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.writer;
+
+import java.io.IOException;
+import java.util.TimeZone;
+
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.api2.MailInterfaceImpl;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.groupware.container.mail.MessageCacheObject;
+import com.openexchange.groupware.container.mail.parser.JSONMessageHandler;
+import com.openexchange.groupware.container.mail.parser.MessageDumper;
+import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.groupware.imap.IMAPProperties;
+import com.openexchange.groupware.imap.OXMailException;
+import com.openexchange.groupware.imap.ThreadSortMessage;
+import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.sessiond.SessionObject;
+import com.sun.mail.imap.IMAPFolder;
+
+/**
+ * MailWriter
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public class MailWriter extends DataWriter {
+
+	public static interface MailFieldWriter {
+		public void writeField(JSONWriter jsonwriter, Message msg, int level, boolean withKey) throws OXException,
+				JSONException, MessagingException;
+	}
+
+	private final SessionObject session;
+
+	private final TimeZone userTimeZone;
+
+	public MailWriter(JSONWriter jw, SessionObject session) {
+		jsonwriter = jw;
+		this.session = session;
+		userTimeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+	}
+
+	public final void writeJSONMessageObject(final JSONMessageObject msgObj) throws JSONException {
+		msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
+	}
+	
+	public final void writeMessageAsJSONObject(final Message msg, final int threadLevel) throws OXException {
+		writeMessageAsJSONObject(msg, threadLevel, true);
+	}
+
+	public final void writeMessageAsJSONObject(final Message msg, final int threadLevel,
+			final boolean createVersionForDisplay) throws OXException {
+		try {
+			final JSONMessageHandler msgHandler = new JSONMessageHandler(session, MessageUtils
+					.getMessageUniqueIdentifier(msg), createVersionForDisplay);
+			new MessageDumper(session).dumpMessage(msg, msgHandler);
+			final JSONMessageObject msgObj = msgHandler.getMessageObject();
+			msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
+		} catch (MessagingException e) {
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+		} catch (IOException e) {
+			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+		} catch (JSONException e) {
+			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+		}
+	}
+
+	public final void writeThreadSortMessageAsArray(final int[] fields, final ThreadSortMessage threadSortMsg)
+			throws OXException {
+		try {
+			try {
+				jsonwriter.array();
+				for (int i = 0; i < fields.length; i++) {
+					writeThreadSortMessageFieldAsJSONValue(fields[i], threadSortMsg, false);
+				}
+			} finally {
+				jsonwriter.endArray();
+			}
+		} catch (JSONException e) {
+			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+		}
+	}
+
+	public final void writeThreadSortMessageFieldAsJSONValue(final int field, final ThreadSortMessage threadSortMsg,
+			final boolean withKey) throws OXException {
+		writeMessageFieldAsJSONValue(field, threadSortMsg.getMsg(), threadSortMsg.getThreadLevel(), withKey);
+	}
+
+	public final void writeMessageAsArray(final int[] fields, final Message msg) throws OXException {
+		try {
+			try {
+				jsonwriter.array();
+				for (int i = 0; i < fields.length; i++) {
+					writeMessageFieldAsJSONValue(fields[i], msg, false);
+				}
+			} finally {
+				jsonwriter.endArray();
+			}
+		} catch (JSONException e) {
+			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+		}
+	}
+
+	public final MailFieldWriter[] getMailFieldWriters(final int[] fields) {
+		MailFieldWriter[] retval = new MailFieldWriter[fields.length];
+		for (int i = 0; i < retval.length; i++) {
+			Fields: switch (fields[i]) {
+			case JSONMessageObject.FIELD_ID:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(DataFields.ID);
+						}
+						/*
+						 * Assume that message's folder is open!
+						 */
+						if (msg instanceof MessageCacheObject) {
+							final MessageCacheObject msgco = (MessageCacheObject) msg;
+							final String msgUIDStr = new StringBuilder(msgco.getFolderFullname()).append(
+									Mail.SEPERATOR).append(msgco.getUid()).toString();
+							jsonwriter.value(msgUIDStr == null ? JSONObject.NULL : msgUIDStr);
+						} else {
+							final String msgUIDStr = new StringBuilder(msg.getFolder().getFullName()).append(
+									Mail.SEPERATOR).append(((IMAPFolder) (msg.getFolder())).getUID(msg)).toString();
+							jsonwriter.value(msgUIDStr == null ? JSONObject.NULL : msgUIDStr);
+						}
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_FOLDER_ID:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(FolderChildFields.FOLDER_ID);
+						}
+						if (msg instanceof MessageCacheObject) {
+							jsonwriter.value(((MessageCacheObject) msg).getFolderFullname());
+						} else {
+							jsonwriter.value(msg.getFolder().getFullName());
+						}
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_ATTACHMENT:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_HAS_ATTACHMENTS);
+						}
+						jsonwriter.value(msg.isMimeType("multipart/*"));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_FROM:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_FROM);
+						}
+						jsonwriter.value(getFromAddr(msg));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_TO:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_TO);
+						}
+						jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.TO));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_CC:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_CC);
+						}
+						jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.CC));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_BCC:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_BCC);
+						}
+						jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.BCC));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_SUBJECT:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_SUBJECT);
+						}
+						if (msg instanceof MessageCacheObject) {
+							final MessageCacheObject msgco = (MessageCacheObject) msg;
+							jsonwriter.value(MessageUtils.decodeMultiEncodedHeader(msgco.getSubject()));
+						} else {
+							jsonwriter.value(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader(
+									"Subject", null)));
+						}
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_SIZE:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_SIZE);
+						}
+						jsonwriter.value(msg.getSize());
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_SENT_DATE:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_SENT_DATE);
+						}
+						jsonwriter.value(JSONMessageObject.addUserTimezone(msg.getSentDate().getTime(), userTimeZone));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_RECEIVED_DATE:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_RECEIVED_DATE);
+						}
+						jsonwriter.value(JSONMessageObject.addUserTimezone(msg.getReceivedDate().getTime(),
+								userTimeZone));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_FLAGS:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_FLAGS);
+						}
+						jsonwriter.value(getFlags(msg));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_THREAD_LEVEL:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_THREAD_LEVEL);
+						}
+						jsonwriter.value(level);
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_DISPOSITION_NOTIFICATION_TO:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_DISPOSITION_NOTIFICATION_TO);
+						}
+						jsonwriter.value(getMessageHeader("Disposition-Notification-To", msg));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_PRIORITY:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_PRIORITY);
+						}
+						final String val = getSingleMessageHeader("X-Priority", msg);
+						jsonwriter.value(val == null ? JSONObject.NULL : Integer.parseInt(val.split(" +")[0]));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_MSG_REF:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_MSGREF);
+						}
+						final String msgref = getSingleMessageHeader("X-Msgref", msg);
+						jsonwriter.value(msgref == null ? JSONObject.NULL : Long.parseLong(msgref.split(" +")[0]));
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_COLOR_LABEL:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_COLOR_LABEL);
+						}
+						if (IMAPProperties.isUserFlagsEnabled()) {
+							final String[] userFlags = msg.getFlags().getUserFlags();
+							for (int i = 0; i < userFlags.length; i++) {
+								if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
+									jsonwriter.value(JSONMessageObject.getColorLabelIntValue(userFlags[i]));
+									return;
+								}
+							}
+						}
+						jsonwriter.value(JSONMessageObject.COLOR_LABEL_NONE);
+					}
+				};
+				break Fields;
+
+			default:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException {
+						if (withKey) {
+							jsonwriter.key("Unknown column");
+						}
+						jsonwriter.value(JSONObject.NULL);
+					}
+				};
+			}
+		}
+		return retval;
+	}
+
+	public final void writeMessageFieldAsJSONValue(final int field, final Message msg, final boolean withKey)
+			throws OXException {
+		writeMessageFieldAsJSONValue(field, msg, 0, withKey);
+	}
+
+	private final void writeMessageFieldAsJSONValue(final int field, final Message msg, final int threadLevel,
+			final boolean withKey) throws OXException {
+		try {
+			Fields: switch (field) {
+			case JSONMessageObject.FIELD_ID:
+				if (withKey) {
+					jsonwriter.key(DataFields.ID);
+				}
+				/*
+				 * Assume that message's folder is open!
+				 */
+				final String msgUIDStr = new StringBuilder(msg.getFolder().getFullName()).append(Mail.SEPERATOR)
+						.append(((IMAPFolder) (msg.getFolder())).getUID(msg)).toString();
+				jsonwriter.value(msgUIDStr == null ? JSONObject.NULL : msgUIDStr);
+				break Fields;
+			case JSONMessageObject.FIELD_FOLDER_ID:
+				if (withKey) {
+					jsonwriter.key(FolderChildFields.FOLDER_ID);
+				}
+				jsonwriter.value(msg.getFolder().getFullName());
+				break Fields;
+			case JSONMessageObject.FIELD_ATTACHMENT:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_HAS_ATTACHMENTS);
+				}
+				jsonwriter.value(msg.isMimeType("multipart/*"));
+				// jsonwriter.value(msg.isMimeType("multipart/mixed"));
+				break Fields;
+			case JSONMessageObject.FIELD_FROM:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_FROM);
+				}
+				jsonwriter.value(getFromAddr(msg));
+				break Fields;
+			case JSONMessageObject.FIELD_TO:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_TO);
+				}
+				jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.TO));
+				break Fields;
+			case JSONMessageObject.FIELD_CC:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_CC);
+				}
+				jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.CC));
+				break Fields;
+			case JSONMessageObject.FIELD_BCC:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_RECIPIENT_BCC);
+				}
+				jsonwriter.value(getRecipientAddresses(msg, MimeMessage.RecipientType.BCC));
+				break Fields;
+			case JSONMessageObject.FIELD_SUBJECT:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_SUBJECT);
+				}
+				jsonwriter
+						.value(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null)));
+				break Fields;
+			case JSONMessageObject.FIELD_SIZE:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_SIZE);
+				}
+				jsonwriter.value(msg.getSize());
+				break Fields;
+			case JSONMessageObject.FIELD_SENT_DATE:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_SENT_DATE);
+				}
+				jsonwriter.value(JSONMessageObject.addUserTimezone(msg.getSentDate().getTime(), userTimeZone));
+				break Fields;
+			case JSONMessageObject.FIELD_RECEIVED_DATE:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_RECEIVED_DATE);
+				}
+				jsonwriter.value(JSONMessageObject.addUserTimezone(msg.getReceivedDate().getTime(), userTimeZone));
+				break Fields;
+			case JSONMessageObject.FIELD_FLAGS:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_FLAGS);
+				}
+				jsonwriter.value(getFlags(msg));
+				break Fields;
+			case JSONMessageObject.FIELD_THREAD_LEVEL:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_THREAD_LEVEL);
+				}
+				jsonwriter.value(threadLevel);
+				break Fields;
+			case JSONMessageObject.FIELD_DISPOSITION_NOTIFICATION_TO:
+				if (!msg.isSet(Flags.Flag.SEEN)) {
+					if (withKey) {
+						jsonwriter.key(JSONMessageObject.JSON_DISPOSITION_NOTIFICATION_TO);
+					}
+					jsonwriter.value(getMessageHeader("Disposition-Notification-To", msg));
+				}
+				break Fields;
+			case JSONMessageObject.FIELD_PRIORITY:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_PRIORITY);
+				}
+				final String val = getSingleMessageHeader("X-Priority", msg);
+				jsonwriter.value(val == null ? JSONObject.NULL : Integer.parseInt(val.split(" +")[0]));
+				break Fields;
+			case JSONMessageObject.FIELD_MSG_REF:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_MSGREF);
+				}
+				final String msgref = getSingleMessageHeader("X-Msgref", msg);
+				jsonwriter.value(msgref == null ? JSONObject.NULL : Long.parseLong(msgref.split(" +")[0]));
+				break Fields;
+			case JSONMessageObject.FIELD_COLOR_LABEL:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_COLOR_LABEL);
+				}
+				if (IMAPProperties.isUserFlagsEnabled()) {
+					final String[] userFlags = msg.getFlags().getUserFlags();
+					for (int i = 0; i < userFlags.length; i++) {
+						if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
+							jsonwriter.value(JSONMessageObject.getColorLabelIntValue(userFlags[i]));
+							break Fields;
+						}
+					}
+				}
+				jsonwriter.value(JSONMessageObject.COLOR_LABEL_NONE);
+				break Fields;
+			default:
+				if (withKey) {
+					jsonwriter.key("Unknown column");
+				}
+				jsonwriter.value("Unknown column " + field);
+			}
+		} catch (JSONException e) {
+			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+		} catch (MessagingException e) {
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+		}
+	}
+
+	private final String getMessageHeader(final String headerName, final Message msg) throws MessagingException {
+		final String[] values = msg.getHeader(headerName);
+		if (values == null || values.length == 0) {
+			return null;
+		}
+		final StringBuilder sb = new StringBuilder();
+		sb.append(values[0]);
+		for (int i = 1; i < values.length; i++) {
+			sb.append(", ").append(values[i]);
+		}
+		return sb.toString();
+	}
+
+	private final String getSingleMessageHeader(final String headerName, final Message msg) throws MessagingException {
+		final String[] values = msg.getHeader(headerName);
+		if (values == null || values.length == 0) {
+			return null;
+		}
+		return values[0];
+	}
+
+	private final JSONArray getFromAddr(final Message msg) throws MessagingException, JSONException {
+		final JSONArray retval = new JSONArray();
+		if (msg.getFrom() != null) {
+			for (int i = 0; i < msg.getFrom().length; i++) {
+				final InternetAddress addr = (InternetAddress) msg.getFrom()[i];
+				final JSONArray arr = new JSONArray();
+				arr.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
+						: preparePersonal(addr.getPersonal()));
+				arr.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr
+						.getAddress());
+				retval.put(i, arr);
+			}
+		}
+		return retval;
+	}
+
+	private final JSONArray getRecipientAddresses(final Message msg, final javax.mail.Message.RecipientType type)
+			throws JSONException, MessagingException {
+		final JSONArray retval = new JSONArray();
+		final Address[] recipients = msg.getRecipients(type);
+		if (recipients != null) {
+			for (int i = 0; i < recipients.length; i++) {
+				final InternetAddress addr = (InternetAddress) recipients[i];
+				final JSONArray arr = new JSONArray();
+				arr.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
+						: preparePersonal(addr.getPersonal()));
+				arr.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr
+						.getAddress());
+				retval.put(i, arr);
+			}
+		}
+		return retval;
+	}
+
+	private static final String preparePersonal(final String personal) {
+		if (personal.charAt(0) == '"') {
+			/*
+			 * Assume personal is alreyd surrounded with quotes
+			 */
+			return personal;
+		}
+		return new StringBuilder().append('"').append(personal).append('"').toString();
+	}
+
+	private final int getFlags(final Message msg) throws MessagingException {
+		int flags = 0;
+		if (msg.isSet(Flags.Flag.ANSWERED)) {
+			flags |= JSONMessageObject.BIT_ANSWERED;
+		}
+		if (msg.isSet(Flags.Flag.DELETED)) {
+			flags |= JSONMessageObject.BIT_DELETED;
+		}
+		if (msg.isSet(Flags.Flag.DRAFT)) {
+			flags |= JSONMessageObject.BIT_DRAFT;
+		}
+		if (msg.isSet(Flags.Flag.FLAGGED)) {
+			flags |= JSONMessageObject.BIT_FLAGGED;
+		}
+		if (msg.isSet(Flags.Flag.RECENT)) {
+			flags |= JSONMessageObject.BIT_RECENT;
+		}
+		if (msg.isSet(Flags.Flag.SEEN)) {
+			flags |= JSONMessageObject.BIT_SEEN;
+		}
+		if (msg.isSet(Flags.Flag.USER)) {
+			flags |= JSONMessageObject.BIT_USER;
+		}
+		return flags;
+	}
+
+}

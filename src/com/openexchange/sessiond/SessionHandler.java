@@ -76,8 +76,6 @@ import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
 
@@ -197,9 +195,7 @@ public class SessionHandler extends TimerTask {
 		if (context == null) {
 			throw new ContextNotFoundException("can't find context with the given name (" + contextname + ")");
 		}
-
-        update(context);
-        
+		
 		Credentials cred = null;
 		User u = null;
 		
@@ -298,30 +294,10 @@ public class SessionHandler extends TimerTask {
 		
 		return sessionobject;
 	}
-
-    /**
-     * @param context
-     * @throws LoginException
-     * @throws SessiondException
-     */
-    private static void update(Context context) throws LoginException, SessiondException {
-        try {
-            Updater updater = Updater.getInstance();
-            if (updater.toUpdate(context)) {
-                updater.startUpdate(context);
-                throw new LoginException(LoginException.Code.UPDATE);
-            }
-            if (updater.isLocked(context)) {
-                throw new LoginException(LoginException.Code.UPDATE);
-            }
-        } catch (UpdateException e) {
-            throw new SessiondException(e.getMessage(), e);
-        }
-    }
 	
 	protected static boolean refreshSession(final String sessionid) {
 		if (LOG.isDebugEnabled()) {
-		LOG.debug("refreshSession <" + sessionid + ">");
+			LOG.debug("refreshSession <" + sessionid + ">");
 		}
 		
 		Map<String, SessionObject> sessions = null;

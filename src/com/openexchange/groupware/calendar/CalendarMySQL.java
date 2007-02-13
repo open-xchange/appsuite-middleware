@@ -1,0 +1,2803 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.groupware.calendar;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.*;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ExternalGroupParticipant;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.GroupParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.ResourceGroupParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.server.DBPool;
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.oxfolder.OXFolderTools;
+import java.sql.DataTruncation;
+import java.sql.Statement;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.ArrayList;
+
+
+/**
+ * CalendarSql
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
+
+class CalendarMySQL implements CalendarSqlImp {
+    
+    private static final String select = "SELECT intfield01, timestampfield01, timestampfield02, field01 FROM prg_dates ";
+    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
+    private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
+    private static final String ORDER_BY = " ORDER BY pd.timestampfield01";
+    private static final String JOIN_DATES = " pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ";
+    private static final String JOIN_PARTICIPANTS = " pd JOIN prg_date_rights pdr ON pd.intfield01 = pdr.object_id AND pd.cid = ";
+    private static final String WHERE = " WHERE";
+    private static final String PDM_MEMBER_UID_IS = " AND pdm.member_uid = ";
+    private static final String PDM_MEMBER_UID_IN = " AND pdm.member_uid IN ";
+    private static final String PDM_CID_IS = " AND pdm.cid = ";
+    private static final String PDM_PFID_IS = " AND pdm.pfid = ";
+    private static final String PD_FID_IS_NULL = " AND pd.fid = 0 ";
+    private static final String PD_CREATED_FROM_IS = " AND pd.created_from = ";
+    private static final String DATES_IDENTIFIER_IS = " AND intfield01 = ";
+    private static final String PARTICIPANTS_IDENTIFIER_IS = " AND object_id = ";    
+    
+    private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
+    
+    
+    public final PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, java.util.Date d1, java.util.Date d2, String select, Connection readcon, java.util.Date since, int orderBy, String orderDir) throws OXException, SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        
+        if (since != null) {
+            sb.append(" AND ");
+            getSince(sb);
+        }
+        sb.append(" AND pdm.member_uid = ");
+        sb.append(uid);
+//        sb.append(" AND pdm.confirm != ");
+//        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        
+        CalendarCommonCollection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
+        
+        if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+            sb.append(" ORDER BY ");
+            sb.append(CalendarCommonCollection.getFieldName(orderBy));
+            sb.append(" ");
+            sb.append(orderDir);
+        } else {
+            sb.append(ORDER_BY);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int a = 1;
+        
+        pst.setTimestamp(a++, new Timestamp(d2.getTime()));
+        pst.setTimestamp(a++, new Timestamp(d1.getTime()));
+        
+        if (since != null) {
+            pst.setLong(a++, since.getTime());
+        }
+        return pst;
+    }
+    
+    public final PreparedStatement getConflicts(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        if (free_busy_select) {
+            sb.append(FREE_BUSY_SELECT);
+        } else {
+            sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
+        }
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getConflictRange(sb);
+        sb.append(PDM_MEMBER_UID_IN);
+        sb.append(member_sql_in);
+        sb.append(" AND pd.intfield06 != ");
+        sb.append(AppointmentObject.FREE);
+        sb.append(" AND pdm.confirm != ");
+        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(ORDER_BY);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String resource_sql_in) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
+        sb.append(JOIN_PARTICIPANTS);
+        sb.append(c.getContextId());
+        sb.append(" AND pdr.cid = ");
+        sb.append(c.getContextId());
+        sb.append(" JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pdm.cid = ");
+        sb.append(c.getContextId());                
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND pdr.id IN ");
+        sb.append(resource_sql_in);
+        sb.append(" AND pdr.type = ");
+        sb.append(Participant.RESOURCE);
+        sb.append(" AND pd.intfield06 != ");
+        sb.append(AppointmentObject.FREE);
+        sb.append(ORDER_BY);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+
+    public final PreparedStatement getResourceConflicts(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String resource_sql_in) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(FREE_BUSY_SELECT);
+        sb.append(JOIN_PARTICIPANTS);
+        sb.append(c.getContextId());
+        sb.append(" AND pdr.cid = ");
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND pdr.id IN ");
+        sb.append(resource_sql_in);
+        sb.append(" AND pdr.type = ");
+        sb.append(Participant.RESOURCE);
+        sb.append(" AND pd.intfield06 != ");
+        sb.append(AppointmentObject.FREE);
+        sb.append(ORDER_BY);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }    
+    
+    public final PreparedStatement getFreeBusy(int uid, Context c, java.util.Date d1, java.util.Date d2, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(FREE_BUSY_SELECT);
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(uid);
+        //sb.append(" AND pd.intfield06 != "); // TODO: this must be done for freebusy but not for the conflict query!
+        //sb.append(AppointmentObject.FREE);
+        sb.append(" AND pdm.confirm != ");
+        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(ORDER_BY);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final PreparedStatement getResourceFreeBusy(int uid, Context c, java.util.Date d1, java.util.Date d2, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(FREE_BUSY_SELECT);
+        sb.append(JOIN_PARTICIPANTS);
+        sb.append(c.getContextId());
+        sb.append(" AND pdr.cid = ");
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND pdr.id = ");
+        sb.append(uid);
+        //sb.append(" AND pd.intfield06 != "); // TODO: this must be done for freebusy but not for the conflict query!
+        //sb.append(AppointmentObject.FREE);
+        sb.append(" AND pdr.type = ");
+        sb.append(Participant.RESOURCE);
+        sb.append(" AND pdm.confirm != ");
+        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(ORDER_BY);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    
+    public PreparedStatement getActiveAppointments(Context c, int uid, java.util.Date d1, java.util.Date d2, String select, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND member_uid = ");
+        sb.append(uid);
+        sb.append(" AND confirm != ");
+        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final boolean[] getUserActiveAppointmentsRangeSQL(Context c, int uid, int groups[], UserConfiguration uc, java.util.Date d1, java.util.Date d2, Connection readcon) throws SQLException, OXException {
+        StringBuilder sb = new StringBuilder(64);
+        long start = d1.getTime();
+        long end = d2.getTime();
+        int size = (int)((end-start)/CalendarRecurringCollection.MILLI_DAY);
+        boolean activeDates[] = new boolean[size];
+        sb.append(RANGE_SELECT);
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND member_uid = ");
+        sb.append(uid);
+        sb.append(" AND confirm != ");
+        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        
+        CalendarCommonCollection.getVisibleFolderSQLInString(sb, uid, groups, c, uc, readcon);
+        
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        ResultSet rs = getResultSet(pst);
+        try {
+            CalendarDataObject cdao = null;
+            while (rs.next()) {
+                cdao = new CalendarDataObject();
+                int oid = rs.getInt(1);
+                java.util.Date s = rs.getTimestamp(2);
+                java.util.Date e = rs.getTimestamp(3);
+                int rec = rs.getInt(4);
+                if (!rs.wasNull() && oid == rec) {
+                    cdao.setStartDate(s);
+                    cdao.setEndDate(e);
+                    cdao.setRecurrenceCalculator(rs.getInt(5));
+                    cdao.setRecurrence(rs.getString(6));
+                    cdao.setDelExceptions(rs.getString(7));
+                    cdao.setExceptions(rs.getString(8));
+                    cdao.setTimezone(rs.getString(9));
+                    if (CalendarRecurringCollection.fillDAO(cdao)) {
+                        RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0);
+                        for (int a = 0; a < rrs.size(); a++) {
+                            RecurringResult rr = rrs.getRecurringResult(a);
+                            fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates);
+                        }
+                    } else {
+                        LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context " ,oid,CalendarOperation.COLON,uid,CalendarOperation.COLON,c.getContextId() }));
+                    }
+                } else {
+                    fillActiveDates(start, s.getTime(), e.getTime(), activeDates);
+                }
+            }
+            //CalendarCommonCollection.debugActiveDates (start, end, activeDates); // TODO:  Make configurable or uncomment in runtime edition
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(pst);
+        }
+        return activeDates;
+    }
+    
+    private final void fillActiveDates(long start, long s, long e, boolean activeDates[]) { 
+        int start_pos = 0;
+        int ll = (int)(e-s);
+        int len = (int)(ll/CalendarRecurringCollection.MILLI_DAY);
+        if (ll != 0 && ll % CalendarRecurringCollection.MILLI_DAY == 0) {
+            len--;
+        }
+        if (s >= start) {
+            start_pos = (int)((s-start)/CalendarRecurringCollection.MILLI_DAY);
+            if (start_pos > activeDates.length) {
+                return;
+            }
+        }
+        for (int a = start_pos; a <= start_pos+len; a++) {
+            if (a >= activeDates.length) {
+                return;
+            }
+            activeDates[a] = true;
+        }
+    }
+    
+    public final PreparedStatement getPublicFolderRangeSQL(Context c, int uid, int groups[], int fid, java.util.Date d1, java.util.Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(parseSelect(select));
+        sb.append(" pd ");
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(" AND pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(" AND pd.fid = ");
+        sb.append(fid);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+            sb.append(" ORDER BY ");
+            sb.append(CalendarCommonCollection.getFieldName(orderBy));
+            sb.append(" ");
+            sb.append(orderDir);
+        } else {
+            sb.append(ORDER_BY);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final PreparedStatement getPrivateFolderRangeSQL(Context c, int uid, int groups[], int fid, java.util.Date d1, java.util.Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(PD_FID_IS_NULL);
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(uid);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+            sb.append(" ORDER BY ");
+            sb.append(CalendarCommonCollection.getFieldName(orderBy));
+            sb.append(" ");
+            sb.append(orderDir);
+        } else {
+            sb.append(ORDER_BY);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, java.util.Date d1, java.util.Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getRange(sb);
+        sb.append(PD_FID_IS_NULL);
+        sb.append(" AND pd.pflag = 0 ");
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(shared_folder_owner);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        if (CalendarCommonCollection.getFieldName(orderBy) != null && orderDir != null) {
+            sb.append(" ORDER BY ");
+            sb.append(CalendarCommonCollection.getFieldName(orderBy));
+            sb.append(" ");
+            sb.append(orderDir);
+        } else {
+            sb.append(ORDER_BY);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setTimestamp(1, new Timestamp(d2.getTime()));
+        pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        return pst;
+    }
+    
+    public final PreparedStatement getPrivateFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, java.util.Date since, String select, boolean readall, Connection readcon, java.util.Date d1, java.util.Date d2) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getSince(sb);
+        if (d1 != null && d2 != null) {
+            sb.append(" AND ");
+            getRange(sb);
+        }
+        sb.append(PD_FID_IS_NULL);
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(uid);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, since.getTime());
+        if (d1 != null && d2 != null) {
+            pst.setTimestamp(2, new Timestamp(d2.getTime()));
+            pst.setTimestamp(3, new Timestamp(d1.getTime()));
+        }
+        return pst;
+    }
+    
+    public final PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, java.util.Date since, String select, boolean readall, Connection readcon, java.util.Date d1, java.util.Date d2) throws SQLException {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getSince(sb);
+        if (d1 != null && d2 != null) {
+            sb.append(" AND ");
+            getRange(sb);
+        }
+        sb.append(PD_FID_IS_NULL);
+        sb.append(" AND pd.pflag = 0 ");
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(shared_folder_owner);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, since.getTime());
+        if (d1 != null && d2 != null) {
+            pst.setTimestamp(2, new Timestamp(d2.getTime()));
+            pst.setTimestamp(3, new Timestamp(d1.getTime()));
+        }
+        return pst;
+    }
+    
+    public final PreparedStatement getPublicFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, java.util.Date since, String select, boolean readall, Connection readcon, java.util.Date d1, java.util.Date d2) throws SQLException {
+        StringBuilder sb = new StringBuilder(48);
+        sb.append(parseSelect(select));
+        sb.append(" pd WHERE pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(" AND ");
+        getSince(sb);
+        if (d1 != null && d2 != null) {
+            sb.append(" AND ");
+            getRange(sb);
+        }
+        sb.append(" AND pd.fid = ");
+        sb.append(fid);
+        if (!readall) {
+            sb.append(PD_CREATED_FROM_IS);
+            sb.append(uid);
+        }
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, since.getTime());
+        if (d1 != null && d2 != null) {
+            pst.setTimestamp(2, new Timestamp(d2.getTime()));
+            pst.setTimestamp(3, new Timestamp(d1.getTime()));
+        }
+        return pst;
+    }
+    
+    public final PreparedStatement getPrivateFolderDeletedSinceSQL(Context c, int uid, int fid, java.util.Date d1, String select, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(parseSelect(select));
+        sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getSince(sb);
+        sb.append(" AND pd.fid = 0");
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(uid);
+        sb.toString();
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, d1.getTime());
+        return pst;
+    }
+    
+    public final PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, java.util.Date d1, String select, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(parseSelect(select));
+        sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getSince(sb);
+        sb.append(" AND pd.fid = 0");
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(shared_folder_owner);
+        sb.toString();
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, d1.getTime());
+        return pst;
+    }
+    
+    public final PreparedStatement getPublicFolderDeletedSinceSQL(Context c, int uid, int fid, java.util.Date d1, String select, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(96);
+        sb.append(parseSelect(select));
+        sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getSince(sb);
+        sb.append(PD_FID_IS_NULL);
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        sb.append(PDM_MEMBER_UID_IS);
+        sb.append(uid);
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        pst.setLong(1, d1.getTime());
+        return pst;
+    }
+    
+    public final String getObjectsByidSQL(int oids[][], int cid, String select) {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(parseSelect(select));
+        sb.append(" pd WHERE");
+        sb.append(" pd.cid = ");
+        sb.append(cid);
+        sb.append(" AND ");
+        sb.append(" intfield01 IN ");
+        sb.append(StringCollection.getSqlInString(oids));
+        return sb.toString();
+    }
+    
+    public PreparedStatement getPrivateFolderObjects(int fid, Context c, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("SELECT intfield01, created_from FROM prg_dates ");
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        sb.append(" pd.fid = 0 ");
+        sb.append(PDM_PFID_IS);
+        sb.append(fid);
+        return getPreparedStatement(readcon, sb.toString());
+    }
+    
+    public PreparedStatement getPublicFolderObjects(int fid, Context c, Connection readcon) throws SQLException {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("SELECT intfield01, created_from FROM prg_dates pd");
+        sb.append(WHERE);
+        sb.append(" pd.cid = ");
+        sb.append(c.getContextId());
+        sb.append(" AND pd.fid = ");
+        sb.append(fid);
+        return getPreparedStatement(readcon, sb.toString());
+    }
+    
+    public boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        if (foldertype == FolderObject.PRIVATE) {
+            sb.append("SELECT intfield01 FROM prg_dates ");
+            sb.append(JOIN_DATES);
+            sb.append(c.getContextId());
+            sb.append(PDM_CID_IS);
+            sb.append(c.getContextId());
+            sb.append(WHERE);
+            sb.append(" pd.created_from != ");
+            sb.append(uid);
+            sb.append(PD_FID_IS_NULL);
+            sb.append(PDM_PFID_IS);
+            sb.append(fid);
+        } else if (foldertype == FolderObject.PUBLIC) {
+            sb.append("SELECT intfield01 FROM prg_dates pd");
+            sb.append(WHERE);
+            sb.append(" pd.created_from != ");
+            sb.append(uid);
+            sb.append(" AND pd.fid = ");
+            sb.append(fid);
+        } else {
+            throw new SQLException("Unknown type detected!");
+        }
+        PreparedStatement prep = getPreparedStatement(readcon, sb.toString());
+        ResultSet rs = getResultSet(prep);
+        boolean ret = true;
+        try {
+            if (!rs.next()) {
+                ret = false;
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+        }
+        return ret;
+    }
+    
+    public boolean checkIfFolderIsEmpty(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        if (foldertype == FolderObject.PRIVATE) {
+            sb.append("SELECT intfield01 FROM prg_dates ");
+            sb.append(JOIN_DATES);
+            sb.append(c.getContextId());
+            sb.append(PDM_CID_IS);
+            sb.append(c.getContextId());
+            sb.append(WHERE);
+            sb.append(" pd.fid = 0 ");
+            sb.append(PDM_PFID_IS);
+            sb.append(fid);
+        } else if (foldertype == FolderObject.PUBLIC) {
+            sb.append("SELECT intfield01 FROM prg_dates pd");
+            sb.append(WHERE);
+            sb.append(" pd.fid = ");
+            sb.append(fid);
+        } else {
+            throw new SQLException("Unknown type detected!");
+        }
+        PreparedStatement prep = getPreparedStatement(readcon, sb.toString());
+        ResultSet rs = getResultSet(prep);
+        boolean ret = true;
+        try {
+            if (rs.next()) {
+                ret = false;
+            }
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(prep);
+            CalendarCommonCollection.closeResultSet(rs);
+        }
+        return ret;
+    }
+    
+    private final void getRange(StringBuilder sb) {
+        sb.append(" pd.timestampfield01 <= ? AND pd.timestampfield02 > ?");
+    }
+    
+    private final void getConflictRange(StringBuilder sb) {
+        sb.append(" pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
+    }
+    
+    private final void getSince(StringBuilder sb) {
+        sb.append(" pd.changing_date >= ?");
+    }
+    
+    private final String parseSelect(String select) {
+        if (select != null) {
+            return select;
+        }
+        return this.select;
+    }
+    
+    public final PreparedStatement getSearchQuery(String select, int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo) throws SQLException, OXException {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(parseSelect(select));
+        sb.append(JOIN_DATES);
+        sb.append(c.getContextId());
+        sb.append(PDM_CID_IS);
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        
+        java.util.Date range[] = searchobject.getRange();
+        
+        if (range != null && range[0] != null && range[1] != null) {
+            range = searchobject.getRange();
+            getRange(sb);
+            sb.append(" AND ");
+        }
+        
+        if (searchobject.getFolder() > 0) {
+            sb.append(" ((pd.fid = 0");
+            sb.append(PDM_PFID_IS);
+            sb.append(searchobject.getFolder());
+            sb.append(" AND pdm.member_uid = ");
+            sb.append(uid);
+            sb.append(") OR (");
+            sb.append("pd.fid = ");
+            sb.append(searchobject.getFolder());
+            sb.append(" AND pdm.member_uid = ");
+            sb.append(uid);
+            sb.append("))");
+        } else {
+
+            
+            sb.append(" pdm.member_uid = ");
+            sb.append(uid);
+            
+            if (cfo != null) {
+                Object private_read_all[] = cfo.getPrivateReadableAll();
+                Object private_read_own[] = cfo.getPrivateReadableOwn();
+                Object public_read_all[] = cfo.getPublicReadableAll();
+                Object public_read_own[] = cfo.getPublicReadableOwn();
+                
+                boolean private_query = false;
+                boolean public_query = false;
+                if (private_read_all.length > 0) {
+                    sb.append(" AND (pdm.pfid IN ");
+                    sb.append(StringCollection.getSqlInString(private_read_all));
+                    private_query = true;
+                }
+                
+                if (private_read_own.length > 0) {
+                    if (!private_query) {
+                        sb.append(PD_CREATED_FROM_IS);
+                    } else {
+                        sb.append("OR pd.created_from = ");
+                    }
+                    sb.append(uid);
+                    sb.append(" AND (pdm.pfid IN ");
+                    sb.append(StringCollection.getSqlInString(private_read_own));
+                    private_query = true;
+                }
+                
+                
+                if (public_read_all.length > 0) {
+                    if (private_query) {
+                        sb.append(" OR pd.fid IN ");
+                        sb.append(StringCollection.getSqlInString(public_read_all));
+                        public_query = true;
+                    } else {
+                        sb.append(" AND pd.fid IN ");
+                        sb.append(StringCollection.getSqlInString(public_read_all));
+                        public_query = true;
+                    }
+                }
+                
+                if (public_read_own.length > 0) {
+                    if (!private_query && !public_query) {
+                        sb.append(" AND pd.fid IN ");
+                        sb.append(StringCollection.getSqlInString(public_read_own));
+                        sb.append(PD_CREATED_FROM_IS);
+                        sb.append(uid);
+                    } else {
+                        sb.append(" OR pd.fid IN ");
+                        sb.append(StringCollection.getSqlInString(public_read_own));
+                        sb.append(PD_CREATED_FROM_IS);
+                        sb.append(uid);
+                    }
+                }
+                
+                if (private_query) {
+                    sb.append(")");
+                }
+            }
+        }
+        
+        
+        String pattern = searchobject.getPattern();
+        if (pattern != null) {
+            sb.append(" AND ");
+            sb.append(CalendarCommonCollection.getFieldName(AppointmentObject.TITLE));
+            sb.append(" LIKE ?");
+            pattern = pattern.trim();
+            if (!pattern.startsWith("*")) {
+                pattern = CalendarOperation.PERCENT+pattern;
+            } else {
+                pattern = "%"+pattern.substring(1, pattern.length());
+            }
+            if (!pattern.endsWith("*")) {
+                pattern = pattern+CalendarOperation.PERCENT;
+            } else {
+                pattern = pattern.substring(0, pattern.length()-1)+CalendarOperation.PERCENT;
+            }
+            
+        }
+        
+        sb.append(" ORDER BY ");
+        String orderby = CalendarCommonCollection.getFieldName(orderBy);
+        if (orderby == null) {
+            orderby = CalendarCommonCollection.getFieldName(AppointmentObject.START_DATE);
+        }
+        sb.append(orderby);
+        if (orderDir != null) {
+            sb.append(" ");
+            sb.append(orderDir);
+        }
+        
+        PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        
+        int x = 1;
+        
+        if (range != null && range[0] != null && range[1] != null) {
+            pst.setTimestamp(x++, new Timestamp(range[1].getTime()));
+            pst.setTimestamp(x++, new Timestamp(range[0].getTime()));
+        }
+        
+        if (pattern != null) {
+            pst.setString(x++, pattern);
+        }
+        
+        // TODO: This should be rewritten to be more flexible and to cover all expectations
+        return pst;
+    }
+    
+    public final ResultSet getResultSet(PreparedStatement pst) throws SQLException {
+        return pst.executeQuery();
+    }
+    
+    public final PreparedStatement getPreparedStatement(Connection readcon, String sql) throws SQLException {
+        return readcon.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    }
+    
+    public final String loadAppointment(int oid, Context c) throws SQLException {
+        StringBuilder sb = new StringBuilder(384);
+        sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, " +
+                " intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
+        sb.append(c.getContextId());
+        sb.append(DATES_IDENTIFIER_IS);
+        sb.append(oid);
+        return sb.toString();
+        
+    }
+    
+    public final CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, SessionObject so) throws DataTruncation, SQLException, LdapException, Exception {
+        int i = 1;
+        PreparedStatement pst = null;
+        try {
+            pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from,"+
+                    "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, "+
+                    "field01, field02, field04, field09, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
+            
+            pst.setTimestamp(i++, cdao.getCreatingDate());
+            if (!cdao.containsLastModified()) {
+                cdao.setLastModified(cdao.getCreatingDate());
+            }
+            pst.setInt(i++, cdao.getCreatedBy());
+            pst.setLong(i++, cdao.getChangingDate().getTime());
+            pst.setInt(i++, cdao.getModifiedBy());
+            
+            if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
+                pst.setInt(i++, 0);
+            } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                pst.setInt(i++, cdao.getGlobalFolderID());
+            } else {
+                throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
+            }
+            pst.setInt(i++, cdao.getPrivateflag());
+            pst.setInt(i++, cdao.getContextID());
+            pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getStartDate().getTime()));
+            pst.setTimestamp(i++, new java.sql.Timestamp(cdao.getEndDate().getTime()));
+            pst.setString(i++, cdao.getTimezone());
+            pst.setInt(i++, cdao.getObjectID());
+            pst.setInt(i++, cdao.getLabel());
+            pst.setInt(i++, cdao.getShownAs());
+            pst.setInt(i++, cdao.getFulltime());
+            pst.setInt(i++, cdao.getNumberOfAttachments());
+            pst.setString(i++, cdao.getTitle());
+            if (cdao.containsLocation()) {
+                pst.setString(i++, cdao.getLocation());
+            } else {
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            }
+            if (cdao.containsNote()) {
+                pst.setString(i++, cdao.getNote());
+            } else {
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            }
+            if (cdao.containsCategories()) {
+                pst.setString(i++, cdao.getCategories());
+            } else {
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            }
+            
+            if (!cdao.isSequence(true)) {
+                pst.setNull(i++, java.sql.Types.INTEGER);
+                pst.setNull(i++, java.sql.Types.INTEGER);
+                pst.setNull(i++, java.sql.Types.INTEGER);
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            } else {
+                if (!cdao.containsRecurrenceID()) {
+                    pst.setInt(i++, cdao.getObjectID());
+                    cdao.setRecurrenceID(cdao.getObjectID());
+                } else {
+                    pst.setInt(i++, cdao.getRecurrenceID());
+                    cdao.setRecurrenceID(cdao.getRecurrenceID());
+                }
+                pst.setInt(i++, cdao.getRecurrenceCalculator());
+                pst.setInt(i++, cdao.getRecurrencePosition());
+                pst.setString(i++, cdao.getRecurrence());
+                if (cdao.getDelExceptions() != null) {
+                    pst.setString(i++, cdao.getDelExceptions());
+                } else {
+                    pst.setNull(i++, java.sql.Types.VARCHAR);
+                }
+                if (cdao.getExceptions() != null) {
+                    pst.setString(i++, cdao.getExceptions());
+                } else {
+                    pst.setNull(i++, java.sql.Types.VARCHAR);
+                }
+            }
+            
+            insertParticipants(cdao, writecon);
+            insertUserParticipants(cdao, writecon, so.getUserObject().getId());
+            pst.executeUpdate();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pst);
+        }
+        writecon.commit();
+        cdao.setParentFolderID(cdao.getActionFolder());
+        CalendarCommonCollection.triggerEvent(so, CalendarOperation.INSERT, cdao);
+        return null;
+    }
+    
+    private final void insertParticipants(CalendarDataObject cdao, Connection writecon) throws SQLException, LdapException, OXCalendarException {
+        Participant p[] = cdao.getParticipants();
+        Arrays.sort(p);
+        if (p != null) {
+            PreparedStatement pi = null;
+            try {
+                pi = writecon.prepareStatement("insert into prg_date_rights (object_id, cid, id, type, dn, ma) values (?, ?, ?, ?, ?, ?)");
+                int lastid = -1;
+                int lasttype = -1;
+                for (int a = 0; a < p.length; a++) {
+                    if (!(lastid == p[a].getIdentifier() && lasttype == p[a].getType())) {
+                        lastid = p[a].getIdentifier();
+                        lasttype = p[a].getType();
+                        pi.setInt(1, cdao.getObjectID());
+                        pi.setInt(2, cdao.getContextID());
+                        pi.setInt(3, p[a].getIdentifier());
+                        pi.setInt(4, p[a].getType());
+                        if (p[a].getDisplayName() == null) {
+                            pi.setNull(5, java.sql.Types.VARCHAR);
+                        } else {
+                            pi.setString(5, p[a].getDisplayName());
+                        }
+                        if (p[a].getEmailAddress() == null) {
+                            if (p[a].getIdentifier() > 0) {
+                                pi.setNull(6, java.sql.Types.VARCHAR);
+                            } else {
+                                throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                            }
+                        } else {
+                            pi.setString(6, p[a].getEmailAddress());
+                        }
+                        pi.addBatch();
+                    }
+                }
+                pi.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pi);
+            }
+        }
+    }
+    
+    private final void insertUserParticipants(CalendarDataObject cdao, Connection writecon, int uid) throws SQLException, Exception {
+        UserParticipant up[] = cdao.getUsers();
+        Arrays.sort(up);
+        if (up != null && up.length > 0) {
+            PreparedStatement pi = null;
+            try {
+                pi = writecon.prepareStatement("insert into prg_dates_members (object_id, member_uid, pfid, confirm, reason, reminder, cid) values (?, ?, ?, ?, ?, ?, ?)");
+                int lastid = -1;
+                for (int a = 0; a < up.length; a++) {
+                    if (lastid != up[a].getIdentifier()) {
+                        lastid = up[a].getIdentifier();
+                        pi.setInt(1, cdao.getObjectID());
+                        pi.setInt(2, up[a].getIdentifier());
+                        
+                        if (cdao.getFolderType() == FolderObject.PRIVATE ) {
+                            if (cdao.getEffectiveFolderId() == 0) {
+                                int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(), cdao.getContext()));
+                                pi.setInt(3, pfid);
+                                up[a].setPersonalFolderId(pfid);
+                                if (up[a].getIdentifier() == uid) {
+                                    cdao.setActionFolder(pfid);
+                                }
+                            } else {
+                                if (up[a].getIdentifier() == uid) {
+                                    pi.setInt(3, cdao.getEffectiveFolderId());
+                                    up[a].setPersonalFolderId(cdao.getEffectiveFolderId());
+                                    if (cdao.getActionFolder() == 0) {
+                                        cdao.setActionFolder(cdao.getEffectiveFolderId());
+                                    }
+                                } else {
+                                    int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(), cdao.getContext()));
+                                    pi.setInt(3, pfid);
+                                    up[a].setPersonalFolderId(pfid);
+                                }
+                            }
+                        } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                            pi.setNull(3, java.sql.Types.INTEGER);
+                        } else if (cdao.getFolderType() == FolderObject.SHARED) {
+                            if (cdao.getSharedFolderOwner() != 0) {
+                                if (up[a].getIdentifier() == cdao.getSharedFolderOwner()) {
+                                    if (cdao.getGlobalFolderID() == 0) {
+                                        int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(cdao.getSharedFolderOwner(), cdao.getContext()));
+                                        pi.setInt(3, pfid);
+                                        up[a].setPersonalFolderId(pfid);
+                                        if (up[a].getIdentifier() == uid) {
+                                            cdao.setActionFolder(pfid);
+                                        }
+                                    } else {
+                                        pi.setInt(3, cdao.getGlobalFolderID());
+                                        up[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                    }
+                                } else {
+                                    int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(up[a].getIdentifier(), cdao.getContext()));
+                                    pi.setInt(3, pfid);    
+                                    up[a].setPersonalFolderId(pfid);
+                                }
+                            } else {
+                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                        }
+                        pi.setInt(4, up[a].getConfirm());
+                        if (cdao.containsAlarm() && up[a].getIdentifier() == uid) {
+                            up[a].setAlarmMinutes(cdao.getAlarm());
+                        } else {
+                            if (!up[a].containsAlarm()) {
+                                up[a].setAlarmMinutes(-1);
+                            }
+                        }
+                        if (up[a].containsConfirmMessage() && up[a].getConfirmMessage() != null) {
+                            pi.setString(5, up[a].getConfirmMessage());
+                        } else {
+                            pi.setNull(5, java.sql.Types.VARCHAR);
+                        }
+                        if (up[a].getAlarmMinutes() >= 0) {
+                            pi.setInt(6, up[a].getAlarmMinutes());
+                        } else {
+                            pi.setNull(6, java.sql.Types.INTEGER);
+                        }
+                        if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
+                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), new Date(cdao.getStartDate().getTime()-(up[a].getAlarmMinutes() * 60000)), CalendarOperation.INSERT);
+                        }
+                        pi.setInt(7, cdao.getContextID());
+                        CalendarCommonCollection.checkUserParticipantObject(up[a], cdao.getFolderType());
+                        pi.addBatch();
+                    }
+                }
+                pi.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pi);
+            }
+        } else {
+            throw new OXMandatoryFieldException(Component.APPOINTMENT, 1000011, "UserParticipant is empty!");
+        }
+    }
+    
+    public final Participants getParticipants(CalendarDataObject cdao, Connection readcon) throws SQLException {
+        Participants participants = new Participants();
+        Statement stmt = readcon.createStatement();
+        StringBuilder query = new StringBuilder(128);
+        query.append("SELECT id, type, dn, ma from prg_date_rights WHERE cid = ");
+        query.append(cdao.getContextID());
+        query.append(PARTICIPANTS_IDENTIFIER_IS);
+        query.append(cdao.getObjectID());
+        ResultSet rs = stmt.executeQuery(query.toString());
+        try {
+            while (rs.next()) {
+                Participant participant = null;
+                int id = rs.getInt(1);
+                int type = rs.getInt(2);
+                if (type == Participant.USER) {
+                    participant = new UserParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.GROUP) {
+                    participant = new GroupParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.RESOURCE) {
+                    participant = new ResourceParticipant();
+                    participant.setIdentifier(id);
+                    cdao.setContainsResources(true);
+                } else if (type == Participant.RESOURCEGROUP) {
+                    participant = new ResourceGroupParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.EXTERNAL_USER) {
+                    participant = new ExternalUserParticipant();
+                    String temp = rs.getString(3);
+                    if (!rs.wasNull()) {
+                        participant.setDisplayName(temp);
+                    }
+                    temp = rs.getString(4);
+                    if (!rs.wasNull()) {
+                        participant.setEmailAddress(rs.getString(4));
+                    }
+                } else if (type == Participant.EXTERNAL_GROUP) {
+                    participant = new ExternalGroupParticipant();
+                    String temp = rs.getString(3);
+                    if (!rs.wasNull()) {
+                        participant.setDisplayName(temp);
+                    }
+                    temp = rs.getString(4);
+                    if (!rs.wasNull()) {
+                        participant.setEmailAddress(rs.getString(4));
+                    }
+                } else {
+                    LOG.warn("Unknown type detected for Participant :"+type);
+                }
+                if (participant != null) {
+                    participants.add(participant);
+                }
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closeStatement(stmt);
+        }
+        return participants;
+    }
+    
+    public final Participants getUserParticipants(CalendarDataObject cdao, Connection readcon, int uid) throws SQLException, OXException {
+        Participants participants = new Participants();
+        Statement stmt = readcon.createStatement();
+        StringBuilder query = new StringBuilder(140);
+        query.append("SELECT member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
+        query.append(cdao.getContextID());
+        query.append(PARTICIPANTS_IDENTIFIER_IS);
+        query.append(cdao.getObjectID());
+        ResultSet rs = stmt.executeQuery(query.toString());;
+        String temp = null;
+        try {
+            while (rs.next()) {
+                UserParticipant up = new UserParticipant();
+                int tuid = rs.getInt(1);
+                up.setIdentifier(tuid);
+                up.setConfirm(rs.getInt(2));
+                temp = rs.getString(3);
+                if (!rs.wasNull()) {
+                    up.setConfirmMessage(temp);
+                }
+                int pfid = rs.getInt(4);
+                if (!rs.wasNull()) {
+                    if (pfid < 1) {
+                        LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipants oid:uid ",uid,CalendarOperation.COLON,cdao.getObjectID() }));
+                    }
+                    if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                        if  (uid == tuid) {
+                            cdao.setGlobalFolderID(pfid);
+                            cdao.setPrivateFolderID(pfid);
+                        }
+                        up.setPersonalFolderId(pfid);
+                    }  else if (cdao.getFolderType() == FolderObject.SHARED) {
+                        if (cdao.getSharedFolderOwner() != 0) {
+                            if (cdao.getSharedFolderOwner() == tuid) {
+                                cdao.setGlobalFolderID(pfid);
+                                cdao.setPrivateFolderID(pfid);
+                                up.setPersonalFolderId(pfid);
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                        }
+                    } else if (uid == tuid) {
+                        cdao.setGlobalFolderID(pfid);
+                        cdao.setPrivateFolderID(pfid);
+                    } else {
+                        cdao.setActionFolder(pfid);
+                    }
+                }
+                int alarm = rs.getInt(5);
+                if (!rs.wasNull()) {
+                    up.setAlarmMinutes(alarm);
+                    if (up.containsAlarm() && up.getAlarmMinutes() >= 0 && up.getIdentifier() == uid) {
+                        cdao.setAlarm(up.getAlarmMinutes());
+                    }
+                }
+                participants.add(up);
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closeStatement(stmt);
+        }
+        return participants;
+    }
+    
+    public final CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, SessionObject so, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException  {
+        CalendarOperation co = new CalendarOperation();
+        Connection readcon = null;
+        CalendarDataObject edao = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            readcon = DBPool.pickup(so.getContext());
+            int action_folder = inFolder;
+            if (cdao.containsParentFolderID()) {
+                action_folder = cdao.getParentFolderID();
+            }
+            prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
+            rs = getResultSet(prep);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, CalendarOperation.UPDATE, action_folder);
+        } catch(SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch(OXPermissionException oxpe ) {
+            throw oxpe;
+        } catch(OXObjectNotFoundException oxonfe) {
+            throw oxonfe;
+        } catch(OXException oxe) {
+            throw oxe;
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+            if (readcon != null) {
+                try {
+                    DBPool.push(so.getContext(), readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:updateAppointment (push)", dbpe);
+                }
+            }
+        }
+        return edao;
+    }
+    
+    
+    public final CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, SessionObject so, int inFolder, java.util.Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+        return updateAppointment(cdao, edao, writecon, so, inFolder, clientLastModified, true);
+    }
+    
+    final CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, SessionObject so, int inFolder, java.util.Date clientLastModified, boolean clientLastModifiedCheck) throws DataTruncation, SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+        
+        CalendarOperation co = new CalendarOperation();
+        
+        if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
+            throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.PRIVATE_MOVE_TO_PUBLIC));
+        }
+        
+        CalendarCommonCollection.detectFolderMoveAction(cdao, edao);
+        
+        if (clientLastModified == null) {
+            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+        } else if (edao.getLastModified() == null) {
+            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+        }
+        
+        if (clientLastModifiedCheck && edao.getLastModified().getTime() > clientLastModified.getTime()) {
+            throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+        }
+        
+        int rec_action = co.checkUpdateRecurring(cdao, edao);
+        CalendarDataObject clone = null;
+        
+        if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE) {
+            ArrayList<Integer> exceptions = getExceptionList(null, so.getContext(), edao.getRecurrenceID());
+            if (exceptions != null && exceptions.size() > 0) {
+                Object oids[] = exceptions.toArray();
+                deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+                for (int a = 0; a < exceptions.size(); a++) {
+                    triggerDeleteEvent(exceptions.get(a), inFolder, so, null);
+                }
+            }
+        } else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE) {
+            ArrayList<Integer> exceptions = getExceptionList(null, so.getContext(), edao.getRecurrenceID());
+            if (exceptions != null && exceptions.size() > 0) {
+                Object oids[] = exceptions.toArray();
+                deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+                for (int a = 0; a < exceptions.size(); a++) {
+                    triggerDeleteEvent(exceptions.get(a), inFolder, so, null);
+                }
+            }
+            CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);
+        } else if (rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
+            // Because the GUI only sends changed fields, we have to create a merged object
+            // from cdao and edao and then we force an insert!
+            clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
+            try {
+                insertAppointment(clone, writecon, so);
+                CalendarCommonCollection.removeFieldsFromObject(cdao);
+                cdao.setRecurrence(edao.getRecurrence());
+                cdao.setLastModified(clone.getLastModified());
+            } catch( SQLException sqle) {
+                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR);
+            } catch(LdapException ldape) {
+                throw new OXException(ldape);
+            } catch(OXException oxe) {
+                throw oxe;
+            } catch(Exception ex) {
+                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, 2);
+            }
+        }
+        
+        int ucols[] = new int[26];
+        int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
+        
+        if (uc > 0 || CalendarCommonCollection.check(cdao.getUsers(), edao.getUsers())) {
+            
+            ucols[uc++] = AppointmentObject.LAST_MODIFIED;
+            ucols[uc++] = AppointmentObject.MODIFIED_BY;
+            
+            StringBuilder update = new StringBuilder();
+            update.append("UPDATE prg_dates pd ");
+            for (int a  = 0; a < uc; a++) {
+                if (a != 0) {
+                    update.append(", ");
+                    update.append(CalendarCommonCollection.getFieldName(ucols[a]));
+                    update.append(" = ?");
+                } else {
+                    update.append("SET ");
+                    update.append(CalendarCommonCollection.getFieldName(ucols[a]));
+                    update.append(" = ?");
+                }
+            }
+            
+            update.append(" WHERE cid = ");
+            update.append(cdao.getContextID());
+            update.append(DATES_IDENTIFIER_IS);
+            update.append(cdao.getObjectID());
+            update.append(" AND changing_date <= ");
+            if (clientLastModifiedCheck) {
+                update.append(clientLastModified.getTime());
+            } else {
+                update.append(System.currentTimeMillis());
+            }
+            
+            PreparedStatement pst = null;
+            
+            try {
+                
+                pst = writecon.prepareStatement(update.toString());
+                
+                for (int a = 0; a < uc; a++) {
+                    switch (ucols[a]) {
+                        case AppointmentObject.TITLE:
+                            pst.setString(a+1, cdao.getTitle());
+                            break;
+                        case AppointmentObject.START_DATE:
+                            pst.setTimestamp(a+1, new java.sql.Timestamp(cdao.getStartDate().getTime()));
+                            break;
+                        case AppointmentObject.END_DATE:
+                            pst.setTimestamp(a+1, new java.sql.Timestamp(cdao.getEndDate().getTime()));
+                            break;
+                        case AppointmentObject.SHOWN_AS:
+                            pst.setInt(a+1, cdao.getShownAs());
+                            break;
+                        case AppointmentObject.LOCATION:
+                            if (cdao.getLocation() != null) {
+                                pst.setString(a+1, cdao.getLocation());
+                            } else {
+                                pst.setNull(a+1, java.sql.Types.VARCHAR);
+                            }
+                            break;
+                        case AppointmentObject.NOTE:
+                            if (cdao.getNote() != null) {
+                                pst.setString(a+1, cdao.getNote());
+                            } else {
+                                pst.setNull(a+1, java.sql.Types.VARCHAR);
+                            }
+                            break;
+                        case AppointmentObject.CATEGORIES:
+                            if (cdao.getCategories() != null) {
+                                pst.setString(a+1, cdao.getCategories());
+                            } else {
+                                pst.setNull(a+1, java.sql.Types.VARCHAR);
+                            }
+                            break;
+                        case AppointmentObject.FULL_TIME:
+                            pst.setInt(a+1, cdao.getFulltime());
+                            break;
+                        case AppointmentObject.COLOR_LABEL:
+                            pst.setInt(a+1, cdao.getLabel());
+                            break;
+                        case AppointmentObject.MODIFIED_BY:
+                            pst.setInt(a+1, cdao.getModifiedBy());
+                            break;
+                        case AppointmentObject.LAST_MODIFIED:
+                            if (!cdao.containsLastModified()) {
+                                Timestamp t = new Timestamp(System.currentTimeMillis());
+                                pst.setLong(a+1, t.getTime());
+                                cdao.setLastModified(t);
+                            } else {
+                                pst.setLong(a+1, cdao.getLastModified().getTime());
+                            }
+                            break;
+                        case AppointmentObject.PRIVATE_FLAG:
+                            pst.setInt(a+1, cdao.getPrivateflag());
+                            break;
+                        case AppointmentObject.FOLDER_ID:
+                            if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
+                                pst.setInt(a+1, 0);
+                            } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                                pst.setInt(a+1, cdao.getGlobalFolderID());
+                            } else {
+                                throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
+                            }
+                            break;
+                        case AppointmentObject.RECURRENCE_TYPE:
+                            pst.setString(a+1, cdao.getRecurrence());
+                            break;
+                        case AppointmentObject.RECURRENCE_ID:
+                            pst.setInt(a+1, cdao.getRecurrenceID());
+                            break;
+                        case AppointmentObject.DELETE_EXCEPTIONS:
+                            pst.setString(a+1, cdao.getDelExceptions());
+                            break;
+                        case AppointmentObject.CHANGE_EXCEPTIONS:
+                            pst.setString(a+1, cdao.getExceptions());
+                            break;
+                        case AppointmentObject.RECURRENCE_CALCULATOR:
+                            pst.setInt(a+1, cdao.getRecurrenceCalculator());
+                            break;
+                        case AppointmentObject.RECURRENCE_POSITION:
+                            pst.setInt(a+1, cdao.getRecurrencePosition());
+                            break;
+                        case AppointmentObject.NUMBER_OF_ATTACHMENTS:
+                            pst.setInt(a+1, cdao.getNumberOfAttachments());
+                            break;
+                        case CalendarDataObject.TIMEZONE:
+                            pst.setString(a+1, cdao.getTimezone());
+                            break;
+                        default:
+                            throw new SQLException("Error: Calendar: Update: Mapping for " + ucols[a] + " not implemented!");
+                    }
+                }
+                updateParticipants(cdao, edao, so.getUserObject().getId(), so.getContext().getContextId(), writecon);
+                int ret = pst.executeUpdate();
+                if (ret == 0) {
+                    throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+                }
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pst);
+            }
+            
+        }
+        cdao.setParentFolderID(cdao.getActionFolder());
+        CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, cdao);
+        if (clone != null) {
+            cdao.setObjectID(clone.getObjectID());
+            cdao.setLastModified(clone.getLastModified());
+        }
+        return null;
+    }
+    
+    private final void updateParticipants(CalendarDataObject cdao, CalendarDataObject edao, int uid, int cid, Connection writecon) throws SQLException, OXException, LdapException {
+        Participant participants[] = cdao.getParticipants();
+        UserParticipant users[] = cdao.getUsers();
+        
+        if (users == null && cdao.getFolderMoveAction() != CalendarOperation.NO_MOVE_ACTION) {
+            users = edao.getUsers();
+            CalendarOperation.fillUserParticipants(cdao);
+        }
+        
+        Participant old_participants[] = edao.getParticipants();
+        UserParticipant old_users[] = edao.getUsers();
+        
+        int check_up = old_users.length;
+        
+        Participant new_participants[] = null;
+        Participant deleted_participants[] = null;
+        
+        UserParticipant new_userparticipants[] = null;
+        UserParticipant modified_userparticipants[] = null;
+        UserParticipant deleted_userparticipants[] = null;
+        
+        Participants deleted = new Participants();
+        Participants new_deleted = new Participants();
+        
+        if (participants != null && !Arrays.equals(participants, old_participants)) {
+            Arrays.sort(participants);
+            Arrays.sort(old_participants);
+            new_participants = CalendarOperation.getNewParticipants(participants, old_participants);
+            deleted_participants = CalendarOperation.getDeletedParticipants(old_participants, participants);
+        }
+        
+        if (users != null) {
+            Arrays.sort(users);
+            Arrays.sort(old_users);
+            boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
+            Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getFolderMoveAction(), time_change);
+            if (p[0] != null) {
+                new_userparticipants = p[0].getUsers();
+                if (new_userparticipants != null) {
+                    check_up += new_userparticipants.length;
+                }
+            }
+            if (p[1] != null) {
+                modified_userparticipants = p[1].getUsers();
+            }
+            deleted_userparticipants = CalendarOperation.getDeletedUserParticipants(old_users, users, uid);
+            if (deleted_userparticipants != null) {
+                check_up -= deleted_userparticipants.length;
+            }
+        }
+        
+        modified_userparticipants = CalendarCommonCollection.checkAndModifyAlarm(cdao, modified_userparticipants, uid);
+        
+        
+        if (check_up < 1) {
+            throw new OXCalendarException(OXCalendarException.Code.UPDATE_WITHOUT_PARTICIPANTS);
+        }
+        
+        if (new_participants != null && new_participants.length > 0) {
+            PreparedStatement dr = null;
+            try {
+                dr = writecon.prepareStatement("insert into prg_date_rights (object_id, cid, id, type, dn, ma) values (?, ?, ?, ?, ?, ?)");
+                Arrays.sort(new_participants);
+                int lastid = -1;
+                int lasttype = -1;
+                for (int a = 0; a < new_participants.length; a++) {
+                    if (!(lastid == new_participants[a].getIdentifier() && lasttype == new_participants[a].getType())) {
+                        lastid = new_participants[a].getIdentifier();
+                        lasttype = new_participants[a].getType();
+                        dr.setInt(1, cdao.getObjectID());
+                        dr.setInt(2, cid);
+                        dr.setInt(3, new_participants[a].getIdentifier());
+                        dr.setInt(4, new_participants[a].getType());
+                        if (new_participants[a].getDisplayName() == null) {
+                            dr.setNull(5, java.sql.Types.VARCHAR);
+                        } else {
+                            dr.setString(5, new_participants[a].getDisplayName());
+                        }
+                        if (new_participants[a].getEmailAddress() == null) {
+                            if (new_participants[a].getIdentifier() == 0) {
+                                throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
+                            } else {
+                                dr.setNull(6, java.sql.Types.VARCHAR);
+                            }
+                        } else {
+                            dr.setString(6, new_participants[a].getEmailAddress());
+                        }
+                        dr.addBatch();
+                    }
+                }
+                dr.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(dr);
+            }
+        }
+        
+        if (deleted_participants != null && deleted_participants.length > 0) {
+            PreparedStatement pd = null;
+            PreparedStatement pde = null;
+            try {
+                pd = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
+                for (int a = 0; a < deleted_participants.length; a++) {
+                    if (deleted_participants[a].getType() != Participant.EXTERNAL_USER || deleted_participants[a].getType() != Participant.EXTERNAL_GROUP) {
+                        pd.setInt(1, cdao.getObjectID());
+                        pd.setInt(2, cid);
+                        pd.setInt(3, deleted_participants[a].getIdentifier());
+                        pd.setInt(4, deleted_participants[a].getType());
+                        pd.addBatch();
+                    } else {
+                        if (pde == null) {
+                            pde = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND type = ? AND dn LIKE ?");
+                        }
+                        pde.setInt(1, cdao.getObjectID());
+                        pde.setInt(2, cid);
+                        pde.setInt(3, deleted_participants[a].getType());
+                        pde.setString(4, deleted_participants[a].getDisplayName());
+                        pde.addBatch();
+                    }
+                }
+                pd.executeBatch();
+                if (pde != null) {
+                    pde.executeBatch();
+                    CalendarCommonCollection.closePreparedStatement(pde);
+                }
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pd);
+            }
+        }
+        
+        if (new_userparticipants != null && new_userparticipants.length > 0) {
+            PreparedStatement pi = null;
+            try {
+                pi = writecon.prepareStatement("insert into prg_dates_members (object_id, member_uid, confirm, reason, pfid, reminder, cid) values (?, ?, ?, ?, ?, ?, ?)");
+                Arrays.sort(new_userparticipants);
+                int lastid = -1;
+                for (int a = 0; a < new_userparticipants.length; a++) {
+                    if (lastid != new_userparticipants[a].getIdentifier()) {
+                        lastid = new_userparticipants[a].getIdentifier();
+                        pi.setInt(1, cdao.getObjectID());
+                        pi.setInt(2, new_userparticipants[a].getIdentifier());
+                        if (uid == new_userparticipants[a].getIdentifier()) {
+                            if (new_userparticipants[a].getConfirm() == 0) {
+                                pi.setInt(3, 1); // AUTO CONFIRM CREATOR
+                            } else {
+                                pi.setInt(3, new_userparticipants[a].getConfirm());
+                            }
+                        } else {
+                            pi.setInt(3, new_userparticipants[a].getConfirm());
+                        }
+                        if (new_userparticipants[a].getConfirmMessage() != null) {
+                            pi.setString(4, new_userparticipants[a].getConfirmMessage());
+                        } else {
+                            pi.setNull(4, java.sql.Types.VARCHAR);
+                        }
+                        
+                        if (edao.getFolderType() == FolderObject.PRIVATE) {
+                            if (new_userparticipants[a].getIdentifier() == uid) {
+                                if (cdao.getGlobalFolderID() != 0) {
+                                    pi.setInt(5, cdao.getGlobalFolderID());
+                                    new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                } else {
+                                    try {
+                                        int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                        pi.setInt(5, pfid);
+                                        new_userparticipants[a].setPersonalFolderId(pfid);
+                                    } catch (Exception fe) {
+                                        throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 3);
+                                    }
+                                }
+                            } else {
+                                try {
+                                    int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                    pi.setInt(5, pfid);
+                                    new_userparticipants[a].setPersonalFolderId(pfid);
+                                } catch(Exception fe) {
+                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 4);
+                                }
+                            }
+                        } else if (edao.getFolderType() == FolderObject.PUBLIC) {
+                            pi.setNull(5, java.sql.Types.INTEGER);
+                        } else if (edao.getFolderType() == FolderObject.SHARED) {
+                            if (edao.getSharedFolderOwner() != 0) {
+                                if (edao.getSharedFolderOwner() == new_userparticipants[a].getIdentifier()) {
+                                    if (cdao.getGlobalFolderID() != 0) {
+                                        pi.setInt(5, cdao.getGlobalFolderID());
+                                        new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                    } else {
+                                        try {
+                                            int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(), cdao.getContext()));
+                                            pi.setInt(5, pfid);
+                                            new_userparticipants[a].setPersonalFolderId(pfid);
+                                        } catch (Exception fe) {
+                                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 5);
+                                        }
+                                    }
+                                } else {
+                                    if (cdao.getGlobalFolderID() != 0) {
+                                        pi.setInt(5, cdao.getGlobalFolderID());
+                                        new_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                    } else {
+                                        try {
+                                            int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                            pi.setInt(5, pfid);
+                                            new_userparticipants[a].setPersonalFolderId(pfid);
+                                        } catch (Exception fe) {
+                                            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 3);
+                                        }
+                                    }
+                                }
+                            } else {
+                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                        }
+                        
+                        pi.setInt(6, new_userparticipants[a].getAlarmMinutes());
+                        pi.setInt(7, cid);
+                        CalendarCommonCollection.checkUserParticipantObject(new_userparticipants[a], cdao.getFolderType());
+                        pi.addBatch();
+                        if (checkForDeletedParticipants(new_userparticipants[a].getIdentifier(), cdao.getContextID(), cdao.getObjectID(), cdao.getContext())) {
+                            deleted.add(new_userparticipants[a]);
+                        }
+                    }
+                }
+                pi.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pi);
+            }
+        }
+        
+        if (modified_userparticipants != null && modified_userparticipants.length > 0) {
+            PreparedStatement pu = null;
+            try {
+                pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ?, pfid = ?, reminder = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
+                for (int a = 0; a < modified_userparticipants.length; a++) {
+                    pu.setInt(1, modified_userparticipants[a].getConfirm());
+                    if (modified_userparticipants[a].getConfirmMessage() != null) {
+                        pu.setString(2, modified_userparticipants[a].getConfirmMessage());
+                    } else {
+                        pu.setNull(2, java.sql.Types.VARCHAR);
+                    }
+                    if (modified_userparticipants[a].getIdentifier() == uid) {
+                        if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                            if (cdao.getGlobalFolderID() != 0) {
+                                pu.setInt(3, cdao.getGlobalFolderID());
+                                modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                            } else {
+                                try {
+                                    int pfid = 0;
+                                    if (modified_userparticipants[a].getPersonalFolderId() > 0) {
+                                        pfid = modified_userparticipants[a].getPersonalFolderId();
+                                    } else {
+                                        pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(modified_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                        modified_userparticipants[a].setPersonalFolderId(pfid);
+                                    }
+                                    pu.setInt(3, pfid);
+                                } catch (Exception fe) {
+                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 6);
+                                }
+                            }
+                        } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                            pu.setNull(3, java.sql.Types.INTEGER);
+                        } else if (cdao.getFolderType() == FolderObject.SHARED) {
+                            //throw new OXCalendarException(OXCalendarException.Code.UPDATE_USER_SHARED_MISMATCH);
+                            if (cdao.getGlobalFolderID() != 0) {
+                                pu.setInt(3, cdao.getGlobalFolderID());
+                                modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                            } else {
+                                try {
+                                    int pfid = 0;
+                                    if (modified_userparticipants[a].getPersonalFolderId() > 0) {
+                                        pfid = modified_userparticipants[a].getPersonalFolderId();
+                                    } else {
+                                        pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(modified_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                        modified_userparticipants[a].setPersonalFolderId(pfid);
+                                    }
+                                    pu.setInt(3, pfid);
+                                } catch (Exception fe) {
+                                    throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 6);
+                                }
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                        }
+                    } else {
+                        if (edao.getFolderType() == FolderObject.PRIVATE) {
+                            pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
+                        } else if (edao.getFolderType() == FolderObject.PUBLIC) {
+                            pu.setInt(3, 0);
+                        } else if (edao.getFolderType() == FolderObject.SHARED) {
+                            if (edao.getSharedFolderOwner() != 0) {
+                                if (edao.getSharedFolderOwner() == modified_userparticipants[a].getIdentifier()) {
+                                    if (cdao.getGlobalFolderID() != 0) {
+                                        pu.setInt(3, cdao.getGlobalFolderID());
+                                        modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                    } else {
+                                        if (cdao.getActionFolder() == 0) {
+                                            try {
+                                                int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(edao.getSharedFolderOwner(), cdao.getContext()));
+                                                pu.setInt(3, pfid);
+                                                modified_userparticipants[a].setPersonalFolderId(pfid);
+                                            } catch (Exception fe) {
+                                                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 7);
+                                            }
+                                        } else {
+                                            pu.setInt(3, cdao.getActionFolder());
+                                            modified_userparticipants[a].setPersonalFolderId(cdao.getActionFolder());
+                                        }
+                                    }
+                                }
+                            } else {
+                                throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
+                        }
+                    }
+                    if (modified_userparticipants[a].getAlarmMinutes() >= 0) {
+                        pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
+                    } else {
+                        pu.setNull(4, java.sql.Types.INTEGER);
+                    }
+                    if (modified_userparticipants[a].isModified() && modified_userparticipants[a].getIdentifier() == uid && modified_userparticipants[a].getAlarmMinutes() >= 0) {
+                        java.util.Date calc_date = null;
+                        if (cdao.containsStartDate()) {
+                            calc_date = cdao.getStartDate();
+                        } else {
+                            calc_date = edao.getStartDate();
+                        }
+                        changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), new Date(calc_date.getTime()-(modified_userparticipants[a].getAlarmMinutes() * 60000 )), CalendarOperation.UPDATE);
+                    } else {
+                        changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), null, CalendarOperation.DELETE);
+                    }
+                    pu.setInt(5, cdao.getObjectID());
+                    pu.setInt(6, cid);
+                    pu.setInt(7, modified_userparticipants[a].getIdentifier());
+                    CalendarCommonCollection.checkUserParticipantObject(modified_userparticipants[a], cdao.getFolderType());
+                    pu.addBatch();
+                }
+                pu.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pu);
+            }
+        }
+        
+        if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
+            PreparedStatement pd = null;
+            try {
+                pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+                for (int a = 0; a < deleted_userparticipants.length; a++) {
+                    pd.setInt(1, cdao.getObjectID());
+                    pd.setInt(2, cid);
+                    pd.setInt(3, deleted_userparticipants[a].getIdentifier());
+                    pd.addBatch();
+                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), new Date(cdao.getStartDate().getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
+                    new_deleted.add(deleted_userparticipants[a]);
+                }
+                pd.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pd);
+            }
+        }
+        
+        boolean del_master_update = false;
+        UserParticipant newdel_up[] = new_deleted.getUsers();
+        
+        if (newdel_up != null && newdel_up.length > 0) {
+            if (!checkForDeletedMasterObject(cdao.getObjectID(), cid, cdao.getContext())) {
+                PreparedStatement pidm = null;
+                try {
+                    pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    pidm.setInt(2, uid);
+                    pidm.setLong(3, System.currentTimeMillis());
+                    pidm.setInt(4, uid);
+                    pidm.setInt(5, cdao.getGlobalFolderID());
+                    pidm.setInt(6, cdao.getObjectID());
+                    pidm.setInt(7, cid);
+                    pidm.setInt(8, cdao.getPrivateflag());
+                    pidm.addBatch();
+                    pidm.executeBatch();
+                } finally {
+                    CalendarCommonCollection.closePreparedStatement(pidm);
+                }
+            }
+            PreparedStatement pid = null;
+            try {
+                pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
+                for (int a = 0; a < newdel_up.length; a++) {
+                    pid.setInt(1, cdao.getObjectID());
+                    pid.setInt(2, newdel_up[a].getIdentifier());
+                    if (cdao.getGlobalFolderID() != 0) {
+                        pid.setNull(3, java.sql.Types.INTEGER);
+                    } else {
+                        pid.setInt(3, newdel_up[a].getPersonalFolderId());
+                    }
+                    pid.setInt(4, cid);
+                    if (newdel_up[a].containsConfirm()) {
+                        pid.setInt(5,newdel_up[a].getConfirm());
+                    } else {
+                        pid.setNull(5, java.sql.Types.INTEGER);
+                    }
+                    pid.addBatch();
+                }
+                pid.executeBatch();
+                del_master_update = true;
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pid);
+            }
+        }
+        
+        UserParticipant del_up[] = deleted.getUsers();
+        
+        if (del_up != null && del_up.length > 0) {
+            PreparedStatement pdd = null;
+            try {
+                pdd = writecon.prepareStatement("delete from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+                for (int a = 0; a < del_up.length; a++) {
+                    pdd.setInt(1, cdao.getObjectID());
+                    pdd.setInt(2, cid);
+                    pdd.setInt(3, del_up[a].getIdentifier());
+                    pdd.addBatch();
+                }
+                pdd.executeBatch();
+                del_master_update = true;
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(pdd);
+            }
+            
+            if (new_deleted.getUsers() != null && new_deleted.getUsers().length > 0 && checkIfMasterIsOrphaned(cdao.getObjectID(), cid, cdao.getContext())) {
+                PreparedStatement ddd = null;
+                try {
+                    ddd = writecon.prepareStatement("delete from del_dates WHERE intfield01 = ? AND cid = ?");
+                    ddd.setInt(1, cdao.getObjectID());
+                    ddd.setInt(2, cid);
+                    ddd.addBatch();
+                    ddd.executeBatch();
+                    del_master_update = false;
+                } finally {
+                    CalendarCommonCollection.closePreparedStatement(ddd);
+                }
+            }
+        }
+        
+        if (del_master_update) {
+            PreparedStatement ddu = null;
+            try {
+                ddu = writecon.prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+                ddu.setLong(1, System.currentTimeMillis());
+                ddu.setInt(2, uid);
+                ddu.setInt(3, cdao.getObjectID());
+                ddu.setInt(4, cid);
+                ddu.addBatch();
+                ddu.executeBatch();
+            } finally {
+                CalendarCommonCollection.closePreparedStatement(ddu);
+            }
+        }
+        
+        CalendarCommonCollection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, edao.getParticipants(), new_participants, deleted_participants);
+        
+    }
+    
+    public final void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, SessionObject so) throws OXException {
+        Connection writecon = null;
+        int changes[];
+        PreparedStatement pu = null;
+        PreparedStatement mo = null;
+        try  {
+            int fid = CalendarCommonCollection.resolveFolderIDForUser(oid, uid, so.getContext());
+            writecon = DBPool.pickupWriteable(so.getContext());
+            writecon.setAutoCommit(false);
+            pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
+            pu.setInt(1, confirm);
+            if (confirm_message != null) {
+                pu.setString(2, confirm_message);
+            } else {
+                pu.setNull(2, java.sql.Types.VARCHAR);
+            }
+            pu.setInt(3, oid);
+            pu.setInt(4, so.getContext().getContextId());
+            pu.setInt(5, uid);
+            pu.addBatch();
+            changes = pu.executeBatch();
+            if (changes[0] == 1) {
+                mo = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+                mo.setLong(1, System.currentTimeMillis());
+                mo.setInt(2, uid);
+                mo.setInt(3, oid);
+                mo.setInt(4, so.getContext().getContextId());
+                mo.addBatch();
+                mo.executeBatch();
+                AppointmentObject ao = new AppointmentObject();
+                ao.setObjectID(oid);
+                if (fid != -1) {
+                    ao.setParentFolderID(fid);
+                    CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
+                } else {
+                    LOG.warn(StringCollection.convertArraytoString(new Object[] { "Unable to resolve folder id for user:oid:context",uid,oid,so.getContext().getContextId()}));
+                }
+            } else if (changes[0] == 0) {
+                LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: setUserConfirmation: prg_dates_members object_id = ",oid , " cid = ",so.getContext().getContextId() , " uid = ",uid }));
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to set User Confirmation");
+            } else {
+                LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ",changes[0],". Check prg_dates_members object_id = ",oid , " cid = ",so.getContext().getContextId() , " uid = ",uid }));
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch(SQLException sqle) {
+            try {
+                writecon.rollback();
+            } catch (SQLException rb) {
+                LOG.error("setUserConfirmation (writecon) error while rollback ", rb);
+            }
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pu);
+            CalendarCommonCollection.closePreparedStatement(mo);
+            if (writecon != null) {
+                try {
+                    writecon.setAutoCommit(true);
+                } catch (SQLException sqle) {
+                    LOG.error("setUserConfirmation (writecon) error while setAutoCommit(true) ", sqle);
+                }
+                DBPool.closeWriterSilent(so.getContext(), writecon);
+            }
+        }
+    }
+    
+    public final long attachmentAction(int oid, int uid, Context c, boolean action) throws OXException {
+        Connection readcon = null, writecon = null;
+        int changes[];
+        PreparedStatement pst = null;
+        int number_of_attachments = 0;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        long last_modified = 0L;
+        try  {
+            readcon = DBPool.pickupWriteable(c);
+            StringBuilder sb = new StringBuilder(96);
+            sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01 = ");
+            sb.append(oid);
+            sb.append(" AND cid = ");
+            sb.append(c.getContextId());
+            prep = getPreparedStatement(readcon, sb.toString());
+            rs = getResultSet(prep);
+            if (rs.next()) {
+                number_of_attachments = rs.getInt(1);
+            } else {
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to handle attachment action");
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch(SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+            if (readcon != null) {
+                DBPool.closeReaderSilent(c, readcon);
+            }
+        }
+        
+        if (action) {
+            number_of_attachments++;
+        } else {
+            number_of_attachments--;
+            if (number_of_attachments < 0) {
+                LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: attachmentAction:",action," oid:cid:uid ",oid , CalendarOperation.COLON,c.getContextId() , CalendarOperation.COLON,uid }));
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to processed attachment action. Got no attachments");
+            }
+        }
+        
+        try  {
+            writecon = DBPool.pickupWriteable(c);
+            writecon.setAutoCommit(false);
+            pst = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ?, intfield08 = ? WHERE intfield01 = ? AND cid = ?");
+            last_modified = System.currentTimeMillis();
+            pst.setLong(1, last_modified);
+            pst.setInt(2, uid);
+            pst.setInt(3, number_of_attachments);
+            pst.setInt(4, oid);
+            pst.setInt(5, c.getContextId());
+            pst.addBatch();
+            changes = pst.executeBatch();
+            if (changes[0] == 0) {
+                LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ",oid , CalendarOperation.COLON,c.getContextId() , CalendarOperation.COLON,uid } ));
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to processed attachment action (update).");
+            } else {
+                LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ",changes[0],". Check prg_dates oid:cid:uid ",oid , CalendarOperation.COLON,c.getContextId() , CalendarOperation.COLON,uid } ));
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch(SQLException sqle) {
+            try {
+                writecon.rollback();
+            } catch (SQLException rb) {
+                LOG.error("attachmentAction (writecon) error while rollback ", rb);
+            }
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(pst);
+            if (writecon != null) {
+                try {
+                    writecon.setAutoCommit(true);
+                } catch (SQLException sqle) {
+                    LOG.error("attachmentAction (writecon) error while setAutoCommit(true) ", sqle);
+                }
+                DBPool.closeWriterSilent(c, writecon);
+            }
+        }
+        return last_modified;
+    }
+    
+    private final boolean checkIfMasterIsOrphaned(int oid, int cid, Context context) throws OXException, SQLException {
+        Connection readcon = null;
+        boolean ret = false;
+        try {
+            readcon  = DBPool.pickup(context);
+            PreparedStatement pst = readcon.prepareStatement("SELECT object_id from del_dates_members WHERE object_id = ? AND cid = ?");
+            pst.setInt(1, oid);
+            pst.setInt(2, cid);
+            ResultSet rs = getResultSet(pst);
+            try {
+                ret = rs.next();
+            } finally {
+                CalendarCommonCollection.closeResultSet(rs);
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (readcon != null) {
+                try {
+                    DBPool.push(context, readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:checkIfMasterIsOrphaned (push)", dbpe);
+                }
+            }
+        }
+        return ret;
+    }
+    
+    private final boolean checkForDeletedMasterObject(int oid, int cid, Context context) throws OXException, SQLException {
+        Connection readcon = null;
+        boolean ret = false;
+        try {
+            readcon  = DBPool.pickup(context);
+            PreparedStatement pst = readcon.prepareStatement("SELECT intfield01 from del_dates WHERE intfield01 = ? AND cid = ?");
+            pst.setInt(1, oid);
+            pst.setInt(2, cid);
+            ResultSet rs = getResultSet(pst);
+            
+            try {
+                ret = rs.next();
+            } finally {
+                CalendarCommonCollection.closeResultSet(rs);
+                CalendarCommonCollection.closePreparedStatement(pst);
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (readcon != null) {
+                try {
+                    DBPool.push(context, readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:checkForDeletedMasterObject (push)", dbpe);
+                }
+            }
+        }
+        return ret;
+    }
+    
+    private final boolean checkForDeletedParticipants(int uid, int cid, int oid, Context context) throws OXException, SQLException {
+        Connection readcon = null;
+        boolean ret = false;
+        try {
+            readcon  = DBPool.pickup(context);
+            PreparedStatement pst = readcon.prepareStatement("SELECT object_id from del_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ?");
+            pst.setInt(1, oid);
+            pst.setInt(2, cid);
+            pst.setInt(3, uid);
+            ResultSet rs = getResultSet(pst);
+            try {
+                ret = rs.next();
+            } finally {
+                CalendarCommonCollection.closeResultSet(rs);
+                CalendarCommonCollection.closePreparedStatement(pst);
+            }
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            if (readcon != null) {
+                try {
+                    DBPool.push(context, readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:checkForDeletedParticipants (push)", dbpe);
+                }
+            }
+        }
+        return ret;
+    }
+    
+    private final boolean checkIfUserIstheOnlyParticipant(int cid, int oid, Connection readcon) throws SQLException {
+        PreparedStatement pst = readcon.prepareStatement("SELECT object_id from prg_dates_members WHERE object_id = ? AND cid = ?");
+        pst.setInt(1, oid);
+        pst.setInt(2, cid);
+        ResultSet rs = getResultSet(pst);
+        int mc = 0;
+        try {
+            while (rs.next()) {
+                mc++;
+                if (mc > 1) {
+                    break;
+                }
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(pst);
+        }
+        if (mc == 1) {
+            return true;
+        }
+        return false;
+    }
+    
+    private final void deleteOnlyOneParticipantInPrivateFolder(int oid, int cid, int uid, int fid, Context c, Connection writecon, SessionObject so) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+        PreparedStatement pd = writecon.prepareStatement("delete from prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid LIKE ?");
+        pd.setInt(1, oid);
+        pd.setInt(2, cid);
+        pd.setInt(3, uid);
+        pd.addBatch();
+        changeReminder(oid, uid, -1, c, false, null, CalendarOperation.DELETE);
+        pd.executeBatch();
+        boolean master_del_update = true;
+        PreparedStatement pdr = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
+        pdr.setInt(1, oid);
+        pdr.setInt(2, cid);
+        pdr.setInt(3, uid);
+        pdr.setInt(4, Participant.USER);
+        pdr.addBatch();
+        pdr.executeBatch();
+        if (!checkForDeletedMasterObject(oid, cid, c)) {
+            PreparedStatement pidm = writecon.prepareStatement(
+                    "insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            pidm.setInt(2, uid);
+            pidm.setLong(3, System.currentTimeMillis());
+            pidm.setInt(4, 0);
+            pidm.setInt(5, fid);
+            pidm.setInt(6, oid);
+            pidm.setInt(7, cid);
+            pidm.setInt(8, 0);
+            pidm.addBatch();
+            pidm.executeBatch();
+            master_del_update = false;
+            CalendarCommonCollection.closePreparedStatement(pidm);
+        }
+        CalendarCommonCollection.closePreparedStatement(pd);
+        CalendarCommonCollection.closePreparedStatement(pdr);
+        
+        PreparedStatement pid = writecon.prepareStatement("insert into del_dates_members (object_id, member_uid, pfid, cid, confirm) values (?, ?, ?, ?, ?)");
+        pid.setInt(1, oid);
+        pid.setInt(2, uid);
+        pid.setInt(3, fid);
+        pid.setInt(4, cid);
+        pid.setInt(5, 0);
+        pid.addBatch();
+        pid.executeBatch();
+        CalendarCommonCollection.closePreparedStatement(pid);
+        
+        PreparedStatement ma = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+        ma.setLong(1, System.currentTimeMillis());
+        ma.setInt(2, uid);
+        ma.setInt(3, oid);
+        ma.setInt(4, cid);
+        ma.addBatch();
+        ma.executeBatch();
+        CalendarCommonCollection.closePreparedStatement(ma);
+        
+        if (master_del_update) {
+            PreparedStatement ddu = writecon.prepareStatement("update del_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?");
+            ddu.setLong(1, System.currentTimeMillis());
+            ddu.setInt(2, uid);
+            ddu.setInt(3, oid);
+            ddu.setInt(4, cid);
+            ddu.addBatch();
+            ddu.executeBatch();
+            CalendarCommonCollection.closePreparedStatement(ddu);
+        }
+        AppointmentObject ao = new AppointmentObject();
+        ao.setObjectID(oid);
+        ao.setParentFolderID(fid);
+        CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
+    }
+    
+    
+    
+    private final void changeReminder(int oid, int uid, int fid, Context c, boolean sequence, Date d, int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+        ReminderSQLInterface rsql = new ReminderHandler(c);
+        if (action != CalendarOperation.DELETE) {
+            if (!CalendarCommonCollection.isInThePast(d)) {
+                ReminderObject ro = new ReminderObject();
+                ro.setUser(uid);
+                ro.setTargetId(oid);
+                ro.setModule(Types.APPOINTMENT);
+                ro.setRecurrenceAppointment(sequence);
+                ro.setDate(d);
+                ro.setFolder(""+fid);
+                if (!rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
+                    rsql.insertReminder(ro);
+                } else {
+                    rsql.updateReminder(ro);
+                }
+            }
+        } else {
+            if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
+                rsql.deleteReminder(oid, Types.APPOINTMENT);
+            }
+        }
+    }
+    
+    
+    public final void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, SessionObject so, int inFolder, java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+        Connection readcon = null;
+        CalendarDataObject edao = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            readcon = DBPool.pickup(so.getContext());
+            CalendarOperation co = new CalendarOperation();
+            prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
+            rs = getResultSet(prep);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, CalendarOperation.DELETE, inFolder);
+        } catch(SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch(OXPermissionException oxpe ) {
+            throw oxpe;
+        } catch(OXException oxe) {
+            throw oxe;
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+            if (readcon != null) {
+                try {
+                    DBPool.push(so.getContext(), readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
+                }
+            }
+        }
+        if (clientLastModified == null) {
+            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+        } else if (edao != null && edao.getLastModified() == null) {
+            throw new OXCalendarException(OXCalendarException.Code.LAST_MODIFIED_IS_NULL);
+        }
+        
+        if (edao.getLastModified().getTime() > clientLastModified.getTime()) {
+            throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+        }
+        
+        deleteSingleAppointment(cdao.getContextID(), cdao.getObjectID(), uid, edao.getCreatedBy(), inFolder, null, writecon, edao.getFolderType(), so, CalendarRecurringCollection.getRecurringAppointmentDeleteAction(cdao, edao), cdao, edao, clientLastModified);
+        
+    }
+    
+    public void deleteAppointmentsInFolder(SessionObject so, ResultSet rs, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+        while (rs.next()) {
+            int oid = rs.getInt(1);
+            int owner = rs.getInt(2);
+            deleteSingleAppointment(so.getContext().getContextId(), oid, so.getUserObject().getId(), owner, fid, readcon, writecon, foldertype, so, CalendarRecurringCollection.RECURRING_NO_ACTION, null, null, null);
+        }
+    }
+    
+    private final void deleteSingleAppointment(int cid, int oid, int uid, int owner, int fid, Connection readcon, Connection writecon, int foldertype, SessionObject so, int recurring_action, CalendarDataObject cdao, CalendarDataObject edao, java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+        
+        if (foldertype == FolderObject.PRIVATE && uid != owner) {
+            boolean close_read = false;
+            try {
+                if (readcon == null) {
+                    readcon = DBPool.pickup(so.getContext());
+                    close_read = true;
+                }
+                if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon) && recurring_action != CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
+                    deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
+                    return;
+                } else {
+                    if (recurring_action == CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
+                        // Ceate an exception first, remove the user as participant and then return
+                        if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
+                            
+                            edao.setRecurrencePosition(cdao.getRecurrencePosition());
+                            edao.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
+                            CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(edao);
+                            
+                            java.util.Date deleted_exceptions[] = edao.getDeleteException();
+                            java.util.Date changed_exceptions[] = edao.getChangeException();
+                            java.util.Date calculated_exception = edao.getRecurrenceDatePosition();
+                            
+                            edao.removeDeleteExceptions();
+                            edao.removeChangeExceptions();
+                            CalendarCommonCollection.removeParticipant(edao, uid);
+                            edao.setModifiedBy(uid);
+                            edao.setRecurrenceID(edao.getObjectID());
+                            edao.removeObjectID();
+                            try {
+                                insertAppointment(edao, writecon, so);
+                            } catch (LdapException le) {
+                                throw new OXException(le);
+                            } catch(Exception e) {
+                                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 8);
+                            }
+                            CalendarDataObject update = new CalendarDataObject();
+                            update.setContext(so.getContext());
+                            update.setObjectID(edao.getRecurrenceID());
+                            update.setDeleteExceptions(CalendarCommonCollection.removeException(deleted_exceptions, calculated_exception));
+                            update.setChangeExceptions(new java.util.Date[] { calculated_exception });
+                            try {
+                                CalendarDataObject ldao = loadObjectForUpdate(update, so, fid);
+                                updateAppointment(update, ldao, writecon, so, fid, clientLastModified, false); // MAIN OBJECT
+                            } catch (LdapException le) {
+                                throw new OXException(le);
+                            } catch(Exception e) {
+                                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 9);
+                            }
+                        } else {
+                            createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, clientLastModified);
+                        }
+                    } else if (recurring_action == CalendarRecurringCollection.RECURRING_EXCEPTION_ACTION) {
+                        if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
+                            // remove participant (update)
+                            CalendarCommonCollection.removeParticipant(edao, uid);
+                            edao.setModifiedBy(uid);
+                            CalendarDataObject update = new CalendarDataObject();
+                            update.setContext(so.getContext());
+                            update.setObjectID(edao.getRecurrenceID());
+                            update.setChangeExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
+                            try {
+                                CalendarDataObject ldao = loadObjectForUpdate(update, so, fid);
+                                updateAppointment(edao, ldao, writecon, so, fid, clientLastModified, false); // EXCEPTION OBJECT
+                                updateAppointment(update, ldao, writecon, so, fid, clientLastModified, false); // MAIN OBJECT
+                            } catch (LdapException le) {
+                                throw new OXException(le);
+                            } catch(Exception e) {
+                                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 10);
+                            }
+                        } else {
+                            // remove this real existing exception and update main object
+                            removeSingleExistingException(edao, writecon, so);
+                            CalendarDataObject update = new CalendarDataObject();
+                            update.setContext(so.getContext());
+                            update.setObjectID(edao.getRecurrenceID());
+                            update.setChangeExceptions(CalendarCommonCollection.removeException(edao.getDeleteException(), edao.getRecurrenceDatePosition()));
+                            update.setDeleteExceptions(new java.util.Date[] { edao.getRecurrenceDatePosition() });
+                            try {
+                                CalendarDataObject ldao = loadObjectForUpdate(update, so, fid);
+                                updateAppointment(update, ldao, writecon, so, fid, clientLastModified, false); // MAIN OBJECT
+                            } catch (LdapException le) {
+                                throw new OXException(le);
+                            } catch(Exception e) {
+                                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 11);
+                            }
+                        }
+                    }
+                    return;
+                }
+            } catch(SQLException sqle) {
+                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            } catch(OXException oxe) {
+                throw oxe;
+            } catch(DBPoolingException dbpe) {
+                throw new OXException(dbpe);
+            } finally {
+                if (close_read && readcon != null) {
+                    try {
+                        DBPool.push(so.getContext(), readcon);
+                    } catch (DBPoolingException dbpe) {
+                        LOG.error("DBPoolingException:deleteSingleAppointment (push) ", dbpe);
+                    }
+                }
+            }
+        }
+        
+        if (recurring_action == CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
+            // this is an update with a new delete_exception
+            if (edao != null) {
+                createSingleVirtualDeleteException(cdao, edao, writecon, oid, uid, fid, so, clientLastModified);
+            } else {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, uid, oid, -1);
+            }
+            return;
+        }  else if (recurring_action == CalendarRecurringCollection.RECURRING_FULL_DELETE) {
+            ArrayList<Integer> al = getExceptionList(readcon, so.getContext(), edao.getRecurrenceID());
+            if (al != null && al.size() > 0) {
+                Object oids[] = al.toArray();
+                deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
+                for (int a = 0; a < al.size(); a++) {
+                    triggerDeleteEvent(al.get(a), fid, so, null);
+                }
+            }
+            oid = edao.getRecurrenceID();
+        }
+        
+        
+        PreparedStatement d_dates = null;
+        PreparedStatement d_members = null;
+        PreparedStatement copy_members = null;
+        PreparedStatement copy_rights = null;
+        PreparedStatement copy_dates = null;
+        PreparedStatement del_dates = null;
+        PreparedStatement del_members = null;
+        PreparedStatement del_rights = null;
+        PreparedStatement update = null;
+        
+        try {
+            StringBuilder delete_statement = new StringBuilder(128);
+            delete_statement.append("delete from del_dates WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(DATES_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            d_dates = writecon.prepareStatement(delete_statement.toString());
+            d_dates.addBatch();
+            d_dates.executeBatch();
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("delete from del_dates_members WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            d_members = writecon.prepareStatement(delete_statement.toString());
+            d_members.addBatch();
+            d_members.executeBatch();
+
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("INSERT INTO del_dates_members SELECT * FROM prg_dates_members WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            copy_members= writecon.prepareStatement(delete_statement.toString());
+            copy_members.addBatch();
+
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("INSERT INTO del_date_rights SELECT * FROM prg_date_rights WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
+            delete_statement.append(oid);                        
+            copy_rights = writecon.prepareStatement(delete_statement.toString());
+            copy_rights.addBatch();
+            
+            
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("INSERT INTO del_dates SELECT * FROM prg_dates WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(DATES_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            copy_dates= writecon.prepareStatement(delete_statement.toString());
+            copy_dates.addBatch();
+            
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("delete from prg_dates WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(DATES_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            del_dates = writecon.prepareStatement(delete_statement.toString());
+            del_dates.addBatch();
+            
+            
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("delete from prg_dates_members WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            del_members = writecon.prepareStatement(delete_statement.toString());
+            del_members.addBatch();
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("delete from prg_date_rights WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(PARTICIPANTS_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            del_rights = writecon.prepareStatement(delete_statement.toString());
+            del_rights.addBatch();
+            
+            delete_statement = new StringBuilder(128);
+            delete_statement.append("UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ");
+            delete_statement.append(cid);
+            delete_statement.append(DATES_IDENTIFIER_IS);
+            delete_statement.append(oid);
+            update = writecon.prepareStatement(delete_statement.toString());
+            update.setLong(1, System.currentTimeMillis());
+            update.setInt(2, uid);
+            update.addBatch();
+            
+            copy_members.executeBatch();
+            copy_rights.executeBatch();
+            copy_dates.executeBatch();
+            
+            del_dates.executeBatch();
+            del_members.executeBatch();
+            del_rights.executeBatch();
+            update.executeBatch();
+            
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(d_dates);
+            CalendarCommonCollection.closePreparedStatement(d_members);
+            CalendarCommonCollection.closePreparedStatement(copy_members);
+            CalendarCommonCollection.closePreparedStatement(copy_rights);
+            CalendarCommonCollection.closePreparedStatement(copy_dates);
+            CalendarCommonCollection.closePreparedStatement(del_dates);
+            CalendarCommonCollection.closePreparedStatement(del_members);
+            CalendarCommonCollection.closePreparedStatement(del_rights);
+            CalendarCommonCollection.closePreparedStatement(update);
+        }
+        
+        if (edao != null) {
+            triggerDeleteEvent(oid, fid, so, edao);
+        } else {
+            triggerDeleteEvent(oid, fid, so, null);
+        }
+    }
+    
+    private final void triggerDeleteEvent(int oid, int fid, SessionObject so, CalendarDataObject edao) throws OXException, SQLException {
+        CalendarDataObject ao = null;
+        if (edao != null) {
+            ao = (CalendarDataObject)edao.clone();
+        } else {
+            ao = new CalendarDataObject();
+        }        
+        ao.setObjectID(oid);
+        ao.setParentFolderID(fid);
+        CalendarCommonCollection.triggerEvent(so, CalendarOperation.DELETE, ao);
+        changeReminder(oid, so.getUserObject().getId(), fid, so.getContext(), false,  null, CalendarOperation.DELETE);
+    }
+    
+    
+    private final void createSingleVirtualDeleteException(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, int oid, int uid, int fid, SessionObject so, java.util.Date clientLastModified) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+        CalendarDataObject udao = new CalendarDataObject();
+        udao.setObjectID(oid);
+        udao.setContext(so.getContext());
+        java.util.Date de = null;
+        if (!cdao.containsRecurrenceDatePosition()) {
+            long del = CalendarRecurringCollection.getLongByPosition(edao, cdao.getRecurrencePosition());
+            if (del != 0) {
+                de = new java.util.Date(del);
+            }
+        } else {
+            de = cdao.getRecurrenceDatePosition();
+        }
+        if (de != null) {
+            udao.setDeleteExceptions(new java.util.Date[] { de });
+            try {
+                CalendarDataObject ldao = loadObjectForUpdate(udao, so, fid);
+                updateAppointment(udao, ldao, writecon, so, fid, clientLastModified);
+            } catch (OXException oxe) {
+                throw oxe;
+            } catch (LdapException lde) {
+                throw new OXException(lde);
+            }
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.RECURRING_UNEXPECTED_DELETE_STATE, uid, oid, cdao.getRecurrencePosition());
+        }
+    }
+    
+    private final void removeSingleExistingException(CalendarDataObject edao, Connection writecon, SessionObject so)  throws SQLException, OXException {
+        PreparedStatement del_dates = null;
+        PreparedStatement del_members = null;
+        PreparedStatement del_rights = null;
+        try {
+            StringBuilder del_dates_ps = new StringBuilder(128);
+            del_dates_ps.append("delete from prg_dates WHERE cid = ");
+            del_dates_ps.append(so.getContext().getContextId());
+            del_dates_ps.append(DATES_IDENTIFIER_IS);
+            del_dates_ps.append(edao.getObjectID());
+            del_dates = writecon.prepareStatement(del_dates_ps.toString());
+            del_dates.addBatch();
+            StringBuilder del_members_ps = new StringBuilder(128);
+            del_members_ps.append("delete from prg_dates_members WHERE cid = ");
+            del_members_ps.append(so.getContext().getContextId());
+            del_members_ps.append(PARTICIPANTS_IDENTIFIER_IS);
+            del_members_ps.append(edao.getObjectID());
+            del_members = writecon.prepareStatement(del_members_ps.toString());
+            del_members.addBatch();
+            StringBuilder del_rights_ps = new StringBuilder(128);
+            del_rights_ps.append("delete from prg_date_rights WHERE cid = ");
+            del_rights_ps.append(so.getContext().getContextId());
+            del_rights_ps.append(PARTICIPANTS_IDENTIFIER_IS);
+            del_rights_ps.append(edao.getObjectID());
+            del_rights = writecon.prepareStatement(del_rights_ps.toString());
+            del_rights.addBatch();
+            del_dates.executeBatch();
+            del_members.executeBatch();
+            del_rights.executeBatch();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(del_dates);
+            CalendarCommonCollection.closePreparedStatement(del_members);
+            CalendarCommonCollection.closePreparedStatement(del_rights);
+        }
+    }
+    
+    
+    final ArrayList getExceptionList(Connection readcon, Context c, int rec_id) throws OXException {
+        boolean close_read = false;
+        ArrayList<Integer> al = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            if (readcon == null) {
+                readcon = DBPool.pickup(c);
+                close_read = true;
+            }
+            al = new ArrayList<Integer>(8);
+            StringBuilder query = new StringBuilder(128);
+            query.append("select intfield01 FROM prg_dates pd WHERE intfield02 = ");
+            query.append(rec_id);
+            query.append(" AND cid = ");
+            query.append(c.getContextId());
+            query.append(" AND intfield01 != intfield02 AND intfield05 > 0");
+            prep = getPreparedStatement(readcon, query.toString());
+            rs = getResultSet(prep);
+            while (rs.next()) {
+                al.add(rs.getInt(1));
+            }
+        } catch(SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch(DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+           CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+            if (close_read && readcon != null) {
+                try {
+                    DBPool.push(c, readcon);
+                } catch (DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:deleteExceptions (push) ", dbpe);
+                }
+            }
+        }
+        return al;
+    }
+    
+    private final void deleteAllRecurringExceptions(String inoids, SessionObject so, Connection writecon)  throws SQLException, OXException {
+        PreparedStatement del_rights = null;
+        PreparedStatement del_members = null;
+        PreparedStatement del_dates = null;
+        try {
+            StringBuilder del_rights_ps = new StringBuilder(128);
+            del_rights_ps.append("delete from prg_date_rights WHERE cid = ");
+            del_rights_ps.append(so.getContext().getContextId());
+            del_rights_ps.append(" AND object_id IN ");
+            del_rights_ps.append(inoids);
+            del_rights = writecon.prepareStatement(del_rights_ps.toString());
+            del_rights.addBatch();
+            StringBuilder del_members_ps = new StringBuilder(128);
+            del_members_ps.append("delete from prg_dates_members WHERE cid = ");
+            del_members_ps.append(so.getContext().getContextId());
+            del_members_ps.append(" AND object_id IN ");
+            del_members_ps.append(inoids);
+            del_members = writecon.prepareStatement(del_members_ps.toString());
+            del_members.executeBatch();
+            StringBuilder del_dates_ps = new StringBuilder(128);
+            del_dates_ps.append("delete FROM prg_dates  WHERE cid = ");
+            del_dates_ps.append(so.getContext().getContextId());
+            del_dates_ps.append(" AND intfield01 IN ");
+            del_dates_ps.append(inoids);
+            del_dates = writecon.prepareStatement(del_dates_ps.toString());
+            del_dates.addBatch();
+            del_rights.executeBatch();
+            del_members.executeBatch();
+            del_dates.executeBatch();
+        } finally {
+            CalendarCommonCollection.closePreparedStatement(del_rights);
+            CalendarCommonCollection.closePreparedStatement(del_members);
+            CalendarCommonCollection.closePreparedStatement(del_dates);
+        }
+    }
+    
+    
+}

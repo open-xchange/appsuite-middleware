@@ -1,0 +1,413 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.webdav.protocol.impl;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
+import com.openexchange.webdav.protocol.util.PropertySwitch;
+import com.openexchange.webdav.protocol.util.Utils;
+import com.openexchange.webdav.xml.WebdavLockWriter;
+
+public abstract class AbstractResource implements WebdavResource {
+	
+	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.GET, WEBDAV_METHOD.PUT, WEBDAV_METHOD.DELETE, WEBDAV_METHOD.HEAD, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.TRACE, WEBDAV_METHOD.PROPPATCH, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.MOVE, WEBDAV_METHOD.COPY, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK};
+	
+	protected void checkPath() throws WebdavException {
+		checkParentExists(getUrl());
+	}
+	
+	protected void checkParentExists(String url) throws WebdavException {
+		String[] comps = url.split("/");
+		StringBuilder path = new StringBuilder();
+		
+		for(int i = 1; i < comps.length-1; i++) {
+			path.append("/");
+			path.append(comps[i]);
+			WebdavResource res = getFactory().resolveResource(path.toString());
+			if(!res.exists() || !res.isCollection()) {
+				throw new WebdavException("Conflict with: "+res.getUrl()+" exists: "+res.exists()+" collection: "+res.isCollection(), getUrl(), HttpServletResponse.SC_CONFLICT);
+			}
+		}
+	}
+	
+	public void putBody(InputStream body) throws WebdavException{
+		putBody(body,false);
+	}
+	
+	public void putBodyAndGuessLength(InputStream body) throws WebdavException{
+		putBody(body, true);
+	}
+	
+	public String getResourceType() throws WebdavException{
+		return null;
+	}
+	
+	public WebdavResource move(String string) throws WebdavException {
+		return move(string,false, true);
+	}
+
+	public WebdavResource copy(String string) throws WebdavException {
+		return copy(string,false, true);
+	}
+	
+	public WebdavResource reload() throws WebdavException {
+		return this.getFactory().resolveResource(getUrl());
+	}
+	
+	public WebdavResource move(String dest, boolean noroot, boolean overwrite) throws WebdavException {
+		WebdavResource copy = copy(dest);
+		delete();
+		((AbstractResource)copy).setCreationDate(getCreationDate());
+		return copy;
+	}
+	
+	public WebdavResource copy(String dest, boolean noroot, boolean overwrite) throws WebdavException {
+		AbstractResource clone = instance(dest);
+		if(hasBody())
+			clone.putBody(getBody());
+		for(WebdavProperty prop : getAllProps()) {
+			clone.putProperty(prop);
+		}
+		clone.create();
+		return clone;
+	}
+
+
+	public AbstractResource instance(String dest) throws WebdavException {
+		return (AbstractResource) getFactory().resolveResource(dest);
+	}
+	
+	public void removeProperty(String namespace, String name) throws WebdavException {
+		internalRemoveProperty(namespace,name);
+	}
+	
+	public void putProperty(WebdavProperty prop) throws WebdavException {
+		if(handleSpecialPut(prop))
+			return;
+		internalPutProperty(prop);
+	}
+
+
+	public WebdavProperty getProperty(String namespace, String name) throws WebdavException {
+		WebdavProperty prop = handleSpecialGet(namespace, name);
+		if(prop != null)
+			return prop;
+		return internalGetProperty(namespace, name);
+	}
+	
+	public List<WebdavProperty> getAllProps() throws WebdavException{
+		List<WebdavProperty> props = internalGetAllProps();
+		for(Property p : getFactory().getProtocol().getKnownProperties()){
+			WebdavProperty prop = getProperty(p.getNamespace(),p.getName());
+			if(prop != null) {
+				props.add(prop);
+			}
+		}
+		
+		return props;
+	}
+	
+	public boolean isCollection() {
+		return false;
+	}
+	
+	public boolean isLockNull(){
+		return false;
+	}
+	
+	public WEBDAV_METHOD[] getOptions(){
+		return OPTIONS;
+	}
+	
+	public WebdavCollection toCollection(){
+		throw new IllegalStateException("This resource is no collection");
+	}
+	
+	protected void addParentLocks(List<WebdavLock> lockList) throws WebdavException {
+		for(WebdavResource res : parents()) {
+			for(WebdavLock lock : res.getOwnLocks()) {
+				if(lock.locks(res, this)){
+					lockList.add(lock);
+				}
+			}
+		}
+	}
+	
+	protected WebdavLock findParentLock(String token) throws WebdavException {
+		for(WebdavResource res : parents()) {
+			WebdavLock lock = res.getOwnLock(token);
+			if(null != lock && lock.locks(res, this))
+				return lock;
+		}
+		return null;
+	}
+	
+	protected WebdavCollection parent() throws WebdavException{
+		String url = getUrl();
+		String parentUrl = url.substring(0, url.lastIndexOf('/'));
+		return getFactory().resolveCollection(parentUrl);
+	}
+	
+	protected List<WebdavCollection> parents() throws WebdavException{
+		List<WebdavCollection> parents = new ArrayList<WebdavCollection>();
+		String[] comps = getUrl().split("/");
+		StringBuilder path = new StringBuilder();
+		
+		for(int i = 1; i < comps.length-1; i++) {
+			path.append("/");
+			path.append(comps[i]);
+			WebdavCollection res = getFactory().resolveCollection(path.toString());
+			parents.add(res);
+		}
+		return parents;
+	}
+	
+	protected boolean handleSpecialPut(WebdavProperty prop) throws WebdavException{
+		Property p = getFactory().getProtocol().get(prop.getNamespace(),prop.getName());
+		if(p == null)
+			return false;
+		SpecialSetSwitch setter = getSetSwitch(prop.getValue());
+		
+		return (Boolean) p.doSwitch(setter);
+	}
+	
+	protected SpecialSetSwitch getSetSwitch(String value) {
+		return new SpecialSetSwitch(value);
+	}
+
+	protected WebdavProperty handleSpecialGet(String namespace, String name) throws WebdavException {
+		Property p = getFactory().getProtocol().get(namespace,name);
+		if(p == null)
+			return null;
+		if(!isset(p))
+			return null;
+		String value = (String) p.doSwitch(getGetSwitch(this));
+		
+		WebdavProperty retVal = p.getWebdavProperty();
+		retVal.setValue(value);
+		// FIXME make overridable call
+		switch(p.getId()) {
+		case Protocol.SUPPORTEDLOCK : 
+		case Protocol.RESOURCETYPE :
+		case Protocol.LOCKDISCOVERY: retVal.setXML(true); break;
+		default : retVal.setXML(false); break;
+		}
+		return retVal;
+	}
+
+	protected PropertySwitch getGetSwitch(AbstractResource resource) {
+		return new SpecialGetSwitch();
+	}
+	
+
+	public int hashCode(){
+		return getUrl().hashCode();
+	}
+	
+	public boolean equals(Object o){
+		if (o instanceof WebdavResource) {
+			WebdavResource res = (WebdavResource) o;
+			return res.getUrl().equals(getUrl());
+		}
+		return false;
+	}
+	
+	public String toString(){
+		return getUrl();
+	}
+
+	public abstract void putBody(InputStream body, boolean guessSize) throws WebdavException;
+	
+	public abstract boolean hasBody() throws WebdavException;
+
+	public abstract void setCreationDate(Date date) throws WebdavException;
+
+	protected abstract List<WebdavProperty> internalGetAllProps() throws WebdavException;
+
+	protected abstract WebdavFactory getFactory();
+	
+	protected abstract void internalPutProperty(WebdavProperty prop) throws WebdavException;
+	
+	protected abstract void internalRemoveProperty(String namespace, String name) throws WebdavException;
+	
+	protected abstract WebdavProperty internalGetProperty(String namespace, String name) throws WebdavException;
+	
+	protected abstract boolean isset(Property p);
+	
+	public class SpecialGetSwitch implements PropertySwitch{
+
+		public Object creationDate() throws WebdavException {
+			return Utils.convert(getCreationDate());
+		}
+
+		public Object displayName() throws WebdavException {
+			return getDisplayName();
+		}
+
+		public Object contentLanguage() throws WebdavException {
+			return getLanguage();
+		}
+
+		public Object contentLength() throws WebdavException {
+			Long l = getLength();
+			if(l == null)
+				return null;
+			return l.toString();
+		}
+
+		public Object contentType() throws WebdavException {
+			return getContentType();
+		}
+
+		public Object etag() throws WebdavException {
+			return getETag();
+		}
+
+		public Object lastModified() throws WebdavException {
+			return Utils.convert(getLastModified());
+		}
+
+		public Object resourceType() throws WebdavException {
+			return getResourceType();
+		}
+
+		public Object lockDiscovery() throws WebdavException {
+			StringBuffer activeLocks = new StringBuffer();
+			WebdavLockWriter writer = new WebdavLockWriter();
+			for(WebdavLock lock : getLocks()){
+				activeLocks.append(writer.lock2xml(lock));
+			}
+			return activeLocks.toString();
+		}
+
+		public Object supportedLock() throws WebdavException {
+			return "<D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>";
+		}
+
+		public Object source() throws WebdavException {
+			return getSource();
+		}
+		
+	}
+	
+	public class SpecialSetSwitch implements PropertySwitch{
+
+		private String value;
+
+		public SpecialSetSwitch(String value) {
+			this.value = value;
+		}
+		
+		public Object creationDate() throws WebdavException {
+			return true;
+		}
+
+		public Object displayName() throws WebdavException {
+			setDisplayName(value);
+			return true;
+		}
+
+		public Object contentLanguage() throws WebdavException {
+			setLanguage(value);
+			return true;
+		}
+
+		public Object contentLength() throws WebdavException {
+			setLength(new Long(value));
+			return true;
+		}
+
+		public Object contentType() throws WebdavException {
+			setContentType(value);
+			return true;
+		}
+
+		public Object etag() throws WebdavException {
+			return true;
+		}
+
+		public Object lastModified() throws WebdavException {
+			return true;
+		}
+
+		public Object resourceType() throws WebdavException {
+			return true;
+		}
+
+		public Object lockDiscovery() throws WebdavException {
+			return true;
+		}
+
+		public Object supportedLock() throws WebdavException {
+			return true;
+		}
+
+		public Object source() throws WebdavException {
+			setSource(value);
+			return true;
+		}
+		
+	}
+
+}
