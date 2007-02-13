@@ -1056,7 +1056,7 @@ public class FolderTest extends AbstractAJAXTest {
 			FolderObject inboxFolder = null;
 			for (int i = 0; i < l.size() && (inboxFolder == null); i++) {
 				FolderObject fo = l.get(i);
-				if (fo.getFullName().equals("INBOX")) {
+				if (fo.getFullName().endsWith("INBOX")) {
 					inboxFolder = fo;
 				}
 			}
