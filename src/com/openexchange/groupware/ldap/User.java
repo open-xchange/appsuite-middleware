@@ -63,6 +63,8 @@ public interface User {
      */
     String getUserPassword();
 
+    String getPasswordMech();
+    
     /**
      * Getter for uid.
      * @return User identifier.

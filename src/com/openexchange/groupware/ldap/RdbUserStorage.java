@@ -80,7 +80,7 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_USER = "SELECT " + USERPASSWORD + ','
         + MAILENABLED + ',' + IMAPSERVER + ",imapLogin," + SMTPSERVER + ','
         + MAILDOMAIN + ',' + SHADOWLASTCHANGE + ',' + MAIL + ',' +  TIMEZONE
-        + ',' + LANGUAGE + ",contactId FROM user WHERE user.cid=? AND "
+        + ',' + LANGUAGE + ",passwordMech,contactId FROM user WHERE user.cid=? AND "
         + IDENTIFIER + "=?";
 
     private static final String SELECT_ALIAS = "SELECT value FROM "
@@ -182,6 +182,7 @@ public class RdbUserStorage extends UserStorage {
                 retval.setMail(result.getString(pos++));
                 retval.setTimeZone(result.getString(pos++));
                 retval.setPreferredLanguage(result.getString(pos++));
+                retval.setPasswordMech(result.getString(pos++));
                 retval.setContactId(result.getInt(pos++));
             } else {
                 throw new LdapException(Component.USER,

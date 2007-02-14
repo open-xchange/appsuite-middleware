@@ -143,6 +143,8 @@ public class UserImpl implements Serializable, User, Cloneable {
      */
     private String userPassword = "x";
 
+    private String passwordMech = "{CRYPT}";
+    
     /**
      * Determines if the user is enabled or disabled.
      */
@@ -184,6 +186,7 @@ public class UserImpl implements Serializable, User, Cloneable {
         preferredLanguage = user.getPreferredLanguage();
         displayName = user.getDisplayName();
         mailEnabled = user.isMailEnabled();
+        passwordMech = user.getPasswordMech();
         shadowLastChange = user.getShadowLastChange();
         groups = user.getGroups().clone();
     }
@@ -247,6 +250,10 @@ public class UserImpl implements Serializable, User, Cloneable {
      */
     void setShadowLastChange(final int shadowLastChange) {
         this.shadowLastChange = shadowLastChange;
+    }
+
+    void setPasswordMech(final String passwordMech) {
+        this.passwordMech = passwordMech;
     }
 
     /**
@@ -478,4 +485,8 @@ public class UserImpl implements Serializable, User, Cloneable {
     void setAliases(final String[] aliases) {
         this.aliases = aliases;
     }
+
+	public String getPasswordMech() {
+		return passwordMech;
+	}
 }
