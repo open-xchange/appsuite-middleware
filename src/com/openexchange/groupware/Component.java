@@ -216,6 +216,10 @@ public enum Component {
 	 */
 	ATTACHMENT("ATT"),
 	/**
+	 * Import and export (with CSV, iCal, TNEF and whatever)
+	 */
+	IMPORT_EXPORT("I_E"),
+	/**
 	 * Upload
 	 */
 	UPLOAD("UPL"),
