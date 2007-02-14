@@ -10,6 +10,7 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.sessiond.SessionObject;
 
 @OXThrowsMultiple(
 		category = { 
@@ -74,14 +75,15 @@ public class ImporterExporter {
 	/**
 	 * Imports data to one or more folders
 	 * 
+	 * @param sessObj: Session object used to determine access rights
 	 * @param format: Format the imported data is in
 	 * @param is: InputStream containing the data to be imported
 	 * @param folders: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
 	 */
-	public List<ImportResult> importData(final Format format, final InputStream is, final String... folders) throws ImportExportException{
+	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final String... folders) throws ImportExportException{
 		for(Importer imp : importers){
-			if(imp.canImport(format, folders)){
-				return imp.importData(format, is, folders);
+			if(imp.canImport(sessObj, format, folders)){
+				return imp.importData(sessObj, format, is, folders);
 			}
 		}
 		throw EXCEPTIONS.create(0, format, folders);
@@ -90,29 +92,32 @@ public class ImporterExporter {
 	/**
 	 * Exports data of one folder
 	 * 
+	 * @param sessObj: Session object used to determine access rights
 	 * @param format: Format the exported data should be in
 	 * @param folder: Folder that is to be exported
 	 * @param fieldsToBeExported: Fields of certain data that are to be exported. Convention: If this is empty, all fields are exported
 	 * @return InputStream containing the exported data in given format
 	 * @throws ImportExportException in case of a missing exporter for that kind of data 
 	 */
-	public InputStream exportData(final Format format, final String folder, final String...fieldsToBeExported) throws ImportExportException{
+	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final String...fieldsToBeExported) throws ImportExportException{
 		for(Exporter exp: exporters){
-			if(exp.canExport(format, folder)){
-				return exp.exportData(format, folder, fieldsToBeExported);
+			if(exp.canExport(sessObj, format, folder)){
+				return exp.exportData(sessObj, format, folder, fieldsToBeExported);
 			}
 		}
 		throw EXCEPTIONS.create(1, folder, format);
 	}
 
 	/**
-	 * Exports data of one object in one folder 
+	 * Exports data of one object in one folder
+	 * 
+	 * @param sessObj: Session object used to determine access rights
 	 * @param objectId: Identifier for one object in a folder
 	 */
-	public InputStream exportData(final Format format, final String folder, final int objectId, final String...fieldsToBeExported) throws ImportExportException{
+	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int objectId, final String...fieldsToBeExported) throws ImportExportException{
 		for(Exporter exp: exporters){
-			if(exp.canExport(format, folder)){
-				return exp.exportData(format, folder, objectId, fieldsToBeExported);
+			if(exp.canExport(sessObj, format, folder)){
+				return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported);
 			}
 		}
 		throw EXCEPTIONS.create(1, folder, format);
@@ -121,16 +126,17 @@ public class ImporterExporter {
 	/**
 	 * Lists all formats a folder (which in OX is always of a certain type) 
 	 * can be converted into.
-	 *  
+	 * 
+	 * @param sessObj: Session object used to determine access rights
 	 * @param folder: Identifier of a certain folder within the OX
 	 * @return A set of possible formats this folder can be exported to
 	 */
-	public Set<Format> getPossibleExportFormats(String folder){
+	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder){
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Exporter exp: exporters){
-				if(exp.canExport(format, folder)){
+				if(exp.canExport(sessObj, format, folder)){
 					res.add(format);
 					break;
 				}
@@ -141,16 +147,17 @@ public class ImporterExporter {
 	
 	/**
 	 * Lists all formats a folder can import data from
-	 * 
+	 *
+	 * @param sessObj: Session object used to determine access rights
 	 * @param folder: Identifier of a certain folder within the OX
 	 * @return A set of possible formats this folder can import
 	 */
-	public Set<Format> getPossibleImportFormats(String folder){
+	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final String folder){
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Importer imp: importers){
-				if(imp.canImport(format, folder)){
+				if(imp.canImport(sessObj, format, folder)){
 					res.add(format);
 					break;
 				}

@@ -2,6 +2,7 @@
 
   - First version of the import/export infrastructure that one day will enable
     us to import or export data in formats like iCAL, TNEF, vCard and CSV.
+  - Later: Added SessionObject as additional param to check access rights properly.
 
 * 2007-02-13 - marcus.klein@open-xchange.com
 
