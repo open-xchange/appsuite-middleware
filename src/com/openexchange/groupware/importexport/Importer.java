@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.sessiond.SessionObject;
+import java.util.Map;
 
 /**
  * This interface defines an importer, meaning a class able to
@@ -19,10 +20,10 @@ public interface Importer {
 	 *
 	 * @param sessObj: Session object enabling us to check write access.
 	 * @param format: Format of the data that is meant to be imported
-	 * @param folders: Folders the data is meant to be imported into (remember: a folder is always of a certain type, like Appointment)
+	 * @param foldermapping: Folders the data is meant to be imported into (remember: a folder is always of a certain type, like Appointment)
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 */
-	public abstract boolean canImport(SessionObject sessObj, Format format, String... folders);
+	public abstract boolean canImport(SessionObject sessObj, Format format, Map<String, Integer> foldermappiing);
 
 	/**
 	 * 
