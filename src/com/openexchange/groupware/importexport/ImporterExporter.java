@@ -131,11 +131,12 @@ public class ImporterExporter {
 	 * @param format: Format the imported data is in
 	 * @param is: InputStream containing the data to be imported
 	 * @param folders: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 */
-	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMapping) throws ImportExportException{
+	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Importer imp : importers){
-			if(imp.canImport(sessObj, format, folderMapping)){
-				return imp.importData(sessObj, format, is, folderMapping);
+			if(imp.canImport(sessObj, format, folderMapping, optionalParams)){
+				return imp.importData(sessObj, format, is, folderMapping, optionalParams);
 			}
 		}
 		throw EXCEPTIONS.create(0, format, folderMapping.keySet());
@@ -148,13 +149,14 @@ public class ImporterExporter {
 	 * @param format: Format the exported data should be in
 	 * @param folder: Folder that is to be exported
 	 * @param fieldsToBeExported: Fields of certain data that are to be exported. Convention: If this is empty, all fields are exported
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return InputStream containing the exported data in given format
 	 * @throws ImportExportException in case of a missing exporter for that kind of data 
 	 */
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final String...fieldsToBeExported) throws ImportExportException{
+	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: exporters){
-			if(exp.canExport(sessObj, format, folder, type)){
-				return exp.exportData(sessObj, format, folder, type, fieldsToBeExported);
+			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
+				return exp.exportData(sessObj, format, folder, type, fieldsToBeExported, optionalParams);
 			}
 		}
 		throw EXCEPTIONS.create(1, folder, format);
@@ -169,13 +171,14 @@ public class ImporterExporter {
 	 * @param type
 	 * @param objectId
 	 * @param fieldsToBeExported
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return
 	 * @throws ImportExportException
 	 */
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int objectId, final String...fieldsToBeExported) throws ImportExportException{
+	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int objectId, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: exporters){
-			if(exp.canExport(sessObj, format, folder, type)){
-				return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported);
+			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
+				return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported, optionalParams);
 			}
 		}
 		throw EXCEPTIONS.create(1, folder, format);
@@ -188,14 +191,15 @@ public class ImporterExporter {
 	 * @param sessObj: Session object used to determine access rights
 	 * @param folder: Identifier of a certain folder within the OX
 	 * @param type: Type of the folder as defined in class Types
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return A set of possible formats this folder can be exported to
 	 */
-	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, final int type){
+	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, final int type, Map<String, String[]> optionalParams){
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Exporter exp: exporters){
-				if(exp.canExport(sessObj, format, folder, type)){
+				if(exp.canExport(sessObj, format, folder, type, optionalParams)){
 					res.add(format);
 					break;
 				}
@@ -209,14 +213,15 @@ public class ImporterExporter {
 	 *
 	 * @param sessObj: Session object used to determine access rights
 	 * @param folderMapping: Identifier of a certain folder (plus its type as defined in class Type) within the OX
+	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return A set of possible formats this folder can import
 	 */
-	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final Map<String, Integer> folderMapping){
+	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams){
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Importer imp: importers){
-				if(imp.canImport(sessObj, format, folderMapping)){
+				if(imp.canImport(sessObj, format, folderMapping, optionalParams)){
 					res.add(format);
 					break;
 				}
