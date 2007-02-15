@@ -74,7 +74,7 @@ public interface Importer {
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract boolean canImport(SessionObject sessObj, Format format, Map<String, Integer> folderMappings, Map<String, String[]> optionalParams);
+	public abstract boolean canImport(SessionObject sessObj, Format format, Map<String, Integer> folderMappings, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 

@@ -193,8 +193,9 @@ public class ImporterExporter {
 	 * @param type: Type of the folder as defined in class Types
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return A set of possible formats this folder can be exported to
+	 * @throws ImportExportException 
 	 */
-	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, final int type, Map<String, String[]> optionalParams){
+	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, final int type, Map<String, String[]> optionalParams) throws ImportExportException{
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
@@ -215,8 +216,9 @@ public class ImporterExporter {
 	 * @param folderMapping: Identifier of a certain folder (plus its type as defined in class Type) within the OX
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return A set of possible formats this folder can import
+	 * @throws ImportExportException 
 	 */
-	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams){
+	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams) throws ImportExportException{
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){

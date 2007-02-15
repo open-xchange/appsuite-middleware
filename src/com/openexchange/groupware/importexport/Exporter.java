@@ -72,7 +72,7 @@ public interface Exporter {
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return true, if the given folders can be exported in the given format; false otherwise
 	 */
-	public abstract boolean canExport(SessionObject sessObj, Format format, String folder, int type, Map<String, String[]> optionalParams);
+	public abstract boolean canExport(SessionObject sessObj, Format format, String folder, int type, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 
