@@ -1458,11 +1458,20 @@ public class CalendarTest extends TestCase {
         String display_name = "Externer test user";
         
         
+        String mail_address2 = "test2@example.org";
+        String display_name2 = "Externer test user2";
+        
+        
         Participants participants = new Participants();
         Participant p = new ExternalUserParticipant();
         p.setEmailAddress(mail_address);
         p.setDisplayName(display_name);
         participants.add(p);
+        
+        Participant p2 = new ExternalUserParticipant();
+        p2.setEmailAddress(mail_address2);
+        p2.setDisplayName(display_name2);
+        participants.add(p2);
         
         cdao.setParticipants(participants.getList());        
         
@@ -1478,9 +1487,14 @@ public class CalendarTest extends TestCase {
         boolean found = false;
         for (int a = 0; a < test_participants.length; a++) {
             if (test_participants[a].getType() == Participant.EXTERNAL_USER) {
-                assertEquals("Check display name", display_name, test_participants[a].getDisplayName());
-                assertEquals("Check mail address", mail_address, test_participants[a].getEmailAddress());
-                found = true;
+                if (test_participants[a].getEmailAddress().equals(mail_address)) {
+                    assertEquals("Check display name", display_name, test_participants[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address, test_participants[a].getEmailAddress());
+                } else if (test_participants[a].getEmailAddress().equals(mail_address2)) {
+                    assertEquals("Check display name", display_name2, test_participants[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address2, test_participants[a].getEmailAddress());                        
+                }
+                found = true;        
             }
         }
         
@@ -1488,11 +1502,10 @@ public class CalendarTest extends TestCase {
         
         CalendarDataObject update = new CalendarDataObject();
         
-        String display_name_2 = "Externer test user without mail address";
+        String display_name_2_fail = "Externer test user without mail address";
         participants = new Participants();
         p = new ExternalUserParticipant();
-        p.setDisplayName(display_name_2);
-        //p.setDisplayName("external2@example.org");
+        p.setDisplayName(display_name_2_fail);
         participants.add(p);
         
         update.setContext(so.getContext());
@@ -1512,7 +1525,65 @@ public class CalendarTest extends TestCase {
         }
         assertFalse("Participant has no mail, update must fail!", check_update);
  
+        CalendarDataObject update_participants = new CalendarDataObject();
+        
+        String update_new_display_1 = "External Update 1";
+        String update_new_mail_1 = "abc@de";
+        String update_new_display_2 = "External Update 2";
+        String update_new_mail_2 = "abc2@de";        
+        
+        Participants participants_update = new Participants();
+        p = new ExternalUserParticipant();
+        p.setDisplayName(update_new_display_1);
+        p.setEmailAddress(update_new_mail_1);
+        participants_update.add(p);
+        
+        p2 = new ExternalUserParticipant();
+        p2.setDisplayName(update_new_display_2);
+        p2.setEmailAddress(update_new_mail_2);
+        participants_update.add(p2);
+        
+        update_participants.setContext(so.getContext());
+        update_participants.setObjectID(object_id);
+        update_participants.setParticipants(participants_update.getList());
+        update_participants.setIgnoreConflicts(true);        
+        
+        csql.updateAppointmentObject(update_participants, fid, cdao.getLastModified());
+
+        
+        CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);    
+        
+        Participant test_participants_update[] = testobject_update.getParticipants();
+        
+        int found_external = 0;
+        for (int a = 0; a < test_participants_update.length; a++) {
+            if (test_participants_update[a].getType() == Participant.EXTERNAL_USER) {
+                if (test_participants_update[a].getEmailAddress().equals(mail_address)) {
+                    assertEquals("Check display name", display_name, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address, test_participants_update[a].getEmailAddress());
+                    found_external++;
+                } else if (test_participants_update[a].getEmailAddress().equals(mail_address2)) {
+                    assertEquals("Check display name", display_name2, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address2, test_participants_update[a].getEmailAddress());                        
+                    found_external++;
+                } else if (test_participants_update[a].getEmailAddress().equals(update_new_mail_1)) {
+                    assertEquals("Check display name", update_new_display_1, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", update_new_mail_1, test_participants_update[a].getEmailAddress());                        
+                    found_external++;
+                } else if (test_participants_update[a].getEmailAddress().equals(update_new_mail_2)) {
+                    assertEquals("Check display name", update_new_display_2, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", update_new_mail_2, test_participants_update[a].getEmailAddress());                        
+                    found_external++;
+                }
+            }
+        }        
+        
+        assertEquals("Found all 4 external participants after update", 4, found_external);
+        
         
     }    
-   
+  
+    
+    
+    
 }
