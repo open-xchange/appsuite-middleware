@@ -83,7 +83,7 @@ public interface Exporter {
 	 * @throws ImportExportException
 	 */
 	public abstract InputStream exportData(SessionObject sessObj, Format format, String folder, int type,
-			String... fieldsToBeExported) throws ImportExportException;
+			int... fieldsToBeExported) throws ImportExportException;
 
 	/**
 	 * 
@@ -97,6 +97,6 @@ public interface Exporter {
 	 * @throws ImportExportException
 	 */
 	public abstract InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId,
-			String... fieldsToBeExported) throws ImportExportException;
+			int... fieldsToBeExported) throws ImportExportException;
 
 }
