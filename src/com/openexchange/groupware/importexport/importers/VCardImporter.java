@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 	"Could not import into the folder %s.",
 	"Subsystem down",
 	"User input Error %s",
-	"Programming Error"})
+	"Programming Error - Folder %s"})
 
 public class VCardImporter implements Importer {
 	
@@ -138,7 +138,7 @@ public class VCardImporter implements Importer {
 				versitObject = def.parseChild(versitReader, rootVersitObject);
 			}
 		} catch (Exception exc) {
-			throw new ImportExportException(exc);
+			throw importExportExceptionFactory.create(4, contactFolderId);
 		} finally {
 			oxContainerConverter.close();
 		}
