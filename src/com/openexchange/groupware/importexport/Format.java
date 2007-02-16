@@ -80,4 +80,14 @@ public enum Format {
 	public String getExtension(){
 		return this.extension;
 	}
+	
+	public static Format getFormatByMimeType(String mimeType) {
+		for (Format f : Format.values()) {
+			if (f.getMimeType().equals(mimeType)) {
+				return f;
+			}
+		}
+		
+		return null;
+	}
 }
