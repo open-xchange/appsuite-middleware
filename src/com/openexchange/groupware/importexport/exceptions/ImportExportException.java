@@ -65,7 +65,7 @@ public class ImportExportException extends OXException {
 	private static final long serialVersionUID = 8368543799201210727L;
 
 	public ImportExportException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.INFOSTORE, category, id, String.format(message, (Object[]) msgParams),cause);
+		super(Component.IMPORT_EXPORT, category, id, String.format(message, (Object[]) msgParams),cause);
 	}
 
 	public ImportExportException(Category category, String message, int id, Object...msgParams){
