@@ -65,7 +65,7 @@ public abstract class DataServlet extends PermissionServlet {
 	
 	public static final int maxEntries = 50000;
 	
-	protected int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+	public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
 		if (containsParameter(httpServletRequest, name)) {
 			try {
 				return Integer.parseInt(httpServletRequest.getParameter(name));
@@ -77,7 +77,7 @@ public abstract class DataServlet extends PermissionServlet {
 		}
 	}
 	
-	protected Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+	public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
 		if (containsParameter(httpServletRequest, name)) {
 			try {
 				return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
@@ -89,11 +89,11 @@ public abstract class DataServlet extends PermissionServlet {
 		}
 	}
 	
-	protected String parseStringParameter(final HttpServletRequest httpServletRequest, final String name) {
+	public static String parseStringParameter(final HttpServletRequest httpServletRequest, final String name) {
 		return httpServletRequest.getParameter(name);
 	}
 	
-	protected String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+	public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseStringParameter(httpServletRequest, name);
 		} else {
@@ -101,7 +101,7 @@ public abstract class DataServlet extends PermissionServlet {
 		}
 	}
 	
-	protected int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+	public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseIntParameter(httpServletRequest, name);
 		} else {
@@ -109,7 +109,24 @@ public abstract class DataServlet extends PermissionServlet {
 		}
 	}
 	
-	protected int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+	public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+		if (containsParameter(httpServletRequest, name)) {
+			final String[] s = httpServletRequest.getParameterValues(name);
+			
+			final int[] i = new int[s.length];
+			
+			for (int a = 0; a < i.length; a++) {
+				i[a] = Integer.parseInt(s[a]);
+			}
+			
+			return i;
+		} else {
+			return null;
+		}
+		
+	}
+	
+	public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			final String[] s = httpServletRequest.getParameterValues(name);
 			
@@ -125,7 +142,7 @@ public abstract class DataServlet extends PermissionServlet {
 		}
 	}
 	
-	protected Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+	public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseDateParameter(httpServletRequest, name);
 		} else {
