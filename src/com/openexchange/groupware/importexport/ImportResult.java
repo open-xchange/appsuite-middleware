@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
+import java.util.Date;
+
 import com.openexchange.api2.OXException;
 
 public class ImportResult {
@@ -56,7 +58,7 @@ public class ImportResult {
 	private String objectId;
 	private String folder;
 	private OXException exception;
-	private long timestamp;
+	private Date date;
 
 
 	/**
@@ -86,7 +88,7 @@ public class ImportResult {
 	public ImportResult(String objectId, String folder, long timestamp, OXException exception){
 		this.objectId = objectId;
 		this.folder = folder;
-		this.timestamp = timestamp;
+		this.date = date;
 		this.exception = exception;
 	}
 	
@@ -110,11 +112,11 @@ public class ImportResult {
 	public void setObjectId(String objectId) {
 		this.objectId = objectId;
 	}
-	public long getTimestamp() {
-		return timestamp;
+	public Date getDate() {
+		return date;
 	}
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 	public String getFolder() {
 		return folder;
