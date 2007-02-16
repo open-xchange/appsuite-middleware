@@ -1,0 +1,130 @@
+package com.openexchange.groupware.importexport.exporters;
+
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLInterface;
+import java.io.InputStream;
+import java.sql.SQLException;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.Exporter;
+import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.EffectivePermission;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.versit.Versit;
+import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+
+@OXExceptionSource(
+		classId=ImportExportExceptionClasses.VCARDEXPORTER,
+		component=Component.IMPORT_EXPORT)
+@OXThrowsMultiple(
+		category={
+	Category.PERMISSION,
+	Category.SUBSYSTEM_OR_SERVICE_DOWN,
+	Category.USER_INPUT,
+	Category.PROGRAMMING_ERROR},
+		desc={"","","",""},
+		exceptionId={0,1,2,3},
+		msg={
+	"Could not import into the folder %s.",
+	"Subsystem down - Could not import into folder %s",
+	"User input Error %s",
+	"Programming Error - Could not import into folder %s"})
+	
+public class VCardExporter implements Exporter {
+	
+	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardExporter.class);
+	
+	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final int type, final Map<String, String[]> optionalParams) throws ImportExportException {
+		int folderId = new Integer(folder).intValue();
+		FolderObject fo;
+		try {
+			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
+		} catch (OXException e) {
+			return false;
+		}
+		//check format of folder
+		if ( type == Types.CONTACT && fo.getModule() != type){
+			return false;
+		}
+		//check read access to folder
+		EffectivePermission perm;
+		try {
+			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
+		} catch (DBPoolingException e) {
+			throw importExportExceptionFactory.create(2, folder);
+		} catch (SQLException e) {
+			throw importExportExceptionFactory.create(2, folder);
+		}
+		return perm.canReadAllObjects();
+	}
+	
+	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		try {
+			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
+			VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
+			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
+			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
+			final VersitDefinition taskDef = versitDefinition.getChildDef("VTODO");
+			
+			final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
+			final String mail = sessObj.getUserObject().getMail();
+			
+			final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mail);
+			
+			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+			final SearchIterator searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
+			
+			while (searchIterator.hasNext()) {
+				exportContact(oxContainerConverter, eventDef, versitWriter, (ContactObject)searchIterator.next());
+			}
+		} catch (Exception exc) {
+			throw importExportExceptionFactory.create(3, folder);
+		}
+		
+		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+	}
+	
+	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		try {
+			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
+			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
+			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
+			
+			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+			final ContactObject contactObj = contactSql.getObjectById(objectId, Integer.parseInt(folder));
+			
+			exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
+		} catch (Exception exc) {
+			throw new ImportExportException(exc);
+		}
+		
+		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+	}
+	
+	protected void exportContact(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, ContactObject contactObj) throws Exception {
+		VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
+		versitDef.write(writer, versitObject);
+	}
+}
