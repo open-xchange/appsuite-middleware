@@ -102,6 +102,12 @@ public class MockUser implements User {
 
 
     /**
+     * Password encryption mechanism
+     */
+    
+    private String passwordMech;
+    
+    /**
      * Getter for userPassword.
      * @return Password.
      */
@@ -407,4 +413,12 @@ public class MockUser implements User {
     public String getImapLogin() {
         return imapLogin;
     }
+
+	public String getPasswordMech() {
+		return passwordMech;
+	}
+
+	public void setPasswordMech(String passwordMech) {
+		this.passwordMech = passwordMech;
+	}
 }
