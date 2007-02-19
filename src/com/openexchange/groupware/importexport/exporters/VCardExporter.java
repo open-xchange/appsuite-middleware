@@ -117,7 +117,7 @@ public class VCardExporter implements Exporter {
 			
 			exportContact(oxContainerConverter, contactDef, versitWriter, contactObj);
 		} catch (Exception exc) {
-			throw new ImportExportException(exc);
+			throw importExportExceptionFactory.create(3, folder);
 		}
 		
 		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
