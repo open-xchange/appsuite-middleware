@@ -47,10 +47,7 @@
  *
  */
 
-
-	
 package com.openexchange.groupware.contact;
-
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -800,6 +797,7 @@ public class Contacts implements DeleteListener {
 						counter++;
 					}
 				}
+				
 				Date ddd = new Date(lmd);
 				co.setLastModified(ddd);
 			} else {
@@ -2528,6 +2526,9 @@ public class Contacts implements DeleteListener {
 		
 		void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException;
 		Object getData(ResultSet rs,int pos) throws SQLException;
+		
+		String getValueAsString(ContactObject co);
+		String getReadableTitle();
 	}
 	
 	static {
@@ -2568,6 +2569,13 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			
+			public String getValueAsString(ContactObject co) {
+				return co.getDisplayName();
+			}
+			public String getReadableTitle() {
+				return "Display name";
+			}
 		};
 		/**************** * field02 *  * *************/
 		mapping[ContactObject.SUR_NAME] = new mapper() {
@@ -2603,6 +2611,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getSurName();
+			}
+			public String getReadableTitle() {
+				return "Sur name";
 			}
 		};	
 		/**************** * field03 *  * *************/
@@ -2640,6 +2654,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getGivenName();
+			}
+			public String getReadableTitle() {
+				return "Given name";
+			}
 		};			
 		/**************** * field04 *  * *************/
 		mapping[ContactObject.MIDDLE_NAME] = new mapper() {
@@ -2676,6 +2696,14 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				
+				return co.getMiddleName();
+			}
+			public String getReadableTitle() {
+				
+				return "Middle name";
+			}
 		};		
 		/**************** * field05 *  * *************/
 		mapping[ContactObject.SUFFIX] = new mapper() {
@@ -2711,6 +2739,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {	
+				return co.getSuffix();
+			}
+			public String getReadableTitle() {
+				return "Suffix";
 			}
 		};				
 		/**************** * field06 *  * *************/
@@ -2749,6 +2783,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTitle();
+			}
+			public String getReadableTitle() {	
+				return "Title";
+			}
 		};				
 		/**************** * field07 *  * *************/
 		mapping[ContactObject.STREET_HOME] = new mapper() {
@@ -2784,6 +2824,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getStreetHome();
+			}
+			public String getReadableTitle() {
+				return "Street home";
 			}
 		};				
 		/**************** * field08 *  * *************/
@@ -2821,6 +2867,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getPostalCodeHome();
+			}
+			public String getReadableTitle() {
+				return "Postal code home";
+			}
 		};				
 		/**************** * field09 *  * *************/
 		mapping[ContactObject.CITY_HOME] = new mapper() {
@@ -2856,6 +2908,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCityHome();
+			}
+			public String getReadableTitle() {
+					return "City home";
 			}
 		};			
 		/**************** * field10 *  * *************/
@@ -2893,6 +2951,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getStateHome();
+			}
+			public String getReadableTitle() {
+				return "State home";
+			}
 		};				
 		/**************** * field11 *  * *************/
 		mapping[ContactObject.COUNTRY_HOME] = new mapper() {
@@ -2928,6 +2992,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCountryHome();
+			}
+			public String getReadableTitle() {
+				return "Country home";
 			}
 		};				
 
@@ -2966,6 +3036,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+					return co.getMaritalStatus();
+			}
+			public String getReadableTitle() {
+				return "Martial status";
+			}
 		};				
 		/**************** * field13 *  * *************/
 		mapping[ContactObject.NUMBER_OF_CHILDREN] = new mapper() {
@@ -3001,6 +3077,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNumberOfChildren();
+			}
+			public String getReadableTitle() {
+				return "Number of children";
 			}
 		};				
 		/**************** * field14 *  * *************/
@@ -3038,6 +3120,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getProfession();
+			}
+			public String getReadableTitle() {
+				return "Profession";
+			}
 		};				
 		/**************** * field15 *  * *************/
 		mapping[ContactObject.NICKNAME] = new mapper() {
@@ -3073,6 +3161,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNickname();
+			}
+			public String getReadableTitle() {
+				return "Nickname";
 			}
 		};				
 		/**************** * field16 *  * *************/
@@ -3110,6 +3204,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getSpouseName();
+			}
+			public String getReadableTitle() {
+				return "Spouse name";
+			}
 		};				
 		/**************** * field17 *  * *************/
 		mapping[ContactObject.NOTE] = new mapper() {
@@ -3145,6 +3245,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNote();
+			}
+			public String getReadableTitle() {
+				return "Note";
 			}
 		};				
 		/**************** * field18 *  * *************/
@@ -3182,6 +3288,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCompany();
+			}
+			public String getReadableTitle() {
+				return "Company";
+			}
 		};				
 		/**************** * field19 *  * *************/
 		mapping[ContactObject.DEPARTMENT] = new mapper() {
@@ -3217,6 +3329,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getDepartment();
+			}
+			public String getReadableTitle() {
+				return "Department";
 			}
 		};			
 		/**************** * field20 *  * *************/
@@ -3254,6 +3372,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getPosition();
+			}
+			public String getReadableTitle() {
+				return "Position";
+			}
 		};				
 		/**************** * field21 *  * *************/
 		mapping[ContactObject.EMPLOYEE_TYPE] = new mapper() {
@@ -3289,6 +3413,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getEmployeeType();
+			}
+			public String getReadableTitle() {
+				return "Employee type";
 			}
 		};				
 		/**************** * field22 *  * *************/
@@ -3326,6 +3456,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getRoomNumber();
+			}
+			public String getReadableTitle() {
+				return "Room number";
+			}
 		};				
 		/**************** * field23 *  * *************/
 		mapping[ContactObject.STREET_BUSINESS] = new mapper() {
@@ -3361,6 +3497,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+					return co.getStreetBusiness();
+			}
+			public String getReadableTitle() {
+				return "Street business";
 			}
 		};				
 		/**************** * field24 *  * *************/
@@ -3398,6 +3540,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getPostalCodeBusiness();
+			}
+			public String getReadableTitle() {
+				return "Postal code business";
+			}
 		};				
 		/**************** * field25 *  * *************/
 		mapping[ContactObject.CITY_BUSINESS] = new mapper() {
@@ -3433,6 +3581,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCityBusiness();
+			}
+			public String getReadableTitle() {
+				return "City business";
 			}
 		};				
 		/**************** * field26 *  * *************/
@@ -3470,6 +3624,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getStateBusiness();
+			}
+			public String getReadableTitle() {
+				return "State business";
+			}
 		};				
 		/**************** * field27 *  * *************/
 		mapping[ContactObject.COUNTRY_BUSINESS] = new mapper() {
@@ -3505,6 +3665,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+					return co.getCountryBusiness();
+			}
+			public String getReadableTitle() {
+				return "Country business";
 			}
 		};				
 		/**************** * field28 *  * *************/
@@ -3542,6 +3708,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNumberOfEmployee();
+			}
+			public String getReadableTitle() {
+				return "Number of employee";
+			}
 		};				
 		/**************** * field29 *  * *************/
 		mapping[ContactObject.SALES_VOLUME] = new mapper() {
@@ -3577,6 +3749,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getSalesVolume();
+			}
+			public String getReadableTitle() {
+				return "Sales volume";
 			}
 		};				
 		/**************** * field30 *  * *************/
@@ -3614,6 +3792,12 @@ public class Contacts implements DeleteListener {
 			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTaxID();
+			}
+			public String getReadableTitle() {
+				return "Tax id";
+			}
 		};				
 		/**************** * field31 *  * *************/
 		mapping[ContactObject.COMMERCIAL_REGISTER] = new mapper() {
@@ -3649,6 +3833,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCommercialRegister();
+			}
+			public String getReadableTitle() {
+				return "Commercial register";
 			}
 		};				
 		/**************** * field32 *  * *************/
@@ -3686,6 +3876,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getBranches();
+			}
+			public String getReadableTitle() {
+				return "Branches";
+			}
 		};				
 		/**************** * field33 *  * *************/
 		mapping[ContactObject.BUSINESS_CATEGORY] = new mapper() {
@@ -3721,6 +3917,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getBusinessCategory();
+			}
+			public String getReadableTitle() {
+				return "Business category";
 			}
 		};				
 		/**************** * field34 *  * *************/
@@ -3758,6 +3960,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getInfo();
+			}
+			public String getReadableTitle() {
+				return "Info";
+			}
 		};				
 		/**************** * field35 *  * *************/
 		mapping[ContactObject.MANAGER_NAME] = new mapper() {
@@ -3793,6 +4001,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getManagerName();
+			}
+			public String getReadableTitle() {
+				return "Manager's name";
 			}
 		};				
 		/**************** * field36 *  * *************/
@@ -3830,6 +4044,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getAssistantName();
+			}
+			public String getReadableTitle() {
+				return "Assistant's name";
+			}
 		};				
 		/**************** * field37 *  * *************/
 		mapping[ContactObject.STREET_OTHER] = new mapper() {
@@ -3865,6 +4085,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getStreetOther();
+			}
+			public String getReadableTitle() {
+				return "Street other";
 			}
 		};				
 		/**************** * field38 *  * *************/
@@ -3902,6 +4128,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getPostalCodeOther();
+			}
+			public String getReadableTitle() {
+				return "Postal code other";
+			}
 		};				
 		/**************** * field39 *  * *************/
 		mapping[ContactObject.CITY_OTHER] = new mapper() {
@@ -3937,6 +4169,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCityOther();
+			}
+			public String getReadableTitle() {
+				return "City other"; 
 			}
 		};				
 		/**************** * field40 *  * *************/
@@ -3974,6 +4212,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getStateOther();
+			}
+			public String getReadableTitle() {
+				return "State other";
+			}
 		};				
 		/**************** * field41 *  * *************/
 		mapping[ContactObject.COUNTRY_OTHER] = new mapper() {
@@ -4009,6 +4253,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos)throws SQLException  {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCountryOther();
+			}
+			public String getReadableTitle() {
+				return "Country other";
 			}
 		};
 		/**************** * field42 *  * *************/
@@ -4046,6 +4296,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneAssistant();
+			}
+			public String getReadableTitle() {
+				return "Telephone assostant";
+			}
 		};				
 		/**************** * field43 *  * *************/
 		mapping[ContactObject.TELEPHONE_BUSINESS1] = new mapper() {
@@ -4081,6 +4337,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneBusiness1();
+			}
+			public String getReadableTitle() {
+				return "Telephone business 1";
 			}
 		};				
 		/**************** * field44 *  * *************/
@@ -4118,6 +4380,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneBusiness2();
+			}
+			public String getReadableTitle() {
+				return "Telephone business 2";
+			}
 		};				
 		/**************** * field45 *  * *************/
 		mapping[ContactObject.FAX_BUSINESS] = new mapper() {
@@ -4153,6 +4421,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getFaxBusiness();
+			}
+			public String getReadableTitle() {
+				return "FAX business";
 			}
 		};				
 		/**************** * field46 *  * *************/
@@ -4190,6 +4464,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneCallback();
+			}
+			public String getReadableTitle() {
+				return "Telephone callback";
+			}
 		};				
 		/**************** * field47 *  * *************/
 		mapping[ContactObject.TELEPHONE_CAR] = new mapper() {
@@ -4225,6 +4505,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneCar();
+			}
+			public String getReadableTitle() {
+				return "Telephone car";
 			}
 		};				
 		/**************** * field48 *  * *************/
@@ -4262,6 +4548,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneCompany();
+			}
+			public String getReadableTitle() {
+				return "Telephone company";
+			}
 		};				
 		/**************** * field49 *  * *************/
 		mapping[ContactObject.TELEPHONE_HOME1] = new mapper() {
@@ -4297,6 +4589,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneHome1();
+			}
+			public String getReadableTitle() {
+				return "Telephone home 1";
 			}
 		};				
 		/**************** * field50 *  * *************/
@@ -4334,6 +4632,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneHome2();
+			}
+			public String getReadableTitle() {
+				return "Telephone home 2";
+			}
 		};				
 		/**************** * field51 *  * *************/
 		mapping[ContactObject.FAX_HOME] = new mapper() {
@@ -4369,6 +4673,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getFaxHome();
+			}
+			public String getReadableTitle() {
+				return "FAX home";
 			}
 		};				
 		/**************** * field52 *  * *************/
@@ -4406,6 +4716,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneISDN();
+			}
+			public String getReadableTitle() {
+				return "Telephone ISDN";
+			}
 		};				
 		/**************** * field53 *  * *************/
 		mapping[ContactObject.CELLULAR_TELEPHONE1] = new mapper() {
@@ -4441,6 +4757,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCellularTelephone1();
+			}
+			public String getReadableTitle() {
+				return "Cellular telephone 1";
 			}
 		};				
 		/**************** * field54 *  * *************/
@@ -4478,6 +4800,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCellularTelephone2();
+			}
+			public String getReadableTitle() {
+				return "Cellular telephone 2";
+			}
 		};				
 		/**************** * field55 *  * *************/
 		mapping[ContactObject.TELEPHONE_OTHER] = new mapper() {
@@ -4513,6 +4841,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneOther();
+			}
+			public String getReadableTitle() {
+				return "Telephone other";
 			}
 		};				
 		/**************** * field56 *  * *************/
@@ -4550,6 +4884,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getFaxOther();
+			}
+			public String getReadableTitle() {
+				return "FAX other";
+			}
 		};				
 		/**************** * field57 *  * *************/
 		mapping[ContactObject.TELEPHONE_PAGER] = new mapper() {
@@ -4585,6 +4925,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephonePager();
+			}
+			public String getReadableTitle() {
+				return "Telephone pager";
 			}
 		};				
 		/**************** * field58 *  * *************/
@@ -4622,6 +4968,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephonePrimary();
+			}
+			public String getReadableTitle() {
+				return "Telephone primary";
+			}
 		};				
 		/**************** * field59 *  * *************/
 		mapping[ContactObject.TELEPHONE_RADIO] = new mapper() {
@@ -4657,6 +5009,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneRadio();
+			}
+			public String getReadableTitle() {
+				return "Telephone radio";
 			}
 		};				
 		/**************** * field60 *  * *************/
@@ -4694,6 +5052,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneTelex();
+			}
+			public String getReadableTitle() {
+				return "Telephone telex";
+			}
 		};				
 		/**************** * field61 *  * *************/
 		mapping[ContactObject.TELEPHONE_TTYTDD] = new mapper() {
@@ -4730,6 +5094,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneTTYTTD();
+			}
+			public String getReadableTitle() {
+				return "Telephone TTY/TDD";
+			}
 		};				
 		/**************** * field62 *  * *************/
 		mapping[ContactObject.INSTANT_MESSENGER1] = new mapper() {
@@ -4765,6 +5135,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getInstantMessenger1();
+			}
+			public String getReadableTitle() {
+				return "Instantmessenger 1";
 			}
 		};				
 
@@ -4803,6 +5179,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getInstantMessenger2();
+			}
+			public String getReadableTitle() {
+				return "Instantmessenger 2";
+			}
 		};				
 	
 		/**************** * field64 *  * *************/
@@ -4840,6 +5222,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getTelephoneIP();
+			}
+			public String getReadableTitle() {
+				return "Telephone IP";
+			}
 		};			
 		/**************** * field65 *  * *************/
 		mapping[ContactObject.EMAIL1] = new mapper() {
@@ -4875,6 +5263,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getEmail1();
+			}
+			public String getReadableTitle() {
+				return "Email 1";
 			}
 		};			
 		/**************** * field66 *  * *************/
@@ -4912,6 +5306,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getEmail2();
+			}
+			public String getReadableTitle() {
+				return "Email 2";
+			}
 		};		
 		/**************** * field67 *  * *************/
 		mapping[ContactObject.EMAIL3] = new mapper() {
@@ -4947,6 +5347,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getEmail3();
+			}
+			public String getReadableTitle() {
+				return "Email 3";
 			}
 		};		
 		/**************** * field68 *  * *************/
@@ -4984,6 +5390,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getURL();
+			}
+			public String getReadableTitle() {
+				return "URL";
+			}
 		};		
 		/**************** * field69 *  * *************/
 		mapping[ContactObject.CATEGORIES] = new mapper() {
@@ -5019,6 +5431,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCategories();
+			}
+			public String getReadableTitle() {
+				return "Categories";
 			}
 		};
 		/**************** * field70 *  * *************/
@@ -5056,6 +5474,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField01();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 1";
+			}
 		};
 		/**************** * field71 *  * *************/
 		mapping[ContactObject.USERFIELD02] = new mapper() {
@@ -5091,6 +5515,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField02();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 2";
 			}
 		};		
 		/**************** * field72 *  * *************/
@@ -5128,6 +5558,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField03();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 3";
+			}
 		};		
 		/**************** * field73 *  * *************/
 		mapping[ContactObject.USERFIELD04] = new mapper() {
@@ -5163,6 +5599,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField04();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 4";
 			}
 		};		
 		/**************** * field74 *  * *************/
@@ -5200,6 +5642,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField05();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 5";
+			}
 		};		
 		/**************** * field75 *  * *************/
 		mapping[ContactObject.USERFIELD06] = new mapper() {
@@ -5235,6 +5683,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField06();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 6";
 			}
 		};		
 		/**************** * field76 *  * *************/
@@ -5272,6 +5726,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField07();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 7";
+			}
 		};		
 		/**************** * field77 *  * *************/
 		mapping[ContactObject.USERFIELD08] = new mapper() {
@@ -5307,6 +5767,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField08();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 8";
 			}
 		};		
 		/**************** * field78 *  * *************/
@@ -5344,6 +5810,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField09();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 9";
+			}
 		};		
 		/**************** * field79 *  * *************/
 		mapping[ContactObject.USERFIELD10] = new mapper() {
@@ -5379,6 +5851,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField10();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 10";
 			}
 		};
 		/**************** * field80 *  * *************/
@@ -5416,6 +5894,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField11();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 11";
+			}
 		};			
 		/**************** * field81 *  * *************/
 		mapping[ContactObject.USERFIELD12] = new mapper() {
@@ -5451,6 +5935,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField12();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 12";
 			}
 		};			
 		/**************** * field82 *  * *************/
@@ -5488,6 +5978,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField13();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 13";
+			}
 		};			
 		/**************** * field83 *  * *************/
 		mapping[ContactObject.USERFIELD14] = new mapper() {
@@ -5523,6 +6019,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField14();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 14";
 			}
 		};			
 		/**************** * field84 *  * *************/
@@ -5560,6 +6062,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField15();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 15";
+			}
 		};			
 		/**************** * field85 *  * *************/
 		mapping[ContactObject.USERFIELD16] = new mapper() {
@@ -5595,6 +6103,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField16();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 16";
 			}
 		};			
 		/**************** * field86 *  * *************/
@@ -5632,6 +6146,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField17();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 17";
+			}
 		};			
 		/**************** * field87 *  * *************/
 		mapping[ContactObject.USERFIELD18] = new mapper() {
@@ -5667,6 +6187,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField18();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 18";
 			}
 		};			
 		/**************** * field88 *  * *************/
@@ -5704,6 +6230,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField19();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 19";
+			}
 		};			
 		/**************** * field89 *  * *************/
 		mapping[ContactObject.USERFIELD20] = new mapper() {
@@ -5740,6 +6272,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getUserField20();
+			}
+			public String getReadableTitle() {
+				return "Dynamic Field 20";
+			}
 		};			
 		/**************** * intfield01 *  * *************/
 		mapping[ContactObject.OBJECT_ID] = new mapper() {
@@ -5766,6 +6304,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getObjectID()+"";
+			}
+			public String getReadableTitle() {
+				return "Object id";
 			}
 		};
 		/**************** * intfield02 *  * *************/
@@ -5794,6 +6338,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNumberOfDistributionLists()+"";
+			}
+			public String getReadableTitle() {
+				return "Number of distributionlists";
+			}
 		};
 		/**************** * intfield03 *  * *************/
 		mapping[ContactObject.NUMBER_OF_LINKS] = new mapper() {
@@ -5820,6 +6370,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getNumberOfLinks()+"";
+			}
+			public String getReadableTitle() {
+				return "Number of links";
 			}
 		};
 		/**************** * intfield02 Part 2 *  * *************/
@@ -5851,6 +6407,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
 			}
 		};
 		/**************** * intfield03 Part 2 *  * *************/
@@ -5884,6 +6446,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};
 		/**************** * fid *  * *************/
 		mapping[ContactObject.FOLDER_ID] = new mapper() {
@@ -5911,6 +6479,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getParentFolderID()+"";
+			}
+			public String getReadableTitle() {
+				return "Folder id";
+			}
 		};
 		/**************** * cid *  * *************/
 		mapping[ContactObject.CONTEXTID] = new mapper() {
@@ -5937,6 +6511,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getContextId()+"";
+			}
+			public String getReadableTitle() {
+				return "Context id";
 			}
 		};
 		/**************** * pflag *  * *************/
@@ -5977,6 +6557,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};
 		/**************** * created_from *  * *************/
 		mapping[ContactObject.CREATED_BY] = new mapper() {
@@ -6004,6 +6590,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCreatedBy()+"";
+			}
+			public String getReadableTitle() {
+				return "Created by";
+			}
 		};
 		/**************** * changed_from *  * *************/
 		mapping[ContactObject.MODIFIED_BY] = new mapper() {
@@ -6030,6 +6622,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getModifiedBy()+"";
+			}
+			public String getReadableTitle() {
+				return "Modified by";
 			}
 		};
 		/**************** * creating_date *  * *************/
@@ -6066,6 +6664,12 @@ public class Contacts implements DeleteListener {
 				}
 				return d;
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getCreationDate().toString();
+			}
+			public String getReadableTitle() {
+				return "Creation date";
+			}
 		};
 		/**************** * changing_date *  * *************/
 		mapping[ContactObject.LAST_MODIFIED] = new mapper() {
@@ -6100,6 +6704,12 @@ public class Contacts implements DeleteListener {
 					d = new Date(x);
 				}
 				return d;
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getLastModified().toString();
+			}
+			public String getReadableTitle() {
+				return "Changing date";
 			}
 		};		
 		/**************** * timestampfield01 *  * *************/
@@ -6151,6 +6761,12 @@ public class Contacts implements DeleteListener {
 				}
 				return d;
 			}
+			public String getValueAsString(ContactObject co) {
+				return co.getBirthday().toString();
+			}
+			public String getReadableTitle() {
+				return "Birthday";
+			}
 		};		
 		/**************** * timestampfield02 *  * *************/
 		mapping[ContactObject.ANNIVERSARY] = new mapper() {
@@ -6200,6 +6816,12 @@ public class Contacts implements DeleteListener {
 					d = new java.util.Date(x.getTime());
 				}
 				return d;
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getAnniversary().toString();
+			}
+			public String getReadableTitle() {
+				return "Anniversay";
 			}
 		};			
 
@@ -6251,6 +6873,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};		
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.IMAGE_LAST_MODIFIED] = new mapper() {
@@ -6293,6 +6921,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.IMAGE1_CONTENT_TYPE] = new mapper() {
@@ -6316,6 +6950,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
 			}
 		};
 		/**************** * userid *  * *************/
@@ -6347,6 +6987,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
 			}
 		};	
 		/**************** * intfield05 *  * *************/
@@ -6382,6 +7028,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
 			}
 		};	
 		/**************** * field90 *  * *************/
@@ -6419,6 +7071,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return rs.getString(pos);
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};	
 		/**************** * intfield06 *  * *************/
 		mapping[ContactObject.DEFAULT_ADDRESS] = new mapper() {
@@ -6453,6 +7111,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return co.getDefaultAddress()+"";
+			}
+			public String getReadableTitle() {
+				return "Default address";
 			}
 		};	
 		/**************** * intfield07 *  * *************/
@@ -6501,6 +7165,12 @@ public class Contacts implements DeleteListener {
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
 		};
 		/**************** * intfield08 *  * *************/
 		mapping[ContactObject.NUMBER_OF_ATTACHMENTS] = new mapper() {
@@ -6535,6 +7205,12 @@ public class Contacts implements DeleteListener {
 			}
 			public Object getData(ResultSet rs,int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
 			}
 		};	
 	}
