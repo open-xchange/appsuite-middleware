@@ -82,20 +82,32 @@ public class SessiondConnector {
 		
 	}
 	
+	/**
+	 * Creates a new instance implementing of the SessiondConnector
+	 * @return an instance implementing the user storage interface.
+	 * @throws LdapException if the instance can't be created.
+	 */
 	public static SessiondConnector getInstance() {
 		if (config == null) {
 			LOG.error("SessiondConfig is null!");
 			
 			return null;
 		}
-
+		
 		return new SessiondConnector();
 	}
 	
+	/**
+	 * set the SessiondConfig that is used by the instance of the SessiondConnector
+	 * @param config - The SessiondConfig for all new instances
+	 */
 	public static void setConfig(final SessiondConfig config) {
 		SessiondConnector.config = config;
 	}
 	
+	/**
+	 * close all used resources
+	 */
 	public void close() {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
@@ -110,10 +122,41 @@ public class SessiondConnector {
 		}
 	}
 	
+	/**
+	 * Add a new Session to the session handler 
+	 * @param username - The username that is saved in this session object
+	 * @param password - The password that is saved in this session object
+	 * @param client_ip - The client_ip that is saved in this session object
+	 * @return SessionObject - Return a filled session object with all informations about this session
+	 * @throws LoginException
+	 * @throws InvalidCredentialsException
+	 * @throws UserNotFoundException
+	 * @throws PasswordExpiredException
+	 * @throws ContextNotFoundException
+	 * @throws MaxSessionLimitException
+	 * @throws SessiondException
+	 */
 	public SessionObject addSession(final String username, final String password, final String client_ip) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException {
 		return SessionHandler.addSession(username, password, client_ip, null);
-	} 
+	}
 	
+	/**
+	 * Add a new Session to the session handler 
+	 * @param username - The username that is saved in this session object
+	 * @param password - The password that is saved in this session object
+	 * @param sessionid - The sessionid that is saved in this session object
+	 * @param client_ip - The client_ip that is saved in this session object
+	 * @param host
+	 * @param data - A String that can contain every information that is maybe useful
+	 * @return SessionObject - Return a filled session object with all informations about this session
+	 * @throws LoginException
+	 * @throws InvalidCredentialsException
+	 * @throws UserNotFoundException
+	 * @throws PasswordExpiredException
+	 * @throws ContextNotFoundException
+	 * @throws MaxSessionLimitException
+	 * @throws SessiondException
+	 */
 	public SessionObject addSession(final String username, final String password, final String sessionid, final String client_ip, final String host, final String data) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException {
 		if (config.isTcpClientSocketEnabled()) {
 			// TCP Connection enabled
@@ -144,6 +187,11 @@ public class SessiondConnector {
 		}
 	}
 	
+	/**
+	 * Refresh the session that contains the given sessionid
+	 * @param sessionid - The sessionid of the session
+	 * @return boolean - true if the session was still active and the refresh was succesfully or false if the session was invalid or not found
+	 */
 	public boolean refreshSession(final String sessionid) {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
@@ -174,6 +222,11 @@ public class SessiondConnector {
 		}
 	}
 	
+	/**
+	 * Remove the session that contains the given sessionid
+	 * @param sessionid - The sessionid of the session
+	 * @return boolean - true if the session was still active and the remove was succesfully or false if the session was invalid or not found
+	 */
 	public boolean removeSession(final String sessionid) {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
@@ -204,14 +257,30 @@ public class SessiondConnector {
 		}
 	}
 	
+	/**
+	 * Return the session object with the given random token
+	 * @param randomToken - The random token of the session
+	 * @return SessionObject - The Session Object that match with the given random token
+	 */
 	public SessionObject getSessionByRandomToken(final String randomToken) {
 		return SessionHandler.getSessionByRandomToken(randomToken);
 	}
 	
+	/**
+	 * Return the session object with the given sessionid
+	 * @param sessionid - The sessionid of the session
+	 * @return SessionObject - The Session Object that match with the given sessionid. This method refresh the session too.
+	 */
 	public SessionObject getSession(final String sessionid) {
 		return getSession(sessionid, true);
 	}
 	
+	/**
+	 * Return the session object with the given sessionid
+	 * @param sessionid - The sessionid of the session
+	 * @param refresh - The refresh parameter. Set to true if the session is refresh by the access or false if not.
+	 * @return SessionObject - The Session Object that match with the given sessionid
+	 */
 	public SessionObject getSession(final String sessionid, final boolean refresh) {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
@@ -260,13 +329,17 @@ public class SessiondConnector {
 		}
 	}
 	
+	/**
+	 * Return an iterator with all open sessions
+	 * @return Iterator - An iterator with all open sessions
+	 */
 	public Iterator getSessions() {
 		if (config.isTcpClientSocketEnabled()) {
 			LOG.warn("NOT IMPLEMENTED YET!");
 			return null;
-		} else {		
+		} else {
 			return SessionHandler.getSessions();
-		} 
+		}
 	}
 	
 	private void initSockets() throws Exception {
@@ -287,7 +360,7 @@ public class SessiondConnector {
 	private String makeAuthData(final String uid, final String pass, final String language, final String localeip, final String remoteip) throws Exception {
 		final String sendString = uid+"\1"+pass+"\1"+language+"\1"+localeip+"\1"+remoteip;
 		return Base64.encode(sendString);
-	}	
+	}
 }
 
 
