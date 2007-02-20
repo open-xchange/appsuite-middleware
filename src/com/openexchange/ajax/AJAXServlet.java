@@ -588,21 +588,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return retval;
 	}
 
-	/**
-	 * Returns the session object for the given session id.
-	 * 
-	 * @param sessionId
-	 *            Identifier of the session.
-	 * @return the session object or <code>null</code> if the session doesn't
-	 *         exist.
-	 */
-	protected static SessionObject getSession(final String sessionId) {
-		if (null == sessionId) {
-			return null;
-		}
-		return SessiondConnector.getInstance().getSession(sessionId);
-	}
-
 	protected static String getAction(final HttpServletRequest req) throws OXConflictException {
 		final String action = req.getParameter(PARAMETER_ACTION);
 
