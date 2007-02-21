@@ -179,8 +179,7 @@ public class OXServletInputStream extends ServletInputStream {
 				if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
 					return -1;
 				}
-				requestMoreDataFromWebServer();
-				if (data == null) {
+				if (!requestMoreDataFromWebServer()) {
 					/*
 					 * Web server sent an empty data package to indicate no more
 					 * available data
@@ -227,6 +226,10 @@ public class OXServletInputStream extends ServletInputStream {
 				return 0;
 			}
 			final int numOfAvailableBytes = data.length - pos;
+			/*
+			 * Number of available bytes is greater than or equal to requested
+			 * length (len)
+			 */
 			if (numOfAvailableBytes >= len) {
 				System.arraycopy(data, pos, b, off, len);
 				pos += len;
@@ -343,7 +346,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 *         <code>false</code> if no more data is expected or an empty data
 	 *         package has been sent from web server
 	 */
-	private boolean requestMoreDataFromWebServer() throws IOException {
+	private final boolean requestMoreDataFromWebServer() throws IOException {
 		try {
 			if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
 				/*

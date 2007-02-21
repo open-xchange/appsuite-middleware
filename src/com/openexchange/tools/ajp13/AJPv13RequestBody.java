@@ -57,7 +57,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
-import com.openexchange.tools.servlet.OXServletInputStream;
 
 /**
  * 
@@ -93,10 +92,18 @@ public class AJPv13RequestBody extends AJPv13Request {
 					 * total requested content length is less than data's
 					 * content length
 					 */
-					final Throwable t = new Throwable("Unexpected end of data from web server");
-					t.fillInStackTrace();
-					LOG.error(t);
-					ajpRequestHandler.setTotalRequestedContentLength(ajpRequestHandler.getContentLength());
+					if (LOG.isWarnEnabled()) {
+						final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
+								ajpRequestHandler.getTotalRequestedContentLength(), ajpRequestHandler.getContentLength());
+						ajpExc.fillInStackTrace();
+						LOG.warn(ajpExc.getMessage(), ajpExc);
+					}
+					/*
+					 * Set data to null to indicate that no more data is
+					 * available from web server
+					 */
+					ajpRequestHandler.makeEqual();
+					ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
 				} else {
 					/*
 					 * Request expected data one more time
@@ -120,7 +127,7 @@ public class AJPv13RequestBody extends AJPv13Request {
 			if (!ajpRequestHandler.containsContentLength() || ajpRequestHandler.isMoreDataReadThanExpected()) {
 				ajpRequestHandler.makeEqual();
 			}
-			((OXServletInputStream) ajpRequestHandler.getServletRequestObj().getInputStream()).setData(null);
+			ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
 			return;
 		}
 		/*

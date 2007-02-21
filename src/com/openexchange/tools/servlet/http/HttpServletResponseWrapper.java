@@ -217,18 +217,36 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * @see javax.servlet.http.HttpServletResponse#encodeURL(java.lang.String)
 	 */
 	public String encodeURL(final String url) {
-		try {
-			final SessionObject groupwareSession = (SessionObject) request.getAttribute(SessionServlet._sessionObject);
-			final HttpSession httpSession = request.getSession();
-			return URLEncoder.encode(appendSessionID(url, groupwareSession == null ? null : groupwareSession
-					.getSecret(), httpSession == null ? null : httpSession.getId()), getCharacterEncoding());
-		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
-			return url;
+		/*
+		 * Retrieve groupware session, if user is logged in
+		 */
+		final SessionObject groupwareSession = (SessionObject) request.getAttribute(SessionServlet._sessionObject);
+		/*
+		 * Check for HTTP session: First look for JSESSIONID cookie, if none
+		 * found check if HTTP session was created.
+		 */
+		boolean foundInCookie = false;
+		final Cookie[] cookies = request.getCookies();
+		for (int i = 0; i < cookies.length && !foundInCookie; i++) {
+			if (AJPv13RequestHandler.COOKIE_NAME_JSESSIONID.equals(cookies[i].getName())) {
+				foundInCookie = true;
+			}
 		}
+		final HttpSession httpSession;
+		if (foundInCookie) {
+			/*
+			 * Set to null, cause obviously cookies are used
+			 */
+			httpSession = null;
+		} else {
+			httpSession = request.getSession(false);
+		}
+		return appendSessionID(url, groupwareSession == null ? null : groupwareSession.getSecret(),
+				httpSession == null ? null : httpSession.getId());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#encodeRedirectURL(java.lang.String)
 	 */
@@ -250,7 +268,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         final int question = url.indexOf('?');
         if (question >= 0) {
             path = url.substring(0, question);
-            query = url.substring(question);
+            query = url.substring(question + 1);
         }
         final int pound = path.indexOf('#');
         if (pound >= 0) {
@@ -258,18 +276,22 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             path = path.substring(0, pound);
         }
         final StringBuilder sb = new StringBuilder(path);
-        if (sb.length() > 0) {
-			if (groupwareSessionId != null) {
-				sb.append(';').append(Mail.PARAMETER_SESSION).append('=');
-				sb.append(groupwareSessionId);
-			}
-			if (httpSessionId != null) {
-				sb.append(';').append(AJPv13RequestHandler.COOKIE_NAME_JSESSIONID).append('=');
-				sb.append(httpSessionId);
-			}
-		}
         sb.append(anchor);
-        sb.append(query);
+        boolean first = true;
+        if (groupwareSessionId != null) {
+			sb.append('?').append(Mail.PARAMETER_SESSION).append('=');
+			sb.append(groupwareSessionId);
+			first = false;
+		}
+		if (httpSessionId != null) {
+			sb.append(first ? '?' : '&').append(AJPv13RequestHandler.COOKIE_NAME_JSESSIONID).append('=');
+			sb.append(httpSessionId);
+			first = false;
+		}
+		if (query.length() > 0) {
+        	sb.append(first ? '?' : '&').append(query);
+        	first = false;
+        }
         return (sb.toString());
     }
 

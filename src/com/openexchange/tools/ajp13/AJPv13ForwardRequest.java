@@ -434,8 +434,8 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 			jsessionIDCookie.setPath("/");
 			jsessionIDCookie.setMaxAge(-1); // session cookie
 			ajpRequestHandler.setHttpSessionId(jsessionIDVal.toString());
+            resp.addCookie(jsessionIDCookie);
 		}
-		resp.addCookie(jsessionIDCookie);
 	}
 
 	private static final Cookie checkJsessionIDQueryParameter(final HttpServletRequestWrapper servletRequest,

@@ -149,7 +149,15 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s
 		 */
-		WRONG_JVM_ROUTE("Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s", Category.SOCKET_CONNECTION, 19);
+		WRONG_JVM_ROUTE("Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s",
+				Category.SOCKET_CONNECTION, 19),
+		/**
+		 * Unexpected empty body package received from web server.
+		 * Total-Received: %d | Content-Length: %d
+		 */
+		UNEXPECTED_EMPTY_DATA_PACKAGE(
+				"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d",
+				Category.SOCKET_CONNECTION, 20);
 
 		private final String message;
 
