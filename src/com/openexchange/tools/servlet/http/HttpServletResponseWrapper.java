@@ -261,27 +261,28 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return encodeURL(url);
 	}
     
-    private static final String appendSessionID(final String url, final String groupwareSessionId, final String httpSessionId) {
-        if ((url == null) || (groupwareSessionId == null && httpSessionId == null)) {
-            return (url);
-        }
-        String path = url;
-        String query = "";
-        String anchor = "";
-        final int question = url.indexOf('?');
-        if (question >= 0) {
-            path = url.substring(0, question);
-            query = url.substring(question + 1);
-        }
-        final int pound = path.indexOf('#');
-        if (pound >= 0) {
-            anchor = path.substring(pound);
-            path = path.substring(0, pound);
-        }
-        final StringBuilder sb = new StringBuilder(path);
-        sb.append(anchor);
-        boolean first = true;
-        if (groupwareSessionId != null) {
+    private static final String appendSessionID(final String url, final String groupwareSessionId,
+			final String httpSessionId) {
+		if ((url == null) || (groupwareSessionId == null && httpSessionId == null)) {
+			return new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString();
+		}
+		String path = url;
+		String query = "";
+		String anchor = "";
+		final int question = url.indexOf('?');
+		if (question >= 0) {
+			path = url.substring(0, question);
+			query = url.substring(question + 1);
+		}
+		final int pound = path.indexOf('#');
+		if (pound >= 0) {
+			anchor = path.substring(pound);
+			path = path.substring(0, pound);
+		}
+		final StringBuilder sb = new StringBuilder(path);
+		sb.append(anchor);
+		boolean first = true;
+		if (groupwareSessionId != null) {
 			sb.append('?').append(Mail.PARAMETER_SESSION).append('=');
 			sb.append(groupwareSessionId);
 			first = false;
@@ -292,14 +293,14 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			first = false;
 		}
 		if (query.length() > 0) {
-        	sb.append(first ? '?' : '&').append(query);
-        	first = false;
-        }
+			sb.append(first ? '?' : '&').append(query);
+			first = false;
+		}
 		if (first) {
-        	sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
-        }
-        return (sb.toString());
-    }
+			sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
+		}
+		return (sb.toString());
+	}
 
 	public void addDateHeader(final String name, final long l) {
 		synchronized (headerDateFormat) {
