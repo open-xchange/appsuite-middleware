@@ -227,9 +227,11 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		 */
 		boolean foundInCookie = false;
 		final Cookie[] cookies = request.getCookies();
-		for (int i = 0; i < cookies.length && !foundInCookie; i++) {
-			if (AJPv13RequestHandler.COOKIE_NAME_JSESSIONID.equals(cookies[i].getName())) {
-				foundInCookie = true;
+		if (cookies != null) {
+			for (int i = 0; i < cookies.length && !foundInCookie; i++) {
+				if (AJPv13RequestHandler.COOKIE_NAME_JSESSIONID.equals(cookies[i].getName())) {
+					foundInCookie = true;
+				}
 			}
 		}
 		final HttpSession httpSession;
