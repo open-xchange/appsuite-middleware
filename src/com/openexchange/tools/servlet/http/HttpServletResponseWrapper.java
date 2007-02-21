@@ -77,6 +77,7 @@ import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.ServletResponseWrapper;
 
@@ -293,6 +294,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		if (query.length() > 0) {
         	sb.append(first ? '?' : '&').append(query);
         	first = false;
+        }
+		if (first) {
+        	sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
         }
         return (sb.toString());
     }
