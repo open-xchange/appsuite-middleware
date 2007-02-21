@@ -263,8 +263,11 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     
     private static final String appendSessionID(final String url, final String groupwareSessionId,
 			final String httpSessionId) {
-		if ((url == null) || (groupwareSessionId == null && httpSessionId == null)) {
-			return new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute()).toString();
+		if (url == null) {
+			return null;
+		} else if (groupwareSessionId == null && httpSessionId == null) {
+			return url.indexOf('?') == -1 ? new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute())
+					.toString() : url;
 		}
 		String path = url;
 		String query = "";
