@@ -67,6 +67,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.dataSource.I_OXContext;
 import com.openexchange.admin.dataSource.I_OXUtil;
 import com.openexchange.admin.dataSource.OXContext_MySQL;
@@ -382,7 +383,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXCONTEXT,
             // add to job queue
             retValue.clear();
             retValue.add("OK");
-            ClientAdminThread.ajx.addJob(rdm, context_id, dstStore_id, reason_id, AdminJob.Mode.MOVE_FILESTORE);
+            ClientAdminThreadExtended.ajx.addJob(rdm, context_id, dstStore_id, reason_id, AdminJob.Mode.MOVE_FILESTORE);
 
         } catch ( PoolException ecp ) {
             log.error( LOG_ERROR, ecp );
@@ -442,7 +443,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXCONTEXT,
             // add to job queue
             retValue.clear();
             retValue.add("OK");
-            ClientAdminThread.ajx.addJob(ddm, context_id, database_id, reason_id, AdminJob.Mode.MOVE_DATABASE);
+            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, database_id, reason_id, AdminJob.Mode.MOVE_DATABASE);
 
         }catch(PoolException ecp){
             log.error(LOG_ERROR,ecp);

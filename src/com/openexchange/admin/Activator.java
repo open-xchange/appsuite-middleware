@@ -3,36 +3,54 @@ package com.openexchange.admin;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.dataSource.I_AdminJobExecutor;
 import com.openexchange.admin.dataSource.I_OXContext;
 import com.openexchange.admin.dataSource.I_OXGroup;
 import com.openexchange.admin.dataSource.I_OXResource;
 import com.openexchange.admin.dataSource.I_OXUser;
 import com.openexchange.admin.dataSource.I_OXUtil;
+import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.AdminJobExecutorInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class Activator implements BundleActivator {
 
-    private static Registry registry = null;
+    private static Log log = LogFactory.getLog(AdminDaemon.class);
     
+    private static Registry registry = null;
+
+    private static com.openexchange.admin.dataSource.impl.OXContext oxctx = null;
+    private static com.openexchange.admin.dataSource.impl.OXUtil oxutil = null;
+    private static com.openexchange.admin.dataSource.impl.OXUser oxuser = null;
+    private static com.openexchange.admin.dataSource.impl.OXGroup oxgrp = null;
+    private static com.openexchange.admin.dataSource.impl.OXResource oxres = null;
+    private static com.openexchange.admin.dataSource.impl.AdminJobExecutor ajx = null;
+
+    private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
+    private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
+    private static com.openexchange.admin.rmi.impl.AdminJobExecutor ajx_v2 = null;
+
+    private MonitorAgent moni = null;
+    private static PropertyHandler prop = null;
+
     /*
      * (non-Javadoc)
      * 
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
-        private static com.openexchange.admin.dataSource.impl.OXContext oxctx = null;
-        private static com.openexchange.admin.dataSource.impl.OXUtil oxutil = null;
-        private static com.openexchange.admin.dataSource.impl.OXUser oxuser = null;
-        private static com.openexchange.admin.dataSource.impl.OXGroup oxgrp = null;
-        private static com.openexchange.admin.dataSource.impl.OXResource oxres = null;
-        private static com.openexchange.admin.dataSource.impl.AdminJobExecutor ajx = null;
 
-        private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
-        private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
+        prop = AdminDaemon.getProp();
 
         // Create all OLD Objects and bind export them
         oxctx = new com.openexchange.admin.dataSource.impl.OXContext();
@@ -51,7 +69,7 @@ public class Activator implements BundleActivator {
         I_OXResource oxres_stub = (I_OXResource) UnicastRemoteObject.exportObject(oxres, 0);
 
         ajx = new com.openexchange.admin.dataSource.impl.AdminJobExecutor();
-        ClientAdminThread.ajx = ajx;
+        ClientAdminThreadExtended.ajx = ajx;
         I_AdminJobExecutor ajx_stub = (I_AdminJobExecutor) UnicastRemoteObject.exportObject(ajx, 0);
         // end of OLD exports
 
@@ -61,6 +79,9 @@ public class Activator implements BundleActivator {
         oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
         OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
 
+        ajx_v2 = new com.openexchange.admin.rmi.impl.AdminJobExecutor();
+        ClientAdminThreadExtended.ajx = ajx_v2;
+        AdminJobExecutorInterface ajx_stub_v2 = (AdminJobExecutorInterface) UnicastRemoteObject.exportObject(ajx_v2, 0);
 
         // bind OLD objects to registry
         registry.bind(I_OXContext.RMI_NAME, oxctx_stub);
@@ -73,7 +94,9 @@ public class Activator implements BundleActivator {
         // bind all NEW Objects to registry
         registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
         registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
+        registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
+        startJMX();
     }
 
     /*
@@ -82,10 +105,12 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) throws Exception {
+        stopJMX();
         if (null != registry) {
             registry.unbind(OXContextInterface.RMI_NAME);
             registry.unbind(OXUtilInterface.RMI_NAME);
-            
+            registry.unbind(AdminJobExecutorInterface.RMI_NAME);
+
             registry.unbind(I_OXContext.RMI_NAME);
             registry.unbind(I_OXUtil.RMI_NAME);
             registry.unbind(I_OXUser.RMI_NAME);
@@ -94,5 +119,31 @@ public class Activator implements BundleActivator {
             registry.unbind(I_AdminJobExecutor.RMI_NAME);
         }
     }
+
+    public void startJMX() {
+        int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
+        this.moni = new MonitorAgent(jmx_port);
+        this.moni.start();
+
+        // I_OXGroup ox_group = new OXGroup();
+        // I_OXResource ox_resource = new OXResource();
+        // I_OXResourceGroup ox_resource_group = new OXResourceGroup();
+        // I_OXUser ox_user = new OXUser();
+        // I_OXContext ox_context = new OXContext();
+        // I_OXUtil ox_util = new OXUtil();
+        // Naming.rebind(I_OXGroup.RMI_NAME, ox_group);
+        // Naming.rebind(I_OXResource.RMI_NAME, ox_resource);
+        // Naming.rebind( I_OXResourceGroup.RMI_NAME, ox_resource_group );
+        // Naming.rebind(I_OXUser.RMI_NAME, ox_user);
+        // Naming.rebind(I_OXContext.RMI_NAME, ox_context);
+        // Naming.rebind(I_OXUtil.RMI_NAME, ox_util);
+        String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
+        log.info("Admindaemon Name: " + servername);
+    }
+    
+    public void stopJMX() {
+        this.moni.stop();
+    }
+    
 
 }
