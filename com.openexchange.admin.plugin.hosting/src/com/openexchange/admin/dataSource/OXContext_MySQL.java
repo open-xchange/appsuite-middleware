@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.dataSource;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.dataSource.impl.OXUser;
 import com.openexchange.admin.dataSource.impl.OXUtil;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
@@ -79,6 +79,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.database.DataFetcher;
 import com.openexchange.admin.tools.database.DataFetcherMysql;
@@ -94,7 +95,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class OXContext_MySQL {
     
-    private AdminCache     cache   = null;
+    private AdminCacheExtended     cache   = null;
     private static Log log = LogFactory.getLog(OXContext_MySQL.class);
     private PropertyHandler prop    = null;
     
@@ -111,7 +112,7 @@ public class OXContext_MySQL {
     
     public OXContext_MySQL() {
         try {
-            cache = ClientAdminThread.cache;
+            cache = ClientAdminThreadExtended.cache;
             prop    = cache.getProperties();
             
             this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA","1"));
@@ -221,7 +222,7 @@ public class OXContext_MySQL {
         if( CONTEXTS_PER_SCHEMA == 1 ) {
             
             String schema_name;
-            synchronized (ClientAdminThread.create_mutex) {
+            synchronized (ClientAdminThreadExtended.create_mutex) {
                 configdb_write_con.setAutoCommit(false);
                 int srv_id = IDGenerator.getId (configdb_write_con);
                 configdb_write_con.commit();
@@ -236,7 +237,7 @@ public class OXContext_MySQL {
             updateContextServer2DbPool(db_handle,configdb_write_con,target_database_id,context_id);
         } else {
             // check if there's a db schema which is not yet full
-            synchronized (ClientAdminThread.create_mutex) {
+            synchronized (ClientAdminThreadExtended.create_mutex) {
                 String schema_name = getNextUnfilledSchemaFromDB(target_database_id,configdb_write_con);
                 // there's none? create one
                 if(schema_name == null){
@@ -1280,7 +1281,7 @@ public class OXContext_MySQL {
                     //synchronized (ClientAdminThread.create_mutex) {
                     // FIXME: generate unique schema name
                     String schema_name;
-                    synchronized (ClientAdminThread.create_mutex) {
+                    synchronized (ClientAdminThreadExtended.create_mutex) {
                         configdb_write_con.setAutoCommit(false);
                         int srv_id = IDGenerator.getId (configdb_write_con);
                         configdb_write_con.commit();
@@ -1296,7 +1297,7 @@ public class OXContext_MySQL {
                     //}
                 } else {
                     // check if there's a db schema which is not yet full
-                    synchronized (ClientAdminThread.create_mutex) {
+                    synchronized (ClientAdminThreadExtended.create_mutex) {
                         String schema_name = getNextUnfilledSchemaFromDB(dbid.intValue(),configdb_write_con);
                         // there's none? create one
                         if( schema_name == null ) {
@@ -2367,7 +2368,7 @@ public class OXContext_MySQL {
     private void initSequenceTables(final int context_id, final Connection con) throws SQLException, OXContextException  {
         PreparedStatement ps = null;
         try{
-            AdminCache  cache   = ClientAdminThread.cache;
+            AdminCache  cache   = ClientAdminThreadExtended.cache;
             ArrayList<String> sequence_tables = cache.getSequenceTables();
             Iterator<String> is = sequence_tables.iterator();
             while( is.hasNext() ) {
