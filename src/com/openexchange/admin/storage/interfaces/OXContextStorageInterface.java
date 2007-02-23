@@ -51,8 +51,7 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -61,9 +60,8 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.groupware.ldap.LdapException;
 
 /**
  * This interface provides an abstraction to the storage of the context
@@ -79,12 +77,12 @@ public abstract class OXContextStorageInterface {
      */
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
-    protected static AdminCache cache = null;
+    protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandler prop = null;
 
     static {
-        cache = ClientAdminThread.cache;
+        cache = ClientAdminThreadExtended.cache;
         prop = cache.getProperties();
     }
 
