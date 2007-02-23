@@ -3,15 +3,15 @@ package com.openexchange.admin.tools;
 import java.sql.Connection;
 
 import com.openexchange.admin.exceptions.PoolException;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 
 public class AdminCacheExtended extends AdminCache {
-    private OXAdminPoolInterface pool            = null;
+    private OXAdminPoolInterfaceExtension pool            = null;
 
     public void initCacheExtended() {
         initCache();
-        pool = new OXAdminPoolDBPool(prop);
+        pool = new OXAdminPoolDBPoolExtension(prop);
 
     }
     

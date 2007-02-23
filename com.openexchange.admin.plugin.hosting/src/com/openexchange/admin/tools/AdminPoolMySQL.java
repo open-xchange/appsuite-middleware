@@ -54,14 +54,14 @@
 //
 //import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 //import com.openexchange.admin.exceptions.PoolException;
-//import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+//import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 //
 //import java.util.Hashtable;
 //
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 //
-//public class AdminPoolMySQL implements OXAdminPoolInterface {
+//public class AdminPoolMySQL implements OXAdminPoolInterfaceExtension {
 //    
 //    private Log log = LogFactory.getLog(this.getClass());
 //    private MysqlConnectionPoolDataSource dsConfWrite;
