@@ -132,7 +132,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXGROUP,
             
             if ( prop.getGroupProp( AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true ) ) {
                 try{
-                    AdminDaemonTools.validateGroupName( groupData.get( I_OXGroup.GID ).toString() );
+                    validateGroupName( groupData.get( I_OXGroup.GID ).toString() );
                 }catch(OXGroupException ox){
                     throw GROUP_EXCEPTIONS.create(1,ox.getMessage());
                 }
@@ -267,7 +267,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXGROUP,
             if ( groupData.containsKey(I_OXGroup.GID) &&
                     prop.getGroupProp( AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true ) ) {
                 try{
-                    AdminDaemonTools.validateGroupName( groupData.get( I_OXGroup.GID ).toString() );
+                    validateGroupName( groupData.get( I_OXGroup.GID ).toString() );
                 }catch(OXGroupException ox){
                     throw GROUP_EXCEPTIONS.create(13,ox.getMessage());
                 }
@@ -490,4 +490,13 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXGROUP,
         return retValue;
     }
     
+    private void validateGroupName( String groupName ) throws OXGroupException {
+        // Check for allowed chars:
+        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
+        String illegal = groupName.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
+        if( illegal.length() > 0 ) {
+            throw new OXGroupException( OXGroupException.ILLEGAL_CHARS + ": \""+illegal+"\"");
+        }
+    }
+
 }

@@ -141,7 +141,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXRESOURCE,
             
             if ( prop.getResourceProp( AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true ) ) {
                 try{
-                    AdminDaemonTools.validateResourceName( resData.get( I_OXResource.RID ).toString() );
+                    validateResourceName( resData.get( I_OXResource.RID ).toString() );
                 }catch(OXResourceException oxres){
                     throw RESOURCE_EXCEPTIONS.create(1,oxres.getMessage());
                 }
@@ -232,7 +232,7 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXRESOURCE,
             if ( resData.containsKey(I_OXResource.RID) &&
                     prop.getResourceProp( AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true ) ) {
                 try{
-                    AdminDaemonTools.validateResourceName( resData.get( I_OXResource.RID ).toString() );
+                    validateResourceName( resData.get( I_OXResource.RID ).toString() );
                 }catch(OXResourceException xres){
                     throw RESOURCE_EXCEPTIONS.create(9,xres.getMessage());
                 }
@@ -354,5 +354,14 @@ classId=Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXRESOURCE,
         }
         log.debug(OXContext.LOG_RESPONSE+retValue);
         return retValue;
+    }
+
+    private void validateResourceName( String resName ) throws OXResourceException {
+        // Check for allowed chars:
+        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
+        String illegal = resName.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
+        if( illegal.length() > 0 ) {
+            throw new OXResourceException( OXResourceException.ILLEGAL_CHARS + ": \""+illegal+"\"");
+        }
     }
 }
