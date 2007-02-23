@@ -25,7 +25,7 @@ import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class Activator implements BundleActivator {
 
-    private static Log log = LogFactory.getLog(AdminDaemon.class);
+    private static Log log = LogFactory.getLog(Activator.class);
     
     private static Registry registry = null;
 
@@ -50,6 +50,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext context) throws Exception {
 
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         prop = AdminDaemon.getProp();
 
         // Create all OLD Objects and bind export them
@@ -120,7 +121,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void startJMX() {
+    private void startJMX() {
         int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
         this.moni = new MonitorAgent(jmx_port);
         this.moni.start();
@@ -141,7 +142,7 @@ public class Activator implements BundleActivator {
         log.info("Admindaemon Name: " + servername);
     }
     
-    public void stopJMX() {
+    private void stopJMX() {
         this.moni.stop();
     }
     
