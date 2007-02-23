@@ -242,6 +242,9 @@ public class OXUser {
                 } catch (NoSuchContextException e) {
                     e.printStackTrace();
                     u.doExit(e);
+                } catch (InvalidDataException e) {
+                    e.printStackTrace();
+                    u.doExit(e);
                 }
                 System.out.println("User_ID");
 
