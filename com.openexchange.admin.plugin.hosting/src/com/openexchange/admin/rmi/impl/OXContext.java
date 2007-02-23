@@ -49,6 +49,7 @@
 package com.openexchange.admin.rmi.impl;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.ContextException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -364,7 +365,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src, dst, context_id, dst_filestore_id.getId());
                 // TODO: d7 set return value of jobid in addJob, so we can
                 // return the id here
-                ClientAdminThread.ajx.addJob(fsdm, context_id, dst_filestore_id.getId(), reason.getId(), AdminJob.Mode.MOVE_FILESTORE);
+                ClientAdminThreadExtended.ajx.addJob(fsdm, context_id, dst_filestore_id.getId(), reason.getId(), AdminJob.Mode.MOVE_FILESTORE);
 
             } catch (final StorageException e) {
                 reEnableContext(ctx, oxcox);
@@ -432,7 +433,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             // add to job queue
             // retValue.clear();
             // retValue.add("OK");
-            ClientAdminThread.ajx.addJob(ddm, context_id, database_id.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
+            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, database_id.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
             // TODO: d7
             // } catch (PoolException ecp) {
             // log.error(LOG_ERROR, ecp);
