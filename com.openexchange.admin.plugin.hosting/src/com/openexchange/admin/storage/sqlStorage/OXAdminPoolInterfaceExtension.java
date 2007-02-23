@@ -57,7 +57,7 @@ import java.sql.Connection;
 /**
  *
  */
-public interface OXAdminPoolInterface {
+public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
     
     // SPECIAL METHODS FOR CONTEXT MOVING
     public int getDBPoolIdForContextId(int context_id) throws PoolException;
@@ -66,19 +66,4 @@ public interface OXAdminPoolInterface {
     public void resetPoolMappingForContext(int context_id) throws PoolException;
     public String getSchemeForContextId(int context_id) throws PoolException;
             
-    public Connection getREADConnectionForCONFIGDB() throws PoolException;
-    
-    public Connection getWRITEConnectionForCONFIGDB() throws PoolException;
-    
-    public Connection getREADConnectionForContext( int context_id ) throws PoolException;
-    
-    public Connection getWRITEConnectionForContext( int context_id ) throws PoolException;
-    
-    public boolean pushConfigDBRead(Connection con) throws PoolException;
-    
-    public boolean pushConfigDBWrite(Connection con) throws PoolException;
-    
-    public boolean pushOXDBWrite(int context_id,Connection con) throws PoolException;
-    
-    public boolean pushOXDBRead(int context_id,Connection con) throws PoolException;
 }
