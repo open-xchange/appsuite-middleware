@@ -1,0 +1,326 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.admin.rmi;
+
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+
+
+/**
+ * This interface defines the Open-Xchange API Version 2 for creating and manipulating OX Contexts.
+ *
+ * @author cutmasta
+ *
+ */
+public interface OXContextInterface extends Remote {
+    
+    
+    
+    /**
+     * RMI name to be used in RMI URL
+     */
+    public static final String RMI_NAME = "OXContext_V2";
+    
+    
+    /**
+     * Create a new context.
+     * @param auth Credentials for authenticating against server.
+     * @param ctx Context object
+     * @param admin_user User data of administrative user account for this context
+     * @param quota_max maximum quota value, this context can use in the filestore (in MB)
+     * @return Context object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public Context create(Context ctx,User admin_user,long quota_max,Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    
+    
+    
+    /**
+     * Delete a context.<br>
+     * Note: Deleting a context will delete all data whitch the context include (all users, groups, appointments, ... )
+     * @param auth Credentials for authenticating against server.
+     * @param ctx Context object
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * 
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void delete(Context ctx,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    
+   
+    /**
+     * Change storage data of a context.
+     * @param ctx Context object
+     * @param filestore Filestore 
+     * @param auth Credentials for authenticating against server.
+     * @throws java.rmi.RemoteException General RMI Exception
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     */
+    public void changeStorageData(Context ctx,Filestore filestore,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+    
+    /**
+     * Move all data of a context contained on the filestore to another filestore using
+     * specified reason to disable context.
+     *         <p>
+     *         This method returns immediately and the data is going to be copied
+     *         in the background. To query the progress and the result of the actual
+     *         task, the AdminJobExecutor interface must be used.
+     * @param ctx Context object
+     * @param dst_filestore_id Id of the Filestore to move the context in.
+     * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
+     * @param auth Credentials for authenticating against server.
+     * @return Job id which can be used for retrieving progress information.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public String moveContextFilestore(Context ctx,Filestore dst_filestore_id, MaintenanceReason reason,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+
+    /**
+     * Move all data of a context contained in a database to another database using
+     * specified reason to disable context.
+     * @param ctx Context object
+     * @param dst_database_id ID of a registered Database to move all data of this context in.
+     * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
+     * @param auth Credentials for authenticating against server.
+     * @return String containing return queue id to query status of job.
+     *         <p>
+     *         This method returns immediately and the data is going to be copied
+     *         in the background. To query the progress and the result of the actual
+     *         task, the AdminJobExecutor interface must be used.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public String moveContextDatabase(Context ctx,Database dst_database_id,MaintenanceReason reason,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+    
+    /**
+     * Disable given context.<br>
+     * Note: To disable a context you need a reason
+     * @param ctx Context object.
+     * @param reason MaintenanceReason
+     * @param auth Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void disable(Context ctx, MaintenanceReason reason,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+    
+    
+    /**
+     * Enable given context.
+     * @param auth Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void enable(Context ctx,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    
+    
+    /**
+     * Search for contexts<br>
+     * Use this for search a context or list all contexts.
+     * @param auth Credentials for authenticating against server.
+     * @param search_pattern Search pattern e.g "*mycontext*".
+     * @return Contexts.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public Context[] search( String search_pattern,Credentials auth ) 
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    
+    
+    
+    /**
+     * Disable all contexts.<br>
+     * Note: To disable all contexts, you need a reason.
+     * @param reason MaintenanceReason
+     * @param auth Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void disableAll(MaintenanceReason reason,Credentials auth ) 
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    
+    
+    
+    /**
+     * Enable all contexts.
+     * @param auth Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void enableAll(Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException;
+    
+    
+    
+    // TODO: here muss noch ein "Context" Object zur?ckgeworfen werden!
+    /**
+     * Retrieves the context setup of given context.
+     * @param auth Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @return Context containing result object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public Context getSetup(Context ctx,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    
+    /**
+     * Change the database handle of the given context.
+     * @param ctx Context object
+     * @param db_handle Datbase informations for the change.
+     * @param auth Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void changeDatabase(Context ctx,Database db_handle,Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+    
+    
+    /**
+     * Change the quota size of the given context.
+     * @param ctx Context object.
+     * @param quota_max Maximum quota for the context.
+     * @param auth Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public void changeQuota(Context ctx, long quota_max,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    
+    /**
+     * Search for context on specified db.
+     * @param db_host_url Database on which to search for contexts.
+     * @param auth Credentials for authenticating against server.
+     * @return Found contexts on the specified database.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public Context[] searchByDatabase(Database db_host_url,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    
+    
+    
+    /**
+     * Search for context which store data on specified filestore
+     * @param filestore_url Filestore
+     * @param auth Credentials for authenticating against server.
+     * @return Contexts found on this filestore.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * 
+     * @throws StorageException When an error in the subsystems occured.
+     */
+    public Context[] searchByFilestore(Filestore filestore_url,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+}
