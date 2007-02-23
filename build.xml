@@ -57,9 +57,6 @@
 	<property name="iojar" value="commons-io.jar" />
 	<property name="webdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
 	<property name="httpclientjar" value="commons-httpclient-2.0.2.jar" />
-	<property name="jettyjar" value="org.mortbay.jetty.jar" />
-    <property name="jbossclientjar" value="jbossall-client.jar" />
-    <property name="oxadapterjar" value="openXchange-login-Client.jar" />
 	<property name="tnefjar" value="tnef.jar" />
 		
 	
