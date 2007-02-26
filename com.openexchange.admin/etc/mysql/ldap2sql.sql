@@ -1,0 +1,1 @@
+#@(#) ldap2sql.sql 

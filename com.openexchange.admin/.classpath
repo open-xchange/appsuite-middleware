@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/open-xchange"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openexchange-common-HEAD"/>
+	<classpathentry kind="lib" path="/usr/lib/j2sdk1.5-sun/lib/tools.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/activation.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/commons-fileupload.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/commons-httpclient-2.0.2.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/commons-io.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/commons-logging.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/concurrent.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/jakarta-slide-webdavlib-2.1.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/jbossall-client.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/jcs-1.2.7.9.2.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/jdom.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/jsdk.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/json.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/mail.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/mysql-connector-java-3.1.13-bin.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/openXchange-login-Client.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/org.mortbay.jetty.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/OxAdapterClient_v0.3.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/selenium-java-client-driver.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/tnef.jar"/>
+	<classpathentry kind="lib" path="/openexchange-common-HEAD/jars/commons-cli-1.0.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
