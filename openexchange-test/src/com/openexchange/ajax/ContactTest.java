@@ -747,6 +747,34 @@ public class ContactTest extends AbstractAJAXTest {
 		return contactObj;
 	}
 	
+	public static ContactObject loadUser(WebConversation webCon, int userId, int inFolder, String host, String session) throws Exception {
+		int[] cols = {
+			DataObject.OBJECT_ID,
+			DataObject.CREATED_BY,
+			DataObject.CREATION_DATE,
+			DataObject.LAST_MODIFIED,
+			DataObject.MODIFIED_BY,
+			FolderChildObject.FOLDER_ID,
+			CommonObject.CATEGORIES,
+			ContactObject.GIVEN_NAME,
+			ContactObject.SUR_NAME,
+			ContactObject.EMAIL1,
+			ContactObject.EMAIL2,
+			ContactObject.EMAIL3,
+			ContactObject.INTERNAL_USERID
+		};
+		
+		ContactObject[] contactArray = listContact(webCon, inFolder, cols, host, session);
+		
+		for (int a = 0; a < contactArray.length; a++) {
+			if (contactArray[a].getInternalUserId() == userId) {
+				return contactArray[a];
+			}
+		}
+		
+		return null;
+	}
+	
 	public static byte[] loadImage(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
@@ -995,7 +1023,7 @@ public class ContactTest extends AbstractAJAXTest {
 			case ContactObject.NUMBER_OF_IMAGES:
 				contactObj.setNumberOfImages(jsonArray.getInt(pos));
 				break;
-				*/
+				 */
 			case ContactObject.INFO:
 				contactObj.setInfo(jsonArray.getString(pos));
 				break;
