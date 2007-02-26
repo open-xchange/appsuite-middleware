@@ -68,9 +68,9 @@ import com.openexchange.groupware.integration.SetupLinkException;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class implements the servlet for authenticating the user at the 1and1
- * Controll Center an returns the URL for jumping to the Controll Center to the
- * GUI.
+ * This class implements the servlet for authenticating the user at the 
+ * user admin interface an returns the URL for jumping to the user admin
+ * interface to the GUI.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigJump extends SessionServlet {
