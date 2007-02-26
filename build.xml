@@ -326,7 +326,7 @@
 	  		<replacefilter token="@JAVA@"	value="${java}"/>
 	  		<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
 	  		<replacefilter token="@oxlibdir@"	value="${lib.subst.patch}"/>
-	  		<replacefilter token="@oxfunctions@" value="${prefix}/etc/oxfunctions.sh"/>
+	  		<replacefilter token="@oxfunctions@" value="${conf.subst.patch}/oxfunctions.sh"/>
 	  		<replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
 	  		<replacefilter token="@jdbcjar@"	value="${lib.subst.patch}/${jdbcjar}"/>
 	  		<replacefilter token="@mailjar@"	value="${lib.subst.patch}/${mailjar}"/>
@@ -357,7 +357,7 @@
 	  		<replacefilter token="@JAVA_HOME@" value="${java.home}"/>
 	  		<replacefilter token="@JAVA@" value="${java}"/>
 	  		<replacefilter token="@oxlibdir@" value="${lib.subst.patch}"/>
-	  		<replacefilter token="@oxfunctions@" value="${prefix}/etc/oxfunctions.sh"/>
+	  		<replacefilter token="@oxfunctions@" value="${conf.subst.patch}/oxfunctions.sh"/>
 	  		<replacefilter token="@oxscriptconf@" value="${consistency.conf.subst.patch}/ox-scriptconf.sh"/>
 	  		<replacefilter token="@jdbcjar@"	value="${lib.subst.patch}/${jdbcjar}"/>
 	  		<replacefilter token="@mailjar@"	value="${lib.subst.patch}/${mailjar}"/>
