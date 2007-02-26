@@ -57,7 +57,7 @@ import java.util.List;
 /**
  * ThreadParser
  * 
- * @author <a href="mailto:marcus.klein@netline-is.de">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 
 public class ThreadParser {

@@ -58,7 +58,7 @@ import javax.swing.text.html.HTMLEditorKit;
 /**
  * html2text This class parse a html document into valid text/plain
  * 
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  */
 public class Html2Text extends HTMLEditorKit.ParserCallback {
 

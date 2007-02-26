@@ -55,7 +55,7 @@ import com.openexchange.sessiond.SessionObject;
 /**
  * LinkSQLInterface
  *
- * @author <a href="mailto:ben.pahne@netline-is.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public interface LinkSQLInterface {
 	

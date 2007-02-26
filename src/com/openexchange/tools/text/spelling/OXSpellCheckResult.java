@@ -58,7 +58,7 @@ import java.util.StringTokenizer;
 /**
  * OXSpellCheckResult
  * 
- * @author Stefan Preuss <stefan.preuss@netline-is.de>
+ * @author Stefan Preuss <stefan.preuss@open-xchange.com>
  * @version 0.8.1, 11/11/05
  * @since 0.8.1-5
  */

@@ -62,7 +62,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /*
- * author: Leonardo Di Lella, leonardo.dilella@netline-is.de
+ * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com
  * date: Fri Jul 23 14:36:51 GMT 2004
  */
 

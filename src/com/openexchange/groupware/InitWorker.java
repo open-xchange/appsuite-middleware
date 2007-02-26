@@ -85,8 +85,8 @@ import com.openexchange.webdav.InfostorePerformer;
 /**
  * InitWorker
  * 
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
+ * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  */
 public class InitWorker extends ComfireInitWorker {
 

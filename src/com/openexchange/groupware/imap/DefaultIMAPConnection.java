@@ -70,7 +70,7 @@ import com.sun.mail.imap.Rights;
  * changed in the future in ways that are incompatible with applications using
  * the current APIs.
  * 
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  */
 
 public class DefaultIMAPConnection implements IMAPConnection, Serializable {

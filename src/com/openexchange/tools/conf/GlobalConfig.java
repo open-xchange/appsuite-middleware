@@ -78,9 +78,9 @@ import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * GlobalConfig
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
- * @author <a href="mailto:ben.pahne@netline-is.de">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  * @deprecated Use specialized config classes.
  */
 public class GlobalConfig {

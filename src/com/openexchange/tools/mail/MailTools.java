@@ -73,7 +73,7 @@ import javax.mail.internet.MimeUtility;
 /**
  * MailTools
  * 
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 

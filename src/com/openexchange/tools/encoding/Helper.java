@@ -57,7 +57,7 @@ import javax.mail.internet.MimeUtility;
 /**
  * This class contains some helpers for encoding.
  * It only contains simple methods that encode some things. 
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Helper {
 
@@ -105,7 +105,7 @@ public class Helper {
      * encodings. Some mailers which are not mime compliant produces such crap.
      * We'll try to find and decode such Strings here using the JavaMail API.
      * 
-     * @author Stefan Preuss <stefan.preuss@netline-is.de>
+     * @author Stefan Preuss <stefan.preuss@open-xchange.com>
      * @param data The string which should be encoded
      * @return The (may) correct encoded String
      */

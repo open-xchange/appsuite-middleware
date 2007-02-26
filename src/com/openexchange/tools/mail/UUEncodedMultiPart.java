@@ -60,7 +60,7 @@ import java.util.StringTokenizer;
  * UUEncodeMultiPart Find possible UUEncode attachments in "normal" text (like
  * Outlook do) and converts them to UUEncodePart Objects.
  * 
- * @author <a href="mailto:stefan.preuss@netline-is.de">Stefan Preuss</a>
+ * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
