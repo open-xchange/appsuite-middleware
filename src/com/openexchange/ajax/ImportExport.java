@@ -135,6 +135,14 @@ public class ImportExport extends SessionServlet {
 				importExportWriter.writeObject(importResult.get(a));
 			}
 			jsonWriter.endArray();
+			
+			final OutputStream outputStream = resp.getOutputStream();
+			
+			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+			resp.setContentLength(byteArrayOutputStream.size());
+			
+			outputStream.write(byteArrayOutputStream.toByteArray());
+			outputStream.flush();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
