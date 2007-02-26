@@ -6,8 +6,8 @@ Bundle-Version: 1.0.0
 Bundle-Activator: com.openexchange.admin.Activator
 Bundle-Localization: plugin
 Import-Package: org.osgi.framework;version="1.3.0"
-Require-Bundle: openexchange_admin
+Require-Bundle: open_xchange_admin
 Bundle-ClassPath: .,
  external:$libdir$/commons-logging.jar,
  external:$libdir$/ox_server.jar
-Eclipse-RegisterBuddy: openexchange_admin
+Eclipse-RegisterBuddy: open_xchange_admin
