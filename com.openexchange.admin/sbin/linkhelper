@@ -2,7 +2,7 @@
 
 DDIR=$1 || DDIR="/opt/open-xchange/sbin"
 pushd $DDIR
-for method in create delete change; do
+for method in create delete change list; do
     for module in user group resource; do
 	linkname="${method}${module}"
 	rm -f $linkname
