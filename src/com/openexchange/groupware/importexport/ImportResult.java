@@ -53,6 +53,17 @@ import java.util.Date;
 
 import com.openexchange.api2.OXException;
 
+/**
+ * Contains information on the result of an import as done by
+ * implementors of Importer (see link).
+ * 
+ * Usage: Usually, you only want to check whether the import
+ * hasErrors or isCorrect (one is the inversion of the other,
+ * no reason for having both besides that I'm lazy) 
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @see com.openexchange.groupware.importexport.Importer
+ */
 public class ImportResult {
 	
 	private String objectId;
@@ -74,8 +85,8 @@ public class ImportResult {
 	 * @param type
 	 * @param timestamp
 	 */
-	public ImportResult(String objectId, String folder, long timestamp){
-		this(objectId, folder, timestamp, null);
+	public ImportResult(String objectId, String folder, Date date){
+		this(objectId, folder, date, null);
 	}
 	
 	/**
@@ -85,12 +96,34 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(String objectId, String folder, long timestamp, OXException exception){
+	public ImportResult(String objectId, String folder, Date date, OXException exception){
 		this.objectId = objectId;
 		this.folder = folder;
 		this.date = date;
 		this.exception = exception;
 	}
+	
+	/** Constructor for correct result using timestamp instead of a Date
+	 * 
+	 * @param objectId
+	 * @param folder
+	 * @param timestamp
+	 */
+	public ImportResult(String objectId, String folder, long timestamp){
+		this(objectId, folder, new Date(timestamp));
+	}
+	
+	/**
+	 * Constructor for a botched result using a timestamp instead of a Date
+	 * @param objectId
+	 * @param folder
+	 * @param timestamp
+	 * @param exception
+	 */
+	public ImportResult(String objectId, String folder, long timestamp, OXException exception){
+		this(objectId, folder, new Date(timestamp), exception);
+	}
+	
 	
 	
 	
