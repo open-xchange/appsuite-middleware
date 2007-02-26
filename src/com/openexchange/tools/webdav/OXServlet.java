@@ -299,9 +299,6 @@ public abstract class OXServlet extends WebDavServlet {
         final SessiondConnector connector = SessiondConnector.getInstance();
         SessionObject session = null;
         try {
-            if (true) {
-                throw new SessiondException("blah", null);
-            }
             session = connector.addSession(login, pass, ipAddress);
         } catch (InvalidCredentialsException e) {
             log(e.getMessage(), e);
