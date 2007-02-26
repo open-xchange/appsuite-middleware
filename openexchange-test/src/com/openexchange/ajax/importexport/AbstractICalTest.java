@@ -6,12 +6,12 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
@@ -75,9 +75,9 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
-
-		UserImpl4Test user = UserTest.loadUser(getWebConversation(), userId, getHostName(), getSessionId());
-		emailaddress = user.getMail();
+		
+		ContactObject contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
+		emailaddress = contactObj.getEmail1();
 		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(timeZone);
@@ -88,7 +88,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		startTime = c.getTime();
 		startTime.setTime(timeZone.getOffset(startTime.getTime()));
-		endTime.setTime(startTime.getTime() + 3600000);
+		endTime = new Date(startTime.getTime() + 3600000);
 	}
 	
 	public static ImportResult[] importICal(WebConversation webCon, AppointmentObject[] appointmentObj, int folderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
