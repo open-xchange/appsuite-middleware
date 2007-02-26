@@ -70,8 +70,8 @@ public class ImportExportExceptionFactory extends AbstractOXExceptionFactory {
 		
 	@Override
 	protected AbstractOXException buildException(Component component, Category category, int number, String message, Throwable cause, Object... msgArgs) {
-		if(component != Component.INFOSTORE) {
-			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
+		if(component != Component.IMPORT_EXPORT) {
+			throw new IllegalArgumentException("This factory can only build exceptions for importers or exporters");
 		}
 		return new ImportExportException(category,number,message,cause,(Object[])msgArgs);
 	}
