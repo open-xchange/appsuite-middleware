@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange-admin Core Plug-in
-Bundle-SymbolicName: open-xchange-admin
+Bundle-SymbolicName: open_xchange_admin
 Bundle-Version: 1.0.0
 Bundle-Activator: com.openexchange.admin.daemons.Activator
 Bundle-Localization: plugin
