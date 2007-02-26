@@ -1,0 +1,81 @@
+#@(#) tasks.sql consistency
+
+ALTER TABLE task
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+    MODIFY creating_date DATETIME NOT NULL,
+    MODIFY last_modified INT8 NOT NULL,
+    MODIFY created_from INT4 UNSIGNED NOT NULL,
+    MODIFY private BOOLEAN NOT NULL,
+    MODIFY recurrence_type INT1 UNSIGNED NOT NULL,
+    MODIFY number_of_attachments INT1 UNSIGNED NOT NULL,
+    ENGINE=InnoDB;
+
+ALTER TABLE task_folder
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+    MODIFY folder INT4 UNSIGNED NOT NULL,
+    MODIFY user INT4 UNSIGNED NOT NULL,
+    ADD FOREIGN KEY (cid, id) REFERENCES task (cid, id),
+    ADD FOREIGN KEY (cid, folder) REFERENCES oxfolder_tree (cid, fuid),
+    ENGINE=InnoDB;
+
+ALTER TABLE task_participant
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY task INT4 UNSIGNED NOT NULL,
+    MODIFY user INT4 UNSIGNED NOT NULL,
+    MODIFY accepted INT1 UNSIGNED NOT NULL,
+    ADD FOREIGN KEY (cid, task) REFERENCES task (cid, id),
+    ADD FOREIGN KEY (cid,user) REFERENCES user(cid,id),
+    ENGINE=InnoDB;
+
+ALTER TABLE task_eparticipant
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY task INT4 UNSIGNED NOT NULL,
+    MODIFY mail VARCHAR(255) NOT NULL,
+    ADD FOREIGN KEY (cid,task) REFERENCES task (cid,id),
+    ENGINE=InnoDB;
+
+ALTER TABLE task_removedparticipant
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY task INT4 UNSIGNED NOT NULL,
+    MODIFY user INT4 UNSIGNED NOT NULL,
+    MODIFY accepted INT1 UNSIGNED NOT NULL,
+    MODIFY folder INT4 UNSIGNED NOT NULL,
+    ADD FOREIGN KEY (cid, task) REFERENCES task (cid, id),
+    ADD FOREIGN KEY (cid,user) REFERENCES user(cid,id),
+    ENGINE=InnoDB;
+
+ALTER TABLE del_task
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+    MODIFY creating_date DATETIME NOT NULL,
+    MODIFY last_modified INT8 NOT NULL,
+    MODIFY created_from INT4 UNSIGNED NOT NULL,
+    MODIFY private BOOLEAN NOT NULL,
+    MODIFY recurrence_type INT1 UNSIGNED NOT NULL,
+    MODIFY number_of_attachments INT1 UNSIGNED NOT NULL,
+    ENGINE=InnoDB;
+
+ALTER TABLE del_task_folder
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+    MODIFY folder INT4 UNSIGNED NOT NULL,
+    MODIFY user INT4 UNSIGNED NOT NULL,
+    ADD FOREIGN KEY (cid, id) REFERENCES del_task (cid, id),
+    ENGINE=InnoDB;
+
+ALTER TABLE del_task_participant
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY task INT4 UNSIGNED NOT NULL,
+    MODIFY user INT4 UNSIGNED NOT NULL,
+    MODIFY accepted INT1 UNSIGNED NOT NULL,
+    ADD FOREIGN KEY (cid, task) REFERENCES del_task (cid, id),
+    ENGINE=InnoDB;
+
+ALTER TABLE del_task_eparticipant
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY task INT4 UNSIGNED NOT NULL,
+    MODIFY mail VARCHAR(255) NOT NULL,
+    ADD FOREIGN KEY (cid,task) REFERENCES del_task (cid,id),
+    ENGINE=InnoDB;

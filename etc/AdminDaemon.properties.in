@@ -1,0 +1,35 @@
+SERVER_NAME=local
+
+# Properties files for the different calls and actions
+SQL_PROP=$PWD/@oxconfdir@/Sql.properties
+USER_PROP=$PWD/@oxconfdir@/User.properties
+GROUP_PROP=$PWD/@oxconfdir@/Group.properties
+RESOURCE_PROP=$PWD/@oxconfdir@/Resource.properties
+RESOURCE_GROUP_PROP=$PWD/@oxconfdir@/ResourceGroup.properties
+RMI_PROP=$PWD/@oxconfdir@/RMI.properties
+
+MASTER_AUTH_FILE=$PWD/@oxconfdir@/mpasswd
+
+CONTEXT_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
+UTIL_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage
+USER_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUserMySQLStorage
+GROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXGroupMySQLStorage
+TOOL_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage
+UTIL_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage
+RESOURCE_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceMySQLStorage
+RESOURCEGROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceGroupMySQLStorage
+
+# Misc properties
+# average size of a context in MB
+AVERAGE_CONTEXT_SIZE=200
+# amount of contexts per database schema
+CONTEXTS_PER_SCHEMA=1000
+# what to count when distributing contexts over db engines
+# possible values: context or user
+CREATE_CONTEXT_USE_UNIT=context
+# how many jobs should be executed concurrently?
+# jobs like moveFilestore, moveDatabase
+CONCURRENT_JOBS=2
+
+# jmx server port 
+JMX_PORT=9998

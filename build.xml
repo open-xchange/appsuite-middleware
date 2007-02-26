@@ -1,0 +1,279 @@
+<project name="open-xchange-admin" default="jar" basedir=".">
+
+    <property file="VERSION"/>
+    <property file="PVERSION"/>
+	
+    <property name="project.name" value="open-xchange-admin" />
+    <property name="test.xml.dir" value="test-results" />
+    <property name="prefix" value="/opt/open-xchange"/>
+    <property name="destdir" value=""/>
+    <property name="deb.optargs" value="" />
+    <property name="daemon.jar" value="ox_admindaemon.jar"/>
+    <property name="client.jar" value="ox_rmiclient.jar"/>
+    <property name="extlibpath" value="lib"/>
+    <property name="libpath" value="lib"/>
+    <property name="logdir"  value="/var/log/open-xchange"/>
+	<property name="oxconfdir" value="etc/admindaemon"/>
+	<property name="serverconfdir" value="etc/groupware"/>
+	<property name="distribution" value="debian"/>
+	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
+
+	<path id="project.classpath">
+        <pathelement location="${libpath}/ox_server.jar"/>
+        <pathelement location="${extlibpath}/commons-fileupload.jar"/>
+        <pathelement location="${extlibpath}/commons-httpclient-2.0.2.jar"/>
+        <pathelement location="${extlibpath}/commons-io.jar"/>
+        <pathelement location="${extlibpath}/commons-logging.jar"/>
+        <pathelement location="${extlibpath}/commons-cli-1.0.jar"/>
+        <pathelement location="${extlibpath}/concurrent.jar"/>
+        <pathelement location="${extlibpath}/jcs-1.2.7.9.2.jar"/>
+        <pathelement location="${extlibpath}/junit-4.1.jar"/>
+        <pathelement location="${extlibpath}/mysql-connector-java-3.1.13-bin.jar"/>
+        <pathelement location="${extlibpath}/jdom.jar"/>
+		<pathelement location="${extlibpath}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
+    </path>
+
+    <filterset id="pathsubst">
+        <filter token="oxprefix"          value="${prefix}"/>
+        <filter token="oxfunctions"       value="${prefix}/${oxconfdir}/oxfunctions.sh"/>
+        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
+        <filter token="systemproperties"  value="${prefix}/${oxconfdir}/system.properties"/>
+        <filter token="adminproperties"   value="${prefix}/${oxconfdir}/AdminDaemon.properties"/>
+        <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
+        <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
+        <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
+        <filter token="nonoxlibpath"      value="${prefix}/lib"/>
+        <filter token="oxlibpath"         value="${prefix}/lib"/>
+        <filter token="oxconfdir"         value="${oxconfdir}"/>
+        <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
+        <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
+        <filter token="adminlogfile"      value="${logdir}/open-xchange-admin.log"/>
+        <filter token="consolelogfile"    value="${logdir}/open-xchange-admin-console.log"/>
+		<filter token="admin_major"       value="${admin_major}"/>
+		<filter token="admin_minor"       value="${admin_minor}"/>
+		<filter token="admin_patch"       value="${admin_patch}"/>
+		<filter token="admin_name"        value="${project.name}"/>
+        <filter token="buildnumber"       value="${pversion}"/>
+    	<filter token="templates"		  value="/opt/open-xchange/var/templates" />
+    </filterset>
+
+    <property name="test.xml.dir" location="test-results" />
+
+		
+
+	<!--                    TARGETS                      -->
+
+	<target name="install-plugins" depends="compile">
+		<antcall target="generic-plugin">
+			<param name="plugindir" value="../open-xchange-admin-plugin-imap"/>
+			<param name="plugintarget" value="install"/>
+		</antcall>
+	</target>
+
+	<target name="clean-plugins">
+		<antcall target="generic-plugin">
+			<param name="plugindir" value="../open-xchange-admin-plugin-imap"/>
+			<param name="plugintarget" value="clean"/>
+		</antcall>
+	</target>
+
+				<target name="generic-plugin">
+	 	<ant antfile="build.xml"
+			 target="${plugintarget}"
+	 		 dir="${plugindir}"
+	 	     inheritall="yes"/>
+	</target>
+
+		<target name="compile" depends="replacer">
+        <mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
+            <exclude name="**/*ResourceGroup*"/>
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+
+    <target name="compile_libs" depends="replacer">
+        <mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="src/com/openexchange/admin/dataSource" debug="true" destdir="classes">
+            <exclude name="*ResourceGroup*"/>
+            <include name="I_*.java"/>
+        	<classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javac>
+        <javac failonerror="true" srcdir="src/com/openexchange/admin/exceptions" debug="true" destdir="classes">
+            <exclude name="*ResourceGroup*"/>
+            <include name="**.java"/>
+        	<classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+
+    <target name="jar" depends="compile">
+        <mkdir dir="jar"/>
+        <jar jarfile="jar/${daemon.jar}"
+        excludes="com/openexchange/admin/test**"
+        basedir="classes"
+        manifest="META-INF/MANIFEST.MF"/>
+    </target>
+
+
+    <target name="client" depends="compile_libs">
+        <mkdir dir="jar"/>
+        <jar jarfile="jar/${client.jar}" basedir="classes"/>
+    </target>
+
+
+    <target name="doc">
+        <mkdir dir="doc"/>
+        <javadoc
+            failonerror="true"
+            sourcepath="src"
+            destdir="doc"
+            author="true"
+            public="true"
+            Windowtitle="ox_admin_interface">
+            <fileset dir="src/com/openexchange/admin/dataSource" defaultexcludes="yes">
+                <exclude name="*ResourceGroup*"/>
+                <include name="I_*.java" />
+            </fileset>
+            <fileset dir="src/com/openexchange/admin/exceptions" defaultexcludes="yes">
+                <exclude name="*ResourceGroup*"/>
+                <include name="**" />
+            </fileset>
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javadoc>
+    </target>
+
+
+    <target name="clean" depends="clean-plugins">
+        <delete dir="classes"/>
+        <delete dir="doc"/>
+        <delete dir="jar"/>
+    </target>
+	
+	<target name="dist-clean" depends="clean">
+        <delete>
+            <fileset dir="sbin" excludes="*.in"/>
+        </delete>
+    	<delete>
+			<fileset dir="etc" includes="file-logging.properties,ox-admin-scriptconf.sh,AdminDaemon.properties,system.properties,Sql.properties"/>
+    	</delete>
+	</target>
+
+    <target name="dist" depends="dist-clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${project.name}-${version}"/>
+        <copy todir="${dist-package}/${project.name}-${version}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${project.name}-${version}.tar.bz2"
+        basedir="${dist-package}"
+        includes="${project.name}-${version}/"
+        compression="bzip2"/>
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="replacer">
+        <copy todir="." overwrite="true">
+            <mapper type="glob" from="*.in" to="*"/>
+            <fileset dir="."/>
+            <filterset refid="pathsubst"/>
+        </copy>
+    </target>
+
+    <target name="install" depends="replacer,jar,install-plugins">
+        <mkdir dir="${destdir}/var/log/open-xchange"/>
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <mkdir dir="${destdir}/${prefix}/libexec"/>
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
+        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
+		<chmod perm="700" dir="${destdir}/var/log/open-xchange"/>
+    	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
+            <fileset dir="etc" excludes="**/*.in,ResourceGroup.properties"/>
+        </copy>
+        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
+            <fileset dir="sbin" excludes="*.in,linkhelper" followsymlinks="true"/>
+        </copy>
+    	<chmod perm="755" file="sbin/linkhelper"/>
+    	<exec executable="sbin/linkhelper">
+			<arg value="${destdir}/${prefix}/sbin"/>
+		</exec>
+    	<chmod perm="755">
+            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
+        </chmod>
+        <copy todir="${destdir}/${prefix}/lib" file="jar/${daemon.jar}" overwrite="true"/>
+    	<mkdir dir="${destdir}/etc/init.d"/>
+		<!-- copy all dist specific files from below system/ to $prefix/ -->
+    	<copy todir="${destdir}/" overwrite="true">
+			<fileset dir="system"/>
+			<mapper type="glob" from="*.${distribution}" to="*"/>
+		</copy>
+    	<chmod perm="755" file="${destdir}/etc/init.d/open-xchange-admin"/>
+		<!-- add here all dist specific install tasks -->
+    	<!-- <antcall target="install-debian"/> -->
+		<!-- EXAMPLE -->
+    	<!-- <antcall target="install-suse"/> -->
+    	<!-- <antcall target="install-redhat"/> -->
+    </target>
+	
+    <target name="install-client" depends="client">
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
+    </target>
+	
+    <target name="install-doc" depends="doc">
+        <mkdir dir="${destdir}/${prefix}/doc/oxadmin"/>
+        <copy todir="${destdir}/${prefix}/doc/oxadmin">
+            <fileset dir="doc"/>
+        </copy>
+    </target>
+
+	<target name="compile-tests">
+		<mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
+            <classpath>
+            	<pathelement location="classes" />
+            </classpath>
+        </javac>
+	</target>
+	
+    <target name="cc-test" depends="compile, compile-tests">
+        <delete dir="${test.xml.dir}"/>
+        <mkdir dir="${test.xml.dir}"/>
+        <junit errorProperty="test.failed" failureProperty="test.failed">
+            <classpath>
+                <pathelement location="classes" />
+            </classpath>
+
+            <sysproperty key="config" value="etc/AdminDaemon.properties"/>
+            <sysproperty key="openexchange.propfile" value="etc/system.properties"/>
+	
+            <test name="com.openexchange.admin.ContextTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.GroupTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.ResourceTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.UserTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.UtilTest" todir="${test.xml.dir}" />
+
+            <formatter type="brief" usefile="false" />
+            <formatter type="xml" />
+        </junit>
+
+        <fail message="Tests failed!" if="test.failed" />
+
+    </target>
+
+</project>

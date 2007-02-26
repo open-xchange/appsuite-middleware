@@ -1,0 +1,47 @@
+SERVER_NAME=local
+
+InitWorker=com.openexchange.groupware.InitWorker
+
+CONFIGPATH=@oxconfdir@/
+configDB=@oxconfdir@/configdb.properties
+
+# ERROR=1, WARN=3, INFO=5 (DEFAULT), DEBUG=10
+LOGLEVEL=5
+
+# Switch for enabling caching in the groupware. Normally this should be set to
+# true or the database will get a lot more load.
+Cache=true
+
+# Location of the server.properties configuration file. This file configures
+# essential server settings.
+Server=@oxconfdir@/server.properties
+
+# Location of the calendar.properties configuration file. This file configures
+# the calendar subsystem.
+Calendar=@oxconfdir@/calendar.properties
+
+# Location of the contact.properties configuration file. This file configures
+# the contact subsystem.
+Contact=@oxconfdir@/contact.properties
+
+# Location of the infostore.properties configuration file. This file configures
+# the infostore subsystem.
+Infostore=@oxconfdir@/infostore.properties
+
+# Location of the attachment.properties configuration file. This file configures
+# the attachment subsystem.
+Attachment=@oxconfdir@/attachment.properties
+
+# Location of the ntofication.properties configuration file. This file 
+# configures certain assumptions about sending notifications
+Notification=@oxconfdir@/notification.properties
+
+
+CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
+
+LDAPPROPERTIES:@oxconfdir@/ldap.properties
+FOLDERCACHEPROPERTIES=@oxconfdir@/foldercache.properties
+CACHECCF:@oxconfdir@/cache.ccf
+IMAPPROPERTIES=@oxconfdir@/imap.properties
+SPELLCHECKCFG=@oxconfdir@/spellcheck.cfg
+
