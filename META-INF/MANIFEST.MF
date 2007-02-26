@@ -10,4 +10,4 @@ Require-Bundle: openexchange_admin
 Bundle-ClassPath: .,
  external:$libdir$/commons-logging.jar,
  external:$libdir$/ox_server.jar
- 
+Eclipse-RegisterBuddy: openexchange_admin
