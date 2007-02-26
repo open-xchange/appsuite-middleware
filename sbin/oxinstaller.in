@@ -1,0 +1,318 @@
+#!/bin/bash
+#
+#
+#   OPEN-XCHANGE legal information
+#
+#   All intellectual property rights in the Software are protected by
+#   international copyright laws.
+#
+#
+#   In some countries OX, OX Open-Xchange, open xchange and OXtender
+#   as well as the corresponding Logos OX Open-Xchange and OX are registered
+#   trademarks of the Open-Xchange, Inc. group of companies.
+#   The use of the Logos is not covered by the GNU General Public License.
+#   Instead, you are allowed to use these Logos according to the terms and
+#   conditions of the Creative Commons License, Version 2.5, Attribution,
+#   Non-commercial, ShareAlike, and the interpretation of the term
+#   Non-commercial applicable to the aforementioned license is published
+#   on the web site http://www.open-xchange.com/EN/legal/index.html.
+#
+#   Please make sure that third-party modules and libraries are used
+#   according to their respective licenses.
+#
+#   Any modifications to this package must retain all copyright notices
+#   of the original copyright holder(s) for the original code used.
+#
+#   After any such modifications, the original and derivative code shall remain
+#   under the copyright of the copyright holder(s) and/or original author(s)per
+#   the Attribution and Assignment Agreement that can be located at
+#   http://www.open-xchange.com/EN/developer/. The contributing author shall be
+#   given Attribution for the derivative code and a license granting use.
+#
+#    Copyright (C) 2004-2006 Open-Xchange, Inc.
+#    Mail: info@open-xchange.com
+#
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License, Version 2 as published
+#    by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+#    for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc., 59
+#    Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+#
+
+
+OXFUNCTIONS=@oxfunctions@
+SERVERCONF=@absserverconfdir@
+ADMINCONF=@absoxconfdir@
+
+
+test -f $OXFUNCTIONS || {
+        echo "missing common shell functions file"
+        exit 1
+}
+
+. $OXFUNCTIONS
+
+# some defaults
+SERVER_NAME=
+SERVER_NAME_LONG=servername
+IMAP_SERVER=localhost
+IMAP_SERVER_LONG=imapserver
+IMAP_LOGIN_TYPE=user
+IMAP_LOGIN_TYPE_LONG=imaplogintype
+IMAP_LOGIN_TYPE_VALUES="global user"
+LOGIN_IMPL_TYPE=1u1
+LOGIN_IMPL_TYPE_LONG=logintype
+LOGIN_IMPL_TYPE_VALUES="1u1 database"
+SERVER_MEMORY=50
+SERVER_MEMORY_LONG=servermemory
+TMPDIR_PATH=/tmp
+TMPDIR_PATH_LONG=tmpdir-path
+#
+CONFIGDB_USER=openexchange
+CONFIGDB_USER_LONG=configdb-user
+CONFIGDB_PASS=
+CONFIGDB_PASS_LONG=configdb-pass
+CONFIGDB_POOL=5
+CONFIGDB_POOL_LONG=configdb-poolsize
+CONFIGDB_READ=localhost
+CONFIGDB_READ_LONG=configdb-readhost
+CONFIGDB_WRITE=$CONFIGDB_READ
+CONFIGDB_WRITE_LONG=configdb-writehost
+CONFIGDB_READ_PORT=3306
+CONFIGDB_READ_PORT_LONG=configdb-readport
+CONFIGDB_WRITE_PORT=$CONFIGDB_READ_PORT
+CONFIGDB_WRITE_PORT_LONG=configdb-writeport
+CONFIGDB_DBNAME=configdb
+CONFIGDB_DBNAME_LONG=configdb-dbname
+
+
+MUSTOPTS="SERVER_NAME CONFIGDB_PASS"
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:'
+
+usage() {
+    echo
+    echo "$0 currently knows the following parameters:"
+    echo
+    local lopts=$(echo $LONGOPTS | sed -e 's/[:,]/ /g')
+    printf '%-25s | %-20s | %-s\n' "Parameter" "Default value" "Possible values"
+    echo "----------------------------------------------------------------------"
+    for opt in $lopts; do
+	local rvar=${opt%_LONG}
+	local default=$(eval echo $rvar)
+	local possible=$(eval echo ${opt%_LONG}_VALUES)
+	local lopt=$(eval echo $opt)
+	#echo $opt $rvar $default $lopt
+	printf '%-25s | %-20s | %-s\n' "--$lopt" "$default" "$possible"
+    done
+    echo
+    echo
+cat<<EOF
+Example:
+
+  $0 --servername=ox6 --configdb-pass=secret --configdb-poolsize=10
+EOF
+    echo
+}
+
+# be verbose for Holger
+v_setprop() {
+    local prop="$1"
+    local val="$2"
+    local propfile="$3"
+    echo setting $prop in $propfile
+    ox_set_property "$prop" "$val" "$propfile"
+}
+
+TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:h --long "$(eval echo $LONGOPTS),help" -- "$@")
+eval set -- "$TEMP"
+
+while true; do
+    case "$1" in
+	-s|--$SERVER_NAME_LONG)
+	    SERVER_NAME=$2
+	    shift 2
+	    ;;
+	-i|--$IMAP_SERVER_LONG)
+	    IMAP_SERVER=$2
+	    shift 2
+	    ;;
+	--$IMAP_LOGIN_TYPE_LONG)
+	    IMAP_LOGIN_TYPE=$2
+	    shift 2
+	    ;;
+	-l|--$LOGIN_IMPL_TYPE_LONG)
+	    LOGIN_IMPL_TYPE=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_USER_LONG)
+	    CONFIGDB_USER=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_PASS_LONG)
+	    CONFIGDB_PASS=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_POOL_LONG)
+	    CONFIGDB_POOL=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_READ_LONG)
+	    CONFIGDB_READ=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_WRITE_LONG)
+	    CONFIGDB_WRITE=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_READ_PORT_LONG)
+	    CONFIGDB_READ_PORT=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_WRITE_PORT_LONG)
+	    CONFIGDB_WRITE_PORT=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_DBNAME_LONG)
+	    CONFIGDB_DBNAME=$2
+	    shift 2
+	    ;;
+	--$SERVER_MEMORY_LONG)
+	    SERVER_MEMORY=$2
+	    shift 2
+	    ;;
+	--$TMPDIR_PATH_LONG)
+	    TMPDIR_PATH=$2
+	    shift 2
+	    ;;
+	-h|--help)
+	    usage
+	    shift
+	    ;;
+	--)
+	    shift
+	    break
+	    ;;
+	*)
+	    die "Internal error!"
+	    exit 1
+	    ;;
+    esac
+done
+
+if [ "$USER" != "root" ]; then
+    die "need to be root in order to setup the system"
+fi
+
+
+# generic parameter checking
+for opt in $MUSTOPTS; do
+    opt_var=$(eval echo \$$opt)
+    opt_var_long=$(eval echo \$${opt}_LONG)
+    if [ -z "$opt_var" ]; then
+	die "missing required option --$opt_var_long"
+    fi
+done
+
+# generic option checking
+ALLOPTS=$(echo $LONGOPTS | sed -e 's/[$:,]/ /g' -e 's/_LONG//g')
+for opt in $ALLOPTS; do
+    opt_var=$(eval echo \$$opt)
+    opt_var_long=$(eval echo \$${opt}_LONG)
+    opt_var_values=$(eval echo \$${opt}_VALUES)
+    if [ -n "$opt_var_values" ]; then
+	found=
+	for val in $opt_var_values; do
+	    if [ "$val" == "$opt_var" ]; then
+		found=$val
+	    fi
+	done
+	if [ -z "$found" ]; then
+	    die "\"$opt_var\" is not a valid option to --$opt_var_long"
+	fi
+    fi
+done
+
+SQL_URL="jdbc:mysql://\$SQLHOST:\$SQLPORT/\$SQLDB"
+SQLDB=$CONFIGDB_DBNAME
+SQLOPTS=$SQLOPTS
+
+# groupware
+
+# this formular and parameters are from Holger
+NSIZE=$(( ${SERVER_MEMORY} / 2 ))
+SERVEROPTS="-ms${SERVER_MEMORY}m -mx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+
+v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
+
+SQLHOST=$CONFIGDB_READ
+SQLPORT=$CONFIGDB_READ_PORT
+EVAL_SQL_URL=$(eval echo $SQL_URL)
+v_setprop readUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
+
+SQLHOST=$CONFIGDB_WRITE
+SQLPORT=$CONFIGDB_WRITE_PORT
+EVAL_SQL_URL=$(eval echo $SQL_URL)
+v_setprop writeUrl $EVAL_SQL_URL ${SERVERCONF}/configdb.properties
+
+if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
+    v_setprop useSeparateWrite "true" ${SERVERCONF}/configdb.properties
+fi
+
+v_setprop readProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
+v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
+
+v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.properties
+v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
+
+v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
+v_setprop imapServer $IMAP_SERVER ${SERVERCONF}/imap.properties
+v_setprop imapLoginType $IMAP_LOGIN_TYPE ${SERVERCONF}/imap.properties
+
+case $LOGIN_IMPL_TYPE in
+    1u1)
+	v_setprop LoginInfo com.openexchange.groupware.contexts.LoginOneAndOneImpl ${SERVERCONF}/system.properties
+	v_setprop checkPassword false ${SERVERCONF}/ldap.properties
+	;;
+    database)
+	v_setprop LoginInfo com.openexchange.groupware.contexts.RdbLoginInfo ${SERVERCONF}/system.properties
+	v_setprop checkPassword true ${SERVERCONF}/ldap.properties
+	;;
+esac
+
+v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
+
+# admin daemon
+
+v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
+v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
+
+SQLHOST=$CONFIGDB_READ
+SQLPORT=$CONFIGDB_READ_PORT
+EVAL_SQL_URL=$(eval echo $SQL_URL)
+v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+
+SQLHOST=$CONFIGDB_WRITE
+SQLPORT=$CONFIGDB_WRITE_PORT
+EVAL_SQL_URL=$(eval echo $SQL_URL)
+v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+
+if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
+    v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
+fi
+
+v_setprop readProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
+v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+
+v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
+v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+
+# where to set pool size?
