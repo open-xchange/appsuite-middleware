@@ -1,0 +1,202 @@
+#!/bin/bash
+#
+#
+#   OPEN-XCHANGE legal information
+#
+#   All intellectual property rights in the Software are protected by
+#   international copyright laws.
+#
+#
+#   In some countries OX, OX Open-Xchange, open xchange and OXtender
+#   as well as the corresponding Logos OX Open-Xchange and OX are registered
+#   trademarks of the Open-Xchange, Inc. group of companies.
+#   The use of the Logos is not covered by the GNU General Public License.
+#   Instead, you are allowed to use these Logos according to the terms and
+#   conditions of the Creative Commons License, Version 2.5, Attribution,
+#   Non-commercial, ShareAlike, and the interpretation of the term
+#   Non-commercial applicable to the aforementioned license is published
+#   on the web site http://www.open-xchange.com/EN/legal/index.html.
+#
+#   Please make sure that third-party modules and libraries are used
+#   according to their respective licenses.
+#
+#   Any modifications to this package must retain all copyright notices
+#   of the original copyright holder(s) for the original code used.
+#
+#   After any such modifications, the original and derivative code shall remain
+#   under the copyright of the copyright holder(s) and/or original author(s)per
+#   the Attribution and Assignment Agreement that can be located at
+#   http://www.open-xchange.com/EN/developer/. The contributing author shall be
+#   given Attribution for the derivative code and a license granting use.
+#
+#    Copyright (C) 2004-2006 Open-Xchange, Inc.
+#    Mail: info@open-xchange.com
+#
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License, Version 2 as published
+#    by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+#    for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc., 59
+#    Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+#
+
+
+OXFUNCTIONS=@oxfunctions@
+ADMINCONF=@absoxconfdir@
+
+
+test -f $OXFUNCTIONS || {
+        echo "missing common shell functions file"
+        exit 1
+}
+
+. $OXFUNCTIONS
+
+# some defaults
+CONFIGDB_USER=openexchange
+CONFIGDB_USER_LONG=configdb-user
+CONFIGDB_PASS=
+CONFIGDB_PASS_LONG=configdb-pass
+CONFIGDB_HOST=localhost
+CONFIGDB_HOST_LONG=configdb-host
+CONFIGDB_PORT=3306
+CONFIGDB_PORT_LONG=configdb-port
+CONFIGDB_DBNAME=configdb
+CONFIGDB_DBNAME_LONG=configdb-dbname
+
+# default is NOT to create sql admin user
+CREATEADMIN=
+
+MUSTOPTS="CONFIGDB_PASS"
+LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:'
+
+usage() {
+    echo
+    echo "$0 currently knows the following parameters:"
+    echo
+    local lopts=$(echo $LONGOPTS | sed -e 's/[:,]/ /g')
+    printf '%-30s | %s\n' "Parameter" "Default value"
+    echo "------------------------------------------------------------"
+    for opt in $lopts; do
+	local rvar=${opt%_LONG}
+	local default=$(eval echo $rvar)
+	local lopt=$(eval echo $opt)
+	#echo $opt $rvar $default $lopt
+	printf '%-30s | %s\n' "--$lopt" $default
+    done
+    echo
+    echo
+    echo 'NOTE: use "-a" to create SQL admin user using GRANT command'
+    echo
+    echo
+    echo
+cat<<EOF
+Example:
+
+  $0 --configdb-pass=secret
+EOF
+    echo
+}
+
+TEMP=$(POSIXLY_CORRECT=true getopt -o ap:h --long "$(eval echo $LONGOPTS),help" -- "$@")
+eval set -- "$TEMP"
+
+while true; do
+    case "$1" in
+	--$CONFIGDB_USER_LONG)
+	    CONFIGDB_USER=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_PASS_LONG)
+	    CONFIGDB_PASS=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_HOST_LONG)
+	    CONFIGDB_HOST=$2
+	    shift 2
+	    ;;
+	-p|--$CONFIGDB_PORT_LONG)
+	    CONFIGDB_PORT=$2
+	    shift 2
+	    ;;
+	--$CONFIGDB_DBNAME_LONG)
+	    CONFIGDB_DBNAME=$2
+	    shift 2
+	    ;;
+	-a)
+	    CREATEADMIN=true
+	    shift
+	    ;;
+	-h|--help)
+	    usage
+	    shift
+	    ;;
+	--)
+	    shift
+	    break
+	    ;;
+	*)
+	    die "Internal error!"
+	    exit 1
+	    ;;
+    esac
+done
+
+# generic parameter checking
+for opt in $MUSTOPTS; do
+    opt_var=$(eval echo \$$opt)
+    opt_var_long=$(eval echo \$${opt}_LONG)
+    opt_var_values=$(eval echo \$${opt}_VALUES)
+    if [ -z "$opt_var" ]; then
+	die "missing required option --$opt_var_long"
+    fi
+    if [ -n "$opt_var_values" ]; then
+	found=
+	for val in $opt_var_values; do
+	    if [ "$val" == "$opt_var" ]; then
+		found=$val
+	    fi
+	done
+	if [ -z "$found" ]; then
+	    die "\"$opt_var\" is not a valid option to --$opt_var_long"
+	fi
+    fi
+done
+
+if [ -n "$CREATEADMIN" ]; then
+    if [ "$USER" != "root" ]; then
+	die "need to be root in order to setup the system"
+    fi
+fi
+
+echo -n "initializing configdb from scratch..."
+
+if [ -n "$CREATEADMIN" ]; then
+    cat<<EOF | mysql
+drop database if exists \`${CONFIGDB_DBNAME}\`;
+GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
+create database \`${CONFIGDB_DBNAME}\`;
+EOF
+else
+    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS}
+drop database if exists \`${CONFIGDB_DBNAME}\`;
+create database \`${CONFIGDB_DBNAME}\`;
+EOF
+fi
+
+cat $ADMINCONF/mysql/configdb.sql \
+    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
+cat $ADMINCONF/mysql/optimize/configdb.sql \
+    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
+cat $ADMINCONF/mysql/consistency/configdb.sql \
+    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
+
+echo " done"
