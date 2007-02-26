@@ -50,9 +50,10 @@
 package com.openexchange.groupware.importexport.exceptions;
 
 /**
- * A list of classes throwing exceptions
+ * A list of classes throwing ImportExportExceptions
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:">Sebastian Kauss</a>
  *
  */
 public class ImportExportExceptionClasses {
@@ -63,4 +64,9 @@ public class ImportExportExceptionClasses {
 	
 	public static final int ICALIMPORTER = 5;
 	public static final int VCARDIMPORTER = 6;
+	
+	public static final int CSVCONTACTIMPORTER = 8;
+	public static final int CSVLIBRARY = 9;
+	public static final int CSVPARSER = 10;
+	public static final int IMPORTEREXPORTER = 11;
 }
