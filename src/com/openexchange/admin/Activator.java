@@ -50,7 +50,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
-//        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         PropertyHandler prop = AdminDaemon.getProp();
         int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
         registry = LocateRegistry.getRegistry(rmi_port);
