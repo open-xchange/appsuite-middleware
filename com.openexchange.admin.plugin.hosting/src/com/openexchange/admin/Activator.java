@@ -1,10 +1,11 @@
 package com.openexchange.admin;
 
+import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -25,10 +26,10 @@ import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class Activator implements BundleActivator {
 
-    private static Log log = LogFactory.getLog(Activator.class);
+//    private static Log log = LogFactory.getLog(Activator.class);
     
     private static Registry registry = null;
-
+//
     private static com.openexchange.admin.dataSource.impl.OXContext oxctx = null;
     private static com.openexchange.admin.dataSource.impl.OXUtil oxutil = null;
     private static com.openexchange.admin.dataSource.impl.OXUser oxuser = null;
@@ -40,7 +41,7 @@ public class Activator implements BundleActivator {
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
     private static com.openexchange.admin.rmi.impl.AdminJobExecutor ajx_v2 = null;
 
-    private MonitorAgent moni = null;
+    private static MonitorAgent moni = null;
     private static PropertyHandler prop = null;
 
     /*
@@ -49,9 +50,10 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
-
-        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-        prop = AdminDaemon.getProp();
+//        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+        PropertyHandler prop = AdminDaemon.getProp();
+        int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
+        registry = LocateRegistry.getRegistry(rmi_port);
 
         // Create all OLD Objects and bind export them
         oxctx = new com.openexchange.admin.dataSource.impl.OXContext();
@@ -97,7 +99,7 @@ public class Activator implements BundleActivator {
         registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
         registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
-        startJMX();
+//        startJMX();
     }
 
     /*
@@ -106,7 +108,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) throws Exception {
-        stopJMX();
+//        stopJMX();
         if (null != registry) {
             registry.unbind(OXContextInterface.RMI_NAME);
             registry.unbind(OXUtilInterface.RMI_NAME);
@@ -123,28 +125,14 @@ public class Activator implements BundleActivator {
 
     private void startJMX() {
         int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
-        this.moni = new MonitorAgent(jmx_port);
-        this.moni.start();
+        moni = new MonitorAgent(jmx_port);
+        moni.start();
 
-        // I_OXGroup ox_group = new OXGroup();
-        // I_OXResource ox_resource = new OXResource();
-        // I_OXResourceGroup ox_resource_group = new OXResourceGroup();
-        // I_OXUser ox_user = new OXUser();
-        // I_OXContext ox_context = new OXContext();
-        // I_OXUtil ox_util = new OXUtil();
-        // Naming.rebind(I_OXGroup.RMI_NAME, ox_group);
-        // Naming.rebind(I_OXResource.RMI_NAME, ox_resource);
-        // Naming.rebind( I_OXResourceGroup.RMI_NAME, ox_resource_group );
-        // Naming.rebind(I_OXUser.RMI_NAME, ox_user);
-        // Naming.rebind(I_OXContext.RMI_NAME, ox_context);
-        // Naming.rebind(I_OXUtil.RMI_NAME, ox_util);
         String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
-        log.info("Admindaemon Name: " + servername);
+//        log.info("Admindaemon Name: " + servername);
     }
     
     private void stopJMX() {
-        this.moni.stop();
+        moni.stop();
     }
-    
-
 }
