@@ -1,5 +1,6 @@
 package com.openexchange.ajax.importexport;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -9,7 +10,9 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -17,14 +20,17 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,17 +68,17 @@ public class AbstractICalTest extends AbstractAJAXTest {
 				.getStandardCalendarFolder(getWebConversation(),
 				getHostName(), getSessionId());
 		appointmentFolderId = appointmentFolderObj.getObjectID();
-
+		
 		final FolderObject taskFolderObj = FolderTest
 				.getStandardTaskFolder(getWebConversation(),
 				getHostName(), getSessionId());
-		taskFolderId = appointmentFolderObj.getObjectID();
-
+		taskFolderId = taskFolderObj.getObjectID();
+		
 		userId = appointmentFolderObj.getCreatedBy();
 		
 		timeZone = ConfigTools.getTimeZone(getWebConversation(),
 				getHostName(), getSessionId());
-
+		
 		LOG.debug(new StringBuilder().append("use timezone: ").append(
 				timeZone).toString());
 		
@@ -131,15 +137,17 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		versitWriter.flush();
 		oxContainerConverter.close();
 		
-		final URLParameter parameter = new URLParameter();
+		final URLParameter parameter = new URLParameter(true);
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		
 		if (appointmentFolderId != -1) {
-			parameter.setParameter("appointmentfolder", appointmentFolderId);
+			parameter.setParameter("folder", appointmentFolderId);
+			parameter.setParameter("type", Types.APPOINTMENT);
 		}
 		
-		if (appointmentFolderId != -1) {
-			parameter.setParameter("taskfolder", taskFolderId);
+		if (taskFolderId != -1) {
+			parameter.setParameter("folder", taskFolderId);
+			parameter.setParameter("type", Types.TASK);
 		}
 		
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
@@ -149,11 +157,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		final Response response = Response.parse(resp.getText());
-		
-		// parse jsonarray
-		
-		JSONArray jsonArray = (JSONArray) response.getData();
+		JSONArray jsonArray = new JSONArray(resp.getText());
 		
 		assertNotNull("json array in response is null", jsonArray);
 		
@@ -161,13 +165,105 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		for (int a = 0; a < jsonArray.length(); a++) {
 			JSONObject jsonObj = jsonArray.getJSONObject(a);
 			
-			String objectId = jsonObj.getString("object_id");
-			String folder = jsonObj.getString("folder");
-			long timestamp = jsonObj.getLong("timestamp");
+			String objectId = jsonObj.getString("id");
+			String folder = jsonObj.getString("folder_id");
+			long timestamp = jsonObj.getLong("last_modified");
 			
 			importResult[a] = new ImportResult(objectId, folder, timestamp);
 		}
 		
 		return importResult;
+	}
+	
+	public AppointmentObject[] exportAppointment(WebConversation webCon, int inFolder, String mailaddress, TimeZone timeZone, String host, String session) throws Exception, TestException {
+		host = appendPrefix(host);
+		
+		final String contentType = "text/calendar";
+		
+		final URLParameter parameter = new URLParameter(true);
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter("content-type", contentType);
+		parameter.setParameter("folder", appointmentFolderId);
+		parameter.setParameter("type", Types.APPOINTMENT);
+		
+		WebRequest req = new GetMethodWebRequest(host + IMPORTEXPORT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
+		
+		final List<AppointmentObject> exportData = new ArrayList<AppointmentObject>();
+		
+		try {
+			final VersitDefinition def = Versit.getDefinition(contentType);
+			final VersitDefinition.Reader versitReader = def.getReader(byteArrayInputStream, "UTF-8");
+			final VersitObject rootVersitObject = def.parseBegin(versitReader);
+			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+			while (versitObject != null) {
+				final Property property = versitObject.getProperty("UID");
+				
+				if ("VEVENT".equals(versitObject.name)) {
+					final CalendarDataObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
+					appointmentObj.setParentFolderID(appointmentFolderId);
+					exportData.add(appointmentObj);
+				} else {
+					LOG.warn("invalid versit object: " + versitObject.name);
+				}
+				
+				versitObject = def.parseChild(versitReader, rootVersitObject);
+			}
+		} catch (Exception exc) {
+			System.out.println("error: " + exc);
+		}
+		
+		return exportData.toArray(new AppointmentObject[exportData.size()]);
+	}
+	
+	public Task[] exportTask(WebConversation webCon, int inFolder, String mailaddress, TimeZone timeZone, String host, String session) throws Exception, TestException {
+		host = appendPrefix(host);
+		
+		final String contentType = "text/calendar";
+		
+		final URLParameter parameter = new URLParameter(true);
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter("content-type", contentType);
+		parameter.setParameter("folder", taskFolderId);
+		parameter.setParameter("type", Types.TASK);
+		
+		WebRequest req = new GetMethodWebRequest(host + IMPORTEXPORT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(resp.getText().getBytes());
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(timeZone, mailaddress);
+		
+		final List<Task> exportData = new ArrayList<Task>();
+		
+		try {
+			final VersitDefinition def = Versit.getDefinition(contentType);
+			final VersitDefinition.Reader versitReader = def.getReader(byteArrayInputStream, "UTF-8");
+			final VersitObject rootVersitObject = def.parseBegin(versitReader);
+			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+			while (versitObject != null) {
+				final Property property = versitObject.getProperty("UID");
+				
+				if ("VTODO".equals(versitObject.name)) {
+					final Task taskObj = oxContainerConverter.convertTask(versitObject);
+					taskObj.setParentFolderID(taskFolderId);
+					exportData.add(taskObj);
+				} else {
+					LOG.warn("invalid versit object: " + versitObject.name);
+				}
+				
+				versitObject = def.parseChild(versitReader, rootVersitObject);
+			}
+		} catch (Exception exc) {
+			System.out.println("error: " + exc);
+		}
+		
+		return exportData.toArray(new Task[exportData.size()]);
 	}
 }
