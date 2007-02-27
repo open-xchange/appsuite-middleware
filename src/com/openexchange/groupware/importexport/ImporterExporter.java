@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.importexport.importers.ICalImporter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,15 +56,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.Component;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
-import com.openexchange.groupware.importexport.exporters.ICalExporter;
-import com.openexchange.groupware.importexport.exporters.VCardExporter;
-import com.openexchange.groupware.importexport.importers.VCardImporter;
 import com.openexchange.sessiond.SessionObject;
 
 @OXThrowsMultiple(
