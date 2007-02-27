@@ -88,7 +88,7 @@ public class ImportExport extends SessionServlet {
 	private static final long serialVersionUID = -7502282736897750395L;
 
 	public static final String AJAX_TYPE = "type";
-
+	
 	private static final Log LOG = LogFactory.getLog(ImportExport.class);
 	
 	private ImporterExporter importerExporter = null;
@@ -105,25 +105,25 @@ public class ImportExport extends SessionServlet {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
 			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
-			final String contentType = DataServlet.parseMandatoryStringParameter(req, "content-type");
 			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
 			
-			final Format f = Format.getFormatByMimeType(contentType);
-			
-			if (f == null) {
-				resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, "no exporter found for the content-type: " + contentType);
-				return;
+			final String mimeType = req.getContentType();
+			Format f = Format.getFormatByMimeType(mimeType);
+			if(f == null){
+				f = Format.getFormatByMimeType(
+					DataServlet.parseMandatoryStringParameter(req, PARAMETER_CONTENT_TYPE));
 			}
 			
 			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), f, folder, type, fieldsToBeExported, req.getParameterMap());
 			
-			resp.setContentLength((int)inputStream.getSize());
-			resp.setContentType(contentType);
 			final OutputStream outputStream = resp.getOutputStream();
+			resp.setContentLength((int) inputStream.getSize());
+			resp.setContentType(inputStream.getFormat().getMimeType());
 			
 			final byte[] b = new byte[1024];
 			int i = 0; 
@@ -136,13 +136,18 @@ public class ImportExport extends SessionServlet {
 		}		
 	}
 	
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			final int[] type = DataServlet.parseMandatoryIntParameterArray(req, AJAX_TYPE);
 			final String[] folder = DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID);
 			
 			final String mimeType = req.getContentType();
-			final Format f = Format.getFormatByMimeType(mimeType);
+			Format f = Format.getFormatByMimeType(mimeType);
+			if(f == null){
+				f = Format.getFormatByMimeType(
+					DataServlet.parseMandatoryStringParameter(req, PARAMETER_CONTENT_TYPE));
+			}
 			
 			final HashMap <String, Integer> hashMap = new HashMap<String, Integer>();
 			if (type.length != folder.length) {

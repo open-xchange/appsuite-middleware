@@ -66,14 +66,20 @@ public class SizedInputStream extends InputStream{
 	
 	private InputStream in;
 	private long size;
+	private Format format; 
 	
-	public SizedInputStream(InputStream in, long size){
+	public SizedInputStream(InputStream in, long size, Format format){
 		this.size = size;
 		this.in = in;
+		this.format = format;
 	}
 
 	public long getSize() {
-		return size;
+		return this.size;
+	}
+	
+	public Format getFormat(){
+		return this.format;
 	}
 
 	@Override

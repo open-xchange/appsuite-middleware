@@ -55,6 +55,7 @@ import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformIn
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformSetToIntArray;
 
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,14 +101,16 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 		Category.PERMISSION, 
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
-		Category.PROGRAMMING_ERROR}, 
-	desc={"","","",""}, 
-	exceptionId={0,1,2,3}, 
+		Category.PROGRAMMING_ERROR,
+		Category.INTERNAL_ERROR}, 
+	desc={"","","","",""}, 
+	exceptionId={0,1,2,3,4}, 
 	msg={
 		"Could not export the folder %s in the format %s.",
 		"Could not load folder %s",
 		"Could not load contacts",
-		"Could not create folderId from String %s"})
+		"Could not create folderId from String %s",
+		"Could not encode as UTF-8"})
 
 public class CSVContactExporter implements Exporter {
 	
@@ -286,9 +289,14 @@ public class CSVContactExporter implements Exporter {
 			}
 			
 		}
-		return new SizedInputStream(
-				new ByteArrayInputStream ( ret.toString().getBytes()) ,  
-				ret.toString().getBytes().length );
+		try {
+			return new SizedInputStream(
+					new ByteArrayInputStream ( ret.toString().getBytes("UTF-8")) ,  
+					ret.toString().getBytes().length,
+					Format.CSV);
+		} catch (UnsupportedEncodingException e) {
+			throw EXCEPTIONS.create(4);
+		}
 	}
 
 	
@@ -318,7 +326,8 @@ public class CSVContactExporter implements Exporter {
 		
 		return new SizedInputStream(
 				new ByteArrayInputStream ( ret.toString().getBytes()) ,  
-				ret.toString().getBytes().length );
+				ret.toString().getBytes().length,
+				Format.CSV);
 	}
 	
 	protected List<String> convertToList(ContactObject conObj, int[] cols){
@@ -347,7 +356,6 @@ public class CSVContactExporter implements Exporter {
 			bob.append(com.openexchange.groupware.importexport.csv.CSVLibrary.CELL_DELIMITER);
 		}
 		bob.setCharAt(bob.length() - 1, com.openexchange.groupware.importexport.csv.CSVLibrary.ROW_DELIMITER);
-		System.out.println( bob.toString() );
 		return bob.toString();
 	}
 

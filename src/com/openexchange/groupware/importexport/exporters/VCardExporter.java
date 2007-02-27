@@ -109,7 +109,10 @@ public class VCardExporter implements Exporter {
 			throw importExportExceptionFactory.create(3, folder);
 		}
 		
-		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
+		return new SizedInputStream(
+			new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+			byteArrayOutputStream.size(),
+			Format.VCARD);
 	}
 	
 	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
@@ -127,7 +130,10 @@ public class VCardExporter implements Exporter {
 			throw importExportExceptionFactory.create(3, folder);
 		}
 		
-		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
+		return new SizedInputStream(
+			new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+			byteArrayOutputStream.size(),
+			Format.VCARD);
 	}
 	
 	protected void exportContact(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, ContactObject contactObj) throws Exception {
