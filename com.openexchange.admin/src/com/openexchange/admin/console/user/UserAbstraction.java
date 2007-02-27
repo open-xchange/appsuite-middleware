@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.console.user;
 
-import java.util.HashSet;
 
 import org.apache.commons.cli.Option;
 
@@ -57,102 +56,6 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
-    protected boolean isInCmdLine(final String opt) {
-        String [] exceptions = {  
-                "serialVersionUID",
-                "extensions",
-                "email2",
-                "email3",
-                "userfield01",
-                "userfield02",
-                "userfield03",
-                "userfield04",
-                "userfield05",
-                "userfield06",
-                "userfield07",
-                "userfield08",
-                "userfield09",
-                "userfield10",
-                "userfield11",
-                "userfield12",
-                "userfield13",
-                "userfield14",
-                "userfield15",
-                "userfield16",
-                "userfield17",
-                "userfield18",
-                "userfield19",
-                "userfield20",
-                "birthday",
-                "anniversary",
-                "branches",
-                "business_category",
-                "categories",
-                "telephone_callback",
-                "city_home",
-                "commercial_register",
-                "country_home",
-                "employeeType",
-                "instant_messenger1",
-                "instant_messenger2",
-                "telephone_ip",
-                "telephone_isdn",
-                "manager_name",
-                "marital_status",
-                "cellular_telephone1",
-                "cellular_telephone2",
-                "number_of_children",
-                "number_of_employee",
-                "telephone_pager",
-                "telephone_assistant",
-                "assistant_name",
-                "telephone_business2",
-                "telephone_car",
-                "telephone_home1",
-                "telephone_home2",
-                "telephone_other",
-                "postal_code_home",
-                "profession",
-                "telephone_radio",
-                "sales_volume",
-                "city_other",
-                "country_other",
-                "postal_code_other",
-                "state_other",
-                "street_other",
-                "spouse_name",
-                "state_home",
-                "street_home",
-                "tax_id",
-                "telephone_telex",
-                "telephone_ttytdd"
-                };
-        HashSet<String> exceptionHash = new HashSet<String>();
-        for(String ex : exceptions ) {
-            exceptionHash.add(ex);
-        }
-        return ! exceptionHash.contains(opt);
-    }
-
-    /*
-     * generate shortoptions [a-zA-Z]
-     */
-    protected char[] generateShortOpts() {
-        final String soptstring = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        String retOpts = "";
-        for(int i=0; i<soptstring.length(); i++) {
-            boolean contained = false;
-            for(String exclopt :  new String[] { OPT_NAME_CONTEXT_SHORT,
-                    OPT_NAME_ADMINPASS_SHORT,
-                    OPT_NAME_ADMINUSER_SHORT,
-                    OPT_NAME_SEARCHPATTERN} ) {
-                if(true) {
-                    
-                }
-            }
-        }
-        return retOpts.toCharArray();
-    }
     
     protected Option getIdOption(){
         return getShortLongOpt(OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true); 
