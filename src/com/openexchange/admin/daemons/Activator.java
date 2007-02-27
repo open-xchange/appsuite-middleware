@@ -54,8 +54,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -86,18 +84,10 @@ public class Activator implements BundleActivator {
             });
         }
 
-        BundleListener bl = new BundleListener() {
-
-            public void bundleChanged(BundleEvent event) {
-                System.out.println(event.getBundle().getSymbolicName() + " changed to " + event.getType());
-            }
-            
-        };
-        
-        context.addBundleListener(bl);
         System.out.println("Config: " + context.getProperty("config"));
         this.daemon = new AdminDaemon();
         log.info("Starting Admindaemon...");
+        this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
 
         // init auth
@@ -109,16 +99,6 @@ public class Activator implements BundleActivator {
         log.info("Build: " + Version.BUILD);
         log.info("Admindaemon successfully started.");
 
-//        BundleListener bl = new BundleListener() {
-//
-//            public void bundleChanged(BundleEvent event) {
-//                if (BundleEvent.STARTED == event.getType()) {
-//                    log.info("Bundle " + event.getBundle().getSymbolicName() + " registered");
-//                }
-//            }
-//            
-//        };
-        
         // The listener which is called if a new plugin is registered
         ServiceListener sl = new ServiceListener() {
             public void serviceChanged(ServiceEvent ev) {
