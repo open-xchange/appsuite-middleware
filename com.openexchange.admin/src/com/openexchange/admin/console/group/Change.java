@@ -52,10 +52,10 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -70,24 +70,58 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class List extends GroupAbstraction {
-    
-    
+public class Change extends GroupAbstraction {
+
     public static void main(String[] args) {
-        new List(args);
+        new Change(args);
     }
 
-    private List() {
+    private Change() {
         
     }
+
+    protected Option getAddMembersOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, false);
+        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
+        return retval;
+    }
+
+    protected Option getRemoveMembersOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, false);
+        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
+        return retval;
+    }
+
+    protected Option getGroupIdOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group which will be deleted", true, true);
+        retval.setArgName("id");
+        return retval;
+    }
     
-    public List(String[] args2) {
+    protected Option getGroupNameOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, false);
+        retval.setArgName(OPT_NAME_GROUPDISPLAYNAME_LONG);
+        return retval;
+    }
+    
+    protected Option getGroupDisplayNameOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, false);
+        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
+        return retval;
+    }
+
+    public Change(String[] args2) {
         
         final CommandLineParser parser = new PosixParser();
 
         final Options options = getDefaultCommandLineOptions();
-        // create options for this command line tool       
-        options.addOption(getSearchPatternOption());        
+
+        // create options for this command line tool        
+        options.addOption(getGroupIdOption());
+        options.addOption(getGroupNameOption());
+        options.addOption(getGroupDisplayNameOption());
+        options.addOption(getAddMembersOption());
+        options.addOption(getRemoveMembersOption());
 
         try {
             final CommandLine cmd = parser.parse(options, args2);
@@ -100,35 +134,61 @@ public class List extends GroupAbstraction {
             final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT), cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
 
             final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(OXGroupInterface.RMI_NAME);
+            final Group grp = new Group();
 
-            final String pattern = cmd.getOptionValue(OPT_NAME_SEARCHPATTERN);
-
-            Group[] allgrps = oxgrp.list(ctx, pattern, auth);
-//          TODO FIX THE OUTPUT OF THIS COMMANDLINE TOOL
-            for(Group group : allgrps){
-                System.out.println(group);
-                System.out.println("  Members:");
-                for(int id : oxgrp.getMembers(ctx, group.getId(), auth)) {
-                    System.out.println("   "+id);
+            final int groupid = Integer.valueOf(cmd.getOptionValue(OPT_NAME_GROUPID));
+            grp.setId(groupid);
+            
+            int []newMemberList = null;
+            int []removeMemberList = null;
+            if(cmd.hasOption(OPT_NAME_ADDMEMBERS)) {
+                final String tmpmembers = cmd.getOptionValue(OPT_NAME_ADDMEMBERS);
+                ArrayList<Integer> newmembers = new ArrayList<Integer>();
+                for(String member : tmpmembers.split(",") ) {
+                    newmembers.add(Integer.parseInt(member));
+                }
+                if(newmembers.size() > 0) {
+                    newMemberList = new int[newmembers.size()];
+                    for(int i=0; i<newmembers.size(); i++) {
+                        newMemberList[i] = newmembers.get(i);
+                    }
                 }
             }
-            
+            if(cmd.hasOption(OPT_NAME_REMOVEMEMBERS)) {
+                final String tmpmembers = cmd.getOptionValue(OPT_NAME_REMOVEMEMBERS);
+                ArrayList<Integer> removemembers = new ArrayList<Integer>();
+                for(String member : tmpmembers.split(",") ) {
+                    removemembers.add(Integer.parseInt(member));
+                }
+                if(removemembers.size() > 0) {
+                    removeMemberList = new int[removemembers.size()];
+                    for(int i=0; i<removemembers.size(); i++) {
+                        removeMemberList[i] = removemembers.get(i);
+                    }
+                }
+            }
+            if(newMemberList != null) {
+                oxgrp.addMember(ctx, groupid, newMemberList, auth);
+            }
+            if(removeMemberList != null) {
+                oxgrp.removeMember(ctx, groupid, removeMemberList, auth);
+            }
+
+            oxgrp.change(ctx, grp, auth);
         }catch(java.rmi.ConnectException neti){
-            printError(neti.getMessage());          
+            printError(neti.getMessage());            
         }catch(org.apache.commons.cli.MissingArgumentException as){
             printError("Missing arguments on the command line: " + as.getMessage());;
-            printHelpText("listgroup", options);
+            printHelpText("changegroup", options);
         }catch(org.apache.commons.cli.UnrecognizedOptionException ux){
             printError("Unrecognized options on the command line: " + ux.getMessage());;
-            printHelpText("listgroup", options);
+            printHelpText("changegroup", options);
         } catch (final org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());;
-            printHelpText("listgroup", options);
+            printHelpText("changegroup", options);
         } catch (final ParseException e) {
             printError("Error parsing the command line. Message was: " + e.getMessage());            
-            printHelpText("listgroup", options);
-        } catch (final NumberFormatException e) {
-            printInvalidInputMsg("The Option for the id of the group contains no parseable integer number");
+            printHelpText("changegroup", options);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
         } catch (final RemoteException e) {
