@@ -51,14 +51,7 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.writer.ImportExportWriter;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.ImporterExporter;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -72,20 +65,41 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 import org.json.JSONWriter;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.FileSystemResource;
+
+import com.openexchange.ajax.writer.ImportExportWriter;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.importexport.ImporterExporter;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
  * ImportExport
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration)
  */
 
 public class ImportExport extends SessionServlet {
-	
+
+	private static final long serialVersionUID = -7502282736897750395L;
+
 	public static final String AJAX_TYPE = "type";
-	
+
 	private static final Log LOG = LogFactory.getLog(ImportExport.class);
+	
+	private final ImporterExporter importerExporter;
+	
+	
+	public ImportExport(){
+		//spring init
+		String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
+		XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
+		importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
+	}
 	
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -96,7 +110,6 @@ public class ImportExport extends SessionServlet {
 			final String mimeType = req.getContentType();
 			final Format f = Format.getFormatByMimeType(mimeType);
 			
-			final ImporterExporter importerExporter = new ImporterExporter();
 			final InputStream inputStream = importerExporter.exportData(getSessionObject(req), f, folder, type, fieldsToBeExported, req.getParameterMap());
 			
 			final OutputStream outputStream = resp.getOutputStream();
@@ -120,7 +133,7 @@ public class ImportExport extends SessionServlet {
 			final String mimeType = req.getContentType();
 			final Format f = Format.getFormatByMimeType(mimeType);
 			
-			final HashMap hashMap = new HashMap<String, Integer>();
+			final HashMap <String, Integer> hashMap = new HashMap<String, Integer>();
 			if (type.length != folder.length) {
 				resp.setStatus(HttpServletResponse.SC_CONFLICT, "invalid data in request");
 				return;
@@ -130,7 +143,6 @@ public class ImportExport extends SessionServlet {
 				hashMap.put(folder[a], type[a]);
 			}
 			
-			final ImporterExporter importerExporter = new ImporterExporter();
 			final List<ImportResult> importResult = importerExporter.importData(getSessionObject(req), f, req.getInputStream(), hashMap, req.getParameterMap());
 			final StringWriter stringWriter = new StringWriter();
 			final JSONWriter jsonWriter = new JSONWriter(stringWriter);

@@ -107,8 +107,6 @@ public class ImporterExporter {
 
 	//--- SETTER & GETTER ---//
 	public List<Exporter> getExporters() {
-		exporters.add(new ICalExporter());
-		exporters.add(new VCardExporter());
 		return exporters;
 	}
 	public void setExporters(final List<Exporter> exporters) {
@@ -122,8 +120,6 @@ public class ImporterExporter {
 	}
 
 	public List<Importer> getImporters() {
-		importers.add(new ICalImporter());
-		importers.add(new VCardImporter());
 		return importers;
 	}
 	public void setImporters(final List<Importer> importers) {

@@ -50,7 +50,7 @@ Notification=@oxgroupwaresysconfdir@/notification.properties
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
 CACHECCF:@oxgroupwaresysconfdir@/cache.ccf
-
+IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
 LDAPPROPERTIES:@oxgroupwaresysconfdir@/ldap.properties
 SESSIONDPROPERTIES:@oxgroupwaresysconfdir@/sessiond.properties
 EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
