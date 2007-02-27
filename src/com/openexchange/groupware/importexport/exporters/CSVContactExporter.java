@@ -80,6 +80,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ModuleTypeTranslator;
+import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -246,7 +247,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type,
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type,
 			final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, type, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
@@ -285,8 +286,9 @@ public class CSVContactExporter implements Exporter {
 			}
 			
 		}
-		
-		return new ByteArrayInputStream ( ret.toString().getBytes() );
+		return new SizedInputStream(
+				new ByteArrayInputStream ( ret.toString().getBytes()) ,  
+				ret.toString().getBytes().length );
 	}
 
 	
