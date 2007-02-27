@@ -1,8 +1,19 @@
+* 2007-02-27 - tobias.prinz@open-xchange.com
+
+  - Added a handy new sub package to allow for bulk entries of contacts,
+    found in ...contacts.helpers. Might seem a bit strange to use, but
+    Hibernate does it kinda he same way. You'll get used to it.
+  - Added two basic CSV handling classes - one of them a parser. Can be found
+    in ...importerexporter.csv - maybe useful for other projects.
+  - Further Work on importers and exporters. Okay, we agreed not to mention 
+    new development, but since I was already typing and even the 
+    system.properties.in has been updated, which usually is worth an e-mail...
+  
 * 2007-02-16 - tobias.prinz@open-xchange.com
 
   - Work on importers and exporters.
   - Added a handy class to translate between constants used in Types.class
-    and in FolderObject.class
+    and in FolderObject.class: ModuleTypeTranslator
   
 * 2007-02-15 - tobias.prinz@open-xchange.com
 
