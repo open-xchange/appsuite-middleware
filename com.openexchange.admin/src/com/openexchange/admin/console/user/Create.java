@@ -191,32 +191,5 @@ public class Create extends UserAbstraction {
         return retval;
         
     }
-    
-//  private Options generateOptions() {
-//  Options options = getDefaultCommandLineOptions();
-//
-//  // generate list of available shortopts
-//  char []shorts = generateShortOpts();
-//  int cnt=0;
-//  System.out.println(shorts);
-//  // create options for all member variables of User class
-//  for (final Field f : User.class.getDeclaredFields()) {
-//      try {
-//          String longopt = f.getName();
-//          // exclude some members, because we only have a limited amount
-//          // of short options (2*26+10)
-//          if( isInCmdLine(longopt) ) {
-//              String shortopt = String.valueOf(shorts[cnt++]);
-//              System.out.println("SHORT: " + shortopt);
-//              options.addOption(shortopt, longopt, false, "");
-//          }
-//      } catch (IllegalArgumentException e) {
-//          e.printStackTrace();
-//          System.out.println("IllegalArgument\n");
-//      }
-//  }
-//  return options;
-//}
-
 
 }
