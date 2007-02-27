@@ -2,6 +2,7 @@ package com.openexchange.groupware.importexport.exporters;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -64,7 +66,7 @@ public class ICalExporter implements Exporter {
 			return false;
 		}
 		//check format of folder
-		if ( (type == Types.APPOINTMENT || type == Types.TASK) && fo.getModule() != type ){
+		if ((type == Types.APPOINTMENT || type == Types.TASK) && fo.getModule() != ModuleTypeTranslator.getFolderObjectConstant(type)) {
 			return false;
 		}
 		//check read access to folder
@@ -86,7 +88,7 @@ public class ICalExporter implements Exporter {
 		return false;
 	}
 	
-	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
@@ -118,10 +120,10 @@ public class ICalExporter implements Exporter {
 			throw importExportExceptionFactory.create(4, folder);
 		}
 		
-		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
 	}
 	
-	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
@@ -149,7 +151,7 @@ public class ICalExporter implements Exporter {
 			throw importExportExceptionFactory.create(4, folder);
 		}
 		
-		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
 	}
 	
 	protected void exportAppointment(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, AppointmentObject appointmentObj) throws Exception {

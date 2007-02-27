@@ -2,7 +2,7 @@ package com.openexchange.groupware.importexport.exporters;
 
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLInterface;
-import java.io.InputStream;
+import com.openexchange.groupware.importexport.SizedInputStream;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
@@ -84,7 +84,7 @@ public class VCardExporter implements Exporter {
 		return false;
 	}
 	
-	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
@@ -109,10 +109,10 @@ public class VCardExporter implements Exporter {
 			throw importExportExceptionFactory.create(3, folder);
 		}
 		
-		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
 	}
 	
-	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
@@ -127,7 +127,7 @@ public class VCardExporter implements Exporter {
 			throw importExportExceptionFactory.create(3, folder);
 		}
 		
-		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
 	}
 	
 	protected void exportContact(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, ContactObject contactObj) throws Exception {
