@@ -88,22 +88,12 @@ public class URLParameter {
 	
 	public String getURLParameters() throws UnsupportedEncodingException {
 		final StringBuffer sb = new StringBuffer();
-		if (parameters.size() > 0) {
-			sb.append('?');
-		}
 		
 		if (multivalue) {
-			final Iterator iter = parameters.keySet().iterator();
-			while (iter.hasNext()) {
-				final String name = (String) iter.next();
-				sb.append(URLCoder.encode(name, "UTF-8"));
-				sb.append('=');
-				sb.append(URLCoder.encode((String) parameters.get(name), "UTF-8"));
-				if (iter.hasNext()) {
-					sb.append('&');
-				}
+			if (multivalueParameters.size() > 0) {
+				sb.append('?');
 			}
-		} else {
+			
 			final Iterator iter = multivalueParameters.keySet().iterator();
 			while (iter.hasNext()) {
 				final String name = (String) iter.next();
@@ -116,6 +106,21 @@ public class URLParameter {
 					if (iter.hasNext()) {
 						sb.append('&');
 					}
+				}
+			}
+		} else {
+			if (parameters.size() > 0) {
+				sb.append('?');
+			}
+			
+			final Iterator iter = parameters.keySet().iterator();
+			while (iter.hasNext()) {
+				final String name = (String) iter.next();
+				sb.append(URLCoder.encode(name, "UTF-8"));
+				sb.append('=');
+				sb.append(URLCoder.encode((String) parameters.get(name), "UTF-8"));
+				if (iter.hasNext()) {
+					sb.append('&');
 				}
 			}
 		}
