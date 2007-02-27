@@ -76,7 +76,14 @@ public class ICalExporter implements Exporter {
 		} catch (SQLException e) {
 			throw importExportExceptionFactory.create(2, folder);
 		}
-		return perm.canReadAllObjects();
+		
+		if (perm.canReadAllObjects()) {
+			if (format.getMimeType().equals("text/calendar")) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
