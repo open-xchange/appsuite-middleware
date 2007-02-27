@@ -14,6 +14,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
+import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -74,7 +75,7 @@ public class ICalImporter implements Importer {
 			
 			int type = folderMappings.get(folder).intValue();
 			//check format of folder
-			if ( (type == Types.APPOINTMENT || type == Types.TASK) && fo.getModule() != type ){
+			if ( (type == Types.APPOINTMENT || type == Types.TASK) && fo.getModule() != ModuleTypeTranslator.getFolderObjectConstant(type)) {
 				return false;
 			}
 			//check read access to folder
@@ -86,10 +87,15 @@ public class ICalImporter implements Importer {
 			} catch (SQLException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			}
-			return perm.canWriteAllObjects();
+			
+			if (perm.canWriteAllObjects()) {
+				if (format.getMimeType().equals("text/calendar")) {
+					return true;
+				}
+			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMappings, final Map<String, String[]> optionalParams) throws ImportExportException {
