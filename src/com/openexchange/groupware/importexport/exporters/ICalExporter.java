@@ -4,7 +4,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import java.io.InputStream;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
@@ -13,8 +12,13 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
@@ -39,7 +43,7 @@ import java.util.Map;
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ICALEXPORTER,
 		component=Component.IMPORT_EXPORT)
-@OXThrowsMultiple(
+		@OXThrowsMultiple(
 		category={
 	Category.PERMISSION,
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
@@ -52,8 +56,67 @@ import java.util.Map;
 	"Subsystem down - Could not import into folder %s",
 	"User input Error %s",
 	"Programming Error - Could not import into folder %s"})
-
+	
 public class ICalExporter implements Exporter {
+	
+	private final static int[] _appointmentFields = {
+		DataObject.OBJECT_ID,
+		DataObject.CREATED_BY,
+		DataObject.CREATION_DATE,
+		DataObject.LAST_MODIFIED,
+		DataObject.MODIFIED_BY,
+		FolderChildObject.FOLDER_ID,
+		CommonObject.PRIVATE_FLAG,
+		CommonObject.CATEGORIES,
+		CalendarObject.TITLE,
+		AppointmentObject.LOCATION,
+		CalendarObject.START_DATE,
+		CalendarObject.END_DATE,
+		CalendarObject.NOTE,
+		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.RECURRENCE_CALCULATOR,
+		CalendarObject.RECURRENCE_ID,
+		CalendarObject.PARTICIPANTS,
+		CalendarObject.USERS,
+		AppointmentObject.SHOWN_AS,
+		AppointmentObject.FULL_TIME,
+		AppointmentObject.COLOR_LABEL,
+		CalendarDataObject.TIMEZONE
+	};
+	
+	protected final static int[] _taskFields = {
+		DataObject.OBJECT_ID,
+		DataObject.CREATED_BY,
+		DataObject.CREATION_DATE,
+		DataObject.LAST_MODIFIED,
+		DataObject.MODIFIED_BY,
+		FolderChildObject.FOLDER_ID,
+		CommonObject.PRIVATE_FLAG,
+		CommonObject.CATEGORIES,
+		CalendarObject.TITLE,
+		CalendarObject.START_DATE,
+		CalendarObject.END_DATE,
+		CalendarObject.NOTE,
+		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.PARTICIPANTS,
+		Task.ACTUAL_COSTS,
+		Task.ACTUAL_DURATION,
+		Task.ALARM,
+		Task.BILLING_INFORMATION,
+		Task.CATEGORIES,
+		Task.COMPANIES,
+		Task.CURRENCY,
+		Task.DATE_COMPLETED,
+		Task.IN_PROGRESS,
+		Task.PERCENT_COMPLETED,
+		Task.PRIORITY,
+		Task.STATUS,
+		Task.TARGET_COSTS,
+		Task.TARGET_DURATION,
+		Task.TRIP_METER,
+		Task.COLOR_LABEL
+	};
+	
 	
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
 	
@@ -100,6 +163,10 @@ public class ICalExporter implements Exporter {
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
 			if (type == Types.APPOINTMENT) {
+				if (fieldsToBeExported == null) {
+					fieldsToBeExported = _appointmentFields;
+				}
+				
 				final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 				final SearchIterator searchIterator = appointmentSql.getModifiedAppointmentsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
 				
@@ -107,6 +174,10 @@ public class ICalExporter implements Exporter {
 					exportAppointment(oxContainerConverter, eventDef, versitWriter, (AppointmentObject)searchIterator.next());
 				}
 			} else if (type == Types.TASK) {
+				if (fieldsToBeExported == null) {
+					fieldsToBeExported = _taskFields;
+				}
+				
 				final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
 				final SearchIterator searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));
 				
@@ -117,7 +188,7 @@ public class ICalExporter implements Exporter {
 				throw importExportExceptionFactory.create(3, type);
 			}
 		} catch (Exception exc) {
-			throw importExportExceptionFactory.create(4, folder);
+			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
 		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
