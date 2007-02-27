@@ -16,7 +16,7 @@
 	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
 
 	<path id="project.classpath">
-        <pathelement location="${libdir}/ox_server.jar"/>
+        <pathelement location="${lib.dir}/ox_server.jar"/>
         <pathelement location="${lib.dir}/commons-fileupload.jar"/>
         <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
         <pathelement location="${lib.dir}/commons-io.jar"/>
