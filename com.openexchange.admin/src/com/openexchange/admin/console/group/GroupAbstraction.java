@@ -55,16 +55,31 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
 public abstract class GroupAbstraction extends BasicCommandlineOptions {
 
     protected static final String OPT_NAME_GROUPNAME_LONG = "name";
-
     protected static final String OPT_NAME_GROUPNAME = "n";
 
     protected static final String OPT_NAME_GROUPDISPLAYNAME_LONG = "displayname";
-
     protected static final String OPT_NAME_GROUPDISPLAYNAME = "d";
 
     protected static final String OPT_NAME_GROUPID_LONG = "groupid";
-
     protected static final String OPT_NAME_GROUPID = "i";
+
+    protected static final String OPT_NAME_ADDMEMBERS_LONG = "addmembers";
+    protected static final String OPT_NAME_ADDMEMBERS = "a";
+    
+    protected static final String OPT_NAME_REMOVEMEMBERS_LONG = "removemembers";
+    protected static final String OPT_NAME_REMOVEMEMBERS = "r";
+
+    protected Option getAddMembersOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, true);
+        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
+        return retval;
+    }
+
+    protected Option getRemoveMembersOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, true);
+        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
+        return retval;
+    }
 
     protected Option getGroupIdOption() {
         final Option retval = getShortLongOpt(OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group which will be deleted", true, true);
