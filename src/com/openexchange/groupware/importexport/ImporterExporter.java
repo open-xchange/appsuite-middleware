@@ -160,7 +160,7 @@ public class ImporterExporter {
 	 * @return InputStream containing the exported data in given format
 	 * @throws ImportExportException in case of a missing exporter for that kind of data 
 	 */
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: getExporters()){
 			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
 				return exp.exportData(sessObj, format, folder, type, fieldsToBeExported, optionalParams);
@@ -182,7 +182,7 @@ public class ImporterExporter {
 	 * @return
 	 * @throws ImportExportException
 	 */
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int objectId, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int objectId, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: exporters){
 			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
 				return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported, optionalParams);

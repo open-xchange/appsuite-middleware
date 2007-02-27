@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import java.io.InputStream;
 import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
@@ -85,7 +84,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract InputStream exportData(SessionObject sessObj, Format format, String folder, int type,
+	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type,
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
@@ -100,7 +99,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract InputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId,
+	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId,
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 }

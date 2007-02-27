@@ -55,7 +55,6 @@ import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformIn
 import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformSetToIntArray;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -293,7 +292,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public InputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
 			final int type, final int objectId,	final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, type, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
@@ -317,7 +316,9 @@ public class CSVContactExporter implements Exporter {
 		ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
 		ret.append( convertToLine( convertToList(conObj, cols) ) );
 		
-		return new ByteArrayInputStream ( ret.toString().getBytes() );
+		return new SizedInputStream(
+				new ByteArrayInputStream ( ret.toString().getBytes()) ,  
+				ret.toString().getBytes().length );
 	}
 	
 	protected List<String> convertToList(ContactObject conObj, int[] cols){
