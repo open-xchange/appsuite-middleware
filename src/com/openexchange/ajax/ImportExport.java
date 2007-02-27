@@ -146,9 +146,11 @@ public class ImportExport extends SessionServlet {
 			final OutputStream outputStream = resp.getOutputStream();
 			
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			resp.setContentLength(stringWriter.toString().length());
 			
-			outputStream.write(stringWriter.toString().getBytes("UTF-8"));
+			final String content = stringWriter.toString();
+			resp.setContentLength(content.length());
+			
+			outputStream.write(content.getBytes("UTF-8"));
 			outputStream.flush();
 		} catch (ImportExportException ex) {
 			LOG.error(ex.toString(), ex);
