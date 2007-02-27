@@ -62,6 +62,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -70,6 +73,7 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
@@ -217,8 +221,8 @@ public class CSVContactExporter implements Exporter {
 		ContactObject.USERFIELD20,
 		ContactObject.DEFAULT_ADDRESS};
 
-	static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
-
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
+	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 	
 	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final int type, Map <String, String[]> optionalParams)  throws ImportExportException {
 		if( !(type == Types.CONTACT && format.equals(Format.CSV)) ){
@@ -278,11 +282,9 @@ public class CSVContactExporter implements Exporter {
 				current = (ContactObject) conIter.next();
 				ret.append( convertToLine( convertToList(current, cols) ) );
 			} catch (SearchIteratorException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
 			} catch (OXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Could not retrieve contact from folder " + folder + ", OXException was: ", e);
 			}
 			
 		}
