@@ -53,7 +53,6 @@ package com.openexchange.ajax;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -74,6 +73,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.ImporterExporter;
+import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
@@ -109,18 +109,25 @@ public class ImportExport extends SessionServlet {
 		try {
 			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
 			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
+			final String contentType = DataServlet.parseMandatoryStringParameter(req, "content-type");
 			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
 			
-			final String mimeType = req.getContentType();
-			final Format f = Format.getFormatByMimeType(mimeType);
+			final Format f = Format.getFormatByMimeType(contentType);
 			
-			final InputStream inputStream = importerExporter.exportData(getSessionObject(req), f, folder, type, fieldsToBeExported, req.getParameterMap());
+			if (f == null) {
+				resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, "no exporter found for the content-type: " + contentType);
+				return;
+			}
 			
+			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), f, folder, type, fieldsToBeExported, req.getParameterMap());
+			
+			resp.setContentLength((int)inputStream.getSize());
+			resp.setContentType(contentType);
 			final OutputStream outputStream = resp.getOutputStream();
 			
 			final byte[] b = new byte[1024];
 			int i = 0; 
-			while ((i = inputStream.read()) != -1) {
+			while ((i = inputStream.read(b)) != -1) {
 				outputStream.write(b, 0, i);
 				outputStream.flush();
 			}		
@@ -139,7 +146,7 @@ public class ImportExport extends SessionServlet {
 			
 			final HashMap <String, Integer> hashMap = new HashMap<String, Integer>();
 			if (type.length != folder.length) {
-				resp.setStatus(HttpServletResponse.SC_CONFLICT, "invalid data in request");
+				resp.sendError(HttpServletResponse.SC_CONFLICT, "invalid data in request");
 				return;
 			}
 			
