@@ -91,14 +91,18 @@ public class ImportExport extends SessionServlet {
 
 	private static final Log LOG = LogFactory.getLog(ImportExport.class);
 	
-	private final ImporterExporter importerExporter;
+	private ImporterExporter importerExporter = null;
 	
 	
 	public ImportExport(){
 		//spring init
 		String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
-		XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
-		importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
+		if (beanPath != null) {
+			XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
+			importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
+		} else {
+			LOG.error("missing property: IMPORTEREXPORTER");
+		}
 	}
 	
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
