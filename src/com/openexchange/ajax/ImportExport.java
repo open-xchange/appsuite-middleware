@@ -72,6 +72,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONWriter;
 
 /**
@@ -113,18 +114,24 @@ public class ImportExport extends SessionServlet {
 	
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
-			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
+			final int[] type = DataServlet.parseMandatoryIntParameterArray(req, AJAX_TYPE);
+			final String[] folder = DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID);
 			
 			final String mimeType = req.getContentType();
 			final Format f = Format.getFormatByMimeType(mimeType);
 			
 			final HashMap hashMap = new HashMap<String, Integer>();
-			hashMap.put(folder, type);
+			if (type.length != folder.length) {
+				resp.setStatus(HttpServletResponse.SC_CONFLICT, "invalid data in request");
+				return;
+			}
+			
+			for (int a = 0; a < type.length; a++) {
+				hashMap.put(folder[a], type[a]);
+			}
 			
 			final ImporterExporter importerExporter = new ImporterExporter();
 			final List<ImportResult> importResult = importerExporter.importData(getSessionObject(req), f, req.getInputStream(), hashMap, req.getParameterMap());
-			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			final StringWriter stringWriter = new StringWriter();
 			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
 			
@@ -139,12 +146,16 @@ public class ImportExport extends SessionServlet {
 			final OutputStream outputStream = resp.getOutputStream();
 			
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			resp.setContentLength(byteArrayOutputStream.size());
+			resp.setContentLength(stringWriter.toString().length());
 			
-			outputStream.write(byteArrayOutputStream.toByteArray());
+			outputStream.write(stringWriter.toString().getBytes("UTF-8"));
 			outputStream.flush();
+		} catch (ImportExportException ex) {
+			LOG.error(ex.toString(), ex);
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LOG.error(ex.toString(), ex);
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
 		}
 	}
 }
