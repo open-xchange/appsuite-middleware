@@ -88,7 +88,7 @@ public class ICalImporter implements Importer {
 				throw importExportExceptionFactory.create(1, folder);
 			}
 			
-			if (perm.canWriteAllObjects()) {
+			if (perm.canCreateObjects()) {
 				if (format.getMimeType().equals("text/calendar")) {
 					return true;
 				}
