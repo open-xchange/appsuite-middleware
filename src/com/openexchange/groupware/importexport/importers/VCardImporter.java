@@ -13,6 +13,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
+import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
@@ -71,7 +72,7 @@ public class VCardImporter implements Importer {
 			
 			int type = folderMappings.get(folder).intValue();
 			//check format of folder
-			if ( type == Types.CONTACT && fo.getModule() != type ){
+			if ( type == Types.CONTACT && fo.getModule() != ModuleTypeTranslator.getFolderObjectConstant(type)){
 				return false;
 			}
 			//check read access to folder
