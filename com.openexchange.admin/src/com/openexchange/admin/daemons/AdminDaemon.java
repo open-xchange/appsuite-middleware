@@ -67,6 +67,8 @@ import java.security.Permission;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -86,28 +88,13 @@ public class AdminDaemon {
     private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
 //    private static com.openexchange.admin.rmi.impl.OXResourceGroup oxresgrp_v2 = null;
 
-    public static void main(String args[]) {
-        //superfluous all this is now done in the activator
-//        if( false ) {
-//            StackTraceDumper dumper = new StackTraceDumper();
-//            dumper.addListener(new HTMLStackTraceListener());
-//            
-//            ThreadDeadlockDetector detector = new ThreadDeadlockDetector();
-//            detector.addListener(new DefaultDeadlockListener());
-//        }        
-//        AdminDaemon daemon = new AdminDaemon();
-//        log.info("Starting Admindaemon...");        
-////        daemon.initCache();
-//        
-//        // init auth
-//        AuthenticationFactory authz = new AuthenticationFactory(null);
-//        
-////        daemon.initDaemon();
-//        daemon.startDaemon();        
-//        log.info("Version: "+Version.MAJOR+"."+Version.MINOR+"."+Version.PATCH);
-//        log.info("Name: "+Version.NAME);
-//        log.info("Build: "+Version.BUILD);
-//        log.info("Admindaemon successfully started.");
+    public void registerBundleListener(final BundleContext context) {
+        BundleListener bl = new BundleListener() {
+            public void bundleChanged(final BundleEvent event) {
+                log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
+            }
+        };
+        context.addBundleListener(bl);
     }
 
     public void initCache(final BundleContext context) {
@@ -158,19 +145,11 @@ public class AdminDaemon {
 
             // END of NEW export
 
-            //TODO add OSGi magic:
-            
-            //END OSGi magic
-            
-            //END OSGi magic
-            
             // bind all NEW Objects to registry
     	    registry.bind(OXUserInterface.RMI_NAME, oxuser_stub_v2);
     	    registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
     	    registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
 //            registry.bind(OXResourceGroupInterface.RMI_NAME, oxresgrp_stub_v2);
-
-    	    //TODO OSGi magic
 
     	} catch (RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
