@@ -7,30 +7,27 @@
     <property name="test.xml.dir" value="test-results" />
     <property name="prefix" value="/opt/open-xchange"/>
     <property name="destdir" value=""/>
-    <property name="deb.optargs" value="" />
     <property name="daemon.jar" value="ox_admindaemon.jar"/>
     <property name="client.jar" value="ox_rmiclient.jar"/>
-    <property name="extlibpath" value="lib"/>
-    <property name="libpath" value="lib"/>
+    <property name="lib.dir" value="lib"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
-	<property name="distribution" value="debian"/>
 	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
 
 	<path id="project.classpath">
-        <pathelement location="${libpath}/ox_server.jar"/>
-        <pathelement location="${extlibpath}/commons-fileupload.jar"/>
-        <pathelement location="${extlibpath}/commons-httpclient-2.0.2.jar"/>
-        <pathelement location="${extlibpath}/commons-io.jar"/>
-        <pathelement location="${extlibpath}/commons-logging.jar"/>
-        <pathelement location="${extlibpath}/commons-cli-1.0.jar"/>
-        <pathelement location="${extlibpath}/concurrent.jar"/>
-        <pathelement location="${extlibpath}/jcs-1.2.7.9.2.jar"/>
-        <pathelement location="${extlibpath}/junit-4.1.jar"/>
-        <pathelement location="${extlibpath}/mysql-connector-java-3.1.13-bin.jar"/>
-        <pathelement location="${extlibpath}/jdom.jar"/>
-		<pathelement location="${extlibpath}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
+        <pathelement location="${libdir}/ox_server.jar"/>
+        <pathelement location="${lib.dir}/commons-fileupload.jar"/>
+        <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
+        <pathelement location="${lib.dir}/commons-io.jar"/>
+        <pathelement location="${lib.dir}/commons-logging.jar"/>
+        <pathelement location="${lib.dir}/commons-cli-1.0.jar"/>
+        <pathelement location="${lib.dir}/concurrent.jar"/>
+        <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
+        <pathelement location="${lib.dir}/junit-4.1.jar"/>
+        <pathelement location="${lib.dir}/mysql-connector-java-3.1.13-bin.jar"/>
+        <pathelement location="${lib.dir}/jdom.jar"/>
+		<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
     </path>
 
     <filterset id="pathsubst">
@@ -42,8 +39,8 @@
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
         <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
         <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
-        <filter token="nonoxlibpath"      value="${prefix}/lib"/>
-        <filter token="oxlibpath"         value="${prefix}/lib"/>
+        <filter token="nonoxlibpath"      value="${prefix}/${lib.dir}"/>
+        <filter token="oxlibpath"         value="${prefix}/${lib.dir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
