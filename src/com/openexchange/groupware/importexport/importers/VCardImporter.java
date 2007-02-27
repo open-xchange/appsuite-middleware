@@ -83,10 +83,15 @@ public class VCardImporter implements Importer {
 			} catch (SQLException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			}
-			return perm.canWriteAllObjects();
+			
+			if (perm.canCreateObjects()) {
+				if (format.getMimeType().equals("text/vcard")) {
+					return true;
+				}
+			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMappings, final Map<String, String[]> optionalParams) throws ImportExportException {
