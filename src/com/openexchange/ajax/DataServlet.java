@@ -123,7 +123,15 @@ public abstract class DataServlet extends PermissionServlet {
 		} else {
 			return null;
 		}
-		
+	}
+	
+	public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+		if (containsParameter(httpServletRequest, name)) {
+			final String[] s = httpServletRequest.getParameterValues(name);
+			return s;
+		} else {
+			return null;
+		}
 	}
 	
 	public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
