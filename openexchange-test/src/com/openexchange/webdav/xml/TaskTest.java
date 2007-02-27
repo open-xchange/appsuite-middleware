@@ -81,7 +81,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		userId = folderObj.getCreatedBy();
 	}
 	
-	protected void compareObject(Task taskObj1, Task taskObj2) throws Exception {
+	public static void compareObject(Task taskObj1, Task taskObj2) throws Exception {
 		assertEquals("id is not equals", taskObj1.getObjectID(), taskObj2.getObjectID());
 		assertEqualsAndNotNull("title is not equals", taskObj1.getTitle(), taskObj2.getTitle());
 		assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());
@@ -467,7 +467,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		return (Task)response[0].getDataObject();
 	}
 	
-	private HashSet participants2String(Participant[] participant) throws Exception {
+	private static HashSet participants2String(Participant[] participant) throws Exception {
 		if (participant == null) {
 			return null;
 		}
@@ -481,7 +481,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		return hs;
 	}
 	
-	private String participant2String(Participant p) throws Exception {
+	private static String participant2String(Participant p) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("T" + p.getType());
 		sb.append("ID" + p.getIdentifier());
@@ -489,7 +489,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		return sb.toString();
 	}
 	
-	private HashSet users2String(UserParticipant[] users) throws Exception {
+	private static HashSet users2String(UserParticipant[] users) throws Exception {
 		if (users == null) {
 			return null;
 		}
@@ -503,7 +503,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		return hs;
 	}
 	
-	private String user2String(UserParticipant user) throws Exception {
+	private static String user2String(UserParticipant user) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("ID" + user.getIdentifier());
 		sb.append("C" + user.getConfirm());
