@@ -43,7 +43,7 @@ import java.util.Map;
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ICALEXPORTER,
 		component=Component.IMPORT_EXPORT)
-		@OXThrowsMultiple(
+@OXThrowsMultiple(
 		category={
 	Category.PERMISSION,
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
@@ -191,7 +191,10 @@ public class ICalExporter implements Exporter {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
-		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
+		return new SizedInputStream(
+				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+				byteArrayOutputStream.size(),
+				Format.ICAL);
 	}
 	
 	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
@@ -222,7 +225,10 @@ public class ICalExporter implements Exporter {
 			throw importExportExceptionFactory.create(4, folder);
 		}
 		
-		return new SizedInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), byteArrayOutputStream.size());
+		return new SizedInputStream(
+				new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), 
+				byteArrayOutputStream.size(),
+				Format.ICAL);
 	}
 	
 	protected void exportAppointment(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, AppointmentObject appointmentObj) throws Exception {
