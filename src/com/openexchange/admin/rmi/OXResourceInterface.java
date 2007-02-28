@@ -79,10 +79,10 @@ public interface OXResourceInterface extends Remote {
      * @param res Resource which should be created
      * @param auth Credentials for authenticating against server.
      * @return Contains the new resource id.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
     public int create(Context ctx, Resource res, Credentials auth) 
@@ -93,10 +93,10 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Change Resource in this Context.
      * @param res Resource containing the data.
      * @param auth Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
     public void change(Context ctx, Resource res, Credentials auth) 
@@ -108,11 +108,11 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param resource_id long containing the resource id.
      * @param auth Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
      * 
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
     public Resource get(Context ctx, int resource_id, Credentials auth) 
@@ -123,11 +123,11 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param resource_id ID of Resource which should be deleted.
      * @param auth Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
      * 
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
     public void delete(Context ctx, int resource_id, Credentials auth) 
@@ -139,10 +139,10 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param pattern Search pattern like * or mon* (e.g. for monitor)
      * @param auth Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
     public Resource[] list(Context ctx, String pattern, Credentials auth) 
