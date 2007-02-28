@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi.impl;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.ContextException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
