@@ -91,6 +91,12 @@
 	   	</subant>
 	</target>
 
+	<target name="doc-plugins">
+		<subant failonerror="true" inheritall="false" target="doc">
+	               <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+	   	</subant>
+	</target>
+
 	<target name="compile" depends="replacer">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
@@ -147,18 +153,18 @@
             author="true"
             public="true"
             Windowtitle="ox_admin_interface">
-            <fileset dir="src/com/openexchange/admin/dataSource" defaultexcludes="yes">
-                <exclude name="*ResourceGroup*"/>
-                <include name="I_*.java" />
+            <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
+				<include name="*Interface*"/>
+				<include name="dataobjects/*"/>
+            	<exclude name="*ResourceGroup*"/>
             </fileset>
-            <fileset dir="src/com/openexchange/admin/exceptions" defaultexcludes="yes">
-                <exclude name="*ResourceGroup*"/>
-                <include name="**" />
+            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
             </fileset>
             <classpath>
                 <path refid="project.classpath"/>
             </classpath>
         </javadoc>
+		<antcall target="doc-plugins"></antcall>
     </target>
 
 
