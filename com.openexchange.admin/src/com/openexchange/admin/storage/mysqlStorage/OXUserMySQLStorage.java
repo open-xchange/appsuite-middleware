@@ -468,11 +468,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             final String passwd;
             if( usrdata.getPasswordMech() == null ) {
             	//TODO: configurable in AdminDaemon.properties
-            	usrdata.setPasswordMech("{CRYPT}");
+            	usrdata.setPasswordMech(User.PASSWORDMECH.CRYPT);
             }
-            if( usrdata.getPasswordMech().toUpperCase().equals("{CRYPT}") ) {
+            if( usrdata.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
             	passwd = UnixCrypt.crypt(usrdata.getPassword());
-            } else if(usrdata.getPasswordMech().toUpperCase().equals("{SHA}") ) {
+            } else if(usrdata.getPasswordMech() == User.PASSWORDMECH.SHA ) {
             	passwd = makeSHAPasswd(usrdata.getPassword());
             } else {
             	throw new StorageException("unsupported password mechanism: "+ usrdata.getPasswordMech());
@@ -485,7 +485,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setInt(1, ctx.getIdAsInt());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
-                stmt.setString(4, usrdata.getPasswordMech());
+                stmt.setString(4, usrdata.getPasswordMech2String());
 
                 if( usrdata.getPassword_expired() == null ) {
                 	usrdata.setPassword_expired(false);
