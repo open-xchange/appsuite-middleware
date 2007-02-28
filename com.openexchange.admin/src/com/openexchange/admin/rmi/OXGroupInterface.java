@@ -79,12 +79,12 @@ public interface OXGroupInterface extends Remote {
      * @param ctx Context object.
      * @param grp Group which should be created.
      * @param auth Credentials for authenticating against server.
-     * @return Id of the new created group.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @return int containing the id of the new group.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public int create(Context ctx,Group grp,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
@@ -95,11 +95,11 @@ public interface OXGroupInterface extends Remote {
      * @param ctx Context object
      * @param grp_id Id of the group to retrieve from server.
      * @param auth Credentials for authenticating against server.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @return The Group with its data.
      */
     public Group get(Context ctx,int grp_id,Credentials auth) 
@@ -111,11 +111,11 @@ public interface OXGroupInterface extends Remote {
      * @param ctx Context object
      * @param grp Group to change.
      * @param auth Credentials for authenticating against server.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void change(Context ctx,Group grp,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;    
@@ -126,11 +126,11 @@ public interface OXGroupInterface extends Remote {
      * @param ctx Context object
      * @param grp_id Contains all ids of the groups which should be deleted from the server.
      * @param auth Credentials for authenticating against server.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void delete(Context ctx,int[] grp_id,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
@@ -142,11 +142,11 @@ public interface OXGroupInterface extends Remote {
      * @param grp_id The ID of the group in which the new members should be added.
      * @param member_ids User IDs.
      * @param auth Credentials for authenticating against server.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void addMember(Context ctx,int grp_id, int [] member_ids,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
@@ -158,11 +158,11 @@ public interface OXGroupInterface extends Remote {
      * @param grp_id The ID of the group from which the members should be removed.
      * @param member_ids User IDs.
      * @param auth Credentials for authenticating against server.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void removeMember(Context ctx,int grp_id,int[] member_ids,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
@@ -174,11 +174,11 @@ public interface OXGroupInterface extends Remote {
      * @param grp_id ID of the group from which to retrieve the members.
      * @param auth Credentials for authenticating against server.
      * @return User IDs.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public int[] getMembers(Context ctx,int grp_id,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
@@ -190,11 +190,11 @@ public interface OXGroupInterface extends Remote {
      * @param pattern Search pattern to search for e.g. "*mygroup*"
      * @param auth Credentials for authenticating against server.
      * @return Groups which matched the supplied search pattern.
-     * @throws java.rmi.RemoteException General RMI Exception
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public Group[] list(Context ctx, String pattern,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;

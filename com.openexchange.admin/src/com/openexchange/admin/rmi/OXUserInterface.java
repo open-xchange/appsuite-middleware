@@ -85,11 +85,14 @@ public interface OXUserInterface extends Remote {
      *            Credentials for authenticating against server.
      * @param access
      *            UserModuleAccess containing module access for the user.
-     * @return long containing the new user id.
+     * @return int containing the id of the new user.
      * 
-     * @throws RemoteException
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-
     public int create(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
@@ -102,7 +105,12 @@ public interface OXUserInterface extends Remote {
      *            User containing user data.
      * @param auth
      *            Credentials for authenticating against server.
-     * @throws RemoteException
+     *            
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void change(Context ctx, User usrdata, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
@@ -113,10 +121,15 @@ public interface OXUserInterface extends Remote {
      * @param context
      *            Context in which the new user will be deleted.
      * @param user_id
-     *            long containing the user id.
+     *            int array containing user id(s).
      * @param auth
      *            Credentials for authenticating against server.
-     * @throws RemoteException
+     *            
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void delete(Context ctx, int[] user_id, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
@@ -127,12 +140,16 @@ public interface OXUserInterface extends Remote {
      * @param context
      *            Context
      * @param user_id
-     *            long containing the user id.
+     *            int containing the user id.
      * @param auth
      *            Credentials for authenticating against server.
-     * @return UserModuleAccess containing the module access tights.
-     * @throws RemoteException
+     * @return UserModuleAccess containing the module access rights.
      * 
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public UserModuleAccess getModuleAccess(Context ctx, int user_id, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
@@ -148,7 +165,12 @@ public interface OXUserInterface extends Remote {
      *            UserModuleAccess containing module access.
      * @param auth
      *            Credentials for authenticating against server.
-     * @throws RemoteException
+     *            
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public void changeModuleAccess(Context ctx, int user_id, UserModuleAccess moduleAccess, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
@@ -160,32 +182,40 @@ public interface OXUserInterface extends Remote {
      *            numerical context identifier
      * @param auth
      *            Credentials for authenticating against server.
-     * @return long[] containing user ids.
-     * @throws RemoteException
+     * @return int[] containing user ids.
      * 
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public int[] getAll(Context ctx, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
     /**
-     * Retrieve user objects for a range of user ids.
+     * Retrieve user objects for a range of users by id
      * 
      * @param ctx
      *            numerical context identifier
      * @param user_id
-     *            long[] with user ids to get data for.
+     *            int[] array containing user id(s)
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] containing result objects.
-     * @throws RemoteException
      * 
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
     /**
-     * Retrieve user objects for a range of users identified by
-     * User.getUsername().
+     * Retrieve user objects for a range of users by name
+     * @see User.getUsername().
      * 
      * @param context
      *            Context object.
@@ -194,8 +224,12 @@ public interface OXUserInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] containing result objects.
-     * @throws RemoteException
-     * 
+     *
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
     public User[] getData(Context ctx, User[] users, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
