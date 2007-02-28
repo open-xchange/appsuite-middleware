@@ -1,0 +1,61 @@
+<project name="open-xchange-admin-plugin-hosting" default="jar" basedir=".">
+
+    <property name="project.name" value="open-xchange-admin-plugin-hosting" />
+    <property name="prefix" value="/opt/open-xchange"/>
+    <property name="destdir" value=""/>
+    <property name="plugin.jar" value="ox_admin_plugin_hosting.jar"/>
+    <property name="lib.dir" value="lib"/>
+    <path id="project.classpath">
+	<pathelement location="${lib.dir}/ox_server.jar"/>
+	<pathelement location="${lib.dir}/commons-logging.jar"/>
+	<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
+        <pathelement location="../open-xchange-admin/classes"/>
+    </path>
+
+    <!--                    TARGETS                      -->
+
+    <target name="compile">
+        <mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="jar"/>
+        <jar jarfile="jar/${plugin.jar}"
+        basedir="classes"
+        manifest="META-INF/MANIFEST.MF"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="classes"/>
+        <delete dir="jar"/>
+    </target>
+
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${project.name}-${version}"/>
+        <copy todir="${dist-package}/${project.name}-${version}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**CVS/**"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${project.name}-${version}.tar.bz2"
+        basedir="${dist-package}"
+        includes="${project.name}-${version}/"
+        compression="bzip2"/>
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="install" depends="jar">
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <copy todir="${destdir}/${prefix}/lib" file="jar/${plugin.jar}" overwrite="true"/>
+    </target>
+	
+
+</project>
