@@ -41,11 +41,8 @@ public class DisableAll extends UserAbstraction {
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
-            Context ctx = new Context();            
-            
-            ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));            
-            
+            CommandLine cmd = parser.parse(options, args2);    
+                        
             Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
                         
             // get rmi ref
