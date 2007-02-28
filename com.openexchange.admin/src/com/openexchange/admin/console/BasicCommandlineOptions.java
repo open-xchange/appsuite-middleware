@@ -58,7 +58,7 @@ public abstract class BasicCommandlineOptions {
     protected static final int DEFAULT_CONTEXT=1;
     protected static final String OPT_NAME_CONTEXT_SHORT="c";
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
-    protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context (Default is 1)";
+    protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context";
     protected static final String OPT_NAME_ADMINUSER_SHORT="A";
     protected static final String OPT_NAME_ADMINUSER_LONG="adminuser";
     protected static final String OPT_NAME_ADMINPASS_SHORT="P";
