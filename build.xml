@@ -35,6 +35,9 @@
         <delete dir="jar"/>
     </target>
 
+    <target name="doc">
+    </target>
+
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
