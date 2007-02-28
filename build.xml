@@ -75,7 +75,7 @@
 		</antcall>
 	</target>
 
-				<target name="generic-plugin">
+    <target name="generic-plugin">
 	 	<ant antfile="build.xml"
 			 target="${plugintarget}"
 	 		 dir="${plugindir}"
