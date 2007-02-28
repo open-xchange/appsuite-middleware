@@ -61,28 +61,37 @@
 
 	<!--                    TARGETS                      -->
 
-	<target name="install-plugins" depends="compile">
-		<antcall target="generic-plugin">
-			<param name="plugindir" value="../open-xchange-admin-plugin-imap"/>
-			<param name="plugintarget" value="install"/>
-		</antcall>
+	<target name="compile-plugins">
+		<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+    	</subant>
+	</target>
+
+	<target name="jar-plugins">
+		<subant failonerror="true" inheritall="false" target="jar">
+                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+    	</subant>
+	</target>
+
+	<target name="install-plugins">
+		<subant failonerror="true" inheritall="false" target="install">
+                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+    	</subant>
 	</target>
 
 	<target name="clean-plugins">
-		<antcall target="generic-plugin">
-			<param name="plugindir" value="../open-xchange-admin-plugin-imap"/>
-			<param name="plugintarget" value="clean"/>
-		</antcall>
+		<subant failonerror="true" inheritall="false" target="clean">
+                <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+    	</subant>
 	</target>
 
-    <target name="generic-plugin">
-	 	<ant antfile="build.xml"
-			 target="${plugintarget}"
-	 		 dir="${plugindir}"
-	 	     inheritall="yes"/>
+   <target name="dist-plugins">
+		<subant failonerror="true" inheritall="false" target="dist">
+	               <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
+	   	</subant>
 	</target>
 
-		<target name="compile" depends="replacer">
+	<target name="compile" depends="replacer">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
             <exclude name="**/*ResourceGroup*"/>
@@ -90,6 +99,7 @@
                 <path refid="project.classpath"/>
             </classpath>
         </javac>
+		<antcall target="compile-plugins"></antcall>
     </target>
 
 
@@ -118,6 +128,7 @@
         excludes="com/openexchange/admin/test**"
         basedir="classes"
         manifest="META-INF/MANIFEST.MF"/>
+		<antcall target="jar-plugins"></antcall>
     </target>
 
 
@@ -151,10 +162,11 @@
     </target>
 
 
-    <target name="clean" depends="clean-plugins">
+    <target name="clean">
         <delete dir="classes"/>
         <delete dir="doc"/>
         <delete dir="jar"/>
+		<antcall target="clean-plugins"></antcall>
     </target>
 	
 	<target name="dist-clean" depends="clean">
@@ -183,6 +195,7 @@
         includes="${project.name}-${version}/"
         compression="bzip2"/>
     	<delete dir="${dist-package}"/>
+		<antcall target="dist-plugins"></antcall>
     </target>
 
     <target name="replacer">
@@ -226,6 +239,7 @@
 		<!-- EXAMPLE -->
     	<!-- <antcall target="install-suse"/> -->
     	<!-- <antcall target="install-redhat"/> -->
+		<antcall target="install-plugins"></antcall>
     </target>
 	
     <target name="install-client" depends="client">
