@@ -56,58 +56,61 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.dataSource.OXContext_MySQL;
+// import com.openexchange.admin.dataSource.OXContext_MySQL;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 
 public class DatabaseDataMover implements Callable<Vector> {
 
-    private Log log = LogFactory.getLog( this.getClass() );
-	private int context_id  = -1;
-	private int database_id = -1;
-	private int reason_id   = -1;
-	
-	
-	/**
-	 * 
-	 */
-	public DatabaseDataMover(final int context_id, final int database_id, final int reason_id) {
-		this.context_id = context_id;
-		this.database_id = database_id;
-		this.reason_id = reason_id;
-	}
+    private Log log = LogFactory.getLog(this.getClass());
 
+    private int context_id = -1;
 
-	public Vector call() {
-    	Vector<String>ret = new Vector<String>();
-    	OXContext_MySQL oxcox;
-		try {
-			oxcox = new OXContext_MySQL();
-	    	ret = oxcox.moveDatabaseContext(context_id, database_id, reason_id);
+    private int database_id = -1;
 
-	    	ret.clear();
-        	ret.add("OK");
-        	ret.add("Successfully moved");
-		} catch (SQLException e) {
-			log.error( "Error copying database", e );
-            ret.add( "ERROR" );
-            ret.add( "" + e.getMessage() );
-		} catch (PoolException e) {
-			log.error( "Error copying database", e );
-            ret.add( "ERROR" );
-            ret.add( "" + e.getMessage() );
-		} catch (TargetDatabaseException e) {
-			log.error( "Error copying database", e );
-            ret.add( "ERROR" );
-            ret.add( "" + e.getMessage() );
-		} catch (DatabaseContextMappingException e) {
-			log.error( "Error copying database", e );
-            ret.add( "ERROR" );
-            ret.add( "" + e.getMessage() );
-		}
+    private int reason_id = -1;
 
-    	return ret;
-	}
+    /**
+     * 
+     */
+    public DatabaseDataMover(final int context_id, final int database_id, final int reason_id) {
+        this.context_id = context_id;
+        this.database_id = database_id;
+        this.reason_id = reason_id;
+    }
+
+    public Vector call() {
+        Vector<String> ret = new Vector<String>();
+        // FIXME: Use new interfaces here
+        // OXContext_MySQL oxcox;
+//        try {
+            // oxcox = new OXContext_MySQL();
+            // ret = oxcox.moveDatabaseContext(context_id, database_id,
+            // reason_id);
+
+            ret.clear();
+            ret.add("OK");
+            ret.add("Successfully moved");
+//        } catch (SQLException e) {
+//            log.error("Error copying database", e);
+//            ret.add("ERROR");
+//            ret.add("" + e.getMessage());
+//        } catch (PoolException e) {
+//            log.error("Error copying database", e);
+//            ret.add("ERROR");
+//            ret.add("" + e.getMessage());
+//        } catch (TargetDatabaseException e) {
+//            log.error("Error copying database", e);
+//            ret.add("ERROR");
+//            ret.add("" + e.getMessage());
+//        } catch (DatabaseContextMappingException e) {
+//            log.error("Error copying database", e);
+//            ret.add("ERROR");
+//            ret.add("" + e.getMessage());
+//        }
+
+        return ret;
+    }
 
 }

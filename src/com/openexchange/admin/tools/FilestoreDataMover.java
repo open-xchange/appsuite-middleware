@@ -63,7 +63,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.dataSource.I_OXContext;
+//import com.openexchange.admin.dataSource.I_OXContext;
 import com.openexchange.admin.exceptions.ContextException;
 import com.openexchange.admin.exceptions.ContextExceptionFactory;
 import com.openexchange.admin.exceptions.Classes;
@@ -302,14 +302,15 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
         }
         if (ret.get(0).equals("OK")) {
             try {
-                com.openexchange.admin.dataSource.impl.OXContext oxcox = new com.openexchange.admin.dataSource.impl.OXContext();
+                // FIXME: Use new context implementation
+//                com.openexchange.admin.dataSource.impl.OXContext oxcox = new com.openexchange.admin.dataSource.impl.OXContext();
                 Hashtable<String, String> fh = new Hashtable<String, String>();
-                fh.put(I_OXContext.CONTEXT_FILESTORE_ID, "" + dstStore_id);
-                ret = oxcox.changeStorageData(context_id, fh);
+//                fh.put(I_OXContext.CONTEXT_FILESTORE_ID, "" + dstStore_id);
+//                ret = oxcox.changeStorageData(context_id, fh);
                 if (!ret.get(0).equals("OK")) {
                     throw CONTEXT_EXCEPTIONS.create(0, context_id);
                 }
-                ret = oxcox.enableContext(context_id);
+//                ret = oxcox.enableContext(context_id);
                 if (!ret.get(0).equals("OK")) {
                     throw CONTEXT_EXCEPTIONS.create(1, context_id);
                 }
@@ -319,10 +320,10 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
                 ret.clear();
                 ret.add("OK");
                 ret.add("Successfully moved");
-            } catch (RemoteException e) {
-                log.error("Error copying filestore", e);
-                ret.add("ERROR");
-                ret.add("" + e.getMessage());
+//            } catch (RemoteException e) {
+//                log.error("Error copying filestore", e);
+//                ret.add("ERROR");
+//                ret.add("" + e.getMessage());
             } catch (ContextException e) {
                 log.error("Error copying filestore", e);
                 ret.add("ERROR");
