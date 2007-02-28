@@ -33,7 +33,9 @@ public class SizedInputStreamTest {
 	@Before public void setup() throws UnsupportedEncodingException{
 		testString = TEXT.getBytes(ENCODING);
 		testStream = new SizedInputStream(
-				new ByteArrayInputStream(testString), testString.length);
+				new ByteArrayInputStream(testString), 
+				testString.length,
+				Format.CSV);
 	}
 	
 	@After public void tearDown() throws IOException{
