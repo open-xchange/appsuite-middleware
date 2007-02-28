@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi;
 
-import com.openexchange.admin.dataSource.I_OXContext;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
