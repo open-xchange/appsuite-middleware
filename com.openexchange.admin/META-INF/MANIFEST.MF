@@ -19,6 +19,7 @@ Bundle-ClassPath: .,
  external:$libdir$/mysql-connector-java-3.1.13-bin.jar,
  external:$libdir$/ox_server.jar
 Export-Package: com.openexchange.admin.console,
+ com.openexchange.admin.console.user,
  com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
  com.openexchange.admin.plugins,
@@ -38,5 +39,6 @@ Export-Package: com.openexchange.admin.console,
  com.openexchange.groupware.ldap,
  com.openexchange.server,
  org.apache.commons.logging,
- org.apache.commons.logging.impl
+ org.apache.commons.logging.impl,
+ org.apache.commons.cli
 Eclipse-BuddyPolicy: registered
