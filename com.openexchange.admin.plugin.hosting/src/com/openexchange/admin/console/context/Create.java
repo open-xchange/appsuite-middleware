@@ -41,12 +41,11 @@ public class Create extends UserAbstraction {
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
-            Context ctx = new Context(DEFAULT_CONTEXT);
+            CommandLine cmd = parser.parse(options, args2);        
             
-            if(cmd.hasOption(OPT_NAME_CONTEXT_SHORT)){
-                ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));
-            }
+            Context ctx = new Context();
+            ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));
+            
             
             Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
             
