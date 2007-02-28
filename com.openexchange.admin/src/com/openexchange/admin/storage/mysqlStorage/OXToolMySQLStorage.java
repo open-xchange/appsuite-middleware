@@ -73,7 +73,7 @@ import com.openexchange.admin.tools.AdminCache;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage {
 
-    private static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
+    private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
 
     
     /**
