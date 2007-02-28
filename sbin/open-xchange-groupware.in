@@ -47,6 +47,8 @@ CLASSPATH="-classpath \
 @jbossclientjar@:\
 @oxadapterjar@:\
 @tnefjar@:\
+@springbeanjar@:\
+@springcorejar@:\
 @oxgroupwarelibdir@/ox_server.jar:\
 @oxgroupwarelibdir@/ox_languages.jar:"
 

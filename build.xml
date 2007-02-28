@@ -58,6 +58,8 @@
 	<property name="webdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
 	<property name="httpclientjar" value="commons-httpclient-2.0.2.jar" />
 	<property name="tnefjar" value="tnef.jar" />
+	<property name="springbeanjar" value="spring-beans_1.2.7.jar" />
+	<property name="springcorejar" value="spring-core_1.2.7.jar" />
 		
 	
 	<!-- Replacements -->
@@ -116,6 +118,8 @@
         <pathelement location="${lib.dir}/${jbossclientjar}" />
         <pathelement location="${lib.dir}/${oxadapterjar}" />
 		<pathelement location="${lib.dir}/${tnefjar}" />
+      	<pathelement location="${lib.dir}/${springbeanjar}" />
+      	<pathelement location="${lib.dir}/${springcorejar}" />
 	</path>
 	
 	<target name="prepare">
@@ -175,9 +179,9 @@
 			basedir="${build.dir}"
 			includes="**" />
 
-		<copy todir="${build.dir}/META-INF">
+		<!--<copy todir="${build.dir}/META-INF">
 			<fileset file="${src.dir}/META-INF/mime.types"/>
-		</copy>	
+		</copy>	-->
 	</target>
 	
 	<!-- Templates -->
@@ -347,6 +351,8 @@
 			<replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
 	  		<replacefilter token="@oxgroupwarelibdir@"	value="${lib.subst.patch}"/>
 		  	<replacefilter token="@consolelogfile@" value= "${log.dir}/open-xchange-console.log"/>
+		  	<replacefilter token="@springcorejar@" value= "${lib.subst.patch}/${springcorejar}"/>
+		  	<replacefilter token="@springbeanjar@" value= "${lib.subst.patch}/${springbeanjar}"/>
 	  	</replace>
 	</target>
 	
@@ -442,10 +448,11 @@
 	</target>
 	
 	<target name="install" depends="build, templates-install, build-structure">
-    	<copy todir="${destdir}/" overwrite="true">
+<!--    	<copy todir="${destdir}/" overwrite="true">
     		<fileset dir="system"/>
 			<mapper type="glob" from="*.${distribution}" to="*"/>
 		</copy>
+-->
     	<chmod perm="755" file="${destdir}/etc/init.d/open-xchange-groupware"/>
 		<chmod perm="755" file="${bin.install.copy.dir}/checkConsistency"/>
 	</target>
