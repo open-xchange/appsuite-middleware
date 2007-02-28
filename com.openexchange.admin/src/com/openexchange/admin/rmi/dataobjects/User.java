@@ -58,7 +58,7 @@ import java.util.TimeZone;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 /**
- * This object represents a user of OX.
+ * Class representing a user
  * 
  * @author cutmasta
  */
@@ -70,27 +70,13 @@ public class User implements Serializable {
 
     private OXUserExtensionInterface[] extensions = null;
 
-    /**
-     * Key representing the user identifier number, value must be
-     * <code>Integer</code>
-     */
     private Integer id;
 
-    /**
-     * Key representing the user identifier, value is a <code>String</code>
-     */
     private String username;
 
-    /**
-     * Represents the password, value is a <code>String</code>
-     */
     private String password;
 
-    /**
-     * Represents the password encryption mechanism, value is a
-     * <code>String</code> Syntax: {MECH}
-     */
-    private String passwordMech;
+    private PASSWORDMECH passwordMech;
 
     /**
      * Primary mail address, value is a <code>String</code> Data is stored in
@@ -398,6 +384,23 @@ public class User implements Serializable {
         this.id = id;
     }
 
+    public enum PASSWORDMECH {
+        CRYPT,
+        SHA
+    }
+    
+    public String getPasswordMech2String() {
+        switch (this.passwordMech) {
+        case CRYPT:
+            return "{CRYPT}";
+        case SHA:
+            return "{SHA}";
+
+        default:
+            return "{CRYPT}";
+        }
+    }
+    
     /**
      * Returns the id of the user as a long
      * 
@@ -408,8 +411,9 @@ public class User implements Serializable {
     }
 
     /**
+     * Set user identifier number
      * 
-     * @param val
+     * @param userid
      */
     public void setId(Integer userid) {
         this.id = userid;
@@ -419,6 +423,9 @@ public class User implements Serializable {
         return username;
     }
 
+    /**
+     * Set user identifier
+     */
     public void setUsername(String username) {
         this.username = username;
     }
@@ -427,6 +434,12 @@ public class User implements Serializable {
         return password;
     }
 
+    /**
+     * The users password
+     * must be encrypted using method as provided in passwordMech
+     * @param passwd
+     * @see setPasswordMech
+     */
     public void setPassword(String passwd) {
         this.password = passwd;
     }
@@ -1455,15 +1468,16 @@ public class User implements Serializable {
     /**
      * @return the passwordMech
      */
-    public String getPasswordMech() {
+    public PASSWORDMECH getPasswordMech() {
         return passwordMech;
     }
 
     /**
+     * Represents the password encryption mechanism, value is a password mechanism
      * @param passwordMech
      *            the passwordMech to set
      */
-    public void setPasswordMech(String passwordMech) {
+    public void setPasswordMech(PASSWORDMECH passwordMech) {
         this.passwordMech = passwordMech;
     }
 }
