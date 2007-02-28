@@ -71,7 +71,7 @@ import com.openexchange.admin.rmi.AdminJobExecutorInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.tools.PropertyHandler;
-//import com.openexchange.admin.tools.monitoring.MonitorAgent;
+import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class PluginStarter {
     private ClassLoader loader = null;
@@ -82,7 +82,9 @@ public class PluginStarter {
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
     private static com.openexchange.admin.rmi.impl.AdminJobExecutor ajx_v2 = null;
 
-//    private static MonitorAgent moni = null;
+    private static PropertyHandler prop = null;
+    private static MonitorAgent moni = null;
+
     public PluginStarter(final ClassLoader loader) {
         this.loader = loader;
     }
@@ -99,7 +101,7 @@ public class PluginStarter {
                 }
             });
         }
-        PropertyHandler prop = AdminDaemon.getProp();
+        prop = AdminDaemon.getProp();
         int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
         registry = LocateRegistry.getRegistry(rmi_port);
 
@@ -119,12 +121,12 @@ public class PluginStarter {
         registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
         registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
-//        startJMX();
+        startJMX();
 
     }
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
-//      stopJMX();
+      stopJMX();
         if (null != registry) {
             registry.unbind(OXContextInterface.RMI_NAME);
             registry.unbind(OXUtilInterface.RMI_NAME);
@@ -133,17 +135,17 @@ public class PluginStarter {
         }
     }
     
-//    private void startJMX() {
-//        int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
-//        moni = new MonitorAgent(jmx_port);
-//        moni.start();
-//
-//        String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
-//        log.info("Admindaemon Name: " + servername);
-//    }
-//    
-//    private void stopJMX() {
-//        moni.stop();
-//    }
+    private void startJMX() {
+        int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
+        moni = new MonitorAgent(jmx_port);
+        moni.start();
+
+        String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
+        log.info("Admindaemon Name: " + servername);
+    }
+    
+    private void stopJMX() {
+        moni.stop();
+    }
 
 }
