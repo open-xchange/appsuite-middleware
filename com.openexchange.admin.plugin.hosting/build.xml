@@ -36,6 +36,25 @@
     </target>
 
     <target name="doc">
+        <mkdir dir="doc"/>
+        <javadoc
+            failonerror="true"
+            sourcepath="src"
+            destdir="doc"
+            author="true"
+            public="true"
+            Windowtitle="ox_admin_interface">
+            <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
+				<include name="*Interface*"/>
+				<include name="dataobjects/*"/>
+            	<exclude name="*ResourceGroup*"/>
+            </fileset>
+<!--            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
+            </fileset> -->
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javadoc>
     </target>
 
     <target name="dist" depends="clean">
@@ -55,9 +74,13 @@
     	<delete dir="${dist-package}"/>
     </target>
 
-    <target name="install" depends="jar">
+    <target name="install" depends="jar,doc">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy todir="${destdir}/${prefix}/lib" file="jar/${plugin.jar}" overwrite="true"/>
+        <mkdir dir="${destdir}/${prefix}/doc/oxadmin/hosting"/>
+        <copy todir="${destdir}/${prefix}/doc/oxadmin/hosting">
+            <fileset dir="doc"/>
+        </copy>
     </target>
 	
 
