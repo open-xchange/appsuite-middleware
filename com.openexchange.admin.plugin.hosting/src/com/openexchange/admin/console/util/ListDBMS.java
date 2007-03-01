@@ -13,6 +13,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -37,7 +38,11 @@ public class ListDBMS extends UtilAbstraction {
 
             final String searchpattern = cmd.getOptionValue(OPT_NAME_SEARCH_PATTERN_SHORT);
 
-            oxutil.searchForDatabase(searchpattern, auth);
+            final Database[] databases = oxutil.searchForDatabase(searchpattern, auth);
+            
+            for (final Database database : databases) {
+                System.out.println(database);
+            }
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
         } catch (final java.lang.NumberFormatException num) {
