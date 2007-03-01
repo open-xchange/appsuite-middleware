@@ -15,9 +15,9 @@
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
 	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
-
+	
 	<path id="project.classpath">
-        <pathelement location="${lib.dir}/ox_server.jar"/>
+	    <pathelement location="${lib.dir}/ox_server.jar"/>
         <pathelement location="${lib.dir}/commons-fileupload.jar"/>
         <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
         <pathelement location="${lib.dir}/commons-io.jar"/>
@@ -91,12 +91,6 @@
 	   	</subant>
 	</target>
 
-	<target name="doc-plugins">
-		<subant failonerror="true" inheritall="false" target="doc">
-	               <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
-	   	</subant>
-	</target>
-
 	<target name="compile" depends="replacer">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
@@ -145,11 +139,12 @@
 
 
     <target name="doc">
-        <mkdir dir="doc"/>
+		<property name="plugdocpath" value="open-xchange-admin-plugin**/src/com/openexchange/admin/rmi"/>
+    	<mkdir dir="doc"/>
         <javadoc
             failonerror="true"
-            sourcepath="src"
-            destdir="doc"
+			sourcepath="src"
+        	destdir="doc"
             author="true"
             public="true"
             Windowtitle="ox_admin_interface">
@@ -160,11 +155,17 @@
             </fileset>
             <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
             </fileset>
+            <fileset dir="../" defaultexcludes="yes">
+				<include name="${plugdocpath}/*Interface*"/>
+				<include name="${plugdocpath}/dataobjects/*"/>
+            	<exclude name="${plugdocpath}/*ResourceGroup*"/>
+            </fileset>
             <classpath>
-                <path refid="project.classpath"/>
+				<path>
+					<fileset dir="${lib.dir}" includes="*.jar"/>
+				</path>
             </classpath>
         </javadoc>
-		<antcall target="doc-plugins"></antcall>
     </target>
 
 
