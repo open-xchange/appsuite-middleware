@@ -53,6 +53,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 CONSOLELOG=@consolelogfile@
+OXCONFIGDIR=@oxconfdir@
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"
@@ -76,7 +77,7 @@ pushd $OXPREFIX
 rm -f $CONSOLELOG
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS -Dopenexchange.propfile=$SYSTEMPROPERTIES \
-		   -Dconfigdir=$OXPREFIX/etc \
+		   -Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 		   -Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 		   -Duser.timezone=GMT \
 		   -Dlibdir=$LIBPATH \
