@@ -64,6 +64,12 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class ContextTest extends AbstractTest {
 
+    
+    public static Credentials DummyMasterCredentials(){
+        return new Credentials("oxadminmaster","secret");
+    }
+    
+    
     public void testChangeStorageData() throws Exception {
         final Credentials cred = DummyMasterCredentials();        
         final int ctsid = createNewContextID(cred);
