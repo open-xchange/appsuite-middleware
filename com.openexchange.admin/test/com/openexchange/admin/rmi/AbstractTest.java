@@ -80,7 +80,7 @@ public abstract class AbstractTest extends TestCase{
     }
     
     public static Credentials DummyCredentials(){
-        return new Credentials("oxadmin","secret");
+        return new Credentials("admin","secret");
     }
     
     public static Credentials DummyMasterCredentials(){
