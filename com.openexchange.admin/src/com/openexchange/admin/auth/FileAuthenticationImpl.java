@@ -49,23 +49,44 @@
 
 package com.openexchange.admin.auth;
 
+
+import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.UnixCrypt;
+
 /**
- * Authentication factory
+ * Default file implementation for admin auth.
  * 
- * @author cutmasta
+ * @author choeger
  */
-public class AuthenticationFactory {
-    
-    
-    public static AuthenticationInterface getInstanceSQL() {
-        synchronized (AuthenticationInterface.class) {
-            return new MySQLAuthenticationImpl();
+public class FileAuthenticationImpl implements AuthenticationInterface {
+
+    /** */
+    public FileAuthenticationImpl() {
+    }
+
+    /**
+     * 
+     * Authenticates against a textfile
+     * 
+     */
+    public boolean authenticate(final Credentials authdata) throws StorageException {
+        Credentials master = ClientAdminThread.cache.getMasterCredentials();
+        if(master != null && authdata != null &&
+           master.getLogin() != null && authdata.getLogin() != null &&
+           master.getPassword() != null && authdata.getPassword() != null &&
+           master.getLogin().equals(authdata.getLogin())) {
+                return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
+        }else{
+            return false;
         }
     }
-    
-    public static AuthenticationInterface getInstanceFile() {
-        synchronized (AuthenticationInterface.class) {
-            return new FileAuthenticationImpl();
-        }
+
+    public boolean authenticate(final Credentials authdata, final Context ctx)
+            throws StorageException {
+        return false;
     }
+
 }

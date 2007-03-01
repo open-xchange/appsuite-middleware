@@ -78,18 +78,8 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
     public MySQLAuthenticationImpl() {
     }
 
-    /**
-     * 
-     * Autheticates the admin user of the system without a context.
-     * 
-     */
     public boolean authenticate(Credentials authdata) throws StorageException {
-        Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null  && master!=null) {                
-                return ((master.getLogin().equals(authdata.getLogin()) && master.getPassword().equals(authdata.getPassword())));
-        }else{
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -164,10 +154,4 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
             return false;
         }
     }
-
-    // THIS COULD BE USED TO AUTH EVERY USER WHICH EXISTS IN THE
-    // SYSTEM; BUT WE WANT TO AUTH ONLY ADMIN OF CONTEXT
-    // "SELECT u.userPassword,u.passwordMech from user u JOIN login2user
-    // l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? ANDl.uid = ?";
-
 }
