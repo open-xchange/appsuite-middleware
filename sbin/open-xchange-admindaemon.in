@@ -66,11 +66,6 @@ test -f $OXCONFIG && . $OXCONFIG
 ox_set_JAVA_BIN
 
 
-test -z "$EXTLIBPATH"       && EXTLIBPATH=${PREFIX}lib
-test -z "$LIBPATH"          && LIBPATH=${PREFIX}lib
-test -z "$OSGIPATH"         && OSGIPATH=${PREFIX}etc/osgi
-test -z "$SYSTEMPROPERTIES" && SYSTEMPROPERTIES=${PREFIX}etc/system.properties
-test -z "$ADMINPROPERTIES"  && ADMINPROPERTIES=${PREFIX}etc/AdminDaemon.properties
 test -z "$JAVA_XTRAOPTS"    && JAVA_XTRAOPTS="-ms50m -mx50m"
 test -z "$NRFILES"          && NRFILES=2048
 
@@ -81,7 +76,7 @@ pushd $OXPREFIX
 rm -f $CONSOLELOG
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS -Dopenexchange.propfile=$SYSTEMPROPERTIES \
-		   -Dconfig=$ADMINPROPERTIES \
+		   -Dconfigdir=$OXPREFIX/etc \
 		   -Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 		   -Duser.timezone=GMT \
 		   -Dlibdir=$LIBPATH \

@@ -1,7 +1,6 @@
 EXTLIBPATH=@nonoxlibpath@
 LIBPATH=@oxlibpath@
 SYSTEMPROPERTIES=@systemproperties@
-ADMINPROPERTIES=@adminproperties@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxprefix@/@oxconfdir@/osgi
 
