@@ -32,9 +32,9 @@ public class PropertyHandlerExtended extends PropertyHandler {
         super(sysprops);
         final StringBuilder configfile = new StringBuilder(); 
         configfile.append(sysprops.getProperty("configdir"));
-        configfile.append(File.pathSeparatorChar);
+        configfile.append(File.separatorChar);
         configfile.append("plugin");
-        configfile.append(File.pathSeparatorChar);
+        configfile.append(File.separatorChar);
         configfile.append("hosting.properties");
         try {
             addpropsfromfile(configfile.toString());
