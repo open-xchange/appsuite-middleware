@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -129,6 +130,15 @@ public class Create extends UserAbstraction {
                 usr.setTimezone(TimeZone.getTimeZone(cmd.getOptionValue(OPT_TIMEZONE_SHORT)));
             }
             
+            if(cmd.hasOption(OPT_ALIASES_SHORT)) {
+                HashSet<String>aliases = new HashSet<String>();
+                final String aliasOpt = cmd.getOptionValue(OPT_ALIASES_SHORT);
+                for(String alias : aliasOpt.split(",")) {
+                    aliases.add(alias.trim());
+                }
+                usr.setAliases(aliases);
+            }
+            
             // default set all access rights
             UserModuleAccess access = new UserModuleAccess();
             access.enableAll();
@@ -187,6 +197,7 @@ public class Create extends UserAbstraction {
         retval.addOption(getTimezoneOption());        
         retval.addOption(getDepartmentOption());
         retval.addOption(getCompanyOption());
+        retval.addOption(getAliasesOption());
         
         return retval;
         

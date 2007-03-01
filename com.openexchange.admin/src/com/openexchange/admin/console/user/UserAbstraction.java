@@ -100,6 +100,10 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option getCompanyOption(){
         return getShortLongOpt(OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
     }
+
+    protected Option getAliasesOption(){
+        return getShortLongOpt(OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
+    }
     
     protected static final String OPT_ID_SHORT = "i";
     protected static final String OPT_ID_LONG = "userid";
@@ -134,5 +138,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String OPT_COMPANY_SHORT = "z";
     protected static final String OPT_COMPANY_LONG = "company";
     
-
+    protected static final String OPT_ALIASES_SHORT = "a";
+    protected static final String OPT_ALIASES_LONG = "aliases";
 }
