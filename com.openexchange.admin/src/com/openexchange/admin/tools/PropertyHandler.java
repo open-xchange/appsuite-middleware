@@ -51,6 +51,8 @@ package com.openexchange.admin.tools;
 import com.openexchange.admin.exceptions.OXGenericException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -62,34 +64,29 @@ import org.apache.commons.logging.LogFactory;
 
 public class PropertyHandler {
     
-    
-    private Hashtable<String, Object>       allPropValues       = null;
-    private Hashtable       sqlPropValues       = null;
+    protected Hashtable<String, Object>       allPropValues       = null;
     private Hashtable       userPropValues      = null;
-    private Hashtable       groupPropValues     = null;
+    protected Hashtable       groupPropValues     = null;
     private Hashtable       resPropValues       = null;
     private Hashtable       resGroupPropValues  = null;
     private Hashtable       rmiPropValues       = null;
     private Log log = LogFactory.getLog(this.getClass());
     
-    private String          propFileName;
+    private String configdirname;
     private Properties sysprops = null;
     
-    private static final String PROPERTIES_SQL              = "SQL_PROP_CONFIG";
     private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
-    private static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
+    protected static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
     private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
     private static final String PROPERTIES_RESOURCE_GROUP   = "RESOURCE_GROUP_PROP_CONFIG";
     private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
     
     // The following lines define the property values for the database implementations
-    public static final String CONTEXT_STORAGE = "CONTEXT_STORAGE";
     public static final String GROUP_STORAGE = "GROUP_STORAGE";
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
     public static final String RESOURCEGROUP_STORAGE = "RESOURCEGROUP_STORAGE";
     public static final String TOOL_STORAGE = "TOOL_STORAGE";
     public static final String USER_STORAGE = "USER_STORAGE";
-    public static final String UTIL_STORAGE = "UTIL_STORAGE";
     
     
     
@@ -102,50 +99,6 @@ public class PropertyHandler {
             log.fatal("Error loading properties!",e);
         }
     }
-    
-    
-    
-    /**
-     * Get int value from Properties-File. If not set or not found, use given fallback!
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public int getProp( String key, int fallBack ) {
-        int retPort = fallBack;
-        
-        if ( allPropValues.containsKey( key ) ) {
-            retPort = Integer.parseInt( allPropValues.get( key ).toString() ); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + propFileName +"! Using fallback :" + fallBack );
-        }
-        
-        return retPort; 
-    }
-    
-    
-    
-    /**
-     * Get boolean value from Properties-File. If not set or not found, use given fallback!
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public boolean getProp( String key, boolean fallBack ) {
-        boolean retBool = fallBack;
-        
-        if ( allPropValues.containsKey( key ) ) {
-            retBool = Boolean.valueOf( allPropValues.get( key ).toString() ).booleanValue(); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + propFileName +"! Using fallback :" + fallBack );
-        }
-        
-        return retBool; 
-    }
-    
-    
     
     /**
      * Get String value from Properties-File. If not set or not found, use given fallback!
@@ -160,7 +113,7 @@ public class PropertyHandler {
         if ( allPropValues.containsKey( key ) ) {
             retString = allPropValues.get( key ).toString(); 
         } else {
-            log.debug( "Property '" + key + "' not found in file " + propFileName +"! Using fallback :" + fallBack );
+            log.debug( "Property '" + key + "' not found in file " + configdirname +"! Using fallback :" + fallBack );
         }
         
         return retString; 
@@ -187,36 +140,6 @@ public class PropertyHandler {
         return retString; 
     }
     
-    
-    
-    /**
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public String getSqlProp( String key, String fallBack ) {
-        String retString = fallBack;
-        
-        if ( sqlPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_SQL ) ) {
-                sqlPropValues = (Hashtable)allPropValues.get( PROPERTIES_SQL );
-            } else {
-                log.error( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_SQL + "' not found in file: " + propFileName ) );
-            }
-        }
-        
-        if ( sqlPropValues != null && sqlPropValues.containsKey( key ) ) {
-            retString = sqlPropValues.get( key ).toString(); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_SQL_FILE ) +"! Using fallback :" + fallBack );
-        }
-        
-        return retString; 
-    }
-    
-    
-    
     /**
      * 
      * @param key
@@ -230,7 +153,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
                 groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -249,34 +172,6 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getGroupProp( String key, String fallBack ) {
-        String retBool = fallBack;
-        
-        if ( groupPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
-            } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + propFileName ) );
-            }
-        }
-        
-        if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
-            retBool =  groupPropValues.get( key ).toString(); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
-        }
-        
-        return retBool; 
-    }
-    
-    
-    
-    /**
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
     public boolean getUserProp( String key, boolean fallBack ) {
         boolean retBool = fallBack;
         
@@ -284,7 +179,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
                 userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -311,7 +206,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
                 userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -340,7 +235,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
                 resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -368,7 +263,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RESOURCE_GROUP ) ) {
                 resGroupPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE_GROUP );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE_GROUP + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE_GROUP + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -396,7 +291,7 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RMI ) ) {
                 rmiPropValues = (Hashtable)allPropValues.get( PROPERTIES_RMI );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + propFileName ) );
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + configdirname ) );
             }
         }
         
@@ -409,92 +304,64 @@ public class PropertyHandler {
         return retInt; 
     }
     
-    
-    
-    /**
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public String getRmiProp( String key, String fallBack ) {
-        String retString = fallBack;
-        
-        if ( rmiPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_RMI ) ) {
-                rmiPropValues = (Hashtable)allPropValues.get( PROPERTIES_RMI );
-            } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + propFileName ) );
-            }
-        }
-        
-        if ( rmiPropValues.containsKey( key ) ) {
-            retString = rmiPropValues.get( key ).toString(); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + propFileName +"! Using fallback :" + fallBack );
-        }
-        
-        return retString; 
-    }
-    
-    
-    
-    
     private void loadProps(final Properties sysprops) throws Exception {
         allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
         
-        Properties configprops  = new Properties();
-        if ( sysprops.getProperty( "config" ) != null ) {
-            propFileName = sysprops.getProperty( "config" );
-            configprops.load( new FileInputStream( propFileName ) );
-            
-            Enumeration enumi = configprops.propertyNames();
-            while ( enumi.hasMoreElements() ) {
-                String param = (String)enumi.nextElement();
-                String value = configprops.getProperty( param );
+        if ( sysprops.getProperty( "configdir" ) != null ) {
+            configdirname = sysprops.getProperty("configdir");
+            addpropsfromfile(configdirname + File.pathSeparatorChar + "AdminDaemon.properties");
+        } else {
+            log.fatal( "Parameter '-Dconfigdir' not given in system properties!" );
+            log.fatal( "Now, using default parameter!" );
+        }
+    }
+    
+    protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
+        final Properties configprops  = new Properties();
+        configprops.load( new FileInputStream(file) );
+        
+        Enumeration enumi = configprops.propertyNames();
+        while ( enumi.hasMoreElements() ) {
+            final String param = (String)enumi.nextElement();
+            String value = configprops.getProperty( param );
 
-                if ( value.startsWith( "$PWD" ) ) {
-                    // FIXME: Set a parsed value here instead of working dir
-                    // A new File without any content point to the current working dir
-                    value = stringReplacer( value, "$PWD", new File( "" ).getAbsolutePath() );
-                }
-                
-                allPropValues.put( param, value );
-                
-                if ( param.toLowerCase().endsWith( "_prop" ) ) {
-                    try {
-                        Properties customprops = new Properties();
-                        customprops.load( new FileInputStream( value ) );
-                        Enumeration enuma = customprops.propertyNames();
-                        Hashtable<String, String> custconfig = new Hashtable<String, String>();
-                        if ( allPropValues.containsKey( param + "_CONFIG" ) ) {
-                            custconfig = (Hashtable)allPropValues.get( param + "_CONFIG" );
-                        }
-                        while ( enuma.hasMoreElements() ){
-                            String param_ = (String)enuma.nextElement();
-                            String value_ = customprops.getProperty( param_ );
-                            if ( value_.startsWith( "$PWD" ) ) {
-                                value_ = stringReplacer( value_, "$PWD", new File( "" ).getAbsolutePath() );
-                            }
-                            if ( value_.startsWith( "\"" ) ) {
-                                value_ = value_.substring( 1 );
-                            }
-                            if ( value_.endsWith( "\"" ) ) {
-                                value_ = value_.substring( 0 , value_.length() - 1 );
-                                
-                            }
-                            custconfig.put( param_, value_ );
-                        }
-                        allPropValues.put( param + "_CONFIG", custconfig );
-                    } catch ( Exception e ) {
-                        log.debug( "File not found. Use default values for the file: " + value, e );
-                    }
-                }
+            if ( value.startsWith( "$PWD" ) ) {
+                // FIXME: Set a parsed value here instead of working dir
+                // A new File without any content point to the current working dir
+                value = stringReplacer( value, "$PWD", new File( "" ).getAbsolutePath() );
             }
             
-        } else {
-            log.fatal( "Parameter '-Dconfig' not given in system properties!" );
-            log.fatal( "Now, using default parameter!" );
+            allPropValues.put( param, value );
+            
+            if ( param.toLowerCase().endsWith( "_prop" ) ) {
+                try {
+                    Properties customprops = new Properties();
+                    customprops.load( new FileInputStream( value ) );
+                    Enumeration enuma = customprops.propertyNames();
+                    Hashtable<String, String> custconfig = new Hashtable<String, String>();
+                    if ( allPropValues.containsKey( param + "_CONFIG" ) ) {
+                        custconfig = (Hashtable)allPropValues.get( param + "_CONFIG" );
+                    }
+                    while ( enuma.hasMoreElements() ){
+                        String param_ = (String)enuma.nextElement();
+                        String value_ = customprops.getProperty( param_ );
+                        if ( value_.startsWith( "$PWD" ) ) {
+                            value_ = stringReplacer( value_, "$PWD", new File( "" ).getAbsolutePath() );
+                        }
+                        if ( value_.startsWith( "\"" ) ) {
+                            value_ = value_.substring( 1 );
+                        }
+                        if ( value_.endsWith( "\"" ) ) {
+                            value_ = value_.substring( 0 , value_.length() - 1 );
+                            
+                        }
+                        custconfig.put( param_, value_ );
+                    }
+                    allPropValues.put( param + "_CONFIG", custconfig );
+                } catch ( Exception e ) {
+                    log.debug( "File not found. Use default values for the file: " + value, e );
+                }
+            }
         }
     }
     
