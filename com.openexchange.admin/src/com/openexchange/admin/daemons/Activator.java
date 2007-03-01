@@ -90,9 +90,6 @@ public class Activator implements BundleActivator {
         this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
 
-        // init auth
-        AuthenticationFactory authz = new AuthenticationFactory(null);
-
         this.daemon.initRMI(this.getClass().getClassLoader(), context);
         log.info("Version: " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH);
         log.info("Name: " + Version.NAME);
