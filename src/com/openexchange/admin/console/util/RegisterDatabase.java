@@ -13,7 +13,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -70,11 +69,6 @@ public class RegisterDatabase extends UtilAbstraction {
 
         try {
             CommandLine cmd = parser.parse(options, args2);
-            Context ctx = new Context(DEFAULT_CONTEXT);
-
-            if (cmd.hasOption(OPT_NAME_CONTEXT_SHORT)) {
-                ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));
-            }
 
             Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT), cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
 
