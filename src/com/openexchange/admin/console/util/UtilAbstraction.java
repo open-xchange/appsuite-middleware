@@ -6,6 +6,10 @@ import org.apache.commons.cli.Options;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 
 public class UtilAbstraction extends BasicCommandlineOptions {
+    
+    protected final static String OPT_NAME_SEARCH_PATTERN_SHORT = "s";
+    protected final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
+
     /**
      * 
      * @return Options containing context,adminuser,adminpass Option objects.

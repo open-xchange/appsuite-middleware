@@ -21,10 +21,6 @@ public class ListFilestore extends UtilAbstraction {
 
     private final static String GENERAL_UTILITY_NAME = "listFilestore";
 
-    // Setting names for options
-    private final static String OPT_NAME_SEARCH_PATTERN_SHORT = "s";
-    private final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
-
     public ListFilestore(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();
