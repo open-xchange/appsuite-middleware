@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -24,8 +24,17 @@ public class RegisterDatabase extends UtilAbstraction {
 
     private final static String GENERAL_UTILITY_NAME="registerDatabase";
     
+    // Setting default values for some options
     private final static String USER_DEFAULT = "openexchange";
+    private final static String PASSWD_DEFAULT = "secret";
+    private final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
+    private final static int MAXUNITS_DEFAULT = 1000;
+    private final static int POOL_HARD_LIMIT_DEFAULT = 20;
+    private final static int POOL_INITIAL_DEFAULT = 2;
+    private final static int POOL_MAX_DEFAULT = 100;
+    private final static int CLUSTER_WEIGHT_DEFAULT = 100;
     
+    // Setting names for options
     private final static String OPT_NAME_NAME_SHORT="n";
     private final static String OPT_NAME_NAME_LONG="name";
     private final static String OPT_NAME_HOSTNAME_SHORT="h";
@@ -42,8 +51,8 @@ public class RegisterDatabase extends UtilAbstraction {
     private final static String OPT_NAME_MASTER_ID_LONG="masterid";
     private final static String OPT_NAME_WEIGHT_SHORT="w";
     private final static String OPT_NAME_WEIGHT_LONG="dbweight";
-    private final static String OPT_NAME_MAX_USER_SHORT="x";
-    private final static String OPT_NAME_MAX_USER_LONG="maxuser";
+    private final static String OPT_NAME_MAX_UNITS_SHORT="x";
+    private final static String OPT_NAME_MAX_UNITS_LONG="maxuser";
     private final static String OPT_NAME_DBPARAM_SHORT="p";
     private final static String OPT_NAME_DBPARAM_LONG="dbparam";
     private final static String OPT_NAME_POOL_HARDLIMIT_SHORT="l";
@@ -79,6 +88,12 @@ public class RegisterDatabase extends UtilAbstraction {
             String username = null;
             String password = null;
             boolean ismaster = false;
+            String masterid = null;
+            String maxunits = null;
+            String pool_hard_limit = null;
+            String pool_initial = null;
+            String pool_max = null;
+            String cluster_weight = null;
             // add optional values if set
             
             if (cmd.hasOption(OPT_NAME_NAME_SHORT)) {
@@ -99,12 +114,35 @@ public class RegisterDatabase extends UtilAbstraction {
             if (cmd.hasOption(OPT_NAME_IS_MASTER_SHORT)) {
                 ismaster = true;
             }
+            if (false == ismaster) {
+                if (cmd.hasOption(OPT_NAME_MASTER_ID_SHORT)) {
+                    masterid = cmd.getOptionValue(OPT_NAME_MASTER_ID_SHORT);
+                } else {
+                    throw new MissingArgumentException("master id must be set if this database isn't the master");
+                }
+            }
+            if (cmd.hasOption(OPT_NAME_MAX_UNITS_SHORT)) {
+                maxunits = cmd.getOptionValue(OPT_NAME_MAX_UNITS_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_POOL_HARDLIMIT_SHORT)) {
+                pool_hard_limit = cmd.getOptionValue(OPT_NAME_POOL_HARDLIMIT_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_POOL_INITIAL_SHORT)) {
+                pool_initial = cmd.getOptionValue(OPT_NAME_POOL_INITIAL_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_POOL_MAX_SHORT)) {
+                pool_max = cmd.getOptionValue(OPT_NAME_POOL_MAX_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_WEIGHT_SHORT)) {
+                cluster_weight = cmd.getOptionValue(OPT_NAME_WEIGHT_SHORT);
+            }
             
+            // Setting the options in the dataobject
             db.setDisplayname(name);
             if (null != driver) {
                 db.setDriver(driver);
             } else {
-                db.setDriver("com.mysql.jdbc.Driver");
+                db.setDriver(DRIVER_DEFAULT);
             }
             if (null != username) {
                 db.setLogin(username);
@@ -114,20 +152,42 @@ public class RegisterDatabase extends UtilAbstraction {
             if (null != password) {
                 db.setPassword(password);
             } else {
-                db.setPassword("secret");    
+                db.setPassword(PASSWD_DEFAULT);    
             }
             db.setMaster(ismaster);
-            db.setMaxUnits(1000);
+            if (null != maxunits) {
+                db.setMaxUnits(Integer.parseInt(maxunits));
+            } else {
+                db.setMaxUnits(MAXUNITS_DEFAULT);                
+            }
+            if (null != pool_hard_limit) {
+                db.setPoolHardLimit(Integer.parseInt(pool_hard_limit));
+            } else {
+                db.setPoolHardLimit(POOL_HARD_LIMIT_DEFAULT);                
+            }
+            if (null != pool_initial) {
+                db.setPoolInitial(Integer.parseInt(pool_initial));
+            } else {
+                db.setPoolInitial(POOL_INITIAL_DEFAULT);
+            }
+            if (null != pool_max) {
+                db.setPoolMax(Integer.parseInt(pool_max));
+            } else {
+                db.setPoolMax(POOL_MAX_DEFAULT);
+            }
             
-            db.setPoolHardLimit(20);
-            db.setPoolInitial(2);
-            db.setPoolMax(100);
             db.setUrl("jdbc:mysql://"+hostname+"/?useUnicode=true&characterEncoding=UTF-8&" +
                     "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
                     "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
-            db.setClusterWeight(100);
-            db.setMasterId(0);
-
+            if (null != cluster_weight) {
+                db.setClusterWeight(Integer.parseInt(cluster_weight));
+            } else {
+                db.setClusterWeight(CLUSTER_WEIGHT_DEFAULT);
+            }
+            if (null != masterid) {
+                db.setMasterId(Integer.parseInt(masterid));                
+            }
+            
             oxutil.registerDatabase(db, auth);
         } catch (java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -135,15 +195,12 @@ public class RegisterDatabase extends UtilAbstraction {
             printInvalidInputMsg("Ids must be numbers!");
         } catch (org.apache.commons.cli.MissingArgumentException as) {
             printError("Missing arguments on the command line: " + as.getMessage());
-            ;
             printHelpText(GENERAL_UTILITY_NAME, options);
         } catch (org.apache.commons.cli.UnrecognizedOptionException ux) {
             printError("Unrecognized options on the command line: " + ux.getMessage());
-            ;
             printHelpText(GENERAL_UTILITY_NAME, options);
         } catch (org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());
-            ;
             printHelpText(GENERAL_UTILITY_NAME, options);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -170,42 +227,21 @@ public class RegisterDatabase extends UtilAbstraction {
     private Options getOptions() {
         Options retval = getDefaultCommandLineOptions();
 
-        // add mandatory options
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_NAME_SHORT, OPT_NAME_NAME_LONG, "name of the database", true, true)));
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "hostname of the server", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_USERNAME_SHORT, OPT_NAME_DB_USERNAME_LONG, "name of the user for the database", USER_DEFAULT, true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DB_DRIVER_SHORT, OPT_NAME_DB_DRIVER_LONG, "the driver to be used for the database", true, false)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DB_PASSWD_SHORT, OPT_NAME_DB_PASSWD_LONG, "password for the database", true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_USERNAME_SHORT, OPT_NAME_DB_USERNAME_LONG, "name of the user for the database", USER_DEFAULT, true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_DRIVER_SHORT, OPT_NAME_DB_DRIVER_LONG, "the driver to be used for the database", DRIVER_DEFAULT, true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_PASSWD_SHORT, OPT_NAME_DB_PASSWD_LONG, "password for the database", PASSWD_DEFAULT, true, false)));
         retval.addOption(getShortLongOpt(OPT_NAME_IS_MASTER_SHORT, OPT_NAME_IS_MASTER_LONG, "set this if the registered database is the master", false, false));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_MASTER_ID_SHORT, OPT_NAME_MASTER_ID_LONG, "if it is the master give the id here", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_WEIGHT_SHORT, OPT_NAME_WEIGHT_LONG, "the db weight for this database", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_MAX_USER_SHORT, OPT_NAME_MAX_USER_LONG, "the maximum number of users in this database", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DBPARAM_SHORT, OPT_NAME_DBPARAM_LONG, "parameter for the database", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "db pool hardlimit", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_POOL_INITIAL_SHORT, OPT_NAME_POOL_INITIAL_LONG, "db pool initial", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_POOL_MAX_SHORT, OPT_NAME_POOL_MAX_LONG, "db pool max", true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_MASTER_ID_SHORT, OPT_NAME_MASTER_ID_LONG, "if this database isn't the master give the id of the master here", true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_WEIGHT_SHORT, OPT_NAME_WEIGHT_LONG, "the db weight for this database", String.valueOf(CLUSTER_WEIGHT_DEFAULT), true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "the maximum number of units in this database", String.valueOf(MAXUNITS_DEFAULT), true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DBPARAM_SHORT, OPT_NAME_DBPARAM_LONG, "parameter for the database", true, false)));
+        // FIXME: choeger Enter right description here
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "db pool hardlimit", String.valueOf(POOL_HARD_LIMIT_DEFAULT), true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_INITIAL_SHORT, OPT_NAME_POOL_INITIAL_LONG, "db pool initial", String.valueOf(POOL_INITIAL_DEFAULT), true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_MAX_SHORT, OPT_NAME_POOL_MAX_LONG, "db pool max", String.valueOf(POOL_MAX_DEFAULT), true, false)));
         return retval;
     }
-
-    private Option addArgName(final Option option, final String argname) {
-        final Option retval = option;
-        retval.setArgName(argname);
-        return retval;
-    }
-    
-    private Option addDefaultArgName(final Option option) {
-        return addArgName(option, option.getLongOpt());
-    }
-    
-    protected Option getShortLongOptWithDefault(final String shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
-        final StringBuilder desc = new StringBuilder();
-        desc.append(description);
-        desc.append(". Default: ");
-        desc.append(defaultvalue);
-        final Option retval = new Option(shortopt, longopt, hasarg, description);
-        retval.setRequired(required);
-        return retval;
-    }
-
 
 }
