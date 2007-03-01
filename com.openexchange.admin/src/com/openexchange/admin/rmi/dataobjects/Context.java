@@ -52,19 +52,24 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
+/**
+ * Class representing a context
+ * 
+ * @author cutmasta
+ */
 public class Context implements Serializable {
     /**
      * 
      */
     private static final long serialVersionUID = -8939189372445990901L;
 
-    private int id;
+    private Integer id;
     private Database readDatabase;
     private Database writeDatabase;
     private Filestore filestore;
-    private long average_size;
-    private long maxQuota;
-    private long usedQuota;
+    private Long average_size;
+    private Long maxQuota;
+    private Long usedQuota;
     private MaintenanceReason maintenanceReason;
     private Boolean enabled;
 
@@ -78,7 +83,7 @@ public class Context implements Serializable {
     /**
      * @param id
      */
-    public Context(int id) {
+    public Context(Integer id) {
         super();
         init();
         this.id = id;
@@ -94,7 +99,7 @@ public class Context implements Serializable {
         this.name = name;
     }
 
-    public int getIdAsInt() {
+    public Integer getIdAsInt() {
         return this.id;
     }
 
@@ -102,7 +107,7 @@ public class Context implements Serializable {
         return String.valueOf(this.id);
     }
 
-    public void setID(int id) {
+    public void setID(Integer id) {
         this.id = id;
     }
     
@@ -119,10 +124,10 @@ public class Context implements Serializable {
         this.name = null;
         this.enabled = false;
         this.filestore = null;
-        this.average_size = -1;
+        this.average_size = null;
         this.maintenanceReason = null;
-        this.maxQuota = -10;
-        this.usedQuota = -10;
+        this.maxQuota = null;
+        this.usedQuota = null;
         this.readDatabase = null;
         this.writeDatabase = null;
     }
@@ -135,19 +140,19 @@ public class Context implements Serializable {
         this.filestore = filestore;
     }
 
-    public long getMaxQuota() {
+    public Long getMaxQuota() {
         return maxQuota;
     }
 
-    public void setMaxQuota(long maxQuota) {
+    public void setMaxQuota(Long maxQuota) {
         this.maxQuota = maxQuota;
     }
 
-    public long getUsedQuota() {
+    public Long getUsedQuota() {
         return usedQuota;
     }
 
-    public void setUsedQuota(long usedQuota) {
+    public void setUsedQuota(Long usedQuota) {
         this.usedQuota = usedQuota;
     }
 
@@ -159,11 +164,11 @@ public class Context implements Serializable {
         this.maintenanceReason = maintenanceReason;
     }
 
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
@@ -183,11 +188,11 @@ public class Context implements Serializable {
         this.writeDatabase = writeDatabase;
     }
 
-    public long getAverage_size() {
+    public Long getAverage_size() {
         return average_size;
     }
 
-    public void setAverage_size(long average_size) {
+    public void setAverage_size(Long average_size) {
         this.average_size = average_size;
     }
     

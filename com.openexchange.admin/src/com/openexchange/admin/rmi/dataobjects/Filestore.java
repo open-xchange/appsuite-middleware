@@ -58,19 +58,19 @@ public class Filestore implements Serializable {
      */
     private static final long serialVersionUID = -6970026864761440793L;
 
-    private int id;
+    private Integer id;
 
     private String url;
 
-    private long size;
+    private Long size;
     
-    private long quota_used;
+    private Long quota_used;
     
-    private long quota_max;
+    private Long quota_max;
 
-    private int maxContexts;
+    private Integer maxContexts;
 
-    private int currentContexts;
+    private Integer currentContexts;
     
     private String login;
     
@@ -83,17 +83,17 @@ public class Filestore implements Serializable {
         init();
     }
     
-    public Filestore(int id) {
+    public Filestore(Integer id) {
         super();
         init();
         this.id = id;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int val) {
+    public void setId(Integer val) {
         this.id = val;
     }
 
@@ -105,27 +105,27 @@ public class Filestore implements Serializable {
         this.url = val;
     }
 
-    public long getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(long val) {
+    public void setSize(Long val) {
         this.size = val;
     }
 
-    public int getMaxContexts() {
+    public Integer getMaxContexts() {
         return maxContexts;
     }
 
-    public void setMaxContexts(int val) {
+    public void setMaxContexts(Integer val) {
         this.maxContexts = val;
     }
 
-    public int getCurrentContexts() {
+    public Integer getCurrentContexts() {
         return this.currentContexts;
     }
 
-    public void setCurrentContexts(int val) {
+    public void setCurrentContexts(Integer val) {
         this.currentContexts = val;
     }
 
@@ -154,29 +154,29 @@ public class Filestore implements Serializable {
     }
 
     
-    public long getQuota_max() {
+    public Long getQuota_max() {
         return quota_max;
     }
 
-    public void setQuota_max(long quota_max) {
+    public void setQuota_max(Long quota_max) {
         this.quota_max = quota_max;
     }
 
-    public long getQuota_used() {
+    public Long getQuota_used() {
         return quota_used;
     }
 
-    public void setQuota_used(long quota_used) {
+    public void setQuota_used(Long quota_used) {
         this.quota_used = quota_used;
     }
 
     private void init() {
-        this.maxContexts = 100;
-        this.id = -1;
-        this.size = -1;
-        this.quota_used = -1;
-        this.quota_max = -1;
-        this.currentContexts = -1;
+        this.maxContexts = null;
+        this.id = null;
+        this.size = null;
+        this.quota_used = null;
+        this.quota_max = null;
+        this.currentContexts = null;
         this.url = null;
         this.name = null;
         this.login = null;

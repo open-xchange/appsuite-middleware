@@ -173,7 +173,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
             try {
-                res.validateResourceName();
+                validateResourceName(res.getName());
             } catch (final OXResourceException xres) {
                 throw new InvalidDataException("Invalid resource name");
                 

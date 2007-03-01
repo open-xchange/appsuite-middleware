@@ -59,7 +59,7 @@ public class Resource implements Serializable {
      */
     private static final long serialVersionUID = 6549687169790363728L;
 
-    private int id;
+    private Integer id;
 
     private String name;
 
@@ -69,22 +69,27 @@ public class Resource implements Serializable {
 
     private String email;
 
-    private boolean available;
+    private Boolean available;
 
     public Resource() {
-        this.setAvailable(false);
-        this.setDisplayname(null);
-        this.setEmail(null);
-        this.setId(-1);
-        this.setName(null);
-        this.setDescription(null);
+        super();
+        init();
     }
 
-    public int getId() {
+    private void init() {
+        this.id = null;
+        this.name = null;
+        this.displayname = null;
+        this.description = null;
+        this.email = null;
+        this.available = null;
+    }
+    
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int val) {
+    public void setId(Integer val) {
         this.id = val;
     }
 
@@ -112,11 +117,11 @@ public class Resource implements Serializable {
         this.email = val;
     }
 
-    public boolean isAvailable() {
+    public Boolean isAvailable() {
         return available;
     }
 
-    public void setAvailable(boolean available) {
+    public void setAvailable(Boolean available) {
         this.available = available;
     }
 
@@ -136,21 +141,6 @@ public class Resource implements Serializable {
         }
     }
 
-    /**
-     * Checks if the name contains valid chars
-     * 
-     * @throws OXResourceException
-     */
-    public void validateResourceName() throws OXResourceException {
-        // Check for allowed chars:
-        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
-        // _-+.%$@
-        String illegal = this.name.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
-        if (illegal.length() > 0) {
-            throw new OXResourceException(OXResourceException.ILLEGAL_CHARS + ": \"" + illegal + "\"");
-        }
-    }
-    
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
