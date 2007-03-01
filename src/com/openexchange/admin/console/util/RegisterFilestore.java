@@ -36,19 +36,19 @@ public class RegisterFilestore extends UtilAbstraction {
     private final static String OPT_NAME_STORE_MAX_CTX_SHORT = "m";
     private final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
 
-    public RegisterFilestore(String[] args2) {
+    public RegisterFilestore(final String[] args2) {
 
-        CommandLineParser parser = new PosixParser();
+        final CommandLineParser parser = new PosixParser();
 
-        Options options = getOptions();
+        final Options options = getOptions();
 
         try {
-            CommandLine cmd = parser.parse(options, args2);
+            final CommandLine cmd = parser.parse(options, args2);
 
-            Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT), cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
+            final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT), cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
 
             // get rmi ref
-            OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Filestore fstore = new Filestore();
             String store_path = null;
@@ -69,11 +69,11 @@ public class RegisterFilestore extends UtilAbstraction {
 
             // Setting the options in the dataobject
             if (null != store_path) {
-                java.net.URI uri = new java.net.URI(store_path);
+                final java.net.URI uri = new java.net.URI(store_path);
                 fstore.setUrl(uri.toString());
                 new java.io.File(uri.getPath()).mkdir();
             } else {
-                java.net.URI uri = new java.net.URI(STORE_PATH_DEFAULT);
+                final java.net.URI uri = new java.net.URI(STORE_PATH_DEFAULT);
                 fstore.setUrl(uri.toString());
                 new java.io.File(uri.getPath()).mkdir();
             }
@@ -90,45 +90,45 @@ public class RegisterFilestore extends UtilAbstraction {
             
 
             oxutil.registerFilestore(fstore, auth);
-        } catch (java.rmi.ConnectException neti) {
+        } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-        } catch (java.lang.NumberFormatException num) {
+        } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-        } catch (org.apache.commons.cli.MissingArgumentException as) {
+        } catch (final org.apache.commons.cli.MissingArgumentException as) {
             printError("Missing arguments on the command line: " + as.getMessage());
             printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (org.apache.commons.cli.UnrecognizedOptionException ux) {
+        } catch (final org.apache.commons.cli.UnrecognizedOptionException ux) {
             printError("Unrecognized options on the command line: " + ux.getMessage());
             printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (org.apache.commons.cli.MissingOptionException mis) {
+        } catch (final org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());
             printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-        } catch (InvalidCredentialsException e) {
+        } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             printServerResponse(e.getMessage());
         }
 
     }
 
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
         new RegisterFilestore(args);
     }
 
     private Options getOptions() {
-        Options retval = getDefaultCommandLineOptions();
+        final Options retval = getDefaultCommandLineOptions();
 
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "where to store filestore contents", STORE_PATH_DEFAULT, true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "the maximum size of the filestore", String.valueOf(STORE_SIZE_DEFAULT), true, false)));
