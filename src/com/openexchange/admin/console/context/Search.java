@@ -32,10 +32,7 @@ public class Search extends BasicCommandlineOptions {
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
-            Context ctx = new Context();            
-            
-            ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));            
+            CommandLine cmd = parser.parse(options, args2); 
             
             Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
                         
@@ -82,12 +79,10 @@ public class Search extends BasicCommandlineOptions {
     }
     
     private Options getOptions() {
-        Options retval = getDefaultCommandLineOptions();
+        Options retval = new Options();
         
-        // this time context id is mandatory
-        Option tmp = retval.getOption(OPT_NAME_CONTEXT_SHORT);
-        tmp.setRequired(true);
-        retval.addOption(tmp);      
+        retval.addOption(getAdminUserOption());
+        retval.addOption(getAdminPassOption());        
         
         Option search = getSearchPatternOption();
         search.setRequired(true);
