@@ -78,46 +78,20 @@ public class User implements Serializable {
 
     private PASSWORDMECH passwordMech;
 
-    /**
-     * Primary mail address, value is a <code>String</code> Data is stored in
-     * user table not in prg_contacts. Fieldname is mail
-     */
     private String primaryEmail;
 
-    /**
-     * Email (business)
-     */
     private String email1;
 
-    /**
-     * Email (home)
-     */
     private String email2;
 
-    /**
-     * Email (other)
-     */
     private String email3;
 
-    /**
-     * Represents the aliases of an user, value is a <code>HashSet[]</code>
-     */
     private HashSet<String> aliases;
 
-    /**
-     * Last name. Data is stored in field02
-     */
     private String sur_name;
 
-    /**
-     * First name. Data is stored in field03
-     */
     private String given_name;
 
-    /**
-     * Key representing if user is enabled or not , value is a
-     * <code>Boolean</code>
-     */
     private Boolean enabled;
 
     private Date birthday;
@@ -146,22 +120,12 @@ public class User implements Serializable {
 
     private String company;
 
-    /**
-     * The default group when creating an user, value is a <code>Group</code>-
-     * object If not set , the default context group is used.
-     */
     private Group default_group;
 
     private String department;
 
-    /**
-     * Display name
-     */
     private String display_name;
 
-    /**
-     * Job title
-     */
     private String employeeType;
 
     private String fax_business;
@@ -170,37 +134,18 @@ public class User implements Serializable {
 
     private String fax_other;
 
-    /**
-     * Represents the imapserver where the user is located, value is a
-     * <code>String</code>. Data is stored in user table not in prg_contacts
-     */
     private String imapServer;
 
-    /**
-     * Represents the smtpserver the user must use, value is a
-     * <code>String</code>. Data is stored in user table not in prg_contacts
-     */
     private String smtpServer;
-
-    /**
-     * Instant messenger (business)
-     */
+    
     private String instant_messenger1;
 
     private String instant_messenger2;
 
-    /**
-     * IP-phone
-     */
     private String telephone_ip;
 
     private String telephone_isdn;
 
-    /**
-     * Represents the language of the user, value is <code>Locale</code>. For
-     * example: de_DE,en_US Data is stored in user table not in prg_contacts.
-     * Fieldname is preferredlanguage
-     */
     private Locale language;
 
     private String mail_folder_drafts_name;
@@ -215,14 +160,8 @@ public class User implements Serializable {
 
     private String marital_status;
 
-    /**
-     * Mobile
-     */
     private String cellular_telephone1;
 
-    /**
-     * Mobile 2
-     */
     private String cellular_telephone2;
 
     private String info;
@@ -233,17 +172,10 @@ public class User implements Serializable {
 
     private String note;
 
-    /**
-     * Employee ID
-     */
     private String number_of_employee;
 
     private String telephone_pager;
 
-    /**
-     * Use this to set the password expired. Value is a <code>Boolean</code>.
-     * shadowLastChange in DB
-     */
     private Boolean password_expired;
 
     private String telephone_assistant;
@@ -258,14 +190,8 @@ public class User implements Serializable {
 
     private String telephone_company;
 
-    /**
-     * Phone (home)
-     */
     private String telephone_home1;
 
-    /**
-     * Phone (home 2)
-     */
     private String telephone_home2;
 
     private String telephone_other;
@@ -292,9 +218,6 @@ public class User implements Serializable {
 
     private String country_business;
 
-    /**
-     * Second name
-     */
     private String middle_name;
 
     private String postal_code_other;
@@ -315,10 +238,6 @@ public class User implements Serializable {
 
     private String telephone_telex;
 
-    /**
-     * Represents the timezone of the user, value is <code>TimeZone</code>
-     * Data is stored in user table not in prg_contacts
-     */
     private TimeZone timezone;
 
     private String title;
@@ -378,7 +297,7 @@ public class User implements Serializable {
     /**
      * @param id
      */
-    public User(int id) {
+    public User(final int id) {
         super();
         init();
         this.id = id;
@@ -389,6 +308,12 @@ public class User implements Serializable {
         SHA
     }
     
+    /**
+     * Returns the String representation of password mechanism as used in the data store
+     * as SQL or LDAP
+     * 
+     * @return String representation of PASSWORDMECH
+     */
     public String getPasswordMech2String() {
         switch (this.passwordMech) {
         case CRYPT:
@@ -402,7 +327,7 @@ public class User implements Serializable {
     }
     
     /**
-     * Returns the id of the user as a long
+     * Returns the id of the user
      * 
      * @return Returns the id of the user as a long.
      */
@@ -411,7 +336,7 @@ public class User implements Serializable {
     }
 
     /**
-     * Set user identifier number
+     * Set user numeric user id
      * 
      * @param userid
      */
@@ -424,7 +349,7 @@ public class User implements Serializable {
     }
 
     /**
-     * Set user identifier
+     * Set symbolic user identifier
      */
     public void setUsername(String username) {
         this.username = username;
@@ -436,11 +361,11 @@ public class User implements Serializable {
 
     /**
      * The users password
-     * must be encrypted using method as provided in passwordMech
+     * must be plaintext
      * @param passwd
      * @see setPasswordMech
      */
-    public void setPassword(String passwd) {
+    public void setPassword(final String passwd) {
         this.password = passwd;
     }
 
@@ -448,6 +373,9 @@ public class User implements Serializable {
         return primaryEmail;
     }
 
+    /**
+     * Primary mail address is the default email address of the user
+     */
     public void setPrimaryEmail(String val) {
         this.primaryEmail = val;
     }
@@ -456,6 +384,9 @@ public class User implements Serializable {
         return sur_name;
     }
 
+    /**
+     * Last name of user
+     */
     public void setSur_name(String val) {
         this.sur_name = val;
     }
@@ -464,6 +395,9 @@ public class User implements Serializable {
         return given_name;
     }
 
+    /**
+     * First name of user
+     */
     public void setGiven_name(String val) {
         this.given_name = val;
     }
@@ -576,6 +510,10 @@ public class User implements Serializable {
         return default_group;
     }
 
+    /**
+     * The default group when creating an user.
+     * If not supplied, a default group is used.
+     */
     public void setDefault_group(Group val) {
         this.default_group = val;
     }
@@ -600,6 +538,9 @@ public class User implements Serializable {
         return email2;
     }
 
+    /**
+     * Email (home)
+     */
     public void setEmail2(String val) {
         this.email2 = val;
     }
@@ -608,6 +549,9 @@ public class User implements Serializable {
         return email3;
     }
 
+    /**
+     * Email (other)
+     */
     public void setEmail3(String val) {
         this.email3 = val;
     }
@@ -616,6 +560,9 @@ public class User implements Serializable {
         return employeeType;
     }
 
+    /**
+     * Job title
+     */
     public void setEmployeeType(String val) {
         this.employeeType = val;
     }
@@ -681,10 +628,25 @@ public class User implements Serializable {
         this.smtpServer = val;
     }
 
+    public int getSmtpPort() {
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.smtpServer != null && this.smtpServer.contains(":")) {
+            String[] sp = smtpServer.split(":");
+            if (sp.length > 1 && sp[1].trim().length() > 0) {
+                return Integer.parseInt(sp[1]);
+            }
+        }
+        return 25;
+    }
+
     public String getInstant_messenger1() {
         return instant_messenger1;
     }
 
+    /**
+     * Instant messenger (business)
+     */
     public void setInstant_messenger1(String val) {
         this.instant_messenger1 = val;
     }
@@ -773,6 +735,9 @@ public class User implements Serializable {
         return cellular_telephone1;
     }
 
+    /**
+     * Mobile
+     */
     public void setCellular_telephone1(String val) {
         this.cellular_telephone1 = val;
     }
@@ -781,6 +746,9 @@ public class User implements Serializable {
         return cellular_telephone2;
     }
 
+    /**
+     * Mobile 2
+     */
     public void setCellular_telephone2(String val) {
         this.cellular_telephone2 = val;
     }
@@ -821,6 +789,9 @@ public class User implements Serializable {
         return number_of_employee;
     }
 
+    /**
+     * Employee ID
+     */
     public void setNumber_of_employee(String val) {
         this.number_of_employee = val;
     }
@@ -973,6 +944,9 @@ public class User implements Serializable {
         return middle_name;
     }
 
+    /**
+     * Second name
+     */
     public void setMiddle_name(String val) {
         this.middle_name = val;
     }
@@ -1318,6 +1292,9 @@ public class User implements Serializable {
         return email1;
     }
 
+    /**
+     * Email (business)
+     */
     public void setEmail1(String privateEmail1) {
         this.email1 = privateEmail1;
     }
