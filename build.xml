@@ -5,9 +5,11 @@
     <property name="destdir" value=""/>
     <property name="plugin.jar" value="ox_admin_plugin_hosting.jar"/>
     <property name="lib.dir" value="lib"/>
+	<property name="oxconfdir" value="etc/admindaemon"/>
     <path id="project.classpath">
 	<pathelement location="${lib.dir}/ox_server.jar"/>
 	<pathelement location="${lib.dir}/commons-logging.jar"/>
+    <pathelement location="${lib.dir}/commons-cli-1.0.jar"/>
 	<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
         <pathelement location="../open-xchange-admin/classes"/>
     </path>
@@ -77,9 +79,9 @@
     <target name="install" depends="jar,doc">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy todir="${destdir}/${prefix}/lib" file="jar/${plugin.jar}" overwrite="true"/>
-        <mkdir dir="${destdir}/${prefix}/doc/oxadmin/hosting"/>
-        <copy todir="${destdir}/${prefix}/doc/oxadmin/hosting">
-            <fileset dir="doc"/>
+        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
+    	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
+            <fileset dir="etc" excludes="**/*.in"/>
         </copy>
     </target>
 	
