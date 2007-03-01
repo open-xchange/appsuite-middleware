@@ -319,9 +319,7 @@ public class GroupTest extends AbstractTest {
     }
 
     public static int getContextID() throws Exception {
-        final Credentials cred = DummyCredentials();
-        final Context ctxset = getTestContextObject(10);
-        return addContext(ctxset, getRMIHostUrl(), cred);
+        return 1;
     }
 
     private void createChangeGroupData(final Group group) {
