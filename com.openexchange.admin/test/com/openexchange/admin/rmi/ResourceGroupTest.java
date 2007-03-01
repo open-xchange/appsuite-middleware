@@ -75,12 +75,7 @@ public class ResourceGroupTest extends AbstractTest{
     }
     
     private static Context getTestContext() throws Exception{
-        final Context ctxset = getTestContextObject(DummyCredentials());        
-        
-        // create new context
-        Context ctx = new Context();
-        ctx.setID(addContext(ctxset,getRMIHostUrl(),DummyCredentials()));
-        return ctx;
+        return new Context(1);
     }
     
     public void testAddMember()throws Exception{

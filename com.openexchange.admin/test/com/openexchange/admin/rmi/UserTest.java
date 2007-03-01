@@ -79,13 +79,7 @@ public class UserTest extends AbstractTest {
     }
     
     private Context getTestContext() throws Exception{
-        final Credentials cred = DummyCredentials();
-        final Context ctxset = getTestContextObject(cred);        
-        
-        // create new context
-        Context ctx = new Context();
-        ctx.setID(addContext(ctxset,getRMIHostUrl(),cred));
-        return ctx;
+        return new Context(1);
     }
     
     public void testCreate() throws Exception {        
