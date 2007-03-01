@@ -81,7 +81,7 @@ public class ResourceTest extends AbstractTest{
         boolean found_resource = false;
         for(int a = 0;a<srv_response.length;a++){
             Resource tmp = srv_response[a];
-            if(tmp.getId()==res.getId()){
+            if(tmp.getId().equals(res.getId())){
                 assertEquals(res.getDescription(),tmp.getDescription());
                 assertEquals(res.getDisplayname(),tmp.getDisplayname());
                 assertEquals(res.getEmail(),tmp.getEmail());
@@ -107,7 +107,7 @@ public class ResourceTest extends AbstractTest{
         boolean found_resource = false;
         for(int a = 0;a<srv_response.length;a++){
             Resource tmp = srv_response[a];
-            if(tmp.getId()==res.getId()){
+            if(tmp.getId().equals(res.getId())){
                 assertEquals(res.getDescription(),tmp.getDescription());
                 assertEquals(res.getDisplayname(),tmp.getDisplayname());
                 assertEquals(res.getEmail(),tmp.getEmail());

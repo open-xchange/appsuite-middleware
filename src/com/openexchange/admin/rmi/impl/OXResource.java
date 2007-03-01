@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.1 2007/02/26 17:01:46 choeger Exp $
+ * $Id: OXResource.java,v 1.2 2007/03/01 11:45:40 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -173,7 +173,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
             try {
-                res.validateResourceName();
+                validateResourceName(res.getName());
             } catch (final OXResourceException xres) {
                 throw new InvalidDataException("Invalid resource name");
                 

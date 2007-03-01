@@ -58,20 +58,20 @@ public class MaintenanceReason implements Serializable{
      */
     private static final long serialVersionUID = -7581806972771279403L;
 
-    private int id;
+    private Integer id;
 
     private String text;
 
     public MaintenanceReason () {
         super();
-        this.id = -1;
+        this.id = null;;
         this.text = null;
     }
 
     /**
      * @param id
      */
-    public MaintenanceReason(int id) {
+    public MaintenanceReason(Integer id) {
         super();
         this.id = id;
         this.text = null;
@@ -81,17 +81,17 @@ public class MaintenanceReason implements Serializable{
      * @param id
      * @param text
      */
-    public MaintenanceReason(int id, String text) {
+    public MaintenanceReason(Integer id, String text) {
         super();
         this.id = id;
         this.text = text;
     }
 
-    public int getId () {
+    public Integer getId () {
         return id;
     }
 
-    public void setId (int val) {
+    public void setId (Integer val) {
         this.id = val;
     }
 
