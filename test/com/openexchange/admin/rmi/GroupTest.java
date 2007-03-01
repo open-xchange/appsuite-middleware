@@ -81,8 +81,9 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        addGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP, ctx, cred), hosturl, cred);
-        final Group[] grps = searchGroup(ctx, VALID_CHAR_TESTGROUP, hosturl, cred);
+        String grpname = VALID_CHAR_TESTGROUP+System.currentTimeMillis();
+        addGroup(ctx, getTestGroupObject(grpname, ctx, cred), hosturl, cred);
+        final Group[] grps = searchGroup(ctx, grpname, hosturl, cred);
         assertEquals("invalid search result", 1, grps.length);
     }
 
@@ -91,7 +92,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final int id = addGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP, ctx, cred), hosturl, cred);
+        final int id = addGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
         final Group grp = new Group();
         grp.setId(id);
         deleteGroup(ctx, grp, hosturl, cred);
@@ -133,13 +134,13 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP, ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
         final int group_id = addGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", group_id > 0);
         addgroup.setId(group_id);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER, "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER+System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
@@ -165,13 +166,13 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP, ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
         final int group_id = addGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", group_id > 0);
         addgroup.setId(group_id);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER, "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
@@ -210,7 +211,7 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("changed_this_group", ctx, cred);
+        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
         final int id = addGroup(ctx, addgroup, hosturl, cred);
         assertTrue("expected id > 0", id > 0);
         addgroup.setId(id);
@@ -245,13 +246,13 @@ public class GroupTest extends AbstractTest {
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
         final String hosturl = getRMIHostUrl();
-        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP, ctx, cred);
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
         final int group_id = addGroup(ctx, addgroup, hosturl, cred);
         assertTrue("group id > 0 expected", group_id > 0);
         addgroup.setId(group_id);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER, "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
@@ -308,7 +309,7 @@ public class GroupTest extends AbstractTest {
 
     private static Group getTestGroupObject(final Credentials cred) throws Exception {
         final Context ctx = new Context(getContextID());
-        return getTestGroupObject(VALID_CHAR_TESTGROUP, ctx, cred);
+        return getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
     }
 
     private static Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
