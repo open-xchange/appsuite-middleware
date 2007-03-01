@@ -76,7 +76,7 @@ public class ContextTest extends AbstractTest {
         final int id = addContext(ctxset, hosturl, cred);
         ctxset.setID(id);
         final Filestore filestore = ctxset.getFilestore();        
-        filestore.setQuota_max(1337);
+        filestore.setQuota_max(1337L);
         filestore.setId(111111337);
         changeStorageData(ctxset, hosturl, cred);
     }
