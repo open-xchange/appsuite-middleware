@@ -80,7 +80,7 @@ public abstract class AbstractTest extends TestCase{
     }
     
     public static Credentials DummyCredentials(){
-        return new Credentials("admin","secret");
+        return new Credentials("oxadmin","secret");
     }    
     
     public static Context getTestContextObject(Credentials cred) throws Exception {
