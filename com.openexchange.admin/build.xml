@@ -15,6 +15,7 @@
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
 	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
+	<property name="masterauthfile" value="mpasswd"/>
 	
 	<path id="project.classpath">
 	    <pathelement location="${lib.dir}/ox_server.jar"/>
@@ -223,6 +224,7 @@
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
             <fileset dir="etc" excludes="**/*.in,ResourceGroup.properties"/>
         </copy>
+		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
             <fileset dir="sbin" excludes="*.in,linkhelper" followsymlinks="true"/>
         </copy>
