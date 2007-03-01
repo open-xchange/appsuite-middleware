@@ -13,6 +13,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -38,7 +39,11 @@ public class ListFilestore extends UtilAbstraction {
             final String searchpattern = cmd.getOptionValue(OPT_NAME_SEARCH_PATTERN_SHORT);
             // Setting the options in the dataobject
 
-            oxutil.listFilestores(searchpattern, auth);
+            final Filestore[] filestores = oxutil.listFilestores(searchpattern, auth);
+            
+            for (final Filestore filestore : filestores) {
+                System.out.println(filestore);
+            }
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
         } catch (final java.lang.NumberFormatException num) {
