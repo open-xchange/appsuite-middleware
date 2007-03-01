@@ -58,13 +58,13 @@ public class Group implements Serializable {
      */
     private static final long serialVersionUID = -916912847701699619L;
 
-    private int id = -1;
+    private Integer id;
 
     private String name;
 
     private String displayname;
 
-    private int[] members;
+    private Integer[] members;
 
     private String email;
 
@@ -73,21 +73,30 @@ public class Group implements Serializable {
      * @param name
      * @param displayname
      */
-    public Group(int id, String name, String displayname) {
+    public Group(Integer id, String name, String displayname) {
         super();
+        init();
         this.id = id;
         this.name = name;
         this.displayname = displayname;
     }
 
+    private void init(){
+        this.id = null;
+        this.name = null;
+        this.displayname = null;
+        this.members = null;
+        this.email = null;
+    }
+    
     public Group() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int val) {
+    public void setId(Integer val) {
         this.id = val;
     }
 
@@ -107,11 +116,11 @@ public class Group implements Serializable {
         this.displayname = val;
     }
 
-    public int[] getMembers() {
+    public Integer[] getMembers() {
         return members;
     }
 
-    public void setMembers(int[] val) {
+    public void setMembers(Integer[] val) {
         this.members = val;
     }
 
