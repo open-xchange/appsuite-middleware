@@ -14,7 +14,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.openexchange.admin.console.user.UserAbstraction;
+import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class ChangeQuota extends UserAbstraction {
+public class ChangeQuota extends BasicCommandlineOptions {
     
     private final static String OPT_QUOTA_SHORT = "q";
     private final static String OPT_QUOTA_LONG = "quota";
