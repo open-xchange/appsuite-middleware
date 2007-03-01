@@ -84,6 +84,4 @@ public class UnregisterFilestore extends UtilAbstraction {
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_STORE_ID_SHORT, OPT_NAME_STORE_ID_LONG, "the id of the filestore which should be deleted", true, true)));
         return retval;
     }
-
-
 }
