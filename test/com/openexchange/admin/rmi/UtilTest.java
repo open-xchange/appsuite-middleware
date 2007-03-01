@@ -79,7 +79,7 @@ public class UtilTest extends AbstractTest {
         client_st.setUrl(uri.toString());
         new java.io.File(uri.getPath()).mkdir();
         
-        client_st.setSize(100);        
+        client_st.setSize(100L);        
         client_st.setName(name);
         client_st.setMaxContexts(100);
         
@@ -557,7 +557,7 @@ public class UtilTest extends AbstractTest {
         
         // set change data
         client_st.setMaxContexts(1337);
-        client_st.setSize(13337);
+        client_st.setSize(13337L);
         client_st.setUrl(client_st.getUrl()+change_suffix);
         
         // change store on server
