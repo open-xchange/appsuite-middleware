@@ -309,7 +309,7 @@ public class PropertyHandler {
         
         if ( sysprops.getProperty( "configdir" ) != null ) {
             configdirname = sysprops.getProperty("configdir");
-            addpropsfromfile(configdirname + File.pathSeparatorChar + "AdminDaemon.properties");
+            addpropsfromfile(configdirname + File.separatorChar + "AdminDaemon.properties");
         } else {
             log.fatal( "Parameter '-Dconfigdir' not given in system properties!" );
             log.fatal( "Now, using default parameter!" );
