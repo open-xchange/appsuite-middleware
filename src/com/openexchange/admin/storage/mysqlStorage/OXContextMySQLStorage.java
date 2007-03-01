@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -87,7 +88,6 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
-import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
@@ -2696,8 +2696,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private void initSequenceTables(final int context_id, final Connection con) throws SQLException, OXContextException {
         PreparedStatement ps = null;
         try {
-            final AdminCache cache = ClientAdminThread.cache;
-            final ArrayList<String> sequence_tables = cache.getSequenceTables();
+            final ArrayList<String> sequence_tables = ClientAdminThreadExtended.cache.getSequenceTables();
             final Iterator<String> is = sequence_tables.iterator();
             while (is.hasNext()) {
                 int startval = 0;
