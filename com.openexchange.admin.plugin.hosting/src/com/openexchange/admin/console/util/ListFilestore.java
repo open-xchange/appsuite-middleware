@@ -41,6 +41,7 @@ public class ListFilestore extends UtilAbstraction {
 
             final Filestore[] filestores = oxutil.listFilestores(searchpattern, auth);
             
+            // FIXME: Format output right
             for (final Filestore filestore : filestores) {
                 System.out.println(filestore);
             }

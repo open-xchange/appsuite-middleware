@@ -40,6 +40,7 @@ public class ListDBMS extends UtilAbstraction {
 
             final Database[] databases = oxutil.searchForDatabase(searchpattern, auth);
             
+            // FIXME: Format output right
             for (final Database database : databases) {
                 System.out.println(database);
             }
