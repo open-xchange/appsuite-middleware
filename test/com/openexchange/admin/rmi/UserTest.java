@@ -91,7 +91,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final Credentials cred = DummyCredentials();
         final UserModuleAccess access = new UserModuleAccess();    
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));        
         int[] id = {urs.getId()};
         
@@ -115,7 +115,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));             
         
         // delete user
@@ -140,7 +140,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();   
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         
         // now load user from server and check if data is correct, else fail
@@ -162,7 +162,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         
         // now load user from server and check if data is correct, else fail
@@ -185,7 +185,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess(); 
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         // get module access 
@@ -205,7 +205,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         // get module access 
@@ -254,7 +254,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
         final Credentials cred = DummyCredentials();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         int[] srv_response = oxu.getAll(ctx,cred);
@@ -280,7 +280,7 @@ public class UserTest extends AbstractTest {
         OXUserInterface oxu = getUserClient();
         final Credentials cred = DummyCredentials();
         final UserModuleAccess access = new UserModuleAccess();    
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER, pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         
         // now load user from server and check if data is correct, else fail
