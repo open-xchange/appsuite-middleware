@@ -62,23 +62,25 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class BasicAuthenticator {
     
-    private AuthenticationInterface isf = null;
+    private AuthenticationInterface sqlAuth = null;
+    private AuthenticationInterface fileAuth = null;
     
     /** */
     public BasicAuthenticator() {
         super();
-        isf = AuthenticationFactory.getAuthenticationInterface();
+        sqlAuth  = AuthenticationFactory.getInstanceSQL();
+        fileAuth = AuthenticationFactory.getInstanceFile();
     }
     
     public void doAuthentication(Credentials authdata) throws InvalidCredentialsException, StorageException{
-        if(!isf.authenticate(authdata)){
-            throw new InvalidCredentialsException("Check username/password");
+        if(!fileAuth.authenticate(authdata)){
+            throw new InvalidCredentialsException("Authentication failed");
         }
     }
     
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
-        if(!isf.authenticate(authdata,ctx)){
-            throw new InvalidCredentialsException("Check username/password");
+        if(!sqlAuth.authenticate(authdata,ctx)){
+            throw new InvalidCredentialsException("Authentication failed");
         }
     }
     
