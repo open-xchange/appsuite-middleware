@@ -62,6 +62,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 
 /**
  * This interface provides an abstraction to the storage of the context
@@ -79,7 +80,7 @@ public abstract class OXContextStorageInterface {
 
     protected static AdminCacheExtended cache = null;
 
-    protected static PropertyHandler prop = null;
+    protected static PropertyHandlerExtended prop = null;
 
     static {
         cache = ClientAdminThreadExtended.cache;
@@ -94,7 +95,7 @@ public abstract class OXContextStorageInterface {
     public static OXContextStorageInterface getInstance() throws StorageException {
         synchronized (OXContextStorageInterface.class) {
             if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.CONTEXT_STORAGE, null);
+                final String className = prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXContextStorageInterface.class);

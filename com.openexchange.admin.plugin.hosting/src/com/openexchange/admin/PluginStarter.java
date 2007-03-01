@@ -63,14 +63,14 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 //import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 //import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.AdminJobExecutorInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class PluginStarter {
@@ -82,7 +82,7 @@ public class PluginStarter {
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
     private static com.openexchange.admin.rmi.impl.AdminJobExecutor ajx_v2 = null;
 
-    private static PropertyHandler prop = null;
+    private static PropertyHandlerExtended prop = null;
     private static MonitorAgent moni = null;
 
     public PluginStarter(final ClassLoader loader) {
@@ -101,7 +101,7 @@ public class PluginStarter {
                 }
             });
         }
-        prop = AdminDaemon.getProp();
+        initCache();
         int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
         registry = LocateRegistry.getRegistry(rmi_port);
 
@@ -122,7 +122,7 @@ public class PluginStarter {
         registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
         startJMX();
-
+        System.out.println(prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
     }
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
@@ -147,5 +147,14 @@ public class PluginStarter {
     private void stopJMX() {
         moni.stop();
     }
+    
+    private void initCache() {
+        AdminCacheExtended cache = new AdminCacheExtended();
+        cache.initCache();
+        ClientAdminThreadExtended.cache = cache;
+        prop = cache.getProperties();        
+        log.info("Cache and Pools initialized!");
+    }
+
 
 }

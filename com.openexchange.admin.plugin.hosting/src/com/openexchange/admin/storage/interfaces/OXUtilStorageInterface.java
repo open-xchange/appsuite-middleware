@@ -51,15 +51,16 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 
 /**
  * This interface provides an abstraction to the storage of the util information
@@ -75,12 +76,12 @@ public abstract class OXUtilStorageInterface {
      */
     private static Class<? extends OXUtilStorageInterface> implementingClass;
 
-    protected static AdminCache cache = null;
+    protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandler prop = null;
 
     static {
-        cache = ClientAdminThread.cache;
+        cache = ClientAdminThreadExtended.cache;
         prop = cache.getProperties();
     }
 
@@ -92,7 +93,7 @@ public abstract class OXUtilStorageInterface {
     public static OXUtilStorageInterface getInstance() throws StorageException {
         synchronized (OXUtilStorageInterface.class) {
             if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.UTIL_STORAGE, null);
+                final String className = prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXUtilStorageInterface.class);
