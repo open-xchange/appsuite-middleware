@@ -48,18 +48,14 @@
  */
 package com.openexchange.admin.rmi;
 
+import java.rmi.Naming;
+
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.rmi.dataobjects.User;
-
-import java.rmi.Naming;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * 
@@ -69,7 +65,7 @@ import java.util.Vector;
 public class ContextTest extends AbstractTest {
 
     public void testChangeStorageData() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();        
         final int ctsid = createNewContextID(cred);
         final Context ctxset = getTestContextObject(ctsid, 50);
         final String hosturl = getRMIHostUrl();
@@ -83,7 +79,7 @@ public class ContextTest extends AbstractTest {
 
     public void testGetContext() throws Exception {
         fail("NOT IMPLEMENTED");
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         Context ctx = getTestContextObject(cred);
         addContext(ctx, getRMIHostUrl(), cred);
 
@@ -108,7 +104,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testSearchContextByDatabase() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -123,7 +119,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testSearchContextByFilestore() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -144,7 +140,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testDisableContext() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
@@ -173,7 +169,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testEnableContext() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
         
