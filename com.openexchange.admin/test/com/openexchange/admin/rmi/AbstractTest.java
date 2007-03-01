@@ -81,11 +81,7 @@ public abstract class AbstractTest extends TestCase{
     
     public static Credentials DummyCredentials(){
         return new Credentials("admin","secret");
-    }
-    
-    public static Credentials DummyMasterCredentials(){
-        return new Credentials("oxadminmaster","secret");
-    }
+    }    
     
     public static Context getTestContextObject(Credentials cred) throws Exception {
         return getTestContextObject(1, 50);
