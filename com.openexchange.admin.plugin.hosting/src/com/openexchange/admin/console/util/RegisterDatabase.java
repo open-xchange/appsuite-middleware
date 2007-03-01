@@ -25,7 +25,6 @@ public class RegisterDatabase extends UtilAbstraction {
     
     // Setting default values for some options
     private final static String USER_DEFAULT = "openexchange";
-    private final static String PASSWD_DEFAULT = "secret";
     private final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
     private final static int MAXUNITS_DEFAULT = 1000;
     private final static int POOL_HARD_LIMIT_DEFAULT = 20;
@@ -51,7 +50,7 @@ public class RegisterDatabase extends UtilAbstraction {
     private final static String OPT_NAME_WEIGHT_SHORT="w";
     private final static String OPT_NAME_WEIGHT_LONG="dbweight";
     private final static String OPT_NAME_MAX_UNITS_SHORT="x";
-    private final static String OPT_NAME_MAX_UNITS_LONG="maxuser";
+    private final static String OPT_NAME_MAX_UNITS_LONG="maxunit";
     private final static String OPT_NAME_DBPARAM_SHORT="p";
     private final static String OPT_NAME_DBPARAM_LONG="dbparam";
     private final static String OPT_NAME_POOL_HARDLIMIT_SHORT="l";
@@ -143,11 +142,7 @@ public class RegisterDatabase extends UtilAbstraction {
             } else {
                 db.setLogin(USER_DEFAULT);
             }
-            if (null != password) {
-                db.setPassword(password);
-            } else {
-                db.setPassword(PASSWD_DEFAULT);    
-            }
+            db.setPassword(password);
             db.setMaster(ismaster);
             if (null != maxunits) {
                 db.setMaxUnits(Integer.parseInt(maxunits));
@@ -225,7 +220,7 @@ public class RegisterDatabase extends UtilAbstraction {
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "hostname of the server", true, true)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_USERNAME_SHORT, OPT_NAME_DB_USERNAME_LONG, "name of the user for the database", USER_DEFAULT, true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_DRIVER_SHORT, OPT_NAME_DB_DRIVER_LONG, "the driver to be used for the database", DRIVER_DEFAULT, true, false)));
-        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_PASSWD_SHORT, OPT_NAME_DB_PASSWD_LONG, "password for the database", PASSWD_DEFAULT, true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DB_PASSWD_SHORT, OPT_NAME_DB_PASSWD_LONG, "password for the database", true, true)));
         retval.addOption(getShortLongOpt(OPT_NAME_IS_MASTER_SHORT, OPT_NAME_IS_MASTER_LONG, "set this if the registered database is the master", false, false));
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_MASTER_ID_SHORT, OPT_NAME_MASTER_ID_LONG, "if this database isn't the master give the id of the master here", true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_WEIGHT_SHORT, OPT_NAME_WEIGHT_LONG, "the db weight for this database", String.valueOf(CLUSTER_WEIGHT_DEFAULT), true, false)));
