@@ -56,6 +56,16 @@ public class RegisterFilestore extends UtilAbstraction {
             String store_max_ctx = null;
             // add optional values if set
 
+            if (cmd.hasOption(OPT_NAME_STORE_PATH_SHORT)) {
+                store_path = cmd.getOptionValue(OPT_NAME_STORE_PATH_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_STORE_SIZE_SHORT)) {
+                store_size = cmd.getOptionValue(OPT_NAME_STORE_SIZE_SHORT);
+            }
+            if (cmd.hasOption(OPT_NAME_STORE_MAX_CTX_SHORT)) {
+                store_max_ctx = cmd.getOptionValue(OPT_NAME_STORE_MAX_CTX_SHORT);
+            }
+
 
             // Setting the options in the dataobject
             if (null != store_path) {
