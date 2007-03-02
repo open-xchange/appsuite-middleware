@@ -23,9 +23,6 @@ public class UnregisterFilestore extends UtilAbstraction {
     private final static String GENERAL_UTILITY_NAME = "unregisterFilestore";
 
     // Setting names for options
-    private final static String OPT_NAME_STORE_ID_SHORT = "i";
-    private final static String OPT_NAME_STORE_ID_LONG = "id";
-
     public UnregisterFilestore(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();
@@ -40,7 +37,7 @@ public class UnregisterFilestore extends UtilAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
-            final String store_id = cmd.getOptionValue(OPT_NAME_STORE_ID_SHORT);
+            final String store_id = cmd.getOptionValue(OPT_NAME_STORE_FILESTORE_ID_SHORT);
 
             oxutil.unregisterFilestore(Integer.parseInt(store_id), auth);
         } catch (final java.rmi.ConnectException neti) {
@@ -81,7 +78,7 @@ public class UnregisterFilestore extends UtilAbstraction {
     private Options getOptions() {
         final Options retval = getDefaultCommandLineOptions();
 
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_STORE_ID_SHORT, OPT_NAME_STORE_ID_LONG, "the id of the filestore which should be deleted", true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "the id of the filestore which should be deleted", true, true)));
         return retval;
     }
 }
