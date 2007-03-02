@@ -23,16 +23,6 @@ public class RegisterDatabase extends UtilAbstraction {
 
     private final static String GENERAL_UTILITY_NAME="registerDatabase";
     
-    // Setting default values for some options
-    private final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
-    private final static int POOL_HARD_LIMIT_DEFAULT = 20;
-    private final static int POOL_INITIAL_DEFAULT = 2;
-    private final static int POOL_MAX_DEFAULT = 100;
-    
-    // Setting names for options
-    private final static String OPT_NAME_DB_DRIVER_SHORT="d";
-    private final static String OPT_NAME_DB_DRIVER_LONG="dbdriver";
-    
     public RegisterDatabase(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();
@@ -75,23 +65,11 @@ public class RegisterDatabase extends UtilAbstraction {
             
             // Setting the options in the dataobject
             db.setDisplayname(name);
-            if (null != driver) {
-                db.setDriver(driver);
-            } else {
-                db.setDriver(DRIVER_DEFAULT);
-            }
-            if (null != username) {
-                db.setLogin(username);
-            } else {
-                db.setLogin(USER_DEFAULT);
-            }
+            db.setDriver(testStringAndGetStringOrDefault(driver, DRIVER_DEFAULT));
+            db.setLogin(testStringAndGetStringOrDefault(username, USER_DEFAULT));
             db.setPassword(password);
             db.setMaster(ismaster);
-            if (null != maxunits) {
-                db.setMaxUnits(Integer.parseInt(maxunits));
-            } else {
-                db.setMaxUnits(MAXUNITS_DEFAULT);                
-            }
+            db.setMaxUnits(testStringAndGetIntOrDefault(maxunits, MAXUNITS_DEFAULT));
             db.setPoolHardLimit(testStringAndGetIntOrDefault(pool_hard_limit, POOL_HARD_LIMIT_DEFAULT));
             db.setPoolInitial(testStringAndGetIntOrDefault(pool_initial, POOL_INITIAL_DEFAULT));
             db.setPoolMax(testStringAndGetIntOrDefault(pool_max, POOL_MAX_DEFAULT));
