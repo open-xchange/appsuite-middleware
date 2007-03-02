@@ -161,7 +161,7 @@ public class ContextTest extends AbstractTest {
         } else {
             mr.setId(mrs[0].getId());
         }
-        disableContext(ctx, mr, hosturl, DummyCredentials());
+        disableContext(ctx, mr, hosturl, cred);
         Context[] ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
         boolean ctx_disabled = false;
 
