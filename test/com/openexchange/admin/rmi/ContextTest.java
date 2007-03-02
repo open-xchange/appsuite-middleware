@@ -166,7 +166,7 @@ public class ContextTest extends AbstractTest {
         boolean ctx_disabled = false;
 
         for (final Context elem : ctxs) {            
-            if (!elem.isEnabled() && elem.getMaintenanceReason().getId() == mr.getId()) {
+            if (!elem.isEnabled() && elem.getMaintenanceReason().getId().intValue() == mr.getId().intValue()) {
                 ctx_disabled = true;
             }
         }
@@ -196,7 +196,7 @@ public class ContextTest extends AbstractTest {
         Context[] ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
         boolean ctx_disabled = false;
         for (final Context elem : ctxs) {
-            if (elem.getIdAsInt() == ctx.getIdAsInt() && !elem.isEnabled() && elem.getMaintenanceReason().getId() == mr.getId()) {
+            if (elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue() && !elem.isEnabled() && elem.getMaintenanceReason().getId().intValue() == mr.getId().intValue()) {
                 ctx_disabled = true;
             }
         }
@@ -207,7 +207,7 @@ public class ContextTest extends AbstractTest {
         ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
         boolean ctx_ensabled = false;
         for (final Context elem : ctxs) {
-            if ((elem.getIdAsInt() == ctx.getIdAsInt()) && elem.isEnabled()) {
+            if ((elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue()) && elem.isEnabled()) {
                 ctx_ensabled = true;
             }
         }
@@ -239,7 +239,7 @@ public class ContextTest extends AbstractTest {
         Context[] ctxs = searchContext(String.valueOf(ctxid), hosturl, cred);
         boolean foundctx = false;
         for (final Context elem : ctxs) {
-            if (elem.getIdAsInt() == ctxid) {
+            if (elem.getIdAsInt().intValue() == ctxid) {
                 foundctx = true;
             }
         }
