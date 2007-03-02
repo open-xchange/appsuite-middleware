@@ -40,23 +40,23 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String OPT_NAME_WEIGHT_LONG="dbweight";
     protected final static String OPT_NAME_MAX_UNITS_SHORT="x";
     protected final static String OPT_NAME_MAX_UNITS_LONG="maxunit";
-    protected final static String OPT_NAME_DBPARAM_SHORT="p";
+    protected final static String OPT_NAME_DBPARAM_SHORT="b";
     protected final static String OPT_NAME_DBPARAM_LONG="dbparam";
     protected final static String OPT_NAME_POOL_HARDLIMIT_SHORT="l";
     protected final static String OPT_NAME_POOL_HARDLIMIT_LONG="poolhardlimit";
-    protected final static String OPT_NAME_POOL_INITIAL_SHORT="i";
+    protected final static String OPT_NAME_POOL_INITIAL_SHORT="o";
     protected final static String OPT_NAME_POOL_INITIAL_LONG="poolinitial";
     protected final static String OPT_NAME_POOL_MAX_SHORT="a";
     protected final static String OPT_NAME_POOL_MAX_LONG="poolmax";
     protected final static String OPT_NAME_DB_DRIVER_SHORT="d";
     protected final static String OPT_NAME_DB_DRIVER_LONG="dbdriver";
-    protected final static String OPT_NAME_STORE_FILESTORE_ID_SHORT = "i";
+    protected final static String OPT_NAME_STORE_FILESTORE_ID_SHORT = "f";
     protected final static String OPT_NAME_STORE_FILESTORE_ID_LONG = "id";
-    protected final static String OPT_NAME_STORE_PATH_SHORT = "p";
+    protected final static String OPT_NAME_STORE_PATH_SHORT = "t";
     protected final static String OPT_NAME_STORE_PATH_LONG = "storepath";
     protected final static String OPT_NAME_STORE_SIZE_SHORT = "s";
     protected final static String OPT_NAME_STORE_SIZE_LONG = "storesize";
-    protected final static String OPT_NAME_STORE_MAX_CTX_SHORT = "m";
+    protected final static String OPT_NAME_STORE_MAX_CTX_SHORT = "x";
     protected final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
     
     /**
