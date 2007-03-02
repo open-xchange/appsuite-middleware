@@ -88,7 +88,7 @@ public class RegisterDatabase extends UtilAbstraction {
                 db.setMasterId(Integer.parseInt(masterid));                
             }
             
-            oxutil.registerDatabase(db, auth);
+            System.out.println(oxutil.registerDatabase(db, auth));
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
         } catch (final java.lang.NumberFormatException num) {

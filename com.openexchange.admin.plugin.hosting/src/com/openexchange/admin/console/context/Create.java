@@ -62,7 +62,7 @@ public class Create extends UserAbstraction {
             
             long quota = Long.parseLong(cmd.getOptionValue(OPT_QUOTA_SHORT));            
                        
-            oxres.create(ctx, usr, quota, auth);
+            System.out.println(oxres.create(ctx, usr, quota, auth));
             
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            
