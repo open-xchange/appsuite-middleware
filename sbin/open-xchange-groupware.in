@@ -18,9 +18,6 @@ ox_set_JAVA_BIN
 
 
 test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-ms50m -mx50m"
-test -z "$NRFILES"       && NRFILES=2048
-
-ulimit -n $NRFILES
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \

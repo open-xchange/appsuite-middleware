@@ -8,6 +8,7 @@ NAME=open-xchange-groupware
 DESC="Open-Xchange Groupware"
 DEFAULTS=/etc/default/open-xchange-groupware
 OXFUNCTIONS=/opt/open-xchange/etc/groupware/oxfunctions.sh
+OXCONFIG=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
 
 # Defaults - don't touch, edit /etc/default/open-xchange-groupware
 ENABLED=0
@@ -17,13 +18,20 @@ if [ ! -f $OXFUNCTIONS ]; then
 	echo "$DESC: $OXFUNCTIONS missing, exiting"
 	exit 0
 fi
+if [ ! -f $OXCONFIG ]; then
+	echo "$DESC: $OXCONFIG missing, exiting"
+	exit 0
+fi
 
 . $OXFUNCTIONS
+. $OXCONFIG
 
 if [ "$ENABLED" = "0" ]; then
     echo "$DESC: disabled, see $DEFAULTS"
     exit 0
 fi
+
+ulimit -n $NRFILES
 
 
 case "$1" in
