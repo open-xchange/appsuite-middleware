@@ -136,4 +136,4 @@ esac
 
 JAVAMAIN="com.openexchange.admin.console.${ACTION}"
 
-$JAVA_BIN -classpath $LIBPATH/ox_admin_plugin_hosting.jar:$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*
+$JAVA_BIN -classpath $LIBPATH/ox_admin_plugin_hosting.jar:$LIBPATH/ox_admindaemon.jar:$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*
