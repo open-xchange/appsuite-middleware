@@ -23,19 +23,6 @@ public class RegisterFilestore extends UtilAbstraction {
 
     private final static String GENERAL_UTILITY_NAME = "registerFilestore";
 
-    // Setting default values for some options
-    private final static String STORE_PATH_DEFAULT = "file:///tmp/filestore";
-    private final static long STORE_SIZE_DEFAULT = 100;
-    private final static int STORE_MAX_CTX_DEFAULT = 5000;
-
-    // Setting names for options
-    private final static String OPT_NAME_STORE_PATH_SHORT = "p";
-    private final static String OPT_NAME_STORE_PATH_LONG = "storepath";
-    private final static String OPT_NAME_STORE_SIZE_SHORT = "s";
-    private final static String OPT_NAME_STORE_SIZE_LONG = "storesize";
-    private final static String OPT_NAME_STORE_MAX_CTX_SHORT = "m";
-    private final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
-
     public RegisterFilestore(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();

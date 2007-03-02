@@ -17,6 +17,9 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static int POOL_INITIAL_DEFAULT = 2;
     protected final static int POOL_MAX_DEFAULT = 100;
     protected final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
+    protected final static String STORE_PATH_DEFAULT = "file:///tmp/filestore";
+    protected final static long STORE_SIZE_DEFAULT = 100;
+    protected final static int STORE_MAX_CTX_DEFAULT = 5000;
     
     //  Setting names for options
     protected final static String OPT_NAME_SEARCH_PATTERN_SHORT = "s";
@@ -47,7 +50,14 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String OPT_NAME_POOL_MAX_LONG="poolmax";
     protected final static String OPT_NAME_DB_DRIVER_SHORT="d";
     protected final static String OPT_NAME_DB_DRIVER_LONG="dbdriver";
-
+    protected final static String OPT_NAME_STORE_FILESTORE_ID_SHORT = "i";
+    protected final static String OPT_NAME_STORE_FILESTORE_ID_LONG = "id";
+    protected final static String OPT_NAME_STORE_PATH_SHORT = "p";
+    protected final static String OPT_NAME_STORE_PATH_LONG = "storepath";
+    protected final static String OPT_NAME_STORE_SIZE_SHORT = "s";
+    protected final static String OPT_NAME_STORE_SIZE_LONG = "storesize";
+    protected final static String OPT_NAME_STORE_MAX_CTX_SHORT = "m";
+    protected final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
     
     /**
      * 
