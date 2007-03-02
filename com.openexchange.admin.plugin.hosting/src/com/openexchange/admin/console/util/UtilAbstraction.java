@@ -13,6 +13,10 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String USER_DEFAULT = "openexchange";
     protected final static int MAXUNITS_DEFAULT = 1000;
     protected final static int CLUSTER_WEIGHT_DEFAULT = 100;
+    protected final static int POOL_HARD_LIMIT_DEFAULT = 20;
+    protected final static int POOL_INITIAL_DEFAULT = 2;
+    protected final static int POOL_MAX_DEFAULT = 100;
+    protected final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
     
     //  Setting names for options
     protected final static String OPT_NAME_SEARCH_PATTERN_SHORT = "s";
@@ -41,6 +45,8 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String OPT_NAME_POOL_INITIAL_LONG="poolinitial";
     protected final static String OPT_NAME_POOL_MAX_SHORT="a";
     protected final static String OPT_NAME_POOL_MAX_LONG="poolmax";
+    protected final static String OPT_NAME_DB_DRIVER_SHORT="d";
+    protected final static String OPT_NAME_DB_DRIVER_LONG="dbdriver";
 
     
     /**
@@ -88,6 +94,14 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
         if (null != test) {
             return Integer.parseInt(test);
+        } else {
+            return defaultvalue;
+        }
+    }
+    
+    protected String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
+        if (null != test) {
+            return test;
         } else {
             return defaultvalue;
         }
