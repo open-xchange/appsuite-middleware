@@ -41,10 +41,8 @@ public class RegisterServer extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Server srv = new Server();
-            String hostname = null;
+            final String hostname = cmd.getOptionValue(OPT_NAME_HOSTNAME_SHORT);
             
-            hostname = cmd.getOptionValue(OPT_NAME_HOSTNAME_SHORT);
-
             // Setting the options in the dataobject
             if (null != hostname) {
                 srv.setName(hostname);

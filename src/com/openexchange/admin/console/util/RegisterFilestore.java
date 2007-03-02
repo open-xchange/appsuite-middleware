@@ -51,21 +51,10 @@ public class RegisterFilestore extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Filestore fstore = new Filestore();
-            String store_path = null;
-            String store_size = null;
-            String store_max_ctx = null;
+            String store_path = verifySetAndGetOption(cmd, OPT_NAME_STORE_PATH_SHORT);
+            String store_size = verifySetAndGetOption(cmd, OPT_NAME_STORE_SIZE_SHORT);
+            String store_max_ctx = verifySetAndGetOption(cmd, OPT_NAME_STORE_MAX_CTX_SHORT);
             // add optional values if set
-
-            if (cmd.hasOption(OPT_NAME_STORE_PATH_SHORT)) {
-                store_path = cmd.getOptionValue(OPT_NAME_STORE_PATH_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_STORE_SIZE_SHORT)) {
-                store_size = cmd.getOptionValue(OPT_NAME_STORE_SIZE_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_STORE_MAX_CTX_SHORT)) {
-                store_max_ctx = cmd.getOptionValue(OPT_NAME_STORE_MAX_CTX_SHORT);
-            }
-
 
             // Setting the options in the dataobject
             if (null != store_path) {
@@ -82,12 +71,7 @@ public class RegisterFilestore extends UtilAbstraction {
             } else {
                 fstore.setSize(STORE_SIZE_DEFAULT);
             }
-            if (null != store_max_ctx) {
-                fstore.setMaxContexts(Integer.parseInt(store_max_ctx));
-            } else {
-                fstore.setMaxContexts(STORE_MAX_CTX_DEFAULT);
-            }
-            
+            fstore.setMaxContexts(testStringAndGetIntOrDefault(store_max_ctx, STORE_MAX_CTX_DEFAULT));
 
             oxutil.registerFilestore(fstore, auth);
         } catch (final java.rmi.ConnectException neti) {
