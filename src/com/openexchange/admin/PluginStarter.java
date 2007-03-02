@@ -90,39 +90,47 @@ public class PluginStarter {
     }
 
     public void start(final BundleContext context) throws RemoteException, AlreadyBoundException {
-        Thread.currentThread().setContextClassLoader(loader);
+        try {
+            Thread.currentThread().setContextClassLoader(loader);
 
-        if (null == System.getSecurityManager()) {
-            System.setSecurityManager(new SecurityManager() {
-                public void checkPermission(Permission perm) {
-                }
+            if (null == System.getSecurityManager()) {
+                System.setSecurityManager(new SecurityManager() {
+                    public void checkPermission(Permission perm) {
+                    }
 
-                public void checkPermission(Permission perm, Object context) {
-                }
-            });
+                    public void checkPermission(Permission perm, Object context) {
+                    }
+                });
+            }
+            initCache();
+            int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
+            registry = LocateRegistry.getRegistry(rmi_port);
+
+            // Create all OLD Objects and bind export them
+            oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext();
+            OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
+
+            oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
+            OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
+
+            ajx_v2 = new com.openexchange.admin.rmi.impl.AdminJobExecutor();
+            ClientAdminThreadExtended.ajx = ajx_v2;
+            AdminJobExecutorInterface ajx_stub_v2 = (AdminJobExecutorInterface) UnicastRemoteObject.exportObject(ajx_v2, 0);
+
+            // bind all NEW Objects to registry
+            registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
+            registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
+            registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
+
+            startJMX();
+            System.out.println(prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+        } catch (RemoteException e) {
+            log.error(e);
+            throw e;
+        } catch (AlreadyBoundException e) {
+            log.error(e);
+            throw e;
         }
-        initCache();
-        int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
-        registry = LocateRegistry.getRegistry(rmi_port);
-
-        // Create all OLD Objects and bind export them
-        oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext();
-        OXContextInterface oxctx_stub_v2 = (OXContextInterface) UnicastRemoteObject.exportObject(oxctx_v2, 0);
-
-        oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
-        OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
-
-        ajx_v2 = new com.openexchange.admin.rmi.impl.AdminJobExecutor();
-        ClientAdminThreadExtended.ajx = ajx_v2;
-        AdminJobExecutorInterface ajx_stub_v2 = (AdminJobExecutorInterface) UnicastRemoteObject.exportObject(ajx_v2, 0);
-
-        // bind all NEW Objects to registry
-        registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
-        registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
-        registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
-
-        startJMX();
-        System.out.println(prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
     }
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
