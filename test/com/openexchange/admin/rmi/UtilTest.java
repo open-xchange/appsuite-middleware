@@ -198,9 +198,11 @@ public class UtilTest extends AbstractTest {
         int resp = 0;
         MaintenanceReason[] srv_reasons = oxu.getAllMaintenanceReasons(ContextTest.DummyMasterCredentials());
         for(int c = 0;c<c_reasons.size();c++){
+            
             MaintenanceReason tmp = c_reasons.get(c);
+            
             for(int b = 0;b<srv_reasons.length;b++){
-                if(srv_reasons[b].getId()==tmp.getId() && 
+                if(srv_reasons[b].getId().intValue()==tmp.getId().intValue() && 
                    srv_reasons[b].getText().equals(tmp.getText())){
                     resp++;
                 }
@@ -509,7 +511,7 @@ public class UtilTest extends AbstractTest {
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()));
         
         try{
-            oxu.listFilestores(null,DummyCredentials());
+            oxu.listFilestores(null,ContextTest.DummyMasterCredentials());
             fail("Exception expected while listing filestore with invalid pattern!");
         }catch(InvalidDataException ivd){    
             assertTrue(true);
@@ -521,7 +523,7 @@ public class UtilTest extends AbstractTest {
         boolean found_store = false;
         for(int a = 0;a<srv_stores.length;a++){
             Filestore tmp = srv_stores[a];            
-            if(tmp.getId()==client_st.getId()){               
+            if(tmp.getId().intValue()==client_st.getId().intValue()){               
                 assertEquals(client_st.getMaxContexts(),tmp.getMaxContexts());                
                 assertEquals(client_st.getSize(),tmp.getSize());                
                 assertEquals(client_st.getUrl(),tmp.getUrl());
@@ -544,7 +546,7 @@ public class UtilTest extends AbstractTest {
         boolean found_store = false;
         for(int a = 0;a<srv_stores.length;a++){
             Filestore tmp = srv_stores[a];            
-            if(tmp.getId()==client_st.getId()){               
+            if(tmp.getId().intValue()==client_st.getId().intValue()){               
                 assertEquals(client_st.getMaxContexts(),tmp.getMaxContexts());                
                 assertEquals(client_st.getSize(),tmp.getSize());                
                 assertEquals(client_st.getUrl(),tmp.getUrl());
@@ -569,7 +571,7 @@ public class UtilTest extends AbstractTest {
         found_store = false;
         for(int a = 0;a<srv_stores.length;a++){
             Filestore tmp = srv_stores[a];            
-            if(tmp.getId()==client_st.getId()){               
+            if(tmp.getId().intValue()==client_st.getId().intValue()){               
                 assertEquals(client_st.getMaxContexts(),tmp.getMaxContexts());                
                 assertEquals(client_st.getSize(),tmp.getSize());                
                 assertEquals(client_st.getUrl(),tmp.getUrl());
@@ -605,7 +607,7 @@ public class UtilTest extends AbstractTest {
         boolean found_store = false;
         for(int a = 0;a<srv_stores.length;a++){
             Filestore tmp = srv_stores[a];            
-            if(tmp.getId()==client_st.getId()){               
+            if(tmp.getId().intValue()==client_st.getId().intValue()){               
                 assertEquals(client_st.getMaxContexts(),tmp.getMaxContexts());                
                 assertEquals(client_st.getSize(),tmp.getSize());                
                 assertEquals(client_st.getUrl(),tmp.getUrl());
