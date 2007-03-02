@@ -1,0 +1,29 @@
+#! /bin/bash
+
+DDIR=$1 || DDIR="/opt/open-xchange/sbin"
+
+COMMANDS="changequotacontext \
+createcontext \
+deletecontext \
+disablecontext \
+disableallcontexts \
+enablecontext \
+enableallcontexts \
+movedatabasecontext \
+movefilestorecontext \
+searchcontext \
+addreason \
+editfilestore \
+listdbms \
+listfilestore \
+registerdatabase \
+registerfilestore \
+registerserver \
+unregisterdatabase \
+unregisterfilestore \
+unregisterserver \
+updatedatabase"
+pushd $DDIR
+for linkname in $COMMANDS; do
+    ln -sf cmdmuxer-plugin-hosting $linkname
+done
