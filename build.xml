@@ -14,7 +14,20 @@
         <pathelement location="../open-xchange-admin/classes"/>
     </path>
 
+	<filterset id="pathsubst">
+        <filter token="oxfunctions"       value="${prefix}/${oxconfdir}/oxfunctions.sh"/>
+        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
+    </filterset>
+
     <!--                    TARGETS                      -->
+
+	<target name="replacer">
+        <copy todir="." overwrite="true">
+            <mapper type="glob" from="*.in" to="*"/>
+            <fileset dir="."/>
+            <filterset refid="pathsubst"/>
+        </copy>
+    </target>
 
     <target name="compile">
         <mkdir dir="classes"/>
@@ -76,13 +89,24 @@
     	<delete dir="${dist-package}"/>
     </target>
 
-    <target name="install" depends="jar,doc">
+    <target name="install" depends="jar,doc,replacer">
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy todir="${destdir}/${prefix}/lib" file="jar/${plugin.jar}" overwrite="true"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
             <fileset dir="etc" excludes="**/*.in"/>
         </copy>
+        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
+            <fileset dir="sbin" excludes="*.in,linkhelper" followsymlinks="true"/>
+        </copy>
+    	<chmod perm="755" file="sbin/linkhelper"/>
+    	<exec executable="sbin/linkhelper">
+			<arg value="${destdir}/${prefix}/sbin"/>
+		</exec>
+    	<chmod perm="755">
+            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
+        </chmod>
     </target>
 	
 
