@@ -24,41 +24,14 @@ public class RegisterDatabase extends UtilAbstraction {
     private final static String GENERAL_UTILITY_NAME="registerDatabase";
     
     // Setting default values for some options
-    private final static String USER_DEFAULT = "openexchange";
     private final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
-    private final static int MAXUNITS_DEFAULT = 1000;
     private final static int POOL_HARD_LIMIT_DEFAULT = 20;
     private final static int POOL_INITIAL_DEFAULT = 2;
     private final static int POOL_MAX_DEFAULT = 100;
-    private final static int CLUSTER_WEIGHT_DEFAULT = 100;
     
     // Setting names for options
-    private final static String OPT_NAME_NAME_SHORT="n";
-    private final static String OPT_NAME_NAME_LONG="name";
-    private final static String OPT_NAME_HOSTNAME_SHORT="h";
-    private final static String OPT_NAME_HOSTNAME_LONG="hostname";
     private final static String OPT_NAME_DB_DRIVER_SHORT="d";
     private final static String OPT_NAME_DB_DRIVER_LONG="dbdriver";
-    private final static String OPT_NAME_DB_USERNAME_SHORT="u";
-    private final static String OPT_NAME_DB_USERNAME_LONG="dbuser";
-    private final static String OPT_NAME_DB_PASSWD_SHORT="p";
-    private final static String OPT_NAME_DB_PASSWD_LONG="dbpasswd";
-    private final static String OPT_NAME_IS_MASTER_SHORT="m";
-    private final static String OPT_NAME_IS_MASTER_LONG="master";
-    private final static String OPT_NAME_MASTER_ID_SHORT="i";
-    private final static String OPT_NAME_MASTER_ID_LONG="masterid";
-    private final static String OPT_NAME_WEIGHT_SHORT="w";
-    private final static String OPT_NAME_WEIGHT_LONG="dbweight";
-    private final static String OPT_NAME_MAX_UNITS_SHORT="x";
-    private final static String OPT_NAME_MAX_UNITS_LONG="maxunit";
-    private final static String OPT_NAME_DBPARAM_SHORT="p";
-    private final static String OPT_NAME_DBPARAM_LONG="dbparam";
-    private final static String OPT_NAME_POOL_HARDLIMIT_SHORT="l";
-    private final static String OPT_NAME_POOL_HARDLIMIT_LONG="poolhardlimit";
-    private final static String OPT_NAME_POOL_INITIAL_SHORT="i";
-    private final static String OPT_NAME_POOL_INITIAL_LONG="poolinitial";
-    private final static String OPT_NAME_POOL_MAX_SHORT="a";
-    private final static String OPT_NAME_POOL_MAX_LONG="poolmax";
     
     public RegisterDatabase(final String[] args2) {
 
@@ -75,35 +48,20 @@ public class RegisterDatabase extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Database db = new Database();
-            String hostname = null;
-            String name = null;
-            String driver = null;
-            String username = null;
-            String password = null;
+            final String hostname = verifySetAndGetOption(cmd, OPT_NAME_HOSTNAME_SHORT);
+            final String name = cmd.getOptionValue(OPT_NAME_DBNAME_SHORT);
+            final String driver = verifySetAndGetOption(cmd, OPT_NAME_DB_DRIVER_SHORT);
+            final String username = verifySetAndGetOption(cmd, OPT_NAME_DB_USERNAME_SHORT);
+            final String password = cmd.getOptionValue(OPT_NAME_DB_PASSWD_SHORT);
             boolean ismaster = false;
             String masterid = null;
-            String maxunits = null;
-            String pool_hard_limit = null;
-            String pool_initial = null;
-            String pool_max = null;
-            String cluster_weight = null;
+            final String maxunits = verifySetAndGetOption(cmd, OPT_NAME_MAX_UNITS_SHORT);
+            final String pool_hard_limit = verifySetAndGetOption(cmd, OPT_NAME_POOL_HARDLIMIT_SHORT);
+            final String pool_initial = verifySetAndGetOption(cmd, OPT_NAME_POOL_INITIAL_SHORT);
+            final String pool_max = verifySetAndGetOption(cmd, OPT_NAME_POOL_MAX_SHORT);
+            final String cluster_weight = verifySetAndGetOption(cmd, OPT_NAME_WEIGHT_SHORT);
             // add optional values if set
             
-            if (cmd.hasOption(OPT_NAME_NAME_SHORT)) {
-                name = cmd.getOptionValue(OPT_NAME_NAME_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_HOSTNAME_SHORT)) {
-                hostname = cmd.getOptionValue(OPT_NAME_HOSTNAME_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_DB_DRIVER_SHORT)) {
-                driver = cmd.getOptionValue(OPT_NAME_DB_DRIVER_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_DB_USERNAME_SHORT)) {
-                username = cmd.getOptionValue(OPT_NAME_DB_DRIVER_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_DB_PASSWD_SHORT)) {
-                password = cmd.getOptionValue(OPT_NAME_DB_DRIVER_SHORT);
-            }
             if (cmd.hasOption(OPT_NAME_IS_MASTER_SHORT)) {
                 ismaster = true;
             }
@@ -113,21 +71,6 @@ public class RegisterDatabase extends UtilAbstraction {
                 } else {
                     throw new MissingArgumentException("master id must be set if this database isn't the master");
                 }
-            }
-            if (cmd.hasOption(OPT_NAME_MAX_UNITS_SHORT)) {
-                maxunits = cmd.getOptionValue(OPT_NAME_MAX_UNITS_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_POOL_HARDLIMIT_SHORT)) {
-                pool_hard_limit = cmd.getOptionValue(OPT_NAME_POOL_HARDLIMIT_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_POOL_INITIAL_SHORT)) {
-                pool_initial = cmd.getOptionValue(OPT_NAME_POOL_INITIAL_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_POOL_MAX_SHORT)) {
-                pool_max = cmd.getOptionValue(OPT_NAME_POOL_MAX_SHORT);
-            }
-            if (cmd.hasOption(OPT_NAME_WEIGHT_SHORT)) {
-                cluster_weight = cmd.getOptionValue(OPT_NAME_WEIGHT_SHORT);
             }
             
             // Setting the options in the dataobject
@@ -149,30 +92,20 @@ public class RegisterDatabase extends UtilAbstraction {
             } else {
                 db.setMaxUnits(MAXUNITS_DEFAULT);                
             }
-            if (null != pool_hard_limit) {
-                db.setPoolHardLimit(Integer.parseInt(pool_hard_limit));
-            } else {
-                db.setPoolHardLimit(POOL_HARD_LIMIT_DEFAULT);                
-            }
-            if (null != pool_initial) {
-                db.setPoolInitial(Integer.parseInt(pool_initial));
-            } else {
-                db.setPoolInitial(POOL_INITIAL_DEFAULT);
-            }
-            if (null != pool_max) {
-                db.setPoolMax(Integer.parseInt(pool_max));
-            } else {
-                db.setPoolMax(POOL_MAX_DEFAULT);
-            }
+            db.setPoolHardLimit(testStringAndGetIntOrDefault(pool_hard_limit, POOL_HARD_LIMIT_DEFAULT));
+            db.setPoolInitial(testStringAndGetIntOrDefault(pool_initial, POOL_INITIAL_DEFAULT));
+            db.setPoolMax(testStringAndGetIntOrDefault(pool_max, POOL_MAX_DEFAULT));
             
-            db.setUrl("jdbc:mysql://"+hostname+"/?useUnicode=true&characterEncoding=UTF-8&" +
-                    "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
-                    "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
-            if (null != cluster_weight) {
-                db.setClusterWeight(Integer.parseInt(cluster_weight));
+            if (null != hostname) {
+                db.setUrl("jdbc:mysql://"+hostname+"/?useUnicode=true&characterEncoding=UTF-8&" +
+                        "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
+                        "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
             } else {
-                db.setClusterWeight(CLUSTER_WEIGHT_DEFAULT);
+                db.setUrl("jdbc:mysql://"+HOSTNAME_DEFAULT+"/?useUnicode=true&characterEncoding=UTF-8&" +
+                        "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
+                        "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
             }
+            db.setClusterWeight(testStringAndGetIntOrDefault(cluster_weight, CLUSTER_WEIGHT_DEFAULT));
             if (null != masterid) {
                 db.setMasterId(Integer.parseInt(masterid));                
             }
@@ -216,8 +149,8 @@ public class RegisterDatabase extends UtilAbstraction {
     private Options getOptions() {
         final Options retval = getDefaultCommandLineOptions();
 
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_NAME_SHORT, OPT_NAME_NAME_LONG, "name of the database", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "hostname of the server", true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DBNAME_SHORT, OPT_NAME_DBNAME_LONG, "name of the database", true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "hostname of the server", HOSTNAME_DEFAULT, true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_USERNAME_SHORT, OPT_NAME_DB_USERNAME_LONG, "name of the user for the database", USER_DEFAULT, true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_DB_DRIVER_SHORT, OPT_NAME_DB_DRIVER_LONG, "the driver to be used for the database", DRIVER_DEFAULT, true, false)));
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DB_PASSWD_SHORT, OPT_NAME_DB_PASSWD_LONG, "password for the database", true, true)));
