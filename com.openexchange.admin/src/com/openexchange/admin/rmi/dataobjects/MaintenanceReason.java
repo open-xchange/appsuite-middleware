@@ -71,7 +71,7 @@ public class MaintenanceReason implements Serializable{
     /**
      * @param id
      */
-    public MaintenanceReason(Integer id) {
+    public MaintenanceReason(final Integer id) {
         super();
         this.id = id;
         this.text = null;
@@ -81,9 +81,19 @@ public class MaintenanceReason implements Serializable{
      * @param id
      * @param text
      */
-    public MaintenanceReason(Integer id, String text) {
+    public MaintenanceReason(final Integer id, final String text) {
         super();
         this.id = id;
+        this.text = text;
+    }
+
+    /**
+     * @param id
+     * @param text
+     */
+    public MaintenanceReason(final String text) {
+        super();
+        this.id = null;
         this.text = text;
     }
 
@@ -91,7 +101,7 @@ public class MaintenanceReason implements Serializable{
         return id;
     }
 
-    public void setId (Integer val) {
+    public void setId (final Integer val) {
         this.id = val;
     }
 
@@ -99,7 +109,7 @@ public class MaintenanceReason implements Serializable{
         return text;
     }
 
-    public void setText (String val) {
+    public void setText (final String val) {
         this.text = val;
     }
     
