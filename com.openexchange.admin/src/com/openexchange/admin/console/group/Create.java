@@ -105,7 +105,7 @@ public class Create extends GroupAbstraction {
             grp.setName(cmd.getOptionValue(OPT_NAME_GROUPNAME));
             grp.setDisplayname(cmd.getOptionValue(OPT_NAME_GROUPDISPLAYNAME));
 
-            oxgrp.create(ctx, grp, auth);
+            System.out.println(oxgrp.create(ctx, grp, auth));
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            
         }catch(org.apache.commons.cli.MissingArgumentException as){

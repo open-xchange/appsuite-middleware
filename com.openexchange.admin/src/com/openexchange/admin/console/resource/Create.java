@@ -109,7 +109,7 @@ public class Create extends ResourceAbstraction {
               res.setDisplayname(cmd.getOptionValue(_OPT_DISPNAME_SHORT));
               res.setEmail(cmd.getOptionValue(_OPT_EMAIL_SHORT));
               res.setName(cmd.getOptionValue(_OPT_NAME_SHORT));
-              oxres.create(ctx, res, auth);
+              System.out.println(oxres.create(ctx, res, auth));
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            
         }catch(java.lang.NumberFormatException num){
