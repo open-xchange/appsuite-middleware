@@ -74,7 +74,7 @@ public interface OXUtilInterface extends Remote {
      * Add new maintenance reason.
      * @param reason MaintenanceReason.
      * @param auth Credentials for authenticating against server.
-     * @return long containing the new id of the added maintenance reason.
+     * @return int containing the new id of the added maintenance reason.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException When an error in the subsystems occured.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
