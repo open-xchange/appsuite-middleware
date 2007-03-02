@@ -41,7 +41,7 @@ public class AddReason extends UtilAbstraction {
 
             final MaintenanceReason reason = new MaintenanceReason(cmd.getOptionValue(OPT_NAME_REASON_TEXT_SHORT));
 
-            oxutil.addMaintenanceReason(reason, auth);
+            System.out.println(oxutil.addMaintenanceReason(reason, auth));
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
         } catch (final java.lang.NumberFormatException num) {
