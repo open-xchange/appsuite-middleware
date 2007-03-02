@@ -215,13 +215,13 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testAddContext() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
     }
 
     public void testDeleteContext() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
@@ -230,7 +230,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public void testSearchContext() throws Exception {
-        final Credentials cred = DummyCredentials();
+        final Credentials cred = DummyMasterCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctxset = getTestContextObject(ctxid, 50);
