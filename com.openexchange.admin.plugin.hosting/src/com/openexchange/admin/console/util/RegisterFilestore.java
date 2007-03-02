@@ -51,9 +51,9 @@ public class RegisterFilestore extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Filestore fstore = new Filestore();
-            String store_path = verifySetAndGetOption(cmd, OPT_NAME_STORE_PATH_SHORT);
-            String store_size = verifySetAndGetOption(cmd, OPT_NAME_STORE_SIZE_SHORT);
-            String store_max_ctx = verifySetAndGetOption(cmd, OPT_NAME_STORE_MAX_CTX_SHORT);
+            final String store_path = verifySetAndGetOption(cmd, OPT_NAME_STORE_PATH_SHORT);
+            final String store_size = verifySetAndGetOption(cmd, OPT_NAME_STORE_SIZE_SHORT);
+            final String store_max_ctx = verifySetAndGetOption(cmd, OPT_NAME_STORE_MAX_CTX_SHORT);
             // add optional values if set
 
             // Setting the options in the dataobject
