@@ -41,7 +41,7 @@ public class ListReason extends UtilAbstraction {
             
             // FIXME: Format output right
             for (final MaintenanceReason mr : mrs) {
-                if (searchpattern.equals('*')) {
+                if (searchpattern.equals("*")) {
                     System.out.println(mr);
                 } else if (mr.getText().equals(searchpattern)) {
                     System.out.println(mr);                    
