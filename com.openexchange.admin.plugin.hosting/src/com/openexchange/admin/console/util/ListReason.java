@@ -17,6 +17,11 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
+/**
+ * 
+ * @author d7
+ *
+ */
 public class ListReason extends UtilAbstraction {
     
     private final static String GENERAL_UTILITY_NAME = "listReason";

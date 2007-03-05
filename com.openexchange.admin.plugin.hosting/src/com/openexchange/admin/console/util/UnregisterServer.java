@@ -17,6 +17,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
+/**
+ * 
+ * @author d7
+ *
+ */
 public class UnregisterServer extends UtilAbstraction {
     private final static String GENERAL_UTILITY_NAME = "unregisterFilestore";
 
