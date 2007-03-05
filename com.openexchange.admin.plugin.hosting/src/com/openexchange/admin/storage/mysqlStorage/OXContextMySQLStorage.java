@@ -92,7 +92,8 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.groupware.IDGenerator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
+
 import java.util.Locale;
 
 /**
@@ -262,7 +263,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxu.delete(ctx, new int[] { admin_id }, write_ox_con);
 
                 // delete all folder stuff via groupware api
-                final OXFolderAction aa = new OXFolderAction();
+                final OXFolderAdminHelper aa = new OXFolderAdminHelper();
                 log.debug("Deleting context folders via OX API ");
                 aa.deleteAllContextFolders(context_id, write_ox_con, write_ox_con);
 
@@ -1313,7 +1314,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     admin_user.setDisplay_name(display);
                 }
 
-                final OXFolderAction oxa = new OXFolderAction();
+                final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
                 oxa.addContextSystemFolders(context_id, display, lang, ox_write_con);
 
                 ox_write_con.commit();
