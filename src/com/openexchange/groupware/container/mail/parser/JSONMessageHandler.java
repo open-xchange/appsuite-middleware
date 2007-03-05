@@ -493,7 +493,17 @@ public class JSONMessageHandler implements MessageHandler {
 			 * Remember content type to avoid a MessagingException in following
 			 * catch-clause
 			 */
-			contentType = new ContentType(part.getContentType());
+			try {
+				contentType = new ContentType(part.getContentType());
+			} catch (OXMailException e) {
+				/*
+				 * Invalid content type: Ignore this attachment
+				 */
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(e.getMessage(), e);
+				}
+				return true;
+			}
 			/*
 			 * Fill attachment object
 			 */
