@@ -105,8 +105,8 @@ case "${BNAME}" in
     "editfilestore")
     ACTION="util.EditFilestore"
     ;;
-    "listdbms")
-    ACTION="util.ListDBMS"
+    "listdatabase")
+    ACTION="util.ListDatabase"
     ;;
     "listfilestore")
     ACTION="util.ListFilestore"
