@@ -17,11 +17,11 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class ListReasons extends UtilAbstraction {
+public class ListReason extends UtilAbstraction {
     
-    private final static String GENERAL_UTILITY_NAME = "listReasons";
+    private final static String GENERAL_UTILITY_NAME = "listReason";
 
-    public ListReasons(final String[] args2) {
+    public ListReason(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();
 
@@ -76,7 +76,7 @@ public class ListReasons extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListReasons(args);
+        new ListReason(args);
     }
 
     private Options getOptions() {
