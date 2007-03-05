@@ -58,7 +58,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 
-import com.openexchange.admin.auth.AuthenticationFactory;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 
@@ -84,7 +83,6 @@ public class Activator implements BundleActivator {
             });
         }
 
-        System.out.println("Config: " + context.getProperty("config"));
         this.daemon = new AdminDaemon();
         log.info("Starting Admindaemon...");
         this.daemon.registerBundleListener(context);
