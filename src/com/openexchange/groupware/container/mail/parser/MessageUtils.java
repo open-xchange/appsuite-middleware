@@ -81,9 +81,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
@@ -310,7 +308,7 @@ public class MessageUtils {
 	 * unaffected.
 	 */
 	public static final String formatContentForDisplay(final String s, final boolean isHtml,
-			final SessionObject session, final String msgUID) throws OXException {
+			final SessionObject session, final String msgUID) {
 		final UserSettingMail usm = session.getUserConfiguration().getUserSettingMail();
 		String retval = s;
 		if (isHtml) {
@@ -319,11 +317,7 @@ public class MessageUtils {
 			 */
 			if (usm.isUseColorQuote()) {
 				if (retval.toLowerCase(Locale.ENGLISH).indexOf(STR_START_BLOCKQUOTE) > -1) {
-					try {
-						retval = replaceHTMLBlockQuotesForDisplay(retval);
-					} catch (IOException e) {
-						throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-					}
+					retval = replaceHTMLBlockQuotesForDisplay(retval);
 				} else {
 					retval = replaceHTMLSimpleQuotesForDisplay(retval);
 				}
@@ -367,8 +361,7 @@ public class MessageUtils {
 	 * with colored "&lt;blockquote&gt;" tags according to configured quote
 	 * colors in file "imap.properties"
 	 */
-	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText)
-			throws IOException {
+	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder(htmlText.length() + 100);
 		int offset = 0;
 		int pos = -1;

@@ -524,7 +524,7 @@ public class JSONMessageObject {
 		}
 	}
 
-	public void addFromAddresses(final InternetAddress[] addrs) throws AddressException {
+	public void addFromAddresses(final InternetAddress[] addrs) {
 		for (int i = 0; i < addrs.length; i++) {
 			if (!containsAddrs(addrs[i], from)) {
 				from.add(addrs[i]);
@@ -595,7 +595,7 @@ public class JSONMessageObject {
 		}
 	}
 
-	public void addToAddresses(final InternetAddress[] addrs) throws AddressException {
+	public void addToAddresses(final InternetAddress[] addrs) {
 		for (int i = 0; i < addrs.length; i++) {
 			if (!containsAddrs(addrs[i], to)) {
 				to.add(addrs[i]);
@@ -774,7 +774,7 @@ public class JSONMessageObject {
 	 * JSON-Array comforming to: [["The Personal", "someone@somewhere.com"],
 	 * ...]
 	 */
-	private static final JSONArray getAddressesAsArray(final List<InternetAddress> addrs) throws JSONException {
+	private static final JSONArray getAddressesAsArray(final List<InternetAddress> addrs) {
 		final JSONArray jsonArr = new JSONArray();
 		if (addrs != null) {
 			final int size = addrs.size();
@@ -790,7 +790,7 @@ public class JSONMessageObject {
 	 * Convert an <code>InternetAddress</code> instance into a JSON-Array
 	 * comforming to: ["The Personal", "someone@somewhere.com"]
 	 */
-	private static final JSONArray getAddressAsArray(final InternetAddress addr) throws JSONException {
+	private static final JSONArray getAddressAsArray(final InternetAddress addr) {
 		final JSONArray retval = new JSONArray();
 		retval.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
 				: preparePersonal(addr.getPersonal()));
@@ -816,7 +816,7 @@ public class JSONMessageObject {
 		return personal;
 	}
 
-	private static final JSONArray getUserFieldsAsObject(final List<String> user) throws JSONException {
+	private static final JSONArray getUserFieldsAsObject(final List<String> user) {
 		final JSONArray jsonArr = new JSONArray();
 		final int size = user.size();
 		final Iterator<String> iter = user.iterator();
@@ -1033,7 +1033,7 @@ public class JSONMessageObject {
 			}
 			return this;
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		} catch (AddressException e) {
 			throw MailInterfaceImpl.handleMessagingException(e);
 		}

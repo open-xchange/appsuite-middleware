@@ -89,6 +89,10 @@ public class HttpServletManager {
 
 	private static final Lock WRITE_LOCK = RW_LOCK.writeLock(); // new
 																// ReentrantLock();
+	
+	private HttpServletManager() {
+		super();
+	}
 
 	public static int getNumberOfWorkingServlets() {
 		return numberOfWorkingServlets;
@@ -166,6 +170,25 @@ public class HttpServletManager {
 				SERVLET_POOL.put(id, servlets);
 			}
 			numberOfWorkingServlets--;
+		} finally {
+			WRITE_LOCK.unlock();
+		}
+	}
+	
+	public static final void destroyServlet(final String id, final HttpServlet servletObj) {
+		WRITE_LOCK.lock();
+		try {
+			if (servletObj instanceof SingleThreadModel) {
+				/*
+				 * Single-thread are used per instance, so theres no reference
+				 * used by HttpServletManager, cause any reference is completely
+				 * removed on invocations of getServlet()
+				 */
+				return;
+			}
+			if (SERVLET_POOL.containsKey(id)) {
+				SERVLET_POOL.remove(id);
+			}
 		} finally {
 			WRITE_LOCK.unlock();
 		}

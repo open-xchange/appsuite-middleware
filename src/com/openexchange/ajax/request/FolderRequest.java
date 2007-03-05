@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -73,7 +72,7 @@ public class FolderRequest {
 		this.pw = pw;
 	}
 	
-	public void action(final String action, final JSONObject jsonObject) throws SearchIteratorException, JSONException, OXFolderException {
+	public void action(final String action, final JSONObject jsonObject) throws JSONException, OXFolderException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ROOT)) {
 			new Folder().actionGetRoot(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
@@ -91,7 +90,7 @@ public class FolderRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			new Folder().actionPutDeleteFolder(sessionObj, pw, jsonObject);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, (String) null, action);
+			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, "", action);
 		}
 	}
 

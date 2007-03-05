@@ -66,8 +66,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.internet.MimeUtility;
-
 ;
 
 /**
@@ -146,10 +144,9 @@ public class MailTools {
 		if (!colorState) {
 			colorState = true;
 			return tColor[0];
-		} else {
-			colorState = false;
-			return tColor[1];
 		}
+		colorState = false;
+		return tColor[1];
 	}
 
 	private static final Pattern htmlPattern = Pattern.compile(

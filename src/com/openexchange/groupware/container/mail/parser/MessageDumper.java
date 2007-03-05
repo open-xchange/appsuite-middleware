@@ -85,10 +85,13 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.IMAPUtils;
+import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.TNEFBodyPart;
+import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.UUEncodedMultiPart;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.sun.mail.iap.ProtocolException;
 
 /**
@@ -101,7 +104,7 @@ public class MessageDumper {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageDumper.class);
-	
+
 	private static final String MESSAGE_RFC822 = "message/rfc822";
 
 	private final SessionObject session;
@@ -109,7 +112,7 @@ public class MessageDumper {
 	private final boolean invokePartModifier;
 
 	private boolean stop;
-	
+
 	private boolean multipartDetected;
 
 	/**
@@ -141,19 +144,23 @@ public class MessageDumper {
 		multipartDetected = false;
 	}
 
-	public void dumpMessage(final Message msg, final MessageHandler msgHandler) throws OXException, MessagingException,
-			IOException {
+	public void dumpMessage(final Message msg, final MessageHandler msgHandler) throws OXException, MessagingException {
 		dumpMessage(msg, msgHandler, null);
 	}
 
-	public void dumpMessage(final Message msg, final MessageHandler msgHandler, final String prefix) throws OXException,
-			MessagingException, IOException {
-		dumpPart(msg, msgHandler, prefix, 1);
+	public void dumpMessage(final Message msg, final MessageHandler msgHandler, final String prefix)
+			throws OXException, MessagingException {
+		try {
+			dumpPart(msg, msgHandler, prefix, 1);
+		} catch (IOException e) {
+			throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, msg.getMessageNumber(), msg.getFolder()
+					.getFullName(), OXFolderManagerImpl.getUserName(session));
+		}
 		msgHandler.handleMessageEnd(msg);
 	}
 
-	private final void dumpPart(final Part partArg, final MessageHandler msgHandler, final String prefix, final int partCountArg)
-			throws MessagingException, OXException, IOException {
+	private final void dumpPart(final Part partArg, final MessageHandler msgHandler, final String prefix,
+			final int partCountArg) throws MessagingException, OXException, IOException {
 		if (stop) {
 			return;
 		}
@@ -199,7 +206,8 @@ public class MessageDumper {
 					 * UUEncoded content detected. Handle normal text.
 					 */
 					if (!msgHandler.handleInlineUUEncodedPlainText(uuencodedMP.getCleanText(), contentType
-							.getBaseType(), uuencodedMP.getCleanText().length(), filename, MessageUtils.getIdentifier(prefix, partCount))) {
+							.getBaseType(), uuencodedMP.getCleanText().length(), filename, MessageUtils.getIdentifier(
+							prefix, partCount))) {
 						stop = true;
 						return;
 					}
@@ -212,8 +220,8 @@ public class MessageDumper {
 						 * Increment part count by 1
 						 */
 						partCount++;
-						if (!msgHandler.handleInlineUUEncodedAttachment(uuencodedMP.getBodyPart(a),
-								MessageUtils.getIdentifier(prefix, partCount))) {
+						if (!msgHandler.handleInlineUUEncodedAttachment(uuencodedMP.getBodyPart(a), MessageUtils
+								.getIdentifier(prefix, partCount))) {
 							stop = true;
 							return;
 						}
@@ -252,7 +260,7 @@ public class MessageDumper {
 		} else if (contentType.isMimeType("multipart/*")) {
 			final Multipart mp = (Multipart) part.getContent();
 			final int count = mp.getCount();
-			final String mpId =  MessageUtils.getIdentifier(prefix, partCount);
+			final String mpId = MessageUtils.getIdentifier(prefix, partCount);
 			if (!msgHandler.handleMultipart(mp, count, mpId)) {
 				stop = true;
 				return;
@@ -282,7 +290,8 @@ public class MessageDumper {
 			}
 		} else if (TNEFUtils.isTNEFMimeType(part.getContentType())) {
 			/*
-			 * Here go with TNEF encoded messages. First, grab TNEF input stream.
+			 * Here go with TNEF encoded messages. First, grab TNEF input
+			 * stream.
 			 */
 			final TNEFInputStream tnefInputStream = new TNEFInputStream(part.getInputStream());
 			/*
@@ -293,23 +302,23 @@ public class MessageDumper {
 			 * Handle special conversion
 			 */
 			final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-	        if (messageClass != null && "IPM.Contact".equalsIgnoreCase((String)messageClass.getValue())) {
-	            // convert contact to standard vCard
-	            final BodyPart bodyPart = TNEFMime.convertContact(message);
-	            dumpPart(bodyPart, msgHandler, prefix, partCount);
-	            return;
-	        }
-	        /*
-	         * Look for body. Usually the body is the rtf text.
-	         */
-	        final Attr attrBody = Attr.findAttr(message.getAttributes(),Attr.attBody);
-	        if (attrBody != null) {
-	        	final TNEFBodyPart bodyPart = new TNEFBodyPart();
-	            bodyPart.setText((String)attrBody.getValue());
-	            bodyPart.setSize(((String)attrBody.getValue()).length());
-	            dumpPart(bodyPart, msgHandler, prefix, partCount++);
-	        }
-	        if (message.getMAPIProps() != null) {
+			if (messageClass != null && "IPM.Contact".equalsIgnoreCase((String) messageClass.getValue())) {
+				// convert contact to standard vCard
+				final BodyPart bodyPart = TNEFMime.convertContact(message);
+				dumpPart(bodyPart, msgHandler, prefix, partCount);
+				return;
+			}
+			/*
+			 * Look for body. Usually the body is the rtf text.
+			 */
+			final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
+			if (attrBody != null) {
+				final TNEFBodyPart bodyPart = new TNEFBodyPart();
+				bodyPart.setText((String) attrBody.getValue());
+				bodyPart.setSize(((String) attrBody.getValue()).length());
+				dumpPart(bodyPart, msgHandler, prefix, partCount++);
+			}
+			if (message.getMAPIProps() != null) {
 				final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(
 						MAPIProp.PR_RTF_COMPRESSED);
 				if (ris != null) {
@@ -331,46 +340,48 @@ public class MessageDumper {
 			for (int i = 0; i < s; i++) {
 				final Attachment attachment = (Attachment) iter.next();
 				final TNEFBodyPart bodyPart = new TNEFBodyPart();
-	            if (attachment.getNestedMessage() == null) {
-	                // add TNEF attributes
-	            	bodyPart.setTNEFAttributes(attachment.getAttributes());
-	                // translate TNEF attributes to Mime
-	            	final  String attachFilename = attachment.getFilename();
-	                if (attachFilename != null) {
-	                	bodyPart.setFileName(attachFilename);
-	                }
-	                String contentTypeStr = null;
-	                if (attachment.getMAPIProps() != null) {
-	                	contentTypeStr = (String)attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
-	                }
-	                if (contentTypeStr == null && attachFilename != null) {
-	                	contentTypeStr = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachFilename);
-	                }
-	                if (contentTypeStr == null) {
-	                	contentTypeStr = "application/octet-stream";
-	                }
-	                final DataSource ds = new RawDataSource(attachment.getRawData(),contentTypeStr);
-	                bodyPart.setDataHandler(new DataHandler(ds));
-	                bodyPart.setHeader("Content-Type", contentTypeStr);
-	                final ByteArrayOutputStream os = new ByteArrayOutputStream();
-	    			attachment.writeTo(os);
-	    			bodyPart.setSize(os.size());
-	                dumpPart(bodyPart, msgHandler, prefix, partCount++);
-	            } else {
-	            	/*
-	            	 * Nested message
-	            	 */
-	            	final MimeMessage nestedMessage = TNEFMime.convert(session.getMailSession(),attachment.getNestedMessage());
-	            	bodyPart.setDataHandler(new DataHandler(nestedMessage, MESSAGE_RFC822));
-	            	bodyPart.setHeader("Content-Type", MESSAGE_RFC822);
-	            	dumpPart(bodyPart, msgHandler, prefix, partCount++);
-	            }
+				if (attachment.getNestedMessage() == null) {
+					// add TNEF attributes
+					bodyPart.setTNEFAttributes(attachment.getAttributes());
+					// translate TNEF attributes to Mime
+					final String attachFilename = attachment.getFilename();
+					if (attachFilename != null) {
+						bodyPart.setFileName(attachFilename);
+					}
+					String contentTypeStr = null;
+					if (attachment.getMAPIProps() != null) {
+						contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+					}
+					if (contentTypeStr == null && attachFilename != null) {
+						contentTypeStr = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachFilename);
+					}
+					if (contentTypeStr == null) {
+						contentTypeStr = "application/octet-stream";
+					}
+					final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
+					bodyPart.setDataHandler(new DataHandler(ds));
+					bodyPart.setHeader("Content-Type", contentTypeStr);
+					final ByteArrayOutputStream os = new ByteArrayOutputStream();
+					attachment.writeTo(os);
+					bodyPart.setSize(os.size());
+					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+				} else {
+					/*
+					 * Nested message
+					 */
+					final MimeMessage nestedMessage = TNEFMime.convert(session.getMailSession(), attachment
+							.getNestedMessage());
+					bodyPart.setDataHandler(new DataHandler(nestedMessage, MESSAGE_RFC822));
+					bodyPart.setHeader("Content-Type", MESSAGE_RFC822);
+					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+				}
 			}
 		} else if (contentType.isMimeType("message/delivery-status")
 				|| contentType.isMimeType("message/disposition-notification")
 				|| contentType.isMimeType("text/rfc822-headers") || contentType.isMimeType("text/*card")
 				|| contentType.isMimeType("text/*calendar")) {
-			if (!msgHandler.handleSpecialPart(part, contentType.getBaseType(), MessageUtils.getIdentifier(prefix, partCount))) {
+			if (!msgHandler.handleSpecialPart(part, contentType.getBaseType(), MessageUtils.getIdentifier(prefix,
+					partCount))) {
 				stop = true;
 				return;
 			}
@@ -382,7 +393,7 @@ public class MessageDumper {
 			}
 		}
 	}
-	
+
 	private static final String STR_CANNOT_LOAD_HEADER = "Cannot load header";
 
 	private final void dumpEnvelope(final Message msg, final MessageHandler msgHandler) throws MessagingException,
@@ -409,8 +420,7 @@ public class MessageDumper {
 		/*
 		 * SUBJECT
 		 */
-		msgHandler
-				.handleSubject(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null)));
+		msgHandler.handleSubject(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null)));
 		/*
 		 * SENT DATE
 		 */

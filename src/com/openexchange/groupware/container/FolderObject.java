@@ -237,7 +237,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	// SQL string for standard modules
 	public static final String SQL_IN_STR_STANDARD_MODULES = new StringBuilder().append('(').append(TASK).append(',')
-			.append(CALENDAR).append(',').append(CONTACT).append(',').append(INFOSTORE).append(')').toString();
+			.append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(',').append(INFOSTORE).append(')').toString();
 
 	// Permissions
 	public static final int PRIVATE_PERMISSION = 1;
@@ -631,7 +631,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				return new ArrayList<Integer>(0);
 			}
 			if (!enforce) {
-				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, (String) null, "subfolderIds");
+				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "", "subfolderIds");
 			}
 			subfolderIds = getSubfolderIds(objectId, ctx, readCon);
 			b_subfolderIds = true;

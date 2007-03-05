@@ -75,6 +75,8 @@ public class FolderParser {
 	private final UserConfiguration userConfig;
 
 	private static final int[] mapping = { 0, 2, 4, -1, 8 };
+	
+	private static final String STR_EMPTY = "";
 
 	public FolderParser(UserConfiguration userConfig) {
 		super();
@@ -96,6 +98,8 @@ public class FolderParser {
 			return FolderObject.CALENDAR;
 		} else if (moduleStr.equalsIgnoreCase(Folder.MODULE_CONTACT)) {
 			return FolderObject.CONTACT;
+		} else if (moduleStr.equalsIgnoreCase(Folder.MODULE_UNBOUND)) {
+			return FolderObject.UNBOUND;
 		} else if (moduleStr.equalsIgnoreCase(Folder.MODULE_MAIL)) {
 			return FolderObject.MAIL;
 		} else if (moduleStr.equalsIgnoreCase(Folder.MODULE_PROJECT)) {
@@ -111,7 +115,7 @@ public class FolderParser {
 				return FolderObject.SYSTEM_MODULE;
 			}
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, (String) null, moduleStr, "");
+			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, moduleStr, STR_EMPTY);
 		}
 	}
 
@@ -119,7 +123,7 @@ public class FolderParser {
 			JSONException {
 		if (jsonObj.has(FolderFields.ID)) {
 			if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(FolderFields.ID)) {
-				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, (String) null, FolderFields.ID,
+				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, STR_EMPTY, FolderFields.ID,
 						FolderFields.ID);
 			}
 			if (!fo.containsObjectID()) {
@@ -152,7 +156,7 @@ public class FolderParser {
 			for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.ENTITY);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
 				}
 				int entity;
 				try {
@@ -172,7 +176,7 @@ public class FolderParser {
 					oclPerm.setFuid(fo.getObjectID());
 				}
 				if (!elem.has(FolderFields.BITS)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.BITS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.BITS);
 				}
 				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
 				if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
@@ -182,7 +186,7 @@ public class FolderParser {
 				}
 				oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
 				if (!elem.has(FolderFields.GROUP)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.GROUP);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.GROUP);
 				}
 				oclPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
 				perms[i] = oclPerm;

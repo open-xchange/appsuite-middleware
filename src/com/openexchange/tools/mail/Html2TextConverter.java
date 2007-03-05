@@ -266,7 +266,7 @@ public class Html2TextConverter {
 				|| tag.regionMatches(true, 0, '<' + pattern + ' ', 0, pattern.length() + 2);
 	}
 
-	private final String convertTag(final String t) throws IOException {
+	private final String convertTag(final String t) {
 		String result = "";
 		if (isTag(t, "body")) {
 			in_body = true;

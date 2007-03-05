@@ -356,45 +356,58 @@ public class MailInterfaceImpl implements MailInterface {
 
 	public static final MailInterface getInstance(final SessionObject sessionObj, final boolean fetchCachedCon) throws OXException {
 		DefaultIMAPConnection imapCon = fetchCachedCon ? getCachedConnection(sessionObj) : null;
+		if (imapCon != null) {
+			final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
+			try {
+				/*
+				 * Apply cached connection
+				 */
+				retval.imapCon = imapCon;
+				retval.imapStore = imapCon.connect();
+			} catch (NoSuchProviderException e) {
+				throw handleMessagingException(e);
+			} catch (MessagingException e) {
+				throw handleMessagingException(e);
+			}
+			return retval;
+		}
+		/*
+		 * No cached connection available, check if a new one may be
+		 * established
+		 */
+		if (IMAPProperties.getMaxNumOfIMAPConnections() > 0
+				&& DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
+			LOCK_CON.lock();
+			try {
+				while (DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Too many IMAP connections currently established. Going asleep.");
+					}
+					LOCK_CON_CONDITION.await();
+				}
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Woke up & IMAP connection(s) may again be established");
+				}
+				/*
+				 * Try to fetch from cache again
+				 */
+				if (fetchCachedCon) {
+					imapCon = getCachedConnection(sessionObj);
+				}
+			} catch (InterruptedException e) {
+				LOG.error(e.getMessage(), e);
+				throw new OXMailException(MailCode.INTERRUPT_ERROR, e, new Object[0]);
+			} finally {
+				LOCK_CON.unlock();
+			}
+		}
 		if (imapCon == null) {
 			/*
-			 * No cached connection available, check if a new one may be
-			 * established
+			 * Return a new instance with an empty connection. Thus a new
+			 * connection is going to be created through calling init()
+			 * method
 			 */
-			if (IMAPProperties.getMaxNumOfIMAPConnections() > 0
-					&& DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
-				LOCK_CON.lock();
-				try {
-					while (DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("Too many IMAP connections currently established. Going asleep.");
-						}
-						LOCK_CON_CONDITION.await();
-					}
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Woke up & IMAP connection(s) may again be established");
-					}
-					/*
-					 * Try to fetch from cache again
-					 */
-					if (fetchCachedCon) {
-						imapCon = getCachedConnection(sessionObj);
-					}
-				} catch (InterruptedException e) {
-					LOG.error(e.getMessage(), e);
-					throw new OXMailException(MailCode.INTERRUPT_ERROR, e, new Object[0]);
-				} finally {
-					LOCK_CON.unlock();
-				}
-			}
-			if (imapCon == null) {
-				/*
-				 * Return a new instance with an empty connection. Thus a new
-				 * connection is going to be created through calling init()
-				 * method
-				 */
-				return new MailInterfaceImpl(sessionObj);
-			}
+			return new MailInterfaceImpl(sessionObj);
 		}
 		final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 		try {
@@ -1125,19 +1138,10 @@ public class MailInterfaceImpl implements MailInterface {
 			Message[] newMsgs = null;
 			boolean tryAgain = true;
 			if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasSort()) {
-				try {
-					final long start = System.currentTimeMillis();
-					newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder());
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					tryAgain = false;
-				} catch (ProtocolException e) {
-					/*
-					 * Unsupported SORT command.
-					 */
-					LOG.error(new StringBuilder().append("IMAPUtils.getNewMessages() failed: ").append(e.getMessage())
-							.toString(), e);
-					tryAgain = true;
-				}
+				final long start = System.currentTimeMillis();
+				newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder());
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				tryAgain = false;
 			}
 			if (tryAgain
 					&& IMAPProperties.isCapabilitiesLoaded()
@@ -1146,33 +1150,24 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Just try SEARCH command
 				 */
-				try {
+				/*
+				 * Request sequence numbers of unseen messages
+				 */
+				final long start = System.currentTimeMillis();
+				final int[] newMsgsSeqNum = IMAPUtils.getNewMsgsSeqNums(imapCon.getImapFolder(), true);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (newMsgsSeqNum.length == 0) {
 					/*
-					 * Request sequence numbers of unseen messages
+					 * Return empty iterator from empty array
 					 */
-					final long start = System.currentTimeMillis();
-					final int[] newMsgsSeqNum = IMAPUtils.getNewMsgsSeqNums(imapCon.getImapFolder(), true);
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					if (newMsgsSeqNum.length == 0) {
-						/*
-						 * Return empty iterator from empty array
-						 */
-						return SearchIteratorAdapter.createEmptyIterator();
-					}
-					newMsgs = new MessageCacheObject[newMsgsSeqNum.length];
-					for (int i = 0; i < newMsgsSeqNum.length; i++) {
-						newMsgs[i] = new MessageCacheObject(imapCon.getImapFolder().getFullName(), imapCon
-								.getImapFolder().getSeparator(), newMsgsSeqNum[i]);
-					}
-					tryAgain = false;
-				} catch (ProtocolException e) {
-					/*
-					 * Unsupported SEARCH command.
-					 */
-					LOG.error(new StringBuilder().append("IMAPUtils.getNewMsgsSeqNums() failed: ").append(
-							e.getMessage()).toString(), e);
-					tryAgain = true;
+					return SearchIteratorAdapter.createEmptyIterator();
 				}
+				newMsgs = new MessageCacheObject[newMsgsSeqNum.length];
+				for (int i = 0; i < newMsgsSeqNum.length; i++) {
+					newMsgs[i] = new MessageCacheObject(imapCon.getImapFolder().getFullName(), imapCon.getImapFolder()
+							.getSeparator(), newMsgsSeqNum[i]);
+				}
+				tryAgain = false;
 			}
 			if (tryAgain) {
 				/*
@@ -1387,9 +1382,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (IMAPException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -1410,15 +1403,13 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (IMAPException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
 
 	private final Message[] searchMessages(final Folder folder, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkWithOR, final int[] fields, final int sortCol) throws MessagingException, OXException,
-			IMAPException, IOException {
+			IMAPException {
 		boolean applicationSearch = true;
 		Message[] msgs = null;
 		if (!folder.exists()) {
@@ -1618,9 +1609,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (IMAPException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -1821,8 +1810,6 @@ public class MailInterfaceImpl implements MailInterface {
 			return msgHandler.getAttachmentObject();
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -1989,7 +1976,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.FAILED_VERSIT_SAVE);
 		}
 	}
 
@@ -2025,8 +2012,6 @@ public class MailInterfaceImpl implements MailInterface {
 			return msgHandler.getImageAttachment();
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2182,8 +2167,6 @@ public class MailInterfaceImpl implements MailInterface {
 			return retval;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2464,8 +2447,6 @@ public class MailInterfaceImpl implements MailInterface {
 			return retval;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2652,7 +2633,8 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#sendMessage(com.openexchange.groupware.container.mail.JSONMessageObject,
 	 *      com.openexchange.groupware.upload.UploadEvent)
 	 */
-	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent, final int sendType) throws OXException {
+	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent, final int sendType)
+			throws OXException {
 		try {
 			init();
 			final MimeMessage newMsg = new MimeMessage(imapCon.getSession());
@@ -2796,120 +2778,117 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					return new StringBuilder(draftFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();
-				} else {
-					final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-					final IMAPFolder sentFolder = (IMAPFolder) imapStore
-							.getFolder(prepareMailFolderParam(getSentFolder()));
-					/*
-					 * Fill message
-					 */
-					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
-							.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
-					msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
-					/*
-					 * Check recipients
-					 */
-					final Address[] allRecipients = newMsg.getAllRecipients();
-					if (allRecipients == null || allRecipients.length == 0) {
-						throw new OXMailException(MailCode.MISSING_RECIPIENTS);
-					}
-					/*
-					 * Set the Reply-To header for future replies to this new
-					 * message
-					 */
-					final InternetAddress[] ia;
-					if (usm.getReplyToAddr() == null) {
-						ia = new InternetAddress[msgObj.getFrom().size()];
-						msgObj.getFrom().toArray(ia);
-					} else {
-						ia = InternetAddress.parse(usm.getReplyToAddr(), false);
-					}
-					newMsg.setReplyTo(ia);
-					/*
-					 * Set sent date if not done, yet
-					 */
-					if (newMsg.getSentDate() == null) {
-						newMsg.setSentDate(new Date());
-					}
-					/*
-					 * Set default subject if none set
-					 */
-					final String subject;
-					if ((subject = newMsg.getSubject()) == null || subject.length() == 0) {
-						newMsg.setSubject(MailStrings.DEFAULT_SUBJECT);
-					}
-					try {
-						final long start = System.currentTimeMillis();
-						Transport transport = null;
-						try {
-							transport = imapCon.getSession().getTransport("smtp");
-							if (IMAPProperties.isSmtpAuth()) {
-								transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
-										.getIMAPProperties().getImapLogin(), sessionObj.getIMAPProperties()
-										.getImapPassword());
-							} else {
-								transport.connect();
-							}
-							mailInterfaceMonitor.changeNumActive(true);
-							newMsg.saveChanges();
-							transport.sendMessage(newMsg, allRecipients);
-						} finally {
-							if (transport != null) {
-								transport.close();
-								mailInterfaceMonitor.changeNumActive(false);
-							}
-							mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-						}
-						if (LOG.isInfoEnabled()) {
-							LOG.info("Message successfully sent ! ! ! (subject=" + newMsg.getSubject() + ')');
-						}
-					} catch (MessagingException e) {
-						throw handleMessagingException(e, sessionObj.getIMAPProperties());
-					}
-					if (usm.isNoCopyIntoStandardSentFolder()) {
-						/*
-						 * No copy in sent folder
-						 */
-						return "";
-					}
-					/*
-					 * Append message to folder "SENT"
-					 */
-					checkAndCreateFolder(sentFolder, inboxFolder);
-					if (!sentFolder.isOpen()) {
-						sentFolder.open(Folder.READ_WRITE);
-						mailInterfaceMonitor.changeNumActive(true);
-					}
-					long uidNext = sentFolder.getUIDNext();
-					if (uidNext == -1) {
-						/*
-						 * UIDNEXT not supported
-						 */
-						uidNext = IMAPUtils.getUIDNext(sentFolder);
-					}
-					newMsg.setFlag(Flags.Flag.SEEN, true);
-					final long start = System.currentTimeMillis();
-					try {
-						sentFolder.appendMessages(new Message[] { newMsg });
-					} catch (MessagingException e) {
-						if (e.getNextException() instanceof CommandFailedException) {
-							final CommandFailedException exc = (CommandFailedException) e.getNextException();
-							if (exc.getMessage().indexOf("Over quota") > 1) {
-								throw new OXMailException(MailCode.COPY_TO_SENT_FOLDER_FAILED);
-							}
-						}
-						LOG.error(new StringBuilder().append(
-								"Sent message could not be appended to default sent folder: ").append(e.getMessage())
-								.toString(), e);
-						return "";
-					} finally {
-						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-						sentFolder.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
-					}
-					return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
-							.toString();
 				}
+				final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+				final IMAPFolder sentFolder = (IMAPFolder) imapStore.getFolder(prepareMailFolderParam(getSentFolder()));
+				/*
+				 * Fill message
+				 */
+				msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
+						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
+				msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
+				/*
+				 * Check recipients
+				 */
+				final Address[] allRecipients = newMsg.getAllRecipients();
+				if (allRecipients == null || allRecipients.length == 0) {
+					throw new OXMailException(MailCode.MISSING_RECIPIENTS);
+				}
+				/*
+				 * Set the Reply-To header for future replies to this new
+				 * message
+				 */
+				final InternetAddress[] ia;
+				if (usm.getReplyToAddr() == null) {
+					ia = new InternetAddress[msgObj.getFrom().size()];
+					msgObj.getFrom().toArray(ia);
+				} else {
+					ia = InternetAddress.parse(usm.getReplyToAddr(), false);
+				}
+				newMsg.setReplyTo(ia);
+				/*
+				 * Set sent date if not done, yet
+				 */
+				if (newMsg.getSentDate() == null) {
+					newMsg.setSentDate(new Date());
+				}
+				/*
+				 * Set default subject if none set
+				 */
+				final String subject;
+				if ((subject = newMsg.getSubject()) == null || subject.length() == 0) {
+					newMsg.setSubject(MailStrings.DEFAULT_SUBJECT);
+				}
+				try {
+					final long start = System.currentTimeMillis();
+					Transport transport = null;
+					try {
+						transport = imapCon.getSession().getTransport("smtp");
+						if (IMAPProperties.isSmtpAuth()) {
+							transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
+									.getIMAPProperties().getImapLogin(), sessionObj.getIMAPProperties()
+									.getImapPassword());
+						} else {
+							transport.connect();
+						}
+						mailInterfaceMonitor.changeNumActive(true);
+						newMsg.saveChanges();
+						transport.sendMessage(newMsg, allRecipients);
+					} finally {
+						if (transport != null) {
+							transport.close();
+							mailInterfaceMonitor.changeNumActive(false);
+						}
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					}
+					if (LOG.isInfoEnabled()) {
+						LOG.info("Message successfully sent ! ! ! (subject=" + newMsg.getSubject() + ')');
+					}
+				} catch (MessagingException e) {
+					throw handleMessagingException(e, sessionObj.getIMAPProperties());
+				}
+				if (usm.isNoCopyIntoStandardSentFolder()) {
+					/*
+					 * No copy in sent folder
+					 */
+					return "";
+				}
+				/*
+				 * Append message to folder "SENT"
+				 */
+				checkAndCreateFolder(sentFolder, inboxFolder);
+				if (!sentFolder.isOpen()) {
+					sentFolder.open(Folder.READ_WRITE);
+					mailInterfaceMonitor.changeNumActive(true);
+				}
+				long uidNext = sentFolder.getUIDNext();
+				if (uidNext == -1) {
+					/*
+					 * UIDNEXT not supported
+					 */
+					uidNext = IMAPUtils.getUIDNext(sentFolder);
+				}
+				newMsg.setFlag(Flags.Flag.SEEN, true);
+				final long start = System.currentTimeMillis();
+				try {
+					sentFolder.appendMessages(new Message[] { newMsg });
+				} catch (MessagingException e) {
+					if (e.getNextException() instanceof CommandFailedException) {
+						final CommandFailedException exc = (CommandFailedException) e.getNextException();
+						if (exc.getMessage().indexOf("Over quota") > 1) {
+							throw new OXMailException(MailCode.COPY_TO_SENT_FOLDER_FAILED);
+						}
+					}
+					LOG.error(new StringBuilder().append("Sent message could not be appended to default sent folder: ")
+							.append(e.getMessage()).toString(), e);
+					return "";
+				} finally {
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					sentFolder.close(false);
+					mailInterfaceMonitor.changeNumActive(false);
+				}
+				return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext).toString();
+
 			} finally {
 				if (originalMsgFolder != null && originalMsgFolder.isOpen()) {
 					originalMsgFolder.close(false);
@@ -2926,7 +2905,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (IOException e) {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2983,13 +2962,17 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
 			}
-			final Message[] msgs;
+			Message[] msgs;
 			long start = System.currentTimeMillis();
 			try {
 				msgs = imapCon.getImapFolder().getMessagesByUID(msgUIDs);
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
+			if (msgs == null || msgs.length == 0) {
+				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUIDs, imapCon.getImapFolder().getFullName());
+			}
+			msgs = cleanMessageArray(msgs);
 			/*
 			 * Perform "soft delete", means to copy message to default trash
 			 * folder
@@ -3029,6 +3012,22 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
+	}
+	
+	/**
+	 * Cleans <tt>null</tt> elements out of given array of
+	 * <tt>javax.mail.Message</tt> instances
+	 * 
+	 * @return cleaned array of <tt>javax.mail.Message</tt> instances
+	 */
+	private static final Message[] cleanMessageArray(final Message[] cleanMe) {
+		final List<Message> tmp = new ArrayList<Message>(cleanMe.length);
+		for (int i = 0; i < cleanMe.length; i++) {
+			if (cleanMe[i] != null) {
+				tmp.add(cleanMe[i]);
+			}
+		}
+		return tmp.toArray(new Message[tmp.size()]);
 	}
 
 	/*
@@ -3106,6 +3105,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (msgs == null || msgs.length == 0) {
 				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUIDs, sourceFolder);
 			}
+			msgs = cleanMessageArray(msgs);
 			/*
 			 * Perform "move" or "copy" operation
 			 */
@@ -3492,7 +3492,7 @@ public class MailInterfaceImpl implements MailInterface {
 					} else {
 						try {
 							if (IMAPProperties.isSupportsACLs()
-									&& !((IMAPFolder) destFolder).myRights().contains(Rights.Right.CREATE)) {
+									&& !destFolder.myRights().contains(Rights.Right.CREATE)) {
 								throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), newParent);
 							}
 						} catch (MessagingException e) {
@@ -3911,9 +3911,9 @@ public class MailInterfaceImpl implements MailInterface {
 						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? "" : imapProps
 								.getImapServer());
 					}
-				} catch (OXException oxExc) {
+				} catch (IMAPException oxExc) {
 					LOG.error(oxExc.getMessage(), e);
-					tmp = new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+					tmp = new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 				}
 				oxme = tmp;
 			} else if (e.getNextException() instanceof ConnectionResetException) {
@@ -3935,7 +3935,7 @@ public class MailInterfaceImpl implements MailInterface {
 					oxme = new OXMailException(MailCode.BROKEN_CONNECTION, e, imapProps == null ? "" : imapProps
 							.getImapServer());
 				} else {
-					oxme = new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+					oxme = new OXMailException(MailCode.SOCKET_ERROR, e, e.getMessage());
 				}
 			} else if (e.getNextException() instanceof UnknownHostException) {
 				oxme = new OXMailException(MailCode.UNKNOWN_HOST, e, e.getMessage());

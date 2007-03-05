@@ -715,12 +715,11 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				 * Matching descendant found
 				 */
 				return true;
-			} else {
-				/*
-				 * Recursive call with collected subfolder ids
-				 */
-				isDescendant = isDescendantFolder(subfolderIDs, possibleDescendant, readCon, ctx);
 			}
+			/*
+			 * Recursive call with collected subfolder ids
+			 */
+			isDescendant = isDescendantFolder(subfolderIDs, possibleDescendant, readCon, ctx);
 		}
 		return isDescendant;
 	}
@@ -875,13 +874,12 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			if (hashMap != null) {
 				deleteValidatedFolders(hashMap, userId, groups, userConf, lastModified, ctx, writeCon, readCon);
 			}
-			deleteValidatedFolder(folderID.intValue(), userId, groups, userConf, lastModified, ctx, writeCon, readCon);
+			deleteValidatedFolder(folderID.intValue(), userId, groups, lastModified, ctx, writeCon, readCon);
 		}
 	}
 
 	private void deleteValidatedFolder(final int folderID, final int userId, final int[] groups,
-			final UserConfiguration userConf, final long lastModified, final Context ctx, final Connection writeConArg,
-			final Connection readConArg) throws OXException, SQLException, DBPoolingException {
+			final long lastModified, final Context ctx, final Connection writeConArg, final Connection readConArg) throws OXException, SQLException, DBPoolingException {
 		/*
 		 * Delete folder
 		 */
@@ -1180,8 +1178,12 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		if (sessionObj == null) {
 			return "";
 		}
-		return new StringBuilder().append(sessionObj.getUserObject().getDisplayName()).append(" (").append(
-				sessionObj.getUserObject().getId()).append(')').toString();
+		final User u = sessionObj.getUserObject();
+		if (u.getDisplayName() == null) {
+			return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(
+					u.getId()).append(')').toString();
+		}
+		return new StringBuilder().append(u.getDisplayName()).append(" (").append(u.getId()).append(')').toString();
 	}
 
 	public static final String getUserName(final int userId, final Context ctx) {
@@ -1193,6 +1195,10 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		}
 		if (u == null) {
 			return String.valueOf(userId);
+		}
+		if (u.getDisplayName() == null) {
+			return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(
+					userId).append(')').toString();
 		}
 		return new StringBuilder().append(u.getDisplayName()).append(" (").append(userId).append(')').toString();
 	}

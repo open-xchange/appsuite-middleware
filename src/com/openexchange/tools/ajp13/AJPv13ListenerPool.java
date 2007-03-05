@@ -174,47 +174,46 @@ public class AJPv13ListenerPool {
 			 * return a new listener.
 			 */
 			return createListener();
-		} else {
-			if (captureLock) {
-				/*
-				 * Either resetPool() or invocation of removeListener(int num)
-				 * set the captureLock flag. All Threads which want to obtain a
-				 * listener ought to wait for these methods to terminate that is
-				 * when the lock WAIT_LOCK is unlocked by either method.
-				 */
-				WAIT_LOCK.lock();
-				try {
-					/*
-					 * Ensure flag is set to false and either method has finished
-					 */
-					while (captureLock) {
-						RESET_FINISHED.await();
-					}
-				} catch (InterruptedException e) {
-					LOG.error(e.getMessage(), e);
-				} finally {
-					WAIT_LOCK.unlock();
-				}
-			}
-			/*
-			 * Return a listener fetched from pool if still available. No lock
-			 * around poll() method cause this method is already thread-safe
-			 * based on "an efficient wait-free algorithm"
-			 */
-			final AJPv13Listener retval = LISTENER_QUEUE.poll();
-			if (retval == null) {
-				return createListener();
-			}
-			AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
-			AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
-			return retval;
 		}
+		if (captureLock) {
+			/*
+			 * Either resetPool() or invocation of removeListener(int num) set
+			 * the captureLock flag. All Threads which want to obtain a listener
+			 * ought to wait for these methods to terminate that is when the
+			 * lock WAIT_LOCK is unlocked by either method.
+			 */
+			WAIT_LOCK.lock();
+			try {
+				/*
+				 * Ensure flag is set to false and either method has finished
+				 */
+				while (captureLock) {
+					RESET_FINISHED.await();
+				}
+			} catch (InterruptedException e) {
+				LOG.error(e.getMessage(), e);
+			} finally {
+				WAIT_LOCK.unlock();
+			}
+		}
+		/*
+		 * Return a listener fetched from pool if still available. No lock
+		 * around poll() method cause this method is already thread-safe based
+		 * on "an efficient wait-free algorithm"
+		 */
+		final AJPv13Listener retval = LISTENER_QUEUE.poll();
+		if (retval == null) {
+			return createListener();
+		}
+		AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
+		AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
+		return retval;
 	}
 	
 	/**
 	 * 
-	 * @return a new
-	 *         <code>AJPv13Listener</code> instance created in a thread-safe manner
+	 * @return a new <code>AJPv13Listener</code> instance created in a
+	 *         thread-safe manner
 	 */
 	private static final AJPv13Listener createListener() {
 		CREATE_LOCK.lock();

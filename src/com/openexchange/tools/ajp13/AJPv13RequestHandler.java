@@ -148,6 +148,8 @@ public class AJPv13RequestHandler {
 	private boolean emptyDataPackageReceived;
 
 	private String httpSessionId;
+	
+	private boolean httpSessionJoined;
 
 	private String servletPath;
 
@@ -449,6 +451,7 @@ public class AJPv13RequestHandler {
 		isFormData = false;
 		emptyDataPackageReceived = false;
 		httpSessionId = null;
+		httpSessionJoined = false;
 		servletPath = null;
 		state = State.IDLE;
 		if (discardConnection) {
@@ -662,8 +665,13 @@ public class AJPv13RequestHandler {
 		return httpSessionId;
 	}
 
-	public void setHttpSessionId(final String httpSessionId) {
+	public void setHttpSessionId(final String httpSessionId, final boolean join) {
 		this.httpSessionId = httpSessionId;
+		this.httpSessionJoined = join;
+	}
+
+	public boolean isHttpSessionJoined() {
+		return httpSessionJoined;
 	}
 
 	public String getServletPath() {

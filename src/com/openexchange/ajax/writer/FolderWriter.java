@@ -87,6 +87,8 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 public class FolderWriter extends DataWriter {
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
+	
+	private static final String STR_EMPTY = "";
 
 	private final User userObj;
 
@@ -137,17 +139,17 @@ public class FolderWriter extends DataWriter {
 	}
 
 	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder) throws JSONException,
-			OXException, MessagingException {
+			OXException {
 		writeIMAPFolderAsObject(fields, folder, null, -1);
 	}
 
 	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder, final String name,
-			final int hasSubfolders) throws JSONException, OXException, MessagingException {
+			final int hasSubfolders) throws JSONException, OXException {
 		writeIMAPFolderAsObject(fields, folder, name, hasSubfolders, null);
 	}
 
 	public void writeIMAPFolderAsObject(int[] fields, final MailFolderObject folder, final String name,
-			final int hasSubfolders, final String fullName) throws JSONException, OXException, MessagingException {
+			final int hasSubfolders, final String fullName) throws JSONException, OXException {
 		try {
 			jsonwriter.object();
 			if (fields == null) {
@@ -162,18 +164,17 @@ public class FolderWriter extends DataWriter {
 	}
 
 	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder) throws JSONException,
-			OXException, MessagingException {
+			OXException {
 		writeIMAPFolderAsArray(fields, folder, null, -1);
 	}
 
 	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder, final String name,
-			final int hasSubfolders) throws JSONException, OXException, MessagingException {
+			final int hasSubfolders) throws JSONException, OXException {
 		writeIMAPFolderAsArray(fields, folder, name, hasSubfolders, null, -1);
 	}
 
 	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder, final String name,
-			final int hasSubfolders, final String fullName, final int module) throws JSONException, OXException,
-			MessagingException {
+			final int hasSubfolders, final String fullName, final int module) throws JSONException, OXException {
 		try {
 			jsonwriter.array();
 			for (int i = 0; i < fields.length; i++) {
@@ -453,7 +454,7 @@ public class FolderWriter extends DataWriter {
 
 	public void writeIMAPFolderField(final int field, final MailFolderObject folder, final boolean withKey,
 			final String name, final int hasSubfolders, final String fullName, final int module) throws OXException,
-			JSONException, MessagingException {
+			JSONException {
 		switch (field) {
 		case FolderObject.OBJECT_ID:
 			if (withKey) {
@@ -786,10 +787,10 @@ public class FolderWriter extends DataWriter {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
 							} catch (SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null,
+								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
 										FolderFields.OWN_RIGHTS, fo.getObjectID(), ctx.getContextId());
 							} catch (DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null,
+								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
 										FolderFields.OWN_RIGHTS, fo.getObjectID(), ctx.getContextId());
 							}
 						}
@@ -816,10 +817,10 @@ public class FolderWriter extends DataWriter {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
 							} catch (SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null,
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
 										FolderFields.PERMISSIONS);
 							} catch (DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null,
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
 										FolderFields.PERMISSIONS);
 							}
 						}
@@ -1014,10 +1015,10 @@ public class FolderWriter extends DataWriter {
 						FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 					}
 				} catch (SQLException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights",
+					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY, "own_rights",
 							getFolderName(fo), ctx.getContextId());
 				} catch (DBPoolingException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights",
+					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY, "own_rights",
 							getFolderName(fo), ctx.getContextId());
 				}
 			}
@@ -1037,9 +1038,9 @@ public class FolderWriter extends DataWriter {
 						FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 					}
 				} catch (SQLException e) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.PERMISSIONS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.PERMISSIONS);
 				} catch (DBPoolingException e) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.PERMISSIONS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.PERMISSIONS);
 				}
 			}
 			if (withKey) {
@@ -1127,6 +1128,8 @@ public class FolderWriter extends DataWriter {
 		case FolderObject.CALENDAR:
 			moduleStr = Folder.MODULE_CALENDAR;
 			break;
+		case FolderObject.UNBOUND:
+			moduleStr = Folder.MODULE_UNBOUND;
 		case FolderObject.MAIL:
 			moduleStr = Folder.MODULE_MAIL;
 			break;

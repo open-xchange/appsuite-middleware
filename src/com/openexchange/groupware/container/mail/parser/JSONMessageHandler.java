@@ -582,8 +582,6 @@ public class JSONMessageHandler implements MessageHandler {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, session.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 		msgObj.addNestedMessage(msgHandler.getMessageObject());
 		return true;

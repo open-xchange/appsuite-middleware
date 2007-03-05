@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.TimeZone;
 
@@ -114,12 +113,11 @@ public class MailWriter extends DataWriter {
 		msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 	}
 	
-	public final void writeMessageAsJSONObject(final Message msg, final int threadLevel) throws OXException {
-		writeMessageAsJSONObject(msg, threadLevel, true);
+	public final void writeMessageAsJSONObject(final Message msg) throws OXException {
+		writeMessageAsJSONObject(msg, true);
 	}
 
-	public final void writeMessageAsJSONObject(final Message msg, final int threadLevel,
-			final boolean createVersionForDisplay) throws OXException {
+	public final void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay) throws OXException {
 		try {
 			final JSONMessageHandler msgHandler = new JSONMessageHandler(session, MessageUtils
 					.getMessageUniqueIdentifier(msg), createVersionForDisplay);
@@ -128,10 +126,8 @@ public class MailWriter extends DataWriter {
 			msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 		} catch (MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -147,7 +143,7 @@ public class MailWriter extends DataWriter {
 				jsonwriter.endArray();
 			}
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -167,7 +163,7 @@ public class MailWriter extends DataWriter {
 				jsonwriter.endArray();
 			}
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -207,7 +203,7 @@ public class MailWriter extends DataWriter {
 						}
 						final String folder;
 						if (msg instanceof MessageCacheObject) {
-							MessageCacheObject msgco = (MessageCacheObject) msg;
+							final MessageCacheObject msgco = (MessageCacheObject) msg;
 							folder = MailFolderObject.prepareFullname(msgco.getFolderFullname(), msgco.getSeparator());
 						} else {
 							folder = MailFolderObject.prepareFullname(msg.getFolder().getFullName(), msg.getFolder()
@@ -442,7 +438,7 @@ public class MailWriter extends DataWriter {
 				}
 				final String folder;
 				if (msg instanceof MessageCacheObject) {
-					MessageCacheObject msgco = (MessageCacheObject) msg;
+					final MessageCacheObject msgco = (MessageCacheObject) msg;
 					folder = MailFolderObject.prepareFullname(msgco.getFolderFullname(), msgco.getSeparator());
 				} else {
 					folder = MailFolderObject.prepareFullname(msg.getFolder().getFullName(), msg.getFolder()
@@ -562,7 +558,7 @@ public class MailWriter extends DataWriter {
 				jsonwriter.value("Unknown column " + field);
 			}
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		} catch (MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
 		}

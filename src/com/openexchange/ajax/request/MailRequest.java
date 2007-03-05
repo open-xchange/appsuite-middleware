@@ -92,7 +92,7 @@ public class MailRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
 			MAIL_SERVLET.actionGetMessage(sessionObj, pw, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
-			MAIL_SERVLET.actionGetAttachment(sessionObj, pw, jsonObject);
+			MAIL_SERVLET.actionGetAttachment();
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
 			MAIL_SERVLET.actionGetNew(sessionObj, pw, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {

@@ -503,7 +503,7 @@ public class IMAPUtils {
 	 * Determines all messages in given folder which have the \UNSEEN flag set
 	 * and sorts them to criteria "REVERSE DATE"
 	 */
-	public static Message[] getNewMessages(final IMAPFolder folder) throws ProtocolException, MessagingException {
+	public static Message[] getNewMessages(final IMAPFolder folder) throws MessagingException {
 		final IMAPFolder imapFolder = folder;
 		final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			/*
@@ -610,8 +610,7 @@ public class IMAPUtils {
 	 *         of unseen messages in selected folder. <code>sort</code>
 	 *         determines whether sequence numbers get sorted or not.
 	 */
-	public static final int[] getNewMsgsSeqNums(final Folder folder, final boolean sort) throws MessagingException,
-			ProtocolException {
+	public static final int[] getNewMsgsSeqNums(final Folder folder, final boolean sort) throws MessagingException {
 		if (!(folder instanceof IMAPFolder)) {
 			throw new MessagingException("Given folder " + folder.getFullName() + " is not an instance of IMAPFolder");
 		}
@@ -1044,7 +1043,7 @@ public class IMAPUtils {
 	}
 
 	public static boolean findPatternInField(final int[] searchFields, final String[] searchPatterns,
-			final boolean linkWithOR, final Message msg) throws IMAPException, IOException {
+			final boolean linkWithOR, final Message msg) throws OXException {
 		try {
 			boolean result = false;
 			for (int i = 0; i < searchFields.length; i++) {
@@ -1088,11 +1087,16 @@ public class IMAPUtils {
 					}
 					break;
 				default:
-					if (msg.getContent() instanceof String) {
-						final String msgText = (String) msg.getContent();
-						foundInCurrentField = msgText.toLowerCase().indexOf(searchPatterns[i].toLowerCase()) > -1;
-					} else {
-						throw new IMAPException("Unknown Search Field: " + searchFields[i]);
+					try {
+						if (msg.getContent() instanceof String) {
+							final String msgText = (String) msg.getContent();
+							foundInCurrentField = msgText.toLowerCase().indexOf(searchPatterns[i].toLowerCase()) > -1;
+						} else {
+							throw new IMAPException("Unknown Search Field: " + searchFields[i]);
+						}
+					} catch (IOException e) {
+						throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, msg.getMessageNumber(), msg
+								.getFolder().getFullName(), "");
 					}
 				}
 				if (linkWithOR && foundInCurrentField) {
@@ -1469,7 +1473,7 @@ public class IMAPUtils {
 	 *         messages in destination folder
 	 */
 	public static final long[] copyUID(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
-			final boolean isSequential) throws OXMailException, MessagingException {
+			final boolean isSequential) throws MessagingException {
 		if (uids == null || uids.length == 0) {
 			return new long[0];
 		}
@@ -1649,7 +1653,7 @@ public class IMAPUtils {
 	private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
 	public static final void setSystemFlags(final IMAPFolder imapFolder, final long[] uids, final boolean isSequential,
-			final Flags flags, final boolean enable) throws OXMailException, MessagingException {
+			final Flags flags, final boolean enable) throws MessagingException {
 		final Flag[] systemFlags;
 		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
 			return;
@@ -2319,7 +2323,7 @@ public class IMAPUtils {
 		}
 	}
 
-	public static String getAllAddresses(final Address[] a) throws MessagingException {
+	public static String getAllAddresses(final Address[] a) {
 		final StringBuilder addressBuilder = new StringBuilder();
 		if (a == null || a.length == 0) {
 			addressBuilder.append("");
@@ -2406,7 +2410,7 @@ public class IMAPUtils {
 			this.sortCol = sortCol;
 			this.descendingDir = descendingDirection;
 			this.locale = locale;
-			fieldComparer = createFieldComparer(sortCol, locale);
+			fieldComparer = createFieldComparer(this.sortCol, this.locale);
 		}
 
 		private static final int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale) {

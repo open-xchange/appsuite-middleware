@@ -72,6 +72,8 @@ import com.sun.mail.imap.Rights;
  * 
  */
 public class MailFolderParser {
+	
+	private static final String STR_EMPTY = "";
 
 	private final SessionObject sessionObj;
 
@@ -98,7 +100,7 @@ public class MailFolderParser {
 		}
 		if (jsonObj.has(FolderFields.MODULE)
 				&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.MODULE);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.MODULE);
 		}
 		if (jsonObj.has("permissions") && jsonObj.getJSONArray("permissions").length() > 0) {
 			try {
@@ -110,10 +112,10 @@ public class MailFolderParser {
 				for (int i = 0; i < size; i++) {
 					final JSONObject jsonPerms = perms.getJSONObject(i);
 					if (!jsonPerms.has("entity")) {
-						throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.ENTITY);
+						throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
 					}
 					if (!jsonPerms.has("rights")) {
-						throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.RIGHTS);
+						throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.RIGHTS);
 					}
 					if (jsonPerms.getString("rights").length() > 0) {
 						applyACLs = true;

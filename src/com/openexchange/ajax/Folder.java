@@ -80,7 +80,6 @@ import com.openexchange.ajax.parser.MailFolderParser;
 import com.openexchange.ajax.writer.FolderWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.ajax.writer.FolderWriter.IMAPFolderFieldWriter;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
@@ -151,6 +150,8 @@ public class Folder extends SessionServlet {
 	private static final String STRING_EMAIL = "E-Mail";
 
 	private static final String STRING_1 = "1";
+	
+	private static final String STRING_EMPTY = "";
 
 	/*
 	 * (non-Javadoc)
@@ -267,12 +268,12 @@ public class Folder extends SessionServlet {
 	 * Performs the GET request to send back root folders
 	 */
 	public void actionGetRoot(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
-			throws JSONException, SearchIteratorException {
+			throws JSONException {
 		actionGetRoot(sessionObj, pw, requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
 	private final void actionGetRoot(final HttpServletRequest req, final HttpServletResponse resp)
-			throws SearchIteratorException, JSONException, IOException {
+			throws JSONException, IOException {
 		actionGetRoot(getSessionObject(req), resp.getWriter(), req, PARAM_SRC_TYPE_REQUEST);
 	}
 
@@ -280,7 +281,7 @@ public class Folder extends SessionServlet {
 	 * Performs the GET request to send back root folders
 	 */
 	private final void actionGetRoot(final SessionObject sessionObj, final Writer pw, final Object paramContainer,
-			final int paramSrcType) throws SearchIteratorException, JSONException {
+			final int paramSrcType) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -369,7 +370,7 @@ public class Folder extends SessionServlet {
 	 * @throws SearchIteratorException
 	 */
 	public void actionGetSubfolders(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
-			throws SearchIteratorException, JSONException {
+			throws JSONException {
 		actionGetSubfolders(sessionObj, pw, requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
@@ -377,15 +378,13 @@ public class Folder extends SessionServlet {
 			throws IOException, ServletException {
 		try {
 			actionGetSubfolders(getSessionObject(req), resp.getWriter(), req, PARAM_SRC_TYPE_REQUEST);
-		} catch (SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
 		} catch (JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
 
 	private final void actionGetSubfolders(final SessionObject sessionObj, final Writer pw,
-			final Object paramContainer, final int paramSrcType) throws SearchIteratorException, JSONException {
+			final Object paramContainer, final int paramSrcType) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -526,7 +525,7 @@ public class Folder extends SessionServlet {
 					}
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
-						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, (String) null,
+						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY,
 								getUserName(sessionObj),
 								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), sessionObj.getContext()
 										.getContextId());
@@ -864,7 +863,7 @@ public class Folder extends SessionServlet {
 	 * @throws SearchIteratorException
 	 */
 	public void actionGetPath(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
-			throws SearchIteratorException, JSONException {
+			throws JSONException {
 		actionGetPath(sessionObj, pw, requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
@@ -872,15 +871,13 @@ public class Folder extends SessionServlet {
 			ServletException {
 		try {
 			actionGetPath(getSessionObject(req), resp.getWriter(), req, PARAM_SRC_TYPE_REQUEST);
-		} catch (SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
 		} catch (JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
 
 	private final void actionGetPath(final SessionObject sessionObj, final Writer pw, final Object paramContainer,
-			final int paramSrcType) throws JSONException, SearchIteratorException {
+			final int paramSrcType) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -1020,7 +1017,7 @@ public class Folder extends SessionServlet {
 	 * @throws SearchIteratorException
 	 */
 	public void actionGetUpdatedFolders(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
-			throws SearchIteratorException, JSONException {
+			throws JSONException {
 		actionGetUpdatedFolders(sessionObj, pw, requestObj, PARAM_SRC_TYPE_REQUEST);
 	}
 
@@ -1028,15 +1025,13 @@ public class Folder extends SessionServlet {
 			throws IOException, ServletException {
 		try {
 			actionGetUpdatedFolders(getSessionObject(req), resp.getWriter(), req, PARAM_SRC_TYPE_REQUEST);
-		} catch (SearchIteratorException e) {
-			sendErrorAsJS(resp, RESPONSE_ERROR);
 		} catch (JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
 
 	private final void actionGetUpdatedFolders(final SessionObject sessionObj, final Writer pw,
-			final Object paramContainer, final int paramSrcType) throws JSONException, SearchIteratorException {
+			final Object paramContainer, final int paramSrcType) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -1575,8 +1570,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private static final String getStringParam(final HttpServletRequest req, final String paramName)
-			throws OXMandatoryFieldException {
+	private static final String getStringParam(final HttpServletRequest req, final String paramName) {
 		return req.getParameter(paramName);
 	}
 
@@ -1587,7 +1581,7 @@ public class Folder extends SessionServlet {
 		try {
 			return jo.getString(paramName);
 		} catch (JSONException e) {
-			throw new OXFolderException(FolderCode.JSON_ERROR, (String) null, e.getMessage());
+			throw new OXFolderException(FolderCode.JSON_ERROR, STRING_EMPTY, e.getMessage());
 		}
 	}
 
@@ -1606,19 +1600,19 @@ public class Folder extends SessionServlet {
 			throws OXException {
 		final String paramVal = req.getParameter(paramName);
 		if (paramVal == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
 		return paramVal;
 	}
 
 	private static final String checkStringParam(final JSONObject jo, final String paramName) throws OXException {
 		if (!jo.has(paramName) || jo.isNull(paramName)) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
 		try {
 			return jo.getString(paramName);
 		} catch (JSONException e) {
-			throw new OXFolderException(FolderCode.JSON_ERROR, (String) null, e.getMessage());
+			throw new OXFolderException(FolderCode.JSON_ERROR, STRING_EMPTY, e.getMessage());
 		}
 	}
 
@@ -1637,7 +1631,7 @@ public class Folder extends SessionServlet {
 			throws OXException {
 		String tmp = req.getParameter(paramName);
 		if (tmp == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
 		final String[] sa = tmp.split(" *, *");
 		tmp = null;
@@ -1646,7 +1640,7 @@ public class Folder extends SessionServlet {
 			try {
 				intArray[a] = Integer.parseInt(sa[a]);
 			} catch (NumberFormatException e) {
-				throw new OXFolderException(FolderCode.BAD_JSON_VALUE, (String) null, sa[a], paramName);
+				throw new OXFolderException(FolderCode.BAD_JSON_VALUE, STRING_EMPTY, sa[a], paramName);
 			}
 		}
 		return intArray;
@@ -1655,7 +1649,7 @@ public class Folder extends SessionServlet {
 	private static final int[] checkIntArrayParam(final JSONObject jo, final String paramName) throws OXException {
 		try {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
-				throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+				throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 			}
 			final String[] tmp = jo.getString(paramName).split(" *, *");
 			int intArray[] = new int[tmp.length];
@@ -1663,12 +1657,12 @@ public class Folder extends SessionServlet {
 				try {
 					intArray[i] = Integer.parseInt(tmp[i]);
 				} catch (NumberFormatException e) {
-					throw new OXFolderException(FolderCode.BAD_JSON_VALUE, (String) null, tmp[i], paramName);
+					throw new OXFolderException(FolderCode.BAD_JSON_VALUE, STRING_EMPTY, tmp[i], paramName);
 				}
 			}
 			return intArray;
 		} catch (JSONException e) {
-			throw new OXFolderException(FolderCode.JSON_ERROR, (String) null, e.getMessage());
+			throw new OXFolderException(FolderCode.JSON_ERROR, STRING_EMPTY, e.getMessage());
 		}
 	}
 
@@ -1686,7 +1680,7 @@ public class Folder extends SessionServlet {
 	private static final Date checkDateParam(final HttpServletRequest req, final String paramName) throws OXException {
 		final String tmp = req.getParameter(paramName);
 		if (tmp == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
 		try {
 			return new Date(Long.parseLong(tmp));
@@ -1697,7 +1691,7 @@ public class Folder extends SessionServlet {
 
 	private static final Date checkDateParam(final JSONObject jo, final String paramName) throws OXException {
 		if (!jo.has(paramName) || jo.isNull(paramName)) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
 		try {
 			return new Date(jo.getLong(paramName));

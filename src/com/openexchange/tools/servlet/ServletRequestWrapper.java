@@ -118,11 +118,11 @@ public class ServletRequestWrapper implements ServletRequest {
 
 	private OXServletInputStream is;
 
-	public void setContentLength(final int contentLength) throws UnsupportedEncodingException, AJPv13Exception {
+	public void setContentLength(final int contentLength) throws AJPv13Exception {
 		setHeader(CONTENT_LENGTH, String.valueOf(contentLength), false);
 	}
 
-	public void setContentType(final String contentType) throws UnsupportedEncodingException, AJPv13Exception {
+	public void setContentType(final String contentType) throws AJPv13Exception {
 		setHeader(CONTENT_TYPE, contentType, true);
 	}
 

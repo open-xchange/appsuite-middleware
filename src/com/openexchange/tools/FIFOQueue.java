@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools;
 
 import java.lang.reflect.Array;

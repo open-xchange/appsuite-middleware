@@ -421,14 +421,14 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 							break NextCookie;
 						}
 						jsessionIDCookie = current;
-						ajpRequestHandler.setHttpSessionId(current.getValue());
+						ajpRequestHandler.setHttpSessionId(current.getValue(), true);
 					} else {
 						/*
 						 * Value does not apply to pattern [UID].[JVM-ROUTE],
 						 * thus only UID is given through special cookie
 						 * JSESSIONID
 						 */
-						ajpRequestHandler.setHttpSessionId(current.getValue());
+						ajpRequestHandler.setHttpSessionId(current.getValue(), true);
 						break NextCookie;
 					}
 				}
@@ -447,6 +447,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 	private static final void addJSessionIDCookie(final String id, final HttpServletResponse resp,
 			final AJPv13RequestHandler ajpRequestHandler) {
 		final String jsessionIdVal;
+		final boolean join;
 		if (id == null) {
 			/*
 			 * Create a new unique id
@@ -456,13 +457,15 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 				jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
 			}
 			jsessionIdVal = jsessionIDVal.toString();
+			join = true;
 		} else {
 			jsessionIdVal = id;
+			join = false;
 		}
 		final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
 		jsessionIDCookie.setPath("/");
 		jsessionIDCookie.setMaxAge(-1); // session cookie
-		ajpRequestHandler.setHttpSessionId(jsessionIdVal);
+		ajpRequestHandler.setHttpSessionId(jsessionIdVal, join);
 		resp.addCookie(jsessionIDCookie);
 	}
 
@@ -519,8 +522,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 	private final int getContentLength(final HttpServletRequestWrapper servletRequest) {
 		if (servletRequest.containsHeader(CONTENT_LENGTH)) {
 			return servletRequest.getIntHeader(CONTENT_LENGTH);
-		} else {
-			return -1;
 		}
+		return -1;
 	}
 }

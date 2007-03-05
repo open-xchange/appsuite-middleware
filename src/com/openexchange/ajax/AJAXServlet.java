@@ -91,7 +91,6 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
@@ -116,6 +115,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String MODULE_CALENDAR = "calendar";
 
 	public static final String MODULE_CONTACT = "contacts";
+	
+	public static final String MODULE_UNBOUND = "unbound";
 
 	public static final String MODULE_MAIL = "mail";
 

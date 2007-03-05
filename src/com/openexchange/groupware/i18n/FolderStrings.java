@@ -67,9 +67,9 @@ public class FolderStrings {
 	
 	public static final String SYSTEM_FOLDER_NAME = "System";
 	
-	public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Global Address Book";
+	public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared Address Book";
 	
-	public static final String SYSTEM_LDAP_FOLDER_NAME = "Internal Users";
+	public static final String SYSTEM_LDAP_FOLDER_NAME = "Global Address Book";
 	
 	public static final String SYSTEM_OX_FOLDER_NAME = "OX Folders";
 	

@@ -101,6 +101,8 @@ public class OXFolderTools {
 	private OXFolderTools() {
 		super();
 	}
+	
+	private static final String STR_EMPTY = "";
 
 	/**
 	 * Determines folder type explicitely from underlying database storage. The
@@ -257,6 +259,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return retval;
 	}
@@ -309,11 +313,13 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		if (retval != 0) {
 			return retval;
 		}
-		throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null, folderModule2String(module),
+		throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY, folderModule2String(module),
 				getUserName(user, ctx), ctx.getContextId());
 	}
 
@@ -402,11 +408,11 @@ public class OXFolderTools {
 				if (rs.next()) {
 					retval = rs.getInt(1);
 					if (rs.wasNull()) {
-						throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null,
+						throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY,
 								folderModule2String(module), getUserName(user, ctx), ctx.getContextId());
 					}
 				} else {
-					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null,
+					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY,
 							folderModule2String(module), getUserName(user, ctx), ctx.getContextId());
 				}
 			} finally {
@@ -416,6 +422,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return retval;
 	}
@@ -688,6 +696,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, true, ctx, readCon);
 	}
@@ -734,7 +745,7 @@ public class OXFolderTools {
 			SearchIteratorException {
 		final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(
 				" AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append(
-				(since == null ? "" : " AND (changing_date >= ?)"));
+				(since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules),
 				condBuilder.toString(), FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
@@ -760,6 +771,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -772,7 +786,7 @@ public class OXFolderTools {
 			final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException,
 			SearchIteratorException {
 		final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PUBLIC).append(
-				") AND (ot.parent = ?)").append((since == null ? "" : " AND (changing_date >= ?)"));
+				") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules),
 				condBuilder.toString(), FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
@@ -798,6 +812,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -826,7 +843,7 @@ public class OXFolderTools {
 			condBuilder.append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ")
 					.append(userId).append(") ");
 		}
-		condBuilder.append("AND (ot.parent = ?)").append((since == null ? "" : " AND (changing_date >= ?)"));
+		condBuilder.append("AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
 						.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
@@ -852,6 +869,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -868,7 +888,7 @@ public class OXFolderTools {
 		if (owner > -1) {
 			condBuilder.append(" AND (ot.created_from = ").append(owner).append(')');
 		}
-		condBuilder.append(since == null ? "" : " AND (changing_date >= ?)");
+		condBuilder.append(since == null ? STR_EMPTY : " AND (changing_date >= ?)");
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
 						.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
@@ -893,6 +913,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -941,6 +964,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -983,7 +1009,7 @@ public class OXFolderTools {
 							FolderObject.PRIVATE).append(") AND ot.type != ").append(FolderObject.PRIVATE).append(
 							" AND ot.module = ").append(module).append(" AND ot.module IN ").append(
 							StringCollection.getSqlInString(userConfig.getAccessibleModules())).append(
-							FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : "");
+							FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
 			stmt = readCon.prepareStatement(sb.toString());
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, ctx.getContextId());
@@ -1000,6 +1026,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1036,7 +1065,7 @@ public class OXFolderTools {
 					/*
 					 * Starting folder is not visible to user
 					 */
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, (String) null, OXFolderManagerImpl.getFolderName(
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, STR_EMPTY, OXFolderManagerImpl.getFolderName(
 							folderId, ctx), getUserName(userId, ctx), ctx.getContextId());
 				}
 				return;
@@ -1095,7 +1124,7 @@ public class OXFolderTools {
 					virtualParent = FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
 					break;
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, (String) null, folderModule2String(fo
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
 							.getModule()), ctx.getContextId());
 				}
 				checkForSpecialFolder(folderList, virtualParent, locale, ctx);
@@ -1117,6 +1146,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
 		} catch (LdapException e) {
 			throw new OXFolderException(FolderCode.LDAP_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 	
@@ -1263,6 +1294,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1305,6 +1339,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1327,7 +1364,7 @@ public class OXFolderTools {
 						"((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(
 						StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date >= ?)")
 				.append(" AND (ot.module IN ").append(StringCollection.getSqlInString(accessibleModules)).append(")")
-				.append(FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : "").append(
+				.append(FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(
 						" ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -1348,6 +1385,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1387,6 +1427,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1421,6 +1464,9 @@ public class OXFolderTools {
 		} catch (DBPoolingException e) {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			closeResources(rs, stmt, readCon, true, ctx);
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
@@ -1462,7 +1508,7 @@ public class OXFolderTools {
 					}
 					return fo;
 				}
-				throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null,
+				throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY,
 						folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), ctx.getContextId());
 			} finally {
 				closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
@@ -1471,6 +1517,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 
@@ -1507,6 +1555,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 
@@ -1543,6 +1593,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 
@@ -1598,6 +1650,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 
@@ -1647,7 +1701,7 @@ public class OXFolderTools {
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
 					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, session.getUserObject(), userConfig);
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, (String) null, folderModule2String(fo
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
 							.getModule()), ctx.getContextId());
 				}
 			} else {
@@ -1669,7 +1723,7 @@ public class OXFolderTools {
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
 					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, (String) null, folderModule2String(fo
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
 							.getModule()), ctx.getContextId());
 				}
 			}
@@ -1678,6 +1732,8 @@ public class OXFolderTools {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+		} catch (Throwable t) {
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
 	}
 }

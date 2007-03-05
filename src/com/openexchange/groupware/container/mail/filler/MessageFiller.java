@@ -173,7 +173,7 @@ public class MessageFiller {
 		this.linewrap = session.getUserConfiguration().getUserSettingMail().getAutoLinebreak();
 	}
 
-	public void close() throws MessagingException {
+	public void close() {
 		// if (origMsgFolder != null && origMsgFolder.isOpen()) {
 		// origMsgFolder.close(false);
 		// }
@@ -374,37 +374,36 @@ public class MessageFiller {
 					 * Should not happen: Invalid attachment
 					 */
 					throw new OXMailException(MailCode.INVALID_ATTACHMENT_ON_SEND, mailTextMao.getPositionInMail());
+				}
+				/*
+				 * Inline element whose content is available
+				 */
+				Multipart mp = null;
+				if (primaryMultipart == null) {
+					primaryMultipart = mp = new MimeMultipart();
+				} else {
+					mp = primaryMultipart;
+				}
+				MimeBodyPart msgBodyPart = new MimeBodyPart();
+				msgBodyPart.setText("", "UTF-8");
+				mp.addBodyPart(msgBodyPart);
+				msgBodyPart = new MimeBodyPart();
+				if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_STRING) {
+					msgBodyPart.setContent(mailTextMao.getContent(), mailTextMao.getContentType());
+				} else if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_BYTE_ARRAY) {
+					msgBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(
+							mailTextMao.getContentType(), mailTextMao.getFileName(), ((byte[]) mailTextMao
+									.getContent()))));
+				} else if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_INPUT_STREAM) {
+					msgBodyPart.setDataHandler(new DataHandler(new MessageDataSource(((InputStream) mailTextMao
+							.getContent()), mailTextMao.getContentType(), mailTextMao.getFileName())));
 				} else {
 					/*
-					 * Inline element whose content is available
+					 * Should not happen: Invalid attachment
 					 */
-					Multipart mp = null;
-					if (primaryMultipart == null) {
-						primaryMultipart = mp = new MimeMultipart();
-					} else {
-						mp = primaryMultipart;
-					}
-					MimeBodyPart msgBodyPart = new MimeBodyPart();
-					msgBodyPart.setText("", "UTF-8");
-					mp.addBodyPart(msgBodyPart);
-					msgBodyPart = new MimeBodyPart();
-					if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_STRING) {
-						msgBodyPart.setContent(mailTextMao.getContent(), mailTextMao.getContentType());
-					} else if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_BYTE_ARRAY) {
-						msgBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(
-								mailTextMao.getContentType(), mailTextMao.getFileName(), ((byte[]) mailTextMao
-										.getContent()))));
-					} else if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_INPUT_STREAM) {
-						msgBodyPart.setDataHandler(new DataHandler(new MessageDataSource(((InputStream) mailTextMao
-								.getContent()), mailTextMao.getContentType(), mailTextMao.getFileName())));
-					} else {
-						/*
-						 * Should not happen: Invalid attachment
-						 */
-						throw new OXMailException(MailCode.INVALID_ATTACHMENT_ON_SEND, mailTextMao.getPositionInMail());
-					}
-					mp.addBodyPart(msgBodyPart);
+					throw new OXMailException(MailCode.INVALID_ATTACHMENT_ON_SEND, mailTextMao.getPositionInMail());
 				}
+				mp.addBodyPart(msgBodyPart);
 			}
 		}
 		if (hasNestedMessages) {
@@ -437,7 +436,7 @@ public class MessageFiller {
 	 * going to be appended as the "html" version
 	 */
 	private final Multipart createMultipartAlternative(final JSONMessageAttachmentObject mailTextMao,
-			final boolean embeddedImages, final JSONMessageObject msgObj) throws IOException, MessagingException {
+			final boolean embeddedImages, final JSONMessageObject msgObj) throws OXException, MessagingException {
 		/*
 		 * Create an "alternative" multipart
 		 */
@@ -450,7 +449,11 @@ public class MessageFiller {
 		/*
 		 * Define & add text content
 		 */
-		text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap), UTF8);
+		try {
+			text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap), UTF8);
+		} catch (IOException e) {
+			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
+		}
 		text.setHeader(MIME_VERSION, VERSION);
 		text.setHeader(CONTENT_TYPE, TEXT_CT);
 		alternativeMultipart.addBodyPart(text);
@@ -513,7 +516,7 @@ public class MessageFiller {
 	}
 
 	private final void addMessageBodyPart(final Multipart mp, final JSONMessageObject msgObj,
-			final JSONMessageAttachmentObject mao) throws MessagingException, OXException, IOException, JSONException {
+			final JSONMessageAttachmentObject mao) throws MessagingException, OXException, IOException {
 		if (mao.getContentType().regionMatches(true, 0, "text/", 0, 5) && mao.getContent() != null) {
 			/*
 			 * Text
@@ -636,7 +639,7 @@ public class MessageFiller {
 	}
 
 	private final void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj)
-			throws MessagingException, JSONException, UnsupportedEncodingException, OXException {
+			throws MessagingException, UnsupportedEncodingException, OXException {
 		/*
 		 * Set from
 		 */

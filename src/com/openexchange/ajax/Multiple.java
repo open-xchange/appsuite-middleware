@@ -457,9 +457,6 @@ public class Multiple extends SessionServlet {
 			} catch (OXFolderException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
-			} catch (SearchIteratorException e) {
-				LOG.error(e.getMessage(), e);
-				response.setException(e);
 			} catch (JSONException e) {
 				final OXJSONException oje = new OXJSONException(OXJSONException
 						.Code.JSON_WRITE_ERROR, e);

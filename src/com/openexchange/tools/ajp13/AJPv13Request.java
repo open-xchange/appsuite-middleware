@@ -144,13 +144,12 @@ public abstract class AJPv13Request {
 			writeResponse(new AJPv13Response(AJPv13Response.END_RESPONSE_PREFIX_CODE), out, true);
 			ajpRequestHandler.setEndResponseSent(true);
 			return;
-		} else {
-			/*
-			 * Request next body chunk package from web sever
-			 */
-			writeResponse(new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE, ajpRequestHandler
-					.getNumOfBytesToRequestFor()), out, true);
 		}
+		/*
+		 * Request next body chunk package from web sever
+		 */
+		writeResponse(new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE, ajpRequestHandler
+				.getNumOfBytesToRequestFor()), out, true);
 	}
 
 	/**
@@ -178,17 +177,15 @@ public abstract class AJPv13Request {
 	protected final byte nextByte() {
 		if (payloadDataIndex < payloadData.length) {
 			return payloadData[payloadDataIndex++];
-		} else {
-			return -1;
 		}
+		return -1;
 	}
 
 	protected final boolean compareNextByte(final int compareTo) {
 		if (hasNext()) {
 			return (payloadData[payloadDataIndex] == compareTo ? true : false);
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	protected final boolean hasNext() {

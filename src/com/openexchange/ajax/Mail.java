@@ -194,6 +194,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_DATA = "data";
 
 	private static final String STR_1 = "1";
+	
+	private static final String STR_EMPTY = "";
 
 	/**
 	 * The parameter 'folder' contains the folder's id whose contents are
@@ -746,9 +748,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					data = new String(baos.toByteArray(), ct.containsParameter(STR_CHARSET) ? ct
 							.getParameter(STR_CHARSET) : STR_UTF8);
 				} else if (showMessageHeaders) {
-					data = formatMessageHeaders((Enumeration<Header>) msg.getAllHeaders());
+					data = formatMessageHeaders(msg.getAllHeaders());
 				} else {
-					mailWriter.writeMessageAsJSONObject(msg, 0, !editDraft);
+					mailWriter.writeMessageAsJSONObject(msg, !editDraft);
 					data = new JSONObject(strWriter.toString());
 				}
 				writer.flush();
@@ -978,7 +980,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		Response.write(response, writer);
 	}
 
-	public void actionGetAttachment(final SessionObject sessionObj, final Writer writer, final JSONObject requestObj)
+	public void actionGetAttachment()
 			throws OXMailException {
 		throw new OXMailException(MailCode.UNSUPPORTED_ACTION, ACTION_MATTACH, "Multiple servlet");
 	}
@@ -1829,11 +1831,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject().getId(),
 						sessionObj.getUserConfiguration());
 				if (!p.isFolderVisible()) {
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, (String) null, getFolderName(folderObj),
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, STR_EMPTY, getFolderName(folderObj),
 							getUserName(sessionObj), sessionObj.getContext().getContextId());
 				}
 				if (!p.canWriteOwnObjects()) {
-					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, (String) null, getUserName(sessionObj),
+					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, STR_EMPTY, getUserName(sessionObj),
 							getFolderName(folderObj), sessionObj.getContext().getContextId());
 				}
 				/*
@@ -1978,8 +1980,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	private static String getStringParam(final HttpServletRequest req, final String paramName)
-			throws OXMandatoryFieldException {
+	private static String getStringParam(final HttpServletRequest req, final String paramName) {
 		return req.getParameter(paramName);
 	}
 
@@ -1990,7 +1991,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			return jo.getString(paramName);
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getLocalizedMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2025,7 +2026,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			return val;
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getLocalizedMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2076,7 +2077,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			return intArray;
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getLocalizedMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -2228,7 +2229,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			return false;
 		} catch (JSONException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getLocalizedMessage());
+			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 

@@ -481,7 +481,11 @@ public class OXFolderException extends OXException {
 		/**
 		 * Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)
 		 */
-		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)", Category.PROGRAMMING_ERROR, 66);
+		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)", Category.PROGRAMMING_ERROR, 66),
+		/**
+		 * A runtime error occured in context %s
+		 */
+		RUNTIME_ERROR("A runtime error occured in context %s", Category.INTERNAL_ERROR, 67);
 
 		/**
 		 * Message of the exception.

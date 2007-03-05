@@ -497,7 +497,27 @@ public class OXMailException extends OXException {
 		/**
 		 * Mail folder cannot be created. Name must not contain character '%s'
 		 */
-		INVALID_FOLDER_NAME("Mail folder cannot be created. Name must not contain character '%s'", Category.USER_INPUT, 88);
+		INVALID_FOLDER_NAME("Mail folder cannot be created. Name must not contain character '%s'", Category.USER_INPUT, 88),
+		/**
+		 * A JSON syntax error occured: %s
+		 */
+		JSON_ERROR("A JSON syntax error occured: %s", Category.PROGRAMMING_ERROR, 89),
+		/**
+		 * A part's content could not be read from message %s in mail folder %s of user %s
+		 */
+		UNREADBALE_PART_CONTENT("A part's content could not be read from message %s in mail folder %s of user %s", Category.INTERNAL_ERROR, 90),
+		/**
+		 * A IMAP error occured: %s
+		 */
+		IMAP_ERROR("A IMAP error occured: %s", Category.PROGRAMMING_ERROR, 91),
+		/**
+		 * A socket error occured: %s
+		 */
+		SOCKET_ERROR("A socket error occured: %s", Category.PROGRAMMING_ERROR, 92),
+		/**
+		 * Html-2-Text conversion failed: %s
+		 */
+		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.PROGRAMMING_ERROR, 93);
 
 		/**
 		 * Message of the exception.

@@ -366,6 +366,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			array.append(FolderObject.INFOSTORE);
 		}
 		array.append(FolderObject.SYSTEM_MODULE);
+		array.append(FolderObject.UNBOUND);
 		accessibleModulesComputed = true;
 		return (accessibleModules = array.toArray());
 	}
@@ -564,7 +565,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 						stmt.executeUpdate();
 					}
 				} else {
-					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null,
+					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, "",
 							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), ctx.getContextId());
 				}
 			} finally {

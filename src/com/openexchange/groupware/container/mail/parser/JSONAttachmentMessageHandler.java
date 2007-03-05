@@ -410,8 +410,6 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 			return true;
 		} catch (MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
 
