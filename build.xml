@@ -448,11 +448,11 @@
 	</target>
 	
 	<target name="install" depends="build, templates-install, build-structure">
-<!--    	<copy todir="${destdir}/" overwrite="true">
+    	<copy todir="${destdir}/" overwrite="true">
     		<fileset dir="system"/>
 			<mapper type="glob" from="*.${distribution}" to="*"/>
 		</copy>
--->
+
     	<chmod perm="755" file="${destdir}/etc/init.d/open-xchange-groupware"/>
 		<chmod perm="755" file="${bin.install.copy.dir}/checkConsistency"/>
 	</target>
