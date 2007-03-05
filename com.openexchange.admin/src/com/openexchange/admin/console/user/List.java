@@ -59,11 +59,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -100,7 +98,8 @@ public class List extends UserAbstraction {
               int[] allusers = oxu.getAll(ctx, auth);
               // TODO FIX THE OUTPUT OF THIS COMMANDLINE TOOL
               for(int id : allusers){
-                  System.out.println(id);
+                  User []u = oxu.getData(ctx, new int[]{id}, auth);
+                  System.out.println(u[0].toString());
               }
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            
