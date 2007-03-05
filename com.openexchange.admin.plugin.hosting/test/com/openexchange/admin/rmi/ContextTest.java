@@ -277,7 +277,6 @@ public class ContextTest extends AbstractTest {
     }
 
     public static int addContext(Context ctx, String host, Credentials cred) throws Exception {
-        final String hosturl = getRMIHostUrl();
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
