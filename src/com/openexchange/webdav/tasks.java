@@ -74,6 +74,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * tasks
@@ -159,6 +160,9 @@ public final class tasks extends XmlServlet {
 			} catch (OXConcurrentModificationException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
+			} catch (XmlPullParserException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(taskobject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os, xo);
 			} catch (OXException exc) {
 				if (exc.getCategory() == Category.USER_INPUT) {
 					LOG.debug(_parsePropChilds, exc);

@@ -91,8 +91,8 @@ import org.apache.commons.logging.LogFactory;
 
 public final class groupuser extends PermissionServlet {
     
-    private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE lastmodified > ?";
-    private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE lastmodified > ?";
+    private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE cid=? AND lastmodified > ?";
+    private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
     
     private static final Log LOG = LogFactory.getLog(groupuser.class);
     
@@ -225,7 +225,8 @@ public final class groupuser extends PermissionServlet {
             try {
                 readCon = DBPool.pickup(sessionObj.getContext());
                 ps = readCon.prepareStatement(DELETED_GROUP_SQL);
-                ps.setTimestamp(1, new Timestamp(lastsync));
+                ps.setInt(1, sessionObj.getContext().getContextId());
+                ps.setTimestamp(2, new Timestamp(lastsync));
                 
                 final ResultSet rs = ps.executeQuery();
                 
@@ -303,7 +304,8 @@ public final class groupuser extends PermissionServlet {
             try {
                 readCon = DBPool.pickup(sessionObj.getContext());
                 ps = readCon.prepareStatement(DELETED_RESOURCE_SQL);
-                ps.setTimestamp(1, new Timestamp(lastsync));
+                ps.setInt(1, sessionObj.getContext().getContextId());
+                ps.setTimestamp(2, new Timestamp(lastsync));
                 
                 final ResultSet rs = ps.executeQuery();
                 
@@ -312,7 +314,7 @@ public final class groupuser extends PermissionServlet {
                     r.setIdentifier(rs.getInt(1));
                     r.setLastModified(new Date(rs.getLong(2)));
                     
-                    writeElementResource(r, xo, os, false);
+                    writeElementResource(r, xo, os, true);
                 }
             } finally {
                 if (ps != null) {

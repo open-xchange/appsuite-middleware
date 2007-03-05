@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container.mail;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -62,6 +63,7 @@ import java.util.regex.Pattern;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,6 +75,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
@@ -85,6 +88,9 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
  * 
  */
 public class JSONMessageObject {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(JSONMessageObject.class);
 
 	/*
 	 * Constant strings for JSON
@@ -786,10 +792,28 @@ public class JSONMessageObject {
 	 */
 	private static final JSONArray getAddressAsArray(final InternetAddress addr) throws JSONException {
 		final JSONArray retval = new JSONArray();
-		retval.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL : (addr
-				.getPersonal()));
+		retval.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
+				: preparePersonal(addr.getPersonal()));
 		retval.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr.getAddress());
 		return retval;
+	}
+
+	private static final String preparePersonal(final String personal) {
+		if (personal.charAt(0) == '"') {
+			/*
+			 * Assume personal is already surrounded with quotes
+			 */
+			return personal;
+		} else if (personal.indexOf(',') != -1) {
+			try {
+				return new StringBuilder().append('"').append(MimeUtility.decodeText(personal)).append(
+						'"').toString();
+			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+				return new StringBuilder().append('"').append(personal).append('"').toString();
+			}
+		}
+		return personal;
 	}
 
 	private static final JSONArray getUserFieldsAsObject(final List<String> user) throws JSONException {
@@ -1023,6 +1047,15 @@ public class JSONMessageObject {
 			return retList;
 		}
 		final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(value), false);
+		for (int i = 0; i < addrs.length; i++) {
+			try {
+				addrs[i].setPersonal(addrs[i].getPersonal(), IMAPProperties.getDefaultMimeCharset());
+			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (IMAPException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
 		retList.addAll(Arrays.asList(addrs));
 		return retList;
 	}

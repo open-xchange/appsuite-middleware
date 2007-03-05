@@ -520,11 +520,10 @@ public class Infostore extends PermissionServlet {
 				res.setHeader("Content-Disposition", "attachment; filename=\""+Helper.encodeFilename(metadata.getFileName(), "UTF-8" , ie)+"\"");
 			}
 			
-			if(ie7) {
-				// IE7 doesn't like the Pragma header the way we usually set this
-				res.setHeader("Pragma", null);
-			}
-			
+			// Browsers doesn't like the Pragma header the way we usually set
+            // this. Especially if files are sent to the browser. So removing
+            // pragma header
+			res.setHeader("Pragma", null);
 			
 			final byte[] buffer = new byte[200];
 			int bytesRead = 0;

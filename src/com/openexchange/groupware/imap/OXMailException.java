@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import com.openexchange.api2.OXException;
@@ -89,7 +87,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Connection was reset
 		 */
-		CONNECTION_RESET("Connection was reset", Category.TRY_AGAIN, 3),
+		CONNECTION_RESET("Connection was reset. Please try again.", Category.TRY_AGAIN, 3),
 		/**
 		 * Port %s was unreachabe on remote IMAP server
 		 */
@@ -119,7 +117,7 @@ public class OXMailException extends OXException {
 		 * Invalid credentials
 		 * </p>
 		 */
-		INVALID_CREDENTIALS("Wrong or missing login data to access server (%s)", Category.PERMISSION, 8), 
+		INVALID_CREDENTIALS("Wrong or missing login data to access server (%s)", Category.PERMISSION, 8),
 		/**
 		 * Folder is closed: %s
 		 * <p>
@@ -129,7 +127,7 @@ public class OXMailException extends OXException {
 		 * state.
 		 * </p>
 		 */
-		FOLDER_CLOSED("Folder is closed: %s", Category.PROGRAMMING_ERROR, 9), 
+		FOLDER_CLOSED("Folder is closed: %s", Category.PROGRAMMING_ERROR, 9),
 		/**
 		 * Folder not found: %s
 		 * <p>
@@ -137,7 +135,7 @@ public class OXMailException extends OXException {
 		 * invoked on a non existent folder.
 		 * </p>
 		 */
-		FOLDER_NOT_FOUND("Folder not found: %s", Category.PROGRAMMING_ERROR, 10), 
+		FOLDER_NOT_FOUND("Folder not found: %s", Category.PROGRAMMING_ERROR, 10),
 		/**
 		 * Illegal write attempt: %s
 		 * <p>
@@ -145,7 +143,7 @@ public class OXMailException extends OXException {
 		 * attribute of any Messaging object.
 		 * </p>
 		 */
-		ILLEGAL_WRITE("Illegal write attempt: %s", Category.PROGRAMMING_ERROR, 11), 
+		ILLEGAL_WRITE("Illegal write attempt: %s", Category.PROGRAMMING_ERROR, 11),
 		/**
 		 * Invalid method on a expunged message: %s
 		 * <p>
@@ -154,7 +152,7 @@ public class OXMailException extends OXException {
 		 * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 		 * </p>
 		 */
-		MESSAGE_REMOVED("Invalid method on a expunged message: %s", Category.PROGRAMMING_ERROR, 12), 
+		MESSAGE_REMOVED("Invalid method on a expunged message: %s", Category.PROGRAMMING_ERROR, 12),
 		/**
 		 * Method not supported: %s
 		 * <p>
@@ -162,12 +160,12 @@ public class OXMailException extends OXException {
 		 * implementation
 		 * </p>
 		 */
-		METHOD_NOT_SUPPORTED("Method not supported: %s", Category.PROGRAMMING_ERROR, 13), 
+		METHOD_NOT_SUPPORTED("Method not supported: %s", Category.PROGRAMMING_ERROR, 13),
 		/**
 		 * Session attempts to instantiate a provider that doesn't exist: %s
 		 */
 		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %s",
-				Category.PROGRAMMING_ERROR, 14), 
+				Category.PROGRAMMING_ERROR, 14),
 		/**
 		 * Wrong message %sheader: %s
 		 * <p>
@@ -175,15 +173,15 @@ public class OXMailException extends OXException {
 		 * headers
 		 * </p>
 		 */
-		PARSE_ERROR("Wrong message %sheader: %s", Category.USER_INPUT, 15), 
+		PARSE_ERROR("Wrong message %sheader: %s", Category.USER_INPUT, 15),
 		/**
 		 * An attempt was made to open a read-only folder with read-write: %s
 		 */
-		READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write: %s", Category.PERMISSION, 16), 
+		READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write: %s", Category.PERMISSION, 16),
 		/**
 		 * Invalid search expression: %s
 		 */
-		SEARCH_ERROR("Invalid search expression: %s", Category.PROGRAMMING_ERROR, 17), 
+		SEARCH_ERROR("Invalid search expression: %s", Category.PROGRAMMING_ERROR, 17),
 		/**
 		 * Message could not be sent to following recipients: %s
 		 * <p>
@@ -192,201 +190,201 @@ public class OXMailException extends OXException {
 		 * and valid addresses to which the message was not sent.
 		 * </p>
 		 */
-		SEND_FAILED("Message could not be sent to the following recipients: %s", Category.USER_INPUT, 18), 
+		SEND_FAILED("Message could not be sent to the following recipients: %s", Category.USER_INPUT, 18),
 		/**
 		 * Store already closed: %s
 		 */
-		STORE_CLOSED("Store already closed: %s", Category.PROGRAMMING_ERROR, 19), 
+		STORE_CLOSED("Store already closed: %s", Category.PROGRAMMING_ERROR, 19),
 		/**
 		 * Internal error: %s
 		 */
-		INTERNAL_ERROR("Internal error: %s", Category.PROGRAMMING_ERROR, 20), 
+		INTERNAL_ERROR("Internal error: %s", Category.PROGRAMMING_ERROR, 20),
 		/**
 		 * User %s has no access on IMAP-Folder %s
 		 */
-		NO_ACCESS("User %s has no access to mail folder %s", Category.PERMISSION, 21), 
+		NO_ACCESS("User %s has no access to mail folder %s", Category.PERMISSION, 21),
 		/**
 		 * User %s has no read access on IMAP-Folder %s
 		 */
-		NO_READ_ACCESS("User %s has no read access to mail folder %s", Category.PERMISSION, 22), 
+		NO_READ_ACCESS("User %s has no read access to mail folder %s", Category.PERMISSION, 22),
 		/**
 		 * Folder %s does not hold messages
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages", Category.PERMISSION, 23), 
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages", Category.PERMISSION, 23),
 		/**
 		 * Missing field %s in message %s
 		 */
-		MISSING_FIELD("Missing field %s in message %s", Category.PROGRAMMING_ERROR, 24), 
+		MISSING_FIELD("Missing field %s in message %s", Category.PROGRAMMING_ERROR, 24),
 		/**
 		 * Missing header %s in message %s
 		 */
-		MISSING_HEADER("Missing header %s in message %s", Category.PROGRAMMING_ERROR, 25), 
+		MISSING_HEADER("Missing header %s in message %s", Category.PROGRAMMING_ERROR, 25),
 		/**
 		 * User %s has no delete access on IMAP-Folder %s
 		 */
-		NO_DELETE_ACCESS("User %s has no delete access to mail folder %s", Category.PERMISSION, 26), 
+		NO_DELETE_ACCESS("User %s has no delete access to mail folder %s", Category.PERMISSION, 26),
 		/**
 		 * Missing %s folder in mail move operation
 		 */
-		MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %s folder in mail move operation", Category.PROGRAMMING_ERROR, 27), 
+		MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %s folder in mail move operation", Category.PROGRAMMING_ERROR, 27),
 		/**
 		 * User %s has no insert access on IMAP-Folder %s
 		 */
-		NO_INSERT_ACCESS("User %s has no insert access to mail folder %s", Category.PERMISSION, 28), 
+		NO_INSERT_ACCESS("User %s has no insert access to mail folder %s", Category.PERMISSION, 28),
 		/**
 		 * Message %s could not be found in folder %s
 		 */
-		MESSAGE_NOT_FOUND("Message %s could not be found in folder %s", Category.PROGRAMMING_ERROR, 29), 
+		MESSAGE_NOT_FOUND("Message %s could not be found in folder %s", Category.PROGRAMMING_ERROR, 29),
 		/**
 		 * User %s has no lookup access on IMAP-Folder %s
 		 */
-		NO_LOOKUP_ACCESS("User %s has no lookup access to mail folder %s", Category.PERMISSION, 30), 
+		NO_LOOKUP_ACCESS("User %s has no lookup access to mail folder %s", Category.PERMISSION, 30),
 		/**
 		 * Folder %s must not be updated
 		 */
-		NO_FOLDER_UPDATE("Folder %s cannot be updated", Category.PERMISSION, 31), 
+		NO_FOLDER_UPDATE("Folder %s cannot be updated", Category.PERMISSION, 31),
 		/**
 		 * Default folder %s must not be updated
 		 */
-		NO_DEFAULT_FOLDER_UPDATE("Default folder %s cannot be updated", Category.PERMISSION, 32), 
+		NO_DEFAULT_FOLDER_UPDATE("Default folder %s cannot be updated", Category.PERMISSION, 32),
 		/**
 		 * User %s has no create access on IMAP-Folder %s
 		 */
-		NO_CREATE_ACCESS("User %s has no create access to mail folder %s", Category.PERMISSION, 33), 
+		NO_CREATE_ACCESS("User %s has no create access to mail folder %s", Category.PERMISSION, 33),
 		/**
 		 * A folder %s already exists
 		 */
-		DUPLICATE_FOLDER("A folder named %s already exists", Category.PERMISSION, 34), 
+		DUPLICATE_FOLDER("A folder named %s already exists", Category.PERMISSION, 34),
 		/**
 		 * Update of folder %s failed
 		 */
-		UPDATE_FAILED("Update of folder %s failed", Category.PROGRAMMING_ERROR, 35), 
+		UPDATE_FAILED("Update of folder %s failed", Category.PROGRAMMING_ERROR, 35),
 		/**
 		 * User %s has no administer access on IMAP-Folder %s
 		 */
-		NO_ADMINISTER_ACCESS("User %s has no administer access to mail folder %s", Category.PERMISSION, 36), 
+		NO_ADMINISTER_ACCESS("User %s has no administer access to mail folder %s", Category.PERMISSION, 36),
 		/**
 		 * Deletion of folder %s failed
 		 */
-		DELETE_FAILED("Deletion of folder %s failed", Category.PROGRAMMING_ERROR, 37), 
+		DELETE_FAILED("Deletion of folder %s failed", Category.PROGRAMMING_ERROR, 37),
 		/**
 		 * Folder %s must not be deleted
 		 */
-		NO_FOLDER_DELETE("Folder %s cannot be deleted", Category.PERMISSION, 38), 
+		NO_FOLDER_DELETE("Folder %s cannot be deleted", Category.PERMISSION, 38),
 		/**
 		 * Default folder %s must not be deleted
 		 */
-		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39), 
+		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39),
 		/**
 		 * User %s has no mail module access due to user configuration
 		 */
 		NO_MAIL_MODULE_ACCESS("User %s has no mail module access due to user configuration",
-				Category.USER_CONFIGURATION, 40), 
+				Category.USER_CONFIGURATION, 40),
 		/**
 		 * The message to send contains an invalid attachment %s: neither
 		 * content nor attachment's filename is set
 		 */
 		INVALID_ATTACHMENT_ON_SEND(
 				"The message to send contains an invalid attachment %s: neither content nor attachment's filename is set",
-				Category.PROGRAMMING_ERROR, 41), 
+				Category.PROGRAMMING_ERROR, 41),
 		/**
 		 * User %s has no write access on IMAP-Folder %s
 		 */
-		NO_WRITE_ACCESS("User %s has no write access on IMAP-Folder %s", Category.PERMISSION, 42), 
+		NO_WRITE_ACCESS("User %s has no write access on IMAP-Folder %s", Category.PERMISSION, 42),
 		/**
 		 * IMAP default folder %s could not be created
 		 */
-		NO_DEFAULT_FOLDER_CREATION("IMAP default folder %s could not be created", Category.PROGRAMMING_ERROR, 43), 
+		NO_DEFAULT_FOLDER_CREATION("IMAP default folder %s could not be created", Category.PROGRAMMING_ERROR, 43),
 		/**
 		 * Missing default %s folder in user mail settings
 		 */
-		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.PROGRAMMING_ERROR, 44), 
+		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.PROGRAMMING_ERROR, 44),
 		/**
 		 * Number of search fields (%d) do not match number of search patterns
 		 * (%d)
 		 */
 		INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)",
-				Category.PROGRAMMING_ERROR, 45), 
+				Category.PROGRAMMING_ERROR, 45),
 		/**
 		 * No send address could be found for user %s in user configuration
 		 */
 		NO_SEND_ADDRESS_FOUND("No send address could be found for user %s in user configuration",
-				Category.PROGRAMMING_ERROR, 46), 
+				Category.PROGRAMMING_ERROR, 46),
 		/**
 		 * Folder "%s" could not be created
 		 */
-		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created", Category.PROGRAMMING_ERROR, 47), 
+		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created", Category.PROGRAMMING_ERROR, 47),
 		/**
 		 * Message could not be moved to trash folder
 		 */
-		MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", Category.EXTERNAL_RESOURCE_FULL, 48), 
+		MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", Category.EXTERNAL_RESOURCE_FULL, 48),
 		/**
 		 * Invalid attachment %s: %s
 		 */
-		INVAILD_ATTACHMENT("Invalid attachment %s: %s", Category.PROGRAMMING_ERROR, 49), 
+		INVAILD_ATTACHMENT("Invalid attachment %s: %s", Category.PROGRAMMING_ERROR, 49),
 		/**
 		 * Missing key %s in message's JSON representation
 		 */
-		MISSING_JSON_KEY("Missing key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 50), 
+		MISSING_JSON_KEY("Missing key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 50),
 		/**
 		 * Missing value in key %s in message's JSON representation
 		 */
-		MISSING_JSON_VALUE("Missing value in key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 51), 
+		MISSING_JSON_VALUE("Missing value in key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 51),
 		/**
 		 * Either key %s or key %s is mssing in message's JSON representation
 		 */
 		MISSING_JSON_KEY_XOR("Either key %s or key %s is mssing in message's JSON representation",
-				Category.PROGRAMMING_ERROR, 52), 
+				Category.PROGRAMMING_ERROR, 52),
 		/**
 		 * Both %s and %s must not be present in message's JSON representation
 		 */
 		INVALID_KEY_COMBINATION("Both %s and %s must not be present in message's JSON representation",
-				Category.PROGRAMMING_ERROR, 53), 
+				Category.PROGRAMMING_ERROR, 53),
 		/**
 		 * Missing parameter %s
 		 */
-		MISSING_PARAM("Missing parameter %s", Category.PROGRAMMING_ERROR, 54), 
+		MISSING_PARAM("Missing parameter %s", Category.PROGRAMMING_ERROR, 54),
 		/**
 		 * Invalid email address %s
 		 */
-		INVALID_EMAIL_ADDRESS("Invalid email address %s", Category.USER_INPUT, 55), 
+		INVALID_EMAIL_ADDRESS("Invalid email address %s", Category.USER_INPUT, 55),
 		/**
 		 * Message could not be sent
 		 */
-		SEND_FAILED_UNKNOWN("Message could not be sent", Category.PROGRAMMING_ERROR, 56), 
+		SEND_FAILED_UNKNOWN("Message could not be sent", Category.PROGRAMMING_ERROR, 56),
 		/**
 		 * Invalid unique message identifier: %s
 		 */
-		INVALID_MAIL_IDENTIFIER("Invalid unique message identifier: %s", Category.PROGRAMMING_ERROR, 57), 
+		INVALID_MAIL_IDENTIFIER("Invalid unique message identifier: %s", Category.PROGRAMMING_ERROR, 57),
 		/**
 		 * Could not create a PartModifier instance from name %s
 		 */
 		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %s",
-				Category.PROGRAMMING_ERROR, 58), 
+				Category.PROGRAMMING_ERROR, 58),
 		/**
 		 * User %s has no keep-seen access on IMAP-Folder %s
 		 */
-		NO_KEEP_SEEN_ACCESS("User %s has no keep-seen access to mail folder %s", Category.PERMISSION, 59), 
+		NO_KEEP_SEEN_ACCESS("User %s has no keep-seen access to mail folder %s", Category.PERMISSION, 59),
 		/**
 		 * Unknown parameter container type %d
 		 */
-		UNKNOWN_PARAM_CONTAINER_TYPE("Unknown parameter container type %d", Category.PROGRAMMING_ERROR, 60), 
+		UNKNOWN_PARAM_CONTAINER_TYPE("Unknown parameter container type %d", Category.PROGRAMMING_ERROR, 60),
 		/**
 		 * Invalid integer value %s
 		 */
-		INVALID_INT_VALUE("Invalid integer value %s", Category.PROGRAMMING_ERROR, 61), 
+		INVALID_INT_VALUE("Invalid integer value %s", Category.PROGRAMMING_ERROR, 61),
 		/**
 		 * Action %s is not supported by %s
 		 */
-		UNSUPPORTED_ACTION("Action %s is not supported by %s", Category.PROGRAMMING_ERROR, 62), 
+		UNSUPPORTED_ACTION("Action %s is not supported by %s", Category.PROGRAMMING_ERROR, 62),
 		/**
 		 * Deletion of message %s failed
 		 */
-		MESSAGE_DELETE_FAILED("Deletion of message %s failed", Category.PROGRAMMING_ERROR, 63), 
+		MESSAGE_DELETE_FAILED("Deletion of message %s failed", Category.PROGRAMMING_ERROR, 63),
 		/**
 		 * No attachment was found with id %s in message %s
 		 */
-		NO_ATTACHMENT_FOUND("No attachment was found with id %s in message %s", Category.USER_INPUT, 64), 
+		NO_ATTACHMENT_FOUND("No attachment was found with id %s in message %s", Category.USER_INPUT, 64),
 		/**
 		 * Per-File Upload Quota (%d) exceeded for file %s (size=%d)
 		 */
@@ -395,93 +393,111 @@ public class OXMailException extends OXException {
 		/**
 		 * Upload Quota (%d) exceeded
 		 */
-		UPLOAD_QUOTA_EXCEEDED("Upload Quota (%d) exceeded", Category.USER_INPUT, 66), 
+		UPLOAD_QUOTA_EXCEEDED("Upload Quota (%d) exceeded", Category.USER_INPUT, 66),
 		/**
 		 * Missing user default email address in mail settings
 		 */
-		MISSING_DEFAULT_EMAIL_ADDRESS("Missing user default email address in mail settings", Category.SETUP_ERROR, 67), 
+		MISSING_DEFAULT_EMAIL_ADDRESS("Missing user default email address in mail settings", Category.SETUP_ERROR, 67),
 		/**
 		 * Unknown (IMAP) folder open mode %d
 		 */
-		UNKNOWN_FOLDER_MODE("Unknown (IMAP) folder open mode %d", Category.PROGRAMMING_ERROR, 68), 
+		UNKNOWN_FOLDER_MODE("Unknown (IMAP) folder open mode %d", Category.PROGRAMMING_ERROR, 68),
 		/**
 		 * %s attachment could not be save due to an unsupported MIME type %s
 		 */
-		UNSUPPORTED_VERSIT_ATTACHMENT("%s attachment could not be save due to an unsupported MIME type %s", Category.USER_INPUT, 69), 
+		UNSUPPORTED_VERSIT_ATTACHMENT("%s attachment could not be save due to an unsupported MIME type %s",
+				Category.USER_INPUT, 69),
 		/**
 		 * Versit object %s could not be saved
 		 */
-		FAILED_VERSIT_SAVE("Versit object could not be saved", Category.PROGRAMMING_ERROR, 70), 
+		FAILED_VERSIT_SAVE("Versit object could not be saved", Category.PROGRAMMING_ERROR, 70),
 		/**
 		 * Unsupported MIME type %s
 		 */
-		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %s", Category.PROGRAMMING_ERROR, 71), 
+		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %s", Category.PROGRAMMING_ERROR, 71),
 		/**
 		 * IMAP search failed due to following reason: %s Switching to
 		 * application-based search
 		 */
 		IMAP_SEARCH_FAILED("IMAP search failed due to following reason: %s Switching to application-based search",
-				Category.SUBSYSTEM_OR_SERVICE_DOWN, 72), 
+				Category.SUBSYSTEM_OR_SERVICE_DOWN, 72),
 		/**
 		 * IMAP sort failed due to following reason: %s Switching to
 		 * application-based sorting
 		 */
 		IMAP_SORT_FAILED("IMAP sort failed due to following reason: %s Switching to application-based sorting",
-				Category.SUBSYSTEM_OR_SERVICE_DOWN, 73), 
+				Category.SUBSYSTEM_OR_SERVICE_DOWN, 73),
 		/**
 		 * No recipient(s) has been defined for new message
 		 */
-		MISSING_RECIPIENTS("There are no recipient(s) for the new message.", Category.USER_INPUT, 74), 
+		MISSING_RECIPIENTS("There are no recipient(s) for the new message.", Category.USER_INPUT, 74),
 		/**
 		 * Draft could not be edited in read-only IMAP-Folder %s
 		 */
-		NO_DRAFT_EDIT("Draft message could not be edited in read-only mail folder %s", Category.PERMISSION, 75), 
+		NO_DRAFT_EDIT("Draft message could not be edited in read-only mail folder %s", Category.PERMISSION, 75),
 		/**
 		 * Folder read-only check failed
 		 */
-		FAILED_READ_ONLY_CHECK("Folder read-only check failed", Category.PROGRAMMING_ERROR, 76), 
+		FAILED_READ_ONLY_CHECK("Folder read-only check failed", Category.PROGRAMMING_ERROR, 76),
 		/**
 		 * IMAP Property error: %s
 		 */
-		IMAP_PROPERTY_ERROR("IMAP Property error: %s", Category.SETUP_ERROR, 77), 
+		IMAP_PROPERTY_ERROR("IMAP Property error: %s", Category.SETUP_ERROR, 77),
 		/**
 		 * Unknown action: %s
 		 */
-		UNKNOWN_ACTION("Unknown or unsupported action: %s", Category.PROGRAMMING_ERROR, 78), 
+		UNKNOWN_ACTION("Unknown or unsupported action: %s", Category.PROGRAMMING_ERROR, 78),
 		/**
 		 * Unknown color label index: %d
 		 */
-		UNKNOWN_COLOR_LABEL("Unknown color label: %s", Category.PROGRAMMING_ERROR, 79), 
+		UNKNOWN_COLOR_LABEL("Unknown color label: %s", Category.PROGRAMMING_ERROR, 79),
 		/**
 		 * Move/Copy failed. New message with UID %d could not be found in
 		 * destination folder %s
 		 */
 		MOVE_COPY_FAILED("Move/Copy failed. New message with UID %d could not be found in destination folder %s",
-				Category.PROGRAMMING_ERROR, 80), 
+				Category.PROGRAMMING_ERROR, 80),
 		/**
 		 * Invalid Content-Type value: %s
 		 */
-		INVALID_CONTENT_TYPE("Invalid Content-Type value: %s", Category.INTERNAL_ERROR, 81), 
+		INVALID_CONTENT_TYPE("Invalid Content-Type value: %s", Category.INTERNAL_ERROR, 81),
 		/**
 		 * Message could not be moved to trash folder. Quota exceeded
 		 */
 		DELETE_FAILED_OVER_QUOTA("Message could not be moved to trash folder. Quota exceeded",
-				Category.EXTERNAL_RESOURCE_FULL, 82), 
+				Category.EXTERNAL_RESOURCE_FULL, 82),
 		/**
 		 * Message has been successfully sent, but could not be copied to sent
 		 * folder due to exceeded quota
 		 */
 		COPY_TO_SENT_FOLDER_FAILED(
 				"Message has been successfully sent, but a copy was not placed in your sent folder due to exceeded quota.",
-				Category.EXTERNAL_RESOURCE_FULL, 83), 
-		/**		
+				Category.EXTERNAL_RESOURCE_FULL, 83),
+		/**
 		 * A protocol exception occured during execution of an IMAP request: %s
 		 */
-		PROTOCOL_ERROR("A protocol exception occured during execution of an IMAP request: %s", Category.INTERNAL_ERROR, 84),
+		PROTOCOL_ERROR("A protocol exception occured during execution of an IMAP request: %s", Category.INTERNAL_ERROR,
+				84),
 		/**
 		 * Folder %s does not allow subfolders.
 		 */
-		FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %s does not allow subfolders.", Category.PERMISSION, 85);
+		FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %s does not allow subfolders.", Category.PERMISSION, 85),
+		/**
+		 * Process was interrupted while waiting for a free IMAP connection.
+		 * Please try again.
+		 */
+		INTERRUPT_ERROR("Process was interrupted while waiting for a free IMAP connection. Please try again.",
+				Category.TRY_AGAIN, 86),
+		/**
+		 * Flag %s could not be set in message %d in folder %s due to following
+		 * reason: %s
+		 */
+		FLAG_FAILED("Flag %s could not be changed in message %d in folder %s due to following reason: %s",
+				Category.INTERNAL_ERROR, 87),
+		/**
+		 * Mail folder cannot be created. Name must not contain character '%s'
+		 */
+		INVALID_FOLDER_NAME("Mail folder cannot be created. Name must not contain character '%s'", Category.USER_INPUT, 88);
 
 		/**
 		 * Message of the exception.
@@ -526,11 +542,11 @@ public class OXMailException extends OXException {
 			return category;
 		}
 	}
-	
+
 	public static final String getFormattedMessage(final MailCode mailCode, final Object... msgArgs) {
 		return String.format(mailCode.getMessage(), msgArgs);
 	}
-	
+
 	public OXMailException(final MailCode mailCode) {
 		this(mailCode, null, new Object[0]);
 	}
@@ -540,10 +556,7 @@ public class OXMailException extends OXException {
 	}
 
 	public OXMailException(final MailCode mailCode, final Exception cause, final Object... messageArgs) {
-		super(Component.EMAIL, mailCode.message, cause);
-		setCategory(mailCode.category);
-		setDetailNumber(mailCode.detailNumber);
-		setMessageArgs(messageArgs);
+		super(Component.EMAIL, mailCode.category, mailCode.detailNumber, mailCode.message, cause, messageArgs);
 	}
 
 }

@@ -357,7 +357,7 @@ public class CalendarCommonCollection {
                     }
                 }
             }
-        }        
+        } 
     }
     
     static final void checkAndFillIfUserIsUser(CalendarDataObject cdao, Participant p) {
@@ -405,7 +405,7 @@ public class CalendarCommonCollection {
         start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
         long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10));
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
-        if (rss.size() == 1) {
+        if (rss != null && rss.size() == 1) {
             RecurringResult rs = rss.getRecurringResult(0);
             return new Date(rs.getStart()-(alarm*60*1000L));
         } else {
@@ -1137,6 +1137,9 @@ public class CalendarCommonCollection {
         }
         if (!cdao.containsNote()) {
             cdao.setNote(edao.getNote());
+        }
+        if (!cdao.containsCreatedBy()) {
+            cdao.setCreatedBy(edao.getCreatedBy());
         }
         
     }

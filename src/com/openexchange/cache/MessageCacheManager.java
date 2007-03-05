@@ -56,21 +56,20 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.mail.Message;
-
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.SessionObject;
 
 /**
  * MessageCacheManager - a tiny cache for instances of
- * <code>javax.mail.Message</code> which does only operate in local memory and
+ * <code>MessageCacheObject</code> which does only operate in local memory and
  * does not use any auxiliary. Furthermore it is heavily volatile cause it's
  * intended to fasten list requests on IMAP folders. All user-constrained
  * entries are going to be deleted (if any present) and refilled on every list
@@ -117,10 +116,17 @@ public class MessageCacheManager {
 		}
 	}
 
+	/**
+	 * @return <code>true</code> if cache is initialized, <code>false</code>
+	 *         otherwise
+	 */
 	public final static boolean isInitialized() {
 		return initialized;
 	}
 
+	/**
+	 * @return the singleton instance of <code>MessageCacheManager</code>
+	 */
 	public final static MessageCacheManager getInstance() throws OXException {
 		if (!initialized) {
 			LOCK.lock();
@@ -136,56 +142,84 @@ public class MessageCacheManager {
 		return instance;
 	}
 
-	public final Message getMessage(final SessionObject session, final long msgUID, final String folder) {
+	/**
+	 * @return <code>MessageCacheObject</code> instance matching given folder
+	 *         and UID
+	 */
+	public final MessageCacheObject getMessage(final SessionObject session, final long msgUID, final String folder) {
 		return getMessage(session.getUserObject().getId(), msgUID, folder, session.getContext());
 	}
 
+	/**
+	 * @return <code>MessageCacheObject</code> instance matching given folder
+	 *         and UID
+	 */
 	@SuppressWarnings("unchecked")
-	public final Message getMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, Message> msgMap = (HashMap<String, Message>) msgCache.get(getUserKey(user, ctx));
+	public final MessageCacheObject getMessage(final int user, final long msgUID, final String folder, final Context ctx) {
+		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+				user, ctx));
 		if (msgMap == null) {
 			return null;
 		}
 		return msgMap.get(getMsgKey(msgUID, folder));
 	}
 
-	public final Message[] getMessages(final SessionObject session, final long[] msgUIDs, final String folder) {
+	/**
+	 * @return <code>MessageCacheObject</code> instances matching given folder
+	 *         and UIDs
+	 */
+	public final MessageCacheObject[] getMessages(final SessionObject session, final long[] msgUIDs, final String folder) {
 		return getMessages(session.getUserObject().getId(), msgUIDs, folder, session.getContext());
 	}
 
+	/**
+	 * @return <code>MessageCacheObject</code> instances matching given folder
+	 *         and UIDs
+	 */
 	@SuppressWarnings("unchecked")
-	public final Message[] getMessages(final int user, final long[] msgUIDs, final String folder, final Context ctx) {
-		final Map<String, Message> msgMap = (HashMap<String, Message>) msgCache.get(getUserKey(user, ctx));
+	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
+			final Context ctx) {
+		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+				user, ctx));
 		if (msgMap == null) {
 			return null;
 		}
-		Message[] retval = new Message[msgUIDs.length];
+		MessageCacheObject[] retval = new MessageCacheObject[msgUIDs.length];
 		for (int i = 0; i < retval.length; i++) {
 			retval[i] = msgMap.get(getMsgKey(msgUIDs[i], folder));
 		}
 		return retval;
 	}
 
-	public final void putMessage(final SessionObject session, final long msgUID, final Message msg) throws OXException {
+	/**
+	 * Puts given <code>MessageCacheObject</code> instance into cache
+	 */
+	public final void putMessage(final SessionObject session, final long msgUID, final MessageCacheObject msg)
+			throws OXException {
 		putMessage(session.getUserObject().getId(), msgUID, msg, session.getContext());
 	}
 
+	/**
+	 * Puts given <code>MessageCacheObject</code> instance into cache
+	 */
 	@SuppressWarnings("unchecked")
-	public final void putMessage(final int user, final long msgUID, final Message msg, final Context ctx)
+	public final void putMessage(final int user, final long msgUID, final MessageCacheObject msg, final Context ctx)
 			throws OXException {
 		if (msg == null) {
 			return;
 		}
-		Map<String, Message> msgMap = (HashMap<String, Message>) msgCache.get(getUserKey(user, ctx));
+		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+				ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
 			 */
-			msgMap = new HashMap<String, Message>();
+			msgMap = new HashMap<String, MessageCacheObject>();
 			insert = true;
 		}
-		msgMap.put(getMsgKey(msgUID, ((MessageCacheObject) msg).getFolderFullname()), msg);
+		msgMap.put(getMsgKey(msgUID, MailFolderObject.prepareFullname(msg.getFolderFullname(), msg.getSeparator())),
+				msg);
 		if (insert) {
 			try {
 				msgCache.put(getUserKey(user, ctx), msgMap);
@@ -195,23 +229,40 @@ public class MessageCacheManager {
 		}
 	}
 
+	/**
+	 * Removes <code>MessageCacheObject</code> instance from cache which
+	 * matches given folder and UID
+	 */
 	protected final void removeMessage(final SessionObject session, final long msgUID, final String folder) {
 		removeMessage(session.getUserObject().getId(), msgUID, folder, session.getContext());
 	}
 
+	/**
+	 * Removes <code>MessageCacheObject</code> instance from cache which
+	 * matches given folder and UID
+	 */
 	@SuppressWarnings("unchecked")
 	protected final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, Message> msgMap = (HashMap<String, Message>) msgCache.get(getUserKey(user, ctx));
+		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+				user, ctx));
 		if (msgMap == null) {
 			return;
 		}
 		msgMap.remove(getMsgKey(msgUID, folder));
 	}
 
+	/**
+	 * @return <code>true</code> if cache currently contains messages
+	 *         belonging to given user, <code>false</code> otherwise
+	 */
 	public final boolean containsUserMessages(final SessionObject session) {
 		return containsUserMessages(session.getUserObject().getId(), session.getContext());
 	}
 
+	/**
+	 * @return <code>true</code> if cache currently contains messages
+	 *         belonging to given user, <code>false</code> otherwise
+	 */
 	public final boolean containsUserMessages(final int user, final Context ctx) {
 		try {
 			return (msgCache.get(getUserKey(user, ctx)) != null);
@@ -220,10 +271,16 @@ public class MessageCacheManager {
 		}
 	}
 
+	/**
+	 * Clears cache from messages belonging to given user
+	 */
 	public void clearUserMessages(final SessionObject session) throws OXException {
 		clearUserMessages(session.getUserObject().getId(), session.getContext());
 	}
 
+	/**
+	 * Clears cache from messages belonging to given user
+	 */
 	public void clearUserMessages(final int user, final Context ctx) throws OXException {
 		try {
 			msgCache.remove(getUserKey(user, ctx));

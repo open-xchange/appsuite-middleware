@@ -69,7 +69,7 @@ import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
 /**
  * DeleteRegistry
@@ -111,7 +111,8 @@ public class DeleteRegistry {
 		/*
 		 * At last insert folder delete listener
 		 */
-		registerDeleteListener(new OXFolderAction());
+		registerDeleteListener(new OXFolderDeleteListener());
+		//registerDeleteListener(new OXFolderAction());
 	}
 	
 	public static DeleteRegistry getInstance() {

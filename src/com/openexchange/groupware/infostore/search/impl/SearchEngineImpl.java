@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -72,15 +73,23 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.SearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.groupware.tasks.TaskLogic;
+import com.openexchange.groupware.tasks.Tools;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.groupware.infostore.Classes;
 
 
@@ -97,6 +106,8 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 	
 	private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(SearchEngineImpl.class);
+	
+	private InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 	
 	// private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
 	
@@ -115,9 +126,16 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 	
 	public SearchEngineImpl(DBProvider provider) {
 		super(provider);
+		security.setProvider(provider);
 	}
 	
-	
+	@Override
+	public void setProvider(DBProvider provider) {
+		super.setProvider(provider);
+		if(security!=null)
+			security.setProvider(provider);
+	}
+
 	@OXThrowsMultiple(
 			category={Category.PROGRAMMING_ERROR, Category.TRY_AGAIN}, 
 			
@@ -128,34 +146,66 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
 	)
 	public SearchIterator search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+		
+		List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        try {
+            final int userId = user.getId();
+            if (folderId == NOT_SET || folderId == NO_FOLDER) {
+                final SearchIterator iter = OXFolderTools
+                    .getAllVisibleFoldersIteratorOfModule(userId,
+                        user.getGroups(), userConfig.getAccessibleModules(),
+                        FolderObject.INFOSTORE, ctx);
+                while (iter.hasNext()) {
+                    final FolderObject folder = (FolderObject) iter.next();
+                    EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
+                    if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
+                        own.add(folder.getObjectID());
+                    } else if (perm.canReadAllObjects()){
+                        all.add(folder.getObjectID());
+                    }
+                }
+            } else {
+                EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);
+                if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
+                    own.add(folderId);
+                } else if (perm.canReadAllObjects()){
+                    all.add(folderId);
+                } else {
+                	return SearchIteratorAdapter.EMPTY_ITERATOR;
+                }
+            }
+            all = Collections.unmodifiableList(all);
+            own = Collections.unmodifiableList(own);
+        } catch (SearchIteratorException e) {
+            throw new OXException(e);
+        }
+		
+        if(all.isEmpty() && own.isEmpty()) {
+        	return SearchIteratorAdapter.EMPTY_ITERATOR;
+        }
+        
 		StringBuffer SQL_QUERY = new StringBuffer();
 		SQL_QUERY.append(getResultFieldsSelect(cols));
-		SQL_QUERY.append(" FROM infostore JOIN infostore_document JOIN oxfolder_tree JOIN oxfolder_permissions ON oxfolder_tree.fuid = oxfolder_permissions.fuid AND infostore.folder_id = oxfolder_tree.fuid AND infostore.cid=");
-		SQL_QUERY.append(ctx.getContextId());
-		SQL_QUERY.append(" AND infostore_document.cid=");
-		SQL_QUERY.append(ctx.getContextId());
-		SQL_QUERY.append(" AND oxfolder_tree.cid = ");
-		SQL_QUERY.append(ctx.getContextId());
-		SQL_QUERY.append(" AND oxfolder_permissions.cid = ");
-		SQL_QUERY.append(ctx.getContextId());
-		SQL_QUERY.append(" AND ((oxfolder_tree.permission_flag = ");
-		SQL_QUERY.append(FolderObject.PUBLIC_PERMISSION);
-		SQL_QUERY.append(" OR (oxfolder_tree.permission_flag = ");
-		SQL_QUERY.append(FolderObject.PRIVATE_PERMISSION);
-		SQL_QUERY.append(" AND oxfolder_tree.created_from = ");
-		SQL_QUERY.append(user.getId());
-		SQL_QUERY.append(")) OR ((oxfolder_permissions.admin_flag = 1 AND oxfolder_permissions.permission_id = ");
-		SQL_QUERY.append(user.getId());
-		SQL_QUERY.append(") OR (oxfolder_permissions.orp > ");
-		SQL_QUERY.append(OCLPermission.NO_PERMISSIONS);
-		SQL_QUERY.append(" AND oxfolder_permissions.permission_id IN ");
-		SQL_QUERY.append(StringCollection.getSqlInString(user.getId(), userConfig.getGroups()));
-		SQL_QUERY.append(")))");
-		if ((folderId != NO_FOLDER) && (folderId != NOT_SET)) {
-			SQL_QUERY.append(" AND infostore.folder_id=");
-			SQL_QUERY.append(folderId);
+		SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
+		.append(ctx.getContextId());
+		boolean needOr = false;
+		
+		if(!all.isEmpty()) {
+			SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
+			needOr = true;
 		}
-		SQL_QUERY.append(" AND infostore.id=infostore_document.infostore_id AND infostore.version=infostore_document.version_number");
+		
+		if(!own.isEmpty()) {
+			if(needOr) {
+				SQL_QUERY.append(" OR ");
+			} else {
+				SQL_QUERY.append(" AND (");
+			}
+			SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(")))");
+ 		} else {
+ 			SQL_QUERY.append(")");
+ 		}
 		
 		query = query.replace('*', '%');
 		query = query.replace('?', '_');
@@ -229,6 +279,16 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			LOG.error("",e);
 			throw EXCEPTIONS.create(1,e);
 		}
+	}
+
+	private String join(List<Integer> all) {
+		StringBuffer joined = new StringBuffer();
+		for(Integer i : all) {
+			joined.append(i.toString());
+			joined.append(",");
+		}
+		joined.setLength(joined.length()-1);
+		return joined.toString();
 	}
 
 	public void index(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws OXException { }

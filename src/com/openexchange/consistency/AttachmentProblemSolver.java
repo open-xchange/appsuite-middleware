@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 
 /**
@@ -166,7 +167,7 @@ public class AttachmentProblemSolver extends ProblemSolver {
 					LOG.info("Created dummy entry for: " + old_identifier + 
 							". New identifier is: " + identifier);
 				}
-			} catch (IOException e) {
+			} catch (FileStorageException e) {
 				LOG.debug("", e);
 			} catch (TransactionException e) {
 				LOG.debug("", e);

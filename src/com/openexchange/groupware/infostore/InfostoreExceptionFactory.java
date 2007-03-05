@@ -82,5 +82,12 @@ public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
 	public InfostoreException create(int id, Throwable cause, Object...msgParams) {
 		return (InfostoreException) createException(id,cause, (Object[]) msgParams);
 	}
+
+	public static boolean isPermissionException(InfostoreException x) {
+		switch(x.getDetailNumber()) {
+		default: return false;
+		case 400: case 401: case 418: case 417: case 402: case 403: case 404: case 406: case 407: case 408: case 409: case 410: case 411: return true;
+		}
+	}
 	
 }

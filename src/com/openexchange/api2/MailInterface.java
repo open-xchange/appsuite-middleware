@@ -51,7 +51,6 @@
 
 package com.openexchange.api2;
 
-import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Store;
 
@@ -77,6 +76,8 @@ public interface MailInterface {
 	public static final int INDEX_SPAM = 2;
 
 	public static final int INDEX_TRASH = 3;
+	
+	public static final int INDEX_INBOX = 4;
 
 	public static final int MAIL_PARAM_HARD_DELETE = 1;
 	
@@ -241,7 +242,7 @@ public interface MailInterface {
 	 * and its possible file attachments contained in given instance of
 	 * <code>uploadEvent</code>.
 	 */
-	public String sendMessage(JSONMessageObject msgObj, UploadEvent uploadEvent) throws OXException;
+	public String sendMessage(JSONMessageObject msgObj, UploadEvent uploadEvent, int sendType) throws OXException;
 
 	/**
 	 * Creates an instance of <code>JSONMessageObject</code> which contains
@@ -309,7 +310,7 @@ public interface MailInterface {
 	 * Returns the store's folder identfied through given <code>String</code>
 	 * instance
 	 */
-	public Folder getFolder(String folder, boolean checkFolder) throws OXException;
+	public MailFolderObject getFolder(String folder, boolean checkFolder) throws OXException;
 
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all
@@ -333,6 +334,11 @@ public interface MailInterface {
 	 * Deletes given folder
 	 */
 	public String deleteFolder(String folder) throws OXException;
+	
+	/**
+	 * Returns user-defined inbox folder
+	 */
+	public String getInboxFolder() throws OXException;
 
 	/**
 	 * Returns user-defined drafts folder

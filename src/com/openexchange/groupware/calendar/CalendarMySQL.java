@@ -180,6 +180,7 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(AppointmentObject.FREE);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(" GROUP BY pd.intfield01 ");
         sb.append(ORDER_BY);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -204,6 +205,7 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(AppointmentObject.FREE);
+        sb.append(" GROUP BY pd.intfield01 ");
         sb.append(ORDER_BY);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -226,6 +228,7 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(AppointmentObject.FREE);
+        sb.append(" GROUP BY pd.intfield01 ");
         sb.append(ORDER_BY);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -244,10 +247,9 @@ class CalendarMySQL implements CalendarSqlImp {
         getRange(sb);
         sb.append(PDM_MEMBER_UID_IS);
         sb.append(uid);
-        //sb.append(" AND pd.intfield06 != "); // TODO: this must be done for freebusy but not for the conflict query!
-        //sb.append(AppointmentObject.FREE);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(" GROUP BY pd.intfield01 ");
         sb.append(ORDER_BY);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -266,12 +268,9 @@ class CalendarMySQL implements CalendarSqlImp {
         getRange(sb);
         sb.append(" AND pdr.id = ");
         sb.append(uid);
-        //sb.append(" AND pd.intfield06 != "); // TODO: this must be done for freebusy but not for the conflict query!
-        //sb.append(AppointmentObject.FREE);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
-        sb.append(" AND pdm.confirm != ");
-        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        sb.append(" GROUP BY pd.intfield01 ");
         sb.append(ORDER_BY);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -612,11 +611,8 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(c.getContextId());
         sb.append(WHERE);
         getSince(sb);
-        sb.append(PD_FID_IS_NULL);
-        sb.append(PDM_PFID_IS);
+        sb.append(" AND pd.fid = ");
         sb.append(fid);
-        sb.append(PDM_MEMBER_UID_IS);
-        sb.append(uid);
         PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setLong(1, d1.getTime());
         return pst;
@@ -1014,6 +1010,9 @@ class CalendarMySQL implements CalendarSqlImp {
                 int lastid = -1;
                 int lasttype = -1;
                 for (int a = 0; a < p.length; a++) {
+                    if (p[a].getIdentifier() == 0 && p[a].getType() == Participant.EXTERNAL_USER && p[a].getEmailAddress() != null) {
+                        p[a].setIdentifier(p[a].getEmailAddress().hashCode());
+                    }
                     if (!(lastid == p[a].getIdentifier() && lasttype == p[a].getType())) {
                         lastid = p[a].getIdentifier();
                         lasttype = p[a].getType();
@@ -1590,6 +1589,9 @@ class CalendarMySQL implements CalendarSqlImp {
                 int lastid = -1;
                 int lasttype = -1;
                 for (int a = 0; a < new_participants.length; a++) {
+                    if (new_participants[a].getIdentifier() == 0 && new_participants[a].getType() == Participant.EXTERNAL_USER && new_participants[a].getEmailAddress() != null) {
+                        new_participants[a].setIdentifier(new_participants[a].getEmailAddress().hashCode());
+                    }
                     if (!(lastid == new_participants[a].getIdentifier() && lasttype == new_participants[a].getType())) {
                         lastid = new_participants[a].getIdentifier();
                         lasttype = new_participants[a].getType();
@@ -1626,7 +1628,7 @@ class CalendarMySQL implements CalendarSqlImp {
             try {
                 pd = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND id = ? AND type = ?");
                 for (int a = 0; a < deleted_participants.length; a++) {
-                    if (deleted_participants[a].getType() != Participant.EXTERNAL_USER || deleted_participants[a].getType() != Participant.EXTERNAL_GROUP) {
+                    if (deleted_participants[a].getType() != Participant.EXTERNAL_USER && deleted_participants[a].getType() != Participant.EXTERNAL_GROUP) {
                         pd.setInt(1, cdao.getObjectID());
                         pd.setInt(2, cid);
                         pd.setInt(3, deleted_participants[a].getIdentifier());
@@ -1634,12 +1636,12 @@ class CalendarMySQL implements CalendarSqlImp {
                         pd.addBatch();
                     } else {
                         if (pde == null) {
-                            pde = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND type = ? AND dn LIKE ?");
+                            pde = writecon.prepareStatement("delete from prg_date_rights WHERE object_id = ? AND cid = ? AND type = ? AND ma LIKE ?");
                         }
                         pde.setInt(1, cdao.getObjectID());
                         pde.setInt(2, cid);
                         pde.setInt(3, deleted_participants[a].getType());
-                        pde.setString(4, deleted_participants[a].getDisplayName());
+                        pde.setString(4, deleted_participants[a].getEmailAddress());
                         pde.addBatch();
                     }
                 }
@@ -2063,7 +2065,7 @@ class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement prep = null;
         long last_modified = 0L;
         try  {
-            readcon = DBPool.pickupWriteable(c);
+            readcon = DBPool.pickup(c);
             StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01 = ");
             sb.append(oid);
@@ -2409,6 +2411,10 @@ class CalendarMySQL implements CalendarSqlImp {
                     close_read = true;
                 }
                 if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon) && recurring_action != CalendarRecurringCollection.RECURRING_VIRTUAL_ACTION) {
+                    if (close_read && readcon != null) {
+                        DBPool.push(so.getContext(), readcon);
+                        close_read = false;
+                    }
                     deleteOnlyOneParticipantInPrivateFolder(oid, cid, uid, fid, new ContextImpl(cid), writecon, so);
                     return;
                 } else {
@@ -2455,6 +2461,10 @@ class CalendarMySQL implements CalendarSqlImp {
                         }
                     } else if (recurring_action == CalendarRecurringCollection.RECURRING_EXCEPTION_ACTION) {
                         if (!checkIfUserIstheOnlyParticipant(cid, oid, readcon)) {
+                            if (close_read && readcon != null) {
+                                DBPool.push(so.getContext(), readcon);
+                                close_read = false;
+                            }
                             // remove participant (update)
                             CalendarCommonCollection.removeParticipant(edao, uid);
                             edao.setModifiedBy(uid);
@@ -2528,7 +2538,6 @@ class CalendarMySQL implements CalendarSqlImp {
             oid = edao.getRecurrenceID();
         }
         
-        
         PreparedStatement d_dates = null;
         PreparedStatement d_members = null;
         PreparedStatement copy_members = null;
@@ -2538,6 +2547,8 @@ class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement del_members = null;
         PreparedStatement del_rights = null;
         PreparedStatement update = null;
+        
+        long modified = 0;
         
         try {
             StringBuilder delete_statement = new StringBuilder(128);
@@ -2606,13 +2617,15 @@ class CalendarMySQL implements CalendarSqlImp {
             del_rights = writecon.prepareStatement(delete_statement.toString());
             del_rights.addBatch();
             
+            modified = System.currentTimeMillis();
+            
             delete_statement = new StringBuilder(128);
             delete_statement.append("UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ");
             delete_statement.append(cid);
             delete_statement.append(DATES_IDENTIFIER_IS);
             delete_statement.append(oid);
             update = writecon.prepareStatement(delete_statement.toString());
-            update.setLong(1, System.currentTimeMillis());
+            update.setLong(1, modified);
             update.setInt(2, uid);
             update.addBatch();
             
@@ -2638,6 +2651,8 @@ class CalendarMySQL implements CalendarSqlImp {
         }
         
         if (edao != null) {
+            edao.setModifiedBy(uid);
+            edao.setChangingDate(new Timestamp(modified));
             triggerDeleteEvent(oid, fid, so, edao);
         } else {
             triggerDeleteEvent(oid, fid, so, null);

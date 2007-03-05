@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.imap;
 
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -156,7 +158,7 @@ public class IMAPUtils {
 	private static final String HDR_REFERENCES = "References";
 
 	private static final String HDR_X_PRIORITY = "X-Priority";
-	
+
 	private static final String HDR_DISP_NOT_TO = "Disposition-Notification-To";
 
 	private static abstract class FetchItemHandler {
@@ -170,11 +172,11 @@ public class IMAPUtils {
 		public final Map<String, HeaderHandler> getHdrHandlers() {
 			return hdrHandlers;
 		}
-		
+
 		public final HeaderHandler getHdrHandler(final String headerName) {
 			return hdrHandlers.get(headerName);
 		}
-		
+
 		public final int getHeadersSize() {
 			return hdrHandlers.size();
 		}
@@ -310,7 +312,7 @@ public class IMAPUtils {
 	private IMAPUtils() {
 		super();
 	}
-	
+
 	private static final String STRING_HAS_CHILDREN = "\\HasChildren";
 
 	/**
@@ -397,15 +399,16 @@ public class IMAPUtils {
 			return false;
 		}
 	}
-	
+
 	private static final String STR_UID = "UID";
-	
+
 	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
-	
+
 	private static final String TMPL_FETCH_HEADER_NON_REV1 = "FETCH %s (RFC822.HEADER)";
-	
-	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
-	
+
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern
+			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
+
 	public static final Map<String, String> loadBrokenHeaders(final Message msg, final boolean uid)
 			throws MessagingException, ProtocolException {
 		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
@@ -425,22 +428,22 @@ public class IMAPUtils {
 			if (response.isOK()) {
 				final StringBuilder valBuilder = new StringBuilder();
 				NextResponse: for (int i = 0; i < r.length - 1; i++) {
-				    if (r[i] == null || !(r[i] instanceof FetchResponse)) {
+					if (r[i] == null || !(r[i] instanceof FetchResponse)) {
 						continue NextResponse;
 					}
-				    final FetchResponse f = ((FetchResponse)r[i]);
-				    if (f.getNumber() != msg.getMessageNumber()) {
-				    	continue NextResponse;
-				    }
-				    final Matcher m = PATTERN_PARSE_HEADER.matcher(f.toString());
-				    while (m.find()) {
-				    	valBuilder.append(m.group(2));
-				    	if (m.group(3) != null) {
-				    		valBuilder.append(m.group(3).replaceAll("\r?\n", ""));
-				    	}
-				    	retval.put(m.group(1), valBuilder.toString());
-				    	valBuilder.setLength(0);
-				    }
+					final FetchResponse f = ((FetchResponse) r[i]);
+					if (f.getNumber() != msg.getMessageNumber()) {
+						continue NextResponse;
+					}
+					final Matcher m = PATTERN_PARSE_HEADER.matcher(f.toString());
+					while (m.find()) {
+						valBuilder.append(m.group(2));
+						if (m.group(3) != null) {
+							valBuilder.append(removeHdrLineBreak(m.group(3)));
+						}
+						retval.put(m.group(1), valBuilder.toString());
+						valBuilder.setLength(0);
+					}
 				}
 			}
 		} finally {
@@ -450,7 +453,7 @@ public class IMAPUtils {
 		}
 		return null;
 	}
-	
+
 	private static final String COMMAND_SEARCH = "SEARCH";
 
 	/**
@@ -576,13 +579,16 @@ public class IMAPUtils {
 								String num;
 								while ((num = ir.readAtomString()) != null) {
 									try {
-										newMsgs[index++] = new MessageCacheObject(imapFolder.getFullName(), Integer
-												.parseInt(num));
+										newMsgs[index++] = new MessageCacheObject(imapFolder.getFullName(), imapFolder
+												.getSeparator(), Integer.parseInt(num));
 										// newMsgs[index++] =
 										// imapFolder.getMessage(Integer.parseInt(num));
 									} catch (NumberFormatException e) {
 										LOG.error(e.getMessage(), e);
 										throw new ProtocolException("Invalid Message Number: " + num);
+									} catch (MessagingException e) {
+										LOG.error(e.getMessage(), e);
+										throw new ProtocolException(e.getMessage());
 									}
 								}
 							}
@@ -811,25 +817,25 @@ public class IMAPUtils {
 			LOG.error(e.getMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * An IMAP argument containing at least one of the following characters
 	 * should be surrounded with quotes: * % ( ) { } " \ \s
 	 */
 	private static final Pattern PATTERN_QUOTE_ARG = Pattern.compile("[\\s\\*%\\(\\)\\{\\}\"\\\\]");
-	
+
 	private static final Pattern PATTERN_ESCAPE_ARG = Pattern.compile("[\"\\\\]");
-	
+
 	private final static String TEMPL_CREATE = "CREATE %s";
-	
+
 	private final static String REPLPAT_QUOTE = "\"";
-	
+
 	private final static String REPLACEMENT_QUOTE = "\\\\\\\"";
-	
+
 	private final static String REPLPAT_BACKSLASH = "(\\\\)([^\"])";
-	
+
 	private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\$2";
-	
+
 	/**
 	 * First encodes given fullname by using
 	 * <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code>
@@ -863,12 +869,12 @@ public class IMAPUtils {
 		}
 		return sb.toString();
 	}
-	
+
 	public static final Response[] doCommand(final IMAPStore store, final String command, final String... strings)
 			throws MessagingException {
 		return doCommand((IMAPFolder) store.getDefaultFolder(), command, strings);
 	}
-	
+
 	public static final Response[] doCommand(final IMAPFolder imapFolder, final String command, final String... strings) {
 		final IMAPProtocol p = imapFolder.getProtocol();
 		final Argument args = new Argument();
@@ -877,8 +883,9 @@ public class IMAPUtils {
 		}
 		return p.command(command, args);
 	}
-	
-	public static final void createFolder(final Store store, final String fullname) throws MessagingException, ProtocolException {
+
+	public static final void createFolder(final Store store, final String fullname) throws MessagingException,
+			ProtocolException {
 		final String folderArg = prepareStringArgument(fullname);
 		final IMAPProtocol p = ((IMAPFolder) store.getDefaultFolder()).getProtocol();
 		final Response[] r = p.command(String.format(TEMPL_CREATE, folderArg), null);
@@ -1072,8 +1079,7 @@ public class IMAPUtils {
 					if (msg instanceof MessageCacheObject) {
 						subject = MessageUtils.decodeMultiEncodedHeader(((MessageCacheObject) msg).getSubject());
 					} else {
-						subject = MessageUtils
-								.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null));
+						subject = MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null));
 					}
 					if (subject != null) {
 						foundInCurrentField = (subject.toLowerCase().indexOf(searchPatterns[i]) != -1);
@@ -1212,7 +1218,7 @@ public class IMAPUtils {
 		List<Message> l = ((List<Message>) val);
 		return l.toArray(new Message[l.size()]);
 	}
-	
+
 	private static final String STR_THREAD = "THREAD";
 
 	/**
@@ -1355,12 +1361,12 @@ public class IMAPUtils {
 	 *         with message's sequence number
 	 */
 	public static final MessageCacheObject[] getMessagesFromThreadResponse(final String folderFullname,
-			final String threadResponse) {
+			final char separator, final String threadResponse) {
 		final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
 		if (m.find()) {
 			final SmartMessageArray retval = new SmartMessageArray();
 			do {
-				retval.append(new MessageCacheObject(folderFullname, Integer.parseInt(m.group())));
+				retval.append(new MessageCacheObject(folderFullname, separator, Integer.parseInt(m.group())));
 			} while (m.find());
 			return retval.toArray();
 		}
@@ -1498,7 +1504,8 @@ public class IMAPUtils {
 					response = r[r.length - 1];
 					try {
 						if (!response.isOK()) {
-							throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR, "COPY not supported"));
+							throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+									"COPY not supported"));
 						}
 						NextResponse: for (int index = 0; index < r.length && index < uids.length; index++) {
 							if (!(r[index] instanceof IMAPResponse)) {
@@ -1697,20 +1704,20 @@ public class IMAPUtils {
 	/*
 	 * \Answered \Flagged \Draft \Deleted \Seen $MDNSent NonJunk \*
 	 */
-	
-	private static final String FLAG_ANSWERED = "\\Answered";
 
-	private static final String FLAG_DELETED = "\\Deleted";
+	public static final String FLAG_ANSWERED = "\\Answered";
 
-	private static final String FLAG_DRAFT = "\\Draft";
+	public static final String FLAG_DELETED = "\\Deleted";
 
-	private static final String FLAG_FLAGGED = "\\Flagged";
+	public static final String FLAG_DRAFT = "\\Draft";
 
-	private static final String FLAG_RECENT = "\\Recent";
+	public static final String FLAG_FLAGGED = "\\Flagged";
 
-	private static final String FLAG_SEEN = "\\Seen";
+	public static final String FLAG_RECENT = "\\Recent";
 
-	private static final String FLAG_USER = "\\User";
+	public static final String FLAG_SEEN = "\\Seen";
+
+	public static final String FLAG_USER = "\\User";
 
 	private static final String getFlagString(final Flag systemFlag) throws MessagingException {
 		if (systemFlag.equals(Flags.Flag.ANSWERED)) {
@@ -1874,7 +1881,8 @@ public class IMAPUtils {
 					if (f.getNumber() != seqnum) {
 						continue;
 					}
-					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), seqnum);
+					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder
+							.getSeparator(), seqnum);
 					final int itemCount = f.getItemCount();
 					if (itemHandlers == null) {
 						itemHandlers = createItemHandlers(itemCount, f);
@@ -1895,7 +1903,7 @@ public class IMAPUtils {
 		}
 		return retval.toArray(new MessageCacheObject[retval.size()]);
 	}
-	
+
 	/**
 	 * Performs a normal <code>FETCH</code> or an <code>UID FETCH</code>
 	 * IMAP command dependent on given parameter <code>arr</code>.
@@ -1904,7 +1912,7 @@ public class IMAPUtils {
 			final int sortField, final boolean isSequential) throws ProtocolException, MessagingException, OXException {
 		return fetchMessages(imapFolder, arr, getFetchProfile(fields, sortField), isSequential);
 	}
-	
+
 	/**
 	 * Performs a normal <code>FETCH</code> or an <code>UID FETCH</code>
 	 * IMAP command dependent on given parameter <code>arr</code>.
@@ -1970,7 +1978,8 @@ public class IMAPUtils {
 						continue;
 					}
 					final FetchResponse f = (FetchResponse) currentReponse;
-					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), f.getNumber());
+					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder
+							.getSeparator(), f.getNumber());
 					final int itemCount = f.getItemCount();
 					if (itemHandlers == null) {
 						itemHandlers = createItemHandlers(itemCount, f);
@@ -2324,7 +2333,7 @@ public class IMAPUtils {
 
 		return (addressBuilder.toString());
 	}
-	
+
 	private static final void appendAddress(final StringBuilder addressBuilder, final InternetAddress ia) {
 		final String pers = ia.getPersonal();
 		String addr = ia.getAddress();
@@ -2376,7 +2385,7 @@ public class IMAPUtils {
 
 		private final Locale locale;
 
-		private abstract class FieldComparer {
+		private static abstract class FieldComparer {
 
 			public final Locale locale;
 
@@ -2387,7 +2396,7 @@ public class IMAPUtils {
 			public abstract int compareFields(final Message msg1, final Message msg2) throws MessagingException;
 		}
 
-		private FieldComparer fieldComparer;
+		private final FieldComparer fieldComparer;
 
 		public MailComparator(final boolean descendingDirection, final Locale locale) {
 			this(JSONMessageObject.FIELD_SENT_DATE, descendingDirection, locale);
@@ -2397,7 +2406,7 @@ public class IMAPUtils {
 			this.sortCol = sortCol;
 			this.descendingDir = descendingDirection;
 			this.locale = locale;
-			createFieldComparer();
+			fieldComparer = createFieldComparer(sortCol, locale);
 		}
 
 		private static final int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale) {
@@ -2419,8 +2428,8 @@ public class IMAPUtils {
 		private static final String getCompareStringFromAddress(final Address addr, final Locale locale) {
 			if (addr instanceof InternetAddress) {
 				final InternetAddress ia1 = (InternetAddress) addr;
-				return ia1.getPersonal() != null ? ia1.getPersonal().toLowerCase(locale) : ia1.getAddress()
-						.toLowerCase(Locale.ENGLISH);
+				return ia1.getPersonal() != null && ia1.getPersonal().length() > 0 ? ia1.getPersonal().toLowerCase(
+						locale) : ia1.getAddress().toLowerCase(Locale.ENGLISH);
 			} else if (addr instanceof DummyAddress) {
 				final DummyAddress da1 = (DummyAddress) addr;
 				return da1.getAddress().toLowerCase(Locale.ENGLISH);
@@ -2429,60 +2438,39 @@ public class IMAPUtils {
 			}
 		}
 
-//		/**
-//		 * @return an array of <code>int</code>. If <code>int</code> value
-//		 *         at index <code>0</code> is greater than zero continue
-//		 *         comparing messages, else return <code>int</code> value at
-//		 *         index <code>1</code>
-//		 */
-//		private static final int[] checkMessages(final Message msg1, final Message msg2) {
-//			if (msg1 != null && msg2 != null) {
-//				return new int[] { 1, 0 };
-//			} else if (msg1 != null && msg2 == null) {
-//				return new int[] { 0, 1 };
-//			} else if (msg1 == null && msg2 != null) {
-//				return new int[] { 0, -1 };
-//			}
-//			return new int[] { 0, 0 };
-//		}
-
-		private void createFieldComparer() {
+		private static final FieldComparer createFieldComparer(final int sortCol, final Locale locale) {
 			switch (sortCol) {
 			case JSONMessageObject.FIELD_SENT_DATE:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						final Date d1 = msg1.getSentDate();
 						final Date d2 = msg2.getSentDate();
 						return (d1.compareTo(d2) * (-1));
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_RECEIVED_DATE:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						final Date d1 = msg1.getReceivedDate();
 						final Date d2 = msg2.getReceivedDate();
 						return (d1.compareTo(d2) * (-1));
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_FROM:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						return compareAddrs(msg1.getFrom(), msg2.getFrom(), this.locale);
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_TO:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						return compareAddrs(msg1.getRecipients(Message.RecipientType.TO), msg2
 								.getRecipients(Message.RecipientType.TO), this.locale);
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_SUBJECT:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						final String sub1 = MessageUtils.decodeMultiEncodedHeader(msg1.getSubject()).toLowerCase(
 								this.locale);
@@ -2491,42 +2479,43 @@ public class IMAPUtils {
 						return (sub1 == null ? "" : sub1).compareTo((sub2 == null ? "" : sub2));
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_FLAG_SEEN:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
-						if (msg1.isSet(Flags.Flag.SEEN) && msg2.isSet(Flags.Flag.SEEN)) {
+						final boolean isSeen1 = msg1.isSet(Flags.Flag.SEEN);
+						final boolean isSeen2 = msg2.isSet(Flags.Flag.SEEN);
+						if (isSeen1 && isSeen2) {
 							return 0;
-						} else if (!msg1.isSet(Flags.Flag.SEEN) && !msg2.isSet(Flags.Flag.SEEN)) {
-							if (msg1.isSet(Flags.Flag.RECENT) && msg2.isSet(Flags.Flag.RECENT)) {
+						} else if (!isSeen1 && !isSeen2) {
+							final boolean isRecent1 = msg1.isSet(Flags.Flag.RECENT);
+							final boolean isRecent2 = msg2.isSet(Flags.Flag.RECENT);
+							if (isRecent1 && isRecent2) {
 								return 0;
-							} else if (!msg1.isSet(Flags.Flag.RECENT) && !msg2.isSet(Flags.Flag.RECENT)) {
+							} else if (!isRecent1 && !isRecent2) {
 								return 0;
-							} else if (msg1.isSet(Flags.Flag.RECENT) && !msg2.isSet(Flags.Flag.RECENT)) {
+							} else if (isRecent1 && !isRecent2) {
 								return 1;
-							} else if (!msg1.isSet(Flags.Flag.RECENT) && msg2.isSet(Flags.Flag.RECENT)) {
+							} else if (!isRecent1 && isRecent2) {
 								return -1;
 							}
-						} else if (msg1.isSet(Flags.Flag.SEEN) && !msg2.isSet(Flags.Flag.SEEN)) {
+						} else if (isSeen1 && !isSeen2) {
 							return 1;
-						} else if (!msg1.isSet(Flags.Flag.SEEN) && msg2.isSet(Flags.Flag.SEEN)) {
+						} else if (!isSeen1 && isSeen2) {
 							return -1;
 						}
 						return 0;
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_SIZE:
-				fieldComparer = new FieldComparer(locale) {
+				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						return Integer.valueOf(msg1.getSize()).compareTo(Integer.valueOf(msg2.getSize()));
 					}
 				};
-				break;
 			case JSONMessageObject.FIELD_COLOR_LABEL:
 				try {
 					if (IMAPProperties.isUserFlagsEnabled()) {
-						fieldComparer = new FieldComparer(locale) {
+						return new FieldComparer(locale) {
 							public int compareFields(Message msg1, Message msg2) throws MessagingException {
 								final Integer cl1 = getColorFlag(msg1.getFlags().getUserFlags());
 								final Integer cl2 = getColorFlag(msg2.getFlags().getUserFlags());
@@ -2534,7 +2523,7 @@ public class IMAPUtils {
 							}
 						};
 					} else {
-						fieldComparer = new FieldComparer(locale) {
+						return new FieldComparer(locale) {
 							public int compareFields(Message msg1, Message msg2) throws MessagingException {
 								return 0;
 							}
@@ -2542,28 +2531,28 @@ public class IMAPUtils {
 					}
 				} catch (IMAPException e) {
 					LOG.error(e.getMessage(), e);
+					return new FieldComparer(locale) {
+						public int compareFields(Message msg1, Message msg2) throws MessagingException {
+							return 0;
+						}
+					};
 				}
-				break;
 			default:
 				throw new UnsupportedOperationException("Unknown sort column value " + sortCol);
 			}
 		}
 
-		private final Integer getColorFlag(final String[] userFlags) {
+		private static final Integer getColorFlag(final String[] userFlags) {
 			for (int i = 0; i < userFlags.length; i++) {
 				if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
 					return Integer.valueOf(userFlags[i].substring(3));
 				}
 			}
-			return Integer.valueOf(-1);
+			return Integer.valueOf(JSONMessageObject.COLOR_LABEL_NONE);
 		}
 
 		public int compare(final Message msg1, final Message msg2) {
 			try {
-//				final int[] cm = checkMessages(msg1, msg2);
-//				if (cm[0] == 0) {
-//					return cm[1];
-//				}
 				int comparedTo = fieldComparer.compareFields(msg1, msg2);
 				if (descendingDir) {
 					comparedTo *= (-1);
@@ -2575,7 +2564,7 @@ public class IMAPUtils {
 			}
 		}
 	} // End of class declaration for MailComparator
-	
+
 	private static class SmartIntArray {
 		/**
 		 * Pointer to keep track of position in the array

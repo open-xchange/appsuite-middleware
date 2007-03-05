@@ -52,7 +52,12 @@ package com.openexchange.groupware.container;
 import javax.mail.MessagingException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.imap.IMAPProperties;
+import com.openexchange.groupware.imap.IMAPUtils;
+import com.openexchange.groupware.imap.OXMailException;
+import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 
 public class MailFolderObject {
@@ -64,6 +69,16 @@ public class MailFolderObject {
 	private String parentFullName;
 	
 	private String name;
+	
+	private boolean hasSubfolders;
+	
+	private String ownRights;
+	
+	private boolean rootFolder;
+	
+	private String summary;
+	
+	private int total, newi, unread, deleted;
 	
 	private ACL[] acls;
 	
@@ -85,6 +100,107 @@ public class MailFolderObject {
 		super();
 		this.exists = exists;
 		this.fullName = fullName;
+	}
+	
+	public MailFolderObject(final IMAPFolder folder) throws MessagingException, OXException {
+		super();
+		this.exists = folder.exists();
+		this.fullName = prepareFullname(folder.getFullName(), folder.getSeparator());
+		this.name = folder.getName();
+		this.parentFullName = prepareParentFullname(folder.getParent());
+		this.separator = folder.getSeparator();
+		this.hasSubfolders = IMAPUtils.hasSubfolders(folder);
+		this.ownRights = getOwnRights(folder);
+		this.rootFolder = (folder instanceof DefaultFolder);
+		if ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) {
+			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
+					folder.getUnreadMessageCount()).append(')').toString();
+			this.total = folder.getMessageCount();
+			this.newi = folder.getNewMessageCount();
+			this.unread = folder.getUnreadMessageCount();
+			this.deleted = folder.getDeletedMessageCount();
+		}
+		this.imapFolder = folder;
+	}
+	
+	private static final String STR_MAILBOX_NOT_EXISTS = "NO Mailbox does not exist";
+	
+	private static final String STR_FULL_RIGHTS = "acdilprsw";
+	
+	private static final String getOwnRights(final IMAPFolder folder) throws MessagingException, OXException {
+		if (folder instanceof DefaultFolder) {
+			return null;
+		}
+		String rights = null;
+		if (IMAPProperties.isSupportsACLs()) {
+			try {
+				rights = folder.myRights().toString();
+			} catch (MessagingException e) {
+				if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
+						&& e.getNextException().getMessage().indexOf(STR_MAILBOX_NOT_EXISTS) != -1) {
+					/*
+					 * This occurs when requesting MYRIGHTS on a shared folder.
+					 * Just log a warning!
+					 */
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(OXMailException.getFormattedMessage(MailCode.FOLDER_NOT_FOUND, folder.getFullName()));
+					}
+				} else {
+					LOG.error(e.getMessage(), e);
+				}
+				/*
+				 * Write empty string as rights. Nevertheless user may see
+				 * folder!
+				 */
+				return "";
+			} catch (Throwable t) {
+				LOG.error(t.getMessage(), t);
+				/*
+				 * Write empty string as rights.
+				 * Nevertheless user may see folder!
+				 */
+				return "";
+			}
+		} else {
+			/*
+			 * No ACLs enabled. User has full access.
+			 */
+			rights = STR_FULL_RIGHTS;
+		}
+		if (rights.length() > 0) {
+			if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
+				/*
+				 * NoInferiors detected: No create access
+				 */
+				rights = rights.replaceFirst("c", "");
+			} else if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
+				/*
+				 * NoSelect detected: No read access
+				 */
+				rights = rights.replaceFirst("r", "");
+			}
+		}
+		if (IMAPProperties.isUserFlagsEnabled() && (IMAPUtils.supportsUserDefinedFlags(folder))) {
+			rights = new StringBuilder(rights).append('u').toString();
+		}
+		return rights;
+	}
+	
+	public static final String prepareFullname(final String fullname, final char sep) {
+		if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(fullname)) {
+			return fullname;
+		}
+		return new StringBuilder().append(MailFolderObject.DEFAULT_IMAP_FOLDER).append(sep).append(fullname).toString();
+	}
+
+	private static final String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
+		final StringBuilder sb = new StringBuilder(50).append(MailFolderObject.DEFAULT_IMAP_FOLDER);
+		if (parent instanceof DefaultFolder) {
+			return sb.toString();
+		} else if (parent == null) {
+			return null;
+		}
+		return sb.append(parent.getSeparator()).append(parent.getFullName()).toString();
 	}
 
 	public String getFullName() {
@@ -133,11 +249,12 @@ public class MailFolderObject {
 		return exists;
 	}
 
-	public char getSeparator() throws OXException {
-		if (separator != '0')
+	public char getSeparator() throws MessagingException {
+		if (separator != '0') {
 			return separator;
-		else
-			throw new OXException("IMAP delimiter not specified!");
+		} else {
+			throw new MessagingException("IMAP delimiter not specified!");
+		}
 	}
 
 	public void setSeparator(final char separator) {
@@ -156,4 +273,41 @@ public class MailFolderObject {
 			LOG.error(e.getMessage(), e);
 		}
 	}
+
+	public int getDeleted() {
+		return deleted;
+	}
+
+	public boolean isExists() {
+		return exists;
+	}
+
+	public boolean hasSubfolders() {
+		return hasSubfolders;
+	}
+
+	public int getNew() {
+		return newi;
+	}
+
+	public String getOwnRights() {
+		return ownRights;
+	}
+
+	public boolean isRootFolder() {
+		return rootFolder;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
+	public int getTotal() {
+		return total;
+	}
+
+	public int getUnread() {
+		return unread;
+	}
+	
 }

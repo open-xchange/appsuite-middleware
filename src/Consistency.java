@@ -71,6 +71,8 @@ import com.openexchange.database.AssignmentStorage;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -81,6 +83,7 @@ import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
@@ -131,9 +134,9 @@ public class Consistency {
 	}
 	
 	private void checkOneContext(Context ctx)
-		throws IOException, ContextException {
+		throws IOException, FilestoreException, FileStorageException {
 		DatabaseImpl DATABASE = new DatabaseImpl(new DBPoolProvider());
-		FileStorage stor = QuotaFileStorage.getQuotaInstance(ctx,
+		FileStorage stor = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
 				new DBPoolProvider()); 
 		AttachmentBase attach = Attachments.getInstance();
 		// We believe in the worst case, so lets check the storage first, so
@@ -225,14 +228,14 @@ public class Consistency {
 					LOG.info("Recalculating usage...");
 					((QuotaFileStorage)stor).recalculateUsage();
 				}
-			} catch (IOException e) {
+			} catch (FileStorageException e) {
 				LOG.debug("", e);
 			}
 		}
 	}
 	
 	private void completeContextChecking() 
-			throws ContextException, IOException {
+			throws ContextException, IOException, FilestoreException, FileStorageException {
 		ContextStorage ctxstor = ContextStorage.getInstance();
 		List<Integer> list = ctxstor.getAllContextIds();
 		Iterator<Integer> it = list.iterator();
@@ -289,7 +292,11 @@ public class Consistency {
 						LOG.debug("", e);
 					} catch (IOException e) {
 						LOG.debug("", e);
-					} 
+					} catch (FilestoreException e) {
+                        LOG.debug(e.getMessage(), e);
+                    } catch (FileStorageException e) {
+                        LOG.debug(e.getMessage(), e);
+                    } 
 
 				}
 			}
@@ -329,7 +336,11 @@ public class Consistency {
 						LOG.debug("", e);
 					} catch (IOException e) {
 						LOG.debug("", e);
-					}
+					} catch (FilestoreException e) {
+                        LOG.debug(e.getMessage(), e);
+                    } catch (FileStorageException e) {
+                        LOG.debug(e.getMessage(), e);
+                    }
 				}
 			}
 		} catch (ContextException e1) {
@@ -451,7 +462,11 @@ public class Consistency {
 				LOG.debug("",e);
 			} catch (IOException e) {
 				LOG.debug("", e);
-			}
+			} catch (FilestoreException e) {
+                LOG.debug(e.getMessage(), e);
+            } catch (FileStorageException e) {
+                LOG.debug(e.getMessage(), e);
+            }
 		}
 		LOG.info("Finished.");
 		System.exit(0);

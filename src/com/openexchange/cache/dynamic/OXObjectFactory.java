@@ -51,6 +51,8 @@
 
 package com.openexchange.cache.dynamic;
 
+import java.util.concurrent.locks.Lock;
+
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -73,4 +75,9 @@ public interface OXObjectFactory<T> {
      * @throws AbstractOXException if loading the object fails.
      */
     T load() throws AbstractOXException;
+
+    /**
+     * @return the single lock for the single cache object.
+     */
+    Lock getCacheLock();
 }

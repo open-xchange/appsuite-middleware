@@ -62,6 +62,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfigurationException;
@@ -114,13 +116,13 @@ public class UserSettingMail implements DeleteListener {
 	
 	public static final int MSG_FORMAT_BOTH = 3;
 	
-	public static final String STD_TRASH = "Deleted Items";
+	public static final String STD_TRASH = "Trash";
 	
 	public static final String STD_DRAFTS = "Drafts";
 	
-	public static final String STD_SENT = "Sent Items";
+	public static final String STD_SENT = "Sent";
 	
-	public static final String STD_SPAM = "Junk E-mail";
+	public static final String STD_SPAM = "Spam";
 	
 	private boolean modifiedDuringSession;
 	
@@ -176,9 +178,12 @@ public class UserSettingMail implements DeleteListener {
 	
 	private final String[] stdFolderFullnames; 
 	
+	private final Lock stdFolderCreationLock;
+	
 	public UserSettingMail() {
 		super();
 		stdFolderFullnames = new String[4];
+		stdFolderCreationLock = new ReentrantLock();
 	}
 	
 	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " +
@@ -798,6 +803,10 @@ public class UserSettingMail implements DeleteListener {
 	
 	public final String getStandardFolder(final int index) {
 		return this.stdFolderFullnames[index];
+	}
+	
+	public final Lock getStdFolderCreationLock() {
+		return stdFolderCreationLock;
 	}
 
 	/*

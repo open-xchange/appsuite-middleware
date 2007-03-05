@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.file;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -65,15 +62,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.tools.file.FileStorageException.Code;
-
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.tools.file.FileStorageException.Code;
-
 
 /**
  * This class defines the interface to the file storage for persistantly keeping
@@ -93,7 +81,7 @@ public abstract class FileStorage {
     /**
      * Class implementing the file storage.
      */
-    private static Class< ? extends FileStorage> IMPL;
+    public static Class< ? extends FileStorage> IMPL;
 
     /**
      * Default number of files or directories per directory.
@@ -130,24 +118,28 @@ public abstract class FileStorage {
      * entries ^ depth files.
      * @param depth depth of sub directories for storing files.
      * @param entries number of entries per sub directory.
-     * @throws IOException if a problem occurs while creating the file storage.
+     * @throws FileStorageException if a problem occurs while creating the file
+     * storage.
      */
-    protected FileStorage(final Object... args)
-        throws IOException {
+    protected FileStorage(final Object... args) throws FileStorageException {
         super();
         if (!(args[0] instanceof Integer)) {
-            throw new IOException("First parameter is not an integer.");
-        }
-        if (!(args[1] instanceof Integer)) {
-            throw new IOException("Second parameter is not an integer.");
+            throw new FileStorageException(FileStorageException.Code
+                .INVALID_PARAMETER, 0, args[0].getClass().getName());
         }
         depth = (Integer) args[0];
+        if (!(args[1] instanceof Integer)) {
+            throw new FileStorageException(FileStorageException.Code
+                .INVALID_PARAMETER, 1, args[1].getClass().getName());
+        }
         entries = (Integer) args[1];
         if (depth < 1) {
-            throw new IOException("Depth must be equal or greater than 1.");
+            throw new FileStorageException(FileStorageException.Code
+                .INVALID_DEPTH, depth);
         }
         if (entries < 1) {
-            throw new IOException("Entries must be equal or greater than 1.");
+            throw new FileStorageException(FileStorageException.Code
+                .INVALID_ENTRIES, entries);
         }
     }
     
@@ -157,11 +149,11 @@ public abstract class FileStorage {
      * has to be a java.io.File object pointing to the folder for the
      * filestorage.
      * @return a file storage implementation.
-     * @throws IOException if the file storage implementation can't be
+     * @throws FileStorageException if the file storage implementation can't be
      * instanciated.
      */
     public static final FileStorage getInstance(final Object... initData)
-        throws IOException {
+        throws FileStorageException {
         return getInstance(DEFAULT_DEPTH, DEFAULT_FILES, initData);
     }
 
@@ -178,7 +170,7 @@ public abstract class FileStorage {
      */
     public static final FileStorage getInstance(final int depth,
         final int entries, final Object... initData)
-        throws IOException {
+        throws FileStorageException {
         try {
             // Varargs sometimes cause strange looking code.
             final Object[] args = new Object[2 + initData.length];
@@ -192,39 +184,23 @@ public abstract class FileStorage {
             retval.checkStorage();
             return retval;
         } catch (InstantiationException e) {
-            final IOException exp = new IOException(
-                "Can't instanciate file storage implementation.");
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         } catch (IllegalAccessException e) {
-            final IOException exp = new IOException(
-                "Can't access file storage implementation.");
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         } catch (SecurityException e) {
-            final IOException exp = new IOException("Security violation while "
-                + "accessing file storage implementation.");
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         } catch (NoSuchMethodException e) {
-            final IOException exp = new IOException("Can't find necessary "
-                + "constructor in file storage implementation.");
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         } catch (IllegalArgumentException e) {
-            final IOException exp = new IOException("Illegal arguments for "
-                + "constructor of file storage implementation.");
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         } catch (InvocationTargetException e) {
-            final IOException exp = new IOException(
-                "Exception while instanciating file storage implementation.");
-            exp.initCause(e);
-            throw exp;
-        } catch (FileStorageException e) {
-            final IOException exp = new IOException(e.getMessage());
-            exp.initCause(e);
-            throw exp;
+            throw new FileStorageException(FileStorageException.Code
+                .INSTANTIATIONERROR, e, initData[0]);
         }
     }
 
@@ -244,7 +220,7 @@ public abstract class FileStorage {
 //                throw new FileStorageException(Code.CLASS_NOT_FOUND, className);
 //            }
 //            IMPL = (Class<? extends FileStorage>) clazz;
-            IMPL = LocalFileStorage.class;
+            IMPL = QuotaFileStorage.class;
         }
         return IMPL;
     }
@@ -253,16 +229,16 @@ public abstract class FileStorage {
      * Gets a file from the file storage.
      * @param identifier identifier of the file.
      * @return an inputstream from that the file can be read once.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    public InputStream getFile(final String identifier) throws IOException {
+    public InputStream getFile(final String identifier) throws FileStorageException {
         return load(identifier);
     }
 
     /**
      * @return a complete list of files in this filestorage
      */
-    public SortedSet<String> getFileList() throws IOException {
+    public SortedSet<String> getFileList() throws FileStorageException {
     	SortedSet<String> retval = new TreeSet<String>();
 
     	String nextentry = computeFirstEntry();
@@ -279,18 +255,18 @@ public abstract class FileStorage {
     /**
      * @param identifier identifier of the file.
      * @return the file size of the file.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    public long getFileSize(final String identifier) throws IOException {
+    public long getFileSize(final String identifier) throws FileStorageException {
         return length(identifier);
     }
 
     /**
      * @param identifier identifier of the file.
      * @return the mime type of the file.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    public String getMimeType(final String identifier) throws IOException {
+    public String getMimeType(final String identifier) throws FileStorageException {
     	return type(identifier);
     }
     
@@ -298,56 +274,64 @@ public abstract class FileStorage {
      * Stores a new file in the file storage.
      * @param input the files data will be written from this input stream.
      * @return the identifier of the newly created file.
-     * @throws IOException if an error occurs while storing the file.
+     * @throws FileStorageException if an error occurs while storing the file.
      */
-    public String saveNewFile(final InputStream input) throws IOException {
+    public String saveNewFile(final InputStream input) throws FileStorageException {
         String nextentry = null;
+        State state = null;
         lock(LOCK_TIMEOUT);
-        State state = new State(load(STATEFILENAME));
-        // Look for an empty slot
-        while (nextentry == null && state.hasUnused()) {
-            nextentry = state.getUnused();
-            if (exists(nextentry)) {
-                nextentry = null;
+        try {
+            state = new State(load(STATEFILENAME));
+            // Look for an empty slot
+            while (nextentry == null && state.hasUnused()) {
+                nextentry = state.getUnused();
+                if (exists(nextentry)) {
+                    nextentry = null;
+                }
             }
-        }
-        // If no empty slot can be found use the next free one.
-        if (nextentry == null) {
-            nextentry = state.getNextEntry();
-            // Does the next entry exist already? Then calculate the next.
-            while (nextentry != null && exists(nextentry)) {
-                nextentry = computeNextEntry(nextentry);
-            }
-            // No empty slot and no next free slot then scan for an unused slot.
+            // If no empty slot can be found use the next free one.
             if (nextentry == null) {
-                final Set unused = scanForUnusedEntries();
-                if (unused.isEmpty()) {
-                    throw new IOException("FileStorage is full.");
+                nextentry = state.getNextEntry();
+                // Does the next entry exist already? Then calculate the next.
+                while (nextentry != null && exists(nextentry)) {
+                    nextentry = computeNextEntry(nextentry);
                 }
-                final Iterator iter = unused.iterator();
-                nextentry = (String) iter.next();
-                while (iter.hasNext()) {
-                    state.addUnused((String) iter.next());
+                // No empty slot and no next free slot then scan for an unused slot.
+                if (nextentry == null) {
+                    final Set unused = scanForUnusedEntries();
+                    if (unused.isEmpty()) {
+                        throw new FileStorageException(FileStorageException.Code
+                            .STORE_FULL);
+                    }
+                    final Iterator iter = unused.iterator();
+                    nextentry = (String) iter.next();
+                    while (iter.hasNext()) {
+                        state.addUnused((String) iter.next());
+                    }
+                }
+                // Calculate next slot and store it.
+                final String savenextentry = computeNextEntry(nextentry);
+                if (savenextentry == null) {
+                    state.setNextEntry(nextentry);
+                } else {
+                    state.setNextEntry(savenextentry);
                 }
             }
-            // Calculate next slot and store it.
-            final String savenextentry = computeNextEntry(nextentry);
-            if (savenextentry == null) {
-                state.setNextEntry(nextentry);
-            } else {
-                state.setNextEntry(savenextentry);
-            }
+            save(STATEFILENAME, state.saveState());
+        } finally {
+            unlock();
         }
-        save(STATEFILENAME, state.saveState());
-        unlock();
         try {
             save(nextentry, input);
-        } catch (IOException ie) {
+        } catch (FileStorageException ie) {
             lock(LOCK_TIMEOUT);
-            state = new State(load(STATEFILENAME));
-            state.addUnused(nextentry);
-            save(STATEFILENAME, state.saveState());
-            unlock();
+            try {
+                state = new State(load(STATEFILENAME));
+                state.addUnused(nextentry);
+                save(STATEFILENAME, state.saveState());
+            } finally {
+                unlock();
+            }
             throw ie;
         }
         return nextentry;
@@ -357,16 +341,19 @@ public abstract class FileStorage {
      * Deletes a file in the FileStorage.
      * @param identifier identifier of the file to delete.
      * @return true if the file has been deleted successfully.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    public boolean deleteFile(final String identifier) throws IOException {
+    public boolean deleteFile(final String identifier) throws FileStorageException {
         final boolean retval = delete(identifier);
         if (retval) {
             lock(LOCK_TIMEOUT);
-            final State state = new State(load(STATEFILENAME));
-            state.addUnused(identifier);
-            save(STATEFILENAME, state.saveState());
-            unlock();
+            try {
+                final State state = new State(load(STATEFILENAME));
+                state.addUnused(identifier);
+                save(STATEFILENAME, state.saveState());
+            } finally {
+                unlock();
+            }
         }
         return retval;
     }
@@ -388,36 +375,42 @@ public abstract class FileStorage {
 
     /**
      * Recreates the state file of a storage no matter if it exists or not
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    public void recreateStateFile() throws IOException {
+    public void recreateStateFile() throws FileStorageException {
         lock(LOCK_TIMEOUT);
-        LOG.info("Repairing.");
-        final State state = repairState();
-        save(STATEFILENAME, state.saveState());
-        unlock();
+        try {
+            LOG.info("Repairing.");
+            final State state = repairState();
+            save(STATEFILENAME, state.saveState());
+        } finally {
+            unlock();
+        }
     }
     
     /**
      * Checks the storage.
      * @throws IOException if an error occurs.
      */
-    private void checkStorage() throws IOException {
+    private void checkStorage() throws FileStorageException {
         lock(LOCK_TIMEOUT);
-        if (!exists(STATEFILENAME)) {
-            LOG.info("Repairing.");
-            final State state = repairState();
-            save(STATEFILENAME, state.saveState());
+        try {
+            if (!exists(STATEFILENAME)) {
+                LOG.info("Repairing.");
+                final State state = repairState();
+                save(STATEFILENAME, state.saveState());
+            }
+        } finally {
+            unlock();
         }
-        unlock();
     }
 
     /**
      * Searches in the file storage for unused file slots.
      * @return unused file slots.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    private Set<String> scanForUnusedEntries() throws IOException {
+    private Set<String> scanForUnusedEntries() throws FileStorageException {
         final Set<String> unused = new HashSet<String>();
         String entry = computeFirstEntry();
         while (entry != null) {
@@ -474,15 +467,16 @@ public abstract class FileStorage {
      * </pre>
      * @param identifier lastly created file
      * @return the successor of oldentry or null if the FileStorage is full.
-     * @throws IOException if there is something wrong.
+     * @throws FileStorageException if there is something wrong.
      */
     private String computeNextEntry(final String identifier)
-        throws IOException {
+        throws FileStorageException {
         int[] entry = new int[depth];
         final StringTokenizer tokenizer = new StringTokenizer(identifier,
             File.separator);
         if (tokenizer.countTokens() != depth) {
-            throw new IOException("Depth mismatch while computing next entry.");
+            throw new FileStorageException(FileStorageException.Code
+                .DEPTH_MISMATCH);
         }
         int actualDepth = 0;
         while (tokenizer.hasMoreTokens()) {
@@ -515,9 +509,10 @@ public abstract class FileStorage {
      * determines only the next free slot in the FileStorage. This method
      * doesn't care about empty (deleted) slots.
      * @return a fastly repaired state object.
-     * @throws IOException if checking for existing files throws an IOException.
+     * @throws FileStorageException if checking for existing files throws an
+     * IOException.
      */
-    private State repairState() throws IOException {
+    private State repairState() throws FileStorageException {
         String nextentry = computeFirstEntry();
         final State state = new State(depth, entries, nextentry);
         String previousentry = null;
@@ -538,50 +533,50 @@ public abstract class FileStorage {
      * @param name name of the file to delete.
      * @return <code>true</code> if the file can be deleted successfully,
      * <code>false</code> otherwise.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    protected abstract boolean delete(String name) throws IOException;
+    protected abstract boolean delete(String name) throws FileStorageException;
 
     /**
      * Save the data for the input stream into the file storage under the given
      * name.
      * @param name name the data should get in the file storage.
      * @param input the data that should be stored.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
     protected abstract void save(String name, InputStream input)
-        throws IOException;
+        throws FileStorageException;
 
     /**
      * Loads a file from the file storage.
      * @param name name of the file.
      * @return an inputstream from that the file can be read once.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    protected abstract InputStream load(String name) throws IOException;
+    protected abstract InputStream load(String name) throws FileStorageException;
 
     /**
      * @param name name of the file.
      * @return the file size of the file.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    protected abstract long length(String name) throws IOException;
+    protected abstract long length(String name) throws FileStorageException;
 
     /**
      * @param name name of the file.
      * @return the mime type of the file.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    protected abstract String type(String name) throws IOException;
+    protected abstract String type(String name) throws FileStorageException;
     
     /**
      * This method returns if a file exists in the storage.
      * @param name name of the file.
      * @return <code>true</code> if the entry exists, <code>false</code>
      * otherwise.
-     * @throws IOException if an error occurs while checking if the file exists.
+     * @throws FileStorageException if an error occurs while checking if the file exists.
      */
-    protected abstract boolean exists(String name) throws IOException;
+    protected abstract boolean exists(String name) throws FileStorageException;
 
     /**
      * This method locks the file storage, so no other can destroy a file in the
@@ -589,16 +584,16 @@ public abstract class FileStorage {
      * method must block for the given time. If the storage is still locked
      * after the to wait time an IOException must be thrown.
      * @param timeout time to block if the storage is already locked.
-     * @throws IOException if the locking fails or the storage is still locked
+     * @throws FileStorageException if the locking fails or the storage is still locked
      * after the to wait time.
      */
-    protected abstract void lock(long timeout) throws IOException;
+    protected abstract void lock(long timeout) throws FileStorageException;
 
     /**
      * This method unlocks the file storage.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    protected abstract void unlock() throws IOException;
+    protected abstract void unlock() throws FileStorageException;
 
     /**
      * Closes temporary resources of the implementing file storage.

@@ -52,6 +52,7 @@ package com.openexchange.server;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -228,7 +229,7 @@ public class EffectivePermission extends OCLPermission {
 						userConfig.getContext());
 			}
 		}
-		catch (Exception e) {
+		catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			return userConfigIsValid;
 		}

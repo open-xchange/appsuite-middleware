@@ -88,6 +88,8 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
@@ -97,6 +99,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
@@ -518,8 +521,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			FileStorage fs = getFileStorage(ctx);
 			return fs.getFile(fileId);
 		
-		} catch (IOException e) {
-			throw EXCEPTIONS.create(4, e, fileId);
+		} catch (FileStorageException e) {
+			throw new AttachmentException(e);
 		}
 	}
 		
@@ -842,7 +845,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			category=Category.SUBSYSTEM_OR_SERVICE_DOWN,
 			desc="A file could not be removed from the file store. This can lead to inconsistencies if the change could not be undone. Keep your eyes peeled for messages indicating an inconsistency between DB and file store.",
 			exceptionId=15,
-			msg="Could not delete file from file store.")
+			msg="Could not delete file from file store. Filestore: %s Context: %s")
 	public void commit() throws TransactionException {
 		if(fileIdRemoveList.get().size()>0) {
 			try {
@@ -850,13 +853,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 				for(String fileId : fileIdRemoveList.get()) {
 					fs.deleteFile(fileId);
 				}
-			} catch (IOException x) {
+			} catch (FileStorageException x) {
 				try {
 					rollback();	
 				} catch (TransactionException txe) {
 					LOG.fatal("Could not execute undo. The system propably contains inconsistent data. Run the recovery tool.", x);//FIXME
 				}
-				throw new TransactionException(EXCEPTIONS.create(15,x));
+				throw new TransactionException(EXCEPTIONS.create(15,x,contextHolder.get().getFilestoreId(), contextHolder.get().getContextId()));
 			}
 			
 		}
@@ -874,15 +877,15 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		super.startTransaction();
 	}
 	
-	protected FileStorage getFileStorage(Context ctx) throws IOException {
+	protected FileStorage getFileStorage(Context ctx) throws FileStorageException {
 		try {
 			if(USE_QUOTA)
-				return QuotaFileStorage.getQuotaInstance(ctx,getProvider());
+				return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,getProvider());
 			else
-				return FileStorage.getInstance(ctx.getFileStorageLocation());
-		} catch (ContextException e) {
-			LOG.debug(e);
-		}
+				return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
+		} catch (FilestoreException e) {
+            LOG.debug(e);
+        }
 		return null;
 	}
 	

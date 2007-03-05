@@ -50,6 +50,7 @@
 package com.openexchange.ajax.writer;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.TimeZone;
 
 import javax.mail.Address;
@@ -58,6 +59,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,6 +71,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.container.mail.parser.JSONMessageHandler;
@@ -88,6 +91,9 @@ import com.sun.mail.imap.IMAPFolder;
  * 
  */
 public class MailWriter extends DataWriter {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailWriter.class);
 
 	public static interface MailFieldWriter {
 		public void writeField(JSONWriter jsonwriter, Message msg, int level, boolean withKey) throws OXException,
@@ -199,11 +205,15 @@ public class MailWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderChildFields.FOLDER_ID);
 						}
+						final String folder;
 						if (msg instanceof MessageCacheObject) {
-							jsonwriter.value(((MessageCacheObject) msg).getFolderFullname());
+							MessageCacheObject msgco = (MessageCacheObject) msg;
+							folder = MailFolderObject.prepareFullname(msgco.getFolderFullname(), msgco.getSeparator());
 						} else {
-							jsonwriter.value(msg.getFolder().getFullName());
+							folder = MailFolderObject.prepareFullname(msg.getFolder().getFullName(), msg.getFolder()
+									.getSeparator());
 						}
+						jsonwriter.value(folder);
 					}
 				};
 				break Fields;
@@ -430,7 +440,15 @@ public class MailWriter extends DataWriter {
 				if (withKey) {
 					jsonwriter.key(FolderChildFields.FOLDER_ID);
 				}
-				jsonwriter.value(msg.getFolder().getFullName());
+				final String folder;
+				if (msg instanceof MessageCacheObject) {
+					MessageCacheObject msgco = (MessageCacheObject) msg;
+					folder = MailFolderObject.prepareFullname(msgco.getFolderFullname(), msgco.getSeparator());
+				} else {
+					folder = MailFolderObject.prepareFullname(msg.getFolder().getFullName(), msg.getFolder()
+							.getSeparator());
+				}
+				jsonwriter.value(folder);
 				break Fields;
 			case JSONMessageObject.FIELD_ATTACHMENT:
 				if (withKey) {
@@ -608,11 +626,19 @@ public class MailWriter extends DataWriter {
 	private static final String preparePersonal(final String personal) {
 		if (personal.charAt(0) == '"') {
 			/*
-			 * Assume personal is alreyd surrounded with quotes
+			 * Assume personal is already surrounded with quotes
 			 */
 			return personal;
+		} else if (personal.indexOf(',') != -1) {
+			try {
+				return new StringBuilder().append('"').append(MimeUtility.decodeText(personal)).append(
+						'"').toString();
+			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+				return new StringBuilder().append('"').append(personal).append('"').toString();
+			}
 		}
-		return new StringBuilder().append('"').append(personal).append('"').toString();
+		return personal;
 	}
 
 	private final int getFlags(final Message msg) throws MessagingException {

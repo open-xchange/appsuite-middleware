@@ -224,14 +224,13 @@ public class Login extends AJAXServlet {
 				for (int a = 0; a < cookie.length; a++) {
 					if (cookie[a].getName().equals(Login.cookiePrefix + cookieId)) {
 						session = cookie[a].getValue();
-						resp.setHeader(_setCookie, new StringBuilder(cookiePrefix).append(cookieId).append('=').append(session).append("; Path=/; max-age=0").toString());
                         final Cookie respCookie = new Cookie(cookiePrefix + cookieId, session);
                         respCookie.setPath("/");
                         respCookie.setMaxAge(0);
                         resp.addCookie(respCookie);
 						break;
-					} else if (AJPv13RequestHandler.COOKIE_NAME_JSESSIONID.equals(cookie[a].getName())) {
-						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.COOKIE_NAME_JSESSIONID, cookie[a].getValue());
+					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie[a].getName())) {
+						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookie[a].getValue());
 						jsessionIdCookie.setPath("/");
 						jsessionIdCookie.setMaxAge(0); // delete
 						resp.addCookie(jsessionIdCookie);

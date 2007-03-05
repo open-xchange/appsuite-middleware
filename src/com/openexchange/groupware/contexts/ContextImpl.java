@@ -52,13 +52,6 @@
 package com.openexchange.groupware.contexts;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import com.openexchange.groupware.contexts.ContextException.Code;
-import com.openexchange.groupware.filestore.FilestoreNotFoundException;
-import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.filestore.IllegalFilestoreException;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -168,25 +161,6 @@ public class ContextImpl implements Context, Serializable {
      */
     public int getMailadmin() {
         return mailadmin;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public URI getFileStorageLocation() throws ContextException {
-        final FilestoreStorage fStorage = FilestoreStorage.getInstance();
-        try {
-            final URI uri = fStorage.getFilestore(filestoreId).getUri();
-            return new URI(uri.getScheme(), uri.getAuthority(),
-                uri.getPath() + '/' + filestoreName, uri.getQuery(),
-                uri.getFragment());
-        } catch (FilestoreNotFoundException e) {
-            throw new ContextException(Code.FILESTORE, e);
-        } catch (IllegalFilestoreException e) {
-            throw new ContextException(Code.FILESTORE, e);
-        } catch (URISyntaxException e) {
-            throw new ContextException(Code.FILESTORE, e);
-        }
     }
 
     /**

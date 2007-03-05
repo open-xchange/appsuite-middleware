@@ -65,6 +65,7 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.infostore.ConflictException;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -84,6 +85,7 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.tx.TransactionException;
 
 
 @OXExceptionSource(
@@ -210,6 +212,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				deleteMetadata();
 				exists = false;
 				factory.removed(this);
+			} catch (InfostoreException x) {
+				if(InfostoreExceptionFactory.isPermissionException(x)) {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);				
+				}
 			} catch (Exception x) {
 				LOG.debug(x.getMessage(),x);
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -325,6 +331,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			lockHelper.dumpLocksToDB();
 		} catch (WebdavException x) {
 			throw x;
+		} catch (InfostoreException x) {
+			if(InfostoreExceptionFactory.isPermissionException(x)){
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			}
 		} catch (Exception x) {
 			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -515,6 +525,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				dumpMetadataToDB();
 			} catch (WebdavException x) {
 				throw x;
+			} catch (InfostoreException x) {
+				if(InfostoreExceptionFactory.isPermissionException(x)){
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				}
 			} catch (Exception x) {
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
@@ -524,9 +538,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			loadMetadata();
 			if(guessSize)
 				metadata.setFileSize(0);
-			//FIXME Detonator Pattern
 			database.saveDocument(metadata, body, Long.MAX_VALUE, session);
+			database.commit();
 		} catch (Exception x) {
+			try {
+				database.rollback();
+			} catch (TransactionException e) {
+				LOG.fatal("Couldn't rollback transaction. Run the recovery tool.");
+			}
 			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -554,14 +573,26 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			}
 			metadata.setTitle(metadata.getFileName());
 			
-			database.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
-			setId(metadata.getId());
+			try {
+				database.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
+				database.commit();
+				setId(metadata.getId());
+			} catch (OXException x) {
+				database.rollback();
+				throw x;
+			}
 		} else {
 			if(setMetadata.contains(Metadata.FILENAME_LITERAL)) {
 				metadata.setTitle(metadata.getFileName());
 				setMetadata.add(Metadata.TITLE_LITERAL);
 			} //FIXME Detonator Pattern
-			database.saveDocumentMetadata(metadata, Long.MAX_VALUE, setMetadata.toArray(new Metadata[setMetadata.size()]),session);
+			try {
+				database.saveDocumentMetadata(metadata, Long.MAX_VALUE, setMetadata.toArray(new Metadata[setMetadata.size()]),session);
+				database.commit();
+			} catch (OXException x) {
+				database.rollback();
+				throw x;
+			}
 		}
 		existsInDB = true;
 		setMetadata.clear();
@@ -576,9 +607,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	)
 	private void deleteMetadata() throws OXException, IllegalAccessException {
 		SessionObject session = sessionHolder.getSessionObject();
-		int[] nd = database.removeDocument(new int[]{ id }, Long.MAX_VALUE,session); //FIXME
-		if(nd.length>0)
+		int[] nd = database.removeDocument(new int[]{ id }, Long.MAX_VALUE,session); 
+		if(nd.length>0) {
+			database.rollback();
 			throw EXCEPTIONS.create(0,nd[0]);
+		}
+		database.commit();
 	}
 
 	public int getId() {

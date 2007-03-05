@@ -53,6 +53,8 @@ package com.openexchange.groupware.contexts;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,6 +85,11 @@ public class CachingContextStorage extends ContextStorage {
      * Cache.
      */
     private static final JCS CACHE;
+
+    /**
+     * Lock for the cache.
+     */
+    private static final Lock CACHE_LOCK;
 
     /**
      * Implementation of the context storage that does persistant storing.
@@ -140,6 +147,9 @@ public class CachingContextStorage extends ContextStorage {
                 public Context load() throws AbstractOXException {
                     return persistantImpl.getContext(contextId);
                 }
+                public Lock getCacheLock() {
+                    return CACHE_LOCK;
+                }
             }, CACHE, Context.class);
     }
 
@@ -160,5 +170,6 @@ public class CachingContextStorage extends ContextStorage {
         } catch (IOException e) {
             throw new RuntimeException("Can't read cache configuration.", e);
         }
+        CACHE_LOCK = new ReentrantLock(true);
     }
 }

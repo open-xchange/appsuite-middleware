@@ -77,7 +77,6 @@ import javax.swing.text.html.HTMLEditorKit;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.MailInterfaceMonitorConnectionListener;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -167,16 +166,28 @@ public class MessageUtils {
 			return null;
 		}
 		final Matcher m = ENC_PATTERN.matcher(hdrVal);
-		final StringBuffer sb = new StringBuffer();
-		while (m.find()) {
-			try {
-				m.appendReplacement(sb, Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
-			} catch (UnsupportedEncodingException e) {
-				m.appendTail(sb);
-			}
+		if (m.find()) {
+			final StringBuilder sb = new StringBuilder();
+			int lastMatch = 0;
+			do {
+				try {
+					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
+					lastMatch = m.end();
+				} catch (UnsupportedEncodingException e) {
+					sb.append(hdrVal.substring(lastMatch));
+				}
+			} while (m.find());
+			return removeHdrLineBreak(sb.toString());
 		}
-		m.appendTail(sb);
-		return sb.toString();
+		return removeHdrLineBreak(hdrVal);
+	}
+	
+	private static final Pattern PATTERN_RMV_HDR_BR = Pattern.compile("(\r)?\n(\\s{1})?");
+	
+	private static final String STR_EMPTY = "";
+	
+	public static final String removeHdrLineBreak(final String hdrVal) {
+		return PATTERN_RMV_HDR_BR.matcher(hdrVal).replaceAll(STR_EMPTY);
 	}
 
 	public static final String performLineWrap(final String content, final boolean isHtml, final int linewrap) {
@@ -290,6 +301,8 @@ public class MessageUtils {
 		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(HTML_BREAK).append(
 				wrapHtmlText(line.substring(linewrap), linewrap)).toString();
 	}
+	
+	private static final String STR_START_BLOCKQUOTE = "<blockquote";
 
 	/**
 	 * Performs all the formatting for both text and html content for a proper
@@ -305,9 +318,9 @@ public class MessageUtils {
 			 * Insert color quotes in html and filter inline images
 			 */
 			if (usm.isUseColorQuote()) {
-				if (retval.toLowerCase(Locale.ENGLISH).indexOf("<blockquote") > -1) {
+				if (retval.toLowerCase(Locale.ENGLISH).indexOf(STR_START_BLOCKQUOTE) > -1) {
 					try {
-						retval = replaceHTMLBlockQuotesForDisplay(retval, 0);
+						retval = replaceHTMLBlockQuotesForDisplay(retval);
 					} catch (IOException e) {
 						throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 					}
@@ -354,7 +367,7 @@ public class MessageUtils {
 	 * with colored "&lt;blockquote&gt;" tags according to configured quote
 	 * colors in file "imap.properties"
 	 */
-	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText, final int level)
+	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText)
 			throws IOException {
 		final StringBuilder sb = new StringBuilder(htmlText.length() + 100);
 		int offset = 0;
@@ -368,8 +381,8 @@ public class MessageUtils {
 			if (htmlText.charAt(pos - 1) == '<') {
 				quotelevel++;
 				sb.append(htmlText.subSequence(offset, pos - 1));
-				final String color = COLORS != null && COLORS.length > 0 ? (level >= COLORS.length ? COLORS[COLORS.length - 1]
-						: COLORS[level])
+				final String color = COLORS != null && COLORS.length > 0 ? (quotelevel >= COLORS.length ? COLORS[COLORS.length - 1]
+						: COLORS[quotelevel])
 						: DEFAULT_COLOR;
 				sb.append(String.format(BLOCKQUOTE_START_TEMPLATE, color, color));
 			} else if (htmlText.charAt(pos - 1) == '/') {
@@ -401,18 +414,33 @@ public class MessageUtils {
 			String line = lines[i];
 			int currentLevel = 0;
 			int offset = 0;
-			int pos = -1;
-			while ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
+			if (line.startsWith(STR_HTML_QUOTE)) {
 				currentLevel++;
-				offset = (pos + 4);
+				offset = 4;
+				int pos = -1;
+				boolean next = true;
+				while (next && (pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
+					/*
+					 * Continue only if next starting position is equal to
+					 * offset or if just one whitespace character has been
+					 * skipped
+					 */
+					next = (offset == pos || (pos - offset == 1 && htmlText.charAt(offset) == ' '));
+					if (next) {
+						currentLevel++;
+						offset = (pos + 4);
+					}
+				}
 			}
-			try {
-				if (offset > 0 && ' ' == line.charAt(offset)) {
-					offset++;
+			if (offset > 0) {
+				try {
+					offset = offset < line.length() && ' ' == line.charAt(offset) ? offset + 1 : offset;
+				} catch (StringIndexOutOfBoundsException e) {
+					if (LOG.isTraceEnabled()) {
+						LOG.trace(e.getMessage(), e);
+					}
 				}
 				line = line.substring(offset);
-			} catch (StringIndexOutOfBoundsException e) {
-				line = "";
 			}
 			if (levelBefore < currentLevel) {
 				for (; levelBefore < currentLevel; levelBefore++) {
@@ -770,9 +798,8 @@ public class MessageUtils {
 		boolean closeFolder = false;
 		try {
 			if (!imapFolder.isOpen()) {
-				imapFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(
-						MailInterfaceImpl.mailInterfaceMonitor));
 				imapFolder.open(Folder.READ_ONLY);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 				closeFolder = true;
 			}
 			return new StringBuilder(imapFolder.getFullName()).append(Mail.SEPERATOR).append(imapFolder.getUID(msg))
@@ -780,6 +807,7 @@ public class MessageUtils {
 		} finally {
 			if (closeFolder) {
 				imapFolder.close(false);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 			}
 		}
 	}

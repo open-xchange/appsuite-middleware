@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
 
@@ -133,7 +134,12 @@ public class Infostore extends OXServlet {
 	}
 
 	private void doIt(HttpServletRequest req, HttpServletResponse resp, Action action) throws ServletException, IOException {
-		InfostorePerformer.getInstance().doIt(req, resp, action, getSession(req));
+		SessionObject session = getSession(req);
+		if(!session.getUserConfiguration().hasWebDAV()){
+			resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+		} else {
+			InfostorePerformer.getInstance().doIt(req, resp, action, getSession(req));
+		}
 	}
 	
 }

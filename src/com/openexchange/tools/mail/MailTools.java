@@ -142,14 +142,6 @@ public class MailTools {
 		}
 	}
 
-	public static String decodeRText(final String data) {
-		try {
-			return (MimeUtility.decodeText(data));
-		} catch (Exception e) {
-			return data;
-		}
-	}
-
 	public String getColorChanger() {
 		if (!colorState) {
 			colorState = true;

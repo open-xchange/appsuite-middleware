@@ -162,7 +162,7 @@ public class CalendarOperation implements SearchIterator {
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
-                        throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));           
+                        throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));
                     } else if (action_folder != inFolder && check_special_action == action) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_3));
@@ -469,7 +469,7 @@ public class CalendarOperation implements SearchIterator {
                 } else {
                     p.setIdentifier(uid);
                 }
-                if (action || cdao.containsUserParticipants()) {
+                if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
                     CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
                 }
                 
@@ -487,6 +487,13 @@ public class CalendarOperation implements SearchIterator {
         }
         
         simpleDataCheck(cdao);
+        if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
+            Participant np[] = new Participant[1];
+            Participant p = new UserParticipant();
+            p.setIdentifier(uid);
+            np[0] = p;
+            cdao.setParticipants(np);   
+        }
         fillUserParticipants(cdao);
         return action;
     }
@@ -813,7 +820,7 @@ public class CalendarOperation implements SearchIterator {
                         LOG.error("Error while checking special permissions", e);
                     }
                 }
-                
+                /*
                 if (check_folder_id == 0) { // TODO: Remove this debug information
                     System.out.println("\n\nGOT A zero folder_id :"+cdao.toString());
                     for (int a = 0; a < oids.length; a++) {
@@ -821,7 +828,7 @@ public class CalendarOperation implements SearchIterator {
                     }
                     System.out.println("\n\n");
                 }
-                
+                */
                 if (check_folder_id != cdao.getParentFolderID()) {                    
                     throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserObject().getId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
                 }
@@ -976,6 +983,14 @@ public class CalendarOperation implements SearchIterator {
                                     } else if (np[a].isModified()) {
                                         p[1].add(np[a]);
                                     }
+                                } else if (move_action == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
+                                    if (p[1] == null) {
+                                        p[1] = new Participants(); // modified
+                                    }
+                                    np[a].setIsModified(true);
+                                    np[a].setConfirm(op[bs].getConfirm());
+                                    np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
+                                    p[1].add(np[a]);
                                 }
                             }
                     } else {
@@ -1094,7 +1109,7 @@ public class CalendarOperation implements SearchIterator {
         }
         if (cdao.containsParticipants()) {
             CalendarCommonCollection.simpleParticipantCheck(cdao);
-        }
+        } 
     }
     
     final int checkUpdateRecurring(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
@@ -1204,6 +1219,9 @@ public class CalendarOperation implements SearchIterator {
             return CalendarRecurringCollection.CHANGE_RECURRING_TYPE;
         } else if (!edao.containsRecurrenceType() && cdao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE) {
             // TODO: Change from normal apointment to sequence
+            if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrence() != null) {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_ALREADY_EXCEPTION);
+            }
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate()) {
                 cdao.setStartDate(edao.getStartDate());

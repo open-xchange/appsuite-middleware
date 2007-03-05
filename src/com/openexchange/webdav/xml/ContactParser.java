@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * ContactParser
@@ -78,7 +79,7 @@ public class ContactParser extends CommonParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, ContactObject contactobject) throws OXException {
+	public void parse(XmlPullParser parser, ContactObject contactobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -88,6 +89,8 @@ public class ContactParser extends CommonParser {
 				parseElementContact(contactobject, parser);
 				parser.nextTag();
 			}
+		} catch (XmlPullParserException exc) {
+			throw exc;
 		} catch (Exception exc) {
 			throw new OXException(exc);
 		}

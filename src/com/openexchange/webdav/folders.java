@@ -60,7 +60,6 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -74,6 +73,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * folders
@@ -157,6 +157,9 @@ public final class folders extends XmlServlet {
 			} catch (OXConcurrentModificationException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(folderobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
+			} catch (XmlPullParserException exc) {
+				LOG.debug(_parsePropChilds, exc);
+				writeResponse(folderobject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os, xo);
 			} catch (Exception exc) {
 				LOG.error(_parsePropChilds, exc);
 				writeResponse(folderobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.SessionObject;
@@ -92,6 +94,9 @@ public abstract class Tasks {
     public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
         int folderId) throws OXException;
 
+    public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
+        Connection con, int folderId) throws OXException;
+
     public abstract void deleteTasksInFolder(SessionObject session,
         int folderId) throws OXException;
 
@@ -104,4 +109,7 @@ public abstract class Tasks {
      */
     public abstract boolean isFolderEmpty(Context ctx, int folderId)
         throws OXException;
+
+    public abstract boolean isFolderEmpty(Context ctx, Connection con,
+        int folderId) throws OXException;    
 }

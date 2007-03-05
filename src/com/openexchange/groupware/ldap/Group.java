@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
@@ -57,7 +55,7 @@ import java.util.Date;
  * This is the data container class for group.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Group {
+public class Group implements Cloneable {
 
     /**
      * Unique nummeric identifier of this group.
@@ -154,5 +152,21 @@ public class Group {
      */
     public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        final Group retval = (Group) super.clone();
+        if (null != lastModified) {
+            retval.lastModified = (Date) lastModified.clone();
+        }
+        if (null != member) {
+            retval.member = new int[member.length];
+            System.arraycopy(member, 0, retval.member, 0, member.length);
+        }
+        return retval;
     }
 }

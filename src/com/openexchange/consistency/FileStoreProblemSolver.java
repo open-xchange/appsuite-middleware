@@ -68,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 
 public class FileStoreProblemSolver extends ProblemSolver {
@@ -112,7 +113,7 @@ public class FileStoreProblemSolver extends ProblemSolver {
 			 * that now new free file slots are available. 
 			 */
 			storage.recreateStateFile();
-		} catch (IOException e) {
+		} catch (FileStorageException e) {
 			LOG.debug("", e);
 		}			
 	}
@@ -148,7 +149,7 @@ public class FileStoreProblemSolver extends ProblemSolver {
 							"created. The admin of this context has now " +
 							"a new document");
 				}
-				} catch (IOException e) {
+				} catch (FileStorageException e) {
 					LOG.debug("", e);
 					try {
 						database.rollback();

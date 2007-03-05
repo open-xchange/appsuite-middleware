@@ -69,19 +69,11 @@ public class SaveFileAction extends AbstractUndoable implements UndoableAction {
 	
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		try {
-			storage.deleteFile(id);
-		} catch (IOException x) {
-			throw new FileStorageException(FileStorageException.Code.IOERROR,x, x.getMessage());
-		}
+		storage.deleteFile(id);
 	}
 	
 	public void perform() throws AbstractOXException {
-		try {
-			id = storage.saveNewFile(in);
-		} catch (IOException x) {
-			throw new FileStorageException(FileStorageException.Code.IOERROR,x, x.getMessage());
-		}
+		id = storage.saveNewFile(in);
 	}
 
 	public String getId() {

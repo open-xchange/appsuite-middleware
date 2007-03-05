@@ -83,6 +83,7 @@ import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -92,37 +93,37 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 public class Multiple extends SessionServlet {
-
+	
 	private static final long serialVersionUID = 3029074251138469122L;
-
+	
 	protected static final String MODULE = "module";
-
+	
 	protected static final String MODULE_CALENDAR = "calendar";
-
+	
 	protected static final String MODULE_TASK = "tasks";
-
+	
 	protected static final String MODULE_CONTACT = "contacts";
-
+	
 	protected static final String MODULE_GROUP = "group";
-
+	
 	protected static final String MODULE_REMINDER = "reminder";
-
+	
 	protected static final String MODULE_RESOURCE = "resource";
-
+	
 	protected static final String MODULE_INFOSTORE = "infostore";
-
+	
 	protected static final String MODULE_FOLDER = "folder";
-
+	
 	private static final String ATTRIBUTE_MAILINTERFACE = "mi";
-
+	
 	private static final transient Log LOG = LogFactory.getLog(Multiple.class);
-
+	
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-			throws ServletException, IOException {
+	throws ServletException, IOException {
 		final Response response = new Response();
 		JSONArray jsonArray = null;
 		final String data = getBody(httpServletRequest);
-
+		
 		try {
 			jsonArray = new JSONArray(data);
 		} catch (JSONException e) {
@@ -131,12 +132,12 @@ public class Multiple extends SessionServlet {
 					.getMessage()));
 			jsonArray = new JSONArray();
 		}
-
+		
 		final StringWriter sw = new StringWriter();
-
+		
 		try {
 			sw.write('[');
-
+			
 			for (int a = 0; a < jsonArray.length(); a++) {
 				parseActionElement(sw, jsonArray, a, getSessionObject(httpServletRequest), httpServletRequest);
 			}
@@ -165,11 +166,11 @@ public class Multiple extends SessionServlet {
 				}
 			}
 		}
-
+		
 		httpServletResponse.getWriter().write(sw.toString());
 		httpServletResponse.getWriter().flush();
 	}
-
+	
 	protected void parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
 			final SessionObject sessionObj, final HttpServletRequest req) throws JSONException, AjaxException,
 			OXException {
@@ -180,29 +181,29 @@ public class Multiple extends SessionServlet {
 				throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
 			}
 		}
-
+		
 		final JSONObject jsonObj = jsonArray.getJSONObject(pos);
-
+		
 		final String module;
 		final String action;
-
+		
 		if (jsonObj.has(MODULE)) {
 			module = DataParser.checkString(jsonObj, MODULE);
 		} else {
 			throw new AjaxException(AjaxException.Code.NoField, MODULE);
 		}
-
+		
 		if (jsonObj.has(PARAMETER_ACTION)) {
 			action = DataParser.checkString(jsonObj, PARAMETER_ACTION);
 		} else {
 			throw new AjaxException(AjaxException.Code.NoField, PARAMETER_ACTION);
 		}
-
+		
 		final Response response = doAction(module, action, jsonObj, sessionObj, req);
 		Response.write(response, w);
-
+		
 	}
-
+	
 	protected Response doAction(final String module, final String action, final JSONObject jsonObj,
 			final SessionObject sessionObj, final HttpServletRequest req) throws AjaxException {
 		Response response = new Response();
@@ -228,7 +229,12 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (OXException e) {
-				LOG.error(e.getMessage(), e);
+				if (e.getCategory() == Category.USER_INPUT) {
+					LOG.debug(e.getMessage(), e);
+				} else {
+					LOG.error(e.getMessage(), e);
+				}
+				
 				response.setException(e);
 			} catch (SearchIteratorException e) {
 				LOG.error(e.getMessage(), e);
@@ -237,10 +243,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                    .JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code
+						.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_CONTACT)) {
 			final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
@@ -272,10 +278,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_GROUP)) {
 			final GroupRequest groupRequest = new GroupRequest(sessionObj, sw);
@@ -304,10 +310,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_REMINDER)) {
 			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, sw);
@@ -336,10 +342,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_RESOURCE)) {
 			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw);
@@ -368,10 +374,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_TASK)) {
 			final TaskRequest taskRequest = new TaskRequest(sessionObj, sw);
@@ -415,10 +421,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_INFOSTORE)) {
 			final InfostoreRequest infoRequest = new InfostoreRequest(sessionObj, sw);
@@ -430,10 +436,10 @@ public class Multiple extends SessionServlet {
 					response = Response.parse(sw.toString());
 				}
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_FOLDER)) {
 			final FolderRequest folderequest = new FolderRequest(sessionObj, sw);
@@ -455,10 +461,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_MAIL)) {
 			final MailRequest mailrequest = new MailRequest(sessionObj, sw);
@@ -484,10 +490,10 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-                final OXJSONException oje = new OXJSONException(OXJSONException
-                    .Code.JSON_WRITE_ERROR, e);
-                LOG.error(oje.getMessage(), oje);
-                response.setException(oje);
+				final OXJSONException oje = new OXJSONException(OXJSONException
+						.Code.JSON_WRITE_ERROR, e);
+				LOG.error(oje.getMessage(), oje);
+				response.setException(oje);
 			}
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);

@@ -64,7 +64,6 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.MailInterfaceMonitorConnectionListener;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.imap.IMAPUtils;
@@ -335,13 +334,14 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 			boolean closeFolder = false;
 			try {
 				if (!fld.isOpen()) {
-					fld.addConnectionListener(new MailInterfaceMonitorConnectionListener(
-							MailInterfaceImpl.mailInterfaceMonitor));
 					fld.open(Folder.READ_WRITE);
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 					closeFolder = true;
 				} else if (fld.getMode() == Folder.READ_ONLY) {
 					fld.close(false);
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 					fld.open(Folder.READ_WRITE);
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 				}
 				/*
 				 * Message was not seen before. Since we have to access
@@ -364,6 +364,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 				if (closeFolder) {
 					try {
 						fld.close(false);
+						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 					} catch (MessagingException e) {
 						LOG.error(e.getMessage(), e);
 					}
@@ -410,10 +411,13 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 		try {
 			if (!fld.isOpen()) {
 				fld.open(Folder.READ_WRITE);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 				closeFld = true;
 			} else if (fld.getMode() != Folder.READ_WRITE) {
 				fld.close(false);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 				fld.open(Folder.READ_WRITE);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 			}
 			final Flags attachFlags = new Flags(hasAttachment ? JSONMessageObject.USER_FLAG_ATTACHMENT
 					: JSONMessageObject.USER_FLAG_NO_ATTACHMENT);
@@ -421,6 +425,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 		} finally {
 			if (closeFld) {
 				fld.close(false);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 			}
 		}
 	}

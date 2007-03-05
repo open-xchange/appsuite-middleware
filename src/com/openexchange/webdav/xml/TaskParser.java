@@ -60,6 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.xml.fields.TaskFields;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * TaskParser
@@ -75,7 +76,7 @@ public class TaskParser extends CalendarParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, Task taskobject) throws OXException {
+	public void parse(XmlPullParser parser, Task taskobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -85,6 +86,8 @@ public class TaskParser extends CalendarParser {
 				parseElementTask(taskobject, parser);	
 				parser.nextTag();
 			}
+		} catch (XmlPullParserException exc) {
+			throw exc;
 		} catch (Exception exc) {
 			throw new OXException(exc);
 		}

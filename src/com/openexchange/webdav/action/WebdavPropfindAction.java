@@ -88,12 +88,8 @@ public class WebdavPropfindAction extends AbstractAction {
 			requestBody = req.getBodyAsDocument();
 		} catch (JDOMException e1) {
 			
-			if(null != req.getHeader("User-Agent") && req.getHeader("User-Agent").contains("Microsoft")){
-				// Assume allProp request
-				forceAllProp = true;
-			} else {
-				throw new WebdavException("",HttpServletResponse.SC_BAD_REQUEST);
-			}
+			forceAllProp = true; //Assume All Prop, if all else fails
+			
 		} catch (IOException e1) {
 			throw new WebdavException("",HttpServletResponse.SC_BAD_REQUEST);
 		}

@@ -15,6 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "%1$d statements aren't closed."
+msgstr ""
+
 msgid "%s attachment could not be save due to an unsupported MIME type %s"
 msgstr ""
 
@@ -282,12 +285,15 @@ msgstr ""
 msgid "Connection is broken due to a socket exception on remote server: %s"
 msgstr ""
 
+msgid "Connection used for %1$d milliseconds."
+msgstr ""
+
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
 "server: %s"
 msgstr ""
 
-msgid "Connection was reset"
+msgid "Connection was reset. Please try again."
 msgstr ""
 
 msgid "Contact not found! Context %1$d"
@@ -511,6 +517,10 @@ msgstr ""
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr ""
 
+msgid ""
+"Fatal error. You are trying to create a new recurring from an exception!"
+msgstr ""
+
 msgid "File \"%s\" does not exist."
 msgstr ""
 
@@ -604,6 +614,9 @@ msgstr ""
 
 msgid ""
 "For tasks which are not started the percentage done must be 0 and not %d."
+msgstr ""
+
+msgid "Found not committed transaction."
 msgstr ""
 
 msgid "Found resource groups with same identifier %d."
@@ -984,6 +997,11 @@ msgid "Problem while communicating with external authorization."
 msgstr ""
 
 msgid "Problem with executing SQL: %s"
+msgstr ""
+
+msgid ""
+"Process was interrupted while waiting for a free IMAP connection. Please try "
+"again."
 msgstr ""
 
 msgid "Property \"%s\" is not defined."
@@ -1591,6 +1609,9 @@ msgid ""
 msgstr ""
 
 msgid "You do not have sufficient read permissions."
+msgstr ""
+
+msgid "You do not have the appropriate permissions to create an object"
 msgstr ""
 
 msgid "You do not have the appropriate permissions to modify this object."

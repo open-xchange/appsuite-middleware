@@ -69,15 +69,15 @@ public class EffectiveInfostorePermission {
 	}
 	
 	public boolean canReadObject(){
-		return permission.canReadAllObjects() || (permission.canReadOwnObjects() && document.getCreatedBy() != user.getId());	
+		return permission.canReadAllObjects() || (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());	
 	}
 	
 	public boolean canDeleteObject() {
-		return permission.canDeleteAllObjects() || (permission.canDeleteOwnObjects() && document.getCreatedBy() != user.getId());	
+		return permission.canDeleteAllObjects() || (permission.canDeleteOwnObjects() && document.getCreatedBy() == user.getId());	
 	}
 	
 	public boolean canWriteObject(){
-		return permission.canWriteAllObjects() || (permission.canWriteOwnObjects() && document.getCreatedBy() != user.getId());	
+		return permission.canWriteAllObjects() || (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());	
 	}
 
 	public boolean canCreateObjects() {

@@ -110,10 +110,6 @@ public class ContextException extends AbstractOXException {
         CACHE_PUT("Can't put object %s into cache.", Category.INTERNAL_ERROR,
             3),
         /**
-         * Problems with the filestore.
-         */
-        FILESTORE(null, Category.SETUP_ERROR, 4),
-        /**
          * No connection to database.
          */
         NO_CONNECTION("Can't get connection to database.",

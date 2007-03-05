@@ -67,6 +67,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
@@ -76,7 +77,9 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.protocol.Protocol;
@@ -130,13 +133,20 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public void delete() throws WebdavException {
 		if(!exists)
 			return;
-		OXFolderAction oxfa = new OXFolderAction(sessionHolder.getSessionObject());
+//		OXFolderManager oxma = new OXFolderManagerImpl(sessionHolder.getSessionObject());
+//		OXFolderAction oxfa = new OXFolderAction(sessionHolder.getSessionObject());
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(sessionHolder.getSessionObject().getContext());
-			oxfa.deleteFolder(id, sessionHolder.getSessionObject(),con, true, Long.MAX_VALUE); // FIXME
+			final OXFolderManager oxma = new OXFolderManagerImpl(sessionHolder.getSessionObject(), con, con);
+			oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
+			//oxfa.deleteFolder(id, sessionHolder.getSessionObject(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
 			factory.removed(this);
+		} catch (OXFolderException x) {
+			if(isPermissionException(x)) {
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			}
 		} catch (Exception e) {
 			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
@@ -409,7 +419,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 	
 	private void dumpToDB() throws WebdavException {
-		OXFolderAction oxfa = new OXFolderAction(sessionHolder.getSessionObject());
+		//OXFolderAction oxfa = new OXFolderAction(sessionHolder.getSessionObject());
 		if(!exists) {
 			if(folder == null)
 				folder = new FolderObject();
@@ -423,10 +433,16 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			
 			try {
 				writeCon = provider.getWriteConnection(ctx);
-				oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
+				OXFolderManager oxma = new OXFolderManagerImpl(sessionHolder.getSessionObject(), writeCon, writeCon);
+				folder = oxma.createFolder(folder, true, System.currentTimeMillis());
+				//oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
 				setId(folder.getObjectID());
+			} catch (OXFolderException x) {
+				if(isPermissionException(x)) {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				}
 			} catch (OXFolderPermissionException e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
 			} catch (Exception e) {
 				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
@@ -446,9 +462,15 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			try {
 				
 				writeCon = provider.getWriteConnection(ctx);
-				oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
+				OXFolderManager oxma = new OXFolderManagerImpl(sessionHolder.getSessionObject(), writeCon, writeCon);
+				oxma.updateFolder(folder, true, System.currentTimeMillis());
+				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
+			} catch (OXFolderException x) {
+				if(isPermissionException(x)) {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				}
 			} catch (OXFolderPermissionException e) {
-				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
 			} catch (Exception e) {
 				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
@@ -458,6 +480,10 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		
 	}
 	
+	private boolean isPermissionException(OXFolderException x) {
+		return Category.PERMISSION.equals(x.getCategory());
+	}
+
 	private void initDefaultFields(FolderObject folder) throws WebdavException {
 		initParent(folder);
 		folder.setType(FolderObject.PUBLIC);
@@ -496,7 +522,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		// All others may read and write
 		
 		OCLPermission perm2 = new OCLPermission();
-		perm2.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+		perm2.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
 		perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
 		perm2.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
 		perm2.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);

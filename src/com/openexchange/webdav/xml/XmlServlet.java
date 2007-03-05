@@ -105,6 +105,8 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	public static final int USER_INPUT_STATUS = 1100;
 	
+	public static final int BAD_REQUEST_STATUS = 1400;
+	
 	public static final int SERVER_ERROR_STATUS = 1500;
 	
 	public static final int OK_STATUS = 1200;
@@ -122,6 +124,8 @@ public abstract class XmlServlet extends PermissionServlet {
 	public static final String APPOINTMENT_CONFLICT_EXCEPTION = "[" + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
 	
 	public static final String MANDATORY_FIELD_EXCEPTION = "[" + MANDATORY_FIELD_STATUS + "] Missing field";
+	
+	public static final String BAD_REQUEST_EXCEPTION = "[" + BAD_REQUEST_STATUS + "] bad xml request";
 	
 	public static final String SERVER_ERROR_EXCEPTION = "[" + SERVER_ERROR_STATUS + "] Server Error - ";
 	

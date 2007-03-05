@@ -180,7 +180,22 @@ public class DBPoolingException extends AbstractOXException {
          * %s is not initialized.
          */
         NOT_INITIALIZED("%s is not initialized.", Category.PROGRAMMING_ERROR,
-            11);
+            11),
+        /**
+         * Connection used for %1$d milliseconds.
+         */
+        TOO_LONG("Connection used for %1$d milliseconds.", Category
+            .SUBSYSTEM_OR_SERVICE_DOWN, 12),
+        /**
+         * %1$d statements aren't closed.
+         */
+        ACTIVE_STATEMENTS("%1$d statements aren't closed.", Category
+            .PROGRAMMING_ERROR, 13),
+        /**
+         * Found not committed transaction.
+         */
+        IN_TRANSACTION("Found not committed transaction.", Category
+            .PROGRAMMING_ERROR, 14);
 
         /**
          * Message of the exception.

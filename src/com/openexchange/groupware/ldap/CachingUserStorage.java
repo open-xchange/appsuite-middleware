@@ -53,6 +53,8 @@ package com.openexchange.groupware.ldap;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,6 +97,11 @@ public class CachingUserStorage extends UserStorage {
     private static final JCS CACHE;
 
     /**
+     * Lock for the cache.
+     */
+    private static final Lock CACHE_LOCK;
+
+    /**
      * Default constructor.
      * @param context Context.
      */
@@ -114,6 +121,9 @@ public class CachingUserStorage extends UserStorage {
             }
             public User load() throws AbstractOXException {
                 return getUserStorage().getUser(uid);
+            }
+            public Lock getCacheLock() {
+                return CACHE_LOCK;
             }
         }, CACHE, User.class);
     }
@@ -174,6 +184,18 @@ public class CachingUserStorage extends UserStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int[] listAllUser() throws UserException {
+        try {
+            return getUserStorage().listAllUser();
+        } catch (LdapException e) {
+            throw new UserException(e);
+        }
+    }
+
+    /**
      * Creates a the instance implementing the user storage interface with
      * persitent storing.
      * @return an instance implementing the user storage interface.
@@ -199,5 +221,6 @@ public class CachingUserStorage extends UserStorage {
         } catch (CacheException e) {
             throw new RuntimeException("Can't create user cache.", e);
         }
+        CACHE_LOCK = new ReentrantLock(true);
     }
 }

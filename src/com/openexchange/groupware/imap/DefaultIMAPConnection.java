@@ -55,11 +55,13 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.event.ConnectionListener;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
@@ -79,6 +81,16 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DefaultIMAPConnection.class);
+	
+	private static final String PROTOCOL_IMAP = "imap";
+	
+	private static final String CHARENC_UTF8 = "UTF-8";
+	
+	private static final String CHARENC_ISO8859 = "ISO-8859-1";
+	
+	private static int counter;
+	
+	private final transient static Lock COUNTER_LOCK = new ReentrantLock();
 
 	private String imapServer = "localhost";
 
@@ -124,26 +136,18 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void setProperties(final Properties imapProperties) {
 		this.imapProperties = imapProperties;
 	}
-
-	/**
-	 * Establishes a new IMAP connection and returns its connected IMAP store
-	 * 
-	 * @return connected <code>com.sun.mail.imap.IMAPStore</code> instance
-	 */
-	public IMAPStore connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException {
-		return connect(null);
-	}
 	
 	private static final String STR_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
 	private static final String STR_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
 
 	/**
-	 * Establishes a new IMAP connection and returns its connected IMAP store
+	 * Establishes a new IMAP connection (if not done yet) and returns its
+	 * connected IMAP store
 	 * 
 	 * @return connected <code>com.sun.mail.imap.IMAPStore</code> instance
 	 */
-	public IMAPStore connect(final ConnectionListener l) throws javax.mail.NoSuchProviderException,
+	public IMAPStore connect() throws javax.mail.NoSuchProviderException,
 			javax.mail.MessagingException {
 		if (imapStore != null && imapStore.isConnected()) {
 			return imapStore;
@@ -162,26 +166,41 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 			imapSession = Session.getDefaultInstance(imapProperties, null);
 		}
 
-		//imapSession.setDebug(true);
-		//imapSession.setDebugOut(System.err);
+		// imapSession.setDebug(true);
+		// imapSession.setDebugOut(System.err);
 
-		imapStore = (IMAPStore) imapSession.getStore("imap");
+		imapStore = (IMAPStore) imapSession.getStore(PROTOCOL_IMAP);
 		String tmpPass = imapPassword;
 		try {
-			tmpPass = new String(imapPassword.getBytes("UTF-8"), "ISO-8859-1");
+			tmpPass = new String(imapPassword.getBytes(CHARENC_UTF8), CHARENC_ISO8859);
 		} catch (UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		if (l != null) {
-			imapStore.addConnectionListener(l);
-		}
 		imapStore.connect(imapServer, imapPort, imapUsername, tmpPass);
+		MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+		COUNTER_LOCK.lock();
+		try {
+			counter++;
+		} finally {
+			COUNTER_LOCK.unlock();
+		}
 		return imapStore;
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#close()
+	 */
 	public void close() throws javax.mail.MessagingException {
-		if (imapStore != null && imapStore.isConnected()) {
+		if (imapStore != null) {
 			imapStore.close();
+			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+			COUNTER_LOCK.lock();
+			try {
+				counter--;
+			} finally {
+				COUNTER_LOCK.unlock();
+			}
 			imapStore = null;
 		}
 	}
@@ -219,6 +238,15 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	public boolean isConnected() throws MessagingException {
 		return (imapStore != null && imapStore.isConnected());
+	}
+
+	public static int getCounter() {
+		COUNTER_LOCK.lock();
+		try {
+			return counter;
+		} finally {
+			COUNTER_LOCK.unlock();
+		}
 	}
 	
 }

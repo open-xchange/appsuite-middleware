@@ -205,6 +205,13 @@ public abstract class UserStorage {
     public abstract User searchUser(String email) throws LdapException;
 
     /**
+     * Returns an array with all user identifier of the context.
+     * @return an array with all user identifier of the context.
+     * @throws UserException if generating this list fails.
+     */
+    public abstract int[] listAllUser() throws UserException;
+
+    /**
      * Searches users who where modified later than the given date.
      * @param modifiedSince Date after that the returned users are modified.
      * @return a string array with the uids of the matching user.

@@ -103,16 +103,10 @@ public class SessionObject {
 	
 	private UserConfiguration userConfig;
 	
-	private final Set<String> replyMsgSet;
-	
-	private final Set<String> forwardMsgSet;
-	
 	private Session mailSession;
 	
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
-		this.replyMsgSet = new HashSet<String>();
-		this.forwardMsgSet = new HashSet<String>();
 	}
 	
 	public void setUsername(final String username) {
@@ -283,76 +277,6 @@ public class SessionObject {
 
 	public void setSecret(final String secret) {
 		this.secret = secret;
-	}
-	
-	/**
-	 * Adds a unique identifier of a message on which a reply is going to be
-	 * expected
-	 */
-	public void addExpectedReplyMsg(final String msgUID) {
-		this.replyMsgSet.add(msgUID);
-	}
-
-	/**
-	 * Removes a unique identifier of a message on which a reply is going to be
-	 * expected
-	 */
-	public boolean removeExpectedReplyMsg(final String msgUID) {
-		if (msgUID != null) {
-			return this.replyMsgSet.remove(msgUID);
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if given message's unique identifier is in set of expected reply
-	 * messages
-	 */
-	public boolean isExpectingReplyMsg(final String msgUID) {
-		return msgUID == null ? false : this.replyMsgSet.contains(msgUID);
-	}
-
-	/**
-	 * Clears the set of message unique identifiers
-	 * 
-	 */
-	public void clearAllExpectedReplyMsgs() {
-		this.replyMsgSet.clear();
-	}
-	
-	/**
-	 * Adds a unique identifier of a message on which a forward is going to be
-	 * expected
-	 */
-	public void addExpectedForwardMsg(final String msgUID) {
-		this.forwardMsgSet.add(msgUID);
-	}
-
-	/**
-	 * Removes a unique identifier of a message on which a forward is going to be
-	 * expected
-	 */
-	public boolean removeExpectedForwardMsg(final String msgUID) {
-		if (msgUID != null) {
-			return this.forwardMsgSet.remove(msgUID);
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if given message's unique identifier is in set of expected forward
-	 * messages
-	 */
-	public boolean isExpectingForwardMsg(final String msgUID) {
-		return msgUID == null ? false : this.forwardMsgSet.contains(msgUID);
-	}
-
-	/**
-	 * Clears the set of message unique identifiers
-	 * 
-	 */
-	public void clearAllExpectedForwardyMsgs() {
-		this.forwardMsgSet.clear();
 	}
 	
 	public static Locale createLocale(final String localeStr) {

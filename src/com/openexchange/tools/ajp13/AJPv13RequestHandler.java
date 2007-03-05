@@ -113,9 +113,9 @@ public class AJPv13RequestHandler {
 	 */
 	private static final int CPING_PREFIX_CODE = 10;
 
-	public static final String COOKIE_NAME_HTTP_SESSION = "ox-http-session-id";
-
-	public static final String COOKIE_NAME_JSESSIONID = "JSESSIONID";
+	public static final String JSESSIONID_COOKIE = "JSESSIONID";
+	
+	public static final String JSESSIONID_URI = ";jsessionid=";
 
 	private HttpServlet servletInstance;
 
@@ -146,8 +146,6 @@ public class AJPv13RequestHandler {
 	private boolean isFormData;
 
 	private boolean emptyDataPackageReceived;
-
-	private boolean sessionCreated;
 
 	private String httpSessionId;
 
@@ -450,7 +448,6 @@ public class AJPv13RequestHandler {
 		endResponseSent = false;
 		isFormData = false;
 		emptyDataPackageReceived = false;
-		sessionCreated = false;
 		httpSessionId = null;
 		servletPath = null;
 		state = State.IDLE;
@@ -667,14 +664,6 @@ public class AJPv13RequestHandler {
 
 	public void setHttpSessionId(final String httpSessionId) {
 		this.httpSessionId = httpSessionId;
-	}
-
-	public boolean isSessionCreated() {
-		return sessionCreated;
-	}
-
-	public void setSessionCreated(final boolean sessionCreated) {
-		this.sessionCreated = sessionCreated;
 	}
 
 	public String getServletPath() {

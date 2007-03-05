@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 /**
  * This class implements the solver for the problem that an entry exists in the
@@ -156,7 +157,7 @@ public class DBDelProblemSolver extends ProblemSolver {
 							" in context " + ctx.getContextId() + " to new " +
 							"dummy identifier " + identifier);
 				}
-			} catch (IOException e) {
+			} catch (FileStorageException e) {
 				LOG.debug("", e);
 			} catch (OXException e) {
 				LOG.debug("", e);

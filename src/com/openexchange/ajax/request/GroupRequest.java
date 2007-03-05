@@ -107,7 +107,7 @@ public class GroupRequest {
 		
 		jsonWriter.array();
 		try {
-			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			
 			for (int a = 0; a < jsonArray.length(); a++) {
 				JSONObject jData = jsonArray.getJSONObject(a);
@@ -132,7 +132,7 @@ public class GroupRequest {
 		
 		timestamp = new Date(0);
 		
-		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 		com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id);
 		
 		GroupWriter groupWriter = new GroupWriter(jsonWriter);
@@ -157,7 +157,7 @@ public class GroupRequest {
 		SearchIterator it = null;
 		
 		try {
-			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			com.openexchange.groupware.ldap.Group[] groups = null;
 			
 			if (searchpattern.equals("*")) {

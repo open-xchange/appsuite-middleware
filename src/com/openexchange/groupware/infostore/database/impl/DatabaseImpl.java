@@ -75,6 +75,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.OXExceptionSource;
@@ -86,10 +87,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -99,7 +104,9 @@ import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.tx.Undoable;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -390,7 +397,7 @@ public class DatabaseImpl extends DBService {
 			"This indicates a problem accessing the underlying filestorage. Look at the exceptions given as cause for this one.",
 			"The context specific data about a filestorage could not be loaded. Look at the underlying exceptions for a hint." }, exceptionId = {
 			2, 3, 4 }, msg = { "Invalid SQL Query: %s",
-			"Could not access file store.", "Could not load context." })
+			"Could not access file store.", "Could not get file store location." })
 	public InputStream getDocument(int id, int version, Context ctx, User user,
 			UserConfiguration userConfig) throws OXException {
 		InputStream retval = null;
@@ -420,18 +427,17 @@ public class DatabaseImpl extends DBService {
 			}
 			result = stmt.executeQuery();
 			if (result.next()) {
-				// FIXME remove QuotaFileStorage
-				FileStorage fs = QuotaFileStorage.getQuotaInstance(ctx, this
+				FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this
 						.getProvider());
 				retval = fs.getFile(result.getString(1));
 				fs.close();
 			}
 		} catch (SQLException x) {
 			throw EXCEPTIONS.create(2, x, getStatement(stmt));
-		} catch (IOException x) {
-			throw EXCEPTIONS.create(3, x);
-		} catch (ContextException e) {
-			throw EXCEPTIONS.create(4, e);
+		} catch (FileStorageException e) {
+			throw new InfostoreException(e);
+		} catch (FilestoreException e) {
+			throw new InfostoreException(e);
 		} finally {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
@@ -1504,8 +1510,94 @@ public class DatabaseImpl extends DBService {
 			"infostore_document");
 
 	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
-	@Deprecated
+	
 	public void removeUser(int id, Context ctx) throws OXException {
+
+		System.out.println("IFO: START");
+		removePrivate(id,ctx);
+		assignToAdmin(id,ctx);
+		System.out.println("IFO: DONE");
+	}
+
+	private void removePrivate(int id, Context ctx) throws OXException {
+		try {
+			List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
+			if(foldersWithPrivateItems.size() == 0)
+				return;
+			StringBuffer where = new StringBuffer("infostore.folder_id in (");
+			for(FolderObject folder : foldersWithPrivateItems){
+				where.append(folder.getObjectID()).append(",");
+			}
+			where.setCharAt(where.length()-1, ')');
+			where.append(" and infostore.cid = ").append(ctx.getContextId());
+			
+			SearchIterator iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(where.toString(), Metadata.VALUES_ARRAY, getProvider(), ctx);
+			where = new StringBuffer("infostore_document.cid = ");
+			where.append(ctx.getContextId()).append(" and infostore_document.infostore_id in (");
+			
+			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+			while(iter.hasNext()) {
+				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				where.append(metadata.getId()).append(",");
+				documents.add(metadata);
+			}
+			if(documents.size() == 0)
+				return;
+			
+			where.setCharAt(where.length()-1, ')');
+			
+			List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
+			
+			iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allVersionsWhere(where.toString(), Metadata.VALUES_ARRAY, getProvider(), ctx);
+			
+			while(iter.hasNext()) {
+				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				versions.add(metadata);
+			}
+			
+			InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
+			
+			DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
+			deleteDocumentAction.setProvider(getProvider());
+			deleteDocumentAction.setContext(ctx);
+			deleteDocumentAction.setDocuments(documents);
+			deleteDocumentAction.setQueryCatalog(catalog);
+			
+			DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
+			deleteVersionAction.setProvider(getProvider());
+			deleteVersionAction.setContext(ctx);
+			deleteVersionAction.setDocuments(versions);
+			deleteVersionAction.setQueryCatalog(catalog);
+			
+			
+			deleteVersionAction.perform();
+			try {
+				deleteDocumentAction.perform();
+			} catch (AbstractOXException e) {
+				try {
+					deleteVersionAction.undo();
+					throw new InfostoreException(e);
+				} catch (AbstractOXException e1) {
+					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
+				}
+			}
+			
+			FileStorage fs = getFileStorage(ctx);
+
+//			Remove the files. No rolling back from this point onward
+			
+			for(DocumentMetadata version : versions) {
+				if(null != version.getFilestoreLocation())
+					fs.deleteFile(version.getFilestoreLocation());
+			}
+			
+		} catch (AbstractOXException x) {
+			throw new InfostoreException(x);
+		}
+		
+	}
+
+	private void assignToAdmin(int id, Context ctx) throws OXException {
 		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = null;
@@ -1775,19 +1867,18 @@ public class DatabaseImpl extends DBService {
 			for (String id : filesToDelete) {
 				try {
 					getFileStorage(ctx).deleteFile(id);
-				} catch (ContextException e) {
+				} catch (FilestoreException e) {
 					throw EXCEPTIONS.create(30, e);
-				} catch (IOException e) {
-					throw EXCEPTIONS.create(31, e.getMessage(), e);
+				} catch (FileStorageException e) {
+					throw new InfostoreException(e);
 				}
 			}
 		}
 	}
 
-	protected FileStorage getFileStorage(Context ctx) throws IOException,
-			ContextException {
-		// FIXME remove QuotaFileStorage
-		return QuotaFileStorage.getQuotaInstance(ctx, this.getProvider());
+	protected FileStorage getFileStorage(Context ctx) throws FileStorageException,
+			FilestoreException {
+		return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this.getProvider());
 	}
 
 	@Override
@@ -1806,11 +1897,10 @@ public class DatabaseImpl extends DBService {
 		for (String id : fileIdRemoveList.get()) {
 			try {
 				getFileStorage(ctx).deleteFile(id);
-			} catch (ContextException e) {
+			} catch (FilestoreException e) {
 				throw new TransactionException(e); // ErrorCode?
-			} catch (IOException e) {
-				throw new TransactionException(EXCEPTIONS.create(32, e, e
-						.getMessage()));
+			} catch (FileStorageException e) {
+				throw new TransactionException(e);
 			}
 		}
 		super.commit();
@@ -1832,11 +1922,10 @@ public class DatabaseImpl extends DBService {
 		for (String id : fileIdAddList.get()) {
 			try {
 				getFileStorage(ctx).deleteFile(id);
-			} catch (ContextException e) {
+			} catch (FilestoreException e) {
 				throw new TransactionException(e); // ErrorCode?
-			} catch (IOException e) {
-				throw new TransactionException(EXCEPTIONS.create(33, e, e
-						.getMessage()));
+			} catch (FileStorageException e) {
+				throw new TransactionException(e);
 			}
 		}
 		super.rollback();

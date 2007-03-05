@@ -56,6 +56,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -143,7 +144,12 @@ public class Tasks extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+
 			response.setException(e);
 		}
 		
@@ -226,7 +232,12 @@ public class Tasks extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+
 			response.setException(e);
 		}
 		

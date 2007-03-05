@@ -133,7 +133,7 @@ public class CalendarAdministration implements DeleteListener {
             sb.append(type);
             sb.append(" AND id = ");
             sb.append(deleteEvent.getId());
-            pst = readcon.prepareStatement(sb.toString());
+            pst = writecon.prepareStatement(sb.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             rs = CalendarSql.getCalendarSqlImplementation().getResultSet(pst);
             PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs.next()) {
@@ -183,7 +183,7 @@ public class CalendarAdministration implements DeleteListener {
             sb.append(" WHERE pdr2.id = ");
             sb.append(deleteEvent.getSession().getUserObject().getId());
             sb.append(" group by pdr.object_id having count(pdr.object_id ) = 1");
-            pst = readcon.prepareStatement(sb.toString());
+            pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = CalendarSql.getCalendarSqlImplementation().getResultSet(pst);
             while (rs.next()) {
                 if (del_rights == null) {
@@ -231,12 +231,12 @@ public class CalendarAdministration implements DeleteListener {
             sb2.append(" AND pd.intfield01 = pdm.object_id");
             sb2.append(" WHERE pdm.member_uid = ");
             sb2.append(deleteEvent.getSession().getUserObject().getId());
-            pst2 = readcon.prepareStatement(sb2.toString());
+            pst2 = readcon.prepareStatement(sb2.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs2 = CalendarSql.getCalendarSqlImplementation().getResultSet(pst2);
             PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs2.next()) {
-                int object_id = rs.getInt(1);
-                int fid = rs.getInt(2);
+                int object_id = rs2.getInt(1);
+                int fid = rs2.getInt(2);
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);

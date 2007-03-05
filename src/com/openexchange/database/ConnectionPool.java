@@ -67,6 +67,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.ReentrantLockPool;
+import com.openexchange.server.DBPoolingException;
 
 /**
  * Extends the pool API especially for database connections.
@@ -210,21 +211,11 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                 LOG.debug("Problem while closing connection.", e);
             }
         }
-        private static String createTrace(final String message,
+        private static void addTrace(final DBPoolingException dbe,
             final PooledData<Connection> data) {
-            final StringBuilder trace = new StringBuilder();
-            trace.append(message);
-            trace.append('\n');
-            StackTraceElement[] stack = data.getTrace();
-            if (null == stack) {
-                stack = Thread.currentThread().getStackTrace();
+            if (null != data.getTrace()) {
+                dbe.setStackTrace(data.getTrace());
             }
-            for (StackTraceElement e : stack) {
-                trace.append("\tat ");
-                trace.append(e);
-                trace.append('\n');
-            }
-            return trace.toString();
         }
         /**
          * {@inheritDoc}
@@ -237,10 +228,10 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     LOG.error("Found closed connection.");
                     retval = false;
                 } else if (!con.getAutoCommit()) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(createTrace("Connection not working anymore.",
-                            data));
-                    }
+                    final DBPoolingException dbe = new DBPoolingException(
+                        DBPoolingException.Code.IN_TRANSACTION);
+                    addTrace(dbe, data);
+                    LOG.error(dbe.getMessage(), dbe);
                     con.rollback();
                     con.setAutoCommit(true);
                 }
@@ -250,11 +241,11 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                         "getActiveStatementCount");
                     final int active = (Integer) method.invoke(con,
                         new Object[0]);
-                    LOG.warn("Number of active statements: " + active);
                     if (active > 0) {
-                        // TODO change to debug
-                        LOG.error(createTrace("" + active
-                            + " statements aren't closed.", data));
+                        final DBPoolingException dbe = new DBPoolingException(
+                            DBPoolingException.Code.ACTIVE_STATEMENTS, active);
+                        addTrace(dbe, data);
+                        LOG.error(dbe.getMessage(), dbe);
                         retval = false;
                     }
                 } catch (RuntimeException e) {
@@ -263,9 +254,10 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     LOG.error(e.getMessage(), e);
                 }
                 if (data.getTimeDiff() > 2000) {
-                    // TODO change to debug
-                    LOG.warn(createTrace("Connection used for "
-                        + data.getTimeDiff() + " milliseconds.", data));
+                    final DBPoolingException dbe = new DBPoolingException(
+                        DBPoolingException.Code.TOO_LONG, data.getTimeDiff());
+                    addTrace(dbe, data);
+                    LOG.warn(dbe.getMessage(), dbe);
                 }
             } catch (SQLException e) {
                 retval = false;

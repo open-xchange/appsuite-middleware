@@ -143,6 +143,16 @@ public class WebdavProppatchAction extends AbstractAction {
 		
 		public Element perform(Element propElement, WebdavResource resource) {
 			int status = 200;
+			
+			if(propElement.getChildren().isEmpty()) {
+				Element propstat = new Element("propstat", DAV_NS);
+				
+				Element statusElement = new Element("status", DAV_NS);
+				statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
+				propstat.addContent(statusElement);
+				return propstat;
+			}
+			
 			Element propertyElement = (Element) propElement.getChildren().get(0);
 			WebdavProperty property = new WebdavProperty();
 			property.setNamespace(propertyElement.getNamespaceURI());
@@ -196,6 +206,14 @@ public class WebdavProppatchAction extends AbstractAction {
 
 		public Element perform(Element propElement, WebdavResource resource) {
 			int status = 200;
+			if(propElement.getChildren().isEmpty()) {
+				Element propstat = new Element("propstat", DAV_NS);
+				
+				Element statusElement = new Element("status", DAV_NS);
+				statusElement.setText("HTTP/1.1 "+status+" "+Utils.getStatusString(status));
+				propstat.addContent(statusElement);
+				return propstat;
+			}
 			Element propertyElement = (Element) propElement.getChildren().get(0);
 			
 			try {

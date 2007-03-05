@@ -64,8 +64,11 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.FileStorageException.Code;
@@ -78,26 +81,20 @@ public class QuotaRequest extends CommonRequest {
 	private static final Log LOG = LogFactory.getLog(QuotaRequest.class);
 	
 	private QuotaFileStorage qfs;
-	private MailInterface mi;
-
+	
 	private AbstractOXException fsException;
-	private AbstractOXException mException;
+
+	private SessionObject session;
 
 	public QuotaRequest(SessionObject sessionObj,PrintWriter w) {
 		super(w);
 		try {
-			this.qfs = QuotaFileStorage.getQuotaInstance(sessionObj.getContext(),new DBPoolProvider());
-		} catch (IOException e) {
-			this.fsException = new FileStorageException(Code.INSTANTIATIONERROR,e,e.getMessage());
-		} catch (ContextException e) {
+			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(sessionObj.getContext()),sessionObj.getContext(),new DBPoolProvider());
+		} catch (AbstractOXException e) {
 			this.fsException = e;
 		}
 		
-		try {
-			this.mi = MailInterfaceImpl.getInstance(sessionObj);
-		} catch (OXException e) {
-			this.mException = e;
-		}
+		this.session = sessionObj;
 	}
 	
 	public boolean action(String action, SimpleRequest req){
@@ -112,6 +109,7 @@ public class QuotaRequest extends CommonRequest {
 			return true;
 		}
 		return false;
+	
 	}
 	
 	private void exception(AbstractOXException exception){
@@ -145,11 +143,10 @@ public class QuotaRequest extends CommonRequest {
 	}
 	
 	private void mail() {
-		if(mException != null) {
-			exception(mException);
-			return;
-		}
+		MailInterface mi = null;
+		
 		try {
+			mi = MailInterfaceImpl.getInstance(this.session);
 			long[] quotaInfo = mi.getQuota();
 			long quota = quotaInfo[0];
 			long use = quotaInfo[1];
@@ -159,8 +156,17 @@ public class QuotaRequest extends CommonRequest {
 			data.put("use",use*1024);
 			res.put("data",data);
 			w.write(res.toString());
+		} catch (OXException e) {
+			exception(e);
 		} catch (Exception e) {
 			handle(e);
+		} finally {
+            // FIXME What about if mi == null?
+			try {
+				mi.close(false);
+			} catch (OXException e) {
+				LOG.error(e);
+			}
 		}
 	}
 

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import org.json.JSONArray;
@@ -71,18 +69,17 @@ import com.sun.mail.imap.Rights;
  * MailFolderParser
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class MailFolderParser {
-	
+
 	private final SessionObject sessionObj;
-	
+
 	public MailFolderParser(SessionObject sessionObj) {
 		super();
 		this.sessionObj = sessionObj;
 	}
-	
-	
+
 	public void parse(final MailFolderObject mfo, final JSONObject jsonObj) throws OXException {
 		try {
 			parseMailFolder(mfo, jsonObj);
@@ -90,25 +87,18 @@ public class MailFolderParser {
 			throw new OXFolderException(FolderCode.JSON_ERROR, exc, exc.getMessage());
 		}
 	}
-	
-	private static final String parseFullname(final String fullname) {
-		if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(fullname)) {
-			return fullname;
-		}
-		return fullname.substring(8);
-	}
-	
+
 	private void parseMailFolder(final MailFolderObject mfo, final JSONObject jsonObj) throws JSONException,
 			OXException {
 		if (jsonObj.has(FolderFields.TITLE)) {
 			mfo.setName(jsonObj.getString(FolderFields.TITLE));
 		}
 		if (jsonObj.has(FolderFields.FOLDER_ID)) {
-			mfo.setParentFullName(parseFullname(jsonObj.getString(FolderFields.FOLDER_ID)));
+			mfo.setParentFullName(jsonObj.getString(FolderFields.FOLDER_ID));
 		}
 		if (jsonObj.has(FolderFields.MODULE)
 				&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.MODULE);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.MODULE);
 		}
 		if (jsonObj.has("permissions") && jsonObj.getJSONArray("permissions").length() > 0) {
 			try {
@@ -120,10 +110,10 @@ public class MailFolderParser {
 				for (int i = 0; i < size; i++) {
 					final JSONObject jsonPerms = perms.getJSONObject(i);
 					if (!jsonPerms.has("entity")) {
-						throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
+						throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.ENTITY);
 					}
 					if (!jsonPerms.has("rights")) {
-						throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.RIGHTS);
+						throw new OXFolderException(FolderCode.MISSING_PARAMETER, (String) null, FolderFields.RIGHTS);
 					}
 					if (jsonPerms.getString("rights").length() > 0) {
 						applyACLs = true;

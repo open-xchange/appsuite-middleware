@@ -49,8 +49,6 @@
 
 package com.openexchange.tools.file;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 
@@ -71,6 +68,7 @@ import com.openexchange.groupware.tx.TransactionException;
  *
  */
 public class QuotaFileStorage extends FileStorage {
+		
 	
 	private static final String SELECT = "SELECT used FROM filestore_usage WHERE cid = ?";
 	private static final String INSERT = "INSERT INTO filestore_usage (used, cid) VALUES (?, ?)";
@@ -82,42 +80,34 @@ public class QuotaFileStorage extends FileStorage {
 	
 	private ThreadLocal<LockMode> lockMode = new ThreadLocal<LockMode>();
 	
-	private static final Log LOG = LogFactory.getLog(FileStorage.class);
-	
-	public static final QuotaFileStorage getQuotaInstance(Context ctx, DBProvider provider) throws IOException, ContextException {
-        final File f;
-        try {
-            f = new File(ctx.getFileStorageLocation());
-        } catch (IllegalArgumentException e) {
-            LOG.error("Problem with URL: \"" + ctx.getFileStorageLocation()
-                + '\"', e);
-            throw new IOException("Problem with URL: \""
-                + ctx.getFileStorageLocation() + '\"');
-        }
-    	return new QuotaFileStorage(DEFAULT_DEPTH, DEFAULT_FILES, getInstance(f), ctx, provider);
-    }
-	
-	public static final QuotaFileStorage getQuotaInstance(Context ctx, DBProvider provider, final Object... initData) throws IOException {
-    	return new QuotaFileStorage(DEFAULT_DEPTH, DEFAULT_FILES, getInstance(initData), ctx, provider);
-    }
-    
-    public static final QuotaFileStorage getQuotaInstance(Context ctx, DBProvider provider, int depth, int files, Object...initData) throws IOException {
-    	return new QuotaFileStorage(depth,files,getInstance(depth,files,initData),ctx,provider);
-    }
+	private static final Log LOG = LogFactory.getLog(QuotaFileStorage.class);
 
 	
-	public QuotaFileStorage(int depth, int entries, FileStorage delegate, Context ctx, DBProvider provider) throws IOException {
-		super(depth,entries);
-		this.delegate = delegate;
-		this.ctx = ctx;
-		this.provider = provider;
-	}
-	
+    public QuotaFileStorage(final Object... initData) throws FileStorageException {
+        super(initData);
+        
+        if (!(initData[3] instanceof Context)) {
+            throw new QuotaFileStorageException(QuotaFileStorageException.Code
+                .INVALID_PARAMETER, 3, initData[3].getClass().getName());
+        }
+        this.ctx = (Context) initData[3];
+        if (!(initData[4] instanceof DBProvider)) {
+            throw new QuotaFileStorageException(QuotaFileStorageException.Code
+                .INVALID_PARAMETER, 4, initData[4].getClass().getName());
+        }
+        this.provider = (DBProvider) initData[4];
+        try {
+        	this.delegate = new LocalFileStorage(initData);   
+        } catch (FileStorageException x) {
+        	throw addContextInfo(x, ctx);
+        }
+    }
+
 	public long getQuota() {
 		return ctx.getFileStorageQuota();
 	}
 	
-	public long getUsage() throws IOException {
+	public long getUsage() throws QuotaFileStorageException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -131,17 +121,15 @@ public class QuotaFileStorage extends FileStorage {
 			}
 			return rs.getLong(1);
 		} catch (SQLException e) {
-			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQL_EXCEPTION, e);
 		} catch (TransactionException e) {
-			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(e);
 		} finally {
 			close(readCon,stmt,rs,false);
 		}
 	}
 	
-	public void recalculateUsage() throws IOException {
+	public void recalculateUsage() throws FileStorageException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -186,108 +174,170 @@ public class QuotaFileStorage extends FileStorage {
 			storeUsage(usage);
 		} catch (SQLException e) {
 			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQL_EXCEPTION, e);
 		} catch (TransactionException e) {
 			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(e);
 		} finally {
 			close(readCon,stmt,rs,false);
 		}
 	}
 
-	
+	public String saveNewFile(InputStream input) throws FileStorageException  {
+		String name;
+		long length;
+		boolean locked = false;
+		try {
+			name = super.saveNewFile(input);
+			length = delegate.length(name);
+			delegate.lock(LOCK_TIMEOUT);
+			locked = true;
+			if(fits(length)) {
+				try {
+					incUsed(length);
+					return name;
+				} catch (FileStorageException x) {
+					LOG.fatal("Can't set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
+				}
+			}
+			super.deleteFile(name);
+			quotaException(length);
+			return null;
+			
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		} finally {
+			if(locked)
+				delegate.unlock();
+		}
+	}
 	
 	@Override
-	public boolean deleteFile(String identifier) throws IOException {
-		delegate.lock(LOCK_TIMEOUT);
-		lockMode.set(new NilLockMode());
+	public boolean deleteFile(String identifier) throws FileStorageException {
 		try {
+			delegate.lock(LOCK_TIMEOUT);
+			lockMode.set(new NilLockMode());
 			long size = delegate.getFileSize(identifier);
 			boolean deleted = super.deleteFile(identifier);
 			if(deleted) {
 					decUsed(size);
 			}
 			return deleted;
-		} finally {
-			lockMode.set(new NormalLockMode(delegate));
+		} catch (QuotaFileStorageException x) {
+			throw x;
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}  finally {
+			lockMode.set(new NormalLockMode(delegate, ctx));
 			delegate.unlock();
 		}
 	}
 
-	@Override
+	/*@Override
 	public String saveNewFile(InputStream input) throws IOException {
-		delegate.lock(LOCK_TIMEOUT);
+		
+		//delegate.lock(LOCK_TIMEOUT);
+		boolean locked = true;
 		try {
-			lockMode.set(new NilLockMode());
+			//lockMode.set(new OnlyUnlockMode(delegate));
+			//locked = false;
 			String name =  super.saveNewFile(input);
 			long length = delegate.length(name);
+			delegate.lock(LOCK_TIMEOUT);
+			locked = true;
 			if(fits(length)) {
 				try {
 					incUsed(length);
 					return name;
 				} catch (IOException x) {
-					LOG.fatal("Can't set quota. Accepting upload anyway. You'll have to run the recover tool! ContextId: "+ctx.getContextId());
+					LOG.fatal("Can't set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
 				}
 			}
+			delegate.unlock();
+			locked = false;
+			
 			super.deleteFile(name);
 			quotaException(length);
 		} finally {
-			lockMode.set(new NormalLockMode(delegate));
-			delegate.unlock();
+			if(locked)
+				delegate.unlock();
 		}
 		return null; // Unreachable 
-	}
+	} */
 
-	public String saveNewFile(InputStream input, long sizeHint) throws IOException{
+	public String saveNewFile(InputStream input, long sizeHint) throws FileStorageException{
 		if(!fits(sizeHint)) {
-			quotaException(sizeHint);
-			
+			quotaException(sizeHint);	
 		}
 		return saveNewFile(input);
 	}
 
 	@Override
-	protected boolean delete(String name) throws IOException {
-		return delegate.delete(name);
+	protected boolean delete(String name) throws FileStorageException {
+		try {
+			return delegate.delete(name);
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected void save(String name, InputStream input) throws IOException {
-		delegate.save(name,input);
+	protected void save(String name, InputStream input) throws FileStorageException {
+		try {
+			delegate.save(name,input);
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected InputStream load(String name) throws IOException {
-		return delegate.load(name);
+	protected InputStream load(String name) throws FileStorageException {
+		try {
+			return delegate.load(name);
+		} catch (FileStorageException x){
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected long length(String name) throws IOException {
-		return delegate.length(name);
+	protected long length(String name) throws FileStorageException {
+		try {
+			return delegate.length(name);
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected String type(String name) throws IOException {
-		return delegate.type(name);
+	protected String type(String name) throws FileStorageException {
+		try {
+			return delegate.type(name);
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected boolean exists(String name) throws IOException {
-		return delegate.exists(name);
+	protected boolean exists(String name) throws FileStorageException {
+		try {
+			return delegate.exists(name);
+		} catch (FileStorageException x) {
+			throw addContextInfo(x, ctx);
+		}
 	}
 
 	@Override
-	protected void lock(long timeout) throws IOException {
+	protected void lock(long timeout) throws FileStorageException {
 		if(null == lockMode.get()) {
-			lockMode.set(new NormalLockMode(delegate));
+			lockMode.set(new NormalLockMode(delegate, ctx));
 		}
 		lockMode.get().lock(timeout);
 	}
 
 	@Override
-	protected void unlock() throws IOException {
+	protected void unlock() throws FileStorageException {
 		if(null == lockMode.get()) {
-			lockMode.set(new NormalLockMode(delegate));
+			lockMode.set(new NormalLockMode(delegate, ctx));
 		}
 		lockMode.get().unlock();
 	}
@@ -297,34 +347,34 @@ public class QuotaFileStorage extends FileStorage {
 		delegate.closeImpl();
 	}
 	
-	private final boolean fits(long length) throws IOException {
+	private final boolean fits(long length) throws QuotaFileStorageException {
 		long quota = getQuota();
 		if(quota == -1)
 			return true;
 		return getUsage() + length <= quota;
 	}
 	
-	private final void incUsed(long length) throws IOException {
+	private final void incUsed(long length) throws QuotaFileStorageException {
 		storeUsage(getUsage()+length);
 	}
 	
-	private void decUsed(long size) throws IOException {
+	private void decUsed(long size) throws QuotaFileStorageException {
 		long usage = getUsage();
 		usage -= size;
 		if(usage < 0) {
-			LOG.error("Quota Statistics seem to be inconsistent with this FileStorage. Run the recovery tool. ContextId: "+ctx.getContextId());
+			LOG.fatal("Quota Statistics seem to be inconsistent with this FileStorage. Run the recovery tool. ContextId: "+ctx.getContextId());
 			usage = 0;
 		}
 		storeUsage(usage);
 	}
 
 
-	private final void quotaException(long length) throws IOException {
-		throw new IOException("This file of size "+length+" doesn't fit in the filestorage. Quota: "+getQuota()+" Used: "+getUsage());
+	private final void quotaException(long length) throws QuotaFileStorageException {
+		throw new QuotaFileStorageException(QuotaFileStorageException.Code.TOO_LARGE, String.valueOf(length), String.valueOf(getQuota()), String.valueOf(getUsage()));
 	}
 	
 	
-	protected void storeUsage(long usage) throws IOException {
+	protected void storeUsage(long usage) throws QuotaFileStorageException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -346,10 +396,10 @@ public class QuotaFileStorage extends FileStorage {
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQL_EXCEPTION, e);
 		} catch (TransactionException e) {
 			LOG.debug(e);
-			throw new IOException(e.toString());
+			throw new QuotaFileStorageException(e);
 		} finally {
 			close(writeCon,stmt,null,true);
 		}
@@ -378,36 +428,73 @@ public class QuotaFileStorage extends FileStorage {
 		
 	}
 
+	private static final QuotaFileStorageException addContextInfo(FileStorageException x, Context ctx) {
+		LOG.error("Filestore seems to be broken: FilestoreID: "+ctx.getFilestoreId()+" ContextID: "+ctx.getContextId(), x);
+		return new QuotaFileStorageException(QuotaFileStorageException.Code.UNDERLYING_EXCEPTION, x, String.valueOf(ctx.getFilestoreId()), String.valueOf(ctx.getContextId()), x.getMessage());
+	}
 	
 	protected static interface LockMode{
-		public void lock(long timeout) throws IOException;
-		public void unlock() throws IOException;
+		public void lock(long timeout) throws FileStorageException;
+		public void unlock() throws FileStorageException;
 	}
 	
 	protected static class NormalLockMode implements LockMode {
 
 		private FileStorage delegate;
+		private Context ctx;
 
-		public NormalLockMode(FileStorage delegate){
+		public NormalLockMode(FileStorage delegate, Context ctx){
 			this.delegate = delegate;
+			this.ctx = ctx;
 		}
 		
-		public void lock(long timeout) throws IOException {
-			delegate.lock(timeout);
+		public void lock(long timeout) throws FileStorageException {
+			try {
+				delegate.lock(timeout);
+			} catch (FileStorageException x) {
+				throw addContextInfo(x, ctx);
+			}
 		}
 
-		public void unlock() throws IOException {
-			delegate.unlock();
+		public void unlock() throws FileStorageException {
+			try {
+				delegate.unlock();
+			} catch (FileStorageException x) {
+				throw addContextInfo(x, ctx);
+			}
 		}
 		
 	}
 	
 	protected static class NilLockMode implements LockMode {
 
-		public void lock(long timeout) throws IOException {
+		public void lock(long timeout) throws FileStorageException {
 		}
 
-		public void unlock() throws IOException {
+		public void unlock() throws FileStorageException {
+		}
+		
+	}
+	
+	protected static class OnlyUnlockMode implements LockMode {
+
+		private FileStorage delegate;
+		private Context ctx;
+
+		public OnlyUnlockMode(FileStorage delegate, Context ctx){
+			this.delegate = delegate;
+			this.ctx = ctx;
+		}
+		
+		public void lock(long timeout) throws FileStorageException {
+		}
+
+		public void unlock() throws FileStorageException {
+			try {
+				delegate.unlock();
+			} catch (FileStorageException x) {
+				throw addContextInfo(x, ctx);
+			}
 		}
 		
 	}

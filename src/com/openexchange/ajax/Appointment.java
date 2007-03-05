@@ -54,6 +54,7 @@ import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -108,7 +109,12 @@ public class Appointment extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+			
 			response.setException(e);
 		} catch (SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
@@ -197,7 +203,12 @@ public class Appointment extends DataServlet {
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+
 			response.setException(e);
 		} catch (SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);

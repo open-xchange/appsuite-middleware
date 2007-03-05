@@ -599,20 +599,30 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.de\n"
+"Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-02-09 11:58+0100\n"
+"PO-Revision-Date: 2007-02-28 16:10+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.10.2\n"
+
+msgid "%1$d statements aren't closed."
+msgstr "%1$d Statements nicht geschlossen."
 
 msgid "%s attachment could not be save due to an unsupported MIME type %s"
 msgstr ""
@@ -921,6 +931,9 @@ msgstr ""
 "Fehlerhafte Verbindung aufgrund einer Socket Exception auf dem entfernten "
 "Rechner: %s"
 
+msgid "Connection used for %1$d milliseconds."
+msgstr "Verbindung verwendet für %1$d Millisekunden."
+
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
 "server: %s"
@@ -928,8 +941,8 @@ msgstr ""
 "Verbindung abgelehnt oder Zeitüberschreitung beim Versuch, eine Verbindung "
 "zum entfernten Server herzustellen: %s"
 
-msgid "Connection was reset"
-msgstr "Verbindung wurde zurückgesetzt"
+msgid "Connection was reset. Please try again."
+msgstr "Verbindung wurde zurückgesetzt. Bitte erneut versuchen."
 
 msgid "Contact not found! Context %1$d"
 msgstr "Kontakt nicht gefunden. Kontext %1$d"
@@ -940,7 +953,9 @@ msgstr "Cookie JSESSIONID enthält nicht passende JVM-Route: %s ist ungleich %s"
 msgid ""
 "Corrupt AJP package #%d: First two bytes do not indicate a package from "
 "server to container: %s %s"
-msgstr "Schadhaftes AJP-Paket #%d: Ersten zwei Bytes zeigen kein Paket vom Server an Container an: %s %s"
+msgstr ""
+"Schadhaftes AJP-Paket #%d: Ersten zwei Bytes zeigen kein Paket vom Server an "
+"Container an: %s %s"
 
 msgid ";"
 msgstr ";"
@@ -1174,6 +1189,9 @@ msgstr "Fataler Fehler. (JÄHRLICH2) fehlendes oder falsches Intervall : %d"
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr "Fataler Fehler. (JÄHRLICH2) Fehlender oder falscher Wert für Tag : %d"
 
+msgid "Fatal error. You are trying to create a new recurring from an exception!"
+msgstr "Fataler Fehler. Sie versuchen, aus einer Ausnahme einen neuen wiederkehrenden Termin zu erstellen!"
+
 msgid "File \"%s\" does not exist."
 msgstr "Die Datei \"%s\" ist nicht vorhanden."
 
@@ -1267,9 +1285,7 @@ msgid "Folder read-only check failed"
 msgstr "Nur-Leseprüfung für Ordner fehlgeschlagen"
 
 msgid "Folder type \"SHARED\" is not allowed in this situation."
-msgstr ""
-"Der Ordnertyp \"FREIGEGEBEN\" ist in dieser Situation nicht "
-"erlaubt."
+msgstr "Der Ordnertyp \"FREIGEGEBEN\" ist in dieser Situation nicht erlaubt."
 
 msgid "Folder type unresolvable !"
 msgstr "Ordnertyp kann nicht aufgelöst werden"
@@ -1283,6 +1299,9 @@ msgid "For tasks which are not started the percentage done must be 0 and not %d.
 msgstr ""
 "Bei nicht begonnenen Aufgaben muss die Prozentangabe bei 0 liegen und nicht "
 "bei %d."
+
+msgid "Found not committed transaction."
+msgstr "Nicht ausgeführte Übertragung gefunden"
 
 msgid "Found resource groups with same identifier %d."
 msgstr "Ressourcengruppen mit gleicher ID %d gefunden"
@@ -1302,12 +1321,16 @@ msgstr "-1 ID von IDGenerator erhalten"
 msgid ""
 "Got the wrong folder identification. You do not have the appropriate "
 "permissions to modify this object."
-msgstr "Falsche Ordner-ID erhalten. Sie haben nicht die entsprechenden Rechte zum Ändern dieser Objekts."
+msgstr ""
+"Falsche Ordner-ID erhalten. Sie haben nicht die entsprechenden Rechte zum "
+"Ändern dieser Objekts."
 
 msgid ""
 "Got the wrong shared folder identification. You do not have the appropriate "
 "permissions to modify this object."
-msgstr "Falsche ID für freigegebenen Ordner erhalten. Sie haben nicht die entsprechenden Rechte zum Ändern dieses Objekts."
+msgstr ""
+"Falsche ID für freigegebenen Ordner erhalten. Sie haben nicht die "
+"entsprechenden Rechte zum Ändern dieses Objekts."
 
 msgid "Hash algorithm %s isn't found."
 msgstr "Hash-Algorithmus %s nicht gefunden"
@@ -1660,8 +1683,8 @@ msgstr "Der Parameter %s stimmt nicht mit dem JSON-Key %s überein"
 
 msgid "Parent folder %s does not allow folder's module setting (%s) in context %s"
 msgstr ""
-"Übergeordneter Ordner %s erlaubt im Kontext %s keine Moduleinstellung (%s) für "
-"den Ordner"
+"Übergeordneter Ordner %s erlaubt im Kontext %s keine Moduleinstellung (%s) "
+"für den Ordner"
 
 msgid "Parent folder %s does not allow folder's type setting %s in context %s"
 msgstr ""
@@ -1699,6 +1722,11 @@ msgstr "Problem beim Kommunizieren mir externer Autorisierung"
 
 msgid "Problem with executing SQL: %s"
 msgstr "Problem beim Ausführen von SQL: %s"
+
+msgid ""
+"Process was interrupted while waiting for a free IMAP connection. Please try "
+"again."
+msgstr "Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte erneut versuchen."
 
 msgid "Property \"%s\" is not defined."
 msgstr "Eigenschaft \"%s\" nicht festgelegt"
@@ -2131,10 +2159,7 @@ msgid ""
 "Unable to scale the contact image. This is a not supported file type or it "
 "is too large! Your mime type is %1$s and your image size is %2$d The max. "
 "allowed image size is %3$d"
-msgstr ""
-"Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um "
-"einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ "
-"ist %1$s und die Bildgröße ist %2$d Die maximal erlaubte Bildgröße ist %3$d."
+msgstr "Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ ist %1$s und die Bildgröße ist %2$d Die maximal erlaubte Bildgröße ist %3$d."
 
 msgid ""
 "Unable to syncronice the old contact with the new changes: Context %1$d "
@@ -2176,7 +2201,6 @@ msgstr ""
 "Unerwarteter Status zum Löschen eines virtuellen Termins (Ausnahme). "
 "Benutzer-ID:Objekt-ID:Position %d:%d:%d"
 
-#, fuzzy
 msgid "Unknown (IMAP) folder open mode %d"
 msgstr "Unbekannter (IMAP) Ordner öffnen-Modus %d"
 
@@ -2417,11 +2441,16 @@ msgstr ""
 msgid "You do not have sufficient read permissions."
 msgstr "Sie haben keine ausreichenden Leseberechtigungen"
 
+msgid "You do not have the appropriate permissions to create an object"
+msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen eines Objekts."
+
 msgid "You do not have the appropriate permissions to modify this object."
 msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Ändern dieses Objekts."
 
 msgid "You do not have the appropriate permissions to move this object."
-msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Verschieben dieses Objekts."
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Verschieben dieses "
+"Objekts."
 
 msgid "You do not have the appropriate permissions to read this object"
 msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts."

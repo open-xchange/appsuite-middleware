@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.filestore;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
@@ -64,13 +67,17 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 
 	private FilestoreStorage delegate;
 	
-	private static JCS cache ;
+	private static JCS cache;
+
+    private static final Lock CACHE_LOCK;
+
 	static {
 		try {
 			cache = JCS.getInstance("Filestore");
 		} catch (CacheException e) {
 			LOG.error(e);
 		}
+        CACHE_LOCK = new ReentrantLock();
 	}
 	
 	public CachingFilestoreStorage(FilestoreStorage fs) {
@@ -78,8 +85,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 	}
 	
 	@Override
-	public Filestore getFilestore(int id) throws FilestoreNotFoundException,
-			IllegalFilestoreException {
+	public Filestore getFilestore(int id) {
 		if(cache == null) {
 			throw new IllegalStateException("Cache not initialised! Not caching");
 		}
@@ -109,6 +115,10 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 				throw new OXCachingException(x.toString());
 			}
 		}
+
+        public Lock getCacheLock() {
+            return CACHE_LOCK;
+        }
 		
 	}
 

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -114,11 +117,11 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.ThreadSortMessage;
@@ -189,7 +192,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_UTF8 = "UTF-8";
 
 	private static final String STR_DATA = "data";
-	
+
 	private static final String STR_1 = "1";
 
 	/**
@@ -207,10 +210,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 	public static final String PARAMETER_SAVE = "save";
 
 	public static final String PARAMETER_SHOW_SRC = "src";
-	
+
 	public static final String PARAMETER_SHOW_HEADER = "hdr";
 
 	public static final String PARAMETER_EDIT_DRAFT = "edit";
+	
+	public static final String PARAMETER_SEND_TYPE = "sendtype";
 
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
@@ -335,7 +340,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (createMailInterface) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
-				retval = Integer.valueOf(mailInterface.getAllMessageCount(prepareMailFolderParam(folderId))[0]);
+				retval = Integer.valueOf(mailInterface.getAllMessageCount(folderId)[0]);
 			} finally {
 				if (createMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -428,7 +433,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Receive message iterator
 				 */
 				if (threadSort) {
-					it = mailInterface.getAllThreadedMessages(prepareMailFolderParam(folderId), columns);
+					it = mailInterface.getAllThreadedMessages(folderId, columns);
 					final int size = it.size();
 					final boolean useCache = ((size < IMAPProperties.getMessageFetchLimit()));
 					for (int i = 0; i < size; i++) {
@@ -463,7 +468,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Get iterator
 					 */
-					it = mailInterface.getAllMessages(prepareMailFolderParam(folderId), sortCol, orderDir, columns);
+					it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns);
 					final int size = it.size();
 					/*
 					 * Cache must not be used if number of contained messages
@@ -573,8 +578,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
-				mailWriter.writeJSONMessageObject(mailInterface.getReplyMessageForDisplay(
-						prepareMailFolderParam(mailIdentifier.folder), mailIdentifier.msgUID, reply2all));
+				mailWriter.writeJSONMessageObject(mailInterface.getReplyMessageForDisplay(mailIdentifier.folder,
+						mailIdentifier.msgUID, reply2all));
 				writer.flush();
 				valueWritten = true;
 			} finally {
@@ -647,8 +652,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
-				mailWriter.writeJSONMessageObject(mailInterface.getForwardMessageForDisplay(
-						prepareMailFolderParam(mailIdentifier.folder), mailIdentifier.msgUID));
+				mailWriter.writeJSONMessageObject(mailInterface.getForwardMessageForDisplay(mailIdentifier.folder,
+						mailIdentifier.msgUID));
 				writer.flush();
 				valueWritten = true;
 			} finally {
@@ -730,8 +735,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
-				final Message msg = mailInterface.getMessage(prepareMailFolderParam(mailIdentifier.folder),
-						mailIdentifier.msgUID);
+				final Message msg = mailInterface.getMessage(mailIdentifier.folder, mailIdentifier.msgUID);
 				if (msg == null) {
 					throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, mailIdentifier.msgUID, mailIdentifier.folder);
 				}
@@ -774,7 +778,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
-	
+
 	private static final String formatMessageHeaders(final Enumeration<Header> e) {
 		final StringBuilder sb = new StringBuilder(500);
 		while (e.hasMoreElements()) {
@@ -850,7 +854,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Pre-Select field writers
 				 */
 				final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
-				it = mailInterface.getNewMessages(prepareMailFolderParam(folderId), sortCol, orderDir, columns);
+				it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns);
 				final int size = it.size();
 				for (int i = 0; i < size; i++) {
 					final Message msg = (Message) it.next();
@@ -938,8 +942,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (createMailInterface) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
-				final CommonObject[] insertedObjs = mailInterface.saveVersitAttachment(
-						prepareMailFolderParam(mailIdentifier.folder), mailIdentifier.msgUID, partIdentifier);
+				final CommonObject[] insertedObjs = mailInterface.saveVersitAttachment(mailIdentifier.folder,
+						mailIdentifier.msgUID, partIdentifier);
 				for (int i = 0; i < insertedObjs.length; i++) {
 					final CommonObject current = insertedObjs[i];
 					final JSONObject jo = new JSONObject();
@@ -1012,18 +1016,17 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final JSONMessageAttachmentObject mao;
 				if (imageContentId == null) {
-					mao = mailInterface.getMessageAttachment(prepareMailFolderParam(mailIdentifier.folder),
-							mailIdentifier.msgUID, attachmentIdentifier);
+					mao = mailInterface.getMessageAttachment(mailIdentifier.folder, mailIdentifier.msgUID,
+							attachmentIdentifier);
 					if (mao == null) {
-						throw new Exception("No attachment found with id \"" + attachmentIdentifier + "\" in mail "
-								+ mailIdentifier);
+						throw new OXMailException(MailCode.NO_ATTACHMENT_FOUND, attachmentIdentifier,
+								mailIdentifier.str);
 					}
 				} else {
-					mao = mailInterface.getMessageImage(prepareMailFolderParam(mailIdentifier.folder),
-							mailIdentifier.msgUID, imageContentId);
+					mao = mailInterface.getMessageImage(mailIdentifier.folder, mailIdentifier.msgUID, imageContentId);
 					if (mao == null) {
-						throw new Exception("No image found with content id \"" + imageContentId + "\" in mail "
-								+ mailIdentifier);
+						throw new OXMailException(MailCode.NO_ATTACHMENT_FOUND, attachmentIdentifier,
+								mailIdentifier.str);
 					}
 				}
 				if (saveIdentifier == null || saveIdentifier.length() == 0) {
@@ -1238,8 +1241,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Receive message iterator
 					 */
 					if (threadSort) {
-						it = mailInterface.getThreadedMessages(prepareMailFolderParam(folderId), null, searchCols,
-								searchPats, true, columns);
+						it = mailInterface.getThreadedMessages(folderId, null, searchCols, searchPats, true, columns);
 						final int size = it.size();
 						for (int i = 0; i < size; i++) {
 							final ThreadSortMessage threadSortedMsgObj = (ThreadSortMessage) it.next();
@@ -1266,8 +1268,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 								throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 							}
 						}
-						it = mailInterface.getMessages(prepareMailFolderParam(folderId), null, sortCol, orderDir,
-								searchCols, searchPats, true, columns);
+						it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true,
+								columns);
 						final int size = it.size();
 						for (int i = 0; i < size; i++) {
 							final Message msg = (Message) it.next();
@@ -1402,8 +1404,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 							/*
 							 * Get message list
 							 */
-							final Message[] msgs = mailInterface.getMessageList(prepareMailFolderParam(entry.getKey()),
-									entry.getValue().toArray(), columns);
+							final Message[] msgs = mailInterface.getMessageList(entry.getKey(), entry.getValue()
+									.toArray(), columns);
 							for (int i = 0; i < msgs.length; i++) {
 								if (msgs[i] != null) {
 									jsonWriter.array();
@@ -1538,7 +1540,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 							/*
 							 * Delete all collected UIDs til here and reset
 							 */
-							mailInterface.deleteMessages(prepareMailFolderParam(lastFld), arr.toArray(), hardDelete);
+							mailInterface.deleteMessages(lastFld, arr.toArray(), hardDelete);
 							arr.reset();
 							lastFld = current.folder;
 						}
@@ -1637,23 +1639,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Perform move operation
 					 */
-					mailInterface.copyMessage(prepareMailFolderParam(sourceFolder), prepareMailFolderParam(destFolder),
-							new long[] { mailIdentifier.msgUID }, true);
+					mailInterface.copyMessage(sourceFolder, destFolder, new long[] { mailIdentifier.msgUID }, true);
 				}
 				if (colorLabel != null) {
 					/*
 					 * Update color label
 					 */
-					mailInterface.updateMessageColorLabel(prepareMailFolderParam(sourceFolder), mailIdentifier.msgUID,
-							colorLabel.intValue());
+					mailInterface.updateMessageColorLabel(sourceFolder, mailIdentifier.msgUID, colorLabel.intValue());
 				}
 				if (flagBits != null) {
 					/*
 					 * Update system flags which are allowed to be altered by
 					 * client
 					 */
-					mailInterface.updateMessageFlags(prepareMailFolderParam(sourceFolder), mailIdentifier.msgUID, flagBits
-							.intValue(), flagVal);
+					mailInterface.updateMessageFlags(sourceFolder, mailIdentifier.msgUID, flagBits.intValue(), flagVal);
 				}
 			} finally {
 				if (createMailInterface && mailInterface != null) {
@@ -1720,8 +1719,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (createMailInterface) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
-				final long[] msgUIDs = mailInterface.copyMessage(prepareMailFolderParam(sourceFolder),
-						prepareMailFolderParam(destFolder), new long[] { mailIdentifier.msgUID }, false);
+				final long[] msgUIDs = mailInterface.copyMessage(sourceFolder, destFolder,
+						new long[] { mailIdentifier.msgUID }, false);
 				if (msgUIDs.length == 1) {
 					jsonWriter.value(new StringBuilder(destFolder).append(SEPERATOR).append(msgUIDs[0]).toString());
 				} else if (msgUIDs.length > 1) {
@@ -1809,8 +1808,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (createMailInterface) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
-				mao = mailInterface.getMessageAttachment(prepareMailFolderParam(mailIdentifier.folder),
-						mailIdentifier.msgUID, attachmentIdentifier);
+				mao = mailInterface.getMessageAttachment(mailIdentifier.folder, mailIdentifier.msgUID,
+						attachmentIdentifier);
 				if (mao == null) {
 					throw new OXMailException(MailCode.NO_ATTACHMENT_FOUND, attachmentIdentifier, mailIdentifier
 							.toString());
@@ -1830,12 +1829,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject().getId(),
 						sessionObj.getUserConfiguration());
 				if (!p.isFolderVisible()) {
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, folderObj.getObjectID(), sessionObj
-							.getUserlogin(), sessionObj.getContext().getContextId());
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, (String) null, getFolderName(folderObj),
+							getUserName(sessionObj), sessionObj.getContext().getContextId());
 				}
 				if (!p.canWriteOwnObjects()) {
-					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, (String) null, sessionObj
-							.getUserlogin(), folderObj.getObjectID(), sessionObj.getContext().getContextId());
+					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, (String) null, getUserName(sessionObj),
+							getFolderName(folderObj), sessionObj.getContext().getContextId());
 				}
 				/*
 				 * Create document's meta data
@@ -1941,8 +1940,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (createMailInterface) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
-				mailInterface
-						.sendReceiptAck(prepareMailFolderParam(mailIdentifier.folder), mailIdentifier.msgUID, fromAddr);
+				mailInterface.sendReceiptAck(mailIdentifier.folder, mailIdentifier.msgUID, fromAddr);
 			} finally {
 				if (createMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -2173,6 +2171,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				throw new OXMailException(MailCode.MISSING_PARAM, UPLOAD_FORMFIELD_MAIL);
 			}
 			final JSONObject jsonMailObj = new JSONObject(mailStr);
+			final int sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? jsonMailObj.getInt(PARAMETER_SEND_TYPE) : MailInterfaceImpl.SENDTYPE_NEW;
 			int[] infostoreDocIDs = null;
 			if (jsonMailObj.has(JSONMessageObject.JSON_INFOSTORE_IDS)) {
 				final JSONArray ja = jsonMailObj.getJSONArray(JSONMessageObject.JSON_INFOSTORE_IDS);
@@ -2196,7 +2195,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Send message
 					 */
-					msgIdentifier = mailInterface.sendMessage(msgObj, uploadEvent);
+					msgIdentifier = mailInterface.sendMessage(msgObj, uploadEvent, sendType);
 					if (msgIdentifier == null) {
 						throw new OXMailException(MailCode.SEND_FAILED_UNKNOWN);
 					}
@@ -2255,8 +2254,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 				mao.setContentType(uf.getContentType());
 				try {
-					mao.setFileName(MimeUtility.encodeText(uf.getFileName()));
+					mao.setFileName(MimeUtility.encodeText(uf.getFileName(), IMAPProperties.getDefaultMimeCharset(), "Q"));
 				} catch (UnsupportedEncodingException e) {
+					mao.setFileName(uf.getFileName());
+				} catch (IMAPException e) {
 					mao.setFileName(uf.getFileName());
 				}
 				mao.setUniqueDiskFileName(uf.getTmpFile());
@@ -2293,8 +2294,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 				mao.setContentType(docMeta.getFileMIMEType());
 				try {
-					mao.setFileName(MimeUtility.encodeText(docMeta.getFileName()));
+					mao.setFileName(MimeUtility.encodeText(docMeta.getFileName(), IMAPProperties
+							.getDefaultMimeCharset(), "Q"));
 				} catch (UnsupportedEncodingException e) {
+					mao.setFileName(docMeta.getFileName());
+				} catch (IMAPException e) {
 					mao.setFileName(docMeta.getFileName());
 				}
 				mao.setUniqueDiskFileName(null);

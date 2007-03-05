@@ -57,37 +57,114 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * FolderSQLInterface for OX Folders
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface FolderSQLInterface {
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible root folders
+	 */
 	public SearchIterator getRootFolderForUser() throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible subfolders of parent folder whose ID matches given
+	 *         <tt>parentId</tt>
+	 */
 	public SearchIterator getSubfolders(int parentId, Timestamp since) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible ancestor folders of folder whose ID matches
+	 *         <tt>folderId</tt> and which are located on path to root folder.
+	 */
 	public SearchIterator getPathToRoot(int folderId) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible shared folders
+	 */
 	public SearchIterator getSharedFoldersFrom(int owner, Timestamp since) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible public <b>calendar</b> folders which cannot be
+	 *         shown in a hierarchical tree-view cause any ancestore is not
+	 *         visible to user
+	 */
 	public SearchIterator getNonTreeVisiblePublicCalendarFolders() throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible public <b>task</b> folders which cannot be shown in
+	 *         a hierarchical tree-view cause any ancestore is not visible to
+	 *         user
+	 */
 	public SearchIterator getNonTreeVisiblePublicTaskFolders() throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible public <b>contact</b> folders which cannot be shown
+	 *         in a hierarchical tree-view cause any ancestore is not visible to
+	 *         user
+	 */
 	public SearchIterator getNonTreeVisiblePublicContactFolders() throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible public <b>infostore</b> folders which cannot be
+	 *         shown in a hierarchical tree-view cause any ancestore is not
+	 *         visible to user
+	 */
 	public SearchIterator getNonTreeVisiblePublicInfostoreFolders() throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible folders that have been modified (created or edited)
+	 *         since given timestamp
+	 */
 	public SearchIterator getModifiedUserFolders(Date since) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all folders
+	 *         that have been modified (created or edited) since given timestamp
+	 *         regardless of user's permissions
+	 */
+	public SearchIterator getAllModifiedFolders(Date since) throws OXException;
+
+	/**
+	 * @return an instance of <tt>SearchIterator</tt> containing all
+	 *         user-visible folders that have been deleted since given timestamp
+	 */
 	public SearchIterator getDeletedFolders(Date since) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>FolderObject</tt> which matches to given
+	 *         <tt>id</tt>
+	 */
 	public FolderObject getFolderById(int id) throws OXException;
-	
+
+	/**
+	 * @return an instance of <tt>FolderObject</tt> which is of module
+	 *         infostore and is marked as user's default folder
+	 */
 	public FolderObject getUsersInfostoreFolder() throws OXException;
-	
+
+	/**
+	 * Either creates (if folder does not exist, yet) or changes a folder
+	 * 
+	 * @return an instance of <tt>FolderObject</tt> that represents the newly
+	 *         created or modified <tt>FolderObject</tt> object
+	 */
 	public FolderObject saveFolderObject(FolderObject folderobject, Date clientLastModified) throws OXException;
-	
+
+	/**
+	 * Deletes a folder
+	 * 
+	 * @return the id of the deleted <tt>FolderObject</tt> object
+	 */
 	public int deleteFolderObject(FolderObject folderobject, Date clientLastModified) throws OXException;
 
 }

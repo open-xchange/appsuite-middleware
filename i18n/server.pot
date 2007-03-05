@@ -91,6 +91,10 @@ msgstr ""
 msgid "Contacts"
 msgstr ""
 
+#: com/openexchange/groupware/i18n/Groups.java:68
+msgid "All groups and users"
+msgstr ""
+
 #: com/openexchange/groupware/i18n/MailStrings.java:62
 msgid ""
 "Reporting-UA: OPEN-XCHANGE - WebMail\n"

@@ -64,7 +64,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.MailInterfaceMonitorConnectionListener;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.imap.DefaultIMAPConnection;
 import com.openexchange.groupware.imap.IMAPProperties;
@@ -257,7 +256,6 @@ public class MailObject {
 				Transport transport = null;
 				try {
 					transport = imapConnection.getSession().getTransport("smtp");
-					transport.addConnectionListener(new MailInterfaceMonitorConnectionListener(MailInterfaceImpl.mailInterfaceMonitor));
 					final long start = System.currentTimeMillis();
 					if (IMAPProperties.isSmtpAuth()) {
 						transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
@@ -265,12 +263,14 @@ public class MailObject {
 					} else {
 						transport.connect();
 					}
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 					msg.saveChanges();
 					transport.sendMessage(msg, msg.getAllRecipients());
 					MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} finally {
 					if (transport != null) {
 						transport.close();
+						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 					}
 				}
 			} finally {

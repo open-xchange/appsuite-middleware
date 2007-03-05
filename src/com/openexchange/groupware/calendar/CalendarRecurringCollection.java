@@ -214,10 +214,10 @@ public final class CalendarRecurringCollection {
         } else if (name.equals("c")) {
             cdao.setMonth(Integer.valueOf(value));
         } else if (name.equals("e")) {
-            long u = new Long(value).longValue();
+            long u = Long.valueOf(value);
             cdao.setUntil(new java.util.Date(u));
         } else if (name.equals("s")) {
-            long s = new Long(value).longValue();
+            long s = Long.valueOf(value);
             cdao.setRecurringStart(s);
         } else if (name.equals("o")) {
             cdao.setOccurrence(Integer.valueOf(value));

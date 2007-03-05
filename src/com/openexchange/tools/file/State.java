@@ -53,12 +53,13 @@ package com.openexchange.tools.file;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -86,17 +87,17 @@ class State {
     /**
      * Number of entries in a level.
      */
-    private final transient int entries;
+    private final int entries;
 
     /**
      * Number of levels.
      */
-    private final transient int depth;
+    private final int depth;
 
     /**
      * Deleted entries that can be reused.
      */
-    private final transient Set<String> unused;
+    private final Set<String> unused;
 
     /**
      * Next empty entry in FileStorage.
@@ -119,55 +120,79 @@ class State {
     /**
      * Creates a state object from the inputstream.
      * @param input input stream to read the state file from.
-     * @throws IOException if an input error occurs
+     * @throws FileStorageException if an input error occurs
      */
-    State(final InputStream input) throws IOException {
+    State(final InputStream input) throws FileStorageException {
         super();
-        final InputStreamReader isr = new InputStreamReader(input,
-            "ISO-8859-1");
-        final BufferedReader reader = new BufferedReader(isr);
-        depth = Integer.parseInt(reader.readLine());
-        entries = Integer.parseInt(reader.readLine());
-        nextEntry = reader.readLine();
-        unused = new HashSet<String>();
-        String line = reader.readLine();
-        while (line != null) {
-            unused.add(line);
-            line = reader.readLine();
+        InputStreamReader isr = null;
+        BufferedReader reader = null;
+        try {
+            isr = new InputStreamReader(input, "ISO-8859-1");
+            reader = new BufferedReader(isr);
+            depth = Integer.parseInt(reader.readLine());
+            entries = Integer.parseInt(reader.readLine());
+            nextEntry = reader.readLine();
+            unused = new HashSet<String>();
+            String line = reader.readLine();
+            while (line != null) {
+                unused.add(line);
+                line = reader.readLine();
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new FileStorageException(FileStorageException.Code.ENCODING,
+                e);
+        } catch (NumberFormatException e) {
+            throw new FileStorageException(FileStorageException.Code.NO_NUMBER,
+                e);
+        } catch (IOException e) {
+            throw new FileStorageException(FileStorageException.Code.IOERROR,
+                e);
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            if (null != isr) {
+                try {
+                    isr.close();
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
         }
-        reader.close();
-        isr.close();
     }
 
     /**
      * Saves the state object.
      * @return an inputstream from that the state file can be read.
-     * @throws IOException if an error occurs.
+     * @throws FileStorageException if an error occurs.
      */
-    InputStream saveState() throws IOException {
-        final PipedInputStream pipeIn = new PipedInputStream();
-        final PipedOutputStream pipeOut = new PipedOutputStream(pipeIn);
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    final OutputStreamWriter osw = new OutputStreamWriter(
-                        pipeOut, "ISO-8859-1");
-                    final BufferedWriter writer = new BufferedWriter(osw);
-                    writer.write(String.valueOf(depth)); writer.newLine();
-                    writer.write(String.valueOf(entries)); writer.newLine();
-                    writer.write(nextEntry); writer.newLine();
-                    final Iterator<String> iter = unused.iterator();
-                    while (iter.hasNext()) {
-                        writer.write(iter.next()); writer.newLine();
-                    }
-                    writer.close();
-                    osw.close();
-                } catch (IOException e) {
-                    LOG.error("Problem while writing state file.", e);
-                }
+    InputStream saveState() throws FileStorageException {
+        try {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final OutputStreamWriter osw = new OutputStreamWriter(
+                baos, "ISO-8859-1");
+            final BufferedWriter writer = new BufferedWriter(osw);
+            writer.write(String.valueOf(depth)); writer.newLine();
+            writer.write(String.valueOf(entries)); writer.newLine();
+            writer.write(nextEntry); writer.newLine();
+            final Iterator<String> iter = unused.iterator();
+            while (iter.hasNext()) {
+                writer.write(iter.next()); writer.newLine();
             }
-        }).start();
-        return pipeIn;
+            writer.close();
+            osw.close();
+            return new ByteArrayInputStream(baos.toByteArray());
+        } catch (UnsupportedEncodingException e) {
+            throw new FileStorageException(FileStorageException.Code.ENCODING,
+                e);
+        } catch (IOException e) {
+            throw new FileStorageException(FileStorageException.Code.IOERROR,
+                e);
+        }
     }
 
     /**

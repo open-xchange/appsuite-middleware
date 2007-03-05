@@ -60,6 +60,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
@@ -174,7 +175,12 @@ public class Contact extends DataServlet {
 			LOG.error("doGet", e);
 			response.setException(e);
 		} catch (OXException e) {
-			LOG.error("doGet", e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+
 			response.setException(e);
 		}
 
@@ -253,7 +259,12 @@ public class Contact extends DataServlet {
 			LOG.error("doGet", e);
 			response.setException(e);
 		} catch (OXException e) {
-			LOG.error("doGet", e);
+			if (e.getCategory() == Category.USER_INPUT) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+
 			response.setException(e);
 		}
 

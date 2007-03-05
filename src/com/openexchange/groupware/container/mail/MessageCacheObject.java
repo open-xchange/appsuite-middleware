@@ -100,6 +100,8 @@ public class MessageCacheObject extends Message implements Serializable {
 	 * Folder's full name
 	 */
 	private final String folderFullname;
+	
+	private final char separator;
 
 	/**
 	 * Message's UID
@@ -152,10 +154,11 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	private final Map<String, String> headers;
 
-	public MessageCacheObject(final String folderFullname, final int msgnum) {
+	public MessageCacheObject(final String folderFullname, final char separator, final int msgnum) {
 		super();
 		this.seqNum = msgnum;
 		this.folderFullname = folderFullname;
+		this.separator = separator;
 		this.headers = new HashMap<String, String>();
 	}
 
@@ -169,6 +172,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		this.seqNum = msg.getMessageNumber();
 		this.uid = msgUID;
 		this.folderFullname = msg.getFolder().getFullName();
+		this.separator = msg.getFolder().getSeparator();
 		this.from = (InternetAddress[]) msg.getFrom();
 		this.to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
 		this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
@@ -572,6 +576,10 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	public void setUid(final long uid) {
 		this.uid = uid;
+	}
+	
+	public final char getSeparator() {
+		return separator;
 	}
 
 	/*

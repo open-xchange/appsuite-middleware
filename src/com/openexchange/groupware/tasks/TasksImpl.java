@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -93,6 +94,15 @@ final class TasksImpl extends Tasks {
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean containsNotSelfCreatedTasks(final SessionObject session,
+        final Connection con, final int folderId) throws OXException {
+        return containsNotSelfCreatedTasks(session, folderId);
     }
 
     /**
@@ -198,4 +208,14 @@ final class TasksImpl extends Tasks {
             throw Tools.convert(e);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isFolderEmpty(final Context ctx, final Connection con,
+        final int folderId) throws OXException {
+        return isFolderEmpty(ctx, folderId);
+    }
+
 }

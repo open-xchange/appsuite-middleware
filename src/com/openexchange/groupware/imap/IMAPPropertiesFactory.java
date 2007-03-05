@@ -128,7 +128,11 @@ public class IMAPPropertiesFactory {
 	
 	private static final String PROP_MAX_IMAP_CON_IDLE_TIME = "maxIMAPConnectionIdleTime";
 	
+	private static final String PROP_MAX_NUM_OF_IMAP_CONS = "imapMaxNumOfConnections";
+	
 	private static final String PROP_ALLOW_NESTED_DEFAULT_FOLDERS = "allowNestedDefaultFolderOnAltNamespace";
+	
+	private static final String PROP_MIME_CHARSET = "mail.mime.charset";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
@@ -418,11 +422,20 @@ public class IMAPPropertiesFactory {
 				logBuilder.append("\tMax IMAP Connection Idle Time: ").append(
 						Integer.parseInt(props.getProperty(PROP_MAX_IMAP_CON_IDLE_TIME, "60000"))).append('\n');
 				
+				IMAPProperties.setMaxNumOfIMAPConnections(Integer.parseInt(props.getProperty(PROP_MAX_NUM_OF_IMAP_CONS,
+						"0")));
+				logBuilder.append("\tMax Number Of IMAP Connections: ").append(
+						Integer.parseInt(props.getProperty(PROP_MAX_NUM_OF_IMAP_CONS, "0"))).append('\n');
+				
 				IMAPProperties.setAllowNestedDefaultFolderOnAltNamespace(STR_TRUE.equalsIgnoreCase(props.getProperty(
 						PROP_ALLOW_NESTED_DEFAULT_FOLDERS, STR_FALSE)));
 				logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(
 						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_ALLOW_NESTED_DEFAULT_FOLDERS, STR_FALSE))).append(
 						'\n');
+				
+				IMAPProperties.setDefaultMimeCharset(props.getProperty(PROP_MIME_CHARSET, "UTF-8"));
+				logBuilder.append("\tDefault MIME Charset: ").append(props.getProperty(PROP_MIME_CHARSET, "UTF-8"))
+						.append('\n');
 				
 				try {
 					IMAPProperties.setPartModifierImpl(PartModifier.getImpl(props.getProperty(PROP_IMAP_PART_MODIFIER,

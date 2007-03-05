@@ -96,12 +96,6 @@ public interface Context {
     int getMailadmin();
 
     /**
-     * @return the location of the file storage for the context.
-     * @throws ContextException if generation of the URI fails.
-     */
-    URI getFileStorageLocation() throws ContextException;
-
-    /**
      * @return a string array with login and password of the file storage.
      */
     String[] getFileStorageAuth();
@@ -125,4 +119,9 @@ public interface Context {
      * otherwise.
      */
     boolean isEnabled();
+
+    /**
+     * @return the context specific location inside the filestore.
+     */
+    String getFilestoreName();
 }

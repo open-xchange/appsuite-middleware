@@ -145,6 +145,20 @@ public abstract class GroupStorage {
      */
     public static GroupStorage getInstance(final Context context)
         throws LdapException {
+        return getInstance(context, false);
+    }
+
+    /**
+     * Creates a new instance implementing the group storage interface. The
+     * returned instance can also handle the group with identifier 0.
+     * @param context Context.
+     * @param group0 <code>true</code> if group with identifier 0 should be
+     * handled.
+     * @return an instance implementing the group storage interface.
+     * @throws LdapException if the instance can't be created.
+     */
+    public static GroupStorage getInstance(final Context context,
+        final boolean group0) throws LdapException {
         synchronized (GroupStorage.class) {
             if (null == implementingClass) {
                 final String className = LdapUtility.findProperty(Names.
@@ -153,7 +167,15 @@ public abstract class GroupStorage {
                     GroupStorage.class);
             }
         }
-        return LdapUtility.getInstance(implementingClass, context);
+        final GroupStorage impl = LdapUtility.getInstance(implementingClass,
+            context);
+        final GroupStorage retval;
+        if (group0) {
+            retval = new GroupsWithGroupZero(context, impl);
+        } else {
+            retval = impl;
+        }
+        return retval;
     }
 
     static {

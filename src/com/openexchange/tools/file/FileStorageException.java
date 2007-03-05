@@ -47,12 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.tools.file;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exceptions of the FileStorage.
@@ -65,6 +64,10 @@ public class FileStorageException extends AbstractOXException {
      */
     private static final long serialVersionUID = 7098813337802054897L;
 
+    public FileStorageException(AbstractOXException x) {
+    	super(x);
+    }
+    
     /**
      * Initializes a new exception using the information provides by the code.
      * @param code code for the exception.
@@ -89,6 +92,20 @@ public class FileStorageException extends AbstractOXException {
     }
 
     /**
+     * Constructor with all parameters for inheritance.
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     */
+    protected FileStorageException(final Component component,
+        final Category category, final int detailNumber, final String message,
+        final Throwable cause) {
+        super(component, category, detailNumber, message, cause);
+    }
+
+    /**
      * Error codes for the file storage exception.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
@@ -101,19 +118,69 @@ public class FileStorageException extends AbstractOXException {
          * Class can not be found.
          */
         CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR, 2),
-
         /**
          * An IO Error occurred
          */
-        
-        IOERROR("An IOError occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN,3),
-        
+        IOERROR("An IOError occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN,
+            3),
         /**
-         * May be used to turn the IOException of getInstance into a proper AbstractOXException
+         * May be used to turn the IOException of getInstance into a proper
+         * AbstractOXException
          */
-        INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 4)
-        ;
-        
+        INSTANTIATIONERROR("Couldn't reach the filestore: %s",
+            Category.SUBSYSTEM_OR_SERVICE_DOWN, 4),
+        /**
+         * Invalid constructor parameter at %1$d with type %2$s.
+         */
+        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
+            Category.PROGRAMMING_ERROR, 5),
+        /**
+         * Can't create directory \"%1$s\" for FileStorage.
+         */
+        CREATE_DIR_FAILED("Can't create directory \"%1$s\" for FileStorage.",
+            Category.SETUP_ERROR, 6),
+        /**
+         * Depth must be >= 1 but is %1$d.
+         */
+        INVALID_DEPTH("Depth must be >= 1 but is %1$d.",
+            Category.PROGRAMMING_ERROR, 7),
+        /**
+         * Entries must be >= 1 but is %1$d.
+         */
+        INVALID_ENTRIES("Entries must be >= 1 but is %1$d.",
+            Category.PROGRAMMING_ERROR, 8),
+        /**
+         * Unsupported encoding.
+         */
+        ENCODING("Unsupported encoding.", Category.PROGRAMMING_ERROR, 9),
+        /**
+         * Number parsing problem.
+         */
+        NO_NUMBER("Number parsing problem.", Category.PROGRAMMING_ERROR, 10),
+        /**
+         * FileStorage is full.
+         */
+        STORE_FULL("FileStorage is full.", Category.EXTERNAL_RESOURCE_FULL, 11),
+        /**
+         * Depth mismatch while computing next entry.
+         */
+        DEPTH_MISMATCH("Depth mismatch while computing next entry.",
+            Category.PROGRAMMING_ERROR, 12),
+        /**
+         * Can't remove lock file.
+         */
+        UNLOCK("Can't remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
+            13),
+        /**
+         * Can't create lock file.
+         */
+        LOCK("Can't create lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
+        /**
+         * Can't create file %1$s.
+         */
+        CREATE_FAILED("Can't create file %1$s.",
+            Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
+
         /**
          * Message of the exception.
          */

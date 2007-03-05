@@ -110,6 +110,10 @@ public class IMAPProperties {
 	private static boolean smtpsEnabled;
 	
 	private static int smtpsPort;
+	
+	private static int maxNumOfIMAPConnections;
+	
+	private static String defaultMimeCharset;
 
 	public IMAPProperties() {
 		super();
@@ -305,6 +309,31 @@ public class IMAPProperties {
 
 	public static void setMaxIMAPConnectionIdleTime(final long maxIMAPConnectionIdleTime) {
 		IMAPProperties.maxIMAPConnectionIdleTime = maxIMAPConnectionIdleTime;
+	}
+
+	public static int getMaxNumOfIMAPConnections() throws IMAPException {
+		checkGlobalImapProperties();
+		return maxNumOfIMAPConnections;
+	}
+
+	public static void setMaxNumOfIMAPConnections(final int maxNumOfIMAPConnections) {
+		IMAPProperties.maxNumOfIMAPConnections = maxNumOfIMAPConnections;
+	}
+
+	public static String getDefaultMimeCharset() throws IMAPException {
+		checkGlobalImapProperties();
+		return defaultMimeCharset;
+	}
+	
+	private static final String PROP_MIME_CS = "mail.mime.charset";
+
+	public static void setDefaultMimeCharset(final String defaultMimeCharset) {
+		IMAPProperties.defaultMimeCharset = defaultMimeCharset;
+		/*
+		 * Add to system properties, too
+		 */
+		System.getProperties().setProperty(PROP_MIME_CS,
+				defaultMimeCharset == null ? System.getProperty("file.encoding", "8859_1") : defaultMimeCharset);
 	}
 
 	public static boolean isImapsEnabled() throws IMAPException {

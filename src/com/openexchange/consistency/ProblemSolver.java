@@ -59,6 +59,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 /**
  * ProblemSolver
@@ -110,9 +111,9 @@ public abstract class ProblemSolver {
 	/**
 	 * This method create a dummy file a returns its name
 	 * @return The name of the dummy file
-	 * @throws IOException 
+	 * @throws FileStorageException 
 	 */
-	protected String createDummyFile() throws IOException {
+	protected String createDummyFile() throws FileStorageException {
 		String filetext = "This is just a dummy file";
 		InputStream input = new ByteArrayInputStream(filetext.getBytes());
 		

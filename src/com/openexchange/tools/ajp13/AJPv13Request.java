@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 
 /**
  * 
@@ -106,15 +105,6 @@ public abstract class AJPv13Request {
 			 * first.
 			 */
 			if (!ajpRequestHandler.isHeadersSent()) {
-				if (ajpRequestHandler.isSessionCreated()) {
-					/*
-					 * Create session cookie in response header: Set-Cookie
-					 */
-					final Cookie sessionIdCookie = new Cookie(AJPv13RequestHandler.COOKIE_NAME_HTTP_SESSION,
-							ajpRequestHandler.getHttpSessionId());
-					sessionIdCookie.setMaxAge(24 * 60 * 60);
-					ajpRequestHandler.getServletResponseObj().addCookie(sessionIdCookie);
-				}
 				writeResponse(new AJPv13Response(AJPv13Response.SEND_HEADERS_PREFIX_CODE, ajpRequestHandler
 						.getServletResponseObj()), out, true);
 				ajpRequestHandler.setHeadersSent(true);

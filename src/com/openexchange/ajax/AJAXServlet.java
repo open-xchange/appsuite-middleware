@@ -383,17 +383,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 		w.write("\"");
 	}
-	
-	protected final static String prepareMailFolderParam(final String folderParam) {
-		if (folderParam == null) {
-			return null;
-		} else if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folderParam)) {
-			return folderParam;
-		} else if (folderParam.startsWith(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
-			return folderParam.substring(8);
-		}
-		return folderParam;
-	}
 
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {
 		if (req.getParameter(name) != null) {
@@ -586,6 +575,21 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			retval.put(STR_ERROR_PARAMS, arr);
 		}
 		return retval;
+	}
+
+	/**
+	 * Returns the session object for the given session id.
+	 * 
+	 * @param sessionId
+	 *            Identifier of the session.
+	 * @return the session object or <code>null</code> if the session doesn't
+	 *         exist.
+	 */
+	protected static SessionObject getSession(final String sessionId) {
+		if (null == sessionId) {
+			return null;
+		}
+		return SessiondConnector.getInstance().getSession(sessionId);
 	}
 
 	protected static String getAction(final HttpServletRequest req) throws OXConflictException {

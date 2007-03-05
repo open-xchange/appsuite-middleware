@@ -80,6 +80,7 @@ public class Classes {
 	
 	
 	public static final int COM_OPENEXCHANGE_AJAX_PARSERL_JSONDOCUMENTMETADATA = 18;
-	  
+	
+	public static final int COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_UTILS_DELUSERFOLDERDISCOVERER = 20;
 
 }

@@ -59,6 +59,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * AppointmentParser
@@ -74,7 +75,7 @@ public class AppointmentParser extends CalendarParser {
 		this.sessionObj = sessionObj;	
 	}
 	
-	public void parse(XmlPullParser parser, AppointmentObject appointmentobject) throws OXException {
+	public void parse(XmlPullParser parser, AppointmentObject appointmentobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -84,6 +85,8 @@ public class AppointmentParser extends CalendarParser {
 				parseElementAppointment(appointmentobject, parser);	
 				parser.nextTag();
 			}
+		} catch (XmlPullParserException exc) {
+			throw exc;
 		} catch (Exception exc) {
 			throw new OXException(exc);
 		}

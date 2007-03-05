@@ -53,6 +53,7 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.ldap.UserException.Detail;
 
 /**
  * This exception is used if problems occur in the ldap DAOs.
@@ -108,6 +109,16 @@ public class LdapException extends AbstractOXException {
         super(component, code.category, code.detailNumber, code.message, cause);
         this.detail = code.detail;
         setMessageArgs(messageArgs);
+    }
+
+    /**
+     * Initialize e new exception using the information from the nested abstract
+     * OX exception.
+     * @param cause the cause.
+     */
+    public LdapException(final UserException cause) {
+        super(cause);
+        detail = Detail.ERROR;
     }
 
     /**

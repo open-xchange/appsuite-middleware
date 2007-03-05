@@ -52,10 +52,8 @@
 package com.openexchange.tools.servlet.http;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.InetAddress;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -74,7 +72,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.ajp13.AJPv13Config;
@@ -230,7 +228,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		final Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (int i = 0; i < cookies.length && !foundInCookie; i++) {
-				if (AJPv13RequestHandler.COOKIE_NAME_JSESSIONID.equals(cookies[i].getName())) {
+				if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookies[i].getName())) {
 					foundInCookie = true;
 				}
 			}
@@ -257,53 +255,55 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return encodeURL(url);
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#encodeUrl(java.lang.String)
+	 */
 	public String encodeUrl(final String url) {
 		return encodeURL(url);
 	}
     
-    private static final String appendSessionID(final String url, final String groupwareSessionId,
-			final String httpSessionId) {
-		if (url == null) {
+    private static final String appendSessionID(final String url, final String groupwareSessionId, final String httpSessionId) {
+    	if (url == null) {
 			return null;
 		} else if (groupwareSessionId == null && httpSessionId == null) {
 			return url.indexOf('?') == -1 ? new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute())
 					.toString() : url;
 		}
-		String path = url;
-		String query = "";
-		String anchor = "";
-		final int question = url.indexOf('?');
-		if (question >= 0) {
-			path = url.substring(0, question);
-			query = url.substring(question + 1);
-		}
-		final int pound = path.indexOf('#');
-		if (pound >= 0) {
-			anchor = path.substring(pound);
-			path = path.substring(0, pound);
-		}
-		final StringBuilder sb = new StringBuilder(path);
-		sb.append(anchor);
-		boolean first = true;
-		if (groupwareSessionId != null) {
-			sb.append('?').append(Mail.PARAMETER_SESSION).append('=');
+        String path = url;
+        String query = "";
+        String anchor = "";
+        final int question = url.indexOf('?');
+        if (question >= 0) {
+            path = url.substring(0, question);
+            query = url.substring(question + 1);
+        }
+        final int pound = path.indexOf('#');
+        if (pound >= 0) {
+            anchor = path.substring(pound);
+            path = path.substring(0, pound);
+        }
+        final StringBuilder sb = new StringBuilder(path);
+        if (httpSessionId != null && sb.length() > 0) {
+        	sb.append(AJPv13RequestHandler.JSESSIONID_URI);
+        	sb.append(httpSessionId);
+        }
+        sb.append(anchor);
+        boolean first = true;
+        if (groupwareSessionId != null) {
+			sb.append('?').append(AJAXServlet.PARAMETER_SESSION).append('=');
 			sb.append(groupwareSessionId);
 			first = false;
 		}
-		if (httpSessionId != null) {
-			sb.append(first ? '?' : '&').append(AJPv13RequestHandler.COOKIE_NAME_JSESSIONID).append('=');
-			sb.append(httpSessionId);
-			first = false;
-		}
 		if (query.length() > 0) {
-			sb.append(first ? '?' : '&').append(query);
-			first = false;
-		}
+        	sb.append(first ? '?' : '&').append(query);
+        	first = false;
+        }
 		if (first) {
-			sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
-		}
-		return (sb.toString());
-	}
+        	sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
+        }
+        return (sb.toString());
+    }
 
 	public void addDateHeader(final String name, final long l) {
 		synchronized (headerDateFormat) {

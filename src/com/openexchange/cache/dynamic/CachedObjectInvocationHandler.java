@@ -53,6 +53,7 @@ package com.openexchange.cache.dynamic;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
@@ -92,25 +93,27 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         return method.invoke(cached, arguments);
     }
 
+    /**
+     * Checks if the object was removed from the cache and must be reloaded from
+     * the database.
+     * @throws AbstractOXException if loading or putting into cache fails.
+     */
     private void refresh() throws AbstractOXException {
-        cached = (T) cache.get(key);
-        if (null == cached) {
-            reload();
-        }
-    }
-
-    private void reload() throws AbstractOXException {
-        synchronized (cache) {
+        final Lock lock = factory.getCacheLock();
+        lock.lock();
+        try {
             cached = (T) cache.get(key);
             if (null == cached) {
                 cached = factory.load();
                 try {
                     cache.putSafe(key, cached);
                 } catch (CacheException e) {
-                    throw new OXCachingException("Problem Accessing Cache: "
-                        + e.toString());
+                    throw new OXCachingException(OXCachingException.Code
+                        .FAILED_PUT, e);
                 }
             }
+        } finally {
+            lock.unlock();
         }
     }
 

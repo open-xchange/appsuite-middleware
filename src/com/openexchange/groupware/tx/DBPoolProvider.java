@@ -99,6 +99,8 @@ public class DBPoolProvider implements DBProvider {
 	}
 
 	public void releaseWriteConnection(Context ctx, Connection con) {
+		if(con == null)
+			return;
 		try {
 			con.setAutoCommit(true);
 		} catch (SQLException e) {

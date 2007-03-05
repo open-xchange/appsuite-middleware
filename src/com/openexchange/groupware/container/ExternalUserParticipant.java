@@ -129,27 +129,29 @@ public class ExternalUserParticipant implements Participant, Comparable
 		return EXTERNAL_USER;
 	}
 	
+	public int hashCode() {
+		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
+	}
+	
+	public boolean equals(final Object o) {
+		return (hashCode() == o.hashCode());
+	}
+	
 	public int compareTo(final Object o) {
-		final String s1 = getHashString(getIdentifier(), getType());
-		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType());
+		final String s1 = getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress());
+		final String s2 = getHashString(((Participant)o).getIdentifier(), ((Participant)o).getType(), ((Participant)o).getDisplayName(), ((Participant)o).getEmailAddress());
 		
 		return s1.compareTo(s2);
 	}
-
-	public int hashCode() {
-		return getHashString(getIdentifier(), getType()).hashCode();
-	}
 	
-	public boolean equals(Object o) {
-		return o.hashCode() == hashCode();
-	}
-	
-	private final String getHashString(final int id, final int type) {
+	private String getHashString(final int id, final int type, String displayName, String emailaddress) {
 		final StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append('I');
 		stringBuilder.append(id);
 		stringBuilder.append('T');
 		stringBuilder.append(type);
+		stringBuilder.append('D');
+		stringBuilder.append(displayName);
 		stringBuilder.append('E');
 		stringBuilder.append(emailaddress);
 		

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container.mail.filler;
 
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.performLineWrap;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -85,6 +86,7 @@ import javax.mail.internet.MimeUtility;
 
 import org.json.JSONException;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
@@ -93,6 +95,7 @@ import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.parser.MessageDumper;
 import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.imap.ByteArrayDataSource;
+import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.imap.MessageDataSource;
@@ -177,7 +180,7 @@ public class MessageFiller {
 	}
 
 	public final void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage,
-			final UploadEvent uploadEvent) throws IOException, MessagingException, OXException, JSONException {
+			final UploadEvent uploadEvent, final int sendType) throws IOException, MessagingException, OXException, JSONException {
 		/*
 		 * Set headers
 		 */
@@ -188,13 +191,18 @@ public class MessageFiller {
 		final boolean hasNestedMessages = (msgObj.getNestedMsgs().size() > 0);
 		final boolean hasAttachments = (msgObj.getMsgAttachments().size() > 1);
 		/*
+		 * A non-inline forward message
+		 */
+		final boolean isNonInlineForward = (msgObj.getMsgref() != null
+				&& (sendType == MailInterfaceImpl.SENDTYPE_FORWARD) && usm.isForwardAsAttachment());
+		/*
 		 * Initialize primary multipart
 		 */
 		Multipart primaryMultipart = null;
 		/*
-		 * We got nested messages which leads to a multipart/mixed message
+		 * Detect if primary multipart is of type multipart/mixed
 		 */
-		if (hasNestedMessages || hasAttachments || msgObj.isAppendVCard()) {
+		if (hasNestedMessages || hasAttachments || msgObj.isAppendVCard() || isNonInlineForward) {
 			primaryMultipart = new MimeMultipart();
 		}
 		if (msgObj.getMsgref() == null) {
@@ -208,11 +216,6 @@ public class MessageFiller {
 		 * Content is expected to be multipart/alternative
 		 */
 		final boolean sendMultipartAlternative = ("alternative".equalsIgnoreCase(mailTextMao.getContentType()));
-		/*
-		 * A non-inline forward message
-		 */
-		final boolean isNonInlineForward = (msgObj.getMsgref() != null
-				&& session.isExpectingForwardMsg(msgObj.getMsgref()) && usm.isForwardAsAttachment());
 		/*
 		 * Html content with embedded images
 		 */
@@ -302,7 +305,7 @@ public class MessageFiller {
 					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, "text/vcard")));
 					vcardPart.setHeader(MIME_VERSION, VERSION);
 					vcardPart.setFileName(MimeUtility.encodeText(new StringBuilder(session.getUserObject()
-							.getDisplayName().replaceAll(" +", "")).append(".vcs").toString()));
+							.getDisplayName().replaceAll(" +", "")).append(".vcs").toString(), IMAPProperties.getDefaultMimeCharset(), "Q"));
 					/*
 					 * Append body part
 					 */
@@ -413,7 +416,7 @@ public class MessageFiller {
 			for (int i = 0; i < nestedMsgSize; i++) {
 				final JSONMessageObject nestedMsgObj = iter.next();
 				final MimeMessage nestedMsg = new MimeMessage(mailSession);
-				fillMessage(nestedMsgObj, nestedMsg, uploadEvent);
+				fillMessage(nestedMsgObj, nestedMsg, uploadEvent, sendType);
 				MimeBodyPart msgBodyPart = new MimeBodyPart();
 				msgBodyPart.setContent(nestedMsg, "message/rfc822");
 				primaryMultipart.addBodyPart(msgBodyPart);
@@ -542,12 +545,26 @@ public class MessageFiller {
 				if (mao.getContentID() == JSONMessageAttachmentObject.CONTENT_STRING) {
 					msgBodyPart.setDataHandler(new DataHandler(new MessageDataSource((String) mao.getContent(),
 							contentType.toString())));
-					msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName()));
+					try {
+						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+								.getDefaultMimeCharset(), "Q"));
+					} catch (UnsupportedEncodingException e) {
+						msgBodyPart.setFileName(mao.getFileName());
+					} catch (IMAPException e) {
+						msgBodyPart.setFileName(mao.getFileName());
+					}
 				} else {
 					final byte[] bytes = (byte[]) mao.getContent();
 					msgBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(contentType.toString(), mao
 							.getFileName(), bytes)));
-					msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName()));
+					try {
+						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+								.getDefaultMimeCharset(), "Q"));
+					} catch (UnsupportedEncodingException e) {
+						msgBodyPart.setFileName(mao.getFileName());
+					} catch (IMAPException e) {
+						msgBodyPart.setFileName(mao.getFileName());
+					}
 				}
 				mp.addBodyPart(msgBodyPart);
 			} else if (mao.getUniqueDiskFileName() != null) {
@@ -557,7 +574,14 @@ public class MessageFiller {
 				final File uploadedFile = mao.getUniqueDiskFileName();
 				final MimeBodyPart messageBodyPart = new MimeBodyPart();
 				messageBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadedFile)));
-				messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName()));
+				try {
+					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+							.getDefaultMimeCharset(), "Q"));
+				} catch (UnsupportedEncodingException e) {
+					messageBodyPart.setFileName(mao.getFileName());
+				} catch (IMAPException e) {
+					messageBodyPart.setFileName(mao.getFileName());
+				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
 				messageBodyPart.setHeader("Content-Type", mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
@@ -574,7 +598,14 @@ public class MessageFiller {
 					throw new OXMailException(MailCode.INTERNAL_ERROR, e.getMessage());
 				}
 				messageBodyPart.setDataHandler(new DataHandler(dataSource));
-				messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName()));
+				try {
+					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+							.getDefaultMimeCharset(), "Q"));
+				} catch (UnsupportedEncodingException e) {
+					messageBodyPart.setFileName(mao.getFileName());
+				} catch (IMAPException e) {
+					messageBodyPart.setFileName(mao.getFileName());
+				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
 				messageBodyPart.setHeader("Content-Type", mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
@@ -634,7 +665,8 @@ public class MessageFiller {
 		 * Set subject
 		 */
 		if (msgObj.getSubject() != null) {
-			msg.setSubject(MimeUtility.encodeText(msgObj.getSubject().replaceAll("(\r)?\n", ""), UTF8, "Q"));
+			msg.setSubject(MimeUtility.encodeText(removeHdrLineBreak(msgObj.getSubject()), IMAPProperties
+					.getDefaultMimeCharset(), "Q"));
 		}
 		/*
 		 * Set sent date
@@ -751,13 +783,13 @@ public class MessageFiller {
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
 
 	private static final String HTML_BREAK = "<br>";
-	
+
 	private static final String DEFAULT_COLOR = "#0026ff";
-	
+
 	private static final String STR_HTML_QUOTE = "&gt;";
-	
+
 	private static final String[] COLORS;
-	
+
 	static {
 		String[] tmp = null;
 		try {
@@ -786,18 +818,33 @@ public class MessageFiller {
 			String line = lines[i];
 			int currentLevel = 0;
 			int offset = 0;
-			int pos = -1;
-			while ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
+			if (line.startsWith(STR_HTML_QUOTE)) {
 				currentLevel++;
-				offset = (pos + 4);
+				offset = 4;
+				int pos = -1;
+				boolean next = true;
+				while (next && (pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
+					/*
+					 * Continue only if next starting position is equal to
+					 * offset or if just one whitespace character has been
+					 * skipped
+					 */
+					next = (offset == pos || (pos - offset == 1 && s.charAt(offset) == ' '));
+					if (next) {
+						currentLevel++;
+						offset = (pos + 4);
+					}
+				}
 			}
-			try {
-				if (offset > 0 && ' ' == line.charAt(offset)) {
-					offset++;
+			if (offset > 0) {
+				try {
+					offset = offset < line.length() && ' ' == line.charAt(offset) ? offset + 1 : offset;
+				} catch (StringIndexOutOfBoundsException e) {
+					if (LOG.isTraceEnabled()) {
+						LOG.trace(e.getMessage(), e);
+					}
 				}
 				line = line.substring(offset);
-			} catch (StringIndexOutOfBoundsException e) {
-				line = "";
 			}
 			if (levelBefore < currentLevel) {
 				for (; levelBefore < currentLevel; levelBefore++) {

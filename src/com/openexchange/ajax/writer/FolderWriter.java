@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.TimeZone;
@@ -69,17 +71,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.sun.mail.imap.DefaultFolder;
-import com.sun.mail.imap.IMAPFolder;
 
 /**
  * FolderWriter
@@ -89,9 +86,6 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public class FolderWriter extends DataWriter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(FolderWriter.class);
-
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
 	private final User userObj;
@@ -100,20 +94,18 @@ public class FolderWriter extends DataWriter {
 
 	private final Context ctx;
 
-	private static final String STR_FULL_RIGHTS = "acdilprsw";
-
 	public static abstract class IMAPFolderFieldWriter {
-		public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder, final boolean withKey)
+		public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder, final boolean withKey)
 				throws JSONException, OXException, MessagingException {
 			writeField(jsonwriter, folder, withKey, null, -1);
 		}
 
-		public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder, final boolean withKey,
+		public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder, final boolean withKey,
 				final String name, final int hasSubfolders) throws JSONException, OXException, MessagingException {
 			writeField(jsonwriter, folder, withKey, name, hasSubfolders, null, -1);
 		}
 
-		public abstract void writeField(JSONWriter jsonwriter, javax.mail.Folder folder, boolean withKey, String name,
+		public abstract void writeField(JSONWriter jsonwriter, MailFolderObject folder, boolean withKey, String name,
 				int hasSubfolders, String fullName, int module) throws JSONException, OXException, MessagingException;
 	}
 
@@ -144,17 +136,17 @@ public class FolderWriter extends DataWriter {
 		this.ctx = ctx;
 	}
 
-	public void writeIMAPFolderAsObject(final int[] fields, final javax.mail.Folder folder) throws JSONException,
+	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder) throws JSONException,
 			OXException, MessagingException {
 		writeIMAPFolderAsObject(fields, folder, null, -1);
 	}
 
-	public void writeIMAPFolderAsObject(final int[] fields, final javax.mail.Folder folder, final String name,
+	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder, final String name,
 			final int hasSubfolders) throws JSONException, OXException, MessagingException {
 		writeIMAPFolderAsObject(fields, folder, name, hasSubfolders, null);
 	}
 
-	public void writeIMAPFolderAsObject(int[] fields, final javax.mail.Folder folder, final String name,
+	public void writeIMAPFolderAsObject(int[] fields, final MailFolderObject folder, final String name,
 			final int hasSubfolders, final String fullName) throws JSONException, OXException, MessagingException {
 		try {
 			jsonwriter.object();
@@ -169,17 +161,17 @@ public class FolderWriter extends DataWriter {
 		}
 	}
 
-	public void writeIMAPFolderAsArray(final int[] fields, final javax.mail.Folder folder) throws JSONException,
+	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder) throws JSONException,
 			OXException, MessagingException {
 		writeIMAPFolderAsArray(fields, folder, null, -1);
 	}
 
-	public void writeIMAPFolderAsArray(final int[] fields, final javax.mail.Folder folder, final String name,
+	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder, final String name,
 			final int hasSubfolders) throws JSONException, OXException, MessagingException {
 		writeIMAPFolderAsArray(fields, folder, name, hasSubfolders, null, -1);
 	}
 
-	public void writeIMAPFolderAsArray(final int[] fields, final javax.mail.Folder folder, final String name,
+	public void writeIMAPFolderAsArray(final int[] fields, final MailFolderObject folder, final String name,
 			final int hasSubfolders, final String fullName, final int module) throws JSONException, OXException,
 			MessagingException {
 		try {
@@ -192,44 +184,25 @@ public class FolderWriter extends DataWriter {
 		}
 	}
 
-	private static final String prepareFullname(final String fullname, final char sep) {
-		if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(fullname)) {
-			return fullname;
-		}
-		return new StringBuilder().append(MailFolderObject.DEFAULT_IMAP_FOLDER).append(sep).append(fullname).toString();
-	}
-
-	private static final String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
-		final StringBuilder sb = new StringBuilder(50).append(MailFolderObject.DEFAULT_IMAP_FOLDER);
-		if (parent instanceof DefaultFolder) {
-			return sb.toString();
-		}
-		return sb.append(parent.getSeparator()).append(parent.getFullName()).toString();
-	}
-
-	private static final String STR_MAILBOX_NOT_EXISTS = "NO Mailbox does not exist";
-
 	public final IMAPFolderFieldWriter[] getIMAPFolderFieldWriter(final int[] fields) {
 		IMAPFolderFieldWriter[] retval = new IMAPFolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
 			case FolderObject.OBJECT_ID:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.ID);
 						}
-						jsonwriter
-								.value(fullName == null ? prepareFullname(folder.getFullName(), folder.getSeparator())
-										: fullName);
+						jsonwriter.value(fullName == null ? folder.getFullName() : fullName);
 					}
 				};
 				break Fields;
 			case FolderObject.CREATED_BY:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -241,7 +214,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.MODIFIED_BY:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -253,7 +226,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.CREATION_DATE:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -265,7 +238,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.LAST_MODIFIED:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -277,19 +250,19 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.FOLDER_ID:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.FOLDER_ID);
 						}
-						jsonwriter.value(prepareParentFullname(folder.getParent()));
+						jsonwriter.value(folder.getParentFullName());
 					}
 				};
 				break Fields;
 			case FolderObject.FOLDER_NAME:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -301,7 +274,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.MODULE:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -313,7 +286,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.TYPE:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -325,14 +298,14 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.SUBFOLDERS:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBFOLDERS);
 						}
 						if (hasSubfolders == -1) {
-							jsonwriter.value(IMAPUtils.hasSubfolders((IMAPFolder) folder));
+							jsonwriter.value(folder.hasSubfolders());
 							return;
 						}
 						jsonwriter.value(hasSubfolders > 0);
@@ -341,74 +314,25 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.OWN_RIGHTS:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.OWN_RIGHTS);
 						}
-						if (folder instanceof DefaultFolder) {
+						if (folder.isRootFolder()) {
 							jsonwriter.value(createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
 									OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
 									OCLPermission.NO_PERMISSIONS, false));
 						} else {
-							String rights = null;
-							if (IMAPProperties.isSupportsACLs()) {
-								try {
-									rights = ((IMAPFolder) folder).myRights().toString();
-								} catch (MessagingException e) {
-									if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
-											&& STR_MAILBOX_NOT_EXISTS.equals(e.getNextException().getMessage())) {
-										LOG.error(OXMailException.getFormattedMessage(MailCode.FOLDER_NOT_FOUND, folder
-												.getFullName()));
-									} else {
-										LOG.error(e.getMessage(), e);
-									}
-									/*
-									 * Write empty string as rights.
-									 * Nevertheless user may see folder!
-									 */
-									jsonwriter.value("");
-									return;
-								} catch (Throwable t) {
-									LOG.error(t.getMessage(), t);
-									/*
-									 * Write empty string as rights.
-									 * Nevertheless user may see folder!
-									 */
-									jsonwriter.value("");
-									return;
-								}
-							} else {
-								/*
-								 * No ACLs enabled. User has full access.
-								 */
-								rights = STR_FULL_RIGHTS;
-							}
-							if (rights.length() > 0) {
-								if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
-									/*
-									 * NoInferiors detected: No create access
-									 */
-									rights = rights.replaceFirst("c", "");
-								} else if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
-									/*
-									 * NoSelect detected: No read access
-									 */
-									rights = rights.replaceFirst("r", "");
-								}
-							}
-							if (IMAPProperties.isUserFlagsEnabled() && (IMAPUtils.supportsUserDefinedFlags(folder))) {
-								rights = new StringBuilder(rights).append('u').toString();
-							}
-							jsonwriter.value(rights);
+							jsonwriter.value(folder.getOwnRights());
 						}
 					}
 				};
 				break Fields;
 			case FolderObject.PERMISSIONS_BITS:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
@@ -421,28 +345,23 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.SUMMARY:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUMMARY);
 						}
-						if (folder instanceof DefaultFolder) {
+						if (folder.isRootFolder()) {
 							jsonwriter.value("");
 							return;
 						}
-						try {
-							jsonwriter.value(new StringBuilder().append('(').append(folder.getMessageCount()).append(
-									'/').append(folder.getUnreadMessageCount()).append(')').toString());
-						} catch (MessagingException e) {
-							jsonwriter.value("");
-						}
+						jsonwriter.value(folder.getSummary());
 					}
 				};
 				break Fields;
 			case FolderObject.STANDARD_FOLDER:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
@@ -454,59 +373,55 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.TOTAL:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.TOTAL);
 						}
-						jsonwriter.value(folder.getMessageCount());
+						jsonwriter.value(folder.getTotal());
 					}
 				};
 				break Fields;
 			case FolderObject.NEW:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.NEW);
 						}
-						jsonwriter.value(folder.getNewMessageCount());
+						jsonwriter.value(folder.getNew());
 					}
 				};
 				break Fields;
 			case FolderObject.UNREAD:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.UNREAD);
 						}
-						try {
-							jsonwriter.value(folder.getUnreadMessageCount());
-						} catch (MessagingException me) {
-							jsonwriter.value(JSONObject.NULL);
-						}
+						jsonwriter.value(folder.getUnread());
 					}
 				};
 				break Fields;
 			case FolderObject.DELETED:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.DELETED);
 						}
-						jsonwriter.value(folder.getDeletedMessageCount());
+						jsonwriter.value(folder.getDeleted());
 					}
 				};
 				break Fields;
 			case FolderObject.CAPABILITIES:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException, OXException, MessagingException {
 						if (withKey) {
@@ -522,7 +437,7 @@ public class FolderWriter extends DataWriter {
 				break Fields;
 			default:
 				retval[i] = new IMAPFolderFieldWriter() {
-					public void writeField(final JSONWriter jsonwriter, final javax.mail.Folder folder,
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
@@ -536,229 +451,153 @@ public class FolderWriter extends DataWriter {
 		return retval;
 	}
 
-	public void writeIMAPFolderField(final int field, final javax.mail.Folder folder, final boolean withKey,
+	public void writeIMAPFolderField(final int field, final MailFolderObject folder, final boolean withKey,
 			final String name, final int hasSubfolders, final String fullName, final int module) throws OXException,
 			JSONException, MessagingException {
-		if (folder instanceof IMAPFolder) {
-			final IMAPFolder imapFolder = (IMAPFolder) folder;
-			switch (field) {
-			case FolderObject.OBJECT_ID:
-				if (withKey) {
-					jsonwriter.key(FolderFields.ID);
-				}
-				jsonwriter
-						.value(fullName == null ? prepareFullname(imapFolder.getFullName(), imapFolder.getSeparator())
-								: fullName);
-				break;
-			case FolderObject.CREATED_BY:
-				if (withKey) {
-					jsonwriter.key(FolderFields.CREATED_BY);
-				}
-				jsonwriter.value(-1);
-				break;
-			case FolderObject.MODIFIED_BY:
-				if (withKey) {
-					jsonwriter.key(FolderFields.MODIFIED_BY);
-				}
-				jsonwriter.value(-1);
-				break;
-			case FolderObject.CREATION_DATE:
-				if (withKey) {
-					jsonwriter.key(FolderFields.CREATION_DATE);
-				}
-				jsonwriter.value(0);
-				break;
-			case FolderObject.LAST_MODIFIED:
-				if (withKey) {
-					jsonwriter.key(FolderFields.LAST_MODIFIED);
-				}
-				jsonwriter.value(0);
-				break;
-			case FolderObject.FOLDER_ID:
-				if (withKey) {
-					jsonwriter.key(FolderFields.FOLDER_ID);
-				}
-				jsonwriter.value(prepareParentFullname(imapFolder.getParent()));
-				break;
-			case FolderObject.FOLDER_NAME:
-				if (withKey) {
-					jsonwriter.key(FolderFields.TITLE);
-				}
-				jsonwriter.value(name == null ? imapFolder.getName() : name);
-				break;
-			case FolderObject.MODULE:
-				if (withKey) {
-					jsonwriter.key(FolderFields.MODULE);
-				}
-				jsonwriter.value(getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
-				break;
-			case FolderObject.TYPE:
-				if (withKey) {
-					jsonwriter.key(FolderFields.TYPE);
-				}
-				jsonwriter.value(FolderObject.MAIL);
-				break;
-			case FolderObject.SUBFOLDERS:
-				if (withKey) {
-					jsonwriter.key(FolderFields.SUBFOLDERS);
-				}
-				if (hasSubfolders == -1) {
-					jsonwriter.value(IMAPUtils.hasSubfolders((IMAPFolder) folder));
-					break;
-				}
-				jsonwriter.value(hasSubfolders > 0);
-				break;
-			case FolderObject.OWN_RIGHTS:
-				/*
-				 * The currently defined standard rights are: l - lookup
-				 * (mailbox is visible to LIST/LSUB commands) r - read (SELECT
-				 * the mailbox, perform CHECK, FETCH, PARTIAL, SEARCH, COPY from
-				 * mailbox) s - keep seen/unseen information across sessions
-				 * (STORE SEEN flag) w - write (STORE flags other than SEEN and
-				 * DELETED) i - insert (perform APPEND, COPY into mailbox) p -
-				 * post (send mail to submission address for mailbox, not
-				 * enforced by IMAP4 itself) c - create (CREATE new
-				 * sub-mailboxes in any implementation-defined hierarchy) d -
-				 * delete (STORE DELETED flag, perform EXPUNGE) a - administer
-				 * (perform SETACL) u - user-defined flags are enabled
-				 */
-				if (withKey) {
-					jsonwriter.key(FolderFields.OWN_RIGHTS);
-				}
-				if (imapFolder instanceof DefaultFolder) {
-					jsonwriter.value(createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
-							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-							false));
-				} else {
-					String rights = null;
-					if (IMAPProperties.isSupportsACLs()) {
-						try {
-							rights = imapFolder.myRights().toString();
-						} catch (MessagingException e) {
-							if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
-									&& STR_MAILBOX_NOT_EXISTS.equals(e.getNextException().getMessage())) {
-								LOG.error(OXMailException.getFormattedMessage(MailCode.FOLDER_NOT_FOUND, folder
-										.getFullName()));
-							} else {
-								LOG.error(e.getMessage(), e);
-							}
-							/*
-							 * Write empty string as rights. Nevertheless user
-							 * may see folder!
-							 */
-							jsonwriter.value("");
-							break;
-						} catch (Exception e) {
-							LOG.error(e.getMessage(), e);
-							/*
-							 * Write empty string as rights. Nevertheless user
-							 * may see folder!
-							 */
-							jsonwriter.value("");
-							break;
-						}
-					} else {
-						/*
-						 * No ACLs enabled. User has full access.
-						 */
-						rights = STR_FULL_RIGHTS;
-					}
-					if (rights.length() > 0) {
-						if ((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
-							/*
-							 * NoInferiors detected: No create access
-							 */
-							rights = rights.replaceFirst("c", "");
-						} else if ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
-							/*
-							 * NoSelect detected: No read access
-							 */
-							rights = rights.replaceFirst("r", "");
-						}
-					}
-					if (IMAPProperties.isUserFlagsEnabled() && (IMAPUtils.supportsUserDefinedFlags(folder))) {
-						rights = new StringBuilder(rights).append('u').toString();
-					}
-					jsonwriter.value(rights);
-				}
-				break;
-			case FolderObject.PERMISSIONS_BITS:
-				if (withKey) {
-					jsonwriter.key(FolderFields.PERMISSIONS);
-				}
-				jsonwriter.value(JSONObject.NULL);
-				ctx.getContextId();
-				/*
-				 * JSONArray ja = new JSONArray(); ACL[] aclArr =
-				 * imapFolder.getACL(); for (int i = 0; i < aclArr.length; i++) {
-				 * ACL current = aclArr[i]; JSONObject jo = new JSONObject();
-				 * //TODO: Determine user/group id from given ACL name }
-				 * jsonwriter.value(ja);
-				 */
-				break;
-			case FolderObject.SUMMARY:
-				if (withKey) {
-					jsonwriter.key(FolderFields.SUMMARY);
-				}
-				if (imapFolder instanceof DefaultFolder) {
-					jsonwriter.value("");
-					break;
-				}
-				try {
-					jsonwriter.value(new StringBuilder().append('(').append(imapFolder.getMessageCount()).append('/')
-							.append(imapFolder.getUnreadMessageCount()).append(')').toString());
-				} catch (MessagingException e) {
-					jsonwriter.value("");
-				}
-				break;
-			case FolderObject.STANDARD_FOLDER:
-				if (withKey) {
-					jsonwriter.key(FolderFields.STANDARD_FOLDER);
-				}
-				jsonwriter.value(false);
-				break;
-			case FolderObject.TOTAL:
-				if (withKey) {
-					jsonwriter.key(FolderFields.TOTAL);
-				}
-				jsonwriter.value(folder.getMessageCount());
-				break;
-			case FolderObject.NEW:
-				if (withKey) {
-					jsonwriter.key(FolderFields.NEW);
-				}
-				jsonwriter.value(folder.getNewMessageCount());
-				break;
-			case FolderObject.UNREAD:
-				if (withKey) {
-					jsonwriter.key(FolderFields.UNREAD);
-				}
-				try {
-					jsonwriter.value(folder.getUnreadMessageCount());
-				} catch (MessagingException me) {
-					jsonwriter.value(JSONObject.NULL);
-				}
-				break;
-			case FolderObject.DELETED:
-				if (withKey) {
-					jsonwriter.key(FolderFields.DELETED);
-				}
-				jsonwriter.value(folder.getDeletedMessageCount());
-				break;
-			case FolderObject.CAPABILITIES:
-				if (withKey) {
-					jsonwriter.key(FolderFields.CAPABILITIES);
-				}
-				if (IMAPProperties.isCapabilitiesLoaded()) {
-					jsonwriter.value(IMAPProperties.getImapCapabilities().getCapabilities());
-					break;
-				}
-				jsonwriter.value(JSONObject.NULL);
-				break;
-			default:
+		switch (field) {
+		case FolderObject.OBJECT_ID:
+			if (withKey) {
+				jsonwriter.key(FolderFields.ID);
+			}
+			jsonwriter.value(fullName == null ? folder.getFullName() : fullName);
+			break;
+		case FolderObject.CREATED_BY:
+			if (withKey) {
+				jsonwriter.key(FolderFields.CREATED_BY);
+			}
+			jsonwriter.value(-1);
+			break;
+		case FolderObject.MODIFIED_BY:
+			if (withKey) {
+				jsonwriter.key(FolderFields.MODIFIED_BY);
+			}
+			jsonwriter.value(-1);
+			break;
+		case FolderObject.CREATION_DATE:
+			if (withKey) {
+				jsonwriter.key(FolderFields.CREATION_DATE);
+			}
+			jsonwriter.value(0);
+			break;
+		case FolderObject.LAST_MODIFIED:
+			if (withKey) {
+				jsonwriter.key(FolderFields.LAST_MODIFIED);
+			}
+			jsonwriter.value(0);
+			break;
+		case FolderObject.FOLDER_ID:
+			if (withKey) {
+				jsonwriter.key(FolderFields.FOLDER_ID);
+			}
+			jsonwriter.value(folder.getParentFullName());
+			break;
+		case FolderObject.FOLDER_NAME:
+			if (withKey) {
+				jsonwriter.key(FolderFields.TITLE);
+			}
+			jsonwriter.value(name == null ? folder.getName() : name);
+			break;
+		case FolderObject.MODULE:
+			if (withKey) {
+				jsonwriter.key(FolderFields.MODULE);
+			}
+			jsonwriter.value(getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
+			break;
+		case FolderObject.TYPE:
+			if (withKey) {
+				jsonwriter.key(FolderFields.TYPE);
+			}
+			jsonwriter.value(FolderObject.MAIL);
+			break;
+		case FolderObject.SUBFOLDERS:
+			if (withKey) {
+				jsonwriter.key(FolderFields.SUBFOLDERS);
+			}
+			if (hasSubfolders == -1) {
+				jsonwriter.value(folder.hasSubfolders());
 				break;
 			}
+			jsonwriter.value(hasSubfolders > 0);
+			break;
+		case FolderObject.OWN_RIGHTS:
+			if (withKey) {
+				jsonwriter.key(FolderFields.OWN_RIGHTS);
+			}
+			if (folder.isRootFolder()) {
+				jsonwriter.value(createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
+						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false));
+			} else {
+				jsonwriter.value(folder.getOwnRights());
+			}
+			break;
+		case FolderObject.PERMISSIONS_BITS:
+			if (withKey) {
+				jsonwriter.key(FolderFields.PERMISSIONS);
+			}
+			jsonwriter.value(JSONObject.NULL);
+			ctx.getContextId();
+			/*
+			 * JSONArray ja = new JSONArray(); ACL[] aclArr =
+			 * imapFolder.getACL(); for (int i = 0; i < aclArr.length; i++) {
+			 * ACL current = aclArr[i]; JSONObject jo = new JSONObject();
+			 * //TODO: Determine user/group id from given ACL name }
+			 * jsonwriter.value(ja);
+			 */
+			break;
+		case FolderObject.SUMMARY:
+			if (withKey) {
+				jsonwriter.key(FolderFields.SUMMARY);
+			}
+			if (folder.isRootFolder()) {
+				jsonwriter.value("");
+				break;
+			}
+			jsonwriter.value(folder.getSummary());
+			break;
+		case FolderObject.STANDARD_FOLDER:
+			if (withKey) {
+				jsonwriter.key(FolderFields.STANDARD_FOLDER);
+			}
+			jsonwriter.value(false);
+			break;
+		case FolderObject.TOTAL:
+			if (withKey) {
+				jsonwriter.key(FolderFields.TOTAL);
+			}
+			jsonwriter.value(folder.getTotal());
+			break;
+		case FolderObject.NEW:
+			if (withKey) {
+				jsonwriter.key(FolderFields.NEW);
+			}
+			jsonwriter.value(folder.getNew());
+			break;
+		case FolderObject.UNREAD:
+			if (withKey) {
+				jsonwriter.key(FolderFields.UNREAD);
+			}
+			jsonwriter.value(folder.getUnread());
+			break;
+		case FolderObject.DELETED:
+			if (withKey) {
+				jsonwriter.key(FolderFields.DELETED);
+			}
+			jsonwriter.value(folder.getDeleted());
+			break;
+		case FolderObject.CAPABILITIES:
+			if (withKey) {
+				jsonwriter.key(FolderFields.CAPABILITIES);
+			}
+			if (IMAPProperties.isCapabilitiesLoaded()) {
+				jsonwriter.value(IMAPProperties.getImapCapabilities().getCapabilities());
+				break;
+			}
+			jsonwriter.value(JSONObject.NULL);
+			break;
+		default:
+			break;
 		}
+
 	}
 
 	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo) throws Exception {
@@ -1175,11 +1014,11 @@ public class FolderWriter extends DataWriter {
 						FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 					}
 				} catch (SQLException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights", fo
-							.getObjectID(), ctx.getContextId());
+					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights",
+							getFolderName(fo), ctx.getContextId());
 				} catch (DBPoolingException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights", fo
-							.getObjectID(), ctx.getContextId());
+					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, (String) null, "own_rights",
+							getFolderName(fo), ctx.getContextId());
 				}
 			}
 			if (withKey) {
@@ -1328,8 +1167,7 @@ public class FolderWriter extends DataWriter {
 					try {
 						retval += mapping[permission[i]] << shiftVal;
 					} catch (Exception e) {
-						throw new OXException("Unable to map OCL permission value " + permission[i]
-								+ " to a JSON permission value");
+						throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, permission[i]);
 					}
 				}
 			}

@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware;
 
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
+
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
 import java.io.Serializable;
@@ -427,8 +430,8 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	public Context getContext() {
 		return ctx;
 	}
-	
-	private static transient Lock LOCK = new ReentrantLock(); 
+
+	private static transient Lock LOCK = new ReentrantLock();
 
 	public UserSettingMail getUserSettingMail() {
 		if (userSettingMail == null) {
@@ -561,8 +564,8 @@ public class UserConfiguration implements Serializable, DeleteListener {
 						stmt.executeUpdate();
 					}
 				} else {
-					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, FolderObject.INFOSTORE, userId, ctx
-							.getContextId());
+					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, (String) null,
+							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), ctx.getContextId());
 				}
 			} finally {
 				closeResources(rs, stmt, readCon, true, ctx);

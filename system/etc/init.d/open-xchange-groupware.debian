@@ -7,7 +7,7 @@ STARTSCRIPT=/opt/open-xchange/sbin/open-xchange-groupware
 NAME=open-xchange-groupware
 DESC="Open-Xchange Groupware"
 DEFAULTS=/etc/default/open-xchange-groupware
-OXFUNCTIONS=/opt/open-xchange/etc/groupware/oxfunctions.sh
+OXFUNCTIONS=/opt/open-xchange/etc/oxfunctions.sh
 OXCONFIG=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
 
 # Defaults - don't touch, edit /etc/default/open-xchange-groupware

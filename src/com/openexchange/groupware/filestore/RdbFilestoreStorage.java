@@ -59,17 +59,38 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 
+@OXExceptionSource(
+    classId = Classes.RDB_FILESTORE_STORAGE,
+    component = Component.FILESTORE
+)
 public class RdbFilestoreStorage extends FilestoreStorage {
+
+    /**
+     * For creating exceptions.
+     */
+    private static final FilestoreExceptionFactory EXCEPTION =
+        new FilestoreExceptionFactory(RdbFilestoreStorage.class);
 
 	private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
 	
 	private static final Log LOG = LogFactory.getLog(RdbFilestoreStorage.class);
 	
 	@Override
-	public Filestore getFilestore(int id) throws FilestoreNotFoundException, IllegalFilestoreException {
+    @OXThrowsMultiple(
+        category = { Category.SETUP_ERROR, Category.SETUP_ERROR },
+        desc = { "", "" },
+        exceptionId = { 3, 4 },
+        msg = { "Can't find filestore with id %1$d.",
+            "Can't create URI from \"%1$s\"." }
+    )
+	public Filestore getFilestore(int id) throws FilestoreException {
 		
 		
 		Connection readCon = null;
@@ -84,14 +105,16 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 			rs = stmt.executeQuery();
 			
 			if(!rs.next())
-				throw new FilestoreNotFoundException("Can't find filestore with id "+id,id);
+				throw EXCEPTION.create(3, id);
 			
 			FilestoreImpl filestore = new FilestoreImpl();
 			filestore.setId(id);
+            String tmp = null;
 			try {
-				filestore.setUri(new URI(rs.getString("uri")));
+                tmp = rs.getString("uri");
+				filestore.setUri(new URI(tmp));
 			} catch (URISyntaxException e) {
-				throw new IllegalFilestoreException(e);
+				throw EXCEPTION.create(4, e, tmp);
 			}
 			filestore.setSize(rs.getLong("size"));
 			filestore.setMaxContext(rs.getLong("max_context"));

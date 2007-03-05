@@ -67,21 +67,31 @@ import javax.mail.internet.MimeUtility;
  * 
  */
 public class QuotedPrintable {
-	
+
 	private static final String ENCODING_QP = "QUOTED-PRINTABLE";
-	
+
+	private static final String ENCODE_Q = "Q";
+
+	private static final String REGEX_PREFIX = "((\\?=)? ?=\\?";
+
+	private static final String REGEX_APPENDIX = "\\?Q\\?)|(\\?=)";
+
+	private static final String[] RPL = { "_", "\\r", "\\n" };
+
+	private static final String[] SUB = { " ", "=0D", "=0A" };
+
 	private QuotedPrintable() {
 		super();
 	}
 
 	public static String encodeString(final String originalStr, final String charset)
 			throws UnsupportedEncodingException {
-		String encStr = MimeUtility.encodeText(originalStr, charset, "Q");
-		encStr = encStr.replaceAll(new StringBuilder().append("((\\?=)? ?=\\?").append(charset).append(
-				"\\?Q\\?)|(\\?=)").toString(), "");
-		encStr = encStr.replaceAll("_", " ");
-		encStr = encStr.replaceAll("\\r", "=0D");
-		encStr = encStr.replaceAll("\\n", "=0A");
+		String encStr = MimeUtility.encodeText(originalStr, charset, ENCODE_Q);
+		encStr = encStr.replaceAll(new StringBuilder().append(REGEX_PREFIX).append(charset).append(REGEX_APPENDIX)
+				.toString(), "");
+		for (int i = 0; i < RPL.length; i++) {
+			encStr = encStr.replaceAll(RPL[i], SUB[i]);
+		}
 		return encStr;
 	}
 

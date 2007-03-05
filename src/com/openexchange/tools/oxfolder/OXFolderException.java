@@ -473,7 +473,15 @@ public class OXFolderException extends OXException {
 		/**
 		 * Specified folder name is too long
 		 */
-		TRUNCATED("Specified folder name is too long", Category.TRUNCATED, 64);
+		TRUNCATED("Specified folder name is too long", Category.TRUNCATED, 64),
+		/**
+		 * Unable to map OCL permission value %s to a JSON permission value
+		 */
+		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.PROGRAMMING_ERROR, 65),
+		/**
+		 * Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)
+		 */
+		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)", Category.PROGRAMMING_ERROR, 66);
 
 		/**
 		 * Message of the exception.
@@ -533,8 +541,9 @@ public class OXFolderException extends OXException {
 	}
 
 	public OXFolderException(final FolderCode folderCode, final String messagePrefix, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, new StringBuilder().append(messagePrefix)
-				.append(folderCode.message).toString(), null);
+		super(Component.FOLDER, folderCode.category, folderCode.detailNumber,
+				messagePrefix == null ? folderCode.message : new StringBuilder().append(messagePrefix).append(
+						folderCode.message).toString(), null);
 		setMessageArgs(messageArgs);
 	}
 

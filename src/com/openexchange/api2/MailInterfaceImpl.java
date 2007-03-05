@@ -47,8 +47,11 @@
  *
  */
 
-
 package com.openexchange.api2;
+
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.decodeMultiEncodedHeader;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.getMessageUniqueIdentifier;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -69,6 +72,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -130,7 +134,6 @@ import com.openexchange.groupware.container.mail.parser.ImageMessageHandler;
 import com.openexchange.groupware.container.mail.parser.JSONAttachmentMessageHandler;
 import com.openexchange.groupware.container.mail.parser.JSONMessageHandler;
 import com.openexchange.groupware.container.mail.parser.MessageDumper;
-import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.container.mail.parser.ReplyTextMessageHandler;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -191,36 +194,42 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String FALSE_STR = "false";
 	
+	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
+
 	private static final String PROPERTY_ALLOWREADONLYSELECT = "mail.imap.allowreadonlyselect";
 
 	private static final Properties IMAP_PROPS;
 
 	private static boolean imapPropsInitialized;
-	
+
 	private static final Lock LOCK_CREATE = new ReentrantLock();
-	
+
+	private static final Lock LOCK_INIT = new ReentrantLock();
+
+	private static final Lock LOCK_CON = new ReentrantLock();
+
+	private static final Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
+
 	private Properties imapProps;
 
 	private final SessionObject sessionObj;
 
 	private final UserSettingMail usm;
-	
+
 	private final TimeZone userTimeZone;
-	
-	private final Lock defaultFolderLock = new ReentrantLock();
 
 	private DefaultIMAPConnection imapCon;
 
 	private IMAPStore imapStore;
 
 	private boolean init;
-	
+
 	private IMAPFolder tmpFolder;
 
 	private Message markAsSeen;
-	
+
 	private Rights tmpRights;
-	
+
 	static {
 		mailInterfaceMonitor = new MailInterfaceMonitor();
 		try {
@@ -275,41 +284,54 @@ public class MailInterfaceImpl implements MailInterface {
 			LOG.error(e.getMessage(), e);
 		}
 	}
-	
+
 	private final static void initializeCapabilities(final IMAPStore imapStore) throws MessagingException {
 		if (!IMAPProperties.isCapabilitiesLoaded()) {
-			final IMAPCapabilities imapCaps = new IMAPCapabilities();
-			imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
-			imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
-			imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
-			imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
-			imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
-			imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
-			imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
-			imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-			IMAPProperties.setImapCapabilities(imapCaps);
-			IMAPProperties.setCapabilitiesLoaded(true);
+			LOCK_INIT.lock();
+			try {
+				if (IMAPProperties.isCapabilitiesLoaded()) {
+					return;
+				}
+				final IMAPCapabilities imapCaps = new IMAPCapabilities();
+				imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
+				imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
+				imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
+				imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
+				imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
+				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
+				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
+				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
+				IMAPProperties.setImapCapabilities(imapCaps);
+				IMAPProperties.setCapabilitiesLoaded(true);
+			} finally {
+				LOCK_INIT.unlock();
+			}
 		}
 	}
-	
+
 	private final static void initializeIMAPProperties() throws OXException {
 		/*
 		 * Fill global IMAP Properties only once and switch flag
 		 */
 		if (!IMAPProperties.isGlobalPropertiesLoaded()) {
+			LOCK_INIT.lock();
 			try {
+				if (IMAPProperties.isGlobalPropertiesLoaded()) {
+					return;
+				}
 				IMAPPropertiesFactory.loadGlobalImapProperties();
 			} catch (IMAPException e) {
 				throw new OXException(e);
+			} finally {
+				LOCK_INIT.unlock();
 			}
 		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
-			IMAP_PROPS
-					.put("mail.imap.connectiontimeout", String.valueOf(IMAPProperties.getImapConnectionTimeout()));
+			IMAP_PROPS.put("mail.imap.connectiontimeout", String.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
 		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? TRUE_STR : FALSE_STR);
 	}
-	
+
 	public final static Properties getDefaultIMAPProperties() throws OXException {
 		if (!imapPropsInitialized) {
 			initializeIMAPProperties();
@@ -329,27 +351,77 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 	
 	public static final MailInterface getInstance(final SessionObject sessionObj) throws OXException {
-		final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
-		DefaultIMAPConnection imapCon = null;
-		if (LOCK_CREATE.tryLock()) {
-			try {
-				imapCon = (DefaultIMAPConnection) IMAPConnectionCacheManager.getInstance().removeIMAPConnection(sessionObj);
-			} finally {
-				LOCK_CREATE.unlock();
+		return getInstance(sessionObj, true);
+	}
+
+	public static final MailInterface getInstance(final SessionObject sessionObj, final boolean fetchCachedCon) throws OXException {
+		DefaultIMAPConnection imapCon = fetchCachedCon ? getCachedConnection(sessionObj) : null;
+		if (imapCon == null) {
+			/*
+			 * No cached connection available, check if a new one may be
+			 * established
+			 */
+			if (IMAPProperties.getMaxNumOfIMAPConnections() > 0
+					&& DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
+				LOCK_CON.lock();
+				try {
+					while (DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("Too many IMAP connections currently established. Going asleep.");
+						}
+						LOCK_CON_CONDITION.await();
+					}
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Woke up & IMAP connection(s) may again be established");
+					}
+					/*
+					 * Try to fetch from cache again
+					 */
+					if (fetchCachedCon) {
+						imapCon = getCachedConnection(sessionObj);
+					}
+				} catch (InterruptedException e) {
+					LOG.error(e.getMessage(), e);
+					throw new OXMailException(MailCode.INTERRUPT_ERROR, e, new Object[0]);
+				} finally {
+					LOCK_CON.unlock();
+				}
+			}
+			if (imapCon == null) {
+				/*
+				 * Return a new instance with an empty connection. Thus a new
+				 * connection is going to be created through calling init()
+				 * method
+				 */
+				return new MailInterfaceImpl(sessionObj);
 			}
 		}
-		if (imapCon == null) {
-			return retval;
-		}
+		final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 		try {
+			/*
+			 * Apply cached connection
+			 */
 			retval.imapCon = imapCon;
-			retval.imapStore = imapCon.connect(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+			retval.imapStore = imapCon.connect();
 		} catch (NoSuchProviderException e) {
 			throw handleMessagingException(e);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e);
 		}
 		return retval;
+	}
+
+	private static final DefaultIMAPConnection getCachedConnection(final SessionObject sessionObj) throws OXException {
+		DefaultIMAPConnection imapCon = null;
+		if (LOCK_CREATE.tryLock()) {
+			try {
+				imapCon = (DefaultIMAPConnection) IMAPConnectionCacheManager.getInstance().removeIMAPConnection(
+						sessionObj);
+			} finally {
+				LOCK_CREATE.unlock();
+			}
+		}
+		return imapCon;
 	}
 
 	/**
@@ -367,12 +439,14 @@ public class MailInterfaceImpl implements MailInterface {
 		if (imapStore == null || !imapStore.isConnected()) {
 			imapCon = new DefaultIMAPConnection();
 			imapCon.setProperties(imapProps);
-			imapCon.setImapServer(sessionObj.getIMAPProperties().getImapServer(), sessionObj.getIMAPProperties().getImapPort());
+			imapCon.setImapServer(sessionObj.getIMAPProperties().getImapServer(), sessionObj.getIMAPProperties()
+					.getImapPort());
 			imapCon.setUsername(sessionObj.getIMAPProperties().getImapLogin());
 			imapCon.setPassword(sessionObj.getIMAPProperties().getImapPassword());
 			final long start = System.currentTimeMillis();
 			try {
-				imapStore = imapCon.connect(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+				imapStore = imapCon.connect();
+				mailInterfaceMonitor.changeNumActive(true);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (AuthenticationFailedException e) {
@@ -393,7 +467,8 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Check user's default mailbox folders
 		 */
 		CheckDefaultFolders: if (!usm.isStdFoldersSetDuringSession()) {
-			defaultFolderLock.lock();
+			final Lock creationLock = usm.getStdFolderCreationLock();
+			creationLock.lock();
 			try {
 				/*
 				 * Already set by previous thread?
@@ -403,25 +478,45 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				String[] stdFolderNames = new String[4];
 				if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
-					throw new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Drafts");
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Drafts");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
+					}
+					stdFolderNames[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
+				} else {
+					stdFolderNames[INDEX_DRAFTS] = usm.getStdDraftsName();
 				}
-				stdFolderNames[INDEX_DRAFTS] = usm.getStdDraftsName();
 				if (usm.getStdSentName() == null || usm.getStdSentName().length() == 0) {
-					throw new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Sent");
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Sent");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
+					}
+					stdFolderNames[INDEX_SENT] = UserSettingMail.STD_SENT;
+				} else {
+					stdFolderNames[INDEX_SENT] = usm.getStdSentName();
 				}
-				stdFolderNames[INDEX_SENT] = usm.getStdSentName();
 				if (usm.getStdSpamName() == null || usm.getStdSpamName().length() == 0) {
-					throw new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Spam");
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Spam");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
+					}
+					stdFolderNames[INDEX_SPAM] = UserSettingMail.STD_SPAM;
+				} else {
+					stdFolderNames[INDEX_SPAM] = usm.getStdSpamName();
 				}
-				stdFolderNames[INDEX_SPAM] = usm.getStdSpamName();
 				if (usm.getStdTrashName() == null || usm.getStdTrashName().length() == 0) {
-					throw new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Trash");
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Trash");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
+					}
+					stdFolderNames[INDEX_TRASH] = UserSettingMail.STD_TRASH;
+				} else {
+					stdFolderNames[INDEX_TRASH] = usm.getStdTrashName();
 				}
-				stdFolderNames[INDEX_TRASH] = usm.getStdTrashName();
 				checkDefaultFolders(stdFolderNames, false);
 				usm.setStdFoldersSetDuringSession(true);
 			} finally {
-				defaultFolderLock.unlock();
+				creationLock.unlock();
 			}
 		}
 		init = true;
@@ -456,7 +551,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * prefix for folder fullname
 				 */
 				if (!noInferiors
-						&& (!isAltNamespaceEnabled(imapStore) || IMAPProperties.isAllowNestedDefaultFolderOnAltNamespace())) {
+						&& (!isAltNamespaceEnabled(imapStore) || IMAPProperties
+								.isAllowNestedDefaultFolderOnAltNamespace())) {
 					/*
 					 * Only allow default folder below INBOX if inferiors are
 					 * permitted and either altNamespace is disabled or nested
@@ -470,7 +566,9 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Check draft folder
 				 */
-				Folder f = imapStore.getFolder(tmp.append(prefix).append(defaultFolderNames[INDEX_DRAFTS]).toString());
+				boolean checkSubscribed = true;
+				Folder f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_DRAFTS])).toString());
 				tmp.setLength(0);
 				long start = System.currentTimeMillis();
 				if (!f.exists()) {
@@ -478,21 +576,28 @@ public class MailInterfaceImpl implements MailInterface {
 						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
 								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_DRAFTS]).toString());
 						LOG.error(oxme.getMessage(), oxme);
+						checkSubscribed = false;
 					}
-					if (!f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						}
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
 					}
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_DRAFTS, f.getFullName());
+				usm
+						.setStandardFolder(INDEX_DRAFTS, MailFolderObject.prepareFullname(f.getFullName(), f
+								.getSeparator()));
 				/*
 				 * Check sent folder
 				 */
-				f = imapStore.getFolder(tmp.append(prefix).append(defaultFolderNames[INDEX_SENT]).toString());
+				checkSubscribed = true;
+				f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_SENT])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists()) {
@@ -500,21 +605,26 @@ public class MailInterfaceImpl implements MailInterface {
 						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
 								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SENT]).toString());
 						LOG.error(oxme.getMessage(), oxme);
+						checkSubscribed = false;
 					}
-					if (!f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						}
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
 					}
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_SENT, f.getFullName());
+				usm.setStandardFolder(INDEX_SENT, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
 				/*
 				 * Check spam folder
 				 */
-				f = imapStore.getFolder(tmp.append(prefix).append(defaultFolderNames[INDEX_SPAM]).toString());
+				checkSubscribed = true;
+				f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_SPAM])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists()) {
@@ -522,21 +632,26 @@ public class MailInterfaceImpl implements MailInterface {
 						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
 								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SPAM]).toString());
 						LOG.error(oxme.getMessage(), oxme);
+						checkSubscribed = false;
 					}
-					if (!f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						}
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
 					}
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_SPAM, f.getFullName());
+				usm.setStandardFolder(INDEX_SPAM, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
 				/*
 				 * Check trash folder
 				 */
-				f = imapStore.getFolder(tmp.append(prefix).append(defaultFolderNames[INDEX_TRASH]).toString());
+				checkSubscribed = true;
+				f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_TRASH])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists()) {
@@ -544,24 +659,27 @@ public class MailInterfaceImpl implements MailInterface {
 						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
 								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_TRASH]).toString());
 						LOG.error(oxme.getMessage(), oxme);
+						checkSubscribed = false;
 					}
-					if (!f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						}
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
 					}
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_TRASH, f.getFullName());
+				usm.setStandardFolder(INDEX_TRASH, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
 			}
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
-	
-	private static boolean isAltNamespaceEnabled(final IMAPStore imapStore) throws MessagingException {
+
+	private static final boolean isAltNamespaceEnabled(final IMAPStore imapStore) throws MessagingException {
 		boolean altnamespace = false;
 		final Folder[] pn = imapStore.getPersonalNamespaces();
 		if (pn.length != 0 && pn[0].getFullName().trim().length() == 0) {
@@ -599,14 +717,17 @@ public class MailInterfaceImpl implements MailInterface {
 			sessionObj.setMailSession(null);
 			if (tmpFolder != null && tmpFolder.isOpen()) {
 				tmpFolder.close(true);
+				mailInterfaceMonitor.changeNumActive(false);
 			}
 			closeIMAPConnection(putIntoCache, sessionObj, imapCon);
+			this.imapStore = null;
+			this.imapCon = null;
 			init = false;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
-	
+
 	public static final boolean closeIMAPConnection(final DefaultIMAPConnection imapCon) throws OXException,
 			MessagingException {
 		return closeIMAPConnection(false, null, imapCon);
@@ -629,36 +750,44 @@ public class MailInterfaceImpl implements MailInterface {
 			if (cached) {
 				return false;
 			}
-			if (imapCon.isConnected()) {
-				/*
-				 * Release rights
-				 */
-				imapCon.setMyRights(null);
-				/*
-				 * Release folder
-				 */
-				if (imapCon.getImapFolder() != null) {
-					try {
-						final long start = System.currentTimeMillis();
-						imapCon.getImapFolder().close(false);
-						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					} catch (MessagingException e) {
-						LOG.error(e.getMessage(), e);
-					} finally {
-						imapCon.setImapFolder(null);
-					}
+			/*
+			 * Release rights
+			 */
+			imapCon.setMyRights(null);
+			/*
+			 * Release folder
+			 */
+			if (imapCon.getImapFolder() != null) {
+				try {
+					final long start = System.currentTimeMillis();
+					imapCon.getImapFolder().close(false);
+					mailInterfaceMonitor.changeNumActive(false);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				} catch (MessagingException e) {
+					LOG.error(e.getMessage(), e);
+				} finally {
+					imapCon.setImapFolder(null);
 				}
-				/*
-				 * Close connection
-				 */
-				imapCon.close();
-				MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+			}
+			/*
+			 * Close connection
+			 */
+			imapCon.close();
+			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+			LOCK_CON.lock();
+			try {
+				LOCK_CON_CONDITION.signalAll();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Sending signal to possible waiting threads");
+				}
+			} finally {
+				LOCK_CON.unlock();
 			}
 			return true;
 		}
 		return true;
 	}
-	
+
 	private static final void expungeDefaultIMAPConnection(final DefaultIMAPConnection imapCon)
 			throws MessagingException {
 		if (!imapCon.isExpunge()) {
@@ -688,7 +817,7 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 
 	private static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
-	
+
 	private static final String ERROR_KEEP_SEEN = "/SEEN flag cannot be set: ";
 
 	private final void keepSeen(final IMAPFolder imapFolder) throws OXException {
@@ -699,7 +828,9 @@ public class MailInterfaceImpl implements MailInterface {
 			try {
 				if (imapFolder.getMode() == Folder.READ_ONLY) {
 					imapFolder.close(false);
+					mailInterfaceMonitor.changeNumActive(false);
 					imapFolder.open(Folder.READ_WRITE);
+					mailInterfaceMonitor.changeNumActive(true);
 				}
 			} catch (MessagingException e) {
 				/*
@@ -708,6 +839,7 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					if (!imapFolder.isOpen()) {
 						imapFolder.open(Folder.READ_WRITE);
+						mailInterfaceMonitor.changeNumActive(true);
 					}
 				} catch (ReadOnlyFolderException e1) {
 					LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e1.getMessage()).toString(), e1);
@@ -742,7 +874,7 @@ public class MailInterfaceImpl implements MailInterface {
 			markAsSeen = null;
 		}
 	}
-	
+
 	private final Rights getTmpRights() throws MessagingException {
 		if (tmpRights == null) {
 			return (tmpRights = tmpFolder.myRights());
@@ -851,13 +983,15 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getAllMessageCount(java.lang.String)
 	 */
-	public int[] getAllMessageCount(final String folder) throws OXException {
+	public int[] getAllMessageCount(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -883,9 +1017,10 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getMessageCount(java.lang.String)
 	 */
-	public int getMessageCount(final String folder) throws OXException {
+	public int getMessageCount(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getMessageCount();
 		} catch (MessagingException e) {
@@ -898,9 +1033,10 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getNewMessageCount(java.lang.String)
 	 */
-	public int getNewMessageCount(final String folder) throws OXException {
+	public int getNewMessageCount(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getNewMessageCount();
 		} catch (MessagingException e) {
@@ -913,9 +1049,10 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getUnreadMessageCount(java.lang.String)
 	 */
-	public int getUnreadMessageCount(final String folder) throws OXException {
+	public int getUnreadMessageCount(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getUnreadMessageCount();
 		} catch (MessagingException e) {
@@ -928,9 +1065,10 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getDeletedMessageCount(java.lang.String)
 	 */
-	public int getDeletedMessageCount(final String folder) throws OXException {
+	public int getDeletedMessageCount(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getDeletedMessageCount();
 		} catch (MessagingException e) {
@@ -964,10 +1102,11 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getNewMessages(java.lang.String,
 	 *      int, int)
 	 */
-	public SearchIterator getNewMessages(final String folder, final int sortCol, final int order, final int[] fields)
+	public SearchIterator getNewMessages(final String folderArg, final int sortCol, final int order, final int[] fields)
 			throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
@@ -1022,7 +1161,8 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					newMsgs = new MessageCacheObject[newMsgsSeqNum.length];
 					for (int i = 0; i < newMsgsSeqNum.length; i++) {
-						newMsgs[i] = new MessageCacheObject(imapCon.getImapFolder().getFullName(), newMsgsSeqNum[i]);
+						newMsgs[i] = new MessageCacheObject(imapCon.getImapFolder().getFullName(), imapCon
+								.getImapFolder().getSeparator(), newMsgsSeqNum[i]);
 					}
 					tryAgain = false;
 				} catch (ProtocolException e) {
@@ -1096,7 +1236,8 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getAllMessages(java.lang.String,
 	 *      int, int)
 	 */
-	public SearchIterator getAllMessages(final String folder, final int sortCol, final int order, final int[] fields) throws OXException {
+	public SearchIterator getAllMessages(final String folder, final int sortCol, final int order, final int[] fields)
+			throws OXException {
 		return getMessages(folder, null, sortCol, order, null, null, true, fields);
 	}
 
@@ -1106,15 +1247,17 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getMessages(java.lang.String,
 	 *      int[], int, int, int[], java.lang.String[], boolean)
 	 */
-	public SearchIterator getMessages(final String folder, final int[] fromToIndices, final int sortCol,
-			final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
-			final int[] fields) throws OXException {
+	public SearchIterator getMessages(final String folderArg, final int[] fromToIndices, final int sortCol,
+			final int order, final int[] searchCols, final String[] searchPatterns,
+			final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
 		try {
 			init();
-			setAndOpenFolder(folder == null ? INBOX : folder, Folder.READ_ONLY);
+			final String folder = prepareMailFolderParam(folderArg);
+			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1131,7 +1274,8 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
-				retval = searchMessages(imapCon.getImapFolder(), searchCols, searchPatterns, linkSearchTermsWithOR, fields, sortCol);
+				retval = searchMessages(imapCon.getImapFolder(), searchCols, searchPatterns, linkSearchTermsWithOR,
+						fields, sortCol);
 				if (retval == null || retval.length == 0) {
 					return SearchIteratorAdapter.createEmptyIterator();
 				}
@@ -1150,12 +1294,13 @@ public class MailInterfaceImpl implements MailInterface {
 							sortRange.append(',').append(retval[i].getMessageNumber());
 						}
 						final long start = System.currentTimeMillis();
-						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol, order == MailInterface.ORDER_DESC,
-								sortRange);
+						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
+								order == MailInterface.ORDER_DESC, sortRange);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					} else {
 						final long start = System.currentTimeMillis();
-						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol, order == MailInterface.ORDER_DESC);
+						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
+								order == MailInterface.ORDER_DESC);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 					if (retval == null || retval.length == 0) {
@@ -1165,9 +1310,11 @@ public class MailInterfaceImpl implements MailInterface {
 						final long start = System.currentTimeMillis();
 						try {
 							if (retval.length < IMAPProperties.getMessageFetchLimit()) {
-								retval = IMAPUtils.fetchMessages(imapCon.getImapFolder(), retval, IMAPUtils.getDefaultFetchProfile(), true);
+								retval = IMAPUtils.fetchMessages(imapCon.getImapFolder(), retval, IMAPUtils
+										.getDefaultFetchProfile(), true);
 							} else {
-								retval = IMAPUtils.fetchMessages(imapCon.getImapFolder(), retval, fields, sortCol, true);
+								retval = IMAPUtils
+										.fetchMessages(imapCon.getImapFolder(), retval, fields, sortCol, true);
 							}
 						} catch (ProtocolException e) {
 							throw new OXMailException(MailCode.PROTOCOL_ERROR, e, e.getMessage());
@@ -1196,7 +1343,8 @@ public class MailInterfaceImpl implements MailInterface {
 					final long start = System.currentTimeMillis();
 					try {
 						if (retval.length < IMAPProperties.getMessageFetchLimit()) {
-							retval = IMAPUtils.fetchMessages(imapCon.getImapFolder(), retval, IMAPUtils.getDefaultFetchProfile(), true);
+							retval = IMAPUtils.fetchMessages(imapCon.getImapFolder(), retval, IMAPUtils
+									.getDefaultFetchProfile(), true);
 						} else {
 							/*
 							 * No messages were fetched. At least, prefetch
@@ -1211,7 +1359,8 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 				final List<Message> msgList = Arrays.asList(retval);
-				Collections.sort(msgList, IMAPUtils.getComparator(sortCol, order == MailInterface.ORDER_DESC, sessionObj.getLocale()));
+				Collections.sort(msgList, IMAPUtils.getComparator(sortCol, order == MailInterface.ORDER_DESC,
+						sessionObj.getLocale()));
 				msgList.toArray(retval);
 			}
 			if (fromToIndices != null && fromToIndices.length == 2) {
@@ -1250,13 +1399,14 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#searchMessages(java.lang.String,
 	 *      int[], java.lang.String[], boolean)
 	 */
-	public SearchIterator searchMessages(final String folder, final int[] searchCols, final String[] searchPatterns,
+	public SearchIterator searchMessages(final String folderArg, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkWithOR, final int[] fields) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
-			return SearchIteratorAdapter.createArrayIterator(searchMessages(imapCon.getImapFolder(), searchCols, searchPatterns,
-					linkWithOR, fields, -1));
+			return SearchIteratorAdapter.createArrayIterator(searchMessages(imapCon.getImapFolder(), searchCols,
+					searchPatterns, linkWithOR, fields, -1));
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (IMAPException e) {
@@ -1267,7 +1417,8 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 
 	private final Message[] searchMessages(final Folder folder, final int[] searchCols, final String[] searchPatterns,
-			final boolean linkWithOR, final int[] fields, final int sortCol) throws MessagingException, OXException, IMAPException, IOException {
+			final boolean linkWithOR, final int[] fields, final int sortCol) throws MessagingException, OXException,
+			IMAPException, IOException {
 		boolean applicationSearch = true;
 		Message[] msgs = null;
 		if (!folder.exists()) {
@@ -1275,8 +1426,8 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		final IMAPFolder imapFolder = (IMAPFolder) folder;
 		if (!imapFolder.isOpen()) {
-			imapFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 			imapFolder.open(Folder.READ_ONLY);
+			mailInterfaceMonitor.changeNumActive(true);
 		}
 		if (IMAPProperties.isImapSearch()) {
 			try {
@@ -1358,7 +1509,7 @@ public class MailInterfaceImpl implements MailInterface {
 	public SearchIterator getAllThreadedMessages(final String folder, final int[] fields) throws OXException {
 		return getThreadedMessages(folder, null, null, null, true, fields);
 	}
-	
+
 	private static final String COMMAND_FAILED_THREAD = "IMAP server does not support THREAD=REFERENCES command";
 
 	/*
@@ -1367,18 +1518,21 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getThreadedMessages(java.lang.String,
 	 *      int[], int[], java.lang.String[], boolean)
 	 */
-	public SearchIterator getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols,
-			final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
+	public SearchIterator getThreadedMessages(final String folderArg, final int[] fromToIndices,
+			final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
+			final int[] fields) throws OXException {
 		try {
 			if (!IMAPProperties.getImapCapabilities().hasThreadReferences()) {
 				throw new OXMailException(MailCode.PROTOCOL_ERROR, null, COMMAND_FAILED_THREAD);
 			}
 			Message[] msgArr = null;
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1396,7 +1550,8 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
-				msgArr = searchMessages(imapCon.getImapFolder(), searchCols, searchPatterns, linkSearchTermsWithOR, fields, -1);
+				msgArr = searchMessages(imapCon.getImapFolder(), searchCols, searchPatterns, linkSearchTermsWithOR,
+						fields, -1);
 				if (msgArr == null || msgArr.length == 0) {
 					return SearchIteratorAdapter.createEmptyIterator();
 				}
@@ -1406,7 +1561,8 @@ public class MailInterfaceImpl implements MailInterface {
 			try {
 				if (search) {
 					/*
-					 * Define sequence of valid message numbers: e.g.: 2,34,35,43,51
+					 * Define sequence of valid message numbers: e.g.:
+					 * 2,34,35,43,51
 					 */
 					final StringBuilder sortRange = new StringBuilder();
 					sortRange.append(msgArr[0].getMessageNumber());
@@ -1424,16 +1580,19 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Parse THREAD response
 			 */
 			final List<TreeNode> threadList = IMAPUtils.parseThreadResponse(threadResp);
-			MessageCacheObject[] msgs = IMAPUtils.getMessagesFromThreadResponse(imapCon.getImapFolder().getFullName(), threadResp);
+			MessageCacheObject[] msgs = IMAPUtils.getMessagesFromThreadResponse(imapCon.getImapFolder().getFullName(),
+					imapCon.getImapFolder().getSeparator(), threadResp);
 			/*
 			 * Fetch messages
 			 */
 			start = System.currentTimeMillis();
 			try {
 				if (msgs.length < IMAPProperties.getMessageFetchLimit()) {
-					msgs = (MessageCacheObject[]) IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgs, IMAPUtils.getDefaultFetchProfile(), false);
+					msgs = (MessageCacheObject[]) IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgs, IMAPUtils
+							.getDefaultFetchProfile(), false);
 				} else {
-					msgs = (MessageCacheObject[]) IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgs, fields, -1, false);
+					msgs = (MessageCacheObject[]) IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgs, fields, -1,
+							false);
 				}
 			} catch (ProtocolException e) {
 				throw new OXMailException(MailCode.PROTOCOL_ERROR, e, e.getMessage());
@@ -1464,7 +1623,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
-	
+
 	private static final int createThreadSortMessages(final List<TreeNode> threadList, final int level,
 			final MessageCacheObject[] msgs, final int indexArg) {
 		int index = indexArg;
@@ -1485,8 +1644,9 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getMessageList(java.lang.String,
 	 *      long[])
 	 */
-	public Message[] getMessageList(final String folder, final long[] uids, final int[] fields) throws OXException {
+	public Message[] getMessageList(final String folderArg, final long[] uids, final int[] fields) throws OXException {
 		try {
+			final String folder = prepareMailFolderParam(folderArg);
 			if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folder)) {
 				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER);
 			}
@@ -1494,7 +1654,8 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1503,7 +1664,8 @@ public class MailInterfaceImpl implements MailInterface {
 			final long start = System.currentTimeMillis();
 			try {
 				if (uids.length < IMAPProperties.getMessageFetchLimit()) {
-					msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), uids, IMAPUtils.getDefaultFetchProfile(), false);
+					msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), uids, IMAPUtils.getDefaultFetchProfile(),
+							false);
 				} else {
 					msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), uids, fields, -1, false);
 				}
@@ -1524,9 +1686,10 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getMessage(java.lang.String,
 	 *      long, boolean)
 	 */
-	public Message getMessage(final String folder, final long msgUID) throws OXException {
+	public Message getMessage(final String folderArg, final long msgUID) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folder)) {
 				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER);
 			}
@@ -1534,8 +1697,8 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Not initialized
 				 */
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore.getFolder(folder)));
-				imapCon.getImapFolder().addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore
+						.getFolder(folder)));
 			} else if (!imapCon.getImapFolder().getFullName().equals(folder)) {
 				/*
 				 * Another folder than previous one
@@ -1548,15 +1711,17 @@ public class MailInterfaceImpl implements MailInterface {
 						keepSeen(imapCon.getImapFolder());
 					}
 					imapCon.getImapFolder().close(false);
+					mailInterfaceMonitor.changeNumActive(false);
 				}
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore.getFolder(folder)));
-				imapCon.getImapFolder().addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore
+						.getFolder(folder)));
 			}
 			/*
 			 * Open
 			 */
 			if (!imapCon.getImapFolder().isOpen()) {
 				imapCon.getImapFolder().open(Folder.READ_WRITE);
+				mailInterfaceMonitor.changeNumActive(true);
 			} else if (markAsSeen != null) {
 				/*
 				 * Folder is already open, mark stored message as seen
@@ -1570,26 +1735,34 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
-			/*
-			 * Check for drafts folder. This is done here, too, cause sometimes
-			 * copy operation does not properly add \Draft flag.
-			 */
-			final boolean isDraftFld = imapCon.getImapFolder().getFullName().equals(getDraftsFolder());
-			final boolean isDraft = msg.getFlags().contains(Flags.Flag.DRAFT);
-			if (isDraftFld && !isDraft) {
-				try {
-					msg.setFlags(FLAGS_DRAFT, true);
-				} catch (MessagingException e) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(e.getMessage(), e);
+			if (msg == null) {
+				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUID, imapCon.getImapFolder().toString());
+			}
+			if (imapCon.getImapFolder().getMode() == Folder.READ_WRITE) {
+				/*
+				 * Check for drafts folder. This is done here, cause sometimes
+				 * copy operation does not properly add \Draft flag.
+				 */
+				final boolean isDraftFld = imapCon.getImapFolder().getFullName().equals(
+						prepareMailFolderParam(getDraftsFolder()));
+				final boolean isDraft = msg.getFlags().contains(Flags.Flag.DRAFT);
+				if (isDraftFld && !isDraft) {
+					try {
+						msg.setFlags(FLAGS_DRAFT, true);
+					} catch (MessagingException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(OXMailException.getFormattedMessage(MailCode.FLAG_FAILED, IMAPUtils.FLAG_DRAFT,
+									msg.getMessageNumber(), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
+						}
 					}
-				}
-			} else if (!isDraftFld && isDraft) {
-				try {
-					msg.setFlags(FLAGS_DRAFT, false);
-				} catch (MessagingException e) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(e.getMessage(), e);
+				} else if (!isDraftFld && isDraft) {
+					try {
+						msg.setFlags(FLAGS_DRAFT, false);
+					} catch (MessagingException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(OXMailException.getFormattedMessage(MailCode.FLAG_FAILED, IMAPUtils.FLAG_DRAFT,
+									msg.getMessageNumber(), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
+						}
 					}
 				}
 			}
@@ -1606,31 +1779,34 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getMessageAttachment(java.lang.String,
 	 *      long, java.lang.String)
 	 */
-	public JSONMessageAttachmentObject getMessageAttachment(final String folder, final long msgUID,
+	public JSONMessageAttachmentObject getMessageAttachment(final String folderArg, final long msgUID,
 			final String attachmentPosition) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			if (imapCon.getImapFolder() == null) {
 				/*
 				 * Not initialized
 				 */
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore.getFolder(folder)));
-				imapCon.getImapFolder().addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore
+						.getFolder(folder)));
 			} else if (!imapCon.getImapFolder().getFullName().equals(folder)) {
 				/*
 				 * Another folder than previous one
 				 */
 				if (imapCon.getImapFolder().isOpen()) {
 					imapCon.getImapFolder().close(false);
+					mailInterfaceMonitor.changeNumActive(false);
 				}
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore.getFolder(folder)));
-				imapCon.getImapFolder().addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(INBOX) : imapStore
+						.getFolder(folder)));
 			}
 			/*
 			 * Open
 			 */
 			if (!imapCon.getImapFolder().isOpen()) {
 				imapCon.getImapFolder().open(Folder.READ_ONLY);
+				mailInterfaceMonitor.changeNumActive(true);
 			}
 			final Message msg;
 			final long start = System.currentTimeMillis();
@@ -1650,14 +1826,16 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	public CommonObject[] saveVersitAttachment(final String folder, final long msgUID, final String partIdentifier)
+	public CommonObject[] saveVersitAttachment(final String folderArg, final long msgUID, final String partIdentifier)
 			throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1821,14 +1999,16 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getMessageImage(java.lang.String,
 	 *      long, java.lang.String)
 	 */
-	public JSONMessageAttachmentObject getMessageImage(final String folder, final long msgUID, final String cid)
+	public JSONMessageAttachmentObject getMessageImage(final String folderArg, final long msgUID, final String cid)
 			throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1856,14 +2036,16 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getReplyMessage(java.lang.String,
 	 *      long, boolean)
 	 */
-	public JSONMessageObject getReplyMessageForDisplay(final String folder, final long replyMsgUID,
+	public JSONMessageObject getReplyMessageForDisplay(final String folderArg, final long replyMsgUID,
 			final boolean replyToAll) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -1887,18 +2069,21 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			final String subjectHeader = "Subject";
 			final String subjectPrefix = "Re: ";
-			final String rawSubject = originalMsg.getHeader(subjectHeader, null).replaceAll("(\r)?\n", "");
+			final String rawSubject = removeHdrLineBreak(originalMsg.getHeader(subjectHeader, null));
 			try {
-				final String decodedSubject = MessageUtils.decodeMultiEncodedHeader(rawSubject);
+				final String decodedSubject = decodeMultiEncodedHeader(rawSubject);
 				final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? rawSubject
 						: MimeUtility.encodeText(new StringBuilder().append(subjectPrefix).append(decodedSubject)
-								.toString(), UTF8, "Q");
+								.toString(), IMAPProperties.getDefaultMimeCharset(), "Q");
 				retval.setSubject(MimeUtility.decodeText(newSubject));
 			} catch (UnsupportedEncodingException e) {
 				/*
 				 * Handle raw value: setting prefix to raw subject value still
 				 * leaves a valid and correct encoded header
 				 */
+				originalMsg.setHeader(subjectHeader, new StringBuilder().append(subjectPrefix).append(rawSubject)
+						.toString());
+			} catch (IMAPException e) {
 				originalMsg.setHeader(subjectHeader, new StringBuilder().append(subjectPrefix).append(rawSubject)
 						.toString());
 			}
@@ -1974,7 +2159,7 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Set mail text of reply message
 			 */
-			final String msgUID = MessageUtils.getMessageUniqueIdentifier(imapCon.getImapFolder(), replyMsgUID);
+			final String msgUID = getMessageUniqueIdentifier(imapCon.getImapFolder(), replyMsgUID);
 			if (!usm.isIgnoreOriginalMailTextOnReply()) {
 				/*
 				 * Append quoted original mail text
@@ -1994,10 +2179,6 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Set message reference
 			 */
 			retval.setMsgref(msgUID);
-			/*
-			 * Add original message to set of expected replies.
-			 */
-			sessionObj.addExpectedReplyMsg(msgUID);
 			return retval;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -2005,8 +2186,9 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
-	
-	private static final InternetAddress[] removeUserAddresses(final InternetAddress[] internetAddrs, final String[] userAddrs) {
+
+	private static final InternetAddress[] removeUserAddresses(final InternetAddress[] internetAddrs,
+			final String[] userAddrs) {
 		if (userAddrs == null || userAddrs.length == 0) {
 			return internetAddrs;
 		}
@@ -2088,6 +2270,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			if (imapCon.getImapFolder().isOpen()) {
 				imapCon.getImapFolder().close(false);
+				mailInterfaceMonitor.changeNumActive(false);
 				imapCon.setMyRights(null);
 			}
 			if (isIdenticalFolder) {
@@ -2100,6 +2283,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Open identical folder in right mode
 				 */
 				imapCon.getImapFolder().open(mode);
+				mailInterfaceMonitor.changeNumActive(true);
 				return;
 			}
 		}
@@ -2115,10 +2299,10 @@ public class MailInterfaceImpl implements MailInterface {
 				&& IMAPUtils.isReadOnly(imapCon.getImapFolder())) {
 			throw new OXMailException(MailCode.READ_ONLY_FOLDER, imapCon.getImapFolder().getFullName());
 		}
-		imapCon.getImapFolder().addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 		imapCon.getImapFolder().open(mode);
+		mailInterfaceMonitor.changeNumActive(true);
 	}
-	
+
 	/**
 	 * Sets and opens (only if exists) the folder in a safe manner
 	 */
@@ -2149,6 +2333,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			if (tmpFolder.isOpen()) {
 				tmpFolder.close(false);
+				mailInterfaceMonitor.changeNumActive(false);
 				tmpRights = null;
 			}
 			if (isIdenticalFolder) {
@@ -2161,6 +2346,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Open identical folder in right mode
 				 */
 				tmpFolder.open(mode);
+				mailInterfaceMonitor.changeNumActive(true);
 				return;
 			}
 		}
@@ -2176,8 +2362,8 @@ public class MailInterfaceImpl implements MailInterface {
 				&& IMAPUtils.isReadOnly(tmpFolder)) {
 			throw new OXMailException(MailCode.READ_ONLY_FOLDER, tmpFolder.getFullName());
 		}
-		tmpFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 		tmpFolder.open(mode);
+		mailInterfaceMonitor.changeNumActive(true);
 	}
 
 	/*
@@ -2186,14 +2372,16 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getForwardMessageForDisplay(java.lang.String,
 	 *      long)
 	 */
-	public JSONMessageObject getForwardMessageForDisplay(final String folder, final long forwardMsgUID)
+	public JSONMessageObject getForwardMessageForDisplay(final String folderArg, final long forwardMsgUID)
 			throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -2215,11 +2403,11 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Set its headers. Start with subject.
 			 */
-			final String subject = originalMsg.getHeader("Subject", null).replaceAll("(\r)?\n", "");
+			final String subject = removeHdrLineBreak(originalMsg.getHeader("Subject", null));
 			if (subject != null) {
 				final String subjectPrefix = new StringHelper(sessionObj.getLocale())
 						.getString(MailStrings.FORWARD_SUBJECT_PREFIX);
-				retval.setSubject(MessageUtils.decodeMultiEncodedHeader(subject.regionMatches(true, 0, subjectPrefix,
+				retval.setSubject(decodeMultiEncodedHeader(subject.regionMatches(true, 0, subjectPrefix,
 						0, subjectPrefix.length()) ? subject : new StringBuilder().append(subjectPrefix)
 						.append(subject).toString()));
 			}
@@ -2233,7 +2421,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Settings indicate to forward message along as an attachment
 			 */
 			final MessageDumper msgDumper = new MessageDumper(sessionObj);
-			final String msgUID = MessageUtils.getMessageUniqueIdentifier(imapCon.getImapFolder(), forwardMsgUID);
+			final String msgUID = getMessageUniqueIdentifier(imapCon.getImapFolder(), forwardMsgUID);
 			if (usm.isForwardAsAttachment()) {
 				/*
 				 * Add dummy content
@@ -2273,10 +2461,6 @@ public class MailInterfaceImpl implements MailInterface {
 				appendAttachmentsFromNestedMessages(retval, originalMsgObj.getNestedMsgs());
 			}
 			retval.setMsgref(msgUID);
-			/*
-			 * Add original message to set of expected replies.
-			 */
-			sessionObj.addExpectedForwardMsg(msgUID);
 			return retval;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -2316,13 +2500,15 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#sendReceiptAck(java.lang.String,
 	 *      long)
 	 */
-	public void sendReceiptAck(final String folder, final long msgUID, final String fromAddr) throws OXException {
+	public void sendReceiptAck(final String folderArg, final long msgUID, final String fromAddr) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
-					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -2430,18 +2616,19 @@ public class MailInterfaceImpl implements MailInterface {
 		Transport transport = null;
 		try {
 			transport = imapCon.getSession().getTransport("smtp");
-			transport.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 			if (IMAPProperties.isSmtpAuth()) {
 				transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
 						.getImapLogin(), sessionObj.getIMAPProperties().getImapPassword());
 			} else {
 				transport.connect();
 			}
+			mailInterfaceMonitor.changeNumActive(true);
 			msg.saveChanges();
 			transport.sendMessage(msg, msg.getAllRecipients());
 		} finally {
 			if (transport != null) {
 				transport.close();
+				mailInterfaceMonitor.changeNumActive(false);
 			}
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		}
@@ -2450,8 +2637,14 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final Flags FLAGS_ANSWERED = new Flags(Flags.Flag.ANSWERED);
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
-	
+
 	private static final Flags FLAGS_DRAFT = new Flags(Flags.Flag.DRAFT);
+	
+	public static final int SENDTYPE_NEW = 0;
+	
+	public static final int SENDTYPE_REPLY = 1;
+	
+	public static final int SENDTYPE_FORWARD = 2;
 
 	/*
 	 * (non-Javadoc)
@@ -2459,14 +2652,13 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#sendMessage(com.openexchange.groupware.container.mail.JSONMessageObject,
 	 *      com.openexchange.groupware.upload.UploadEvent)
 	 */
-	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent) throws OXException {
+	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent, final int sendType) throws OXException {
 		try {
 			init();
 			final MimeMessage newMsg = new MimeMessage(imapCon.getSession());
 			IMAPFolder originalMsgFolder = null;
 			MimeMessage originalMsg = null;
 			MessageFiller msgFiller = null;
-			boolean isReply = false;
 			try {
 				if (msgObj.getMsgref() != null) {
 					/*
@@ -2481,8 +2673,6 @@ public class MailInterfaceImpl implements MailInterface {
 					if (!originalMsgFolder.exists()) {
 						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, originalMsgFolder.getFullName());
 					}
-					originalMsgFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(
-							mailInterfaceMonitor));
 					boolean isReadWrite = true;
 					try {
 						originalMsgFolder.open(Folder.READ_WRITE);
@@ -2490,6 +2680,7 @@ public class MailInterfaceImpl implements MailInterface {
 						originalMsgFolder.open(Folder.READ_ONLY);
 						isReadWrite = false;
 					}
+					mailInterfaceMonitor.changeNumActive(true);
 					originalMsg = (MimeMessage) originalMsgFolder.getMessageByUID(mailId.getMsgUID());
 					if (originalMsg.isSet(Flags.Flag.DRAFT) && msgObj.isDraft()) {
 						if (!isReadWrite) {
@@ -2501,11 +2692,12 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						originalMsg.setFlags(FLAGS_DELETED, true);
 						originalMsgFolder.close(true);
+						mailInterfaceMonitor.changeNumActive(false);
 						/*
 						 * Reset message reference cause not needed anymore
 						 */
 						msgObj.setMsgref(null);
-					} else if ((isReply = sessionObj.isExpectingReplyMsg(msgObj.getMsgref()))) {
+					} else if (sendType == SENDTYPE_REPLY) {
 						/*
 						 * A reply! Appropiately set message headers
 						 */
@@ -2573,16 +2765,17 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Append message to folder "DRAFT"
 					 */
 					final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-					final IMAPFolder draftFolder = (IMAPFolder) imapStore.getFolder(getDraftsFolder());
+					final IMAPFolder draftFolder = (IMAPFolder) imapStore
+							.getFolder(prepareMailFolderParam(getDraftsFolder()));
 					/*
 					 * Fill message
 					 */
 					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
-					msgFiller.fillMessage(msgObj, newMsg, uploadEvent);
+					msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
-					draftFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 					if (!draftFolder.isOpen()) {
 						draftFolder.open(Folder.READ_WRITE);
+						mailInterfaceMonitor.changeNumActive(true);
 					}
 					newMsg.setFlag(Flags.Flag.DRAFT, true);
 					long uidNext = draftFolder.getUIDNext();
@@ -2599,18 +2792,20 @@ public class MailInterfaceImpl implements MailInterface {
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);
+						mailInterfaceMonitor.changeNumActive(false);
 					}
 					return new StringBuilder(draftFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();
 				} else {
 					final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-					final IMAPFolder sentFolder = (IMAPFolder) imapStore.getFolder(getSentFolder());
+					final IMAPFolder sentFolder = (IMAPFolder) imapStore
+							.getFolder(prepareMailFolderParam(getSentFolder()));
 					/*
 					 * Fill message
 					 */
 					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 							.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
-					msgFiller.fillMessage(msgObj, newMsg, uploadEvent);
+					msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
 					/*
 					 * Check recipients
 					 */
@@ -2648,8 +2843,6 @@ public class MailInterfaceImpl implements MailInterface {
 						Transport transport = null;
 						try {
 							transport = imapCon.getSession().getTransport("smtp");
-							transport.addConnectionListener(new MailInterfaceMonitorConnectionListener(
-									mailInterfaceMonitor));
 							if (IMAPProperties.isSmtpAuth()) {
 								transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
 										.getIMAPProperties().getImapLogin(), sessionObj.getIMAPProperties()
@@ -2657,11 +2850,13 @@ public class MailInterfaceImpl implements MailInterface {
 							} else {
 								transport.connect();
 							}
+							mailInterfaceMonitor.changeNumActive(true);
 							newMsg.saveChanges();
 							transport.sendMessage(newMsg, allRecipients);
 						} finally {
 							if (transport != null) {
 								transport.close();
+								mailInterfaceMonitor.changeNumActive(false);
 							}
 							mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						}
@@ -2681,9 +2876,9 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Append message to folder "SENT"
 					 */
 					checkAndCreateFolder(sentFolder, inboxFolder);
-					sentFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
 					if (!sentFolder.isOpen()) {
 						sentFolder.open(Folder.READ_WRITE);
+						mailInterfaceMonitor.changeNumActive(true);
 					}
 					long uidNext = sentFolder.getUIDNext();
 					if (uidNext == -1) {
@@ -2710,6 +2905,7 @@ public class MailInterfaceImpl implements MailInterface {
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						sentFolder.close(false);
+						mailInterfaceMonitor.changeNumActive(false);
 					}
 					return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();
@@ -2717,12 +2913,9 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				if (originalMsgFolder != null && originalMsgFolder.isOpen()) {
 					originalMsgFolder.close(false);
+					mailInterfaceMonitor.changeNumActive(false);
 					originalMsgFolder = null;
 				}
-				if (isReply) {
-					sessionObj.removeExpectedReplyMsg(msgObj.getMsgref());
-				}
-				sessionObj.removeExpectedForwardMsg(msgObj.getMsgref());
 				if (msgFiller != null) {
 					msgFiller.close();
 					msgFiller = null;
@@ -2784,7 +2977,8 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.DELETE)) {
-					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -2806,7 +3000,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Append message to folder "TRASH"
 				 */
 				final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-				final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
+				final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(prepareMailFolderParam(getTrashFolder()));
 				checkAndCreateFolder(trashFolder, inboxFolder);
 				start = System.currentTimeMillis();
 				try {
@@ -2829,9 +3023,7 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Mark messages as \DELETED
 			 */
-			for (int i = 0; i < msgs.length; i++) {
-				msgs[i].setFlags(FLAGS_DELETED, true);
-			}
+			IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
 			imapCon.setExpunge(true);
 			return true;
 		} catch (MessagingException e) {
@@ -2845,22 +3037,25 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#copyMessage(java.lang.String,
 	 *      java.lang.String, long, boolean)
 	 */
-	public long[] copyMessage(final String sourceFolder, final String destFolder, final long[] msgUIDs, final boolean move)
-			throws OXException {
+	public long[] copyMessage(final String sourceFolderArg, final String destFolderArg, final long[] msgUIDs,
+			final boolean move) throws OXException {
 		try {
-			if (sourceFolder == null || sourceFolder.length() == 0) {
+			if (sourceFolderArg == null || sourceFolderArg.length() == 0) {
 				throw new OXMailException(MailCode.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "source");
-			} else if (destFolder == null || destFolder.length() == 0) {
+			} else if (destFolderArg == null || destFolderArg.length() == 0) {
 				throw new OXMailException(MailCode.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "target");
 			}
 			init();
+			final String sourceFolder = prepareMailFolderParam(sourceFolderArg);
+			final String destFolder = prepareMailFolderParam(destFolderArg);
 			/*
 			 * Open and check user rights on source folder
 			 */
 			setAndOpenFolder(sourceFolder, Folder.READ_WRITE);
 			try {
 				if (move && IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.DELETE)) {
-					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -2871,7 +3066,8 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenTmpFolder(destFolder, Folder.READ_ONLY);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !getTmpRights().contains(Rights.Right.INSERT)) {
-					throw new OXMailException(MailCode.NO_INSERT_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_INSERT_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -2954,7 +3150,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	public boolean updateMessageColorLabel(final String folder, final long msgUID, final int newColorLabel)
+	public boolean updateMessageColorLabel(final String folderArg, final long msgUID, final int newColorLabel)
 			throws OXException {
 		if (!IMAPProperties.isUserFlagsEnabled()) {
 			/*
@@ -2967,10 +3163,12 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -3018,14 +3216,21 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#updateMessageFlags(java.lang.String,
 	 *      long, int, boolean)
 	 */
-	public boolean updateMessageFlags(final String folder, final long msgUID, final int flagBitsArg,
+	public boolean updateMessageFlags(final String folderArg, final long msgUID, final int flagBitsArg,
 			final boolean flagsVal) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_WRITE);
+			/*
+			 * r - read (SELECT the mailbox, perform CHECK, FETCH, PARTIAL, SEARCH, COPY from mailbox)
+			 * s - keep seen/unseen information across sessions (STORE SEEN flag)
+			 * w - write (STORE flags other than SEEN and DELETED)
+			 */
 			try {
-				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.READ)) {
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
@@ -3053,31 +3258,36 @@ public class MailInterfaceImpl implements MailInterface {
 			final Flags affectedFlags = new Flags();
 			if (((flagBits & JSONMessageObject.BIT_ANSWERED) > 0)) {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.ANSWERED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_DELETED) > 0)) {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.DELETE)) {
-					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DELETED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_DRAFT) > 0)) {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DRAFT);
 			}
 			if (((flagBits & JSONMessageObject.BIT_FLAGGED) > 0)) {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.FLAGGED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_SEEN) > 0)) {
 				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.KEEP_SEEN)) {
-					throw new OXMailException(MailCode.NO_KEEP_SEEN_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.NO_KEEP_SEEN_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.SEEN);
 			}
@@ -3098,9 +3308,9 @@ public class MailInterfaceImpl implements MailInterface {
 	public SearchIterator getRootFolders() throws OXException {
 		try {
 			init();
-			final List<Folder> list = new ArrayList<Folder>(1);
+			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(1);
 			final IMAPFolder defaultFolder = (IMAPFolder) imapStore.getDefaultFolder();
-			list.add(defaultFolder);
+			list.add(new MailFolderObject(defaultFolder));
 			return new SearchIteratorAdapter(list.iterator(), 1);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -3112,10 +3322,11 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getChildFolders(java.lang.String)
 	 */
-	public SearchIterator getChildFolders(final String parentFolder) throws OXException {
+	public SearchIterator getChildFolders(final String parentFolderArg) throws OXException {
 		try {
-			IMAPFolder parentFldr = null;
 			init();
+			final String parentFolder = prepareMailFolderParam(parentFolderArg);
+			final IMAPFolder parentFldr;
 			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
 				parentFldr = (IMAPFolder) imapStore.getDefaultFolder();
 				if (!parentFldr.exists()) {
@@ -3132,7 +3343,11 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
-			return new SearchIteratorAdapter(Arrays.asList(childFolders).iterator(), childFolders.length);
+			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(childFolders.length);
+			for (int i = 0; i < childFolders.length; i++) {
+				list.add(new MailFolderObject((IMAPFolder) childFolders[i]));
+			}
+			return new SearchIteratorAdapter(list.iterator(), childFolders.length);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -3144,11 +3359,12 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getFolder(java.lang.String,
 	 *      boolean)
 	 */
-	public Folder getFolder(final String folder, final boolean checkFolder) throws OXException {
+	public MailFolderObject getFolder(final String folderArg, final boolean checkFolder) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
-				return imapStore.getDefaultFolder();
+				return new MailFolderObject((IMAPFolder) imapStore.getDefaultFolder());
 			}
 			final IMAPFolder retval = (IMAPFolder) imapStore.getFolder(folder);
 			if (checkFolder) {
@@ -3164,7 +3380,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 			}
-			return retval;
+			return new MailFolderObject(retval);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -3175,18 +3391,30 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getPathToDefaultFolder(java.lang.String)
 	 */
-	public SearchIterator getPathToDefaultFolder(final String folder) throws OXException {
+	public SearchIterator getPathToDefaultFolder(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
 				return SearchIteratorAdapter.createEmptyIterator();
 			}
 			final String defaultFolder = imapStore.getDefaultFolder().getFullName();
-			Folder f = getFolder(folder, true);
-			final List<Folder> retval = new ArrayList<Folder>();
+			IMAPFolder f = (IMAPFolder) imapStore.getFolder(folder);
+			if (!f.exists()) {
+				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
+			} else if (IMAPProperties.isSupportsACLs()) {
+				try {
+					if (!f.myRights().contains(Rights.Right.READ)) {
+						throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), f.getFullName());
+					}
+				} catch (MessagingException e) {
+					throw new OXMailException(MailCode.NO_ACCESS, getUserName(), f.getFullName());
+				}
+			}
+			final List<MailFolderObject> retval = new ArrayList<MailFolderObject>();
 			while (!f.getFullName().equals(defaultFolder)) {
-				retval.add(f);
-				f = f.getParent();
+				retval.add(new MailFolderObject(f));
+				f = (IMAPFolder) f.getParent();
 			}
 			return new SearchIteratorAdapter(retval.iterator(), retval.size());
 		} catch (MessagingException e) {
@@ -3225,6 +3453,7 @@ public class MailInterfaceImpl implements MailInterface {
 	public String saveFolder(final MailFolderObject folderObj) throws OXException {
 		String retval = null;
 		try {
+			init();
 			if (folderObj.exists()) {
 				/*
 				 * Update
@@ -3240,7 +3469,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Is move operation?
 				 */
 				final String oldParent = updateMe.getParent().getFullName();
-				final String newParent = folderObj.getParentFullName();
+				final String newParent = prepareMailFolderParam(folderObj.getParentFullName());
 				final boolean move = (newParent != null && !newParent.equalsIgnoreCase(oldParent));
 				/*
 				 * Is rename operation?
@@ -3249,18 +3478,26 @@ public class MailInterfaceImpl implements MailInterface {
 				final String newName = folderObj.getName();
 				final boolean rename = (!move && newName != null && !newName.equalsIgnoreCase(oldName));
 				if (move) {
-					final Folder destFolder = MailFolderObject.DEFAULT_IMAP_FOLDER.equals(newParent) ? imapStore
-							.getDefaultFolder() : imapStore.getFolder(newParent);
+					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(newParent) ? imapStore
+							.getDefaultFolder()
+							: imapStore.getFolder(newParent)));
 					if (!destFolder.exists()) {
 						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, newParent);
 					}
-					try {
-						if (IMAPProperties.isSupportsACLs()
-								&& !((IMAPFolder) destFolder).myRights().contains(Rights.Right.CREATE)) {
-							throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), newParent);
+					if (destFolder instanceof DefaultFolder) {
+						if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
+							throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS,
+									MailCode.NO_DEFAULT_FOLDER_UPDATE);
 						}
-					} catch (MessagingException e) {
-						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), newParent);
+					} else {
+						try {
+							if (IMAPProperties.isSupportsACLs()
+									&& !((IMAPFolder) destFolder).myRights().contains(Rights.Right.CREATE)) {
+								throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), newParent);
+							}
+						} catch (MessagingException e) {
+							throw new OXMailException(MailCode.NO_ACCESS, getUserName(), newParent);
+						}
 					}
 					updateMe = moveFolder(updateMe, destFolder, newName);
 				}
@@ -3280,6 +3517,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					if (updateMe.isOpen()) {
 						updateMe.close(false);
+						mailInterfaceMonitor.changeNumActive(false);
 					}
 					final String parentFullName = folderObj.getImapFolder().getParent().getFullName();
 					StringBuilder tmp = new StringBuilder();
@@ -3354,15 +3592,30 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Insert
 				 */
-				final IMAPFolder parent = (IMAPFolder) getFolder(folderObj.getParentFullName(), true);
-				if (!(parent instanceof DefaultFolder)) {
+				final String parentStr = prepareMailFolderParam(folderObj.getParentFullName());
+				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER.equals(parentStr) ? (IMAPFolder) imapStore
+						.getDefaultFolder()
+						: (IMAPFolder) imapStore.getFolder(parentStr);
+				if (!parent.exists()) {
+					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, parentStr);
+				} else if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
+					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS, parentStr);
+				} else if (parent instanceof DefaultFolder) {
+					if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
+						throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS,
+								MailCode.NO_DEFAULT_FOLDER_UPDATE);
+					}
+				} else if (IMAPProperties.isSupportsACLs()) {
 					try {
-						if (IMAPProperties.isSupportsACLs() && !parent.myRights().contains(Rights.Right.CREATE)) {
-							throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), parent.getFullName());
+						if (!parent.myRights().contains(Rights.Right.CREATE)) {
+							throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), parentStr);
 						}
 					} catch (MessagingException e) {
-						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), parent.getFullName());
+						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), parentStr);
 					}
+				}
+				if (folderObj.getName().indexOf(parent.getSeparator()) != -1) {
+					throw new OXMailException(MailCode.INVALID_FOLDER_NAME, parent.getSeparator());
 				}
 				final IMAPFolder createMe = (IMAPFolder) getFolder(parent, folderObj.getName());
 				if (createMe.exists()) {
@@ -3395,7 +3648,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	private final IMAPFolder moveFolder(final Folder toMove, final Folder destFolder, final String folderName)
+	private final IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName)
 			throws MessagingException, OXException {
 		String name = folderName;
 		if (name == null) {
@@ -3404,17 +3657,20 @@ public class MailInterfaceImpl implements MailInterface {
 		return moveFolder(toMove, destFolder, name, true);
 	}
 
-	private final IMAPFolder moveFolder(final Folder toMove, final Folder destFolder, final String folderName,
+	private final IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName,
 			final boolean checkForDuplicate) throws MessagingException, OXException {
-		try {
-			if (IMAPProperties.isSupportsACLs() && !((IMAPFolder) toMove).myRights().contains(Rights.Right.READ)) {
-				throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), toMove.getFullName());
+		if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
+			throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
+		} else if (IMAPProperties.isSupportsACLs()) {
+			try {
+				if (!toMove.myRights().contains(Rights.Right.READ)) {
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), toMove.getFullName());
+				} else if (!toMove.myRights().contains(Rights.Right.CREATE)) {
+					throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), toMove.getFullName());
+				}
+			} catch (MessagingException e) {
+				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), toMove.getFullName());
 			}
-			if (IMAPProperties.isSupportsACLs() && !((IMAPFolder) toMove).myRights().contains(Rights.Right.CREATE)) {
-				throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), toMove.getFullName());
-			}
-		} catch (MessagingException e) {
-			throw new OXMailException(MailCode.NO_ACCESS, getUserName(), toMove.getFullName());
 		}
 		/*
 		 * Move by creating a new folder, copying all messages and deleting old
@@ -3430,37 +3686,45 @@ public class MailInterfaceImpl implements MailInterface {
 		if (checkForDuplicate && newFolder.exists()) {
 			throw new OXMailException(MailCode.DUPLICATE_FOLDER, folderName);
 		}
-		newFolder.create(Folder.HOLDS_FOLDERS | Folder.HOLDS_MESSAGES);
-		newFolder.addConnectionListener(new MailInterfaceMonitorConnectionListener(mailInterfaceMonitor));
-		try {
-			newFolder.open(Folder.READ_WRITE);
-		} catch (ReadOnlyFolderException e) {
-			throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), newFolder.getFullName());
+		if (!newFolder.create(Folder.HOLDS_FOLDERS | Folder.HOLDS_MESSAGES)) {
+			throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, newFolder.getFullName());
 		}
-		if (!toMove.isOpen()) {
-			toMove.open(Folder.READ_ONLY);
-		}
-		long start = System.currentTimeMillis();
 		try {
-			toMove.copyMessages(toMove.getMessages(), newFolder);
+			try {
+				newFolder.open(Folder.READ_WRITE);
+				mailInterfaceMonitor.changeNumActive(true);
+			} catch (ReadOnlyFolderException e) {
+				throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), newFolder.getFullName());
+			}
+			if (!toMove.isOpen()) {
+				toMove.open(Folder.READ_ONLY);
+				mailInterfaceMonitor.changeNumActive(true);
+			}
+			final long start = System.currentTimeMillis();
+			try {
+				toMove.copyMessages(toMove.getMessages(), newFolder);
+			} finally {
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
 		} finally {
-			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			newFolder.close(false);
+			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 		}
-		newFolder.close(false);
 		/*
 		 * Iterate subfolders
 		 */
 		final Folder[] subFolders = toMove.list();
 		for (int i = 0; i < subFolders.length; i++) {
-			moveFolder(subFolders[i], newFolder, subFolders[i].getName(), false);
+			moveFolder((IMAPFolder) subFolders[i], newFolder, subFolders[i].getName(), false);
 		}
 		/*
 		 * Delete old folder
 		 */
 		if (toMove.isOpen()) {
 			toMove.close(false);
+			mailInterfaceMonitor.changeNumActive(false);
 		}
-		start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		try {
 			toMove.setSubscribed(false);
 		} finally {
@@ -3491,6 +3755,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		if (deleteMe.isOpen()) {
 			deleteMe.close(false);
+			mailInterfaceMonitor.changeNumActive(false);
 		}
 		final long start = System.currentTimeMillis();
 		try {
@@ -3506,16 +3771,16 @@ public class MailInterfaceImpl implements MailInterface {
 	private boolean isDefaultFolder(final String folderFullName) throws OXException {
 		boolean isDefaultFolder = false;
 		isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
-		isDefaultFolder |= (folderFullName.equalsIgnoreCase(getDraftsFolder()));
-		isDefaultFolder |= (folderFullName.equalsIgnoreCase(getSentFolder()));
-		isDefaultFolder |= (folderFullName.equalsIgnoreCase(getSpamFolder()));
-		isDefaultFolder |= (folderFullName.equalsIgnoreCase(getTrashFolder()));
+		for (int index = 0; index < 4 && !isDefaultFolder; index++) {
+			isDefaultFolder |= (folderFullName.equalsIgnoreCase(prepareMailFolderParam(getStdFolder(index))));
+		}
 		return isDefaultFolder;
 	}
 
-	public String deleteFolder(final String folder) throws OXException {
+	public String deleteFolder(final String folderArg) throws OXException {
 		try {
 			init();
+			final String folder = prepareMailFolderParam(folderArg);
 			final IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(folder);
 			final String retval = deleteMe.getFullName();
 			deleteFolder(deleteMe);
@@ -3525,13 +3790,17 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
+	public String getInboxFolder() throws OXException {
+		return getStdFolder(INDEX_INBOX);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getDraftsFolder()
 	 */
 	public String getDraftsFolder() throws OXException {
-	    return getStdFolder(INDEX_DRAFTS);
+		return getStdFolder(INDEX_DRAFTS);
 	}
 
 	/*
@@ -3540,7 +3809,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getSentFolder()
 	 */
 	public String getSentFolder() throws OXException {
-	    return getStdFolder(INDEX_SENT);
+		return getStdFolder(INDEX_SENT);
 	}
 
 	/*
@@ -3549,7 +3818,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getSpamFolder()
 	 */
 	public String getSpamFolder() throws OXException {
-	    return getStdFolder(INDEX_SPAM);
+		return getStdFolder(INDEX_SPAM);
 	}
 
 	/*
@@ -3558,23 +3827,27 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getTrashFolder()
 	 */
 	public String getTrashFolder() throws OXException {
-	    return getStdFolder(INDEX_TRASH);
+		return getStdFolder(INDEX_TRASH);
 	}
 
 	private String getStdFolder(final int index) throws OXException {
-        try {
-            init();
-            return usm.getStandardFolder(index);
-        } catch (MessagingException e) {
-            throw handleMessagingException(e);
-        }
+		try {
+			init();
+			if (INDEX_INBOX == index) {
+				final Folder inbox = imapStore.getFolder("INBOX");
+				return MailFolderObject.prepareFullname(inbox.getFullName(), inbox.getSeparator());
+			}
+			return usm.getStandardFolder(index);
+		} catch (MessagingException e) {
+			throw handleMessagingException(e);
+		}
 	}
 
-	private String getUserName() {
+	private final String getUserName() {
 		if (sessionObj == null) {
 			return "";
 		}
-		return new StringBuilder().append(sessionObj.getUserlogin()).append(" (").append(
+		return new StringBuilder().append(sessionObj.getUserObject().getDisplayName()).append(" (").append(
 				sessionObj.getUserObject().getId()).append(')').toString();
 	}
 
@@ -3627,8 +3900,8 @@ public class MailInterfaceImpl implements MailInterface {
 					if (IMAPProperties.getImapConnectionTimeout() > 0) {
 						/*
 						 * Most modern IP stack implementations sense connection
-						 * idleness, and abort the connection attempt, resulting in
-						 * a java.net.ConnectionException
+						 * idleness, and abort the connection attempt, resulting
+						 * in a java.net.ConnectionException
 						 */
 						mailInterfaceMonitor.changeNumTimeoutConnections(true);
 						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? "" : imapProps
@@ -3678,6 +3951,17 @@ public class MailInterfaceImpl implements MailInterface {
 
 	public DefaultIMAPConnection getImapConnection() {
 		return imapCon;
+	}
+
+	private final static String prepareMailFolderParam(final String folderStringArg) {
+		if (folderStringArg == null) {
+			return null;
+		} else if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folderStringArg)) {
+			return folderStringArg;
+		} else if (folderStringArg.startsWith(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+			return folderStringArg.substring(8);
+		}
+		return folderStringArg;
 	}
 
 }

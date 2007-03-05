@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.groupware.imap.IMAPUtils.hasSubfolders;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -57,6 +58,7 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
@@ -99,10 +101,9 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderAction;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.sun.mail.imap.IMAPFolder;
 
 /**
  * Folder
@@ -312,6 +313,18 @@ public class Folder extends SessionServlet {
 					 * Ignore 'system' and 'ox folder' folder
 					 */
 					continue NextRootFolder;
+				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+					/*
+					 * Reset infostore's permission to read-only, cause virtual
+					 * folder 'UserStore' is going to be used instead
+					 */
+					final OCLPermission perm = new OCLPermission();
+					perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+					perm.setFolderAdmin(false);
+					perm.setGroupPermission(true);
+					perm.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
+							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+					rootFolder.setPermissionsAsArray(new OCLPermission[] { perm });
 				}
 				lastModified = rootFolder.getLastModified() == null ? lastModified : Math.max(lastModified, rootFolder
 						.getLastModified().getTime());
@@ -513,8 +526,10 @@ public class Folder extends SessionServlet {
 					}
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
-						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, sessionObj.getUserObject().getId(),
-								FolderObject.INFOSTORE, sessionObj.getContext().getContextId());
+						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, (String) null,
+								getUserName(sessionObj),
+								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), sessionObj.getContext()
+										.getContextId());
 					}
 					/*
 					 * Append virtual folder 'Userstore'
@@ -526,10 +541,16 @@ public class Folder extends SessionServlet {
 						lastModified = FolderObject.loadFolderObjectFromDB(parentId, sessionObj.getContext())
 								.getLastModified().getTime();
 					}
+					final OCLPermission virtualPerm = new OCLPermission();
+					virtualPerm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+					virtualPerm.setFolderAdmin(false);
+					virtualPerm.setGroupPermission(true);
+					virtualPerm.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
+							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 					final FolderObject virtualUserstoreFolder = FolderObject.createVirtualFolderObject(
 							FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(
 									FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, sessionObj.getLocale()),
-							FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE);
+							FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE, virtualPerm);
 					folderWriter.writeOXFolderFieldsAsArray(columns, virtualUserstoreFolder);
 					/*
 					 * Append virtual root folder for non-tree visible infostore
@@ -606,7 +627,7 @@ public class Folder extends SessionServlet {
 								it = mailInterface.getRootFolders();
 								final int size = it.size();
 								for (int a = 0; a < size; a++) {
-									final javax.mail.Folder rootFolder = (javax.mail.Folder) it.next();
+									final MailFolderObject rootFolder = (MailFolderObject) it.next();
 									folderWriter.writeIMAPFolderAsArray(columns, rootFolder, STRING_EMAIL, 1,
 											MailFolderObject.DEFAULT_IMAP_FOLDER, FolderObject.SYSTEM_MODULE);
 								}
@@ -775,16 +796,15 @@ public class Folder extends SessionServlet {
 					 * E-Mail folder
 					 */
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
-					it = mailInterface.getChildFolders(prepareMailFolderParam(parentIdentifier));
+					it = mailInterface.getChildFolders(parentIdentifier);
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
-						final javax.mail.Folder f = (javax.mail.Folder) it.next();
+						final MailFolderObject f = (MailFolderObject) it.next();
 						if (f.getName().equals("INBOX")) {
 							jsonWriter.array();
 							try {
 								for (int j = 0; j < writers.length; j++) {
-									writers[j].writeField(jsonWriter, f, false, "Inbox",
-											hasSubfolders((IMAPFolder) f) ? 1 : 0);
+									writers[j].writeField(jsonWriter, f, false, "Inbox", -1);
 								}
 							} finally {
 								jsonWriter.endArray();
@@ -882,6 +902,7 @@ public class Folder extends SessionServlet {
 					.getUserConfiguration(), sessionObj.getContext());
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
+				folderId = FolderObject.mapVirtualID2SystemID(folderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				/*
 				 * Pre-Select field writers
@@ -915,10 +936,10 @@ public class Folder extends SessionServlet {
 					 * Pre-Select field writers
 					 */
 					final IMAPFolderFieldWriter[] writers = folderWriter.getIMAPFolderFieldWriter(columns);
-					it = mailInterface.getPathToDefaultFolder(prepareMailFolderParam(folderIdentifier));
+					it = mailInterface.getPathToDefaultFolder(folderIdentifier);
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
-						final javax.mail.Folder fld = (javax.mail.Folder) it.next();
+						final MailFolderObject fld = (MailFolderObject) it.next();
 						jsonWriter.array();
 						try {
 							for (IMAPFolderFieldWriter ffw : writers) {
@@ -933,7 +954,7 @@ public class Folder extends SessionServlet {
 					/*
 					 * Write virtual folder "E-Mail"
 					 */
-					final javax.mail.Folder defaultFolder = mailInterface.getFolder(
+					final MailFolderObject defaultFolder = mailInterface.getFolder(
 							MailFolderObject.DEFAULT_IMAP_FOLDER, true);
 					if (defaultFolder != null) {
 						folderWriter.writeIMAPFolderAsArray(columns, defaultFolder, STRING_EMAIL, 1,
@@ -1042,12 +1063,42 @@ public class Folder extends SessionServlet {
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 			final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
 			/*
-			 * Get updated OX folders
+			 * Get all updated OX folders
 			 */
-			Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getModifiedUserFolders(timestamp))
+			Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp))
 					.asQueue();
+			final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
+			final Queue<FolderObject> deletedQueue = new LinkedList<FolderObject>();
+			boolean updateSystemSharedFolder = false;
 			int size = q.size();
 			Iterator<FolderObject> iter = q.iterator();
+			for (int i = 0; i < size; i++) {
+				final FolderObject fo = iter.next();
+				if (fo.isVisible(sessionObj.getUserObject().getId(), sessionObj.getUserConfiguration())) {
+					if (fo.isShared(sessionObj.getUserObject().getId())) {
+						updateSystemSharedFolder = true;
+					}
+					updatedQueue.add(fo);
+				} else {
+					deletedQueue.add(fo);
+				}
+			}
+			if (updateSystemSharedFolder) {
+				final FolderObject sharedFld;
+				if (FolderCacheManager.isEnabled()) {
+					sharedFld = FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID,
+							true, sessionObj.getContext(), null);
+				} else {
+					sharedFld = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_SHARED_FOLDER_ID, sessionObj
+							.getContext());
+				}
+				updatedQueue.add(sharedFld);
+			}
+			/*
+			 * Output updated folders
+			 */
+			size = updatedQueue.size();
+			iter = updatedQueue.iterator();
 			for (int i = 0; i < size; i++) {
 				final FolderObject fo = iter.next();
 				lastModified = Math.max(fo.getLastModified().getTime(), lastModified);
@@ -1065,6 +1116,10 @@ public class Folder extends SessionServlet {
 			 */
 			final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
 			q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
+			/*
+			 * Add deleted OX folders from above
+			 */
+			q.addAll(deletedQueue);
 			size = q.size();
 			iter = q.iterator();
 			for (int i = 0; i < size; i++) {
@@ -1088,7 +1143,7 @@ public class Folder extends SessionServlet {
 					it = mailInterface.getRootFolders();
 					final int size2 = it.size();
 					for (int a = 0; a < size2; a++) {
-						final javax.mail.Folder rootFolder = (javax.mail.Folder) it.next();
+						final MailFolderObject rootFolder = (MailFolderObject) it.next();
 						folderWriter.writeIMAPFolderAsArray(columns, rootFolder, STRING_EMAIL, 1,
 								MailFolderObject.DEFAULT_IMAP_FOLDER, FolderObject.SYSTEM_MODULE);
 					}
@@ -1168,6 +1223,7 @@ public class Folder extends SessionServlet {
 					.getUserConfiguration(), sessionObj.getContext());
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
+				folderId = FolderObject.mapVirtualID2SystemID(folderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				final FolderObject fo = foldersqlinterface.getFolderById(folderId);
 				lastModifiedDate = fo.getLastModified();
@@ -1177,7 +1233,7 @@ public class Folder extends SessionServlet {
 			} else {
 				final MailInterface mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				try {
-					final javax.mail.Folder f = mailInterface.getFolder(prepareMailFolderParam(folderIdentifier), true);
+					final MailFolderObject f = mailInterface.getFolder(folderIdentifier, true);
 					valueWritten = false;
 					folderWriter.writeIMAPFolderAsObject(columns, f);
 					valueWritten = true;
@@ -1247,6 +1303,7 @@ public class Folder extends SessionServlet {
 			final JSONObject jsonObj = new JSONObject(body);
 			int updateFolderId = -1;
 			if ((updateFolderId = getUnsignedInteger(folderIdentifier)) != -1) {
+				updateFolderId = FolderObject.mapVirtualID2SystemID(updateFolderId);
 				timestamp = checkDateParam(paramContainer, PARAMETER_TIMESTAMP, paramSrcType);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				FolderObject fo = new FolderObject(updateFolderId);
@@ -1257,12 +1314,11 @@ public class Folder extends SessionServlet {
 			} else {
 				final MailInterface mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				try {
-					final javax.mail.Folder updateFolder = mailInterface.getFolder(
-							prepareMailFolderParam(folderIdentifier), true);
+					final MailFolderObject updateFolder = mailInterface.getFolder(folderIdentifier, true);
 					if (updateFolder != null) {
 						final MailFolderObject mfo = new MailFolderObject(updateFolder.getFullName(), updateFolder
 								.exists());
-						mfo.setImapFolder((IMAPFolder) updateFolder);
+						mfo.setImapFolder(updateFolder.getImapFolder());
 						mfo.setSeparator(updateFolder.getSeparator());
 						new MailFolderParser(sessionObj).parse(mfo, jsonObj);
 						retval = mailInterface.saveFolder(mfo);
@@ -1325,6 +1381,7 @@ public class Folder extends SessionServlet {
 			final JSONObject jsonObj = new JSONObject(body);
 			int parentFolderId = -1;
 			if ((parentFolderId = getUnsignedInteger(parentFolder)) != -1) {
+				parentFolderId = FolderObject.mapVirtualID2SystemID(parentFolderId);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				FolderObject fo = new FolderObject();
 				fo.setParentFolderID(parentFolderId);
@@ -1336,7 +1393,7 @@ public class Folder extends SessionServlet {
 				final MailInterface mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				try {
 					final MailFolderObject mfo = new MailFolderObject();
-					mfo.setParentFullName(prepareMailFolderParam(parentFolder));
+					mfo.setParentFullName(parentFolder);
 					new MailFolderParser(sessionObj).parse(mfo, jsonObj);
 					retval = mailInterface.saveFolder(mfo);
 				} finally {
@@ -1406,6 +1463,7 @@ public class Folder extends SessionServlet {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
 					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) != -1) {
+						delFolderId = FolderObject.mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
 							timestamp = checkDateParam(paramContainer, PARAMETER_TIMESTAMP, paramSrcType);
 						}
@@ -1439,7 +1497,7 @@ public class Folder extends SessionServlet {
 							if (mailInterface == null) {
 								mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 							}
-							mailInterface.deleteFolder(prepareMailFolderParam(deleteIdentifier));
+							mailInterface.deleteFolder(deleteIdentifier);
 						} else {
 							jsonWriter.value(deleteIdentifier);
 						}
@@ -1491,8 +1549,8 @@ public class Folder extends SessionServlet {
 		String dataObj = "FAILED";
 		try {
 			final int[] delids = checkIntArrayParam(req, "del_ids");
-			final OXFolderAction oxfa = new OXFolderAction(sessionObj);
-			oxfa.cleanUpTestFolders(delids, sessionObj.getContext());
+			final OXFolderManagerImpl oxma = new OXFolderManagerImpl(sessionObj);
+			oxma.cleanUpTestFolders(delids, sessionObj.getContext());
 			dataObj = "OK";
 		} catch (Exception e) {
 			LOG.error("actionPutRemoveTestFolder", e);

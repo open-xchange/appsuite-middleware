@@ -53,6 +53,8 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.groupware.ldap.LdapException.Detail;
 
 /**
  * This exception is used if problems occur in the user storage component.
@@ -73,6 +75,15 @@ public class UserException extends AbstractOXException {
     /**
      * Initializes a new exception using the information provides by the code.
      * @param code code for the exception.
+     * @param messageArgs arguments that will be formatted into the message.
+     */
+    public UserException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
+
+    /**
+     * Initializes a new exception using the information provides by the code.
+     * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
@@ -82,6 +93,16 @@ public class UserException extends AbstractOXException {
             cause);
         this.detail = code.detail;
         setMessageArgs(messageArgs);
+    }
+
+    /**
+     * Initialize e new exception using the information from the nested abstract
+     * OX exception.
+     * @param cause the cause.
+     */
+    public UserException(final LdapException cause) {
+        super(cause);
+        detail = Detail.ERROR;
     }
 
     /**
@@ -135,7 +156,17 @@ public class UserException extends AbstractOXException {
          * A database connection can't be obtained.
          */
         NO_CONNECTION("Can't get database connection.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5);
+            Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5),
+        /**
+         * Can't clone object %1$s.
+         */
+        NOT_CLONEABLE("Can't clone object %1$s.", Category.PROGRAMMING_ERROR,
+            Detail.ERROR, 6),
+        /**
+         * SQL Problem: \"%s\".
+         */
+        SQL_ERROR("SQL Problem: \"%s\".", Category.PROGRAMMING_ERROR,
+            Detail.ERROR, 7);
 
         /**
          * Message of the exception.

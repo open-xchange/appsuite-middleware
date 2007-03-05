@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -80,6 +79,8 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
@@ -120,6 +121,7 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
@@ -198,7 +200,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	private DocumentMetadata load(int id, int version, Context ctx) throws OXException {
 		InfostoreIterator iter = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
 		if(!iter.hasNext()) {
-			System.out.println(id+" : "+version);
 			throw EXCEPTIONS.create(38);
 		}
 		DocumentMetadata dm;
@@ -239,15 +240,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		FileStorage fs = null;
 		try {
 			fs = getFileStorage(ctx);
-		} catch (ContextException e) {
+		} catch (FilestoreException e) {
 			throw new InfostoreException(e);
-		} catch (IOException e) {
-			throw EXCEPTIONS.create(39);
+		} catch (FileStorageException e) {
+			throw new InfostoreException(e);
 		}
 		try {
 			return fs.getFile(dm.getFilestoreLocation());
-		} catch (IOException e) {
-			throw EXCEPTIONS.create(40);
+		} catch (FileStorageException e) {
+			throw new InfostoreException(e);
 		}
 	}
 
@@ -519,8 +520,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 					perform(createVersionAction, true);
 
-				} catch (IOException e) {
-					throw EXCEPTIONS.create(19, e);
+				} catch (FileStorageException e) {
+					throw new InfostoreException(e);
 				} catch (ContextException e) {
 					throw new InfostoreException(e);
 				} catch (OXException x) {
@@ -612,9 +613,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		
 	}
 
-	protected FileStorage getFileStorage(Context ctx) throws IOException,
-			ContextException {
-		return QuotaFileStorage.getQuotaInstance(ctx, this.getProvider());
+	protected FileStorage getFileStorage(Context ctx) throws
+			FilestoreException, FileStorageException {
+		return FileStorage.getInstance(FilestoreStorage.createURI(ctx),ctx, this.getProvider());
 	}
 
 	private Metadata[] nonNull(DocumentMetadata document) {
@@ -744,8 +745,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 					perform(createVersionAction, true);
 
-				} catch (IOException e) {
-					throw EXCEPTIONS.create(19, e);
+				} catch (FileStorageException e) {
+					throw new InfostoreException(e);
 				} catch (ContextException e) {
 					throw new InfostoreException(e);
 				} catch (OXException x) {
@@ -917,9 +918,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			try {
 				QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(context);
 				qfs.deleteFile(filestoreLocation);
-			} catch (IOException x) {
-				throw EXCEPTIONS.create(37);
-			} catch (ContextException e) {
+			} catch (FileStorageException x) {
+				throw new InfostoreException(x);
+			} catch (FilestoreException e) {
 				throw new InfostoreException(e);
 			}
 		}
@@ -1402,15 +1403,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					try {
 						//System.out.println("REMOVE " + id);
 						qfs.deleteFile(id);
-					} catch (IOException x) {
-						throw new TransactionException(EXCEPTIONS.create(36, x));
+					} catch (FileStorageException x) {
+						throw new TransactionException(x);
 					}
 				}
-			} catch (ContextException e) {
+			} catch (FilestoreException e) {
 				throw new TransactionException(e);
-			} catch (IOException e) {
+			} catch (FileStorageException e) {
 				rollback();
-				throw new TransactionException(EXCEPTIONS.create(35, e));
+				throw new TransactionException(e);
 			}
 		}
 		super.commit();

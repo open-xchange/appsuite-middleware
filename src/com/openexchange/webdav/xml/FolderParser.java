@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * FolderParser
@@ -76,7 +77,7 @@ public class FolderParser extends FolderChildParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, FolderObject folderobject) throws OXException {
+	public void parse(XmlPullParser parser, FolderObject folderobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -86,6 +87,8 @@ public class FolderParser extends FolderChildParser {
 				parseElementFolder(folderobject, parser);
 				parser.nextTag();
 			}
+		} catch (XmlPullParserException exc) {
+			throw exc;
 		} catch (Exception exc) {
 			throw new OXException(exc);
 		}

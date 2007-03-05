@@ -157,7 +157,7 @@ public class EventQueue extends TimerTask {
 	
 	protected static void callEvent(final ArrayList<EventObject> al) {
 		for (int a = 0; a < al.size(); a++) {
-			event(al.get(a));
+            event(al.get(a));
 		}
 		
 		al.clear();
@@ -191,17 +191,29 @@ public class EventQueue extends TimerTask {
 		switch (action) {
 			case EventClient.CREATED:
 				for (int a = 0; a < appointmentEventList.size(); a++) {
-					appointmentEventList.get(a).appointmentCreated((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+                    try {
+                        appointmentEventList.get(a).appointmentCreated((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.CHANGED:
 				for (int a = 0; a < appointmentEventList.size(); a++) {
-					appointmentEventList.get(a).appointmentModified((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+                    try {
+				        appointmentEventList.get(a).appointmentModified((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.DELETED:
 				for (int a = 0; a < appointmentEventList.size(); a++) {
-					appointmentEventList.get(a).appointmentDeleted((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        appointmentEventList.get(a).appointmentDeleted((AppointmentObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			default:
@@ -214,17 +226,29 @@ public class EventQueue extends TimerTask {
 		switch (action) {
 			case EventClient.CREATED:
 				for (int a = 0; a < contactEventList.size(); a++) {
-					contactEventList.get(a).contactCreated((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        contactEventList.get(a).contactCreated((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.CHANGED:
 				for (int a = 0; a < contactEventList.size(); a++) {
-					contactEventList.get(a).contactModified((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        contactEventList.get(a).contactModified((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.DELETED:
 				for (int a = 0; a < contactEventList.size(); a++) {
-					contactEventList.get(a).contactDeleted((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        contactEventList.get(a).contactDeleted((ContactObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			default:
@@ -237,17 +261,29 @@ public class EventQueue extends TimerTask {
 		switch (action) {
 			case EventClient.CREATED:
 				for (int a = 0; a < taskEventList.size(); a++) {
-					taskEventList.get(a).taskCreated((Task)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        taskEventList.get(a).taskCreated((Task)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.CHANGED:
 				for (int a = 0; a < taskEventList.size(); a++) {
-					taskEventList.get(a).taskModified((Task)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        taskEventList.get(a).taskModified((Task)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.DELETED:
 				for (int a = 0; a < taskEventList.size(); a++) {
-					taskEventList.get(a).taskDeleted((Task)eventObj.getObject(), eventObj.getSessionObject());
+				    try {
+                        taskEventList.get(a).taskDeleted((Task)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			default:
@@ -260,17 +296,29 @@ public class EventQueue extends TimerTask {
 		switch (action) {
 			case EventClient.CREATED:
 				for (int a = 0; a < folderEventList.size(); a++) {
-					folderEventList.get(a).folderCreated((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        folderEventList.get(a).folderCreated((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.CHANGED:
 				for (int a = 0; a < folderEventList.size(); a++) {
-					folderEventList.get(a).folderModified((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        folderEventList.get(a).folderModified((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.DELETED:
 				for (int a = 0; a < folderEventList.size(); a++) {
-					folderEventList.get(a).folderDeleted((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        folderEventList.get(a).folderDeleted((FolderObject)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			default:
@@ -283,17 +331,29 @@ public class EventQueue extends TimerTask {
 		switch (action) {
 			case EventClient.CREATED:
 				for (int a = 0; a < infostoreEventList.size(); a++) {
-					infostoreEventList.get(a).infoitemCreated((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        infostoreEventList.get(a).infoitemCreated((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.CHANGED:
 				for (int a = 0; a < infostoreEventList.size(); a++) {
-					infostoreEventList.get(a).infoitemModified((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        infostoreEventList.get(a).infoitemModified((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			case EventClient.DELETED:
 				for (int a = 0; a < infostoreEventList.size(); a++) {
-					infostoreEventList.get(a).infoitemDeleted((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+					try {
+                        infostoreEventList.get(a).infoitemDeleted((DocumentMetadata)eventObj.getObject(), eventObj.getSessionObject());
+                    } catch (Throwable t) {
+                        LOG.error(t.getMessage(), t);
+                    }
 				}
 				break;
 			default:

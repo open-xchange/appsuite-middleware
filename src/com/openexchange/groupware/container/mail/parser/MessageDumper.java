@@ -141,41 +141,6 @@ public class MessageDumper {
 		multipartDetected = false;
 	}
 
-	public boolean hasAttachment(final Message msg) throws MessagingException, IOException {
-		if (msg.isMimeType("multipart/*")) {
-			try {
-				final Multipart mp = (Multipart) msg.getContent();
-				return hasAttachment(mp);
-			} catch (ClassCastException e) {
-				LOG.error(e);
-			}
-		}
-		return false;
-	}
-
-	private final boolean hasAttachment(final Multipart mp) throws MessagingException, IOException {
-		boolean attachmentDetected = false;
-		for (int index = 0; index < mp.getCount() && !attachmentDetected; index++) {
-			final BodyPart bodyPart = mp.getBodyPart(index);
-			if (bodyPart.isMimeType("multipart/*")) {
-				attachmentDetected = hasAttachment((Multipart) bodyPart.getContent());
-			} else {
-				final boolean markedAsAttachment = (bodyPart.getDisposition() != null && bodyPart.getDisposition()
-						.equalsIgnoreCase(Part.ATTACHMENT));
-				final boolean isNonTextPart = !bodyPart.isMimeType("text/*");
-				attachmentDetected = markedAsAttachment
-						|| isNonTextPart
-						|| (bodyPart.isMimeType(MESSAGE_RFC822))
-						|| (bodyPart.isMimeType("message/delivery-status")
-								|| bodyPart.isMimeType("message/disposition-notification")
-								|| bodyPart.isMimeType("text/rfc822-headers") || bodyPart.isMimeType("text/x-vcard")
-								|| bodyPart.isMimeType("text/vcard") || bodyPart.isMimeType("text/calendar") || bodyPart
-								.isMimeType("text/x-vCalendar"));
-			}
-		}
-		return attachmentDetected;
-	}
-
 	public void dumpMessage(final Message msg, final MessageHandler msgHandler) throws OXException, MessagingException,
 			IOException {
 		dumpMessage(msg, msgHandler, null);

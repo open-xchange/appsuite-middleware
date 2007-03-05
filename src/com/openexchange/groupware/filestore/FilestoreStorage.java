@@ -49,13 +49,30 @@
 
 package com.openexchange.groupware.filestore;
 
+import java.net.URI;
+
+import com.openexchange.groupware.contexts.Context;
+
 public abstract class FilestoreStorage {
-	
+
 	private static final FilestoreStorage INSTANCE = new CachingFilestoreStorage(new RdbFilestoreStorage());
-	
+
 	public static FilestoreStorage getInstance(){
 		return INSTANCE;
 	}
-	
-	public abstract Filestore getFilestore(int id) throws FilestoreNotFoundException, IllegalFilestoreException;
+
+	public abstract Filestore getFilestore(int id) throws FilestoreException;
+
+    /**
+     * Convenience method for generating the context specific file store
+     * location.
+     * @param ctx the location will be generated for this context.
+     * @return a ready to use context specific file store location.
+     * @throws FilestoreException if an error occurs generating the URI.
+     */
+    public static URI createURI(final Context ctx) throws FilestoreException {
+        final FilestoreStorage storage = getInstance();
+        final Filestore store = storage.getFilestore(ctx.getFilestoreId());
+        return FilestoreTools.createLocation(store, ctx);
+    }
 }

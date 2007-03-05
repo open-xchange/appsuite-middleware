@@ -415,13 +415,14 @@ public class RdbUserStorage extends UserStorage {
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON "
             + "(user.cid=prg_contacts.cid AND "
             + "user.contactId=prg_contacts.intfield01) "
-            + "WHERE " + MODIFYTIMESTAMP + ">=?";
+            + "WHERE cid=? AND " + MODIFYTIMESTAMP + ">=?";
         int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setTimestamp(1, new Timestamp(modifiedSince.getTime()));
+            stmt.setInt(1, context.getContextId());
+            stmt.setTimestamp(2, new Timestamp(modifiedSince.getTime()));
             result = stmt.executeQuery();
             final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
@@ -434,6 +435,44 @@ public class RdbUserStorage extends UserStorage {
         } catch (SQLException e) {
             throw new LdapException(Component.USER, Code.SQL_ERROR, e,
                 e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+        return users;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int[] listAllUser() throws UserException {
+        final String sql = "SELECT " + IDENTIFIER + " FROM user "
+            + "WHERE user.cid=?";
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (Exception e) {
+            throw new UserException(UserException.Code.NO_CONNECTION, e);
+        }
+        final int[] users;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, context.getContextId());
+            result = stmt.executeQuery();
+            final List<Integer> tmp = new ArrayList<Integer>();
+            while (result.next()) {
+                tmp.add(result.getInt(1));
+            }
+            users = new int[tmp.size()];
+            for (int i = 0; i < users.length; i++) {
+                users[i] = tmp.get(i);
+            }
+        } catch (SQLException e) {
+            throw new UserException(UserException.Code.SQL_ERROR, e, e
+                .getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
