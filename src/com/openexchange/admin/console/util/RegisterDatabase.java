@@ -138,7 +138,7 @@ public class RegisterDatabase extends UtilAbstraction {
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "the maximum number of units in this database", String.valueOf(MAXUNITS_DEFAULT), true, false)));
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_DBPARAM_SHORT, OPT_NAME_DBPARAM_LONG, "parameter for the database", true, false)));
         // FIXME: choeger Enter right description here
-        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "db pool hardlimit", String.valueOf(POOL_HARD_LIMIT_DEFAULT), true, true)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "db pool hardlimit", String.valueOf(POOL_HARD_LIMIT_DEFAULT), true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_INITIAL_SHORT, OPT_NAME_POOL_INITIAL_LONG, "db pool initial", String.valueOf(POOL_INITIAL_DEFAULT), true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_POOL_MAX_SHORT, OPT_NAME_POOL_MAX_LONG, "db pool max", String.valueOf(POOL_MAX_DEFAULT), true, false)));
         return retval;
