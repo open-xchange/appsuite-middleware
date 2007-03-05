@@ -14,7 +14,7 @@ movefilestorecontext \
 searchcontext \
 addreason \
 editfilestore \
-listdbms \
+listdatabase \
 listfilestore \
 registerdatabase \
 registerfilestore \

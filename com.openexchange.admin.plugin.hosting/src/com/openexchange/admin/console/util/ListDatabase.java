@@ -18,11 +18,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class ListDBMS extends UtilAbstraction {
+public class ListDatabase extends UtilAbstraction {
 
     private final static String GENERAL_UTILITY_NAME = "listDBMS";
 
-    public ListDBMS(final String[] args2) {
+    public ListDatabase(final String[] args2) {
 
         final CommandLineParser parser = new PosixParser();
 
@@ -76,7 +76,7 @@ public class ListDBMS extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListDBMS(args);
+        new ListDatabase(args);
     }
 
     private Options getOptions() {
