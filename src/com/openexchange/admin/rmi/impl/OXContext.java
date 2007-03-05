@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -745,70 +746,70 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.PROGRAMMING_ERROR }, desc = { "invalid data", MSG_SQL_QUERY_FAILED }, exceptionId = { 24, 25 }, msg = { "Invalid data sent-%s", MSG_SQL_OPERATION_ERROR })
     public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
         
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id + " - " + quota_max + " - " + admin_user);
-        try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            if (tool.existsContext(ctx)) {
-                throw CONTEXT_EXCEPTIONS.create(19, context_id);
-            }
-
-            if (!admin_user.attributesforcreateset()) {
-                throw new InvalidDataException("Mandatory fields not set");               
-            } 
-
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            // MonitoringInfos.incrementNumberOfCreateContextCalled();
-            return oxcox.create(ctx, admin_user, quota_max);
-            // TODO: cutmasta
-            // } catch (SQLException sql) {
-            // log.error(MSG_SQL_OPERATION_ERROR, sql);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + CONTEXT_EXCEPTIONS.create(18).getMessage());
-        } catch (final ContextException ctxe) {
-            throw new StorageException(ctxe);
-            // log.debug(LOG_CLIENT_ERROR, ctxe);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ctxe.getMessage());
-            // } catch (NoSuchAlgorithmException ctxe) {
-            // log.debug(LOG_ERROR, ctxe);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add(""
-            // + CONTEXT_EXCEPTIONS.create(20, ctxe.getMessage())
-            // .getMessage());
-            // } catch (UserException ctxe) {
-            // log.debug(LOG_CLIENT_ERROR, ctxe);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ctxe.getMessage());
-            // } catch (PoolException popx) {
-            // log.error(LOG_ERROR, popx);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + popx.getMessage());
-            // } catch (DBPoolingException popx) {
-            // log.error(LOG_ERROR, popx);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + popx.getMessage());
-            // } catch (OXContextException popx) {
-            // log.error(LOG_ERROR, popx);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add(""
-            // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
-            // .getMessage());
-            // } catch (OXException popx) {
-            // log.error(LOG_ERROR, popx);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + CONTEXT_EXCEPTIONS.create(36).getMessage());
-            // } catch (RemoteException popx) {
-            // log.error(LOG_ERROR, popx);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add(""
-            // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
-            // .getMessage());
+        //try {
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        if (tool.existsContext(ctx)) {
+            throw new ContextExistsException();
         }
+
+        if (!admin_user.attributesforcreateset()) {
+            throw new InvalidDataException("Mandatory fields not set");               
+        } 
+
+        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+        // MonitoringInfos.incrementNumberOfCreateContextCalled();
+        return oxcox.create(ctx, admin_user, quota_max);
+        // TODO: cutmasta
+        // } catch (SQLException sql) {
+        // log.error(MSG_SQL_OPERATION_ERROR, sql);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + CONTEXT_EXCEPTIONS.create(18).getMessage());
+        //} catch (final ContextException ctxe) {
+        //    throw new StorageException(ctxe);
+        // log.debug(LOG_CLIENT_ERROR, ctxe);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + ctxe.getMessage());
+        // } catch (NoSuchAlgorithmException ctxe) {
+        // log.debug(LOG_ERROR, ctxe);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add(""
+        // + CONTEXT_EXCEPTIONS.create(20, ctxe.getMessage())
+        // .getMessage());
+        // } catch (UserException ctxe) {
+        // log.debug(LOG_CLIENT_ERROR, ctxe);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + ctxe.getMessage());
+        // } catch (PoolException popx) {
+        // log.error(LOG_ERROR, popx);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + popx.getMessage());
+        // } catch (DBPoolingException popx) {
+        // log.error(LOG_ERROR, popx);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + popx.getMessage());
+        // } catch (OXContextException popx) {
+        // log.error(LOG_ERROR, popx);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add(""
+        // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
+        // .getMessage());
+        // } catch (OXException popx) {
+        // log.error(LOG_ERROR, popx);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add("" + CONTEXT_EXCEPTIONS.create(36).getMessage());
+        // } catch (RemoteException popx) {
+        // log.error(LOG_ERROR, popx);
+        // retValue.add(RESPONSE_ERROR);
+        // retValue.add(""
+        // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
+        // .getMessage());
+        //}
         // log.debug(LOG_RESPONSE + retValue);
     }
 
