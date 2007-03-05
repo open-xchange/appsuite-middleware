@@ -73,7 +73,6 @@ public class ListServer extends UtilAbstraction {
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
         }
-
     }
 
     public static void main(final String args[]) {
