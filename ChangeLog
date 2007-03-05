@@ -1,3 +1,17 @@
+* 2007-03-05 - thorben.betten@open-xchange.com
+
+ - Fixed bug #4928	OX Global Address Book vs. Internal Users
+	Fixed through changes made in FolderStrings.java. Last thing to do is translation (Antje)
+ - Fixed bug #6201	com.openexchange.ajax.Mail NullPointerException
+	Fixed through additional null-check in MailInterfaceImpl.java (line 1704)
+ - Fixed bug #6048	Email: Emails without display name aren't sorted by sender (all views)
+	Also checking for empty personal in MailComparator when comparing email addresses
+ - Fixed bug #6229	Folder.actionGetUpdatedFolders Object was not returned
+	Fixed through adding additional catch-clause when instantiating an instance of
+	FolderObjectIterator, cause no finally-block can be used to close used resource
+ - Fixed bug #6230	Logging when missing default Drafts folder in user mail settings
+	Fixed in class MailInterfaceImpl.java (line 472 through 508): Falling back to default values defined in UserSettingMail
+
 * 2007-02-27 - tobias.prinz@open-xchange.com
 
   - Added a handy new sub package to allow for bulk entries of contacts,
