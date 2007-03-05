@@ -49,21 +49,10 @@
 
 package com.openexchange.admin.tools;
 
-import java.sql.SQLException;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-// import com.openexchange.admin.dataSource.OXContext_MySQL;
-import com.openexchange.admin.exceptions.DatabaseContextMappingException;
-import com.openexchange.admin.exceptions.PoolException;
-import com.openexchange.admin.exceptions.TargetDatabaseException;
-
 public class DatabaseDataMover implements Callable<Vector> {
-
-    private Log log = LogFactory.getLog(this.getClass());
 
     private int context_id = -1;
 
