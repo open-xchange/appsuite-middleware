@@ -395,10 +395,24 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
 		forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from);
 		forwardPrefix = forwardPrefix.replaceFirst("#TO#", to);
-		forwardPrefix = forwardPrefix.replaceFirst("#DATE#", receivedDate == null ? "" : DateFormat.getDateInstance(
-				DateFormat.LONG, session.getLocale()).format(receivedDate));
-		forwardPrefix = forwardPrefix.replaceFirst("#TIME#", receivedDate == null ? "" : DateFormat.getTimeInstance(
-				DateFormat.SHORT, session.getLocale()).format(receivedDate));
+		try {
+			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", receivedDate == null ? "" : DateFormat.getDateInstance(
+					DateFormat.LONG, session.getLocale()).format(receivedDate));
+		} catch (Throwable t) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(t.getMessage(), t);
+			}
+			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+		}
+		try {
+			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", receivedDate == null ? "" : DateFormat.getTimeInstance(
+					DateFormat.SHORT, session.getLocale()).format(receivedDate));
+		} catch (Throwable t) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(t.getMessage(), t);
+			}
+			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+		}
 		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", subject);
 		final String doubleBreak = "<br><br>";
 		if (isHtml) {
