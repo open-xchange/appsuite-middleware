@@ -83,7 +83,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -741,7 +741,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 // a context is currently in creation and we would get an error
                 // by the ox api
                 if (internal_user_id != admin_id) {
-                    final OXFolderAction oxa = new OXFolderAction();
+                    final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
                     oxa.addUserToOXFolders(internal_user_id, usrdata.getDisplay_name(), lang, ctx.getIdAsInt(), write_ox_con);
                 }
             } finally {
