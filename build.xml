@@ -6,6 +6,7 @@
     <property name="plugin.jar" value="ox_admin_plugin_hosting.jar"/>
     <property name="lib.dir" value="lib"/>
 	<property name="oxconfdir" value="etc/admindaemon"/>
+	<property name="serverconfdir" value="etc/groupware"/>
     <path id="project.classpath">
 	<pathelement location="${lib.dir}/ox_server.jar"/>
 	<pathelement location="${lib.dir}/commons-logging.jar"/>
