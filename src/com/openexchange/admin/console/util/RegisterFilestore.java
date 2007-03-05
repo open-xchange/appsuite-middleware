@@ -101,7 +101,7 @@ public class RegisterFilestore extends UtilAbstraction {
     private Options getOptions() {
         final Options retval = getDefaultCommandLineOptions();
 
-        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "where to store filestore contents", STORE_PATH_DEFAULT, true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "where to store filestore contents", STORE_PATH_DEFAULT, true, true)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "the maximum size of the filestore", String.valueOf(STORE_SIZE_DEFAULT), true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", String.valueOf(STORE_MAX_CTX_DEFAULT), true, false)));
         return retval;
