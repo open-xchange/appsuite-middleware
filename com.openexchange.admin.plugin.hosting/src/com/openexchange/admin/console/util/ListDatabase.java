@@ -20,7 +20,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class ListDatabase extends UtilAbstraction {
 
-    private final static String GENERAL_UTILITY_NAME = "listDBMS";
+    private final static String GENERAL_UTILITY_NAME = "listDatabase";
 
     public ListDatabase(final String[] args2) {
 
