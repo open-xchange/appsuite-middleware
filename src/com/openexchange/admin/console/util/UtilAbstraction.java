@@ -6,6 +6,11 @@ import org.apache.commons.cli.Options;
 
 import com.openexchange.admin.console.BasicCommandlineOptions;
 
+/**
+ * 
+ * @author d7
+ *
+ */
 public class UtilAbstraction extends BasicCommandlineOptions {
     
     //  Setting default values for some options
