@@ -111,6 +111,12 @@ case "${BNAME}" in
     "listfilestore")
     ACTION="util.ListFilestore"
     ;;
+    "listreason")
+    ACTION="util.ListReason"
+    ;;
+    "listserver")
+    ACTION="util.ListServer"
+    ;;
     "registerdatabase")
     ACTION="util.RegisterDatabase"
     ;;

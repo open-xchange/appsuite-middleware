@@ -16,6 +16,8 @@ addreason \
 editfilestore \
 listdatabase \
 listfilestore \
+listreason \
+listserver \
 registerdatabase \
 registerfilestore \
 registerserver \
