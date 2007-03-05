@@ -61,7 +61,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
-import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 
 /**
