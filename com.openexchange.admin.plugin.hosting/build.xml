@@ -19,6 +19,8 @@
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="nonoxlibpath"      value="${prefix}/${lib.dir}"/>
         <filter token="oxlibpath"         value="${lib.dir}"/>
+        <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
+        <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
     </filterset>
 
     <!--                    TARGETS                      -->
