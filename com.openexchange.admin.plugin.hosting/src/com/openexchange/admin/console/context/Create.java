@@ -19,6 +19,7 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -90,6 +91,8 @@ public class Create extends UserAbstraction {
         } catch (InvalidCredentialsException e) {
             printServerResponse(e.getMessage());        
         } catch (InvalidDataException e) {            
+            printServerResponse(e.getMessage());
+        } catch (ContextExistsException e) {
             printServerResponse(e.getMessage());
         }
 

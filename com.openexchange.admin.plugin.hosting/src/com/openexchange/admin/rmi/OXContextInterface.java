@@ -54,6 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -90,9 +91,10 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @throws ContextExistsException 
      */
     public Context create(Context ctx,User admin_user,long quota_max,Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
     
     
     
