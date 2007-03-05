@@ -134,13 +134,24 @@ public class PluginStarter {
     }
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
-      stopJMX();
-        if (null != registry) {
-            registry.unbind(OXContextInterface.RMI_NAME);
-            registry.unbind(OXUtilInterface.RMI_NAME);
-            registry.unbind(AdminJobExecutorInterface.RMI_NAME);
-
+        try {
+            stopJMX();
+            if (null != registry) {
+                registry.unbind(OXContextInterface.RMI_NAME);
+                registry.unbind(OXUtilInterface.RMI_NAME);
+                registry.unbind(AdminJobExecutorInterface.RMI_NAME);
+            }
+        } catch (AccessException e) {
+            log.error(e);
+            throw e;
+        } catch (RemoteException e) {
+            log.error(e);
+            throw e;
+        } catch (NotBoundException e) {
+            log.error(e);
+            throw e;
         }
+
     }
     
     private void startJMX() {
