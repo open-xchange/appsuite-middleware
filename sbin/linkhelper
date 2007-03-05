@@ -21,6 +21,7 @@ listserver \
 registerdatabase \
 registerfilestore \
 registerserver \
+removereason \
 unregisterdatabase \
 unregisterfilestore \
 unregisterserver \

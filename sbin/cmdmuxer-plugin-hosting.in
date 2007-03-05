@@ -126,6 +126,9 @@ case "${BNAME}" in
     "registerserver")
     ACTION="util.RegisterServer"
     ;;
+    "removereason")
+    ACTION="util.RemoveReason"
+    ;;
     "unregisterdatabase")
     ACTION="util.UnregisterDatabase"
     ;;
