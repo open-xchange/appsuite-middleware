@@ -54,11 +54,10 @@ package com.openexchange.admin.rmi.exceptions;
 import java.io.Serializable;
 
 /**
- * @author cutmasta
- * Is thrown when user want to do an action in a context which doesnt exists in the system.
+ * @author choeger
  *
  */
-public class NoSuchContextException extends Exception implements Serializable{
+public class ContextExistsException extends Exception implements Serializable{
 
 	/**
          * For serialization
@@ -68,14 +67,14 @@ public class NoSuchContextException extends Exception implements Serializable{
         /**
 	 * 
 	 */
-	public NoSuchContextException() {
-		super("Context does not exist");
+	public ContextExistsException() {
+		super("Context already exists");
 	}
 
 	/**
 	 * @param message
 	 */
-	public NoSuchContextException(String message) {
+	public ContextExistsException(String message) {
 		super(message);
 		
 	}
@@ -83,7 +82,7 @@ public class NoSuchContextException extends Exception implements Serializable{
 	/**
 	 * @param cause
 	 */
-	public NoSuchContextException(Throwable cause) {
+	public ContextExistsException(Throwable cause) {
 		super(cause);
 		
 	}
@@ -92,7 +91,7 @@ public class NoSuchContextException extends Exception implements Serializable{
 	 * @param message
 	 * @param cause
 	 */
-	public NoSuchContextException(String message, Throwable cause) {
+	public ContextExistsException(String message, Throwable cause) {
 		super(message, cause);		
 	}
 
