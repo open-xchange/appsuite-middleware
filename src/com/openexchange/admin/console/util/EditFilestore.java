@@ -39,20 +39,15 @@ public class EditFilestore extends UtilAbstraction {
 
             final Filestore fstore = new Filestore();
             final String filestore_id = cmd.getOptionValue(OPT_NAME_STORE_FILESTORE_ID_SHORT);
-            final String store_path = verifySetAndGetOption(cmd, OPT_NAME_STORE_PATH_SHORT);
+            final String store_path = cmd.getOptionValue(OPT_NAME_STORE_PATH_SHORT);
             final String store_size = verifySetAndGetOption(cmd, OPT_NAME_STORE_SIZE_SHORT);
             final String store_max_ctx = verifySetAndGetOption(cmd, OPT_NAME_STORE_MAX_CTX_SHORT);
 
             fstore.setId(Integer.parseInt(filestore_id));
-            if (null != store_path) {
-                final java.net.URI uri = new java.net.URI(store_path);
-                fstore.setUrl(uri.toString());
-                new java.io.File(uri.getPath()).mkdir();
-            } else {
-                final java.net.URI uri = new java.net.URI(STORE_PATH_DEFAULT);
-                fstore.setUrl(uri.toString());
-                new java.io.File(uri.getPath()).mkdir();
-            }
+            final java.net.URI uri = new java.net.URI(store_path);
+            fstore.setUrl(uri.toString());
+            new java.io.File(uri.getPath()).mkdir();
+
             if (null != store_size) {
                 fstore.setSize(Long.parseLong(store_size));
             } else {
@@ -102,7 +97,7 @@ public class EditFilestore extends UtilAbstraction {
         final Options retval = getDefaultCommandLineOptions();
 
         retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "the id of the filestore which should be edited", true, true)));
-        retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "where to store filestore contents", STORE_PATH_DEFAULT, true, false)));
+        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "where to store filestore contents", true, true)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "the maximum size of the filestore", String.valueOf(STORE_SIZE_DEFAULT), true, false)));
         retval.addOption(addDefaultArgName(getShortLongOptWithDefault(OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", String.valueOf(STORE_MAX_CTX_DEFAULT), true, false)));
 
