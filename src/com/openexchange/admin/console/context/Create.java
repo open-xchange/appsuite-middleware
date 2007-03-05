@@ -46,7 +46,7 @@ public class Create extends UserAbstraction {
             
             
             // get rmi ref
-            OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
+            OXContextInterface oxctx = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
             
             // create user obj
             User usr = new User();
@@ -62,7 +62,7 @@ public class Create extends UserAbstraction {
             
             long quota = Long.parseLong(cmd.getOptionValue(OPT_QUOTA_SHORT));            
                        
-            System.out.println(oxres.create(ctx, usr, quota, auth));
+            System.out.println(oxctx.create(ctx, usr, quota, auth));
             
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            

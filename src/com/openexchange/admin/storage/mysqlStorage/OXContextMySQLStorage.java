@@ -1321,8 +1321,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // context created
                 log.info("Context " + context_id + " created!");
             } // end if admin_user
-            // FIXME: For the first time we throw an empty context object here
-            return new Context();
+            // TODO: cutmasta call setters and fill all required fields
+            ctx.setEnabled(true);
+            return ctx;
         }catch(OXException oxae){
             log.error("Error", oxae);
             handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
