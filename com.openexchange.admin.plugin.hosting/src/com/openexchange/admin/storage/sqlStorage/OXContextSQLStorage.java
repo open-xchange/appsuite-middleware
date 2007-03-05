@@ -49,7 +49,6 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
