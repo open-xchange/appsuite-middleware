@@ -614,7 +614,7 @@ public class OXFolderSQL {
 	private static final String STR_DELOXFOLDERPERMS = "del_oxfolder_permissions";
 
 	public static final void delWorkingOXFolder(final int folderId, final int userId, final long lastModified,
-			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException, OXException {
+			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		delOXFolder(folderId, userId, lastModified, true, true, ctx, writeConArg);
 	}
 
@@ -898,7 +898,7 @@ public class OXFolderSQL {
 	public static final void handleEntityPermissions(final int entity, final int mailAdmin, final long lastModified, final String folderTable,
 			final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
-		handleEntityPermissions(mailAdmin, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg, writeConArg,
+		handleEntityPermissions(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg, writeConArg,
 				ctx);
 	}
 
