@@ -226,7 +226,7 @@ public class OXFolderAdminHelper {
 				systemPermission, FolderObject.SYSTEM_ROOT_FOLDER_ID, FolderObject.SYSTEM_MODULE, true, creatingTime,
 				mailAdmin, cid, writeCon);
 		/*
-		 * Insert system system_global folder
+		 * Insert system system_global folder aka 'Shared Address Book'
 		 */
 		systemPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.ADMIN_PERMISSION,
 				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -235,10 +235,10 @@ public class OXFolderAdminHelper {
 				systemPermission, FolderObject.SYSTEM_FOLDER_ID, FolderObject.CONTACT, true, creatingTime, mailAdmin,
 				cid, writeCon);
 		/*
-		 * Insert system internal users folder
+		 * Insert system internal users folder aka 'Global Address Book'
 		 */
 		systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+				OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
 		systemPermission.setFolderAdmin(false);
 		createSystemFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_NAME, systemPermission,
 				FolderObject.SYSTEM_FOLDER_ID, FolderObject.CONTACT, true, creatingTime, mailAdmin, cid, writeCon);
