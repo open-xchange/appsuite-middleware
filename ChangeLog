@@ -1,3 +1,13 @@
+* 2007-03-06 - thorben.betten@open-xchange.com
+
+ - Fixed bug #6031: Better html2text conversion concerning paragraph
+   elements "<p>"
+ - Replaced "int foo = new Integer(str).intValue()" constructs with
+   invocation of faster routine "int foo = Integer.parseInt(str)": Avoids
+   unnecessary instantiation of Integer objects.
+ - Changed permission for folder 'Global Address Book' formerly known as
+   'Internal Users'
+
 * 2007-03-05 - thorben.betten@open-xchange.com
 
  - Fixed bug #4928	OX Global Address Book vs. Internal Users
@@ -10,7 +20,8 @@
 	Fixed through adding additional catch-clause when instantiating an instance of
 	FolderObjectIterator, cause no finally-block can be used to close used resource
  - Fixed bug #6230	Logging when missing default Drafts folder in user mail settings
-	Fixed in class MailInterfaceImpl.java (line 472 through 508): Falling back to default values defined in UserSettingMail
+   Fixed in class MailInterfaceImpl.java (line 472 through 508): Falling back to default
+   values defined in UserSettingMail
  - Fixed bug #6297: NPE check
 
 * 2007-02-27 - tobias.prinz@open-xchange.com
