@@ -518,6 +518,12 @@ public class OXFolderAdminHelper {
 			closeResources(rs, stmt, null, true, ctx);
 		}
 	}
+	
+	private static final String DEFAULT_CAL_NAME = "My Calendar";
+	
+	private static final String DEFAULT_CON_NAME = "My Contacts";
+	
+	private static final String DEFAULT_TASK_NAME = "My Tasks";
 
 	/**
 	 * <code>addUserToOXFolders</code> adds rights to the oxfolder tables so
@@ -543,15 +549,15 @@ public class OXFolderAdminHelper {
 			}
 			String defaultCalName = strHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
 			if (defaultCalName == null || defaultCalName.length() == 0) {
-				defaultCalName = "My Calendar";
+				defaultCalName = DEFAULT_CAL_NAME;
 			}
 			String defaultConName = strHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
 			if (defaultConName == null || defaultCalName.length() == 0) {
-				defaultConName = "My Contacts";
+				defaultConName = DEFAULT_CON_NAME;
 			}
 			String defaultTaskName = strHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
 			if (defaultTaskName == null || defaultTaskName.length() == 0) {
-				defaultTaskName = "My Tasks";
+				defaultTaskName = DEFAULT_TASK_NAME;
 			}
 			/*
 			 * GlobalConfig.loadLanguageCodes(propfile); String stdCalFolderName =

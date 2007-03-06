@@ -62,6 +62,8 @@ import java.util.regex.Pattern;
  * 
  */
 public class Html2TextConverter {
+	
+	private static final String LINEBREAK = "\n";
 
 	private boolean body_found;
 
@@ -124,10 +126,12 @@ public class Html2TextConverter {
 			 */
 			final String head = convert(htmlContent.substring(0, start));
 			sb.append(head);
+			reset();
 			sb.append(convert(addSimpleQuote(htmlContent.substring(start), openBlockquotes)));
 			return sb.toString();
 		}
 		if (found) {
+			reset();
 			final String head = convert(htmlContent.substring(0, start));
 			sb.append(head);
 			final String body = convertWithQuotes(addSimpleQuote(htmlContent.substring(bodyStart, bodyEnd)));
@@ -135,6 +139,7 @@ public class Html2TextConverter {
 			final String tail = convertWithQuotes(htmlContent.substring(end));
 			sb.append(tail);
 		} else {
+			reset();
 			sb.append(convert(htmlContent));
 		}
 		return sb.toString();
@@ -173,13 +178,12 @@ public class Html2TextConverter {
 			 * Convert until '-1' (EOF) is reached
 			 */
 			while (c != -1) {
-				text = "";
 				if (c == '<') {
 					/*
 					 * A starting tag
 					 */
 					final String CurrentTag = getTag(input);
-					text = convertTag(CurrentTag);
+					text = convertTag(CurrentTag, in_body ? getLastChar(result) : getLastChar(result2));
 				} else if (c == '&') {
 					final String special = getSpecial(input);
 					if ("lt;".equals(special) || "#60".equals(special)) {
@@ -212,7 +216,7 @@ public class Html2TextConverter {
 					text = "" + (char) c;
 				}
 				final StringBuilder s = in_body ? result : result2;
-				s.append(text);
+				s.append(text == null ? "" : text);
 				c = input.read();
 			}
 		} catch (IOException e) {
@@ -221,8 +225,15 @@ public class Html2TextConverter {
 		}
 		return body_found ? result.toString() : result2.toString();
 	}
+	
+	private static final char getLastChar(final StringBuilder sb) {
+		if (sb.length() == 0) {
+			return ' ';
+		}
+		return sb.charAt(sb.length() - 1);
+	}
 
-	private final String getTag(final Reader r) throws IOException {
+	private static final String getTag(final Reader r) throws IOException {
 		final StringBuilder result = new StringBuilder();
 		int level = 1;
 		result.append('<');
@@ -241,7 +252,7 @@ public class Html2TextConverter {
 		return result.toString();
 	}
 
-	private final String getSpecial(final Reader r) throws IOException {
+	private static final String getSpecial(final Reader r) throws IOException {
 		final StringBuilder result = new StringBuilder();
 		/*
 		 * Mark the present position in the stream
@@ -261,43 +272,47 @@ public class Html2TextConverter {
 		return result.toString();
 	}
 
-	private final boolean isTag(final String tag, final String pattern) {
+	private static final boolean isTag(final String tag, final String pattern) {
 		return tag.regionMatches(true, 0, '<' + pattern + '>', 0, pattern.length() + 2)
 				|| tag.regionMatches(true, 0, '<' + pattern + ' ', 0, pattern.length() + 2);
 	}
 
-	private final String convertTag(final String t) {
+	private final String convertTag(final String t, final char prevChar) {
 		String result = "";
 		if (isTag(t, "body")) {
 			in_body = true;
 			body_found = true;
 		} else if (isTag(t, "/body")) {
 			in_body = false;
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "center")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/center")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "pre")) {
-			result = "\n";
+			result = LINEBREAK;
 			pre = true;
 		} else if (isTag(t, "/pre")) {
-			result = "\n";
+			result = LINEBREAK;
 			pre = false;
 		} else if (isTag(t, "p")) {
-			result = "\n";
+			if (prevChar == '\n') {
+				result = LINEBREAK;
+			} else {
+				result = "\n\n";
+			}
 		} else if (isTag(t, "br")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "br/")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "h1") || isTag(t, "h2") || isTag(t, "h3") || isTag(t, "h4") || isTag(t, "h5")
 				|| isTag(t, "h6") || isTag(t, "h7")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/h1") || isTag(t, "/h2") || isTag(t, "/h3") || isTag(t, "/h4") || isTag(t, "/h5")
 				|| isTag(t, "/h6") || isTag(t, "/h7")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/dl")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "dd")) {
 			result = "\n * ";
 		} else if (isTag(t, "dt")) {
@@ -305,19 +320,19 @@ public class Html2TextConverter {
 		} else if (isTag(t, "li")) {
 			result = "\n * ";
 		} else if (isTag(t, "/ul")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/ol")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "hr")) {
 			result = "_________________________________________\n";
 		} else if (isTag(t, "table")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/table")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "form")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "/form")) {
-			result = "\n";
+			result = LINEBREAK;
 		} else if (isTag(t, "b")) {
 			result = "*";
 		} else if (isTag(t, "/b")) {
