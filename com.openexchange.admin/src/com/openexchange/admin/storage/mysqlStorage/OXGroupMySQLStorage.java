@@ -61,6 +61,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -107,7 +108,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
     public void addMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException {
         Connection con = null;
         PreparedStatement prep_add_member = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getIdAsInt().intValue();
         try {
 
             con = cache.getWRITEConnectionForContext(context_id);
@@ -128,6 +129,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             for (final int element : member_ids) {
                 oxu.changeLastModified(element, ctx, con);
             }
+            
+            // let the groupware api know that the group has changed
+            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
+            
             con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
@@ -163,7 +168,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
     public void removeMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException {
         Connection con = null;
         PreparedStatement prep_del_member = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getIdAsInt().intValue();
         try {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
@@ -187,6 +192,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
                     oxu.changeLastModified(element, ctx, con);
                 }
             }
+            
+            // let the groupware api know that the group has changed
+            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
+            
             con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
@@ -368,6 +377,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
             for (final int elem : grp_id) {
+                
+//              let the groupware api know that the group will be deleted
+                OXFolderAdminHelper.propagateGroupModification(elem, con, con, context_id); 
+                
                 final DeleteEvent delev = new DeleteEvent(this, elem, DeleteEvent.TYPE_GROUP, context_id);
                 AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
@@ -385,6 +398,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
                 prep_del_group.executeUpdate();
                 prep_del_group.close();
             }
+            
+            
+            
             con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
