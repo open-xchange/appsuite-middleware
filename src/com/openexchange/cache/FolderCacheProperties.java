@@ -56,7 +56,8 @@ import java.util.Properties;
 import com.openexchange.configuration.SystemConfig;
 
 /**
- * FolderCacheProperties
+ * <tt>FolderCacheProperties</tt> contains both folder properties and folder
+ * cache properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,22 +73,21 @@ public class FolderCacheProperties {
 	private static boolean enableDBGrouping = true;
 
 	private static boolean enableFolderCache = true;
-	
+
 	private static boolean ignoreGlobalAddressbook;
-	
+
 	private static boolean enableInternalUsersEdit;
-	
+
 	private FolderCacheProperties() {
 		super();
 	}
 
 	static {
 		FOLDER_CACHE_PROPS = new Properties();
-        final String propFileName = SystemConfig.getProperty(PROPFILE);
-        if (null == propFileName) {
-            LOG.error("Can't find property \"" + PROPFILE
-                + "\" in system.properties.");
-        }
+		final String propFileName = SystemConfig.getProperty(PROPFILE);
+		if (null == propFileName) {
+			LOG.error("Can't find property \"" + PROPFILE + "\" in system.properties.");
+		}
 		try {
 			FileInputStream fis = null;
 			try {
@@ -110,11 +110,13 @@ public class FolderCacheProperties {
 			/*
 			 * IGNORE_GLOBAL_ADDRESSBOOK
 			 */
-			ignoreGlobalAddressbook = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty("IGNORE_GLOBAL_ADDRESSBOOK", "false"));
+			ignoreGlobalAddressbook = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty(
+					"IGNORE_GLOBAL_ADDRESSBOOK", "false"));
 			/*
 			 * ENABLE_INTERNAL_USER_EDIT
 			 */
-			enableInternalUsersEdit = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty("ENABLE_INTERNAL_USER_EDIT", "false"));
+			enableInternalUsersEdit = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty(
+					"ENABLE_INTERNAL_USER_EDIT", "false"));
 			/*
 			 * Log info
 			 */
@@ -127,7 +129,7 @@ public class FolderCacheProperties {
 	private static final void logInfo() {
 		if (LOG.isInfoEnabled()) {
 			final StringBuilder sb = new StringBuilder(500);
-			sb.append("\nFolder Cache Properties:\n");
+			sb.append("\nFolder Properties & Folder Cache Properties:\n");
 			sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
 			sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
 			sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
@@ -135,7 +137,7 @@ public class FolderCacheProperties {
 			LOG.info(sb.toString());
 		}
 	}
-	
+
 	public static final boolean isEnableDBGrouping() {
 		return enableDBGrouping;
 	}
@@ -147,7 +149,7 @@ public class FolderCacheProperties {
 	public static boolean isIgnoreGlobalAddressbook() {
 		return ignoreGlobalAddressbook;
 	}
-	
+
 	public static boolean isEnableInternalUsersEdit() {
 		return enableInternalUsersEdit;
 	}
