@@ -48,7 +48,10 @@
  */
 package com.openexchange.admin.rmi;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -56,6 +59,9 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
@@ -266,7 +272,7 @@ public class ContextTest extends AbstractTest {
         return xres.getSetup(ctx, cred);
     }
 
-    public static Context[] searchContext(String pattern, String host, Credentials cred) throws Exception {
+    public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);        
         return xres.search(pattern, cred);
     }
@@ -320,7 +326,7 @@ public class ContextTest extends AbstractTest {
         xres.enable(ctx, cred);
     }
 
-    private static int searchNextFreeContextID(int pos, Credentials cred) throws Exception {
+    private static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         Context[] ctx = searchContext(String.valueOf(pos), getRMIHostUrl(), cred);
         if (ctx.length == 0) {
             return pos;
@@ -329,7 +335,7 @@ public class ContextTest extends AbstractTest {
         }
     }
 
-    public static Context getTestContextObject(Credentials cred) throws Exception {
+    public static Context getTestContextObject(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         return getTestContextObject(createNewContextID(cred), 50);
     }
 
@@ -341,7 +347,7 @@ public class ContextTest extends AbstractTest {
         return ctx;
     }
 
-    public static int createNewContextID(Credentials cred) throws Exception {
+    public static int createNewContextID(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         int pos = 5;
         int ret = -1;
         while (ret == -1) {
