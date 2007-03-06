@@ -87,7 +87,7 @@ public abstract class AbstractTest extends TestCase{
         return getTestContextObject(1, 50);
     }
 
-    public static Context getTestContextObject(long quota_max_in_mb) throws Exception {
+    public static Context getTestContextObject(long quota_max_in_mb) {
         return getTestContextObject(1, quota_max_in_mb);
     }
 
