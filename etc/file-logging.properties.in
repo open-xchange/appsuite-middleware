@@ -2,7 +2,7 @@
 
 com.openexchange.daemons.AdminDaemon.level=INFO
 com.openexchange.admin.tools.monitoring.level=INFO
-com.openexchange.admin.level=SEVERE
+com.openexchange.admin.level=INFO
 
 handlers=java.util.logging.FileHandler
 java.util.logging.FileHandler.pattern=@adminlogfile@
