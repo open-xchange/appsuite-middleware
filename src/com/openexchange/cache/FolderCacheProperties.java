@@ -127,7 +127,7 @@ public class FolderCacheProperties {
 	private static final void logInfo() {
 		if (LOG.isInfoEnabled()) {
 			final StringBuilder sb = new StringBuilder(500);
-			sb.append("\nFolder Properties & Folder Cache Properties:\n");
+			sb.append("\nFolder Cache Properties:\n");
 			sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
 			sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
 			sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
