@@ -121,11 +121,10 @@ public class MailObject {
 		if (imapConnection != null) {
 			if (imapConnection.isConnected()) {
 				return;
-			} else {
-				imapConnection.connect();
-				MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-				return;
 			}
+			imapConnection.connect();
+			MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+			return;
 		}
 		final Properties mailProperties = getDefaultIMAPProperties();
 		mailProperties.put("mail.smtp.host", sessionObj.getIMAPProperties().getSmtpServer());
@@ -246,10 +245,6 @@ public class MailObject {
 					final TimeZone userTimeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
 					msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
 				}
-				/*
-				 * Save headers
-				 */
-				msg.saveChanges();
 				/*
 				 * Finally send mail
 				 */
