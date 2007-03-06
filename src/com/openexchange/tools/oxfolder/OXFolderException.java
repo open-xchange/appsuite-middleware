@@ -479,9 +479,9 @@ public class OXFolderException extends OXException {
 		 */
 		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.PROGRAMMING_ERROR, 65),
 		/**
-		 * Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)
+		 * Folder existence cannot be checked due to unsufficient folder information
 		 */
-		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information:\nObject ID OR (parent ID AND folder name)", Category.PROGRAMMING_ERROR, 66),
+		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)", Category.PROGRAMMING_ERROR, 66),
 		/**
 		 * A runtime error occured in context %s
 		 */

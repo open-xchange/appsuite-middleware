@@ -109,9 +109,9 @@ public class OXFolderTools {
 	 * returned value is either <code>FolderObject.PRIVATE</code>,
 	 * <code>FolderObject.PUBLIC</code> or <code>FolderObject.SHARED</code>
 	 */
-	public static int getFolderTypeFromDB(final int folderId, final int userId, final int[] groups,
-			final UserConfiguration userConfig, final Context ctx) throws OXException {
-		return getFolderTypeFromDB(folderId, userId, groups, userConfig, ctx, null);
+	public static int getFolderTypeFromDB(final int folderId, final int userId, final UserConfiguration userConfig,
+			final Context ctx) throws OXException {
+		return getFolderTypeFromDB(folderId, userId, userConfig, ctx, null);
 	}
 
 	/**
@@ -119,8 +119,8 @@ public class OXFolderTools {
 	 * returned value is either <code>FolderObject.PRIVATE</code>,
 	 * <code>FolderObject.PUBLIC</code> or <code>FolderObject.SHARED</code>
 	 */
-	public static int getFolderTypeFromDB(final int folderId, final int userId, final int[] groups,
-			final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+	public static int getFolderTypeFromDB(final int folderId, final int userId, final UserConfiguration userConfig,
+			final Context ctx, final Connection readCon) throws OXException {
 		try {
 			final FolderObject fo;
 			if (FolderCacheManager.isEnabled()) {
@@ -185,7 +185,7 @@ public class OXFolderTools {
 		 * Fetch from storage
 		 */
 		final EffectivePermission retval = new EffectivePermission(userId, folderId, getFolderTypeFromDB(folderId,
-				userId, groups, userConfig, ctx, con), getFolderModule(folderId, ctx, con), userConfig);
+				userId, userConfig, ctx, con), getFolderModule(folderId, ctx, con), userConfig);
 		retval.setEntity(userId);
 		retval.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
@@ -1605,9 +1605,8 @@ public class OXFolderTools {
 	public static Date getFolderLastModifed(final int folderId, final Context ctx) throws OXException {
 		if (FolderCacheManager.isEnabled()) {
 			return FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null).getLastModified();
-		} else {
-			return getFolderLastModifedFromDB(folderId, ctx);
 		}
+		return getFolderLastModifedFromDB(folderId, ctx);
 	}
 
 	/**

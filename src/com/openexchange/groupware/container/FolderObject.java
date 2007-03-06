@@ -78,6 +78,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -749,11 +750,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return this;
 	}
 
-	private static final String SQL_SELECT_FOLDER = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fname = ?";
-
 	/**
 	 * Checks if this folder exists in underlying storage by checking its object
-	 * ID or (if object ID is not present) by its folder name and parent. An
+	 * ID or (if object ID is not present) by its folder name, parent and module. An
 	 * <code>OXException</code> is thrown if folder does not hold sufficient
 	 * information to verify existence.
 	 * 
@@ -762,27 +761,20 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 */
 	public final boolean exists(final Context ctx) throws OXException {
 		if (containsObjectID()) {
-			return (getObjectID() > 0);
-		} else if (containsParentFolderID() && containsFolderName()) {
 			try {
-				Connection readcon = null;
-				PreparedStatement stmt = null;
-				ResultSet rs = null;
-				try {
-					readcon = DBPool.pickup(ctx);
-					stmt = readcon.prepareStatement(SQL_SELECT_FOLDER);
-					stmt.setInt(1, ctx.getContextId());
-					stmt.setInt(2, getParentFolderID());
-					stmt.setString(3, getFolderName());
-					rs = stmt.executeQuery();
-					return rs.next();
-				} finally {
-					closeResources(rs, stmt, readcon, true, ctx);
-				}
-			} catch (SQLException e) {
-				throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+				return OXFolderSQL.exists(getObjectID(), null, ctx);
 			} catch (DBPoolingException e) {
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, e.getMessage());
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
+			} catch (SQLException e) {
+				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
+			}
+		} else if (containsParentFolderID() && containsFolderName() && containsModule()) {
+			try {
+				return OXFolderSQL.lookUpFolder(getParentFolderID(), getFolderName(), getModule(), null, ctx);
+			} catch (DBPoolingException e) {
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
+			} catch (SQLException e) {
+				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
 			}
 		}
 		throw new OXFolderException(FolderCode.UNSUFFICIENT_FOLDER_INFORMATION);
