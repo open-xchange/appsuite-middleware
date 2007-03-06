@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.FolderObject;
@@ -237,8 +238,13 @@ public class OXFolderAdminHelper {
 		/*
 		 * Insert system internal users folder aka 'Global Address Book'
 		 */
-		systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
-				OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
+		if (FolderCacheProperties.isEnableInternalUsersEdit()) {
+			systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
+					OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
+		} else {
+			systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
+					OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+		}
 		systemPermission.setFolderAdmin(false);
 		createSystemFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_NAME, systemPermission,
 				FolderObject.SYSTEM_FOLDER_ID, FolderObject.CONTACT, true, creatingTime, mailAdmin, cid, writeCon);

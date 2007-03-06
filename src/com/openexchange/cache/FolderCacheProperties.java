@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.cache;
 
 import java.io.FileInputStream;
@@ -76,6 +74,8 @@ public class FolderCacheProperties {
 	private static boolean enableFolderCache = true;
 	
 	private static boolean ignoreGlobalAddressbook;
+	
+	private static boolean enableInternalUsersEdit;
 	
 	private FolderCacheProperties() {
 		super();
@@ -112,6 +112,10 @@ public class FolderCacheProperties {
 			 */
 			ignoreGlobalAddressbook = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty("IGNORE_GLOBAL_ADDRESSBOOK", "false"));
 			/*
+			 * ENABLE_INTERNAL_USER_EDIT
+			 */
+			enableInternalUsersEdit = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty("ENABLE_INTERNAL_USER_EDIT", "false"));
+			/*
 			 * Log info
 			 */
 			logInfo();
@@ -123,9 +127,10 @@ public class FolderCacheProperties {
 	private static final void logInfo() {
 		if (LOG.isInfoEnabled()) {
 			final StringBuilder sb = new StringBuilder(500);
-			sb.append("\nFolder Cache Properties:\n");
+			sb.append("\nFolder Properties & Folder Cache Properties:\n");
 			sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
 			sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
+			sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
 			sb.append("\tIGNORE_GLOBAL_ADDRESSBOOK=").append(ignoreGlobalAddressbook);
 			LOG.info(sb.toString());
 		}
@@ -141,5 +146,9 @@ public class FolderCacheProperties {
 
 	public static boolean isIgnoreGlobalAddressbook() {
 		return ignoreGlobalAddressbook;
+	}
+	
+	public static boolean isEnableInternalUsersEdit() {
+		return enableInternalUsersEdit;
 	}
 }

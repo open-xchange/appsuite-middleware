@@ -10,6 +10,12 @@
  - Fixed bug #6274: Changed error message as demanded: login to imap server
    failed, please try again later.
  - Removed unnecessary invocation of javax.mail.Message.saveChanges() method
+ - Option to enable/disable possibility that an user may edit his own contact object
+   in folder 'Global Address Book' aka 'Internal Users'
+#################### ATTENTION ! #####################
+ - CONFIG change: New property "ENABLE_INTERNAL_USER_EDIT" added to file
+   "foldercache.properties"
+#################################################
 
 * 2007-03-05 - thorben.betten@open-xchange.com
 
