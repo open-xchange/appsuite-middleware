@@ -16,6 +16,7 @@ Bundle-ClassPath: .,../open-xchange/build,
  external:$libdir$/concurrent.jar,
  external:$libdir$/jcs-1.2.7.9.2.jar,
  external:$libdir$/jdom.jar,
+ external:$libdir$/mail.jar,
  external:$libdir$/mysql-connector-java-3.1.13-bin.jar
 Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.user,
