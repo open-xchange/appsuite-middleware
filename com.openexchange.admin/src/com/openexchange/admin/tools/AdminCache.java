@@ -95,9 +95,13 @@ public class AdminCache {
         readMasterCredentials();
         initOXProccess();
         log.info("Init Cache");
-        pool = new OXAdminPoolDBPool(prop);
+        initPool();
     }
 
+    protected void initPool() {
+        pool = new OXAdminPoolDBPool(prop);
+    }
+    
     public Credentials getMasterCredentials() {
         return this.masterCredentials;
     }
