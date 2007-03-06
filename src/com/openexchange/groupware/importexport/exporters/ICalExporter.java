@@ -121,7 +121,7 @@ public class ICalExporter implements Exporter {
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
 	
 	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final int type, final Map<String, String[]> optionalParams) throws ImportExportException {
-		int folderId = new Integer(folder).intValue();
+		int folderId = Integer.parseInt(folder);
 		FolderObject fo;
 		try {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
@@ -155,7 +155,7 @@ public class ICalExporter implements Exporter {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-			VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
 			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
 			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
 			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");

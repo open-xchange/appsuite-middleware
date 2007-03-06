@@ -60,9 +60,9 @@ public class VCardImporter implements Importer {
 	public boolean canImport(final SessionObject sessObj, final Format format, final Map<String, Integer> folderMappings, final Map<String, String[]> optionalParams) throws ImportExportException {
 		final Iterator iterator = folderMappings.keySet().iterator();
 		while (iterator.hasNext()) {
-			String folder = iterator.next().toString();
+			final String folder = iterator.next().toString();
 			
-			int folderId = new Integer(folder).intValue();
+			int folderId = Integer.parseInt(folder);
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
@@ -100,9 +100,9 @@ public class VCardImporter implements Importer {
 		
 		final Iterator iterator = folderMappings.keySet().iterator();
 		while (iterator.hasNext()) {
-			String folder = iterator.next().toString();
+			final String folder = iterator.next().toString();
 			
-			int folderId = new Integer(folder).intValue();
+			int folderId = Integer.parseInt(folder);
 			int type = folderMappings.get(folder).intValue();
 			
 			if (type == Types.CONTACT) {

@@ -54,7 +54,7 @@ public class VCardExporter implements Exporter {
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardExporter.class);
 	
 	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final int type, final Map<String, String[]> optionalParams) throws ImportExportException {
-		int folderId = new Integer(folder).intValue();
+		final int folderId = Integer.parseInt(folder);
 		FolderObject fo;
 		try {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());

@@ -107,7 +107,7 @@ public class CSVLibrary {
 
 	public static int getFolderId(String folderString) throws ImportExportException {
 		try{
-			return new Integer(folderString).intValue();
+			return Integer.parseInt(folderString);
 		} catch (NumberFormatException e) {
 			throw EXCEPTIONS.create(1, folderString);
 		}
