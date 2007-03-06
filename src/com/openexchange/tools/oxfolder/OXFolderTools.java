@@ -381,12 +381,14 @@ public class OXFolderTools {
 			throws OXException {
 		return getDefaultFolder(user, ctx, con, FolderObject.INFOSTORE);
 	}
+	
+	private static final String SQL_SEL_DEFFLD = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND created_from = ? AND default_flag = ? AND module = ?";
 
 	/**
 	 * Returns user's default folder id for given standard module (either task,
 	 * calendar or contact)
 	 */
-	private static int getDefaultFolder(final int user, final Context ctx, final Connection readConArg, final int module)
+	private static final int getDefaultFolder(final int user, final Context ctx, final Connection readConArg, final int module)
 			throws OXException {
 		int retval = 0;
 		Connection readCon = readConArg;
@@ -395,11 +397,10 @@ public class OXFolderTools {
 			if (createCon) {
 				readCon = DBPool.pickup(ctx);
 			}
-			final String sqlSelectStr = "SELECT fuid from oxfolder_tree WHERE cid = ? AND created_from = ? AND default_flag = ? AND module = ?";
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				stmt = readCon.prepareStatement(sqlSelectStr);
+				stmt = readCon.prepareStatement(SQL_SEL_DEFFLD);
 				stmt.setInt(1, ctx.getContextId());
 				stmt.setInt(2, user);
 				stmt.setInt(3, 1);
