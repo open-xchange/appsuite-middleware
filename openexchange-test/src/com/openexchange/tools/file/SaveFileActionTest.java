@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.UndoableAction;
@@ -16,12 +17,33 @@ public class SaveFileActionTest extends AbstractActionTest {
 	
 	private SaveFileAction saveFile = null;
 	private FileStorage storage = null;
+
+	private Class<? extends FileStorage> origImpl;
 	
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        origImpl = FileStorage.IMPL;
+        FileStorage.IMPL = LocalFileStorage.class;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        FileStorage.IMPL = origImpl;
+        super.tearDown();
+    }
+    
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		final File tempFile = File.createTempFile("filestorage", ".tmp");
 		tempFile.delete();
-		storage = FileStorage.getInstance(tempFile);
+		storage = FileStorage.getInstance(new URI("file://"+tempFile.getAbsolutePath()));
 		saveFile = new SaveFileAction();
 		saveFile.setStorage(storage);
 		saveFile.setIn(new ByteArrayInputStream(content.getBytes("UTF-8")));
@@ -54,7 +76,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 		try {
 			storage.getFile(saveFile.getId());
 			fail("Expected Exception");
-		} catch (IOException x) {
+		} catch (FileStorageException x) {
 			assertTrue(true);
 		}
 	}

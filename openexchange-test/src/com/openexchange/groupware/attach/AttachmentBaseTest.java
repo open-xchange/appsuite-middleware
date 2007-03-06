@@ -31,7 +31,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.SimpleDBProvider;
+import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
@@ -589,7 +589,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 	public static class STATIC extends AbstractAttachmentTest.ISOLATION implements Mode {
 
 		public DBProvider getProvider() {
-			SimpleDBProvider provider = new SimpleDBProvider();
+			ConfigurableDBProvider provider = new ConfigurableDBProvider();
 			try {
 				provider.setDriver("com.mysql.jdbc.Driver");
 			} catch (ClassNotFoundException e) {

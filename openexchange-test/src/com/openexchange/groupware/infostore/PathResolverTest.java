@@ -11,7 +11,8 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -22,8 +23,9 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderAction;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 public class PathResolverTest extends TestCase {
@@ -74,11 +76,10 @@ public class PathResolverTest extends TestCase {
 		
 	}
 	
-	private Context getContext() {
-		ContextImpl ctxI = new ContextImpl(1);
-		ctxI.setFilestoreId(5);
-		ctxI.setFileStorageQuota(Long.MAX_VALUE);
-		return ctxI;
+	private Context getContext() throws ContextException {
+        final ContextStorage ctxstor = ContextStorage.getInstance();
+        final int contextId = ctxstor.getContextId("defaultcontext");
+        return ctxstor.getContext(contextId);
 	}
 
 	public void tearDown() throws Exception {
@@ -164,7 +165,7 @@ public class PathResolverTest extends TestCase {
 	
 	private int mkdir(int parent, String name) throws SQLException, OXFolderPermissionException, Exception {
 	
-		OXFolderAction oxfa = new OXFolderAction(session);
+		//OXFolderAction oxfa = new OXFolderAction(session);
 		FolderObject folder = new FolderObject();
 		folder.setFolderName(name);
 		folder.setParentFolderID(parent);
@@ -198,7 +199,9 @@ public class PathResolverTest extends TestCase {
 			if (writeCon != null)
 				provider.releaseWriteConnection(ctx, writeCon);
 		}
-		oxfa.createFolder(folder, session, true, writeCon, writeCon, false);
+		final OXFolderManager oxma = new OXFolderManagerImpl(session, writeCon, writeCon);
+		oxma.createFolder(folder, true, System.currentTimeMillis());
+		//oxfa.createFolder(folder, session, true, writeCon, writeCon, false);
 		return folder.getObjectID();
 	}
 	
@@ -222,8 +225,10 @@ public class PathResolverTest extends TestCase {
 	}
 	
 	private void rmdir(int id) throws SQLException, OXFolderPermissionException, OXFolderLogicException, Exception {
-		OXFolderAction oxfa = new OXFolderAction(session);
-		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
+//		OXFolderAction oxfa = new OXFolderAction(session);
+//		oxfa.deleteFolder(id, session, true, Long.MAX_VALUE);
+		final OXFolderManager oxma = new OXFolderManagerImpl(session);
+		oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
 	}
 
 }

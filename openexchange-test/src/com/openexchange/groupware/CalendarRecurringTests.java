@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
@@ -28,17 +29,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
 import com.openexchange.tools.oxfolder.OXFolderTools;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
-import junit.framework.TestCase;
 
 
 public class CalendarRecurringTests extends TestCase {

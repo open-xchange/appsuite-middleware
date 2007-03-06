@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tx.DBProvider;
 
-public class SimpleDBProvider implements DBProvider {
+public class ConfigurableDBProvider implements DBProvider {
 
 	private String url;
 	private String driver;

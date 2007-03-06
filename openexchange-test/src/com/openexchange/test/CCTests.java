@@ -102,7 +102,7 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
 		// tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-	    tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
+	   // tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
 		
@@ -125,10 +125,11 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
-		
+		tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
 		
 		
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
 		
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);

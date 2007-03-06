@@ -21,7 +21,8 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
@@ -32,13 +33,21 @@ public class FolderTest extends TestCase {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderTest.class);
 	
-	public final static int CONTEXT_ID = 1;
+	public final static int CONTEXT_ID = 1337;
 	
 	private static boolean init = false;
 	
-	private static int resolveUser(final String user) throws Exception {
-        final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(CONTEXT_ID));
-        return uStorage.getUserId(user);
+	private static int resolveUser(String user) throws Exception {
+		try {
+			int pos = -1;
+			user = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user; 
+	        final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(CONTEXT_ID));
+	        return uStorage.getUserId(user);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			System.exit(1);
+			return -1;
+		}
     }
 	
 	
@@ -76,10 +85,11 @@ public class FolderTest extends TestCase {
 	public void testFolderInsertSuccess() {
 		final int userId = session.getUserObject().getId();
 		final int[] groups = session.getUserObject().getGroups();
-		final OXFolderAction oxfa = new OXFolderAction(session);
+		//final OXFolderAction oxfa = new OXFolderAction(session);
+		final OXFolderManager oxma = new OXFolderManagerImpl(session);
 		int fuid = -1;
 		try {
-			final FolderObject fo = new FolderObject();
+			FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 			fo.setModule(FolderObject.CALENDAR);
@@ -93,7 +103,7 @@ public class FolderTest extends TestCase {
 			/*
 			 * Create folder
 			 */
-			fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+			fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 			/*
 			 * Check folder object
 			 */
@@ -106,20 +116,25 @@ public class FolderTest extends TestCase {
 			/*
 			 * Delete Test Folder...
 			 */
-			oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+			oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+			fuid = -1;
+			//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 			final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 			assertTrue(tmp == null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} finally {
-			try {
-				/*
-				 * Delete Test Folder...
-				 */
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
-			} catch (Exception e) {
-				LOG.error(e.getMessage(), e);
+			if (fuid != -1) {
+				try {
+					/*
+					 * Delete Test Folder...
+					 */
+					oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 		}
 	}
@@ -128,7 +143,7 @@ public class FolderTest extends TestCase {
 		try {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
-			final FolderObject fo = new FolderObject();
+			FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 			fo.setModule(FolderObject.CALENDAR);
@@ -140,18 +155,18 @@ public class FolderTest extends TestCase {
 			ocl.setGroupPermission(false);
 			ocl.setFolderAdmin(true);
 			fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-			final OXFolderAction oxfa = new OXFolderAction(session);
-			int fuid = -1;
+			//final OXFolderAction oxfa = new OXFolderAction(session);
+			final OXFolderManager oxma = new OXFolderManagerImpl(session); 
 			Exception exc = null;
 			try {
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxma.createFolder(fo, true, System.currentTimeMillis());
 			} catch (Exception e) {
 				System.out.println("\n\n\n" + e.getMessage());
 				exc = e;
 			}
 			assertTrue(exc != null);
-			if (fuid != -1) {
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+			if (fo.getObjectID() != -1) {
+				oxma.deleteFolder(fo, true, System.currentTimeMillis());
 				fail("Exception expected!");
 			}
 		} catch (Exception e) {
@@ -164,7 +179,7 @@ public class FolderTest extends TestCase {
 		try {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
-			final FolderObject fo = new FolderObject();
+			FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 			fo.setModule(FolderObject.CALENDAR);
@@ -186,18 +201,20 @@ public class FolderTest extends TestCase {
 			ocl.setFolderAdmin(true);
 			perms.add(ocl);
 			fo.setPermissions(perms);
-			final OXFolderAction oxfa = new OXFolderAction(session);
-			int fuid = -1;
+			//final OXFolderAction oxfa = new OXFolderAction(session);
+			final OXFolderManager oxma = new OXFolderManagerImpl(session);
 			Exception exc = null;
 			try {
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxma.createFolder(fo, true, System.currentTimeMillis());
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 			} catch (Exception e) {
 				System.out.println("\n\n\n" + e.getMessage());
 				exc = e;
 			}
 			assertTrue(exc != null);
-			if (fuid != -1) {
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+			if (fo.getObjectID() != -1) {
+				oxma.deleteFolder(fo, true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				fail("Exception expected!");
 			}
 		} catch (Exception e) {
@@ -227,18 +244,21 @@ public class FolderTest extends TestCase {
 			ocl.setFolderAdmin(true);
 			perms.add(ocl);
 			fo.setPermissions(perms);
-			final OXFolderAction oxfa = new OXFolderAction(session);
+			//final OXFolderAction oxfa = new OXFolderAction(session);
+			final OXFolderManager oxma = new OXFolderManagerImpl(session);
 			int fuid = -1;
 			Exception exc = null;
 			try {
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 			} catch (Exception e) {
 				System.out.println("\n\n\n" + e.getMessage());
 				exc = e;
 			}
 			assertTrue(exc != null);
 			if (fuid != -1) {
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				fail("Exception expected!");
 			}
 		} catch (Exception e) {
@@ -267,18 +287,21 @@ public class FolderTest extends TestCase {
 			ocl.setFolderAdmin(true);
 			perms.add(ocl);
 			fo.setPermissions(perms);
-			final OXFolderAction oxfa = new OXFolderAction(session);
+			//final OXFolderAction oxfa = new OXFolderAction(session);
+			final OXFolderManager oxma = new OXFolderManagerImpl(session);
 			int fuid = -1;
 			Exception exc = null;
 			try {
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+				// fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 			} catch (Exception e) {
 				System.out.println("\n\n\n" + e.getMessage());
 				exc = e;
 			}
 			assertTrue(exc != null);
 			if (fuid != -1) {
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				// oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				fail("Exception expected!");
 			}
 		} catch (Exception e) {
@@ -292,7 +315,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			try {
 				FolderObject fo = new FolderObject();
 				fo.setFolderName("NewCalendarTestFolder");
@@ -305,8 +328,9 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+				// fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
 				 * Check folder object
 				 */
@@ -323,7 +347,8 @@ public class FolderTest extends TestCase {
 				fo.setObjectID(fuid);
 				fo.setFolderName("NewCalendarTestFolderRenamed");
 				final long lastModified = System.currentTimeMillis();
-				fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
+				fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+				//fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
 				assertTrue(fo.containsLastModified());
 				assertTrue(fo.containsModifiedBy());
 				assertTrue(fo.getLastModified().getTime() == lastModified);
@@ -332,7 +357,8 @@ public class FolderTest extends TestCase {
 				/*
 				 * Delete Test Folder...
 				 */
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				assertTrue(tmp == null);
 			}
@@ -347,7 +373,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			
 			try {
 				FolderObject fo = new FolderObject();
@@ -361,8 +387,9 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
 				 * Check folder object
 				 */
@@ -380,7 +407,8 @@ public class FolderTest extends TestCase {
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
 				final long lastModified = System.currentTimeMillis();
-				fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
+				fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+				// fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
 				assertTrue(fo.containsLastModified());
 				assertTrue(fo.containsModifiedBy());
 				assertTrue(fo.getLastModified().getTime() == lastModified);
@@ -390,7 +418,8 @@ public class FolderTest extends TestCase {
 				/*
 				 * Delete Test Folder...
 				 */
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				assertTrue(tmp == null);
 			}
@@ -405,7 +434,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			
 			try {
 				FolderObject fo = new FolderObject();
@@ -419,8 +448,9 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				fuid = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
 				 * Check folder object
 				 */
@@ -439,7 +469,8 @@ public class FolderTest extends TestCase {
 				fo.setParentFolderID(stdCalFolder);
 				fo.setFolderName("AARRGGH!");
 				final long lastModified = System.currentTimeMillis();
-				fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
+				fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+				//fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
 				assertTrue(fo.containsLastModified());
 				assertTrue(fo.containsModifiedBy());
 				assertTrue(fo.getLastModified().getTime() == lastModified);
@@ -449,7 +480,8 @@ public class FolderTest extends TestCase {
 				/*
 				 * Delete Test Folder...
 				 */
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				assertTrue(tmp == null);
 			}
@@ -464,7 +496,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			
 			try {
 				FolderObject fo = new FolderObject();
@@ -478,8 +510,10 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				fuid = fo.getObjectID();
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
 				 * Check folder object
 				 */
@@ -514,7 +548,8 @@ public class FolderTest extends TestCase {
 				fo.setPermissions(perms);
 				
 				final long lastModified = System.currentTimeMillis();
-				fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
+				//fo = oxfa.updateMoveRenameFolder(fo, session, true, lastModified, null, null);
+				oxfa.updateFolder(fo, true, System.currentTimeMillis());
 				assertTrue(fo.containsLastModified());
 				assertTrue(fo.containsModifiedBy());
 				assertTrue(fo.getLastModified().getTime() == lastModified);
@@ -531,7 +566,8 @@ public class FolderTest extends TestCase {
 				/*
 				 * Delete Test Folder...
 				 */
-				oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				assertTrue(tmp == null);
 			}
@@ -546,7 +582,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			try {
 				FolderObject fo = new FolderObject();
 				fo.setFolderName("NewCalendarTestFolder");
@@ -559,8 +595,10 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				fo = oxfa.createFolder(fo, true, System.currentTimeMillis());
+				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				fuid = fo.getObjectID();
 				/*
 				 * Check folder object
 				 */
@@ -584,7 +622,8 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				//oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				
 				fo.reset();
 				fo.setFolderName("NewTaskTestSubFolder002");
@@ -597,7 +636,8 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				//oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				
 				int subfolderId = -1;
 				
@@ -612,7 +652,8 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				subfolderId = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				//subfolderId = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				
 				
 				fo.reset();
@@ -626,14 +667,16 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				//oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				
 				/*
 				 * Delet parent folder that should also delete all subfolders
 				 */
 				final long lastModified = System.currentTimeMillis();
 				try {
-					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, lastModified);
+					oxfa.deleteFolder(new FolderObject(fuid), true, lastModified);
+					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, lastModified);
 				} catch (Exception e) {
 					e.printStackTrace();
 					fail(e.getMessage());
@@ -648,7 +691,8 @@ public class FolderTest extends TestCase {
 				 */
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				if (tmp != null) {
-					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				}
 			}
 		} catch (Exception e) {
@@ -662,7 +706,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			try {
 				/*
 				 * Create a public folder
@@ -678,12 +722,17 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
+				oxfa = new OXFolderManagerImpl(session);
 				try {
-					fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+					oxfa.createFolder(fo, true, System.currentTimeMillis());
+					fuid = fo.getObjectID();
+					//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				} catch (Exception e) {
-					oxfa.deleteFolder(2498, session, true, System.currentTimeMillis());
-					fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					//oxfa.deleteFolder(2498, session, true, System.currentTimeMillis());
+					//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+					oxfa.createFolder(fo, true, System.currentTimeMillis());
+					fuid = fo.getObjectID();
 				}
 				/*
 				 * Deny creation or modifications of public folders
@@ -695,7 +744,8 @@ public class FolderTest extends TestCase {
 				fo.setFolderName("NewCalendarTestFolder_Changed");
 				Exception exc=null;
 				try {
-					fo = oxfa.updateMoveRenameFolder(fo, session, true, System.currentTimeMillis(), null, null);
+					fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+					//fo = oxfa.updateMoveRenameFolder(fo, session, true, System.currentTimeMillis(), null, null);
 				} catch (Exception e) {
 					System.out.println("\n\n\n" + e.getMessage());
 					exc = e;
@@ -708,7 +758,8 @@ public class FolderTest extends TestCase {
 				 */
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				if (tmp != null) {
-					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				}
 			}
 		} catch (Exception e) {
@@ -722,7 +773,7 @@ public class FolderTest extends TestCase {
 			final int userId = session.getUserObject().getId();
 			final int[] groups = session.getUserObject().getGroups();
 			int fuid = -1;
-			OXFolderAction oxfa = null;
+			OXFolderManager oxfa = null;
 			try {
 				/*
 				 * Create a public folder
@@ -738,8 +789,10 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa = new OXFolderAction(session);
-				fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
+				oxfa = new OXFolderManagerImpl(session);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				fuid = fo.getObjectID();
+				// fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				/*
 				 * Deny calendar module access
 				 */
@@ -750,7 +803,8 @@ public class FolderTest extends TestCase {
 				fo.setFolderName("NewCalendarTestFolder_Changed");
 				Exception exc=null;
 				try {
-					fo = oxfa.updateMoveRenameFolder(fo, session, true, System.currentTimeMillis(), null, null);
+					fo = oxfa.updateFolder(fo, true, System.currentTimeMillis());
+					// fo = oxfa.updateMoveRenameFolder(fo, session, true, System.currentTimeMillis(), null, null);
 				} catch (Exception e) {
 					System.out.println("\n\n\n" + e.getMessage());
 					exc = e;
@@ -763,7 +817,8 @@ public class FolderTest extends TestCase {
 				 */
 				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
 				if (tmp != null) {
-					oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, System.currentTimeMillis());
+					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				}
 			}
 		} catch (Exception e) {

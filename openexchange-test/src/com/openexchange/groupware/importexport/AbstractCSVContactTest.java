@@ -72,7 +72,8 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.
@@ -211,10 +212,10 @@ public class AbstractCSVContactTest {
 		ocl.setGroupPermission(false);
 		ocl.setFolderAdmin(true);
 		fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-		OXFolderAction oxfa = new OXFolderAction(sessObj);
+		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
 		int tempFolderId = -1;
 		try {
-			tempFolderId = oxfa.createFolder(fo, user.getId(), groups, sessObj.getUserConfiguration(), true, true, sessObj.getContext(), null, null, true, true);
+			tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 		} catch (OXException e) {
 			System.out.println("Folder did exist already. Did you do then clean-up last time?");
 		} 
@@ -225,8 +226,8 @@ public class AbstractCSVContactTest {
 		if(fuid < 0){
 			return;
 		}
-		OXFolderAction oxfa = new OXFolderAction(sessObj);
-		oxfa.deleteFolder(fuid, userId, sessObj.getUserObject().getGroups(), sessObj.getUserConfiguration(), true, sessObj.getContext(), null, System.currentTimeMillis());
+		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
+		oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 	}
 
 	public static String readStreamAsString(InputStream is) throws IOException {

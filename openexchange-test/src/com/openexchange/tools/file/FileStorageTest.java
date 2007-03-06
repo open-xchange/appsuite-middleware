@@ -39,7 +39,6 @@ package com.openexchange.tools.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +58,27 @@ public class FileStorageTest extends TestCase {
      */
     private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
 
+    private Class< ? extends FileStorage> origImpl;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        origImpl = FileStorage.IMPL;
+        FileStorage.IMPL = LocalFileStorage.class;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        FileStorage.IMPL = origImpl;
+        super.tearDown();
+    }
+
     /**
      * Test method for
      * 'com.openexchange.tools.file.FileStorage.getInstance(Object...)'.
@@ -68,6 +88,7 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
+        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         tempFile.delete();
         assertNotNull("Can't create file storage.", storage);
@@ -84,6 +105,7 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
+        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         final String identifier = storage.saveNewFile(baos);
         tempFile.delete();
@@ -97,6 +119,7 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
+        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
@@ -104,15 +127,15 @@ public class FileStorageTest extends TestCase {
         try {
         	storage.getFile(identifier);
         	fail("Expected IOException");
-        } catch (IOException x) {
-        	assertTrue(true);
+        } catch (FileStorageException x) {
+        	// Everything fine. Error is discovered.
         }
-        
+
         try {
         	storage.saveNewFile(baos);
             fail("Expected IOException");
-        } catch (IOException x) {
-        	assertTrue(true);
+        } catch (FileStorageException x) {
+        	// Everything fine. Error is discovered.
         }
     }
     
@@ -120,12 +143,13 @@ public class FileStorageTest extends TestCase {
     public final void testExceptionOnUnknown() throws Throwable {
     	final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
+        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         try {
         	storage.getFile("00/00/01");
         	fail("Expected IOException");
-        } catch (IOException x) {
-        	assertTrue(true);
+        } catch (FileStorageException x) {
+        	// Everything fine. Error is discovered.
         }
         
         

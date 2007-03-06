@@ -1,12 +1,5 @@
 package com.openexchange.groupware;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
-import com.openexchange.groupware.calendar.CalendarOperation;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.server.OCLPermission;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,8 +7,12 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXException;
 import com.openexchange.event.EventConfigImpl;
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResult;
@@ -26,25 +23,19 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
+import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
-import junit.framework.TestCase;
 
 
 public class AppointmentBugTests extends TestCase {
@@ -502,7 +493,8 @@ public class AppointmentBugTests extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);        
         
         int fid = getPrivateFolder(userid);
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
@@ -520,7 +512,8 @@ public class AppointmentBugTests extends TestCase {
         
         int shared_folder_id = 0;
         try {
-            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            //ofa.createFolder(fo, so, true, readcon, writecon, false);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             shared_folder_id = fo.getObjectID();       
             
             CalendarSql csql2 = new CalendarSql(so2);
@@ -583,7 +576,8 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
                 } 
             } catch(Exception e) {
                 e.printStackTrace();
@@ -776,7 +770,8 @@ public class AppointmentBugTests extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);        
         
         int fid = getPrivateFolder(userid);
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
@@ -794,7 +789,8 @@ public class AppointmentBugTests extends TestCase {
         
         int shared_folder_id = 0;
         try {
-            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            //ofa.createFolder(fo, so, true, readcon, writecon, false);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             shared_folder_id = fo.getObjectID();       
             
             CalendarSql csql2 = new CalendarSql(so2);
@@ -819,7 +815,8 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
                 } 
             } catch(Exception e) {
                 e.printStackTrace();
@@ -976,7 +973,8 @@ public class AppointmentBugTests extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);        
         
         int fid = getPrivateFolder(userid);
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
@@ -994,7 +992,8 @@ public class AppointmentBugTests extends TestCase {
         
         int shared_folder_id = 0;
         try {
-            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            //ofa.createFolder(fo, so, true, readcon, writecon, false);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             shared_folder_id = fo.getObjectID();       
             
             CalendarSql csql = new CalendarSql(so);
@@ -1042,7 +1041,8 @@ public class AppointmentBugTests extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
                 } 
             } catch(Exception e) {
                 e.printStackTrace();

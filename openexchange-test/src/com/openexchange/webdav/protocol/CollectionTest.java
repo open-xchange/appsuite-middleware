@@ -200,7 +200,7 @@ public class CollectionTest extends ResourceTest {
 		Thread.sleep(1000);
 		
 		dev2.move(dev.getUrl(), true, true);
-		assertEquals(lastModified, dev.getLastModified());
+		assertFalse(FACTORY.resolveCollection(dev2.getUrl()).exists());
 		
 	}
 		

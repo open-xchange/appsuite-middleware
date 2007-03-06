@@ -22,6 +22,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
@@ -71,39 +72,11 @@ public class FolderTest extends AbstractAJAXTest {
 	private static final int[] mapping_01 = { 0, 2, 4, -1, 8 };
 	
 	public static final int getUserId(final WebConversation conversation,
-			final String hostname, final String entityArg, final String password) throws JSONException, MalformedURLException, IOException,
-			SAXException {
-		final String arg = new StringBuilder(20).append(entityArg).append("_id").toString();
-		if (containsTestArg(arg)) {
-			return Integer.parseInt(getTestArg(arg));
-		}
-		final String sessionId = LoginTest.getSessionId(conversation, hostname, entityArg, password);
-		final int pos = entityArg.indexOf('@');
-		final String entity = pos == -1 ? entityArg : entityArg.substring(0, pos);
-		JSONObject jsonFolder = new JSONObject();
-		jsonFolder.put("title", "FooBar");
-		JSONArray perms = new JSONArray();
-		JSONObject jsonPermission = new JSONObject();
-		jsonPermission.put("entity", entity);
-		jsonPermission.put("group", false);
-		jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
-		perms.put(jsonPermission);
-		jsonFolder.put("permissions", perms);
-		jsonFolder.put("module", "calendar");
-		jsonFolder.put("type", FolderObject.PUBLIC);
-		URLParameter urlParam = new URLParameter();
-		urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-		byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(),
-				bais, "text/javascript; charset=UTF-8");
-		final WebResponse resp = conversation.getResponse(req);
-		JSONObject respObj = new JSONObject(resp.getText());
-		final JSONArray arr = respObj.getJSONArray("error_params");
-		putTestArg(arg, String.valueOf(arr.getInt(0)));
-		return arr.getInt(0);
+			final String hostname, final String entityArg,
+            final String password) throws IOException, SAXException,
+            JSONException {
+        final String sessionId = LoginTest.getSessionId(conversation, hostname, entityArg, password);
+        return ConfigTools.getUserId(conversation, hostname, sessionId);
 	}
 
 	public static List<FolderObject> getRootFolders(final WebConversation conversation, final String hostname,
@@ -707,7 +680,7 @@ public class FolderTest extends AbstractAJAXTest {
 			getFolder(getWebConversation(), getHostName(), getSessionId(), "" + child02, cal, true);
 
 			int subchild01 = insertFolder(getWebConversation(), getHostName(), getSessionId(), userId, false,
-					new int[] { 8, 8, 8, 8 }, false, child01, "DeleteMeImmediatelySubChild01", "calendar",
+					new int[] { 8, 8, 8, 8 }, false, child01, "NonDeleteableSubChild01", "calendar",
 					FolderObject.PUBLIC, secId, new int[] { 8, 8, 8, 8 }, true, true);
 			assertFalse(subchild01 == -1);
 			getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subchild01, cal, true);

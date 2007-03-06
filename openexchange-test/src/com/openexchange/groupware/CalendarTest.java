@@ -2,21 +2,9 @@
 package com.openexchange.groupware;
 
 
-import com.openexchange.ajax.Resource;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.groupware.calendar.RecurringResult;
-import com.openexchange.groupware.calendar.RecurringResults;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.reminder.ReminderHandler;
-import com.openexchange.groupware.reminder.ReminderObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -24,6 +12,9 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
@@ -32,22 +23,29 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.FreeBusyResults;
+import com.openexchange.groupware.calendar.RecurringResult;
+import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAction;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class CalendarTest extends TestCase {
@@ -448,7 +446,8 @@ public class CalendarTest extends TestCase {
         
         int folder_id = getPrivateFolder();
         
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -461,7 +460,8 @@ public class CalendarTest extends TestCase {
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
         int public_folder_id = 0;
         try {
-            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            //ofa.createFolder(fo, so, true, readcon, writecon, false);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             public_folder_id = fo.getObjectID();
             CalendarSql csql = new CalendarSql(so);            
             SearchIterator si = csql.searchAppointments("test", folder_id, 0, "ASC", cols);
@@ -502,7 +502,8 @@ public class CalendarTest extends TestCase {
             assertTrue("Got some results by searching \"*e*\"", !gotresults);
             si.close();
         } finally {
-            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+            //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
         
         
@@ -537,7 +538,8 @@ public class CalendarTest extends TestCase {
         Connection readcon = DBPool.pickup(context);
         Connection writecon = DBPool.pickupWriteable(context);
         
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -548,7 +550,8 @@ public class CalendarTest extends TestCase {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
-        ofa.createFolder(fo, so, true, readcon, writecon, false);
+        //ofa.createFolder(fo, so, true, readcon, writecon, false);
+        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
         int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
         try {
@@ -602,7 +605,8 @@ public class CalendarTest extends TestCase {
             update3.setIgnoreConflicts(true);
             csql.updateAppointmentObject(update3, private_folder_id, new Date(SUPER_END));        
         } finally {
-            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+            //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
@@ -644,7 +648,8 @@ public class CalendarTest extends TestCase {
         Connection readcon = DBPool.pickup(context);
         Connection writecon = DBPool.pickupWriteable(context);
         
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -655,7 +660,8 @@ public class CalendarTest extends TestCase {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
-        ofa.createFolder(fo, so, true, readcon, writecon, false);
+        //ofa.createFolder(fo, so, true, readcon, writecon, false);
+        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
         
         int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
@@ -729,7 +735,8 @@ public class CalendarTest extends TestCase {
             
             si.close();
         } finally {
-            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+            //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
@@ -1036,7 +1043,8 @@ public class CalendarTest extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);        
         
         int fid = getPrivateFolder();
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
@@ -1054,7 +1062,8 @@ public class CalendarTest extends TestCase {
         
         int shared_folder_id = 0;
         try {
-            ofa.createFolder(fo, so, true, readcon, writecon, false);
+            //ofa.createFolder(fo, so, true, readcon, writecon, false);
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             shared_folder_id = fo.getObjectID();       
             
             CalendarDataObject cdao = new CalendarDataObject();
@@ -1097,7 +1106,8 @@ public class CalendarTest extends TestCase {
         } finally {
             try {
                 if (shared_folder_id > 0) {
-                    ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
+                	oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                    //ofa.deleteFolder(shared_folder_id, so, true, SUPER_END);
                 } else {
                     fail("Folder was not created.");
                 }
@@ -1275,7 +1285,8 @@ public class CalendarTest extends TestCase {
         Connection readcon = DBPool.pickup(context);
         Connection writecon = DBPool.pickupWriteable(context);
         
-        OXFolderAction ofa = new OXFolderAction(so);
+        //OXFolderAction ofa = new OXFolderAction(so);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
         OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1286,7 +1297,8 @@ public class CalendarTest extends TestCase {
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
-        ofa.createFolder(fo, so, true, readcon, writecon, false);
+        //ofa.createFolder(fo, so, true, readcon, writecon, false);
+        fo = oxma.createFolder(fo, true, System.currentTimeMillis());
         int public_folder_id = fo.getObjectID();
         CalendarDataObject testobject = null;
         try {
@@ -1305,7 +1317,8 @@ public class CalendarTest extends TestCase {
             }
             
         } finally {
-            ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        	oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+            //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
         }
 
         try {
@@ -1558,15 +1571,7 @@ public class CalendarTest extends TestCase {
         int found_external = 0;
         for (int a = 0; a < test_participants_update.length; a++) {
             if (test_participants_update[a].getType() == Participant.EXTERNAL_USER) {
-                if (test_participants_update[a].getEmailAddress().equals(mail_address)) {
-                    assertEquals("Check display name", display_name, test_participants_update[a].getDisplayName());
-                    assertEquals("Check mail address", mail_address, test_participants_update[a].getEmailAddress());
-                    found_external++;
-                } else if (test_participants_update[a].getEmailAddress().equals(mail_address2)) {
-                    assertEquals("Check display name", display_name2, test_participants_update[a].getDisplayName());
-                    assertEquals("Check mail address", mail_address2, test_participants_update[a].getEmailAddress());                        
-                    found_external++;
-                } else if (test_participants_update[a].getEmailAddress().equals(update_new_mail_1)) {
+                if (test_participants_update[a].getEmailAddress().equals(update_new_mail_1)) {
                     assertEquals("Check display name", update_new_display_1, test_participants_update[a].getDisplayName());
                     assertEquals("Check mail address", update_new_mail_1, test_participants_update[a].getEmailAddress());                        
                     found_external++;
@@ -1578,12 +1583,8 @@ public class CalendarTest extends TestCase {
             }
         }        
         
-        assertEquals("Found all 4 external participants after update", 4, found_external);
-        
+        assertEquals("Found all 2 external participants after update", 2, found_external);
         
     }    
-  
-    
-    
-    
+   
 }

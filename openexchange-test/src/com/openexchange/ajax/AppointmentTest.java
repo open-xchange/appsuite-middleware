@@ -967,6 +967,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		StringBuffer sb = new StringBuffer();
 		sb.append("T" + p.getType());
 		sb.append("ID" + p.getIdentifier());
+		sb.append("E" + p.getEmailAddress());
+		sb.append("D" + p.getDisplayName());
 		
 		return sb.toString();
 	}

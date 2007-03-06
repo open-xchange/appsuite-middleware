@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -13,6 +15,7 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionHolder;
@@ -50,8 +53,12 @@ public class TestWebdavFactoryBuilder {
 		factory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
 		factory.setProvider(new DBPoolProvider());
 		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
+		
 		try {
-			factory.setSessionHolder(new DummySessionHolder("thorben", 1,5));
+            final ContextStorage ctxstor = ContextStorage.getInstance();
+            final int contextId = ctxstor.getContextId("defaultcontext");
+            final Context ctx = ctxstor.getContext(contextId);
+			factory.setSessionHolder(new DummySessionHolder("thorben", ctx));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -62,10 +69,7 @@ public class TestWebdavFactoryBuilder {
 
 		private SessionObject session = null;
 		
-		public DummySessionHolder(String username, int context, int filestoreId) throws LdapException, SQLException, DBPoolingException, OXException {
-			ContextImpl ctx = new ContextImpl(context);
-			ctx.setFilestoreId(filestoreId);
-			ctx.setFileStorageQuota(Long.MAX_VALUE);
+		public DummySessionHolder(String username, Context ctx) throws LdapException, SQLException, DBPoolingException, OXException {
 			session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(username)  , ctx,"12345");
 		}
 		
