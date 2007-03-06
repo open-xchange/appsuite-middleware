@@ -50,7 +50,6 @@
 
 package com.openexchange.consistency;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.SortedSet;
 
@@ -75,7 +74,7 @@ import com.openexchange.tools.file.FileStorageException;
  */
 public class AttachmentProblemSolver extends ProblemSolver {
 
-	private Log LOG = LogFactory.getLog(DBDelProblemSolver.class);
+	private static final Log LOG = LogFactory.getLog(DBDelProblemSolver.class);
 	
 	/**
      * Don't allow to create a DBDelProblemSolver object without specifying a
@@ -97,15 +96,15 @@ public class AttachmentProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteEntries(SortedSet<String> set, Context ctx) {
+	public void deleteEntries(final SortedSet<String> set, final Context ctx) {
 		// Now we go through the set an delete each superfluous entry:
-		Iterator<String> it = set.iterator();
+		final Iterator<String> it = set.iterator();
 		while (it.hasNext()) {
 			try {
-				String identifier = it.next();
+				final String identifier = it.next();
 				attachments.setTransactional(true);
 				attachments.startTransaction();
-				int[] numbers = attachments.removeAttachment(identifier, ctx);
+				final int[] numbers = attachments.removeAttachment(identifier, ctx);
 				attachments.commit();
 				if (numbers[0] ==  1) {
 					LOG.info("Inserted entry for identifier " + identifier +
@@ -148,19 +147,19 @@ public class AttachmentProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void dummyEntries(SortedSet<String> set, Context ctx) {
+	public void dummyEntries(final SortedSet<String> set, final Context ctx) {
 		/* 
 		 * Here we operate in two stages. First we create a dummy entry in the
 		 * filestore. Second we update the Entries in the database
 		 */
-		Iterator<String> it = set.iterator();
+		final Iterator<String> it = set.iterator();
 		while (it.hasNext()) {
 			try {
-				String identifier = createDummyFile();
-				String old_identifier = it.next();
+				final String identifier = createDummyFile();
+				final String old_identifier = it.next();
 				attachments.setTransactional(true);
 				attachments.startTransaction();
-				int changed = attachments.modifyAttachment(old_identifier, identifier, 
+				final int changed = attachments.modifyAttachment(old_identifier, identifier, 
 						"\nCaution! The file has changed", "text/plain", ctx);
 				attachments.commit();
 				if (changed == 1) {

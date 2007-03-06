@@ -266,6 +266,9 @@ public abstract class AbstractAgent {
 	 * Remove a Snmp adaptor and start it
 	 */
 	public void removeSnmpAdaptor(final int port) {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(new StringBuilder("removeSnmpAdaptor() with ").append(port).toString());
+		}
 	}
 
 	public abstract void run();
