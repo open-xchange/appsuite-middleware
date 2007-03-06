@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.AdminJobExecutorGlobalInterface;
-import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.jobs.AdminJob;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -86,7 +86,7 @@ public class AdminJobExecutor implements AdminJobExecutorInterface, AdminJobExec
 	 * 
 	 */
 	public AdminJobExecutor() {
-        this.cache = ClientAdminThread.cache;
+        this.cache = ClientAdminThreadExtended.cache;
         this.prop    = cache.getProperties();
         int threadCount = Integer.parseInt(prop.getProp("CONCURRENT_JOBS","2"));
         log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
