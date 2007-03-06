@@ -56,7 +56,7 @@ import java.io.Writer;
 
 public class FoldingWriter implements VersitDefinition.Writer {
 
-	private Writer w;
+	private final Writer w;
 
 	private int LineLength = 0;
 
@@ -64,10 +64,10 @@ public class FoldingWriter implements VersitDefinition.Writer {
 		this.w = w;
 	}
 
-	public void write(String s) throws IOException {
+	public void write(final String s) throws IOException {
 		int start = 0, len = s.length() + LineLength;
 		while (len > 75) {
-			int delta = 75 - LineLength;
+			final int delta = 75 - LineLength;
 			w.write(s.substring(start, start + delta));
 			w.write("\r\n ");
 			start += delta;
@@ -83,7 +83,7 @@ public class FoldingWriter implements VersitDefinition.Writer {
 		LineLength = 0;
 	}
 
-	public void writeln(String s) throws IOException {
+	public void writeln(final String s) throws IOException {
 		write(s);
 		writeln();
 	}
