@@ -201,13 +201,12 @@ public final class ConfigDB {
         if (null == readDriverClass) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,
                 Property.READ_DRIVER_CLASS.propertyName);
-        } else {
-            try {
-                Class.forName(readDriverClass);
-            } catch (ClassNotFoundException e) {
-                throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
-                    readDriverClass);
-            }
+        }
+        try {
+            Class.forName(readDriverClass);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
+                readDriverClass);
         }
         if (!isWriteDefined()) {
             return;
@@ -217,13 +216,12 @@ public final class ConfigDB {
         if (null == writeDriverClass) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,
             Property.WRITE_DRIVER_CLASS.propertyName);
-        } else {
-            try {
-                Class.forName(writeDriverClass);
-            } catch (ClassNotFoundException e) {
-                throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
-                    writeDriverClass);
-            }
+        }
+        try {
+            Class.forName(writeDriverClass);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
+                writeDriverClass);
         }
     }
 
