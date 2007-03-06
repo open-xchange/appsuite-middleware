@@ -3854,6 +3854,8 @@ public class MailInterfaceImpl implements MailInterface {
 	public static OXMailException handleMessagingException(final MessagingException e) {
 		return handleMessagingException(e, null);
 	}
+	
+	private static final String ERR_AUTH_FAILED = "BAD authentication failed";
 
 	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps) {
 		final OXMailException oxme;
@@ -3939,6 +3941,8 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			} else if (e.getNextException() instanceof UnknownHostException) {
 				oxme = new OXMailException(MailCode.UNKNOWN_HOST, e, e.getMessage());
+			} else if (e.getMessage().indexOf(ERR_AUTH_FAILED) != -1) {
+				oxme = new OXMailException(MailCode.LOGIN_FAILED, e, new Object[0]);
 			} else {
 				/*
 				 * Default case

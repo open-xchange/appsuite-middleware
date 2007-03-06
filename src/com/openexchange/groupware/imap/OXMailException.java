@@ -112,12 +112,12 @@ public class OXMailException extends OXException {
 		 */
 		UNKNOWN_HOST("The IP address of host \"%s\" could not be determined", Category.SUBSYSTEM_OR_SERVICE_DOWN, 7),
 		/**
-		 * Wrong or missing login data to access server (%s)
+		 * Wrong or missing login data to access server %s
 		 * <p>
 		 * Invalid credentials
 		 * </p>
 		 */
-		INVALID_CREDENTIALS("Wrong or missing login data to access server (%s)", Category.PERMISSION, 8),
+		INVALID_CREDENTIALS("Wrong or missing login data to access server %s", Category.PERMISSION, 8),
 		/**
 		 * Folder is closed: %s
 		 * <p>
@@ -517,7 +517,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Html-2-Text conversion failed: %s
 		 */
-		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.PROGRAMMING_ERROR, 93);
+		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.PROGRAMMING_ERROR, 93),
+		/**
+		 * Login to imap server failed, please try again later
+		 */
+		LOGIN_FAILED("Login to imap server failed, please try again later", Category.PERMISSION, 94);
 
 		/**
 		 * Message of the exception.
