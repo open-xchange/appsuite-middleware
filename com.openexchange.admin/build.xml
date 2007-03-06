@@ -91,6 +91,22 @@
 	   	</subant>
 	</target>
 
+	<target name="manifest">
+		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
+		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
+				<attribute name="Bundle-ClassPath" value=".,
+					 external:$libdir$/ox_server.jar,
+					 external:$libdir$/commons-fileupload.jar,
+					 external:$libdir$/commons-httpclient-2.0.2.jar,
+					 external:$libdir$/commons-io.jar,
+					 external:$libdir$/commons-logging.jar,
+					 external:$libdir$/concurrent.jar,
+					 external:$libdir$/jcs-1.2.7.9.2.jar,
+					 external:$libdir$/jdom.jar,
+					 external:$libdir$/mysql-connector-java-3.1.13-bin.jar"/>
+		</manifest>
+	</target>
+
 	<target name="compile" depends="replacer">
         <mkdir dir="classes"/>
         <javac failonerror="true" srcdir="src" debug="true" destdir="classes">
@@ -122,12 +138,12 @@
     </target>
 
 
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile,manifest">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${daemon.jar}"
         excludes="com/openexchange/admin/test**"
         basedir="classes"
-        manifest="META-INF/MANIFEST.MF"/>
+        manifest="META-INF/MANIFEST.MF.package"/>
 		<antcall target="jar-plugins"></antcall>
     </target>
 
