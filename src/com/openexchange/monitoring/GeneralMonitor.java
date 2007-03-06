@@ -61,6 +61,8 @@ import javax.management.ObjectName;
  *
  */
 public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralMonitor.class);
 
 	private MBeanServer server;
 
@@ -119,12 +121,21 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	}
 
 	public void postRegister(final Boolean registrationDone) {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
+		}
 	}
 
 	public void preDeregister() throws Exception {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("preDeregister()");
+		}
 	}
 
 	public void postDeregister() {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("postDeregister()");
+		}
 	}
 
 	public Integer getNbObjects() {

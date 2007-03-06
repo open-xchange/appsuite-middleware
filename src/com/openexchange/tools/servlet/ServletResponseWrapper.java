@@ -290,19 +290,18 @@ public class ServletResponseWrapper implements ServletResponse {
 		 */
 		if (outputSelection == USE_OUTPUT_STREAM) {
 			throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
-		} else {
-			if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
-				outputSelection = USE_OUTPUT_WRITER;
-			}
-			if (bufferSize > 0) {
-				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
-						getCharacterEncoding()), bufferSize), true);
-			} else {
-				writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
-						getCharacterEncoding())), true);
-			}
-			return writer;
 		}
+		if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
+			outputSelection = USE_OUTPUT_WRITER;
+		}
+		if (bufferSize > 0) {
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					getCharacterEncoding()), bufferSize), true);
+		} else {
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(oxOutputStream,
+					getCharacterEncoding())), true);
+		}
+		return writer;
 	}
 
 	/*
@@ -384,12 +383,11 @@ public class ServletResponseWrapper implements ServletResponse {
 		 */
 		if (outputSelection == USE_OUTPUT_WRITER) {
 			throw new IllegalStateException("Servlet's Writer has already been selected as output");
-		} else {
-			if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
-				outputSelection = USE_OUTPUT_STREAM;
-			}
-			return oxOutputStream;
 		}
+		if (outputSelection == USE_OUTPUT_NONE_SELECTED_YET) {
+			outputSelection = USE_OUTPUT_STREAM;
+		}
+		return oxOutputStream;
 	}
 
 	public void reset() {

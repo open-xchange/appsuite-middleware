@@ -52,7 +52,6 @@
 package com.openexchange.tools.encoding;
 
 import sun.misc.BASE64Encoder;
-import sun.misc.BASE64Decoder;
 
 /**
  * Base64
@@ -62,19 +61,19 @@ import sun.misc.BASE64Decoder;
 
 public class Base64 {
 	
-	public Base64() {
-		
+	private Base64() {
+		super();
 	}
 	
-	public static String encode(byte[] b) {
+	public static String encode(final byte[] b) {
 		return new BASE64Encoder().encode(b);
 	}
 	
-	public static String encode(String s) throws Exception {
+	public static String encode(final String s) throws Exception {
 		return new BASE64Encoder().encode(s.getBytes("UTF-8"));
 	}
 	
-	public static byte[] decode(String s) throws Exception {
+	public static byte[] decode(final String s) throws Exception {
 		return new sun.misc.BASE64Decoder().decodeBuffer(s);
 	}
 }

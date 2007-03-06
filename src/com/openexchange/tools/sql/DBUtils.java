@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -168,9 +167,10 @@ public final class DBUtils {
 		return (stmt == null) ? "" : stmt.toString();
 	}
 
-	public static String getStatement(PreparedStatement stmt, String query) {
-		if(stmt == null)
+	public static String getStatement(final PreparedStatement stmt, final String query) {
+		if(stmt == null) {
 			return query;
+		}
 		try {
 			return stmt.toString();
 		} catch (Exception x) {

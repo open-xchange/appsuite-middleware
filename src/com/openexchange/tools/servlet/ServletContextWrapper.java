@@ -55,7 +55,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -79,9 +80,9 @@ public class ServletContextWrapper implements ServletContext {
 
 	public static final int OX_SERVLET_PATCH = 2;
 
-	protected Hashtable<String, Object> attributes = new Hashtable<String, Object>();
+	protected Map<String, Object> attributes = new HashMap<String, Object>();
 
-	private ServletConfigWrapper servletconfigwrapper;
+	private final ServletConfigWrapper servletconfigwrapper;
 
 	public ServletContextWrapper(ServletConfigWrapper servletconfigwrapper) {
 		this.servletconfigwrapper = servletconfigwrapper;
@@ -114,9 +115,8 @@ public class ServletContextWrapper implements ServletContext {
 	public Object getAttribute(final String name) {
 		if (attributes.containsKey(name)) {
 			return attributes.get(name);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	public Set getResourcePaths(final String string) {

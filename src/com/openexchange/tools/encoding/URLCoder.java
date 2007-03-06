@@ -62,11 +62,14 @@ import java.util.BitSet;
  * @author <a href="mailto:m.klein@comfire.de">Marcus Klein </a>
  */
 public final class URLCoder {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(URLCoder.class);
 
 	private URLCoder() {
+		super();
 	}
 
-	public static String encode(String s) throws UnsupportedEncodingException {
+	public static String encode(final String s) throws UnsupportedEncodingException {
 		return encode(s, "UTF-8");
 	}
 
@@ -85,11 +88,11 @@ public final class URLCoder {
         }
     }
 
-	public static String decode(String s, String encoding) throws UnsupportedEncodingException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	public static String decode(final String s, final String encoding) throws UnsupportedEncodingException {
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int pos = 0;
 		while (pos < s.length()) {
-			char c = s.charAt(pos++);
+			final char c = s.charAt(pos++);
 			if ('\u0025' == c) {
 				baos.write(Hex.toByte(s.substring(pos, pos + 2)));
 				pos += 2;
@@ -97,18 +100,18 @@ public final class URLCoder {
 				baos.write((byte) c);
 			}
 		}
-		String retval = new String(baos.toByteArray(), encoding);
+		final String retval = new String(baos.toByteArray(), encoding);
 		try {
 			baos.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		}
 		return retval;
 	}
 
-	public static String encode(String s, String encoding) throws UnsupportedEncodingException {
-		byte[] b = s.getBytes(encoding);
-		StringBuffer sb = new StringBuffer(b.length);
+	public static String encode(final String s, final String encoding) throws UnsupportedEncodingException {
+		final byte[] b = s.getBytes(encoding);
+		final StringBuilder sb = new StringBuilder(b.length);
 		for (int i = 0; i < b.length; i++) {
 			if (needToBeEncoded.get(b[i] < 0 ? 256 + b[i] : b[i])) {
 				sb.append('\u0025');

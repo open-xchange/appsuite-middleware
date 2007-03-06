@@ -62,6 +62,7 @@ import javax.mail.internet.MimeUtility;
 public class Helper {
 
 	private Helper() {
+		super();
 	}
 	
 	/**
@@ -79,10 +80,10 @@ public class Helper {
 	 * @return the encoded filename that can be put directly into the filename of the content-disposition header
 	 * @throws UnsupportedEncodingException if the given encoding is not supported by java.
 	 */
-	public static String encodeFilename(String orig, String encoding, boolean internetExplorer) throws UnsupportedEncodingException {
+	public static String encodeFilename(final String orig, final String encoding, final boolean internetExplorer) throws UnsupportedEncodingException {
 		String encoded = orig;
 		boolean isAscii = true;
-		char[] namechars = orig.toCharArray();
+		final char[] namechars = orig.toCharArray();
 		for (int i = orig.length(); isAscii && --i>=0;) {
 			isAscii &= namechars[i] < 0x7f; // non-ascii characters
 			isAscii &= namechars[i] > 0x21; // space and control characters
@@ -109,16 +110,16 @@ public class Helper {
      * @param data The string which should be encoded
      * @return The (may) correct encoded String
      */
-    public static String decodeText(String data) {
+    public static String decodeText(final String data) {
         int start = 0, i;
-        StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer();
         while ((i = data.indexOf("=?", start)) >= 0) {
             sb.append(data.substring(start, i));
-            int end = data.indexOf("?=", i);
+            final  int end = data.indexOf("?=", i);
             if (end < 0) {
                 break;
             }
-            String s = data.substring(i, end + 2);
+            final String s = data.substring(i, end + 2);
             try {
                 sb.append(MimeUtility.decodeWord(s));
             } catch (Exception e) {
@@ -126,10 +127,12 @@ public class Helper {
             }
             start = end + 2;
         }
-        if (start == 0)
+        if (start == 0) {
             return data;
-        if (start < data.length())
+        }
+        if (start < data.length()) {
             sb.append(data.substring(start));
+        }
         return sb.toString();
     }
 }

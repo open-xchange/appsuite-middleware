@@ -47,10 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.tools.encoding;
-
 
 /**
  * QuotedPrintable
@@ -59,75 +56,74 @@ package com.openexchange.tools.encoding;
  */
 
 public class QuotedPrintable {
-    
-    public QuotedPrintable() {
-	
-    } 
-    
-    public static String encode(String s) {
-	
-	StringBuffer sb = new StringBuffer();
-	
-	int i = 0; 
-	String x = "";
-	
-	try {
-	    byte b[] = s.getBytes();
-	    
-	    for (int a = 0; a < b.length; a++) {
-		if ((b[a] >= 32) && (b[a] <= 127) && (b[a] != 61)) {
-		    sb.append((char)b[a]);
-		} else {
-		    i = b[a];
-		    if (i < 0) {
-			i = i + 256;
-		    } 
-		    
-		    x = Integer.toString(i, 16).toUpperCase();
-		    
-		    if (x.length() == 1) {
-			x = "0" + x;
-		    }
-		    
-		    sb.append("=" + x);
+
+	private QuotedPrintable() {
+		super();
+	}
+
+	public static String encode(final String s) {
+
+		final StringBuilder sb = new StringBuilder();
+
+		int i = 0;
+		String x = "";
+
+		try {
+			final byte b[] = s.getBytes();
+
+			for (int a = 0; a < b.length; a++) {
+				if ((b[a] >= 32) && (b[a] <= 127) && (b[a] != 61)) {
+					sb.append((char) b[a]);
+				} else {
+					i = b[a];
+					if (i < 0) {
+						i = i + 256;
+					}
+
+					x = Integer.toString(i, 16).toUpperCase();
+
+					if (x.length() == 1) {
+						x = '0' + x;
+					}
+
+					sb.append('=').append(x);
+				}
+			}
+		} catch (Exception exc) {
+			System.out.println(new StringBuilder("encode error: ").append(exc).toString());
 		}
-	    } 
-	} catch (Exception exc) {
-	    System.out.println("encode error: " + exc);
-	} 
 
-	return sb.toString();
-    } 
+		return sb.toString();
+	}
 
-    public static String decode(String s) {
-	StringBuffer sb = new StringBuffer();
-	
-	int i = 0; 
+	public static String decode(final String s) {
+		final StringBuilder sb = new StringBuilder();
 
-	String x = "";
-	
-	try {
-	    byte b[] = s.getBytes();
-	    
-	    for (int a = 0; a < b.length; a++) {
-		if (b[a] == 61) {
-		    if ((a+2) < b.length) {
-			x = ((char)b[a+1]+ "" + (char)b[a+2]);
-			
-			i = Integer.parseInt(x,16); 
-			
-			sb.append((char)i);
-			a = a+2;
-		    } 
-		} else {
-		    sb.append((char)b[a]);
-		} 
-	    }  
-	} catch (Exception exc) {
-	    System.out.println("decode error: " + exc);
-	} 
+		int i = 0;
 
-	return sb.toString();	
-    } 
-} 
+		String x = "";
 
+		try {
+			final byte b[] = s.getBytes();
+
+			for (int a = 0; a < b.length; a++) {
+				if (b[a] == 61) {
+					if ((a + 2) < b.length) {
+						x = ((char) b[a + 1] + "" + (char) b[a + 2]);
+
+						i = Integer.parseInt(x, 16);
+
+						sb.append((char) i);
+						a = a + 2;
+					}
+				} else {
+					sb.append((char) b[a]);
+				}
+			}
+		} catch (Exception exc) {
+			System.out.println("decode error: " + exc);
+		}
+
+		return sb.toString();
+	}
+}

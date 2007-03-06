@@ -56,8 +56,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -94,11 +95,11 @@ public class ServletRequestWrapper implements ServletRequest {
 		singleValueHeaders.add(CONTENT_LENGTH);
 	}
 
-	private final Hashtable<String, Object> attributes = new Hashtable<String, Object>();
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
-	private final Hashtable<String, String[]> parameters = new Hashtable<String, String[]>();
+	private final Map<String, String[]> parameters = new HashMap<String, String[]>();
 
-	protected final Hashtable<String, String[]> headers = new Hashtable<String, String[]>();
+	protected final Map<String, String[]> headers = new HashMap<String, String[]>();
 
 	private String characterEncoding;
 
@@ -219,7 +220,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public Enumeration getHeaderNames() {
-		return headers.keys();
+		return new IteratorEnumeration(headers.keySet().iterator());
 	}
 
 	public void setParameterValues(final String name, final String[] values) {
@@ -235,7 +236,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public Enumeration getParameterNames() {
-		return parameters.keys();
+		return new IteratorEnumeration(parameters.keySet().iterator());
 	}
 
 	public Map getParameterMap() {
@@ -251,7 +252,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public Enumeration getAttributeNames() {
-		return attributes.keys();
+		return new IteratorEnumeration(attributes.keySet().iterator());
 	}
 
 	public void removeAttribute(final String name) {
@@ -393,40 +394,58 @@ public class ServletRequestWrapper implements ServletRequest {
 		final Class type = obj.getClass();
 		if (!type.isArray()) {
 			throw new IllegalArgumentException(obj.getClass().toString());
-		} else {
-			return (new Enumeration() {
-				int size = Array.getLength(obj);
-
-				int cursor;
-
-				public boolean hasMoreElements() {
-					return (cursor < size);
-				}
-
-				public Object nextElement() {
-					return Array.get(obj, cursor++);
-				}
-			});
 		}
+		return (new Enumeration() {
+			int size = Array.getLength(obj);
+
+			int cursor;
+
+			public boolean hasMoreElements() {
+				return (cursor < size);
+			}
+
+			public Object nextElement() {
+				return Array.get(obj, cursor++);
+			}
+		});
 	}
 
 	public int getRemotePort() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public String getLocalName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getLocalAddr() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public int getLocalPort() {
-		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	/**
+	 * IteratorEnumeration
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 */
+	private static class IteratorEnumeration implements Enumeration {
+
+		private final Iterator iter;
+		
+		public IteratorEnumeration(Iterator iter) {
+			this.iter = iter;
+		}
+		
+		public boolean hasMoreElements() {
+			return iter.hasNext();
+		}
+
+		public Object nextElement() {
+			return iter.next();
+		}
+		
 	}
 }

@@ -214,7 +214,7 @@ public class MailTools {
 					boolean end = false;
 					while (st.hasMoreTokens()) {
 						final String tmp = st.nextToken();
-						if (!end && tmp.equals(" ")) {
+						if (!end && " ".equals(tmp)) {
 							retval.append(replaceWith);
 						} else {
 							retval.append(tmp);

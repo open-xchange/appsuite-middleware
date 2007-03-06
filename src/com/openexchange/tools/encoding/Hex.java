@@ -58,6 +58,7 @@ package com.openexchange.tools.encoding;
 public class Hex {
 	
 	private Hex() {
+		super();
 	}
 
 	/**
@@ -68,21 +69,21 @@ public class Hex {
 	 * @param b The byte array to convert.
 	 * @return A string with hexadezimal coded bytes.
 	 */
-	public static String toHexString(byte[] b) {
-		StringBuffer sb = new StringBuffer();
+	public static String toHexString(final byte[] b) {
+		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < b.length; i++) {
 			if (b[i] < 0x10 && b[i] >= 0) {
-				sb.append("0");
+				sb.append('0');
 			}
 			sb.append(Integer.toHexString(b[i] < 0 ? 256+b[i] : b[i]));
 		}
 		return sb.toString();
 	}
 
-	public static String toHex(byte b) {
-		StringBuffer sb = new StringBuffer(2);
+	public static String toHex(final byte b) {
+		final StringBuffer sb = new StringBuffer(2);
 		if (b >= 0 && b < 0x10) {
-			sb.append("0");
+			sb.append('0');
 		}
 		sb.append(Integer.toHexString(b < 0 ? 256+b : b));
 		return sb.toString();
@@ -94,8 +95,8 @@ public class Hex {
 	 * @param hex
 	 * @return
 	 */	
-	public static byte[] toByteArray(String hex) throws NumberFormatException {
-		int length = hex.length() / 2;
+	public static byte[] toByteArray(final String hex) throws NumberFormatException {
+		final int length = hex.length() / 2;
 		byte[] retval = new byte[length];
 		for (int i = 0; i < length; i++) {
 			retval[i] = toByte(hex.substring(i*2, i*2+2));
@@ -103,8 +104,8 @@ public class Hex {
 		return retval;
 	}
 	
-	public static byte toByte(String hex) {
-		int value = Integer.parseInt(hex, 16);
+	public static byte toByte(final String hex) {
+		final int value = Integer.parseInt(hex, 16);
 		return (byte)(value < 128 ? value : value-256);
 	}
 }

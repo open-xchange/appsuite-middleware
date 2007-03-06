@@ -95,9 +95,8 @@ public class ServletConfigWrapper implements ServletConfig {
 	public String getInitParameter(final String name) {
 		if (init_parameter.containsKey(name)) {
 			return init_parameter.get(name);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	public String getServletName() {
@@ -121,7 +120,7 @@ public class ServletConfigWrapper implements ServletConfig {
 
 		private final Iterator iter;
 		
-		private IteratorEnumeration(Iterator iter) {
+		public IteratorEnumeration(Iterator iter) {
 			this.iter = iter;
 		}
 		

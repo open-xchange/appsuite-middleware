@@ -53,11 +53,8 @@ package com.openexchange.monitoring;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Stack;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
@@ -80,7 +77,7 @@ public class MonitorAgent extends AbstractAgent {
 	
 	private static MonitorAgent instance;
 	
-	private static MBeanServer alternativeMBeanServer;
+	//private static MBeanServer alternativeMBeanServer;
 	
 	/*
 	 * Member fields
@@ -146,7 +143,7 @@ public class MonitorAgent extends AbstractAgent {
 		}
 	}
 	
-	private static final void createAlternativeMBeanServer() {
+	/*private static final void createAlternativeMBeanServer() {
 		synchronized (MonitorAgent.class) {
 			if (alternativeMBeanServer == null) {
 				final List servers = MBeanServerFactory.findMBeanServer(null);
@@ -155,7 +152,7 @@ public class MonitorAgent extends AbstractAgent {
 	            }
 			}
 		}
-	}
+	}*/
 
 	private MonitorAgent() {
 		super();
@@ -253,9 +250,11 @@ public class MonitorAgent extends AbstractAgent {
 		return ip;
 	}
 	
+	private static final String ERR_REGISTRATION = "MBean registration denied: MonitorAgent is not running";
+	
 	public void registerMBean(final String name, final Object mbean) throws Exception {
 		if (!running) {
-			throw new Exception("MBean registration denied: MonitorAgent is not running");
+			throw new Exception(ERR_REGISTRATION);
 		}
 		final ObjectName objectName = new ObjectName(name);
 		super.registerMBean(objectName, mbean);
@@ -264,7 +263,7 @@ public class MonitorAgent extends AbstractAgent {
 	
 	public void registerMBean(final ObjectName objectName, final Object mbean) throws Exception {
 		if (!running) {
-			throw new Exception("MBean registration denied: MonitorAgent is not running");
+			throw new Exception(ERR_REGISTRATION);
 		}
 		super.registerMBean(objectName, mbean);
 		objectNames.push(objectName);
@@ -272,7 +271,7 @@ public class MonitorAgent extends AbstractAgent {
 	
 	 public void unregisterMBean(final String name) throws Exception {
 		 if (!running) {
-				throw new Exception("MBean registration denied: MonitorAgent is not running");
+				throw new Exception(ERR_REGISTRATION);
 			}
 		 final ObjectName objectName = new ObjectName(name);
 		 super.unregisterMBean(objectName);
@@ -281,7 +280,7 @@ public class MonitorAgent extends AbstractAgent {
 	 
 	 public void unregisterMBean(final ObjectName objectName) throws Exception {
 		 if (!running) {
-				throw new Exception("MBean registration denied: MonitorAgent is not running");
+				throw new Exception(ERR_REGISTRATION);
 			}
 		 super.unregisterMBean(objectName);
 		 objectNames.remove(objectName);

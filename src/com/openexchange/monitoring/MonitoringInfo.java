@@ -228,10 +228,14 @@ public class MonitoringInfo {
 	}
 	
 	public static void setNumberOfSessionsInContainer(final int[] numberOfSessionsInContainer) {
-		MonitoringInfo.numberOfSessionsInContainer = numberOfSessionsInContainer;
+		MonitoringInfo.numberOfSessionsInContainer = new int[numberOfSessionsInContainer.length];
+		System.arraycopy(numberOfSessionsInContainer, 0, MonitoringInfo.numberOfSessionsInContainer, 0,
+				numberOfSessionsInContainer.length);
 	}
 	
 	public static int[] getNumberOfSessionsInContainer() {
-		return numberOfSessionsInContainer;
+		final int[] retval = new int[numberOfSessionsInContainer.length];
+		System.arraycopy(numberOfSessionsInContainer, 0, retval, 0, retval.length);
+		return retval;
 	}
 }
