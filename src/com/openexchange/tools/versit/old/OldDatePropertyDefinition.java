@@ -64,15 +64,15 @@ public class OldDatePropertyDefinition extends OldDateTimePropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner ss)
+	protected Object parseValue(final Property property, final StringScanner ss)
 			throws IOException {
-		DateTimeValue date = new DateTimeValue();
+		final DateTimeValue date = new DateTimeValue();
 		parseDate(ss, date);
 		date.hasTime = false;
 		return date;
 	}
 
-	public String writeValue(Property property, Object value) {
+	public String writeValue(final Property property, final Object value) {
 		return writeDate((DateTimeValue) value);
 	}
 

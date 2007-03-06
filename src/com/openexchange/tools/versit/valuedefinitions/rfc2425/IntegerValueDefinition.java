@@ -69,11 +69,12 @@ public class IntegerValueDefinition extends ValueDefinition {
 	
 	private static Pattern IntegerPattern = Pattern.compile("[-+]?\\d+");
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		String value = s.regex(IntegerPattern);
-		if (value == null)
+		final String value = s.regex(IntegerPattern);
+		if (value == null) {
 			throw new VersitException(s, "Integer expected");
+		}
 		return Integer.valueOf(value);
 	}
 

@@ -65,7 +65,7 @@ public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		int sign = 1;
 		switch (s.peek) {
@@ -77,8 +77,9 @@ public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 			throw new VersitException(s, "UTC offset expected");
 		}
 		int offset = s.parseNumber(2) * 3600000;
-		if (s.peek != ':')
+		if (s.peek != ':') {
 			throw new VersitException(s, "UTC offset expected");
+		}
 		s.read();
 		offset += s.parseNumber(2) * 60000;
 		return Integer.valueOf(sign * offset);
@@ -86,12 +87,10 @@ public class OldTZPropertyDefinition extends OldShortPropertyDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 
-	protected String writeValue(Property property, Object value) {
-		int offset = ((Integer) value).intValue();
-		String retval = (offset >= 0 ? '+' : '-')
-				+ Format.format(offset / 3600000)
-				+ Format.format(offset / 60000 % 60);
-		return retval;
+	protected String writeValue(final Property property, final Object value) {
+		final int offset = ((Integer) value).intValue();
+		return new StringBuilder().append((offset >= 0 ? '+' : '-')).append(Format.format(offset / 3600000)).append(
+				Format.format(offset / 60000 % 60)).toString();
 	}
 
 }

@@ -51,6 +51,7 @@
 
 package com.openexchange.tools.versit;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +61,7 @@ import java.util.regex.Pattern;
  */
 public class StringScanner extends Scanner {
 
-	private String Text;
+	private final String Text;
 	
 	private String UpcaseText = null;
 
@@ -72,7 +73,7 @@ public class StringScanner extends Scanner {
 	 * @param text
 	 *            is the string to scan.
 	 */
-	public StringScanner(Scanner s, String text) {
+	public StringScanner(final Scanner s, final String text) {
 		Line = s.getLine();
 		Column = s.getColumn();
 		Text = text;
@@ -83,14 +84,15 @@ public class StringScanner extends Scanner {
 		if (pos < Text.length()) {
 			Column++;
 			return Text.charAt(pos++);
-		} else
-			return -1;
+		}
+		return -1;
 	}
 
-	public boolean match(String text) {
-		if (peek == -1)
+	public boolean match(final String text) {
+		if (peek == -1) {
 			return text.length() == 0;
-		boolean retval = Text.startsWith(text, pos - 1);
+		}
+		final boolean retval = Text.startsWith(text, pos - 1);
 		if (retval) {
 			pos += text.length() - 1;
 			peek = readImpl();
@@ -98,12 +100,14 @@ public class StringScanner extends Scanner {
 		return retval;
 	}
 
-	public boolean imatch(String text) {
-		if (peek == -1)
+	public boolean imatch(final String text) {
+		if (peek == -1) {
 			return text.length() == 0;
-		if (UpcaseText == null)
+		}
+		if (UpcaseText == null) {
 			UpcaseText = Text.toUpperCase();
-		boolean retval = UpcaseText.startsWith(text.toUpperCase(), pos - 1);
+		}
+		final boolean retval = UpcaseText.startsWith(text.toUpperCase(Locale.ENGLISH), pos - 1);
 		if (retval) {
 			pos += text.length() - 1;
 			peek = readImpl();
@@ -111,23 +115,26 @@ public class StringScanner extends Scanner {
 		return retval;
 	}
 	
-	public String regex(Pattern pattern) {
-		if (peek == -1)
+	public String regex(final Pattern pattern) {
+		if (peek == -1) {
 			return null;
-		String rest = Text.substring(pos - 1, Text.length());
-		Matcher m = pattern.matcher(rest);
-		if (!m.lookingAt())
+		}
+		final String rest = Text.substring(pos - 1, Text.length());
+		final Matcher m = pattern.matcher(rest);
+		if (!m.lookingAt()) {
 			return null;
-		String retval = Text.substring(pos - 1, pos - 1 + m.end());
+		}
+		final String retval = Text.substring(pos - 1, pos - 1 + m.end());
 		pos += m.end() - 1;
 		peek = readImpl();
 		return retval;
 	}
 	
 	public String getRest() {
-		if (peek < 0)
+		if (peek < 0) {
 			return "";
-		int start = pos - 1;
+		}
+		final int start = pos - 1;
 		pos = Text.length();
 		peek = -1;
 		return Text.substring(start);

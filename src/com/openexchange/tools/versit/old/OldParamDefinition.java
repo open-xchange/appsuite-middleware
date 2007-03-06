@@ -62,9 +62,11 @@ public class OldParamDefinition {
 
 	public static final OldParamDefinition Default = new OldParamDefinition();
 	
-	private HashSet<String> Values = new HashSet<String>();
+	private final HashSet<String> Values = new HashSet<String>();
 	
-	public OldParamDefinition() {}
+	public OldParamDefinition() {
+		super();
+	}
 	
 	public OldParamDefinition(String[] values) {
 		for (int i = 0; i < values.length; i++) {

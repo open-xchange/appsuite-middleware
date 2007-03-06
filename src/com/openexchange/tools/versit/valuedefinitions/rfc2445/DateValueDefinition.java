@@ -65,15 +65,15 @@ public class DateValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new DateValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue date = new DateTimeValue();
+		final DateTimeValue date = new DateTimeValue();
 		parseDate(s, date);
 		date.hasTime = false;
 		return date;
 	}
 
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		return writeDate((DateTimeValue) value);
 	}
 

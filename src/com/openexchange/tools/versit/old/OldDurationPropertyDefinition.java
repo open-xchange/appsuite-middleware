@@ -66,15 +66,16 @@ public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner ss)
+	protected Object parseValue(final Property property, final StringScanner ss)
 			throws IOException {
-		DurationValue dur = new DurationValue();
-		if (ss.peek != 'P')
+		final DurationValue dur = new DurationValue();
+		if (ss.peek != 'P') {
 			throw new VersitException(ss, "Duration expected");
+		}
 		ss.read();
-		if (ss.peek == 'T')
+		if (ss.peek == 'T') {
 			parseTime(ss, dur);
-		else {
+		} else {
 			int num = ss.parseNumber();
 			if (ss.peek == 'Y') {
 				dur.Years = num;
@@ -95,13 +96,14 @@ public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 				dur.Days = num;
 				ss.read();
 			}
-			if (ss.peek == 'T')
+			if (ss.peek == 'T') {
 				parseTime(ss, dur);
+			}
 		}
 		return dur;
 	}
 
-	void parseTime(Scanner s, DurationValue dur) throws IOException {
+	void parseTime(final Scanner s, final DurationValue dur) throws IOException {
 		s.read();
 		int num = s.parseNumber();
 		if (s.peek == 'H') {
@@ -120,9 +122,9 @@ public class OldDurationPropertyDefinition extends OldShortPropertyDefinition {
 		}
 	}
 
-	protected String writeValue(Property property, Object value) {
-		DurationValue dur = (DurationValue) value;
-		StringBuffer sb = new StringBuffer();
+	protected String writeValue(final Property property, final Object value) {
+		final DurationValue dur = (DurationValue) value;
+		final StringBuilder sb = new StringBuilder();
 		sb.append('P');
 		if (dur.Years != 0) {
 			sb.append(dur.Years);

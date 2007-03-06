@@ -66,25 +66,25 @@ public class OldSoundPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	public Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		Parameter param = property.getParameter("VALUE");
+	public Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final Parameter param = property.getParameter("VALUE");
 		if (param == null
 				|| "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
-			if (property.getParameter("TYPE") == null)
+			if (property.getParameter("TYPE") == null) {
 				return new String(value, charset);
-			else
-				return value;
-		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText()))
+			}
+			return value;
+		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				return new URI(new String(value, charset).trim());
 			} catch (URISyntaxException e) {
-				VersitException ve = new VersitException(s, e.getMessage());
+				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
 			}
-		else
-			return new String(value, charset);
+		}
+		return new String(value, charset);
 	}
 
 	public void write(OldFoldingWriter fw, Property property)

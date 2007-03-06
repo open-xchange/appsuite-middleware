@@ -66,11 +66,12 @@ public class UTCPeriodValueDefinition extends PeriodValueDefinition {
 
 	public static final ValueDefinition Default = new UTCPeriodValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		PeriodValue retval = (PeriodValue) super.createValue(s, property);
-		if (!retval.Start.isUTC || retval.End != null && !retval.End.isUTC)
+		final PeriodValue retval = (PeriodValue) super.createValue(s, property);
+		if (!retval.Start.isUTC || retval.End != null && !retval.End.isUTC) {
 			throw new VersitException(s, "UTC time expected");
+		}
 		return retval;
 	}
 

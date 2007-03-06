@@ -66,11 +66,12 @@ public class PositiveDurationValueDefinition extends DurationValueDefinition {
 
 	public static final ValueDefinition Default = new PositiveDurationValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DurationValue dur = (DurationValue) super.createValue(s, property);
-		if (dur.Negative)
+		final DurationValue dur = (DurationValue) super.createValue(s, property);
+		if (dur.Negative) {
 			throw new VersitException(s, "Positive Duration expected");
+		}
 		return dur;
 	}
 

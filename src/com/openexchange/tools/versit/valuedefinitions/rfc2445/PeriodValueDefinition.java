@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
@@ -61,7 +59,6 @@ import com.openexchange.tools.versit.values.DateTimeValue;
 import com.openexchange.tools.versit.values.DurationValue;
 import com.openexchange.tools.versit.values.PeriodValue;
 
-
 /**
  * @author Viktor Pracht
  */
@@ -69,33 +66,31 @@ public class PeriodValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new PeriodValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
-			throws IOException {
-		PeriodValue period = new PeriodValue();
-		period.Start = (DateTimeValue) DateTimeValueDefinition.Default
-				.createValue(s, property);
-		if (s.peek != '/')
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		final PeriodValue period = new PeriodValue();
+		period.Start = (DateTimeValue) DateTimeValueDefinition.Default.createValue(s, property);
+		if (s.peek != '/') {
 			throw new IOException("Period expected");
+		}
 		s.read();
-		if (s.peek == '+' || s.peek == 'P')
-			period.End = (DateTimeValue) DateTimeValueDefinition.Default
-					.createValue(s, property);
-		else
-			period.Duration = (DurationValue) PositiveDurationValueDefinition.Default
-					.createValue(s, property);
+		if (s.peek == '+' || s.peek == 'P') {
+			period.End = (DateTimeValue) DateTimeValueDefinition.Default.createValue(s, property);
+		} else {
+			period.Duration = (DurationValue) PositiveDurationValueDefinition.Default.createValue(s, property);
+		}
 		return period;
 	}
 
-	public String writeValue(Object value) {
-		PeriodValue period = (PeriodValue) value;
+	public String writeValue(final Object value) {
+		final PeriodValue period = (PeriodValue) value;
 		String end = null;
-		if (period.End != null)
+		if (period.End != null) {
 			end = DateTimeValueDefinition.Default.writeValue(period.End);
-		else if (period.Duration != null)
-			end = PositiveDurationValueDefinition.Default
-					.writeValue(period.Duration);
-		return DateTimeValueDefinition.Default.writeValue(period.Start) + "/"
-				+ end;
+		} else if (period.Duration != null) {
+			end = PositiveDurationValueDefinition.Default.writeValue(period.Duration);
+		}
+		return new StringBuilder().append(DateTimeValueDefinition.Default.writeValue(period.Start)).append('/').append(
+				end).toString();
 	}
 
 }

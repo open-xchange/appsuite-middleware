@@ -72,65 +72,74 @@ public class DateTimeValueDefinition extends ValueDefinition {
 
 	private static Pattern TZPattern = Pattern.compile("[-+]\\d{2}:?\\d{2}");
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue date = new DateTimeValue();
+		final DateTimeValue date = new DateTimeValue();
 		parseDate(s, date);
-		if (s.peek != 'T')
+		if (s.peek != 'T') {
 			throw new VersitException(s, "Date and time expected");
+		}
 		s.read();
 		parseTime(s, date);
 		return date;
 	}
 
-	protected void parseDate(StringScanner s, DateTimeValue date)
+	protected void parseDate(final StringScanner s, final DateTimeValue date)
 			throws IOException {
 		date.calendar.set(Calendar.YEAR, s.parseNumber(4));
-		if (s.peek == '-')
+		if (s.peek == '-') {
 			s.read();
+		}
 		date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
-		if (s.peek == '-')
+		if (s.peek == '-') {
 			s.read();
+		}
 		date.calendar.set(Calendar.DATE, s.parseNumber(2));
 	}
 
-	protected void parseTime(StringScanner s, DateTimeValue date)
+	protected void parseTime(final StringScanner s, final DateTimeValue date)
 			throws IOException {
 		date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
-		if (s.peek == ':')
+		if (s.peek == ':') {
 			s.read();
+		}
 		date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
-		if (s.peek == ':')
+		if (s.peek == ':') {
 			s.read();
+		}
 		date.calendar.set(Calendar.SECOND, s.parseNumber(2));
 		if (s.peek == '.') {
 			s.read();
 			int ms = 0;
-			for (int scale = 100; s.peek >= '0' && s.peek <= '9' && scale >= 1; scale /= 10)
+			for (int scale = 100; s.peek >= '0' && s.peek <= '9' && scale >= 1; scale /= 10) {
 				ms += scale * (s.read() - '0');
+			}
 			date.calendar.set(Calendar.MILLISECOND, ms);
-			while (s.peek >= '0' && s.peek <= '9')
+			while (s.peek >= '0' && s.peek <= '9') {
 				s.read();
+			}
 		}
-		String tz = "GMT";
+		final StringBuilder tz = new StringBuilder("GMT");
 		if (s.peek == 'Z') {
 			s.read();
 		} else {
-			String offs = s.regex(TZPattern);
+			final String offs = s.regex(TZPattern);
 			if (offs != null) {
-				tz += offs;
+				tz.append(offs);
 				date.isUTC = false;
-			} else
+			} else {
 				date.isFloating = true;
+			}
 		}
-		date.calendar.setTimeZone(TimeZone.getTimeZone(tz));
+		date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
 	}
 
-	public String writeValue(Object value) {
-		DateTimeValue dtval = (DateTimeValue) value;
-		StringBuffer sb = new StringBuffer();
-		if (dtval.hasDate)
+	public String writeValue(final Object value) {
+		final DateTimeValue dtval = (DateTimeValue) value;
+		final StringBuilder sb = new StringBuilder();
+		if (dtval.hasDate) {
 			sb.append(writeDate(dtval));
+		}
 		if (dtval.hasTime) {
 			sb.append('T');
 			sb.append(writeTime(dtval));
@@ -144,27 +153,27 @@ public class DateTimeValueDefinition extends ValueDefinition {
 
 	private static final DecimalFormat MSFormat = new DecimalFormat("000");
 
-	protected String writeDate(DateTimeValue dtval) {
+	protected String writeDate(final DateTimeValue dtval) {
 		return YearFormat.format(dtval.calendar.get(Calendar.YEAR))
 				+ Format.format(dtval.calendar.get(Calendar.MONTH) + 1)
 				+ Format.format(dtval.calendar.get(Calendar.DATE));
 	}
 
-	protected String writeTime(DateTimeValue dtval) {
-		StringBuffer sb = new StringBuffer();
+	protected String writeTime(final DateTimeValue dtval) {
+		final StringBuilder sb = new StringBuilder();
 		sb.append(Format.format(dtval.calendar.get(Calendar.HOUR_OF_DAY)));
 		sb.append(Format.format(dtval.calendar.get(Calendar.MINUTE)));
 		sb.append(Format.format(dtval.calendar.get(Calendar.SECOND)));
-		int ms = dtval.calendar.get(Calendar.MILLISECOND);
+		final int ms = dtval.calendar.get(Calendar.MILLISECOND);
 		if (ms != 0) {
 			sb.append('.');
 			sb.append(MSFormat.format(ms));
 		}
 		if (!dtval.isFloating) {
-			int offset = dtval.calendar.getTimeZone().getRawOffset();
-			if (dtval.isUTC || offset == 0)
+			final int offset = dtval.calendar.getTimeZone().getRawOffset();
+			if (dtval.isUTC || offset == 0) {
 				sb.append('Z');
-			else {
+			} else {
 				sb.append(offset > 0 ? '+' : '-');
 				sb.append(Format.format(offset / 3600000));
 				sb.append(Format.format(offset / 60000 % 60));

@@ -66,12 +66,12 @@ public class OldURIPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		try {
 			return new URI(s.getRest().trim());
 		} catch (URISyntaxException e) {
-			VersitException ve = new VersitException(s, e.getMessage());
+			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;
 		}

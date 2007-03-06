@@ -68,20 +68,24 @@ public class OldStatusPropertyDefinition extends OldPropertyDefinition {
 	private static final String[] New = { "NEEDS-ACTION", "CANCELLED",
 			"IN-PROCESS" };
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		String val = new String(value, charset);
-		for (int i = 0; i < Old.length; i++)
-			if (Old[i].equalsIgnoreCase(val))
+	protected Object parseValue(final Property property, final OldScanner s,final  byte[] value,
+			final String charset) throws IOException {
+		final String val = new String(value, charset);
+		for (int i = 0; i < Old.length; i++) {
+			if (Old[i].equalsIgnoreCase(val)) {
 				return New[i];
+			}
+		}
 		return val;
 	}
 
-	protected String writeValue(Property property) {
-		String val = (String) property.getValue();
-		for (int i = 0; i < New.length; i++)
-			if (New[i].equalsIgnoreCase(val))
+	protected String writeValue(final Property property) {
+		final String val = (String) property.getValue();
+		for (int i = 0; i < New.length; i++) {
+			if (New[i].equalsIgnoreCase(val)) {
 				return Old[i];
+			}
+		}
 		return val;
 	}
 

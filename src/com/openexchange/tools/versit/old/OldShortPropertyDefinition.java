@@ -63,23 +63,23 @@ public class OldShortPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		StringScanner ss = new StringScanner(s, new String(value, charset)
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final StringScanner ss = new StringScanner(s, new String(value, charset)
 				.trim());
 		return parseValue(property, ss);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		return s.getRest();
 	}
 
-	protected String writeValue(Property property) {
+	protected String writeValue(final Property property) {
 		return writeValue(property, property.getValue());
 	}
 	
-	protected String writeValue(Property property, Object value) {
+	protected String writeValue(final Property property, final Object value) {
 		return value.toString();
 	}
 

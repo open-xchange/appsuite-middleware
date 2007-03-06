@@ -65,17 +65,18 @@ public class OldAgentPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		VersitObject object = VCard21.definition.parse(value.length == 0 ? s
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final VersitObject object = VCard21.definition.parse(value.length == 0 ? s
 				: VCard21.definition.getReader(new ByteArrayInputStream(value),
 						charset));
-		if (object == null)
+		if (object == null) {
 			throw new VersitException(s, "Nested vCard expected");
+		}
 		return object;
 	}
 
-	public void write(OldFoldingWriter fw, Property property)
+	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		fw.write(property.name);
 		fw.write(":");

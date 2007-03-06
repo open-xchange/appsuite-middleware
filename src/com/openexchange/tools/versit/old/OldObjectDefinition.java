@@ -91,9 +91,9 @@ public class OldObjectDefinition implements VersitDefinition {
 
 	protected String Name = null;
 
-	protected HashMap Properties = new HashMap();
+	protected HashMap<String, OldPropertyDefinition> Properties = new HashMap<String, OldPropertyDefinition>();
 
-	protected HashMap Children = new HashMap();
+	protected HashMap<String, OldObjectDefinition> Children = new HashMap<String, OldObjectDefinition>();
 
 	public OldObjectDefinition(String[] propertyNames,
 			OldPropertyDefinition[] properties) {
@@ -104,173 +104,185 @@ public class OldObjectDefinition implements VersitDefinition {
 	public OldObjectDefinition(String[] propertyNames,
 			OldPropertyDefinition[] properties, String[] childNames,
 			OldObjectDefinition[] children) {
-		for (int i = 0; i < propertyNames.length; i++)
+		for (int i = 0; i < propertyNames.length; i++) {
 			Properties.put(propertyNames[i].toUpperCase(), properties[i]);
-		for (int i = 0; i < childNames.length; i++)
+		}
+		for (int i = 0; i < childNames.length; i++) {
 			Children.put(childNames[i].toUpperCase(), children[i]);
+		}
 	}
 
-	private OldObjectDefinition(String name, HashMap properties,
-			HashMap children) {
+	private OldObjectDefinition(String name, HashMap<String, OldPropertyDefinition> properties,
+			HashMap<String, OldObjectDefinition> children) {
 		Name = name;
 		Properties.putAll(properties);
 		Children.putAll(children);
 	}
 
-	private String getType(OldScanner s) throws IOException {
+	private String getType(final OldScanner s) throws IOException {
 		s.skipWS();
-		if (s.peek != ':')
+		if (s.peek != ':') {
 			return null;
+		}
 		s.read();
 		s.skipWS();
-		String type = s.parseName();
+		final String type = s.parseName();
 		s.skipWS();
-		if (s.peek == -2)
+		if (s.peek == -2) {
 			return type;
+		}
 		throw new VersitException(s, "Invalid BEGIN type");
 	}
 
-	public void write(OldFoldingWriter fw, VersitObject object)
+	public void write(final OldFoldingWriter fw, final VersitObject object)
 			throws IOException {
 		fw.write("BEGIN");
 		fw.write(":");
 		fw.writeln(object.name.getBytes(fw.charset));
 		for (int i = 0; i < object.getPropertyCount(); i++) {
-			Property property = object.getProperty(i);
-			OldPropertyDefinition propdef = (OldPropertyDefinition) Properties
-					.get(property.name);
-			if (propdef != null)
+			final Property property = object.getProperty(i);
+			final OldPropertyDefinition propdef = Properties.get(property.name);
+			if (propdef != null) {
 				propdef.write(fw, property);
+			}
 		}
 		for (int i = 0; i < object.getChildCount(); i++) {
-			VersitObject child = object.getChild(i);
-			OldObjectDefinition objdef = (OldObjectDefinition) Children
-					.get(child.name);
-			if (objdef != null)
+			final VersitObject child = object.getChild(i);
+			final OldObjectDefinition objdef = Children.get(child.name);
+			if (objdef != null) {
 				objdef.write(fw, child);
+			}
 		}
 		fw.write("END");
 		fw.write(":");
 		fw.writeln(object.name.getBytes(fw.charset));
 	}
 
-	public Reader getReader(InputStream stream, String charset)
+	public Reader getReader(final InputStream stream, final String charset)
 			throws IOException {
-		OldScanner s = new OldScanner(stream);
+		final OldScanner s = new OldScanner(stream);
 		s.DefaultCharset = charset;
 		s.DefaultEncoding = OldXBitEncoding.Default;
 		return s;
 	}
 
-	public VersitObject parse(Reader reader) throws IOException {
+	public VersitObject parse(final Reader reader) throws IOException {
 		VersitObject child, object = parseBegin(reader);
-		if (object != null)
-			while ((child = parseChild(reader, object)) != null)
+		if (object != null) {
+			while ((child = parseChild(reader, object)) != null) {
 				object.addChild(child);
+			}
+		}
 		return object;
 	}
 
-	public VersitObject parseBegin(Reader reader) throws IOException {
-		OldScanner s = (OldScanner) reader;
-		VersitObject object = new VersitObject(Name);
+	public VersitObject parseBegin(final Reader reader) throws IOException {
+		final OldScanner s = (OldScanner) reader;
+		final VersitObject object = new VersitObject(Name);
 		while (s.peek != -1) {
 			if ("BEGIN".equalsIgnoreCase(s.parseName())
-					&& object.name.equalsIgnoreCase(getType(s)))
+					&& object.name.equalsIgnoreCase(getType(s))) {
 				return object;
-			while (s.peek != -2 && s.peek != -1)
+			}
+			while (s.peek != -2 && s.peek != -1) {
 				s.read();
-			while (s.peek == -2)
+			}
+			while (s.peek == -2) {
 				s.read();
+			}
 		}
 		return null;
 	}
 
-	public VersitObject parseChild(Reader reader, VersitObject object)
+	public VersitObject parseChild(final Reader reader, final VersitObject object)
 			throws IOException {
-		OldScanner s = (OldScanner) reader;
+		final OldScanner s = (OldScanner) reader;
 		while (s.peek != -1) {
-			while (s.peek == -2)
+			while (s.peek == -2) {
 				s.read();
+			}
 			String name = s.parseName().toUpperCase();
 			if ("END".equalsIgnoreCase(name) && s.peek != '.' && s.peek != ';') {
 				s.unfold = false;
-				if (object.name.equalsIgnoreCase(getType(s)))
+				if (object.name.equalsIgnoreCase(getType(s))) {
 					return null;
+				}
 				throw new VersitException(s, "Invalid end of " + object.name);
 			}
 			if ("BEGIN".equalsIgnoreCase(name) && s.peek != '.'
 					&& s.peek != ';') {
-				String type = getType(s);
-				OldObjectDefinition objdef = (OldObjectDefinition) Children
-						.get(type);
-				if (objdef == null)
+				final String type = getType(s);
+				final OldObjectDefinition objdef = Children.get(type);
+				if (objdef == null) {
 					throw new VersitException(s, "Invalid element: " + type);
-				VersitObject grandchild, child = new VersitObject(type);
-				while ((grandchild = objdef.parseChild(s, child)) != null)
-					child.addChild(grandchild);
-				return child;
-			} else {
-				s.unfold = true;
-				while (s.peek == '.') {
-					s.read();
-					name = s.parseName();
 				}
-				OldPropertyDefinition propdef = (OldPropertyDefinition) Properties
-						.get(name);
-				if (propdef == null)
-					propdef = DefaultProperty;
-				Property property = new Property(name);
-				propdef.parse(s, property);
-				object.addProperty(property);
-				s.unfold = false;
-				if (s.peek != -1 && s.peek != -2)
-					throw new VersitException(s, "Error at the end of property");
+				VersitObject grandchild, child = new VersitObject(type);
+				while ((grandchild = objdef.parseChild(s, child)) != null) {
+					child.addChild(grandchild);
+				}
+				return child;
+			}
+			s.unfold = true;
+			while (s.peek == '.') {
+				s.read();
+				name = s.parseName();
+			}
+			OldPropertyDefinition propdef = Properties.get(name);
+			if (propdef == null) {
+				propdef = DefaultProperty;
+			}
+			final Property property = new Property(name);
+			propdef.parse(s, property);
+			object.addProperty(property);
+			s.unfold = false;
+			if (s.peek != -1 && s.peek != -2) {
+				throw new VersitException(s, "Error at the end of property");
 			}
 		}
 		return null;
 	}
 
-	public Writer getWriter(OutputStream stream, String charset)
+	public Writer getWriter(final OutputStream stream, final String charset)
 			throws IOException {
 		return new OldFoldingWriter(stream, charset);
 	}
 
-	public void write(Writer writer, VersitObject object) throws IOException {
+	public void write(final Writer writer, final VersitObject object) throws IOException {
 		writeProperties(writer, object);
 		writeEnd(writer, object);
 	}
 
-	public void writeProperties(Writer writer, VersitObject object)
+	public void writeProperties(final Writer writer, final VersitObject object)
 			throws IOException {
-		OldFoldingWriter fw = (OldFoldingWriter) writer;
+		final OldFoldingWriter fw = (OldFoldingWriter) writer;
 		fw.write("BEGIN");
 		fw.write(":");
 		fw.writeln(object.name.getBytes(fw.charset));
 		for (int i = 0; i < object.getPropertyCount(); i++) {
-			Property property = object.getProperty(i);
-			OldPropertyDefinition propdef = (OldPropertyDefinition) Properties
-					.get(property.name);
-			if (propdef != null)
+			final Property property = object.getProperty(i);
+			final OldPropertyDefinition propdef = Properties.get(property.name);
+			if (propdef != null) {
 				propdef.write(fw, property);
+			}
 		}
 		for (int i = 0; i < object.getChildCount(); i++) {
-			VersitObject child = object.getChild(i);
-			OldObjectDefinition objdef = (OldObjectDefinition) Children
-					.get(child.name);
-			if (objdef != null)
+			final VersitObject child = object.getChild(i);
+			final OldObjectDefinition objdef = Children.get(child.name);
+			if (objdef != null) {
 				objdef.write(fw, child);
+			}
 		}
 	}
 
-	public void writeEnd(Writer writer, VersitObject object) throws IOException {
-		OldFoldingWriter fw = (OldFoldingWriter) writer;
+	public void writeEnd(final Writer writer, final VersitObject object) throws IOException {
+		final OldFoldingWriter fw = (OldFoldingWriter) writer;
 		fw.write("END");
 		fw.write(":");
 		fw.writeln(object.name.getBytes(fw.charset));
 	}
 
-	public VersitDefinition getChildDef(String name) {
-		return (VersitDefinition) Children.get(name);
+	public VersitDefinition getChildDef(final String name) {
+		return Children.get(name);
 	}
 
 	public VersitDefinition copy() {

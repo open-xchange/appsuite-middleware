@@ -65,15 +65,16 @@ import java.util.Map.Entry;
 public class VersionedObjectDefinition extends ObjectDefinition implements
 		VersitDefinition {
 
-	private HashMap Definitions = new HashMap();
+	private final HashMap<String, ObjectDefinition> Definitions = new HashMap<String, ObjectDefinition>();
 
 	private ObjectDefinition Definition = ObjectDefinition.Default;
 
 	public VersionedObjectDefinition() {
+		super();
 	}
 
-	private VersionedObjectDefinition(HashMap definitions,
-			ObjectDefinition definition) {
+	private VersionedObjectDefinition(final HashMap definitions,
+			final ObjectDefinition definition) {
 		final int size = definitions.size();
 		final Iterator iter = definitions.entrySet().iterator();
 		for (int k = 0; k < size; k++) {
@@ -90,70 +91,78 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 
 	public VersionedObjectDefinition(String[] versions,
 			ObjectDefinition[] definitions) {
-		for (int i = 0; i < versions.length; i++)
+		for (int i = 0; i < versions.length; i++) {
 			addDefinition(versions[i], definitions[i]);
+		}
 	}
 
-	public void addDefinition(String version, ObjectDefinition definition) {
-		if (Definitions.size() == 0)
+	public final void addDefinition(final String version, final ObjectDefinition definition) {
+		if (Definitions.size() == 0) {
 			Definition = definition;
+		}
 		Definitions.put(version, definition);
 	}
 
-	public void setVersion(String version) {
-		Definition = (ObjectDefinition) Definitions.get(version);
-		if (Definition == null)
+	public void setVersion(final String version) {
+		Definition = Definitions.get(version);
+		if (Definition == null) {
 			Definition = ObjectDefinition.Default;
+		}
 	}
 
-	public Reader getReader(InputStream stream, String charset)
+	public Reader getReader(final InputStream stream, final String charset)
 			throws IOException {
 		return new ReaderScanner(new InputStreamReader(stream, charset));
 	}
 
-	public VersitObject parseChild(Reader reader, VersitObject object)
+	public VersitObject parseChild(final Reader reader, final VersitObject object)
 			throws IOException {
-		Scanner s = (Scanner) reader;
+		final Scanner s = (Scanner) reader;
 		Property property = Definition.parseProperty(s);
 		while (property != null && !property.name.equalsIgnoreCase("END")) {
 			if (property.name.equalsIgnoreCase("BEGIN")) {
-				String childName = ((String) property.getValue()).toUpperCase();
-				VersitDefinition def = Definition.getChildDef(childName);
+				final String childName = ((String) property.getValue()).toUpperCase();
+				final VersitDefinition def = Definition.getChildDef(childName);
 				VersitObject grandchild, child = new VersitObject(childName);
-				while ((grandchild = def.parseChild(s, child)) != null)
+				while ((grandchild = def.parseChild(s, child)) != null) {
 					child.addChild(grandchild);
+				}
 				return child;
 			}
 			object.addProperty(property);
-			if (property.name.equalsIgnoreCase("VERSION"))
+			if (property.name.equalsIgnoreCase("VERSION")) {
 				setVersion(property.getValue().toString());
+			}
 			property = Definition.parseProperty(s);
 		}
-		if (property == null)
+		if (property == null) {
 			throw new VersitException(s, "Incomplete object");
+		}
 		return null;
 	}
 
-	public void write(Writer writer, VersitObject object) throws IOException {
-		Property VersionProperty = object.getProperty("VERSION");
-		if (VersionProperty != null)
+	public void write(final Writer writer, final VersitObject object) throws IOException {
+		final Property VersionProperty = object.getProperty("VERSION");
+		if (VersionProperty != null) {
 			setVersion((String) VersionProperty.getValue());
+		}
 		Definition.write(writer, object);
 	}
 
-	public void writeProperties(Writer writer, VersitObject object)
+	public void writeProperties(final Writer writer, final VersitObject object)
 			throws IOException {
-		Property VersionProperty = object.getProperty("VERSION");
-		if (VersionProperty != null)
+		final Property VersionProperty = object.getProperty("VERSION");
+		if (VersionProperty != null) {
 			setVersion((String) VersionProperty.getValue());
+		}
 		Definition.writeProperties(writer, object);
 	}
 
-	public void writeEnd(Writer writer, VersitObject object) throws IOException {
+	public void writeEnd(final Writer writer, final VersitObject object) throws IOException {
 		Definition.writeEnd(writer, object);
 	}
 
-	public VersitDefinition getChildDef(String name) {
+	public VersitDefinition getChildDef(final String name) {
 		return Definition.getChildDef(name);
 	}
 

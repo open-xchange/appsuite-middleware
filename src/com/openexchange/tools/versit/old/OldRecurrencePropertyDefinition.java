@@ -81,11 +81,11 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 
 	private static final Pattern Num = Pattern.compile("[0-9]{1,3}(?![0-9#])");
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		StringScanner ss = new StringScanner(s, new String(value, charset)
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final StringScanner ss = new StringScanner(s, new String(value, charset)
 				.trim().toUpperCase());
-		RecurrenceValue recur = new RecurrenceValue();
+		final RecurrenceValue recur = new RecurrenceValue();
 		switch (ss.peek) {
 		case 'D':
 			recur.Freq = RecurrenceValue.DAILY;
@@ -114,12 +114,13 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 				int weekNo = 0;
 				String week = ss.regex(WeekNo);
 				while (week != null || ss.peek >= 'A' && ss.peek <= 'Z') {
-					if (week != null)
+					if (week != null) {
 						weekNo = (week.charAt(0) - '0')
 								* (week.charAt(1) == '-' ? -1 : 1);
-					else {
-						if (weekNo == 0)
+					} else {
+						if (weekNo == 0) {
 							throw new VersitException(ss, "Invalid recurrence");
+						}
 						recur.ByDay.add(recur.new Weekday(weekNo,
 								parseWeekday(ss)));
 					}
@@ -132,10 +133,11 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 				recur.Interval = ss.parseNumber();
 				ss.skipWS();
 				String day = ss.regex(DayNo);
-				ArrayList days = new ArrayList();
+				final ArrayList<Integer> days = new ArrayList<Integer>();
 				while (day != null) {
-					if (day == "LD")
+					if ("LD".equals(day)) {
 						day = "1-";
+					}
 					int sign = 1;
 					switch (day.charAt(day.length() - 1)) {
 					case '-':
@@ -148,8 +150,9 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 					day = ss.regex(DayNo);
 				}
 				recur.ByMonthDay = new int[days.size()];
-				for (int i = 0; i < recur.ByMonthDay.length; i++)
-					recur.ByMonthDay[i] = ((Integer) days.get(i)).intValue();
+				for (int i = 0; i < recur.ByMonthDay.length; i++) {
+					recur.ByMonthDay[i] = days.get(i).intValue();
+				}
 				break;
 			default:
 				throw new VersitException(ss, "Invalid recurrence");
@@ -173,19 +176,21 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 			recur.Interval = ss.parseNumber();
 			ss.skipWS();
 			String val = ss.regex(Num);
-			ArrayList values = new ArrayList();
+			final ArrayList<Integer> values = new ArrayList<Integer>();
 			while (val != null) {
 				values.add(Integer.valueOf(Integer.parseInt(val)));
 				ss.skipWS();
 				val = ss.regex(Num);
 			}
 			int[] vs = new int[values.size()];
-			for (int i = 0; i < vs.length; i++)
-				vs[i] = ((Integer) values.get(i)).intValue();
-			if (month)
+			for (int i = 0; i < vs.length; i++) {
+				vs[i] = values.get(i).intValue();
+			}
+			if (month) {
 				recur.ByMonth = vs;
-			else
+			} else {
 				recur.ByYearDay = vs;
+			}
 			break;
 		default:
 			throw new VersitException(ss, "Invalid recurrence");
@@ -195,27 +200,32 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 			recur.Count = ss.parseNumber();
 			ss.skipWS();
 		}
-		if (ss.peek >= '0' && ss.peek <= '9')
+		if (ss.peek >= '0' && ss.peek <= '9') {
 			recur.Until = (DateTimeValue) DateOrDateTimeValueDefinition.Default
 					.createValue(ss, property);
-		if (recur.Count == -1 && recur.Until == null)
+		}
+		if (recur.Count == -1 && recur.Until == null) {
 			recur.Count = 2;
-		if (recur.Count == 0)
+		}
+		if (recur.Count == 0) {
 			recur.Count = -1;
+		}
 		return recur;
 	}
 
-	private int parseWeekday(StringScanner s) throws IOException {
-		String weekday = String.valueOf((char) s.read()) + (char)s.read();
-		for (int i = 0; i < 7; i++)
-			if (weekday.equals(weekdays[i]))
+	private int parseWeekday(final StringScanner s) throws IOException {
+		final String weekday = String.valueOf((char) s.read()) + (char)s.read();
+		for (int i = 0; i < 7; i++) {
+			if (weekday.equals(weekdays[i])) {
 				return Calendar.SUNDAY + i;
+			}
+		}
 		throw new VersitException(s, "Invalid recurrence: " + weekday);
 	}
 
-	protected String writeValue(Property property) {
-		StringBuffer sb = new StringBuffer();
-		RecurrenceValue recur = (RecurrenceValue) property.getValue();
+	protected String writeValue(final Property property) {
+		final StringBuilder sb = new StringBuilder();
+		final RecurrenceValue recur = (RecurrenceValue) property.getValue();
 		switch (recur.Freq) {
 		case RecurrenceValue.DAILY:
 			sb.append('D');
@@ -241,7 +251,7 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 				final int monthlySize = recur.ByDay.size();
 				final Iterator monthlyIter = recur.ByDay.iterator();
 				for (int k = 0; k < monthlySize; k++) {
-					RecurrenceValue.Weekday day = (RecurrenceValue.Weekday) monthlyIter
+					final RecurrenceValue.Weekday day = (RecurrenceValue.Weekday) monthlyIter
 							.next();
 					if (day.week != occurrence) {
 						sb.append(' ');
@@ -258,8 +268,9 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 				for (int i = 0; i < recur.ByMonthDay.length; i++) {
 					sb.append(' ');
 					sb.append(Math.abs(recur.ByMonthDay[i]));
-					if (recur.ByMonthDay[i] < 0)
+					if (recur.ByMonthDay[i] < 0) {
 						sb.append('-');
+					}
 				}
 			}
 			break;
@@ -283,8 +294,9 @@ public class OldRecurrencePropertyDefinition extends OldPropertyDefinition {
 		}
 		switch (recur.Count) {
 		case -1:
-			if (recur.Until == null)
+			if (recur.Until == null) {
 				sb.append(" #0");
+			}
 		case 2:
 			break;
 		default:

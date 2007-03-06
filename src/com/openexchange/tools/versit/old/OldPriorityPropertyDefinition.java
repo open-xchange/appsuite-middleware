@@ -64,20 +64,22 @@ public class OldPriorityPropertyDefinition extends OldIntegerPropertyDefinition 
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		final int[] mapping = { 1, 3, 5, 7, 9 };
-		int prio = Integer.parseInt(s.getRest());
-		if (prio < 1 || prio > 5)
+		final int prio = Integer.parseInt(s.getRest());
+		if (prio < 1 || prio > 5) {
 			throw new VersitException(s, "Invalid priority: " + prio);
+		}
 		return Integer.valueOf(mapping[prio - 1]);
 	}
 
-	protected String writeValue(Property property, Object value) {
+	protected String writeValue(final Property property, final Object value) {
 		final String[] mapping = { "1", "1", "2", "2", "3", "4", "4", "5", "5" };
-		int prio = ((Integer) value).intValue();
-		if (prio < 1 || prio > 9)
+		final int prio = ((Integer) value).intValue();
+		if (prio < 1 || prio > 9) {
 			return "0";
+		}
 		return mapping[prio - 1];
 	}
 

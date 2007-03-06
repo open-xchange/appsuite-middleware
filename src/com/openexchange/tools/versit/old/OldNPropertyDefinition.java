@@ -65,26 +65,26 @@ public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		ArrayList al = new ArrayList();
-		StringScanner ss = new StringScanner(s, new String(value, charset));
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final ArrayList<Object> al = new ArrayList<Object>();
+		final StringScanner ss = new StringScanner(s, new String(value, charset));
 		String element = getElement(ss);
 		while (ss.peek == ';') {
-			ArrayList al2 = new ArrayList();
+			final ArrayList<String> al2 = new ArrayList<String>();
 			al2.add(element);
 			al.add(al2);
 			ss.read();
 			element = getElement(ss);
 		}
-		ArrayList al2 = new ArrayList();
+		final ArrayList<String> al2 = new ArrayList<String>();
 		al2.add(element);
 		al.add(al2);
 		return al;
 	}
 
 	protected String writeValue(final Property property, final Object value) {
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		final ArrayList al = (ArrayList) value;
 		final int size = al.size();
 		final Iterator i = al.iterator();
@@ -104,7 +104,7 @@ public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 		return sb.toString();
 	}
 	
-	private void append(final StringBuffer sb, final Object list) {
+	private void append(final StringBuilder sb, final Object list) {
 		final ArrayList al = ((ArrayList) list);
 		final int size = al.size();
 		final Iterator i = al.iterator();

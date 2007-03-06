@@ -53,6 +53,7 @@ package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * @author Viktor Pracht
@@ -61,9 +62,9 @@ public class Property {
 
 	public final String name;
 
-	private ArrayList Parameters = new ArrayList();
+	private final ArrayList<Parameter> Parameters = new ArrayList<Parameter>();
 	
-	private HashMap Index = new HashMap();
+	private final HashMap<String, Parameter> Index = new HashMap<String, Parameter>();
 
 	private Object value = null;
 
@@ -71,28 +72,29 @@ public class Property {
 		this.name = name;
 	}
 
-	public Parameter getParameter(String name) {
-		return (Parameter) Index.get(name.toUpperCase());
+	public Parameter getParameter(final String name) {
+		return Index.get(name.toUpperCase(Locale.ENGLISH));
 	}
 	
-	public Parameter getParameter(int index) {
-		return (Parameter) Parameters.get(index);
+	public Parameter getParameter(final int index) {
+		return Parameters.get(index);
 	}
 	
 	public int getParameterCount() {
 		return Parameters.size();
 	}
 	
-	public void addParameter(Parameter parameter) {
-		String Name = parameter.name.toUpperCase();
-		Parameter existingParam = (Parameter) Index.get(Name);
+	public void addParameter(final Parameter parameter) {
+		final String Name = parameter.name.toUpperCase(Locale.ENGLISH);
+		final Parameter existingParam = Index.get(Name);
 		if (existingParam != null) {
-			int count = parameter.getValueCount();
-			for (int i = 0; i < count; i++)
+			final int count = parameter.getValueCount();
+			for (int i = 0; i < count; i++) {
 				existingParam.addValue(parameter.getValue(i));
+			}
 		} else {
 			Parameters.add(parameter);
-			Index.put(parameter.name.toUpperCase(), parameter);
+			Index.put(parameter.name.toUpperCase(Locale.ENGLISH), parameter);
 		}
 	}
 
@@ -100,7 +102,7 @@ public class Property {
 		return value;
 	}
 
-	public Property setValue(Object value) {
+	public Property setValue(final Object value) {
 		this.value = value;
 		return this;
 	}

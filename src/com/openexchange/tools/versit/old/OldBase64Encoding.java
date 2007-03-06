@@ -62,8 +62,8 @@ public class OldBase64Encoding implements OldEncoding {
 
 	private final BASE64Decoder decoder = new BASE64Decoder();
 
-	public byte[] decode(OldScanner s) throws IOException {
-		StringBuffer sb = new StringBuffer();
+	public byte[] decode(final OldScanner s) throws IOException {
+		final StringBuilder sb = new StringBuilder();
 		boolean newline = false;
 		while (!newline || s.peek != -1 && s.peek != -2) {
 			newline = s.peek == -1 || s.peek == -2;
@@ -76,7 +76,7 @@ public class OldBase64Encoding implements OldEncoding {
 
 	private final BASE64Encoder encoder = new BASE64Encoder();
 	
-	public void encode(OldFoldingWriter fw, byte[] b) throws IOException {
+	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
 		fw.rawStart();
 		fw.writeRaw(SoftBreak);
 		fw.writeRaw(encoder.encode(b).getBytes(fw.charset));

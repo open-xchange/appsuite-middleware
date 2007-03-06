@@ -59,7 +59,7 @@ import com.openexchange.tools.versit.Scanner;
 
 public class OldScanner extends Scanner {
 
-	private PushbackInputStream r;
+	private final PushbackInputStream r;
 
 	public boolean unfold = false;
 
@@ -89,8 +89,9 @@ public class OldScanner extends Scanner {
 					c = r.read();
 					if (c == '\n')
 						c = r.read();
-				} else
+				} else {
 					c = r.read();
+				}
 				Line++;
 				if (c != '\t' && c != ' ') {
 					r.unread(c);
@@ -100,14 +101,16 @@ public class OldScanner extends Scanner {
 				if (Column >= 76 && !spaces) {
 					c = r.read();
 					Column = 2;
-				} else
+				} else {
 					Column = 1;
+				}
 				spaces = false;
 			} else {
 				if (c == '\r') {
 					c = r.read();
-					if (c != '\n')
+					if (c != '\n') {
 						r.unread(c);
+					}
 				}
 				Line++;
 				Column = 0;
@@ -119,7 +122,7 @@ public class OldScanner extends Scanner {
 	}
 
 	public String parseWord() throws IOException {
-		StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		while (peek > ' ' && peek < 127 && peek != '[' && peek != ']'
 				&& peek != '=' && peek != ':' && peek != '.' && peek != ','
 				&& peek != ';') {

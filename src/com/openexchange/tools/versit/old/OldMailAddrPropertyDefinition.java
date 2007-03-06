@@ -70,16 +70,16 @@ public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		String str = s.getRest();
-		Parameter param = property.getParameter("VALUE");
+		final Parameter param = property.getParameter("VALUE");
 		if (param == null
 				|| !"URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				str = "mailto:" + new InternetAddress(str).getAddress();
 			} catch (AddressException e) {
-				VersitException ve = new VersitException(s, e.getMessage());
+				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
 			}
@@ -87,13 +87,13 @@ public class OldMailAddrPropertyDefinition extends OldShortPropertyDefinition {
 		try {
 			return new URI(str);
 		} catch (URISyntaxException e) {
-			VersitException ve = new VersitException(s, e.getMessage());
+			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;
 		}
 	}
 
-	protected String writeValue(Property property, Object value) {
+	protected String writeValue(final Property property, final Object value) {
 		return ((URI) value).getSchemeSpecificPart();
 	}
 

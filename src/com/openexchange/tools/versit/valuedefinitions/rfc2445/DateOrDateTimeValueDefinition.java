@@ -65,24 +65,25 @@ public class DateOrDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new DateOrDateTimeValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue date = new DateTimeValue();
+		final DateTimeValue date = new DateTimeValue();
 		parseDate(s, date);
 		if (s.peek == 'T') {
 			s.read();
 			parseTime(s, date, property);
-		} else
+		} else {
 			date.hasTime = false;
+		}
 		return date;
 	}
 
-	public String writeValue(Object value) {
-		DateTimeValue date = (DateTimeValue) value;
-		if (date.hasTime)
+	public String writeValue(final Object value) {
+		final DateTimeValue date = (DateTimeValue) value;
+		if (date.hasTime) {
 			return writeDate(date) + 'T' + writeTime(date);
-		else
-			return writeDate(date);
+		}
+		return writeDate(date);
 	}
 
 }

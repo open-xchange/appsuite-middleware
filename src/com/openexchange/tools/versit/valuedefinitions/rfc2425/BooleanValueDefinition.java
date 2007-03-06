@@ -67,16 +67,17 @@ public class BooleanValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new BooleanValueDefinition();
 	
-	public Object createValue(StringScanner s, Property property) throws IOException {
-		if (s.imatch("TRUE"))
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		if (s.imatch("TRUE")) {
 			return new Boolean(true);
-		else if (s.imatch("FALSE"))
+		} else if (s.imatch("FALSE")) {
 			return new Boolean(false);
-		else
+		} else {
 			throw new VersitException(s, "TRUE or FALSE expected");
+		}
 	}
 	
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		return ((Boolean) value).booleanValue() ? "TRUE" : "FALSE";
 	}
 	

@@ -63,13 +63,13 @@ public class OldTranspPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
 		return Integer.parseInt(s.getRest().trim()) == 0 ? "OPAQUE"
 				: "TRANSPARENT";
 	}
 
-	protected String writeValue(Property property, Object value) {
+	protected String writeValue(final Property property, final Object value) {
 		return "OPAQUE".equalsIgnoreCase(value.toString()) ? "0" : "1";
 	}
 

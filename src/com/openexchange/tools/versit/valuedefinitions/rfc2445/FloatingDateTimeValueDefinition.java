@@ -66,11 +66,12 @@ public class FloatingDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new FloatingDateTimeValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
-		if (!retval.isFloating)
+		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
+		if (!retval.isFloating) {
 			throw new VersitException(s, "Floating date and time expected");
+		}
 		return retval;
 	}
 

@@ -66,7 +66,7 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		int sign = 1;
 		switch (s.peek) {
@@ -78,15 +78,16 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 			throw new VersitException(s, "UTC offset expected");
 		}
 		int offset = s.parseNumber(2) * 3600000;
-		if (s.peek != ':')
+		if (s.peek != ':') {
 			throw new VersitException(s, "UTC offset expected");
+		}
 		s.read();
 		offset += s.parseNumber(2) * 60000;
 		return Integer.valueOf(sign * offset);
 	}
 
-	public String writeValue(Object value) {
-		int offset = ((Integer) value).intValue();
+	public String writeValue(final Object value) {
+		final int offset = ((Integer) value).intValue();
 		return (offset >= 0 ? '+' : '-') + Format.format(offset / 3600000)
 				+ ':' + Format.format(offset / 60000 % 60);
 	}

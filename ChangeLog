@@ -12,6 +12,8 @@
  - Removed unnecessary invocation of javax.mail.Message.saveChanges() method
  - Option to enable/disable possibility that an user may edit his own contact object
    in folder 'Global Address Book' aka 'Internal Users'
+ - Applied code conventions & usage of new Java5.0 features to package
+   'com.openexchange.tools.versit'
 #################### ATTENTION ! #####################
  - CONFIG change: New property "ENABLE_INTERNAL_USER_EDIT" added to file
    "foldercache.properties"

@@ -62,14 +62,17 @@ public class Versit {
 	private static VersitDefinition[] Definitions = { ICalendar.definition,
 			VCard.definition, VCalendar10.definition, VCard21.definition };
 
-	public static VersitDefinition getDefinition(String MIMEType) {
-		for (int i = 0; i < Types.length; i++)
-			if (Types[i].equalsIgnoreCase(MIMEType))
+	public static VersitDefinition getDefinition(final String MIMEType) {
+		for (int i = 0; i < Types.length; i++) {
+			if (Types[i].equalsIgnoreCase(MIMEType)) {
 				return Definitions[i].copy();
+			}
+		}
 		return null;
 	}
 
 	private Versit() {
+		super();
 	}
 
 }

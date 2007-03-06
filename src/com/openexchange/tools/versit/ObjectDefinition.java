@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -58,161 +56,169 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * @author Viktor Pracht
  */
 public class ObjectDefinition implements VersitDefinition {
 
-	private HashMap Properties = new HashMap();
+	private final HashMap<String, PropertyDefinition> Properties = new HashMap<String, PropertyDefinition>();
 
-	private HashMap Children = new HashMap();
+	private final HashMap<String, ObjectDefinition> Children = new HashMap<String, ObjectDefinition>();
 
 	public static final ObjectDefinition Default = new ObjectDefinition();
 
 	public ObjectDefinition() {
+		super();
 	}
 
-	public ObjectDefinition(String[] propertyNames,
-			PropertyDefinition[] properties, String[] childNames,
+	public ObjectDefinition(String[] propertyNames, PropertyDefinition[] properties, String[] childNames,
 			ObjectDefinition[] children) {
-		for (int i = 0; i < properties.length; i++)
+		for (int i = 0; i < properties.length; i++) {
 			addProperty(propertyNames[i], properties[i]);
-		for (int i = 0; i < childNames.length; i++)
+		}
+		for (int i = 0; i < childNames.length; i++) {
 			addChild(childNames[i], children[i]);
+		}
 	}
 
-	private ObjectDefinition(HashMap properties, HashMap children) {
+	private ObjectDefinition(final HashMap<String, PropertyDefinition> properties,
+			final HashMap<String, ObjectDefinition> children) {
 		Properties.putAll(properties);
 		Children.putAll(children);
 	}
 
-	public PropertyDefinition getProperty(String name) {
-		return (PropertyDefinition) Properties.get(name.toUpperCase());
+	public PropertyDefinition getProperty(final String name) {
+		return Properties.get(name.toUpperCase(Locale.ENGLISH));
 	}
 
-	public void addProperty(String name, PropertyDefinition property) {
-		Properties.put(name.toUpperCase(), property);
+	public final void addProperty(final String name, final PropertyDefinition property) {
+		Properties.put(name.toUpperCase(Locale.ENGLISH), property);
 	}
 
-	public void addChild(String name, ObjectDefinition child) {
-		Children.put(name.toUpperCase(), child);
+	public final void addChild(final String name, final ObjectDefinition child) {
+		Children.put(name.toUpperCase(Locale.ENGLISH), child);
 	}
 
-	protected Property parseProperty(Scanner s) throws IOException {
-		while (s.peek == -2)
+	protected Property parseProperty(final Scanner s) throws IOException {
+		while (s.peek == -2) {
 			s.read();
+		}
 		String name = s.parseName();
-		if (name.length() == 0)
+		if (name.length() == 0) {
 			return null;
+		}
 		if (s.peek == '.') {
 			s.read();
 			name = s.parseName();
-			if (name.length() == 0)
+			if (name.length() == 0) {
 				return null;
+			}
 		}
 		PropertyDefinition propdef = getProperty(name);
-		if (propdef == null)
+		if (propdef == null) {
 			propdef = PropertyDefinition.Default;
+		}
 		return propdef.parse(s, name);
 	}
 
-	public Reader getReader(InputStream stream, String charset)
-			throws IOException {
+	public Reader getReader(final InputStream stream, final String charset) throws IOException {
 		return new ReaderScanner(new InputStreamReader(stream, charset));
 	}
 
-	public VersitObject parse(VersitDefinition.Reader reader)
-			throws IOException {
+	public VersitObject parse(final VersitDefinition.Reader reader) throws IOException {
 		VersitObject child, object = parseBegin(reader);
-		if (object != null)
-			while ((child = parseChild(reader, object)) != null)
+		if (object != null) {
+			while ((child = parseChild(reader, object)) != null) {
 				object.addChild(child);
+			}
+		}
 		return object;
 	}
 
-	public VersitObject parseBegin(VersitDefinition.Reader reader)
-			throws IOException {
-		Scanner s = (Scanner) reader;
+	public VersitObject parseBegin(final VersitDefinition.Reader reader) throws IOException {
+		final Scanner s = (Scanner) reader;
 		Property begin;
 		do {
-			while (s.peek == -2)
+			while (s.peek == -2) {
 				s.read();
-			if (s.peek == -1)
+			}
+			if (s.peek == -1) {
 				return null;
+			}
 			begin = ObjectDefinition.Default.parseProperty(s);
-			if (begin == null)
-				while (s.peek != -1 && s.peek != -2)
+			if (begin == null) {
+				while (s.peek != -1 && s.peek != -2) {
 					s.read();
+				}
+			}
 		} while (begin == null || !begin.name.equalsIgnoreCase("BEGIN"));
-		VersitObject object = new VersitObject((String) begin.getValue());
-		return object;
+		return new VersitObject((String) begin.getValue());
 	}
 
-	public VersitObject parseChild(VersitDefinition.Reader reader,
-			VersitObject object) throws IOException {
-		Scanner s = (Scanner) reader;
+	public VersitObject parseChild(final VersitDefinition.Reader reader, final VersitObject object) throws IOException {
+		final Scanner s = (Scanner) reader;
 		Property property = parseProperty(s);
 		while (property != null && !property.name.equalsIgnoreCase("END")) {
 			if (property.name.equalsIgnoreCase("BEGIN")) {
-				String childName = ((String) property.getValue()).toUpperCase();
-				VersitDefinition def = getChildDef(childName);
+				final String childName = ((String) property.getValue()).toUpperCase();
+				final VersitDefinition def = getChildDef(childName);
 				VersitObject grandchild, child = new VersitObject(childName);
-				while ((grandchild = def.parseChild(s, child)) != null)
+				while ((grandchild = def.parseChild(s, child)) != null) {
 					child.addChild(grandchild);
+				}
 				return child;
 			}
 			object.addProperty(property);
 			property = parseProperty(s);
 		}
-		if (property == null)
+		if (property == null) {
 			throw new VersitException(s, "Incomplete object");
+		}
 		return null;
 	}
 
-	public Writer getWriter(OutputStream stream, String charset)
-			throws IOException {
+	public Writer getWriter(final OutputStream stream, final String charset) throws IOException {
 		return new FoldingWriter(new OutputStreamWriter(stream, charset));
 	}
 
-	public void write(VersitDefinition.Writer writer, VersitObject object)
-			throws IOException {
+	public void write(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
 		writeProperties(writer, object);
 		writeEnd(writer, object);
 	}
 
-	public void writeProperties(VersitDefinition.Writer writer,
-			VersitObject object) throws IOException {
-		FoldingWriter fw = (FoldingWriter) writer;
+	public void writeProperties(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
+		final FoldingWriter fw = (FoldingWriter) writer;
 		fw.write("BEGIN:");
 		fw.writeln(object.name);
 		int count = object.getPropertyCount();
 		for (int i = 0; i < count; i++) {
-			Property property = object.getProperty(i);
-			PropertyDefinition definition = getProperty(property.name);
-			if (definition != null)
+			final Property property = object.getProperty(i);
+			final PropertyDefinition definition = getProperty(property.name);
+			if (definition != null) {
 				definition.write(fw, property);
+			}
 		}
 		count = object.getChildCount();
 		for (int i = 0; i < count; i++) {
-			VersitObject child = object.getChild(i);
-			VersitDefinition definition = getChildDef(child.name);
+			final VersitObject child = object.getChild(i);
+			final VersitDefinition definition = getChildDef(child.name);
 			definition.write(fw, child);
 		}
 	}
 
-	public void writeEnd(VersitDefinition.Writer writer, VersitObject object)
-			throws IOException {
-		FoldingWriter fw = (FoldingWriter) writer;
+	public void writeEnd(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
+		final FoldingWriter fw = (FoldingWriter) writer;
 		fw.write("END:");
 		fw.writeln(object.name);
 	}
 
-	public VersitDefinition getChildDef(String name) {
-		VersitDefinition child = (ObjectDefinition) Children.get(name
-				.toUpperCase());
-		if (child == null)
+	public VersitDefinition getChildDef(final String name) {
+		final VersitDefinition child = Children.get(name.toUpperCase(Locale.ENGLISH));
+		if (child == null) {
 			return ObjectDefinition.Default;
+		}
 		return child;
 	}
 

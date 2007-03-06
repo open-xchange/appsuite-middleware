@@ -61,13 +61,15 @@ public class ParameterValueDefinition {
 
 	public static final ParameterValueDefinition Default = new ParameterValueDefinition();
 
-	public ParameterValue parse(Scanner s) throws IOException {
-		StringBuffer sb = new StringBuffer();
+	public ParameterValue parse(final Scanner s) throws IOException {
+		final StringBuilder sb = new StringBuilder();
 		if (s.peek == '"') {
-			while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f))
+			while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
 				sb.append((char) s.read());
-			if (s.peek != '"')
+			}
+			if (s.peek != '"') {
 				return null;
+			}
 			s.read();
 		} else {
 			Loop: do {
@@ -80,8 +82,9 @@ public class ParameterValueDefinition {
 				case ',':
 					break Loop;
 				default:
-					if (s.peek < ' ')
+					if (s.peek < ' ') {
 						break Loop;
+					}
 				}
 				sb.append((char) s.read());
 			} while (true);
@@ -89,11 +92,11 @@ public class ParameterValueDefinition {
 		return createValue(s, sb.toString());
 	}
 
-	protected ParameterValue createValue(Scanner s, String text) throws IOException {
+	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
 		return new ParameterValue(text);
 	}
 
-	public void write(FoldingWriter fw, ParameterValue value) throws IOException {
+	public void write(final FoldingWriter fw, final ParameterValue value) throws IOException {
 		fw.write(value.getText());
 	}
 	

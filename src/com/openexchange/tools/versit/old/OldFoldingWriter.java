@@ -64,9 +64,9 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
 
 	public final CharsetEncoder encoder;
 
-	private OutputStream w;
+	private final OutputStream w;
 
-	private StringBuffer sb = new StringBuffer();
+	private final StringBuilder sb = new StringBuilder();
 
 	int Break = 0;
 
@@ -84,7 +84,7 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
 
 	private static final byte[] HardBreak = { '\r', '\n' };
 
-	public void write(String s) throws IOException {
+	public void write(final String s) throws IOException {
 		sb.append(s);
 		if (sb.length() > 76 && Break > 0) {
 			w.write(sb.toString().getBytes(charset), 0, Break);
@@ -100,7 +100,7 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
 		Break = 0;
 	}
 
-	public void writeRaw(byte[] data) throws IOException {
+	public void writeRaw(final byte[] data) throws IOException {
 		w.write(data);
 	}
 
@@ -108,7 +108,7 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
 		w.write(HardBreak);
 	}
 
-	public void writeln(byte[] value) throws IOException {
+	public void writeln(final byte[] value) throws IOException {
 		rawStart();
 		writeRaw(value);
 		rawEnd();

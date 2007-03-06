@@ -67,11 +67,12 @@ public class CalAddressParamValueDefinition extends ParameterValueDefinition {
 
 	public static final CalAddressParamValueDefinition Default = new CalAddressParamValueDefinition();
 
-	protected ParameterValue createValue(Scanner s, String text)
+	protected ParameterValue createValue(final Scanner s, final String text)
 			throws IOException {
-		URIParamValue value = (URIParamValue) super.createValue(s, text);
-		if (!value.getURI().getScheme().equalsIgnoreCase("MAILTO"))
+		final URIParamValue value = (URIParamValue) super.createValue(s, text);
+		if (!value.getURI().getScheme().equalsIgnoreCase("MAILTO")) {
 			throw new VersitException(s, "'mailto:' URI expected");
+		}
 		return value;
 	}
 

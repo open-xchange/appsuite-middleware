@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit;
 
 import java.io.IOException;
@@ -77,83 +75,91 @@ public abstract class Scanner implements VersitDefinition.Reader {
 	}
 
 	public void skipWS() throws IOException {
-		while (peek == '\t' || peek == ' ')
+		while (peek == '\t' || peek == ' ') {
 			read();
+		}
 	}
 
 	public String parseName() throws IOException {
-		StringBuffer sb = new StringBuffer();
-		while (peek >= 'A' && peek <= 'Z' || peek >= 'a' && peek <= 'z'
-				|| peek == '-' || peek >= '0' && peek <= '9') {
+		final StringBuilder sb = new StringBuilder();
+		while (peek >= 'A' && peek <= 'Z' || peek >= 'a' && peek <= 'z' || peek == '-' || peek >= '0' && peek <= '9') {
 			sb.append((char) read());
 		}
 		return sb.toString();
 	}
 
 	public int parseNumber() throws IOException {
-		if (peek < '0' || peek > '9')
+		if (peek < '0' || peek > '9') {
 			throw new VersitException(this, "Number expected");
+		}
 		int retval = 0;
-		while (peek >= '0' && peek <= '9')
+		while (peek >= '0' && peek <= '9') {
 			retval = retval * 10 + read() - '0';
+		}
 		return retval;
 	}
 
-	public void parseNumber(StringBuffer sb) throws IOException {
-		if (peek < '0' || peek > '9')
+	public void parseNumber(final StringBuffer sb) throws IOException {
+		if (peek < '0' || peek > '9') {
 			throw new IOException("Number expected");
-		do
+		}
+		do {
 			sb.append((char) read());
-		while (peek >= '0' && peek <= '9');
+		} while (peek >= '0' && peek <= '9');
 	}
 
-	public int parseNumber(int digits) throws IOException {
+	public int parseNumber(final int digits) throws IOException {
 		int retval = 0;
 		for (int i = 0; i < digits; i++) {
-			if (peek < '0' || peek > '9')
-				throw new VersitException(this, digits
-						+ "-digit number expected");
+			if (peek < '0' || peek > '9') {
+				throw new VersitException(this, digits + "-digit number expected");
+			}
 			retval = retval * 10 + read() - '0';
 		}
 		return retval;
 	}
 
-	public void parseNumber(StringBuffer sb, int digits) throws IOException {
+	public void parseNumber(final StringBuffer sb, final int digits) throws IOException {
 		for (int i = 0; i < digits; i++) {
-			if (peek < '0' || peek > '9')
+			if (peek < '0' || peek > '9') {
 				throw new IOException(digits + "-digit number expected");
+			}
 			sb.append((char) read());
 		}
 	}
 
-	public boolean optionalNumber(StringBuffer sb) throws IOException {
-		if (peek < '0' || peek > '9')
+	public boolean optionalNumber(final StringBuffer sb) throws IOException {
+		if (peek < '0' || peek > '9') {
 			return false;
+		}
 		sb.setLength(0);
-		while (peek >= '0' && peek <= '9')
+		while (peek >= '0' && peek <= '9') {
 			sb.append((char) read());
+		}
 		return true;
 	}
 
 	public int[] parseNumList() throws IOException {
-		ArrayList list = new ArrayList();
+		final ArrayList list = new ArrayList();
 		while (true) {
 			int sign = 1;
-			if (peek == '+')
+			if (peek == '+') {
 				read();
-			else if (peek == '-') {
+			} else if (peek == '-') {
 				sign = -1;
 				read();
 			}
 			int i = parseNumber();
 			list.add(Integer.valueOf(i * sign));
-			if (peek != ',')
+			if (peek != ',') {
 				break;
+			}
 			read();
 		}
 		int[] retval = new int[list.size()];
-		for (int i = 0; i < retval.length; i++)
+		for (int i = 0; i < retval.length; i++) {
 			retval[i] = ((Integer) list.get(i)).intValue();
+		}
 		return retval;
 	}
 
@@ -165,7 +171,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
 	 * @throws IOException
 	 */
 	public int read() throws IOException {
-		int retval = peek;
+		final int retval = peek;
 		peek = readImpl();
 		return retval;
 	}

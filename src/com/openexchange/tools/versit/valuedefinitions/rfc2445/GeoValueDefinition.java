@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
@@ -70,30 +68,32 @@ public class GeoValueDefinition extends ValueDefinition {
 
 	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
-	public Object createValue(StringScanner s, Property property)
-			throws IOException {
-		ArrayList geo = new ArrayList();
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		final ArrayList<Double> geo = new ArrayList<Double>();
 		String str = s.regex(FloatPattern);
-		if (str == null)
+		if (str == null) {
 			throw new VersitException(s, "Latitude expected");
+		}
 		geo.add(Double.valueOf(str));
-		if (s.peek != ';')
+		if (s.peek != ';') {
 			throw new IOException("Geographic position expected");
+		}
 		s.read();
 		str = s.regex(FloatPattern);
-		if (str == null)
+		if (str == null) {
 			throw new VersitException(s, "Latitude expected");
+		}
 		geo.add(Double.valueOf(str));
 		return geo;
 	}
 
-	private static DecimalFormat Format = new DecimalFormat(
-			"0.################");
+	private static DecimalFormat Format = new DecimalFormat("0.################");
 
-	public String writeValue(Object value) {
-		ArrayList geo = (ArrayList) value;
-		return Format.format(((Double) geo.get(0)).doubleValue()) + ";"
-				+ Format.format(((Double) geo.get(1)).doubleValue());
+	@SuppressWarnings("unchecked")
+	public String writeValue(final Object value) {
+		final ArrayList<Double> geo = (ArrayList<Double>) value;
+		return new StringBuilder().append(Format.format(geo.get(0).doubleValue())).append(';').append(
+				Format.format(geo.get(1).doubleValue())).toString();
 	}
 
 }

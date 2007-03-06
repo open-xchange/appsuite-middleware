@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
@@ -62,39 +60,39 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldGeoPropertyDefinition extends OldPropertyDefinition {
 
-	public OldGeoPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldGeoPropertyDefinition(String[] paramNames, OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
-	private static Pattern FloatPattern = Pattern
-			.compile("[ \t\r\n]*[-+]\\d+(\\.\\d+)?[ \t\r\n]*");
+	private static Pattern FloatPattern = Pattern.compile("[ \t\r\n]*[-+]\\d+(\\.\\d+)?[ \t\r\n]*");
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		StringScanner ss = new StringScanner(s, new String(value, charset));
-		ArrayList geo = new ArrayList();
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
+			throws IOException {
+		final StringScanner ss = new StringScanner(s, new String(value, charset));
+		final ArrayList<Double> geo = new ArrayList<Double>();
 		String str = ss.regex(FloatPattern);
-		if (str == null)
+		if (str == null) {
 			throw new VersitException(s, "Latitude expected");
+		}
 		geo.add(Double.valueOf(str.trim()));
-		if (s.peek != ',')
+		if (s.peek != ',') {
 			throw new IOException("Geographic position expected");
+		}
 		s.read();
 		str = ss.regex(FloatPattern);
-		if (str == null)
+		if (str == null) {
 			throw new VersitException(s, "Latitude expected");
+		}
 		geo.add(Double.valueOf(str.trim()));
 		return geo;
 	}
 
-	private static DecimalFormat Format = new DecimalFormat(
-			"0.################");
+	private static final DecimalFormat Format = new DecimalFormat("0.################");
 
-	protected String writeValue(Property property) {
-		ArrayList geo = (ArrayList) property.getValue();
-		return Format.format(((Double) geo.get(0)).doubleValue()) + ";"
-				+ Format.format(((Double) geo.get(1)).doubleValue());
+	protected String writeValue(final Property property) {
+		final ArrayList geo = (ArrayList) property.getValue();
+		return new StringBuilder().append(Format.format(((Double) geo.get(0)).doubleValue())).append(';').append(
+				Format.format(((Double) geo.get(1)).doubleValue())).toString();
 	}
 
 }

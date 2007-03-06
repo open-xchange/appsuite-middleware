@@ -59,12 +59,12 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldMAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 
-	public OldMAlarmPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params, OldShortPropertyDefinition[] elements) {
+	public OldMAlarmPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params, final OldShortPropertyDefinition[] elements) {
 		super("EMAIL", null, paramNames, params, elements);
 	}
 
-	protected void parseProp(OldScanner s, Property prop, VersitObject alarm)
+	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
 			throws VersitException {
 		Property property = new Property("ATTENDEE");
 		property.setValue(((ArrayList) prop.getValue()).get(3));

@@ -67,14 +67,15 @@ public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected String getElement(Scanner s) throws IOException {
-		StringBuffer sb = new StringBuffer();
+	protected String getElement(final Scanner s) throws IOException {
+		final StringBuilder sb = new StringBuilder();
 		while (s.peek != -1 && s.peek != -2 && s.peek != ';') {
 			int c = s.read();
 			if (c == '\\') {
-				if (s.peek == -1 || s.peek == -2)
+				if (s.peek == -1 || s.peek == -2) {
 					throw new VersitException(s,
 							"Escape sequence \"\\\" CRLF is not supported.");
+				}
 				c = s.read();
 			}
 			sb.append((char) c);
@@ -82,9 +83,9 @@ public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 		return sb.length() == 0 ? null : sb.toString().trim();
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
-		ArrayList al = new ArrayList();
+		final ArrayList<String> al = new ArrayList<String>();
 		String element = getElement(s);
 		while (s.peek == ';') {
 			al.add(element);
@@ -117,7 +118,7 @@ public class OldCompoundPropertyDefinition extends OldShortPropertyDefinition {
 		return sb.toString();
 	}
 
-	protected String writeElement(Property property, Object value) {
+	protected String writeElement(final Property property, final Object value) {
 		return value.toString();
 	}
 }

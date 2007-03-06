@@ -61,21 +61,21 @@ public class Parameter {
 
 	public final String name;
 
-	private ArrayList Values = new ArrayList();
+	private final ArrayList<ParameterValue> Values = new ArrayList<ParameterValue>();
 
 	public Parameter(String name) {
 		this.name = name;
 	}
 
-	public ParameterValue getValue(int index) {
-		return (ParameterValue) Values.get(index);
+	public ParameterValue getValue(final int index) {
+		return Values.get(index);
 	}
 	
 	public int getValueCount() {
 		return Values.size();
 	}
 
-	public void addValue(ParameterValue value) {
+	public void addValue(final ParameterValue value) {
 		Values.add(value);
 	}
 

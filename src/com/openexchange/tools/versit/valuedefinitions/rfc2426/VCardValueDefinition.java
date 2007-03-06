@@ -67,15 +67,15 @@ public class VCardValueDefinition extends TextValueDefinition {
 
 	public static final ValueDefinition Default = new VCardValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		return VCard.definition.parse(new ReaderScanner(new StringReader(
 				(String) super.createValue(s, property))));
 	}
 
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		try {
-			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			VCard.definition.write(VCard.definition.getWriter(stream,
 					"US-ASCII"), (VersitObject) value);
 			return new String(stream.toByteArray(), "US-ASCII");

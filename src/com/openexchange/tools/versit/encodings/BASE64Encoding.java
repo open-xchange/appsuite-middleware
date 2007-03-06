@@ -63,12 +63,12 @@ import com.openexchange.tools.versit.Encoding;
  */
 public class BASE64Encoding implements Encoding {
 
-	public String decode(String text) throws IOException {
+	public String decode(final String text) throws IOException {
 		return new String((new BASE64Decoder()).decodeBuffer(text),
 				"ISO-8859-1");
 	}
 
-	public String encode(String text) throws IOException {
+	public String encode(final String text) throws IOException {
 		return (new BASE64Encoder()).encode(text.getBytes("ISO-8859-1"))
 				.replaceAll("[\\r\\n]", "");
 	}

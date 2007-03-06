@@ -68,25 +68,27 @@ public class ParameterDefinition {
 		this.value = value;
 	}
 
-	public Parameter parse(Scanner s, String name) throws IOException {
-		if (s.peek != '=')
+	public Parameter parse(final Scanner s, final String name) throws IOException {
+		if (s.peek != '=') {
 			return null;
-		Parameter parameter = new Parameter(name);
+		}
+		final Parameter parameter = new Parameter(name);
 		do {
 			s.read();
-			ParameterValue parameterValue = value.parse(s);
-			if (parameterValue == null)
+			final ParameterValue parameterValue = value.parse(s);
+			if (parameterValue == null) {
 				return null;
+			}
 			parameter.addValue(parameterValue);
 		} while (s.peek == ',');
 		return parameter;
 	}
 
-	public void write(FoldingWriter fw, Parameter parameter) throws IOException {
+	public void write(final FoldingWriter fw, final Parameter parameter) throws IOException {
 		fw.write(";");
 		fw.write(parameter.name);
 		fw.write("=");
-		int valueCount = parameter.getValueCount();
+		final int valueCount = parameter.getValueCount();
 		if (valueCount > 0) {
 			value.write(fw, parameter.getValue(0));
 			for (int j = 1; j < valueCount; j++) {

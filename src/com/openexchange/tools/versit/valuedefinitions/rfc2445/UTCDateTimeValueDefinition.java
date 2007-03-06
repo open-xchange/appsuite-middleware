@@ -66,16 +66,17 @@ public class UTCDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new UTCDateTimeValueDefinition();
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
-		if (!retval.isUTC)
+		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
+		if (!retval.isUTC) {
 			throw new VersitException(s, "UTC time expected");
+		}
 		return retval;
 	}
 
-	public String writeValue(Object value) {
-		DateTimeValue date = (DateTimeValue) value;
+	public String writeValue(final Object value) {
+		final DateTimeValue date = (DateTimeValue) value;
 		date.isUTC = true;
 		return writeDate(date) + 'T' + writeTime(date);
 	}

@@ -66,21 +66,22 @@ public class OldAAlarmPropertyDefinition extends OldAlarmPropertyDefinition {
 		super("AUDIO", null, paramNames, params, elements);
 	}
 
-	protected void parseProp(OldScanner s, Property prop, VersitObject alarm)
+	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm)
 			throws VersitException {
-		ArrayList values = (ArrayList) prop.getValue();
-		Property property = new Property("ATTACH");
+		final ArrayList values = (ArrayList) prop.getValue();
+		final Property property = new Property("ATTACH");
 		Parameter param = prop.getParameter("TYPE");
 		if (param != null) {
 			String type = param.getValue(0).getText();
-			if (type.equalsIgnoreCase("PCM"))
+			if ("PCM".equalsIgnoreCase(type)) {
 				type = "audio/basic";
-			else if (type.equals("WAVE"))
+			} else if ("WAVE".equals(type)) {
 				type = "audio/x-wav";
-			else if (type.equals("AIFF"))
+			} else if ("AIFF".equals(type)) {
 				type = "audio/x-aiff";
-			else
+			} else {
 				throw new VersitException(s, "Unknown audio type: " + type);
+			}
 			param = new Parameter("TYPE");
 			param.addValue(new ParameterValue(type));
 			property.addParameter(param);

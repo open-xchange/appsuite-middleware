@@ -66,9 +66,9 @@ public class OldAttachPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	public Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		Parameter param = property.getParameter("VALUE");
+	public Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final Parameter param = property.getParameter("VALUE");
 		if (param == null
 				|| "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
 			return new String(value, charset);
@@ -80,8 +80,9 @@ public class OldAttachPropertyDefinition extends OldPropertyDefinition {
 				ve.initCause(e);
 				throw ve;
 			}
-		else
+		else {
 			return new String(value, charset);
+		}
 	}
 
 }

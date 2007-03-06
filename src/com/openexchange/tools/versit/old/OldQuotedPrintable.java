@@ -60,22 +60,26 @@ public class OldQuotedPrintable implements OldEncoding {
 
 	public static final OldEncoding Default = new OldQuotedPrintable();
 
-	private int getHexDigit(OldScanner s) throws IOException {
+	private int getHexDigit(final OldScanner s) throws IOException {
 		int retval;
-		if (s.peek >= '0' && s.peek <= '9')
+		if (s.peek >= '0' && s.peek <= '9') {
 			retval = s.read() - '0';
-		else if (s.peek >= 'A' && s.peek <= 'F')
+		}
+		else if (s.peek >= 'A' && s.peek <= 'F') {
 			retval = s.read() - 'A' + 10;
-		else if (s.peek >= 'a' && s.peek <= 'f')
+		}
+		else if (s.peek >= 'a' && s.peek <= 'f') {
 			retval = s.read() - 'a' + 10;
-		else
+		}
+		else {
 			throw new VersitException(s,
 					"Invalid character in Quoted-Printable encoding");
+		}
 		return retval;
 	}
 
-	public byte[] decode(OldScanner s) throws IOException {
-		ArrayList al = new ArrayList();
+	public byte[] decode(final OldScanner s) throws IOException {
+		final ArrayList<Byte> al = new ArrayList<Byte>();
 		int len = 0;
 		s.unfold = false;
 		while (s.peek != -1 && s.peek != -2) {
@@ -87,34 +91,37 @@ public class OldQuotedPrintable implements OldEncoding {
 					al.add(new Byte(
 							(byte) ((getHexDigit(s) << 4) + getHexDigit(s))));
 					len = al.size();
-				} else if (s.peek == -2)
+				} else if (s.peek == -2) {
 					s.read();
-				else
+				} else {
 					al.add(new Byte((byte) '='));
+				}
 			} else if (s.peek >= 33 && s.peek <= 126) {
 				al.add(new Byte((byte) s.read()));
 				len = al.size();
-			} else if (s.peek == 9 || s.peek == 32)
+			} else if (s.peek == 9 || s.peek == 32) {
 				al.add(new Byte((byte) s.read()));
-			else
+			} else {
 				throw new VersitException(s,
 						"Invalid character in Quoted-Printable encoding");
+			}
 		}
 		byte[] retval = new byte[len];
-		for (int i = 0; i < len; i++)
-			retval[i] = ((Byte) al.get(i)).byteValue();
+		for (int i = 0; i < len; i++) {
+			retval[i] =  al.get(i).byteValue();
+		}
 		s.unfold = true;
 		return retval;
 	}
 
-	private byte hexDigit(int value) {
-		int val = value & 15;
+	private byte hexDigit(final int value) {
+		final int val = value & 15;
 		return (byte) (val + (val > 9 ? 'A' - 10 : '0'));
 	}
 
 	private static final byte[] SoftBreak = { '=', '\r', '\n' };
 
-	public void encode(OldFoldingWriter fw, byte[] b) throws IOException {
+	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
 		int len = fw.lineLength();
 		fw.rawStart();
 		byte[] Escape = { '=', 0, 0 };

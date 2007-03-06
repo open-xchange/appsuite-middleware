@@ -64,8 +64,8 @@ public class OldDaylightPropertyDefinition extends OldRecordPropertyDefinition {
 
 	private static OldParamDefinition[] NoParams = {};
 
-	public OldDaylightPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldDaylightPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params, new OldShortPropertyDefinition[] {
 				new OldShortPropertyDefinition(NoNames, NoParams),
 				new OldTZPropertyDefinition(NoNames, NoParams),
@@ -75,21 +75,23 @@ public class OldDaylightPropertyDefinition extends OldRecordPropertyDefinition {
 				new OldShortPropertyDefinition(NoNames, NoParams)});
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
-		ArrayList al = new ArrayList();
+		final ArrayList<Object> al = new ArrayList<Object>();
 		String element = getElement(s).trim().toUpperCase();
 		if ("TRUE".equals(element)) {
 			al.add(element);
 			for (int i = 1; i < Elements.length; i++) {
 				element = getElement(s);
-				if (element == null)
+				if (element == null) {
 					throw new VersitException(s, "Too few elements");
+				}
 				al.add(Elements[i].parseValue(property, new StringScanner(s,
 						element.trim())));
 			}
-		} else if (!"FALSE".equals(element))
+		} else if (!"FALSE".equals(element)) {
 			throw new VersitException(s, "Invalid daylight savings rule");
+		}
 		al.add(element);
 		return al;
 	}

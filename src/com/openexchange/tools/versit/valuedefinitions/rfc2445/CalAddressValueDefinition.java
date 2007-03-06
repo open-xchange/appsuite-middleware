@@ -68,10 +68,11 @@ public class CalAddressValueDefinition extends URIValueDefinition {
 
 	public static final ValueDefinition Default = new CalAddressValueDefinition();
 	
-	public Object createValue(StringScanner s, Property property) throws IOException {
-		URI retval = (URI)super.createValue(s, property);
-		if (!retval.getScheme().equalsIgnoreCase("MAILTO"))
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		final URI retval = (URI)super.createValue(s, property);
+		if (!retval.getScheme().equalsIgnoreCase("MAILTO")) {
 			throw new IOException("'mailto:' URI expected");
+		}
 		return retval;
 	}
 	

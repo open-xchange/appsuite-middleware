@@ -71,26 +71,27 @@ public class DateTimeValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new DateTimeValueDefinition();
 	
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DateTimeValue date = new DateTimeValue();
+		final DateTimeValue date = new DateTimeValue();
 		parseDate(s, date);
-		if (s.peek != 'T')
+		if (s.peek != 'T') {
 			throw new VersitException(s, "Date and time expected");
+		}
 		s.read();
 		parseTime(s, date, property);
 		return date;
 	}
 
-	protected void parseDate(StringScanner s, DateTimeValue date)
+	protected void parseDate(final StringScanner s, final DateTimeValue date)
 			throws IOException {
 		date.calendar.set(Calendar.YEAR, s.parseNumber(4));
 		date.calendar.set(Calendar.MONTH, s.parseNumber(2) - 1);
 		date.calendar.set(Calendar.DATE, s.parseNumber(2));
 	}
 
-	protected void parseTime(StringScanner s, DateTimeValue date,
-			Property property) throws IOException {
+	protected void parseTime(final StringScanner s, final DateTimeValue date,
+			final Property property) throws IOException {
 		date.calendar.set(Calendar.HOUR_OF_DAY, s.parseNumber(2));
 		date.calendar.set(Calendar.MINUTE, s.parseNumber(2));
 		date.calendar.set(Calendar.SECOND, s.parseNumber(2));
@@ -100,21 +101,22 @@ public class DateTimeValueDefinition extends ValueDefinition {
 			return;
 		}
 		date.isUTC = false;
-		Parameter tzid = property.getParameter("TZID");
+		final Parameter tzid = property.getParameter("TZID");
 		if (tzid == null) {
 			date.isFloating = true;
 			return;
 		}
-		String tz_str = tzid.getValue(0).getText();
-		if (tz_str.startsWith("/"))
+		final String tz_str = tzid.getValue(0).getText();
+		if (tz_str.charAt(0) == '/') {
 			date.calendar
 					.setTimeZone(TimeZone.getTimeZone(tz_str.substring(1)));
-		else
+		} else {
 			date.needsVTIMEZONE = true;
+		}
 	}
 
-	public String writeValue(Object value) {
-		DateTimeValue date = (DateTimeValue) value;
+	public String writeValue(final Object value) {
+		final DateTimeValue date = (DateTimeValue) value;
 		return writeDate(date) + 'T' + writeTime(date);
 	}
 	
@@ -122,19 +124,20 @@ public class DateTimeValueDefinition extends ValueDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 	
-	protected String writeDate(DateTimeValue value) {
+	protected String writeDate(final DateTimeValue value) {
 		return YearFormat.format(value.calendar.get(Calendar.YEAR))
 				+ Format.format(value.calendar.get(Calendar.MONTH) + 1)
 				+ Format.format(value.calendar.get(Calendar.DATE));
 	}
 
-	protected String writeTime(DateTimeValue value) {
-		StringBuffer sb = new StringBuffer();
+	protected String writeTime(final DateTimeValue value) {
+		final StringBuilder sb = new StringBuilder();
 		sb.append(Format.format(value.calendar.get(Calendar.HOUR_OF_DAY)));
 		sb.append(Format.format(value.calendar.get(Calendar.MINUTE)));
 		sb.append(Format.format(value.calendar.get(Calendar.SECOND)));
-		if (value.isUTC)
+		if (value.isUTC) {
 			sb.append('Z');
+		}
 		return sb.toString();
 	}
 

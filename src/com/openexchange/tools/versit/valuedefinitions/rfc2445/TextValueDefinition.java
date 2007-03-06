@@ -63,8 +63,8 @@ public class TextValueDefinition extends ValueDefinition {
 
 	public static final ValueDefinition Default = new TextValueDefinition();
 	
-	public Object createValue(StringScanner s, Property property) throws IOException {
-		StringBuffer sb = new StringBuffer();
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		final StringBuilder sb = new StringBuilder();
 		while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
 			if (s.peek == '\\') {
 				s.read();
@@ -89,16 +89,17 @@ public class TextValueDefinition extends ValueDefinition {
 		return sb.length() == 0 ? null : sb.toString();
 	}
 
-	public String writeValue(Object value) {
-		String str = (String) value;
-		int length = str.length();
-		StringBuffer sb =  new StringBuffer(length);
+	public String writeValue(final Object value) {
+		final String str = (String) value;
+		final int length = str.length();
+		final StringBuilder sb =  new StringBuilder(length);
 		for (int i = 0; i < length; i++) {
-			char c = str.charAt(i);
+			final char c = str.charAt(i);
 			switch (c) {
 			case '\r':
-				if (i < length && str.charAt(i + 1) == '\n')
+				if (i < length && str.charAt(i + 1) == '\n') {
 					i++;
+				}
 				// no break;
 			case '\n':
 				sb.append("\\n");

@@ -69,12 +69,12 @@ public class BinaryValueDefinition extends ValueDefinition {
 		super(encodingNames, encodings);
 	}
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		return s.getRest().getBytes("ISO-8859-1");
 	}
 
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		try {
 			return new String((byte[]) value, "ISO-8859-1");
 		} catch (UnsupportedEncodingException e) {

@@ -71,14 +71,15 @@ public class URIValueDefinition extends ValueDefinition {
 	
 	private static Pattern URIPattern = Pattern.compile("[^,]+");
 	
-	public Object createValue(StringScanner s, Property property) throws IOException {
-		String value = s.regex(URIPattern);
-		if (value == null)
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
+		final String value = s.regex(URIPattern);
+		if (value == null) {
 			throw new VersitException(s, "URI expected");
+		}
 		try {
 			return new URI(value);
 		} catch (URISyntaxException e) {
-			VersitException ve = new VersitException(s, e.getMessage());
+			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;
 		}

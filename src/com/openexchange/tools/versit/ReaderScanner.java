@@ -60,9 +60,9 @@ import java.io.Reader;
  */
 public class ReaderScanner extends Scanner {
 
-	private PushbackReader r;
+	private final PushbackReader r;
 
-	public ReaderScanner(Reader reader) throws IOException {
+	public ReaderScanner(final Reader reader) throws IOException {
 		// Initialize the scanner.
 		r = new PushbackReader(reader);
 		peek = readImpl();
@@ -72,10 +72,11 @@ public class ReaderScanner extends Scanner {
 		int c = r.read();
 		Column++;
 		while (c == '\r' || c == '\n') {
-			int c0 = c;
+			final int c0 = c;
 			c = r.read();
-			if (c0 == '\r' && c == '\n')
+			if (c0 == '\r' && c == '\n') {
 				c = r.read();
+			}
 			Line++;
 			if (c == '\t' || c == ' ') {
 				// CRLF WSP detected: ignore

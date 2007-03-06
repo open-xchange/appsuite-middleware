@@ -69,11 +69,11 @@ public class URIParamValueDefinition extends ParameterValueDefinition {
 	
 	public static final URIParamValueDefinition Default = new URIParamValueDefinition();
 	
-	protected ParameterValue createValue(Scanner s, String text) throws IOException {
+	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
 		try {
 			return new URIParamValue(new URI(text));
 		} catch (URISyntaxException e) {
-			VersitException ve = new VersitException(s, e.getMessage());
+			final VersitException ve = new VersitException(s, e.getMessage());
 			ve.initCause(e);
 			throw ve;
 		}

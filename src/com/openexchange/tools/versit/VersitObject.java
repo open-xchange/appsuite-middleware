@@ -53,6 +53,7 @@ package com.openexchange.tools.versit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * A container for vCard and iCalendar objects.
@@ -63,42 +64,42 @@ public class VersitObject {
 
 	public final String name;
 	
-	private HashMap Index = new HashMap();
+	private final HashMap<String, Property> Index = new HashMap<String, Property>();
 
-	private ArrayList Properties = new ArrayList();
+	private final ArrayList<Property> Properties = new ArrayList<Property>();
 
-	private ArrayList Children = new ArrayList();
+	private final ArrayList<VersitObject> Children = new ArrayList<VersitObject>();
 	
 	public VersitObject(String name) {
 		this.name = name;
 	}
 	
-	public Property getProperty(String name) {
-		return (Property) Index.get(name.toUpperCase());
+	public Property getProperty(final String name) {
+		return Index.get(name.toUpperCase(Locale.ENGLISH));
 	}
 
-	public Property getProperty(int index) {
-		return (Property) Properties.get(index);
+	public Property getProperty(final int index) {
+		return Properties.get(index);
 	}
 	
 	public int getPropertyCount() {
 		return Properties.size();
 	}
 
-	public void addProperty(Property property) {
-		Index.put(property.name.toUpperCase(), property);
+	public void addProperty(final Property property) {
+		Index.put(property.name.toUpperCase(Locale.ENGLISH), property);
 		Properties.add(property);
 	}
 
-	public VersitObject getChild(int index) {
-		return (VersitObject) Children.get(index);
+	public VersitObject getChild(final int index) {
+		return Children.get(index);
 	}
 	
 	public int getChildCount() {
 		return Children.size();
 	}
 
-	public void addChild(VersitObject child) {
+	public void addChild(final VersitObject child) {
 		Children.add(child);
 	}
 

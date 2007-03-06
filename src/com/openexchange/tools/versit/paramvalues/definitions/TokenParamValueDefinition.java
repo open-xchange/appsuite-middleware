@@ -67,9 +67,10 @@ public class TokenParamValueDefinition extends ParameterValueDefinition {
 
 	public static final TokenParamValueDefinition Default = new TokenParamValueDefinition();
 	
-	protected ParameterValue createValue(Scanner s, String text) throws IOException {
-		if (!text.matches("[-0-9A-Za-z]*"))
+	protected ParameterValue createValue(final Scanner s, final String text) throws IOException {
+		if (!text.matches("[-0-9A-Za-z]*")) {
 			throw new VersitException(s, "Token expected");
+		}
 		return super.createValue(s, text.toUpperCase());
 	}
 

@@ -76,13 +76,13 @@ public class OldPropertyDefinition {
     private static final Log LOG = LogFactory.getLog(
         OldPropertyDefinition.class);
     
-	private HashMap Params = new HashMap();
+	private final HashMap<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
 
-	private HashMap ParamValues = new HashMap();
+	private final HashMap<Object, String> ParamValues = new HashMap<Object, String>();
 
-	public OldPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
-		HashSet duplicates = new HashSet();
+	public OldPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
+		HashSet<Object> duplicates = new HashSet<Object>();
 		for (int i = 0; i < paramNames.length; i++) {
 			Params.put(paramNames[i], params[i]);
 			final int size = params[i].size();
@@ -92,20 +92,21 @@ public class OldPropertyDefinition {
 				if (ParamValues.containsKey(value)) {
 					ParamValues.remove(value);
 					duplicates.add(value);
-				} else if (!duplicates.contains(value))
+				} else if (!duplicates.contains(value)) {
 					ParamValues.put(value, paramNames[i]);
+				}
 			}
 		}
 	}
 
-	public void parse(OldScanner s, String name, VersitObject object)
+	public void parse(final OldScanner s, final String name, final VersitObject object)
 			throws IOException {
-		Property property = new Property(name);
+		final Property property = new Property(name);
 		parse(s, property);
 		object.addProperty(property);
 	}
 
-	public void parse(OldScanner s, Property property) throws IOException {
+	public void parse(final OldScanner s, final Property property) throws IOException {
 		s.skipWS();
 		while (s.peek == ';') {
 			s.read();
@@ -115,89 +116,99 @@ public class OldPropertyDefinition {
 			if (s.peek == '=') {
 				s.read();
 				s.skipWS();
-				OldParamDefinition paramdef = (OldParamDefinition) Params
-						.get(param);
-				if (paramdef == null)
+				OldParamDefinition paramdef = Params.get(param);
+				if (paramdef == null) {
 					paramdef = OldParamDefinition.Default;
-				Parameter parameter = new Parameter(param);
+				}
+				final Parameter parameter = new Parameter(param);
 				paramdef.parse(s, parameter);
 				property.addParameter(parameter);
 			} else {
-				String paramname = (String) ParamValues.get(param);
+				final String paramname = ParamValues.get(param);
 				if (paramname != null) {
-					Parameter parameter = new Parameter(paramname);
+					final Parameter parameter = new Parameter(paramname);
 					parameter.addValue(new ParameterValue(param));
 					property.addParameter(parameter);
-				} else
+				} else {
 					LOG.debug("Unknown property parameter: " + paramname);
+				}
 			}
 			s.skipWS();
 		}
-		if (s.peek != ':')
+		if (s.peek != ':') {
 			throw new VersitException(s, "':' expected");
+		}
 		s.read();
 		OldEncoding encoding;
 		Parameter param = property.getParameter("ENCODING");
 		if (param != null) {
-			String encoding_str = param.getValue(0).getText();
-			if ("QUOTED-PRINTABLE".equalsIgnoreCase(encoding_str))
+			final String encoding_str = param.getValue(0).getText();
+			if ("QUOTED-PRINTABLE".equalsIgnoreCase(encoding_str)) {
 				encoding = OldQuotedPrintable.Default;
-			else if ("BASE64".equalsIgnoreCase(encoding_str))
+			}
+			else if ("BASE64".equalsIgnoreCase(encoding_str)) {
 				encoding = OldBase64Encoding.Default;
-			else if ("8BIT".equalsIgnoreCase(encoding_str))
+			}
+			else if ("8BIT".equalsIgnoreCase(encoding_str)) {
 				encoding = OldXBitEncoding.Default;
-			else if ("7BIT".equalsIgnoreCase(encoding_str))
+			}
+			else if ("7BIT".equalsIgnoreCase(encoding_str)) {
 				encoding = OldXBitEncoding.Default;
-			else
+			}
+			else {
 				throw new VersitException(s, "Unknown encoding: "
 						+ encoding_str);
-		} else
+			}
+		} else {
 			encoding = s.DefaultEncoding;
+		}
 		param = property.getParameter("CHARSET");
-		String charset = param == null ? s.DefaultCharset : param.getValue(0)
+		final String charset = param == null ? s.DefaultCharset : param.getValue(0)
 				.getText();
 		try {
 			property.setValue(parseValue(property, s, encoding.decode(s),
 					MimeUtility.javaCharset(charset)));
 		} catch (UnsupportedEncodingException e) {
-			VersitException ve = new VersitException(s, "Unsupported charset");
+			final VersitException ve = new VersitException(s, "Unsupported charset");
 			ve.initCause(e);
 			throw (ve);
 		}
 	}
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
 		return new String(value, charset).replaceAll("\\\\(.)", "$1");
 	}
 
-	protected void writeType(OldFoldingWriter fw, Property property)
+	protected void writeType(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		fw.write(property.name);
-		Parameter type = property.getParameter("TYPE");
-		if (type != null)
+		final Parameter type = property.getParameter("TYPE");
+		if (type != null) {
 			for (int i = 0; i < type.getValueCount(); i++) {
 				fw.write(";");
-				String val = type.getValue(i).getText();
+				final String val = type.getValue(i).getText();
 				if (!ParamValues.containsKey(val)) {
 					fw.write("TYPE");
 					fw.write("=");
 				}
 				fw.write(val);
 			}
+		}
 	}
 
-	public void write(OldFoldingWriter fw, Property property)
+	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		writeType(fw, property);
 		String value = writeValue(property).replaceAll("([^\\r])\\n",
 				"$1\\r\\n");
-		if (value.length() > 0 && value.charAt(0) == '\n')
+		if (value.length() > 0 && value.charAt(0) == '\n') {
 			value = "\r" + value;
+		}
 		OldEncoding encoding = OldXBitEncoding.Default;
 		if (value.length() <= 74 - fw.lineLength()) {
 			for (int i = 0; i < value.length(); i++) {
-				char c = value.charAt(i);
+				final char c = value.charAt(i);
 				if (c != 9 && c < 32 || c > 126) {
 					encoding = OldQuotedPrintable.Default;
 					fw.write(";");
@@ -222,7 +233,7 @@ public class OldPropertyDefinition {
 		encoding.encode(fw, value.getBytes(charset));
 	}
 
-	protected String writeValue(Property property) {
+	protected String writeValue(final Property property) {
 		return property.getValue().toString().replaceAll("\\\\", "\\\\\\\\");
 	}
 

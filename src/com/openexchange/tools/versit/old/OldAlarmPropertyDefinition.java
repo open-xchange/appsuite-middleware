@@ -60,26 +60,27 @@ import com.openexchange.tools.versit.VersitObject;
 
 public class OldAlarmPropertyDefinition extends OldRecordPropertyDefinition {
 
-	private String Action;
+	private final String Action;
 
-	private String Value;
+	private final String Value;
 
-	public OldAlarmPropertyDefinition(String action, String value,
-			String[] paramNames, OldParamDefinition[] params,
+	public OldAlarmPropertyDefinition(final String action, final String value,
+			final String[] paramNames, final OldParamDefinition[] params,
 			OldShortPropertyDefinition[] elements) {
 		super(paramNames, params, elements);
 		Action = action;
 		Value = value;
 	}
 
-	public void parse(OldScanner s, String name, VersitObject object)
+	public void parse(final OldScanner s, final String name, final VersitObject object)
 			throws IOException {
-		Property prop = new Property(name);
+		final Property prop = new Property(name);
 		parse(s, prop);
-		ArrayList values = (ArrayList) prop.getValue();
-		VersitObject alarm = new VersitObject("VALARM");
-		if (values.size() < 4)
+		final ArrayList values = (ArrayList) prop.getValue();
+		final VersitObject alarm = new VersitObject("VALARM");
+		if (values.size() < 4) {
 			throw new VersitException(s, "Invalid alarm");
+		}
 		Property property = new Property("ACTION");
 		property.setValue(Action);
 		alarm.addProperty(property);
@@ -93,9 +94,8 @@ public class OldAlarmPropertyDefinition extends OldRecordPropertyDefinition {
 		object.addChild(alarm);
 	}
 
-	protected void parseProp(OldScanner s, Property prop, VersitObject alarm)
-			throws VersitException {
-		Property property = new Property(Value);
+	protected void parseProp(final OldScanner s, final Property prop, final VersitObject alarm) throws VersitException {
+		final Property property = new Property(Value);
 		property.setValue(((ArrayList) prop.getValue()).get(3));
 		alarm.addProperty(property);
 	}

@@ -66,25 +66,26 @@ public class OldBinaryPropertyDefinition extends OldPropertyDefinition {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, OldScanner s, byte[] value,
-			String charset) throws IOException {
-		Parameter param = property.getParameter("VALUE");
+	protected Object parseValue(final Property property, final OldScanner s, final byte[] value,
+			final String charset) throws IOException {
+		final Parameter param = property.getParameter("VALUE");
 		if (param == null
 				|| "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
 			return value;
-		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText()))
+		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				return new URI(new String(value, charset).trim());
 			} catch (URISyntaxException e) {
-				VersitException ve = new VersitException(s, e.getMessage());
+				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
 			}
-		else // CONTENT-ID or CID
+		} else { // CONTENT-ID or CID
 			return new String(value, charset);
+		}
 	}
 
-	public void write(OldFoldingWriter fw, Property property)
+	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
 		writeType(fw, property);
 		fw.write(";");

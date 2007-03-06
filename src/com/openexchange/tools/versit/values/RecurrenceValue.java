@@ -104,7 +104,7 @@ public class RecurrenceValue {
 	/**
 	 * Weekdays (Recurrence.Weekday instances) on which the event occurs.
 	 */
-	public ArrayList ByDay = new ArrayList();
+	public ArrayList<Weekday> ByDay = new ArrayList<Weekday>();
 
 	/**
 	 * Hours (0 to 23) on which the event occurs.

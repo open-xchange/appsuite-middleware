@@ -58,12 +58,12 @@ import com.openexchange.tools.versit.StringScanner;
 
 public class OldIntegerPropertyDefinition extends OldShortPropertyDefinition {
 
-	public OldIntegerPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldIntegerPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s) throws IOException {
+	protected Object parseValue(final Property property, final StringScanner s) throws IOException {
 		return Integer.valueOf(s.getRest());
 	}
 

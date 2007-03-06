@@ -62,11 +62,11 @@ public class EightBitEncoding implements Encoding {
 
 	public static final EightBitEncoding Default = new EightBitEncoding();
 	
-	public String decode(String text) throws IOException {
+	public String decode(final String text) throws IOException {
 		return text;
 	}
 	
-	public String encode(String text) throws IOException {
+	public String encode(final String text) throws IOException {
 		return text;
 	}
 

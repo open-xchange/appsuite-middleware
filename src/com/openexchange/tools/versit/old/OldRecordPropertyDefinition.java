@@ -67,34 +67,37 @@ public class OldRecordPropertyDefinition extends OldCompoundPropertyDefinition {
 		Elements = elements;
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
-		ArrayList al = new ArrayList();
+		final ArrayList<Object> al = new ArrayList<Object>();
 		for (int i = 0; i < Elements.length; i++) {
-			String element = getElement(s);
-			if (element == null || element.length() == 0)
+			final String element = getElement(s);
+			if (element == null || element.length() == 0) {
 				al.add(null);
-			else
+			} else {
 				al.add(Elements[i].parseValue(property, new StringScanner(s,
 						element.trim())));
+			}
 		}
 		return al;
 	}
 
-	protected String writeValue(Property property) {
-		StringBuffer sb = new StringBuffer();
-		ArrayList al = (ArrayList) property.getValue();
+	protected String writeValue(final Property property) {
+		final StringBuilder sb = new StringBuilder();
+		final ArrayList al = (ArrayList) property.getValue();
 		if (Elements.length > 0 && al.size() > 0) {
 			Object val = al.get(0);
-			if (val != null)
+			if (val != null) {
 				sb.append(Elements[0].writeValue(property, val).replaceAll(";",
 						"\\\\;"));
+			}
 			for (int i = 1; i < Elements.length && i < al.size(); i++) {
 				sb.append(';');
 				val = al.get(i);
-				if (val != null)
+				if (val != null) {
 					sb.append(Elements[i].writeValue(property, val).replaceAll(
 							";", "\\\\;"));
+				}
 			}
 		}
 		return sb.toString();

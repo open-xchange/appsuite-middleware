@@ -67,64 +67,73 @@ public class OldAlarmObjectDefinition extends OldObjectDefinition {
 		super(propertyNames, properties);
 	}
 
-	public void parse(OldScanner s, VersitObject object) throws IOException {
+	public void parse(final OldScanner s, final VersitObject object) throws IOException {
 		throw new VersitException(s, "Invalid element: VALARM");
 	}
 
-	public void write(OldFoldingWriter fw, VersitObject object)
+	public void write(final OldFoldingWriter fw, final VersitObject object)
 			throws IOException {
 		Property property = object.getProperty("ACTION");
-		if (property == null)
+		if (property == null) {
 			throw new IOException("ACTION in VALARM not found");
-		String action = property.getValue().toString();
+		}
+		final String action = property.getValue().toString();
 		final String[] actions = { "AUDIO", "DISPLAY", "EMAIL", "PROCEDURE" };
 		int alarm_type = -1;
-		for (int i = 0; i < actions.length; i++)
+		for (int i = 0; i < actions.length; i++) {
 			if (actions[i].equalsIgnoreCase(action)) {
 				alarm_type = i;
 				break;
 			}
-		if (alarm_type < 0)
+		}
+		if (alarm_type < 0) {
 			throw new IOException("Unknown ACTION in VALARM: " + action);
+		}
 		final String[] propNames = { "AALARM", "DALARM", "MALARM", "PALARM" };
-		Property alarm = new Property(propNames[alarm_type]);
+		final Property alarm = new Property(propNames[alarm_type]);
 		if (alarm_type == 0) { // AUDIO
 			property = object.getProperty("ATTACH");
 			if (property != null) {
-				Parameter param = property.getParameter("FMTTYPE");
+				final Parameter param = property.getParameter("FMTTYPE");
 				String type = param.getValue(0).getText();
-				if ("audio/basic".equalsIgnoreCase(type))
+				if ("audio/basic".equalsIgnoreCase(type)) {
 					type = "PCM";
-				else if ("audio/x-wav".equalsIgnoreCase(type))
+				} else if ("audio/x-wav".equalsIgnoreCase(type)) {
 					type = "WAVE";
-				else if ("audio/x-aiff".equalsIgnoreCase(type))
+				} else if ("audio/x-aiff".equalsIgnoreCase(type)) {
 					type = "AIFF";
-				else
+				} else {
 					throw new IOException("Unknown audio format: " + type);
-				Parameter type_param = new Parameter("TYPE");
+				}
+				final Parameter type_param = new Parameter("TYPE");
 				type_param.addValue(new ParameterValue(type));
 				alarm.addParameter(type_param);
 			}
 		}
-		ArrayList value = new ArrayList();
+		final ArrayList<Object> value = new ArrayList<Object>();
 		property = object.getProperty("TRIGGER");
-		if (property != null)
+		if (property != null) {
 			value.add(property.getValue());
+		}
 		property = object.getProperty("DURATION");
-		if (property != null)
+		if (property != null) {
 			value.add(property.getValue());
+		}
 		property = object.getProperty("REPEAT");
-		if (property != null)
+		if (property != null) {
 			value.add(property.getValue());
+		}
 		final String[] propValueNames = { "ATTACH", "DESCRIPTION", "ATTENDEE",
 				"ATTACH" };
 		property = object.getProperty(propValueNames[alarm_type]);
-		if (property != null)
+		if (property != null) {
 			value.add(property.getValue());
+		}
 		if (alarm_type == 2) {
 			property = object.getProperty("DESCRIPTION");
-			if (property != null)
+			if (property != null) {
 				value.add(property.getValue());
+			}
 		}
 	}
 

@@ -63,43 +63,48 @@ import com.openexchange.tools.versit.ValueDefinition;
  */
 public class ListValueDefinition extends ValueDefinition {
 
-	private char Separator;
+	private final char Separator;
 
-	private ValueDefinition Definition;
+	private final ValueDefinition Definition;
 
-	public ListValueDefinition(char separator, ValueDefinition definition) {
+	public ListValueDefinition(final char separator, final ValueDefinition definition) {
 		Separator = separator;
 		Definition = definition;
 	}
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		ArrayList retval = new ArrayList();
+		final ArrayList<Object> retval = new ArrayList<Object>();
 		while (true) {
-			Object val = Definition.createValue(s, property);
-			if (val != null)
+			final Object val = Definition.createValue(s, property);
+			if (val != null) {
 				retval.add(val);
-			if (val == null || s.peek != Separator)
+			}
+			if (val == null || s.peek != Separator) {
 				break;
+			}
 			s.read();
 		}
 		return retval;
 	}
 
-	public String writeValue(Object value) {
-		ArrayList list = (ArrayList) value;
-		int count = list.size();
-		if (count == 0)
+	public String writeValue(final Object value) {
+		final ArrayList list = (ArrayList) value;
+		final int count = list.size();
+		if (count == 0) {
 			return "";
-		StringBuffer sb = new StringBuffer();
+		}
+		final StringBuilder sb = new StringBuilder();
 		Object val = list.get(0);
-		if (val != null)
+		if (val != null) {
 			sb.append(Definition.writeValue(val));
+		}
 		for (int i = 1; i < count; i++) {
 			sb.append(Separator);
 			val = list.get(i);
-			if (val != null)
+			if (val != null) {
 				sb.append(Definition.writeValue(val));
+			}
 		}
 		return sb.toString();
 	}

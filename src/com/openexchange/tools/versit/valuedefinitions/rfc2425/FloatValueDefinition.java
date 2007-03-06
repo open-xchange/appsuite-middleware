@@ -69,18 +69,19 @@ public class FloatValueDefinition extends ValueDefinition {
 
 	private static Pattern FloatPattern = Pattern.compile("[-+]\\d+(\\.\\d+)?");
 
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		String value = s.regex(FloatPattern);
-		if (value == null)
+		final String value = s.regex(FloatPattern);
+		if (value == null) {
 			throw new VersitException(s, "Float expected");
+		}
 		return Double.valueOf(value);
 	}
 
 	private static final DecimalFormat Format = new DecimalFormat(
 			"0.################");
 
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		return Format.format(((Double) value).doubleValue());
 	}
 

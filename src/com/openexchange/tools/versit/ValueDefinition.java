@@ -53,15 +53,16 @@ package com.openexchange.tools.versit;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * @author Viktor Pracht
  */
 public class ValueDefinition {
 
-	private final HashMap Encodings;
+	private final HashMap<String, Encoding> Encodings;
 
-	private static final HashMap NoEncodings = new HashMap();
+	private static final HashMap<String, Encoding> NoEncodings = new HashMap<String, Encoding>();
 
 	// public static final ValueDefinition Default = new ValueDefinition();
 
@@ -69,51 +70,54 @@ public class ValueDefinition {
 		Encodings = NoEncodings;
 	}
 
-	public ValueDefinition(String[] encodingNames, Encoding[] encodings) {
-		Encodings = new HashMap();
-		for (int i = 0; i < encodingNames.length; i++)
-			Encodings.put(encodingNames[i].toUpperCase(), encodings[i]);
+	public ValueDefinition(final String[] encodingNames, final Encoding[] encodings) {
+		Encodings = new HashMap<String, Encoding>();
+		for (int i = 0; i < encodingNames.length; i++) {
+			Encodings.put(encodingNames[i].toUpperCase(Locale.ENGLISH), encodings[i]);
+		}
 	}
 
-	public Encoding getEncoding(String name) {
-		return (Encoding) Encodings.get(name.toUpperCase());
+	public Encoding getEncoding(final String name) {
+		return Encodings.get(name.toUpperCase(Locale.ENGLISH));
 	}
 
-	public Object parse(Scanner s, Property property) throws IOException {
-		StringBuffer sb = new StringBuffer();
-		while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f))
+	public Object parse(final Scanner s, final Property property) throws IOException {
+		final StringBuilder sb = new StringBuilder();
+		while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
 			sb.append((char) s.read());
+		}
 		String text = sb.toString();
-		Parameter encodingParam = property.getParameter("ENCODING");
+		final Parameter encodingParam = property.getParameter("ENCODING");
 		if (encodingParam != null) {
-			String EncName = encodingParam.getValue(0).getText();
-			Encoding encoding = getEncoding(EncName);
-			if (encoding == null)
+			final String EncName = encodingParam.getValue(0).getText();
+			final Encoding encoding = getEncoding(EncName);
+			if (encoding == null) {
 				throw new VersitException(s, "Unknown encoding: " + EncName);
+			}
 			text = encoding.decode(text);
 		}
 		return createValue(new StringScanner(s, text), property);
 	}
 
-	public Object createValue(StringScanner s, Property property)
-			throws IOException {
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		return s.getRest();
 	}
 
-	public void write(FoldingWriter fw, Property property) throws IOException {
+	public void write(final FoldingWriter fw, final Property property) throws IOException {
 		String value = writeValue(property.getValue());
-		Parameter encodingParam = property.getParameter("ENCODING");
+		final Parameter encodingParam = property.getParameter("ENCODING");
 		if (encodingParam != null) {
-			String enc_name = encodingParam.getValue(0).getText();
-			Encoding encoding = getEncoding(enc_name);
-			if (encoding == null)
+			final String enc_name = encodingParam.getValue(0).getText();
+			final Encoding encoding = getEncoding(enc_name);
+			if (encoding == null) {
 				throw new IOException("Unknown encoding: " + enc_name);
+			}
 			value = encoding.encode(value);
 		}
 		fw.writeln(value);
 	}
 
-	public String writeValue(Object value) {
+	public String writeValue(final Object value) {
 		return value.toString();
 	}
 

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
@@ -68,8 +66,7 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 
-	public Object createValue(StringScanner s, Property property)
-			throws IOException {
+	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		int sign = 1;
 		switch (s.peek) {
 		case '-':
@@ -81,19 +78,21 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 		}
 		s.read();
 		int offset = s.parseNumber(2) * 3600000 + s.parseNumber(2) * 60000;
-		if (s.peek >= '0' && s.peek <= '9')
+		if (s.peek >= '0' && s.peek <= '9') {
 			offset += s.parseNumber(2) * 1000;
+		}
 		return Integer.valueOf(sign * offset);
 	}
 
-	public String writeValue(Object value) {
-		int offset = ((Integer) value).intValue();
-		String retval = (offset >= 0 ? '+' : '-')
-				+ Format.format(offset / 3600000)
-				+ Format.format(offset / 60000 % 60);
-		if (offset % 60000 != 0)
-			retval += Format.format(offset / 1000 % 60);
-		return retval;
+	public String writeValue(final Object value) {
+		final int offset = ((Integer) value).intValue();
+		final StringBuilder sb = new StringBuilder();
+		sb.append(offset >= 0 ? '+' : '-').append(Format.format(offset / 3600000)).append(
+				Format.format(offset / 60000 % 60));
+		if (offset % 60000 != 0) {
+			sb.append(Format.format(offset / 1000 % 60));
+		}
+		return sb.toString();
 	}
 
 }

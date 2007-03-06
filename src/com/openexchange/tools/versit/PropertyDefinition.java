@@ -53,6 +53,7 @@ package com.openexchange.tools.versit;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * @author Viktor Pracht
@@ -61,9 +62,9 @@ public class PropertyDefinition {
 
 	public final ValueDefinition value;
 
-	private HashMap Values = new HashMap();
+	private final HashMap<String, ValueDefinition> Values = new HashMap<String, ValueDefinition>();
 
-	private HashMap Parameters = new HashMap();
+	private final HashMap<String, ParameterDefinition> Parameters = new HashMap<String, ParameterDefinition>();
 
 	public static final PropertyDefinition Default = new PropertyDefinition(
 			new ValueDefinition());
@@ -72,79 +73,87 @@ public class PropertyDefinition {
 		this.value = value;
 	}
 
-	public PropertyDefinition(ValueDefinition value, String[] valueNames,
+	public PropertyDefinition(final ValueDefinition value, final String[] valueNames,
 			ValueDefinition[] values, String[] paramNames,
 			ParameterDefinition[] parameters) {
 		this.value = value;
-		for (int i = 0; i < values.length; i++)
+		for (int i = 0; i < values.length; i++) {
 			addValue(valueNames[i], values[i]);
-		for (int i = 0; i < parameters.length; i++)
+		}
+		for (int i = 0; i < parameters.length; i++) {
 			addParameter(paramNames[i], parameters[i]);
+		}
 	}
 
-	public ParameterDefinition getParameter(String name) {
-		ParameterDefinition param = (ParameterDefinition) Parameters.get(name
-				.toUpperCase());
-		if (param == null)
+	public ParameterDefinition getParameter(final String name) {
+		final ParameterDefinition param = Parameters.get(name.toUpperCase(Locale.ENGLISH));
+		if (param == null) {
 			return ParameterDefinition.Default;
+		}
 		return param;
 	}
 
-	public void addParameter(String name, ParameterDefinition parameter) {
-		Parameters.put(name.toUpperCase(), parameter);
+	public final void addParameter(final String name, final ParameterDefinition parameter) {
+		Parameters.put(name.toUpperCase(Locale.ENGLISH), parameter);
 	}
 
-	public ValueDefinition getValue(String name) {
-		ValueDefinition value = (ValueDefinition) Values
-				.get(name.toUpperCase());
-		if (value == null)
+	public ValueDefinition getValue(final String name) {
+		final ValueDefinition value = Values.get(name.toUpperCase(Locale.ENGLISH));
+		if (value == null) {
 			return this.value;
+		}
 		return value;
 	}
 
-	public void addValue(String name, ValueDefinition value) {
-		Values.put(name.toUpperCase(), value);
+	public final void addValue(final String name, final ValueDefinition value) {
+		Values.put(name.toUpperCase(Locale.ENGLISH), value);
 	}
 
-	public Property parse(Scanner s, String propertyName) throws IOException {
-		Property property = new Property(propertyName);
+	public Property parse(final Scanner s, final String propertyName) throws IOException {
+		final Property property = new Property(propertyName);
 		while (s.peek == ';') {
 			s.read();
-			String paramName = s.parseName();
-			if (paramName.length() == 0)
+			final String paramName = s.parseName();
+			if (paramName.length() == 0) {
 				return null;
-			Parameter param = getParameter(paramName).parse(s, paramName);
-			if (param == null)
+			}
+			final Parameter param = getParameter(paramName).parse(s, paramName);
+			if (param == null) {
 				return null;
+			}
 			property.addParameter(param);
 		}
-		if (s.peek != ':')
+		if (s.peek != ':') {
 			return null;
+		}
 		s.read();
 		ValueDefinition valueDefinition = value;
-		Parameter valueParam = property.getParameter("VALUE");
-		if (valueParam != null)
+		final Parameter valueParam = property.getParameter("VALUE");
+		if (valueParam != null) {
 			valueDefinition = getValue(valueParam.getValue(0).getText());
-		Object value = valueDefinition.parse(s, property);
-		if (value == null)
+		}
+		final Object value = valueDefinition.parse(s, property);
+		if (value == null) {
 			return null;
+		}
 		property.setValue(value);
 		return property;
 	}
 
-	public void write(FoldingWriter fw, Property property) throws IOException {
+	public void write(final FoldingWriter fw, final Property property) throws IOException {
 		fw.write(property.name);
-		int count = property.getParameterCount();
+		final int count = property.getParameterCount();
 		for (int i = 0; i < count; i++) {
-			Parameter parameter = property.getParameter(i);
+			final Parameter parameter = property.getParameter(i);
 			ParameterDefinition definition = getParameter(parameter.name);
 			definition.write(fw, parameter);
 		}
 		fw.write(":");
 		ValueDefinition definition = value;
-		Parameter valueParameter = property.getParameter("VALUE");
-		if (valueParameter != null)
+		final Parameter valueParameter = property.getParameter("VALUE");
+		if (valueParameter != null) {
 			definition = getValue(valueParameter.getValue(0).getText());
+		}
 		definition.write(fw, property);
 	}
 

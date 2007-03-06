@@ -131,9 +131,8 @@ public class PrefetchIterator<T> implements SearchIterator {
     public boolean hasNext() {
         if (prefetch) {
             return !data.isEmpty() || null != oxExc || null != sie; 
-        } else {
-            return delegate.hasNext();
         }
+        return delegate.hasNext();
     }
 
     /**
@@ -158,9 +157,8 @@ public class PrefetchIterator<T> implements SearchIterator {
                 throw new SearchIteratorException("No such element!");
             }
             return data.poll();
-        } else {
-            return (T) delegate.next();
         }
+        return (T) delegate.next();
     }
 
     /**
@@ -169,8 +167,7 @@ public class PrefetchIterator<T> implements SearchIterator {
     public int size() {
         if (prefetch) {
             return data.size();
-        } else {
-            return delegate.size();
         }
+        return delegate.size();
     }
 }

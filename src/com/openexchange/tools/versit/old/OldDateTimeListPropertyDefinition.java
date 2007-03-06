@@ -68,17 +68,18 @@ public class OldDateTimeListPropertyDefinition extends
 		super(paramNames, params);
 	}
 
-	protected Object parseValue(Property property, StringScanner s)
+	protected Object parseValue(final Property property, final StringScanner s)
 			throws IOException {
-		ArrayList al = new ArrayList();
+		final ArrayList<Object> al = new ArrayList<Object>();
 		String element;
-		while (null != (element = getElement(s)))
+		while (null != (element = getElement(s))) {
 			al.add(PropDef.parseValue(property, new StringScanner(s, element
 					.trim())));
+		}
 		return al;
 	}
 
-	protected String writeElement(Property property, Object value) {
+	protected String writeElement(final Property property, final Object value) {
 		return PropDef.writeValue(property, value);
 	}
 

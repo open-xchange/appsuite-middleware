@@ -83,38 +83,41 @@ public class DurationValueDefinition extends ValueDefinition {
 	 *     	 
 	 * </pre>
 	 */
-	public Object createValue(StringScanner s, Property property)
+	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
-		DurationValue dur = new DurationValue();
-		if (s.peek == '+')
+		final DurationValue dur = new DurationValue();
+		if (s.peek == '+') {
 			s.read();
-		else if (s.peek == '-') {
+		} else if (s.peek == '-') {
 			dur.Negative = true;
 			s.read();
 		}
-		if (s.peek != 'P')
+		if (s.peek != 'P') {
 			throw new VersitException(s, "Duration expected");
+		}
 		s.read();
-		if (s.peek == 'T')
+		if (s.peek == 'T') {
 			parseTime(s, dur);
-		else {
-			int num = s.parseNumber();
+		} else {
+			final int num = s.parseNumber();
 			if (s.peek == 'D') {
 				dur.Days = num;
-				if (s.peek == 'T')
+				if (s.peek == 'T') {
 					parseTime(s, dur);
-			} else if (s.peek == 'W')
+				}
+			} else if (s.peek == 'W') {
 				dur.Weeks = num;
-			else
+			} else {
 				throw new VersitException(s, "Duration expected");
+			}
 		}
 		return dur;
 	}
 
-	private void parseTime(StringScanner s, DurationValue dur)
+	private void parseTime(final StringScanner s, final DurationValue dur)
 			throws IOException {
 		s.read();
-		int num = s.parseNumber();
+		final int num = s.parseNumber();
 		switch (s.peek) {
 		case 'H':
 			parseHour(s, num, dur);
@@ -130,37 +133,42 @@ public class DurationValueDefinition extends ValueDefinition {
 		}
 	}
 
-	private void parseHour(StringScanner s, int num, DurationValue dur)
+	private void parseHour(final StringScanner s, final int num, final DurationValue dur)
 			throws IOException {
-		if (s.peek != 'H')
+		if (s.peek != 'H') {
 			throw new VersitException(s, "Duration expected");
+		}
 		s.read();
 		dur.Hours = num;
-		if (s.peek >= '0' && s.peek <= '9')
+		if (s.peek >= '0' && s.peek <= '9') {
 			parseMinute(s, s.parseNumber(), dur);
+		}
 	}
 
-	private void parseMinute(StringScanner s, int num, DurationValue dur)
+	private void parseMinute(final StringScanner s, final int num, final DurationValue dur)
 			throws IOException {
-		if (s.peek != 'M')
+		if (s.peek != 'M') {
 			throw new VersitException(s, "Duration expected");
+		}
 		s.read();
 		dur.Minutes = num;
-		if (s.peek >= '0' && s.peek <= '9')
+		if (s.peek >= '0' && s.peek <= '9') {
 			parseSecond(s, s.parseNumber(), dur);
+		}
 	}
 
-	private void parseSecond(StringScanner s, int num, DurationValue dur)
+	private void parseSecond(final StringScanner s, final int num, final DurationValue dur)
 			throws IOException {
-		if (s.peek != 'S')
+		if (s.peek != 'S') {
 			throw new VersitException(s, "Duration expected");
+		}
 		s.read();
 		dur.Seconds = num;
 	}
 
-	public String writeValue(Object value) {
-		DurationValue dur = (DurationValue) value;
-		StringBuffer sb = new StringBuffer();
+	public String writeValue(final Object value) {
+		final DurationValue dur = (DurationValue) value;
+		final StringBuilder sb = new StringBuilder();
 		sb.append(dur.Negative ? "-P" : "P");
 		if (dur.Weeks != 0) {
 			sb.append(dur.Weeks);
