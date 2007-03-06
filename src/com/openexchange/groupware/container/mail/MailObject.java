@@ -146,7 +146,7 @@ public class MailObject {
 		}
 	}
 	
-	private void validateMailObject() throws OXException {
+	private final void validateMailObject() throws OXException {
 		if (fromAddr == null || fromAddr.length() == 0) {
 			throw new OXMailException(MailCode.MISSING_FIELD, "From", "");
 		} else if (toAddrs == null || toAddrs.length == 0) {
@@ -160,7 +160,7 @@ public class MailObject {
 		}
 	}
 	
-	public void send() throws OXException {
+	public final void send() throws OXException {
 		try {
 			validateMailObject();
 			try {

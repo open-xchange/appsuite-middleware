@@ -9,15 +9,16 @@
    'Internal Users'
  - Fixed bug #6274: Changed error message as demanded: login to imap server
    failed, please try again later.
+ - Removed unnecessary invocation of javax.mail.Message.saveChanges() method
 
 * 2007-03-05 - thorben.betten@open-xchange.com
 
  - Fixed bug #4928	OX Global Address Book vs. Internal Users
-	Fixed through changes made in FolderStrings.java. Last thing to do is translation (Antje)
+   Fixed through changes made in FolderStrings.java. Last thing to do is translation
  - Fixed bug #6201	com.openexchange.ajax.Mail NullPointerException
-	Fixed through additional null-check in MailInterfaceImpl.java (line 1704)
+   Fixed through additional null-check in MailInterfaceImpl.java (line 1704)
  - Fixed bug #6048	Email: Emails without display name aren't sorted by sender (all views)
-	Also checking for empty personal in MailComparator when comparing email addresses
+   Also checking for empty personal in MailComparator when comparing email addresses
  - Fixed bug #6229	Folder.actionGetUpdatedFolders Object was not returned
 	Fixed through adding additional catch-clause when instantiating an instance of
 	FolderObjectIterator, cause no finally-block can be used to close used resource
