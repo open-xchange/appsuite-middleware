@@ -4,6 +4,8 @@
  - Fixed bug #6333: NPE check on forward message
  - Fixed bug #6280: Accept non-semicolon-separated parameters
    in Content-Type header
+ - Fixed bug #6332: getFlags() is no more invoked on a message that is
+   marked as '\DELETED'
 
 * 2007-03-06 - thorben.betten@open-xchange.com
 

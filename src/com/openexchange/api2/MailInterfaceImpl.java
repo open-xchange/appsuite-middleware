@@ -1727,7 +1727,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (msg == null) {
 				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUID, imapCon.getImapFolder().toString());
 			}
-			if (imapCon.getImapFolder().getMode() == Folder.READ_WRITE) {
+			if (imapCon.getImapFolder().getMode() == Folder.READ_WRITE && !msg.isExpunged()) {
 				/*
 				 * Check for drafts folder. This is done here, cause sometimes
 				 * copy operation does not properly add \Draft flag.
