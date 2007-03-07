@@ -86,6 +86,8 @@ public class ForwardTextMessageHandler implements MessageHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ForwardTextMessageHandler.class);
+	
+	private static final String STR_EMPTY = "";
 
 	private final SessionObject session;
 
@@ -267,22 +269,21 @@ public class ForwardTextMessageHandler implements MessageHandler {
 				this.firstText = htmlContent;
 				this.isHtml = true;
 				return false;
-			} else {
-				/*
-				 * Still no text found til here. Insert text-converted html
-				 * content
-				 */
-				final Html2TextConverter converter = new Html2TextConverter();
-				final String content;
-				try {
-					content = converter.convertWithQuotes(htmlContent);
-				} catch (IOException e) {
-					throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-				}
-				this.firstText = MailTools.htmlFormat(content);
-				this.isHtml = false;
-				return false;
 			}
+			/*
+			 * Still no text found til here. Insert text-converted html
+			 * content
+			 */
+			final Html2TextConverter converter = new Html2TextConverter();
+			final String content;
+			try {
+				content = converter.convertWithQuotes(htmlContent);
+			} catch (IOException e) {
+				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+			}
+			this.firstText = MailTools.htmlFormat(content);
+			this.isHtml = false;
+			return false;
 		}
 		/*
 		 * No multipart/alternative or user does not want to see content's html
@@ -387,31 +388,31 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			return preparedText;
 		}
 		if (firstText == null) {
-			preparedText = "";
+			preparedText = STR_EMPTY;
 			isHtml = false;
 		} else {
 			preparedText = firstText;
 		}
 		String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
-		forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from);
-		forwardPrefix = forwardPrefix.replaceFirst("#TO#", to);
+		forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null ? STR_EMPTY : from);
+		forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null ? STR_EMPTY : to);
 		try {
-			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", receivedDate == null ? "" : DateFormat.getDateInstance(
+			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", receivedDate == null ? STR_EMPTY : DateFormat.getDateInstance(
 					DateFormat.LONG, session.getLocale()).format(receivedDate));
 		} catch (Throwable t) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(t.getMessage(), t);
 			}
-			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", STR_EMPTY);
 		}
 		try {
-			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", receivedDate == null ? "" : DateFormat.getTimeInstance(
+			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", receivedDate == null ? STR_EMPTY : DateFormat.getTimeInstance(
 					DateFormat.SHORT, session.getLocale()).format(receivedDate));
 		} catch (Throwable t) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(t.getMessage(), t);
 			}
-			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", STR_EMPTY);
 		}
 		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", subject);
 		final String doubleBreak = "<br><br>";

@@ -72,9 +72,9 @@ public class ContentType implements Serializable {
 	private static final long serialVersionUID = -9197784872892324694L;
 
 	private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile(
-			"([^\\s]+)(/)([^\\s]+\\s*)((?:;\\s*\\S+=(?:(?:[^;]*)|(?:\"\\S+?\")))*)", Pattern.CASE_INSENSITIVE);
+			"([^\\s]+)(/)([^\\s]+?\\s*)((?:(?:;\\s*|\\s+)\\S+=(?:(?:[^;]*)|(?:\"\\S+?\")))*)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_PARAMETER = Pattern.compile("(;)(\\s*)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))",
+	private static final Pattern PATTERN_PARAMETER = Pattern.compile("(;\\s*|\\s+)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern PATTERN_BASETYPE = Pattern.compile("([^\\s]+)(/)([^\\s]+)", Pattern.CASE_INSENSITIVE);
@@ -113,11 +113,11 @@ public class ContentType implements Serializable {
 	private final void parseParameters(final String ct) {
 		final Matcher paramMatcher = PATTERN_PARAMETER.matcher(ct);
 		NextParam: while (paramMatcher.find()) {
-			final String value = paramMatcher.group(5);
+			final String value = paramMatcher.group(4);
 			if (value.length() == 0 || "\"\"".equals(value)) {
 				continue NextParam;
 			}
-			parameters.put(paramMatcher.group(3).toLowerCase(Locale.ENGLISH), value);
+			parameters.put(paramMatcher.group(2).toLowerCase(Locale.ENGLISH), value);
 		}
 	}
 
