@@ -1,6 +1,9 @@
 * 2007-03-07 - thorben.betten@open-xchange.com
 
  - Fixed bug (#6331) with (multi-)mime-encoded message headers
+ - Fixed bug #6333: NPE check on forward message
+ - Fixed bug #6280: Accept non-semicolon-separated parameters
+   in Content-Type header
 
 * 2007-03-06 - thorben.betten@open-xchange.com
 
