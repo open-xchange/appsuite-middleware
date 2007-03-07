@@ -57,6 +57,28 @@ package com.openexchange.groupware.container;
 
 public abstract class CommonObject extends FolderChildObject {
 	
+	public static final int LABEL_NONE = 0;
+	
+	public static final int LABEL_1 = 1;
+	
+	public static final int LABEL_2 = 2;
+	
+	public static final int LABEL_3 = 3;
+	
+	public static final int LABEL_4 = 4;
+	
+	public static final int LABEL_5 = 5;
+	
+	public static final int LABEL_6 = 6;
+	
+	public static final int LABEL_7 = 7;
+	
+	public static final int LABEL_8 = 8;
+	
+	public static final int LABEL_9 = 9;
+	
+	public static final int LABEL_10 = 10;
+	
 	public static final int CATEGORIES = 100;
 
 	public static final int PRIVATE_FLAG = 101;
