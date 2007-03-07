@@ -152,7 +152,7 @@ public class OXMailException extends OXException {
 		 * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 		 * </p>
 		 */
-		MESSAGE_REMOVED("Invalid method on a expunged message: %s", Category.PROGRAMMING_ERROR, 12),
+		MESSAGE_REMOVED("Invalid method on an expunged message: %s", Category.PROGRAMMING_ERROR, 12),
 		/**
 		 * Method not supported: %s
 		 * <p>
