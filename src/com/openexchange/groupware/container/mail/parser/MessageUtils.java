@@ -176,6 +176,7 @@ public class MessageUtils {
 					sb.append(hdrVal.substring(lastMatch));
 				}
 			} while (m.find());
+			sb.append(hdrVal.substring(lastMatch));
 			return removeHdrLineBreak(sb.toString());
 		}
 		return removeHdrLineBreak(hdrVal);
