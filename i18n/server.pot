@@ -32,11 +32,11 @@ msgid "System"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:70
-msgid "Global Address Book"
+msgid "Shared Address Book"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:72
-msgid "Internal Users"
+msgid "Global Address Book"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:74

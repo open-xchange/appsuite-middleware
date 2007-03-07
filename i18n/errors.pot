@@ -30,7 +30,13 @@ msgstr ""
 msgid "A DBPooling error occured"
 msgstr ""
 
+msgid "A IMAP error occured: %s"
+msgstr ""
+
 msgid "A JSON error occured: %s"
+msgstr ""
+
+msgid "A JSON syntax error occured: %s"
 msgstr ""
 
 msgid "A LDAP error occurred in context %s"
@@ -60,7 +66,18 @@ msgstr ""
 msgid "A messaging error occured: %s"
 msgstr ""
 
+msgid ""
+"A part's content could not be read from message %s in mail folder %s of user "
+"%s"
+msgstr ""
+
 msgid "A protocol exception occured during execution of an IMAP request: %s"
+msgstr ""
+
+msgid "A runtime error occured in context %s"
+msgstr ""
+
+msgid "A socket error occured: %s"
 msgstr ""
 
 msgid ""
@@ -138,6 +155,9 @@ msgstr ""
 msgid "An error occurred attaching to the given object."
 msgstr ""
 
+msgid "An invalid SQL query was sent to the server."
+msgstr ""
+
 msgid "Attachments must contain a file."
 msgstr ""
 
@@ -165,13 +185,31 @@ msgstr ""
 msgid "Can't build distinguished name from %s."
 msgstr ""
 
+msgid "Can't clone object %1$s."
+msgstr ""
+
 msgid "Can't close database connection"
+msgstr ""
+
+msgid "Can't create URI from \"%1$s\"."
+msgstr ""
+
+msgid "Can't create directory \"%1$s\" for FileStorage."
+msgstr ""
+
+msgid "Can't create file %1$s."
+msgstr ""
+
+msgid "Can't create lock file."
 msgstr ""
 
 msgid "Can't create private task in public/shared folder %1$d."
 msgstr ""
 
 msgid "Can't find context %d."
+msgstr ""
+
+msgid "Can't find filestore with id %1$d."
 msgstr ""
 
 msgid "Can't find folder of task participant."
@@ -223,6 +261,9 @@ msgid "Can't put object %s into cache."
 msgstr ""
 
 msgid "Can't read file \"%s\"."
+msgstr ""
+
+msgid "Can't remove lock file."
 msgstr ""
 
 msgid "Can't resolve mailadmin for context %d."
@@ -328,7 +369,7 @@ msgstr ""
 msgid "Could not delete attachment."
 msgstr ""
 
-msgid "Could not delete file from file store."
+msgid "Could not delete file from file store. Filestore: %s Context: %s"
 msgstr ""
 
 msgid ""
@@ -344,10 +385,10 @@ msgstr ""
 msgid "Could not generate new ID."
 msgstr ""
 
-msgid "Could not iterate result"
+msgid "Could not get file store location."
 msgstr ""
 
-msgid "Could not load context."
+msgid "Could not iterate result"
 msgstr ""
 
 msgid "Could not load documents to check the permissions"
@@ -408,6 +449,12 @@ msgid ""
 "%s in context %s"
 msgstr ""
 
+msgid "Depth mismatch while computing next entry."
+msgstr ""
+
+msgid "Depth must be >= 1 but is %1$d."
+msgstr ""
+
 msgid "Draft message could not be edited in read-only mail folder %s"
 msgstr ""
 
@@ -444,6 +491,9 @@ msgid "Encoding %s can't be used."
 msgstr ""
 
 msgid "End date is before start date"
+msgstr ""
+
+msgid "Entries must be >= 1 but is %1$d."
 msgstr ""
 
 msgid "Error in SQL Update"
@@ -530,12 +580,20 @@ msgstr ""
 msgid "File upload failed: %s"
 msgstr ""
 
+msgid "FileStorage is full."
+msgstr ""
+
 msgid "Filename for property file is not defined."
 msgstr ""
 
 msgid ""
 "Files attached to InfoStore items must have unique names. Filename: %s. The "
 "other document with this file name is %s."
+msgstr ""
+
+msgid ""
+"Flag %s could not be changed in message %d in folder %s due to following "
+"reason: %s"
 msgstr ""
 
 msgid "Folder %1$s (%2$d) is not a task folder."
@@ -591,6 +649,10 @@ msgstr ""
 msgid "Folder cache has not been enabled in config file %s"
 msgstr ""
 
+msgid ""
+"Folder existence cannot be checked due to unsufficient folder information:"
+msgstr ""
+
 msgid "Folder is closed: %s"
 msgstr ""
 
@@ -635,6 +697,11 @@ msgid "Got a -1 ID from IDGenerator"
 msgstr ""
 
 msgid ""
+"Got a FileStorageException for FileStorage with id %s in Context %s . "
+"Underlying message is: %s. Check the StackTrace"
+msgstr ""
+
+msgid ""
 "Got the wrong folder identification. You do not have the appropriate "
 "permissions to modify this object."
 msgstr ""
@@ -648,6 +715,9 @@ msgid "Hash algorithm %s isn't found."
 msgstr ""
 
 msgid "Header \"content-type\" does not indicate multipart content"
+msgstr ""
+
+msgid "Html-2-Text conversion failed: %s"
 msgstr ""
 
 msgid "I/O error while writing to Writer Object: %s"
@@ -722,6 +792,9 @@ msgstr ""
 msgid "Invalid constructor argument. Instance of %s not supported"
 msgstr ""
 
+msgid "Invalid constructor parameter at %1$d with type %2$s."
+msgstr ""
+
 msgid "Invalid content-type header value: %s"
 msgstr ""
 
@@ -765,6 +838,9 @@ msgid "Invalid unique message identifier: %s"
 msgstr ""
 
 msgid "Mail folder \"%s\" could not be created"
+msgstr ""
+
+msgid "Mail folder cannot be created. Name must not contain character '%s'"
 msgstr ""
 
 msgid "Mandatory field last name is not set."
@@ -931,6 +1007,9 @@ msgid ""
 "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr ""
 
+msgid "Number parsing problem."
+msgstr ""
+
 msgid "Object not found. %s"
 msgstr ""
 
@@ -994,6 +1073,9 @@ msgid "Problem setting auto commit to true."
 msgstr ""
 
 msgid "Problem while communicating with external authorization."
+msgstr ""
+
+msgid "Problem with URI when creating context specific filestore location."
 msgstr ""
 
 msgid "Problem with executing SQL: %s"
@@ -1153,6 +1235,9 @@ msgid ""
 msgstr ""
 
 msgid "The document you requested doesn't exist."
+msgstr ""
+
+msgid "The file can't be added to filestore. File size: %s Quota: %s Used: %s"
 msgstr ""
 
 msgid "The file could not be retrieved."
@@ -1333,6 +1418,9 @@ msgid ""
 "$d Context %4$d"
 msgstr ""
 
+msgid "Unable to map OCL permission value %s to a JSON permission value"
+msgstr ""
+
 msgid ""
 "Unable to perform Contact Folder check for readable content: Context %1$d "
 "Folder %2$d"
@@ -1394,6 +1482,11 @@ msgstr ""
 msgid "Unexpected SQL Error!"
 msgstr ""
 
+msgid ""
+"Unexpected empty body package received from web server. Total-Received: %d | "
+"Content-Length: %d"
+msgstr ""
+
 msgid "Unexpected exception %d!"
 msgstr ""
 
@@ -1448,6 +1541,9 @@ msgid "Unparseable header field %s in forward request package"
 msgstr ""
 
 msgid "Unsupported MIME type %s"
+msgstr ""
+
+msgid "Unsupported encoding."
 msgstr ""
 
 msgid "Unsupported encoding: %s"
@@ -1546,6 +1642,9 @@ msgid "Word contains illegal comma character(s): %s"
 msgstr ""
 
 msgid "Writing the setting %1$s is not permitted."
+msgstr ""
+
+msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr ""
 
 msgid "Wrong message %sheader: %s"
