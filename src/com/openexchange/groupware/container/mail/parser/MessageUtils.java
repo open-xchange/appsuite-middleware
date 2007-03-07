@@ -224,16 +224,15 @@ public class MessageUtils {
 //			}
 //			sb.append(content.substring(from));
 //			return sb.toString();
-		} else {
-			final BufferedReader reader = new BufferedReader(new StringReader(content));
-			String line = null;
-			try {
-				while ((line = reader.readLine()) != null) {
-					sb.append(wrapTextLine(line, linewrap)).append("\n");
-				}
-			} catch (IOException e) {
-				LOG.error(e.getMessage(), e);
+		}
+		final BufferedReader reader = new BufferedReader(new StringReader(content));
+		String line = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(wrapTextLine(line, linewrap)).append("\n");
 			}
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
 		}
 		return sb.toString();
 	}

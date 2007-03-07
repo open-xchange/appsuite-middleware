@@ -1,3 +1,7 @@
+* 2007-03-07 - thorben.betten@open-xchange.com
+
+ - Fixed bug (#6331) with (multi-)mime-encoded message headers
+
 * 2007-03-06 - thorben.betten@open-xchange.com
 
  - Fixed bug #6031: Better html2text conversion concerning paragraph
