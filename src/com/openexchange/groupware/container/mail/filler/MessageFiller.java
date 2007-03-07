@@ -773,10 +773,7 @@ public class MessageFiller {
 				throw oxExc;
 			} catch (Exception e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
-			} finally {
-				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}
-			readCon = null;
 			final VersitObject versitObj = converter.convertContact(contactObj, "3.0");
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final VersitDefinition def = Versit.getDefinition("text/vcard");
