@@ -169,6 +169,7 @@ public class MessageUtils {
 			int lastMatch = 0;
 			do {
 				try {
+					sb.append(hdrVal.substring(lastMatch, m.start()));
 					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
 					lastMatch = m.end();
 				} catch (UnsupportedEncodingException e) {

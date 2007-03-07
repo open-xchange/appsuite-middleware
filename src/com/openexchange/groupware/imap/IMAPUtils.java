@@ -409,6 +409,11 @@ public class IMAPUtils {
 	private static final Pattern PATTERN_PARSE_HEADER = Pattern
 			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
 
+	/**
+	 * Call this method if JavaMail's routine fails to load a message's header.
+	 * Header is read in a safe manner and filled into given
+	 * <tt>javax.mail.Message</tt> instance
+	 */
 	public static final Map<String, String> loadBrokenHeaders(final Message msg, final boolean uid)
 			throws MessagingException, ProtocolException {
 		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
@@ -428,7 +433,9 @@ public class IMAPUtils {
 			if (response.isOK()) {
 				final StringBuilder valBuilder = new StringBuilder();
 				NextResponse: for (int i = 0; i < r.length - 1; i++) {
-					if (r[i] == null || !(r[i] instanceof FetchResponse)) {
+					if (r[i] == null) {
+						continue NextResponse;
+					} else if (!(r[i] instanceof FetchResponse)) {
 						continue NextResponse;
 					}
 					final FetchResponse f = ((FetchResponse) r[i]);
@@ -741,6 +748,9 @@ public class IMAPUtils {
 		return val.booleanValue();
 	}
 
+	/**
+	 * @return the next expected UID of given mail folder
+	 */
 	public static long getUIDNext(final Folder mailbox) throws MessagingException {
 		if (!(mailbox instanceof IMAPFolder)) {
 			throw new MessagingException("Given folder " + mailbox.getFullName() + " is not an instance of IMAPFolder");
@@ -1081,7 +1091,7 @@ public class IMAPUtils {
 						subject = MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null));
 					}
 					if (subject != null) {
-						foundInCurrentField = (subject.toLowerCase().indexOf(searchPatterns[i]) != -1);
+						foundInCurrentField = (subject.toLowerCase(Locale.ENGLISH).indexOf(searchPatterns[i]) != -1);
 					} else {
 						foundInCurrentField = false;
 					}
@@ -1090,7 +1100,7 @@ public class IMAPUtils {
 					try {
 						if (msg.getContent() instanceof String) {
 							final String msgText = (String) msg.getContent();
-							foundInCurrentField = msgText.toLowerCase().indexOf(searchPatterns[i].toLowerCase()) > -1;
+							foundInCurrentField = msgText.toLowerCase(Locale.ENGLISH).indexOf(searchPatterns[i].toLowerCase()) > -1;
 						} else {
 							throw new IMAPException("Unknown Search Field: " + searchFields[i]);
 						}
@@ -1554,9 +1564,14 @@ public class IMAPUtils {
 	}
 
 	private static class UIDCopyResponse {
+		
 		private String src;
 
 		private String dest;
+		
+		public UIDCopyResponse() {
+			super();
+		}
 
 		public String getDest() {
 			return dest;
@@ -1651,13 +1666,15 @@ public class IMAPUtils {
 	}
 
 	private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
+	
+	private final static String[] ALL = new String[] { "1:*" };
+	
+	public static final void setAllSystemFlags(final IMAPFolder imapFolder, final Flags flags, final boolean enable) throws MessagingException {
+		setSystemFlags(imapFolder, ALL, flags, enable);
+	}
 
 	public static final void setSystemFlags(final IMAPFolder imapFolder, final long[] uids, final boolean isSequential,
 			final Flags flags, final boolean enable) throws MessagingException {
-		final Flag[] systemFlags;
-		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
-			return;
-		}
 		final String[] uidsArr;
 		if (isSequential) {
 			final StringBuilder tmp = new StringBuilder(100);
@@ -1665,6 +1682,15 @@ public class IMAPUtils {
 			uidsArr = new String[] { tmp.toString() };
 		} else {
 			uidsArr = getUIDs(uids);
+		}
+		setSystemFlags(imapFolder, uidsArr, flags, enable);
+	}
+	
+	private static final void setSystemFlags(final IMAPFolder imapFolder, final String[] uidsArr,
+			final Flags flags, final boolean enable) throws MessagingException {
+		final Flag[] systemFlags;
+		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
+			return;
 		}
 		final StringBuilder flagBuilder = new StringBuilder(200);
 		flagBuilder.append(getFlagString(systemFlags[0]));
@@ -1874,7 +1900,9 @@ public class IMAPUtils {
 					/*
 					 * Response is null or not a FetchResponse
 					 */
-					if (currentReponse == null || !(currentReponse instanceof FetchResponse)) {
+					if (currentReponse == null) {
+						continue;
+					} else if (!(currentReponse instanceof FetchResponse)) {
 						continue;
 					}
 					final FetchResponse f = (FetchResponse) currentReponse;
@@ -1978,7 +2006,9 @@ public class IMAPUtils {
 					/*
 					 * Response is null or not a FetchResponse
 					 */
-					if (currentReponse == null || !(currentReponse instanceof FetchResponse)) {
+					if (currentReponse == null) {
+						continue;
+					} else if (!(currentReponse instanceof FetchResponse)) {
 						continue;
 					}
 					final FetchResponse f = (FetchResponse) currentReponse;
@@ -2226,11 +2256,11 @@ public class IMAPUtils {
 	}
 
 	private static final String craftHeaderCmd(final IMAPProtocol p, final String[] hdrs) {
-		StringBuffer sb;
+		final StringBuilder sb;
 		if (p.isREV1()) {
-			sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
+			sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
 		} else {
-			sb = new StringBuffer("RFC822.HEADER.LINES (");
+			sb = new StringBuilder("RFC822.HEADER.LINES (");
 		}
 		sb.append(hdrs[0]);
 		for (int i = 1; i < hdrs.length; i++) {
@@ -2526,21 +2556,20 @@ public class IMAPUtils {
 								return cl1.compareTo(cl2);
 							}
 						};
-					} else {
-						return new FieldComparer(locale) {
-							public int compareFields(Message msg1, Message msg2) throws MessagingException {
-								return 0;
-							}
-						};
 					}
-				} catch (IMAPException e) {
-					LOG.error(e.getMessage(), e);
 					return new FieldComparer(locale) {
 						public int compareFields(Message msg1, Message msg2) throws MessagingException {
 							return 0;
 						}
 					};
+				} catch (IMAPException e) {
+					LOG.error(e.getMessage(), e);
 				}
+				return new FieldComparer(locale) {
+					public int compareFields(Message msg1, Message msg2) throws MessagingException {
+						return 0;
+					}
+				};
 			default:
 				throw new UnsupportedOperationException("Unknown sort column value " + sortCol);
 			}
