@@ -267,10 +267,15 @@ public interface MailInterface {
 	/**
 	 * Deletes the message located in given folder corresponding to given
 	 * <code>msgUID</code>
-	 * @param hardDelete TODO
 	 */
 	public boolean deleteMessages(String folder, long[] msgUIDs, boolean hardDelete) throws OXException;
-
+	
+	/**
+	 * Clears all messages out of given folder. <b>NOTE</b> this is a hard
+	 * delete, thus no copies are created
+	 */
+	public boolean clearFolder(final String folderArg) throws OXException;
+	
 	/**
 	 * Copies or moves (if <code>move</code> is set) the defined message from
 	 * source folder to destination folder.

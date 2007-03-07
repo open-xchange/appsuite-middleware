@@ -2941,6 +2941,37 @@ public class MailInterfaceImpl implements MailInterface {
 		return imapStore.getFolder(new StringBuilder(100).append(parent.getFullName()).append(parent.getSeparator())
 				.append(folderName).toString());
 	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#clearFolder(java.lang.String)
+	 */
+	public boolean clearFolder(final String folderArg) throws OXException {
+		try {
+			init();
+			final String folder = folderArg == null ? INBOX : folderArg;
+			setAndOpenFolder(folder, Folder.READ_WRITE);
+			try {
+				if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.DELETE)) {
+					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
+							.getFullName());
+				}
+			} catch (MessagingException e) {
+				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
+			}
+			/*
+			 * Mark all messages as /DELETED
+			 */
+			IMAPUtils.setAllSystemFlags(imapCon.getImapFolder(), FLAGS_DELETED, true);
+			/*
+			 * Force expunge on close()
+			 */
+			imapCon.setExpunge(true);
+			return true;
+		} catch (MessagingException e) {
+			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
