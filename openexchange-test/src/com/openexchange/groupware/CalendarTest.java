@@ -1571,7 +1571,15 @@ public class CalendarTest extends TestCase {
         int found_external = 0;
         for (int a = 0; a < test_participants_update.length; a++) {
             if (test_participants_update[a].getType() == Participant.EXTERNAL_USER) {
-                if (test_participants_update[a].getEmailAddress().equals(update_new_mail_1)) {
+                if (test_participants_update[a].getEmailAddress().equals(mail_address)) {
+                    assertEquals("Check display name", display_name, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address, test_participants_update[a].getEmailAddress());
+                    found_external++;
+                } else if (test_participants_update[a].getEmailAddress().equals(mail_address2)) {
+                    assertEquals("Check display name", display_name2, test_participants_update[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address2, test_participants_update[a].getEmailAddress());                        
+                    found_external++;
+                } else if (test_participants_update[a].getEmailAddress().equals(update_new_mail_1)) {
                     assertEquals("Check display name", update_new_display_1, test_participants_update[a].getDisplayName());
                     assertEquals("Check mail address", update_new_mail_1, test_participants_update[a].getEmailAddress());                        
                     found_external++;
@@ -1583,8 +1591,12 @@ public class CalendarTest extends TestCase {
             }
         }        
         
-        assertEquals("Found all 2 external participants after update", 2, found_external);
+        assertEquals("Found all 4 external participants after update", 4, found_external);
+        
         
     }    
-   
+  
+    
+    
+    
 }
