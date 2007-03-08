@@ -1,3 +1,7 @@
+* 2007-03-08 - thorben.betten@open-xchange.com
+
+ - Fixed bug #5903: Added user and context information if IMAP login fails
+
 * 2007-03-07 - thorben.betten@open-xchange.com
 
  - Fixed bug (#6331) with (multi-)mime-encoded message headers
