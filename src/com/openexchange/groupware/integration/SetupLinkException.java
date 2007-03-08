@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.integration;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -72,7 +70,7 @@ public class SetupLinkException extends AbstractOXException {
     public SetupLinkException(final AbstractOXException cause) {
         super(cause);
     }
-    
+
     /**
      * Initializes a new exception using the information provided by the code.
      * @param code code for the exception.
@@ -129,9 +127,9 @@ public class SetupLinkException extends AbstractOXException {
         MISSING_SETTING("Missing property %1$s in server.properties.",
             Category.SETUP_ERROR, 6),
         /**
-         * URL "%s" provided by OxAdapter is malformed. 
+         * URL "%s" is malformed.
          */
-        MALFORMED_URL("URL \"%s\" provided by OxAdapter is malformed.",
+        MALFORMED_URL("URL \"%s\" is malformed.",
             Category.PROGRAMMING_ERROR, 7);
 
         /**
@@ -162,16 +160,25 @@ public class SetupLinkException extends AbstractOXException {
             this.number = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        /**
+         * @return the category.
+         */
+        public Category getCategory() {
+            return category;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        /**
+         * @return the message.
+         */
+        public String getMessage() {
+            return message;
+        }
 
-		public int getNumber() {
-			return number;
-		}
+        /**
+         * @return the number.
+         */
+        public int getNumber() {
+            return number;
+        }
     }
 }
