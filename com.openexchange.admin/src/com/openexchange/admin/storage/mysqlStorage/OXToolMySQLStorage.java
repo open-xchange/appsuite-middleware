@@ -511,7 +511,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
     /*
      * Check if any login mapping in the given context already exists in the system
      */
-    public static boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException {
+    public boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException {
         if(ctx.getLoginMappings()!=null){
             boolean retval = false;
             // check if any sent mapping entry already exists            
