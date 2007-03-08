@@ -970,10 +970,6 @@ public class User implements Serializable {
         this.given_name = given_name;
     }
 
-    public Boolean isEnabled() {
-        return enabled;
-    }
-
     public void setEnabled(final Boolean enabled) {
         if (null == enabled) {
             this.enabledset = true;

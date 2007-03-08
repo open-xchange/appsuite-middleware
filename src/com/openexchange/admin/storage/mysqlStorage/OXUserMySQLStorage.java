@@ -161,24 +161,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             if (null != mail) {
                 stmt.setString(1, mail);
             } else {
-                stmt.setNull(1, java.sql.Types.VARCHAR);
+                if (usrdata.isPrimaryEmailset()) {
+                    stmt.setNull(1, java.sql.Types.VARCHAR);
+                }
             }
 
             final Locale locale = usrdata.getLanguage();
             if (null != locale) {
                 stmt.setString(2, usrdata.getLanguage().getLanguage() + "_" + usrdata.getLanguage().getCountry());
             } else {
-                stmt.setNull(2, java.sql.Types.VARCHAR);
+                if (usrdata.isLanguageset()) {
+                    stmt.setNull(2, java.sql.Types.VARCHAR);    
+                }
             }
 
             final TimeZone timezone = usrdata.getTimezone();
             if (null != timezone) {
                 stmt.setString(3, timezone.getID());
             } else {
-                stmt.setString(3, DEFAULT_TIMEZONE_CREATE);
+                if (usrdata.isTimezoneset()) {
+                    stmt.setString(3, DEFAULT_TIMEZONE_CREATE);    
+                }
             }
 
-            stmt.setBoolean(4, usrdata.isEnabled());
+            stmt.setBoolean(4, usrdata.getEnabled());
 
             stmt.setInt(5, getintfrombool(usrdata.getPassword_expired()));
 
@@ -506,10 +512,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setString(8,lang);
                 
                 // mailenabled
-                if( usrdata.isEnabled() == null ) {
+                if( usrdata.getEnabled() == null ) {
                 	usrdata.setEnabled(true);
                 }
-                stmt.setBoolean(9, usrdata.isEnabled());
+                stmt.setBoolean(9, usrdata.getEnabled());
 
                 // imap and smtp server
                 if (usrdata.getImapServer() != null) {
