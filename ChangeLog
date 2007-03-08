@@ -1,3 +1,7 @@
+* 2007-03-08 - francisco.laguna@open-xchange.com
+
+ - Fixed bug #6251: Quota inconsistencies on master-slave setup.
+
 * 2007-03-08 - thorben.betten@open-xchange.com
 
  - Fixed bug #5903: Added user and context information if IMAP login fails
