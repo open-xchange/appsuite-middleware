@@ -459,7 +459,7 @@ public class UserTest extends AbstractTest {
         System.out.println("USERB" + b.toString());
         
         assertEquals("username not equal", a.getUsername(), b.getUsername());
-        assertEquals("enabled not equal", a.isEnabled(), b.isEnabled());
+        assertEquals("enabled not equal", a.getEnabled(), b.getEnabled());
         assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());        
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
@@ -592,7 +592,7 @@ public class UserTest extends AbstractTest {
     private void createChangeUserData(final User usr){
         // change all fields of the user
        
-        usr.setEnabled(!usr.isEnabled());        
+        usr.setEnabled(!usr.getEnabled());        
         usr.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
         usr.setEmail1(usr.getEmail1()+change_suffix);
         usr.setEmail2(usr.getEmail2()+change_suffix);
