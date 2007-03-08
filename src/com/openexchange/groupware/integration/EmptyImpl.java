@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.integration;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.openexchange.groupware.integration.SetupLinkException.Code;
@@ -61,7 +60,7 @@ import com.openexchange.groupware.integration.SetupLinkException.Code;
 public class EmptyImpl extends SetupLink {
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
     public EmptyImpl() {
         super();
@@ -72,12 +71,7 @@ public class EmptyImpl extends SetupLink {
      */
     @Override
     public URL getLink(final Object... values) throws SetupLinkException {
-        final String url = "";
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw new SetupLinkException(Code.MALFORMED_URL, e, url);
-        }
+        throw new SetupLinkException(Code.NOT_IMPLEMENTED);
     }
 
 }

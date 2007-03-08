@@ -130,7 +130,11 @@ public class SetupLinkException extends AbstractOXException {
          * URL "%s" is malformed.
          */
         MALFORMED_URL("URL \"%s\" is malformed.",
-            Category.PROGRAMMING_ERROR, 7);
+            Category.PROGRAMMING_ERROR, 7),
+        /**
+         * Link is not implemented.
+         */
+        NOT_IMPLEMENTED("Link is not implemented.", Category.SETUP_ERROR, 8);
 
         /**
          * Message of the exception.
