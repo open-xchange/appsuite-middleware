@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import com.openexchange.admin.exceptions.OXResourceException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
