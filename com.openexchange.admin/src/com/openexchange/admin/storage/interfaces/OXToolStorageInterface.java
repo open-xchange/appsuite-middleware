@@ -166,6 +166,10 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsStore(final String url) throws StorageException;
 
     public abstract boolean existsDatabase(final String db_name) throws StorageException;
+    
+    public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
+    
+    public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
 
     public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
 
