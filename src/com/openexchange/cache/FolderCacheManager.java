@@ -171,9 +171,9 @@ public class FolderCacheManager {
 		 * Either fromCache was false or the data object was not found.
 		 */
 		if (folderObj == null) {
-			Connection readCon = readConArg;
-			final boolean createCon = (readCon == null);
 			try {
+				Connection readCon = readConArg;
+				final boolean createCon = (readCon == null);
 				try {
 					if (createCon) {
 						readCon = DBPool.pickup(ctx);
@@ -273,11 +273,23 @@ public class FolderCacheManager {
 						 */
 						return;
 					}
+					/*
+					 * Since this must be the initial PUT, disable this element
+					 * for lateral cache distribution
+					 */
+					final IElementAttributes attribs;
 					if (elemAttribs == null) {
-						folderCache.put(ck, folderObj.clone());
+						attribs = folderCache.getDefaultElementAttributes();
 					} else {
-						folderCache.put(ck, folderObj.clone(), elemAttribs);
+						attribs = elemAttribs;
 					}
+					attribs.setIsLateral(false);
+					folderCache.put(ck, folderObj.clone(), attribs);
+//					if (elemAttribs == null) {
+//						folderCache.put(ck, folderObj.clone());
+//					} else {
+//						folderCache.put(ck, folderObj.clone(), elemAttribs);
+//					}
 				} finally {
 					LOCK_MODIFY.unlock();
 				}
@@ -288,11 +300,24 @@ public class FolderCacheManager {
 				 */
 				LOCK_MODIFY.lock();
 				try {
+					final IElementAttributes attribs;
 					if (elemAttribs == null) {
-						folderCache.put(ck, folderObj.clone());
+						attribs = folderCache.getDefaultElementAttributes();
 					} else {
-						folderCache.put(ck, folderObj.clone(), elemAttribs);
+						attribs = elemAttribs;
 					}
+					/*
+					 * Disable lateral cache distribution on initial PUT
+					 */
+					if (folderCache.get(ck) == null) {
+						attribs.setIsLateral(false);
+					}
+					folderCache.put(ck, folderObj.clone(), attribs);
+//					if (elemAttribs == null) {
+//						folderCache.put(ck, folderObj.clone());
+//					} else {
+//						folderCache.put(ck, folderObj.clone(), elemAttribs);
+//					}
 				} finally {
 					LOCK_MODIFY.unlock();
 				}
