@@ -1369,6 +1369,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("Pool Error", e);
             handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
             throw new StorageException(e);
+        }catch(Exception ecp){
+            log.error("Internal Error", ecp);
+            handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            throw new StorageException("Internal server error occured");
         } finally {
             try {
                 if(configdb_write_con!=null){
