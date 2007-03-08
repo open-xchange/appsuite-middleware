@@ -108,11 +108,19 @@ public class QuotaFileStorage extends FileStorage {
 	}
 	
 	public long getUsage() throws QuotaFileStorageException {
+		return getUsage(false);
+	}
+	
+	protected long getUsage(boolean write) throws QuotaFileStorageException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			readCon = provider.getReadConnection(ctx);
+			if(write) {
+				readCon = provider.getWriteConnection(ctx);
+			} else {
+				readCon = provider.getReadConnection(ctx);
+			}
 			stmt = readCon.prepareStatement(SELECT);
 			stmt.setInt(1,ctx.getContextId());
 			rs = stmt.executeQuery();
@@ -125,7 +133,7 @@ public class QuotaFileStorage extends FileStorage {
 		} catch (TransactionException e) {
 			throw new QuotaFileStorageException(e);
 		} finally {
-			close(readCon,stmt,rs,false);
+			close(readCon,stmt,rs,write);
 		}
 	}
 	
@@ -355,11 +363,11 @@ public class QuotaFileStorage extends FileStorage {
 	}
 	
 	private final void incUsed(long length) throws QuotaFileStorageException {
-		storeUsage(getUsage()+length);
+		storeUsage(getUsage(true)+length);
 	}
 	
 	private void decUsed(long size) throws QuotaFileStorageException {
-		long usage = getUsage();
+		long usage = getUsage(true);
 		usage -= size;
 		if(usage < 0) {
 			LOG.fatal("Quota Statistics seem to be inconsistent with this FileStorage. Run the recovery tool. ContextId: "+ctx.getContextId());
