@@ -68,223 +68,332 @@ public class User implements Serializable {
      */
     private static final long serialVersionUID = -4492376747507390066L;
 
-    private OXUserExtensionInterface[] extensions = null;
+    private final OXUserExtensionInterface[] extensions = null;
+    private final boolean extensionsset = false;
 
     private Integer id;
+    private boolean idset = false;
 
     private String username;
+    private boolean usernameset = false;
 
     private String password;
+    private boolean passwordset = false;
 
     private PASSWORDMECH passwordMech;
+    private boolean passwordMechset = false;
 
     private String primaryEmail;
+    private boolean primaryEmailset = false;
 
     private String email1;
+    private boolean email1set = false;
 
     private String email2;
+    private boolean email2set = false;
 
     private String email3;
+    private boolean email3set = false;
 
     private HashSet<String> aliases;
+    private boolean aliasesset = false;
 
     private String sur_name;
+    private boolean sur_nameset = false;
 
     private String given_name;
+    private boolean given_nameset = false;
 
     private Boolean enabled;
+    private boolean enabledset = false;
 
     private Date birthday;
+    private boolean birthdayset = false;
 
     private Date anniversary;
+    private boolean anniversaryset = false;
 
     private String branches;
+    private boolean branchesset = false;
 
     private String business_category;
+    private boolean business_categoryset = false;
 
     private String categories;
+    private boolean categoriesset = false;
 
     private String postal_code_business;
+    private boolean postal_code_businessset = false;
 
     private String state_business;
+    private boolean state_businessset = false;
 
     private String street_business;
+    private boolean street_businessset = false;
 
     private String telephone_callback;
+    private boolean telephone_callbackset = false;
 
     private String city_home;
+    private boolean city_homeset = false;
 
     private String commercial_register;
+    private boolean commercial_registerset = false;
 
     private String country_home;
+    private boolean country_homeset = false;
 
     private String company;
+    private boolean companyset = false;
 
     private Group default_group;
+    private boolean default_groupset = false;
 
     private String department;
+    private boolean departmentset = false;
 
     private String display_name;
+    private boolean display_nameset = false;
 
     private String employeeType;
+    private boolean employeeTypeset = false;
 
     private String fax_business;
+    private boolean fax_businessset = false;
 
     private String fax_home;
+    private boolean fax_homeset = false;
 
     private String fax_other;
+    private boolean fax_otherset = false;
 
     private String imapServer;
+    private boolean imapServerset = false;
 
     private String smtpServer;
+    private boolean smtpServerset = false;
     
     private String instant_messenger1;
+    private boolean instant_messenger1set = false;
 
     private String instant_messenger2;
+    private boolean instant_messenger2set = false;
 
     private String telephone_ip;
+    private boolean telephone_ipset = false;
 
     private String telephone_isdn;
+    private boolean telephone_isdnset = false;
 
     private Locale language;
+    private boolean languageset = false;
 
     private String mail_folder_drafts_name;
+    private boolean mail_folder_drafts_nameset = false;
 
     private String mail_folder_sent_name;
+    private boolean mail_folder_sent_nameset = false;
 
     private String mail_folder_spam_name;
+    private boolean mail_folder_spam_nameset = false;
 
     private String mail_folder_trash_name;
+    private boolean mail_folder_trash_nameset = false;
 
     private String manager_name;
+    private boolean manager_nameset = false;
 
     private String marital_status;
+    private boolean marital_statusset = false;
 
     private String cellular_telephone1;
+    private boolean cellular_telephone1set = false;
 
     private String cellular_telephone2;
+    private boolean cellular_telephone2set = false;
 
     private String info;
+    private boolean infoset = false;
 
     private String nickname;
+    private boolean nicknameset = false;
 
     private String number_of_children;
+    private boolean number_of_childrenset = false;
 
     private String note;
+    private boolean noteset = false;
 
     private String number_of_employee;
+    private boolean number_of_employeeset = false;
 
     private String telephone_pager;
+    private boolean telephone_pagerset = false;
 
     private Boolean password_expired;
+    private boolean password_expiredset = false;
 
     private String telephone_assistant;
+    private boolean telephone_assistantset = false;
 
     private String assistant_name;
+    private boolean assistant_nameset = false;
 
     private String telephone_business1;
+    private boolean telephone_business1set = false;
 
     private String telephone_business2;
+    private boolean telephone_business2set = false;
 
     private String telephone_car;
+    private boolean telephone_carset = false;
 
     private String telephone_company;
+    private boolean telephone_companyset = false;
 
     private String telephone_home1;
+    private boolean telephone_home1set = false;
 
     private String telephone_home2;
+    private boolean telephone_home2set = false;
 
     private String telephone_other;
+    private boolean telephone_otherset = false;
 
     private String telephone_primary;
+    private boolean telephone_primaryset = false;
 
     private String position;
+    private boolean positionset = false;
 
     private String postal_code_home;
+    private boolean postal_code_homeset = false;
 
     private String profession;
+    private boolean professionset = false;
 
     private String telephone_radio;
+    private boolean telephone_radioset = false;
 
     private String room_number;
+    private boolean room_numberset = false;
 
     private String sales_volume;
+    private boolean sales_volumeset = false;
 
     private String city_other;
+    private boolean city_otherset = false;
 
     private String city_business;
+    private boolean city_businessset = false;
 
     private String country_other;
+    private boolean country_otherset = false;
 
     private String country_business;
+    private boolean country_businessset = false;
 
     private String middle_name;
+    private boolean middle_nameset = false;
 
     private String postal_code_other;
+    private boolean postal_code_otherset = false;
 
     private String state_other;
+    private boolean state_otherset = false;
 
     private String street_other;
+    private boolean street_otherset = false;
 
     private String spouse_name;
+    private boolean spouse_nameset = false;
 
     private String state_home;
+    private boolean state_homeset = false;
 
     private String street_home;
+    private boolean street_homeset = false;
 
     private String suffix;
+    private boolean suffixset = false;
 
     private String tax_id;
+    private boolean tax_idset = false;
 
     private String telephone_telex;
+    private boolean telephone_telexset = false;
 
     private TimeZone timezone;
+    private boolean timezoneset = false;
 
     private String title;
+    private boolean titleset = false;
 
     private String telephone_ttytdd;
+    private boolean telephone_ttytddset = false;
 
     private String url;
+    private boolean urlset = false;
 
     private String userfield01;
+    private boolean userfield01set = false;
 
     private String userfield02;
+    private boolean userfield02set = false;
 
     private String userfield03;
+    private boolean userfield03set = false;
 
     private String userfield04;
+    private boolean userfield04set = false;
 
     private String userfield05;
+    private boolean userfield05set = false;
 
     private String userfield06;
+    private boolean userfield06set = false;
 
     private String userfield07;
+    private boolean userfield07set = false;
 
     private String userfield08;
+    private boolean userfield08set = false;
 
     private String userfield09;
+    private boolean userfield09set = false;
 
     private String userfield10;
+    private boolean userfield10set = false;
 
     private String userfield11;
+    private boolean userfield11set = false;
 
     private String userfield12;
+    private boolean userfield12set = false;
 
     private String userfield13;
+    private boolean userfield13set = false;
 
     private String userfield14;
+    private boolean userfield14set = false;
 
     private String userfield15;
+    private boolean userfield15set = false;
 
     private String userfield16;
+    private boolean userfield16set = false;
 
     private String userfield17;
+    private boolean userfield17set = false;
 
     private String userfield18;
+    private boolean userfield18set = false;
 
     private String userfield19;
+    private boolean userfield19set = false;
 
     private String userfield20;
+    private boolean userfield20set = false;
 
     /**
      * Creates a new instance of user
@@ -335,12 +444,455 @@ public class User implements Serializable {
         return id;
     }
 
+    public boolean isAliasesset() {
+        return aliasesset;
+    }
+
+    public boolean isAnniversaryset() {
+        return anniversaryset;
+    }
+
+    public boolean isAssistant_nameset() {
+        return assistant_nameset;
+    }
+
+    public boolean isBirthdayset() {
+        return birthdayset;
+    }
+
+    public boolean isBranchesset() {
+        return branchesset;
+    }
+
+    public boolean isBusiness_categoryset() {
+        return business_categoryset;
+    }
+
+    public boolean isCategoriesset() {
+        return categoriesset;
+    }
+
+    public boolean isCellular_telephone1set() {
+        return cellular_telephone1set;
+    }
+
+    public boolean isCellular_telephone2set() {
+        return cellular_telephone2set;
+    }
+
+    public boolean isCity_businessset() {
+        return city_businessset;
+    }
+
+    public boolean isCity_homeset() {
+        return city_homeset;
+    }
+
+    public boolean isCity_otherset() {
+        return city_otherset;
+    }
+
+    public boolean isCommercial_registerset() {
+        return commercial_registerset;
+    }
+
+    public boolean isCompanyset() {
+        return companyset;
+    }
+
+    public boolean isCountry_businessset() {
+        return country_businessset;
+    }
+
+    public boolean isCountry_homeset() {
+        return country_homeset;
+    }
+
+    public boolean isCountry_otherset() {
+        return country_otherset;
+    }
+
+    public boolean isDefault_groupset() {
+        return default_groupset;
+    }
+
+    public boolean isDepartmentset() {
+        return departmentset;
+    }
+
+    public boolean isDisplay_nameset() {
+        return display_nameset;
+    }
+
+    public boolean isEmail1set() {
+        return email1set;
+    }
+
+    public boolean isEmail2set() {
+        return email2set;
+    }
+
+    public boolean isEmail3set() {
+        return email3set;
+    }
+
+    public boolean isEmployeeTypeset() {
+        return employeeTypeset;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public boolean isEnabledset() {
+        return enabledset;
+    }
+
+    public boolean isExtensionsset() {
+        return extensionsset;
+    }
+
+    public boolean isFax_businessset() {
+        return fax_businessset;
+    }
+
+    public boolean isFax_homeset() {
+        return fax_homeset;
+    }
+
+    public boolean isFax_otherset() {
+        return fax_otherset;
+    }
+
+    public boolean isGiven_nameset() {
+        return given_nameset;
+    }
+
+    public boolean isIdset() {
+        return idset;
+    }
+
+    public boolean isImapServerset() {
+        return imapServerset;
+    }
+
+    public boolean isInfoset() {
+        return infoset;
+    }
+
+    public boolean isInstant_messenger1set() {
+        return instant_messenger1set;
+    }
+
+    public boolean isInstant_messenger2set() {
+        return instant_messenger2set;
+    }
+
+    public boolean isLanguageset() {
+        return languageset;
+    }
+
+    public boolean isMail_folder_drafts_nameset() {
+        return mail_folder_drafts_nameset;
+    }
+
+    public boolean isMail_folder_sent_nameset() {
+        return mail_folder_sent_nameset;
+    }
+
+    public boolean isMail_folder_spam_nameset() {
+        return mail_folder_spam_nameset;
+    }
+
+    public boolean isMail_folder_trash_nameset() {
+        return mail_folder_trash_nameset;
+    }
+
+    public boolean isManager_nameset() {
+        return manager_nameset;
+    }
+
+    public boolean isMarital_statusset() {
+        return marital_statusset;
+    }
+
+    public boolean isMiddle_nameset() {
+        return middle_nameset;
+    }
+
+    public boolean isNicknameset() {
+        return nicknameset;
+    }
+
+    public boolean isNoteset() {
+        return noteset;
+    }
+
+    public boolean isNumber_of_childrenset() {
+        return number_of_childrenset;
+    }
+
+    public boolean isNumber_of_employeeset() {
+        return number_of_employeeset;
+    }
+
+    public boolean isPassword_expiredset() {
+        return password_expiredset;
+    }
+
+    public boolean isPasswordMechset() {
+        return passwordMechset;
+    }
+
+    public boolean isPasswordset() {
+        return passwordset;
+    }
+
+    public boolean isPositionset() {
+        return positionset;
+    }
+
+    public boolean isPostal_code_businessset() {
+        return postal_code_businessset;
+    }
+
+    public boolean isPostal_code_homeset() {
+        return postal_code_homeset;
+    }
+
+    public boolean isPostal_code_otherset() {
+        return postal_code_otherset;
+    }
+
+    public boolean isPrimaryEmailset() {
+        return primaryEmailset;
+    }
+
+    public boolean isProfessionset() {
+        return professionset;
+    }
+
+    public boolean isRoom_numberset() {
+        return room_numberset;
+    }
+
+    public boolean isSales_volumeset() {
+        return sales_volumeset;
+    }
+
+    public boolean isSmtpServerset() {
+        return smtpServerset;
+    }
+
+    public boolean isSpouse_nameset() {
+        return spouse_nameset;
+    }
+
+    public boolean isState_businessset() {
+        return state_businessset;
+    }
+
+    public boolean isState_homeset() {
+        return state_homeset;
+    }
+
+    public boolean isState_otherset() {
+        return state_otherset;
+    }
+
+    public boolean isStreet_businessset() {
+        return street_businessset;
+    }
+
+    public boolean isStreet_homeset() {
+        return street_homeset;
+    }
+
+    public boolean isStreet_otherset() {
+        return street_otherset;
+    }
+
+    public boolean isSuffixset() {
+        return suffixset;
+    }
+
+    public boolean isSur_nameset() {
+        return sur_nameset;
+    }
+
+    public boolean isTax_idset() {
+        return tax_idset;
+    }
+
+    public boolean isTelephone_assistantset() {
+        return telephone_assistantset;
+    }
+
+    public boolean isTelephone_business1set() {
+        return telephone_business1set;
+    }
+
+    public boolean isTelephone_business2set() {
+        return telephone_business2set;
+    }
+
+    public boolean isTelephone_callbackset() {
+        return telephone_callbackset;
+    }
+
+    public boolean isTelephone_carset() {
+        return telephone_carset;
+    }
+
+    public boolean isTelephone_companyset() {
+        return telephone_companyset;
+    }
+
+    public boolean isTelephone_home1set() {
+        return telephone_home1set;
+    }
+
+    public boolean isTelephone_home2set() {
+        return telephone_home2set;
+    }
+
+    public boolean isTelephone_ipset() {
+        return telephone_ipset;
+    }
+
+    public boolean isTelephone_isdnset() {
+        return telephone_isdnset;
+    }
+
+    public boolean isTelephone_otherset() {
+        return telephone_otherset;
+    }
+
+    public boolean isTelephone_pagerset() {
+        return telephone_pagerset;
+    }
+
+    public boolean isTelephone_primaryset() {
+        return telephone_primaryset;
+    }
+
+    public boolean isTelephone_radioset() {
+        return telephone_radioset;
+    }
+
+    public boolean isTelephone_telexset() {
+        return telephone_telexset;
+    }
+
+    public boolean isTelephone_ttytddset() {
+        return telephone_ttytddset;
+    }
+
+    public boolean isTimezoneset() {
+        return timezoneset;
+    }
+
+    public boolean isTitleset() {
+        return titleset;
+    }
+
+    public boolean isUrlset() {
+        return urlset;
+    }
+
+    public boolean isUserfield01set() {
+        return userfield01set;
+    }
+
+    public boolean isUserfield02set() {
+        return userfield02set;
+    }
+
+    public boolean isUserfield03set() {
+        return userfield03set;
+    }
+
+    public boolean isUserfield04set() {
+        return userfield04set;
+    }
+
+    public boolean isUserfield05set() {
+        return userfield05set;
+    }
+
+    public boolean isUserfield06set() {
+        return userfield06set;
+    }
+
+    public boolean isUserfield07set() {
+        return userfield07set;
+    }
+
+    public boolean isUserfield08set() {
+        return userfield08set;
+    }
+
+    public boolean isUserfield09set() {
+        return userfield09set;
+    }
+
+    public boolean isUserfield10set() {
+        return userfield10set;
+    }
+
+    public boolean isUserfield11set() {
+        return userfield11set;
+    }
+
+    public boolean isUserfield12set() {
+        return userfield12set;
+    }
+
+    public boolean isUserfield13set() {
+        return userfield13set;
+    }
+
+    public boolean isUserfield14set() {
+        return userfield14set;
+    }
+
+    public boolean isUserfield15set() {
+        return userfield15set;
+    }
+
+    public boolean isUserfield16set() {
+        return userfield16set;
+    }
+
+    public boolean isUserfield17set() {
+        return userfield17set;
+    }
+
+    public boolean isUserfield18set() {
+        return userfield18set;
+    }
+
+    public boolean isUserfield19set() {
+        return userfield19set;
+    }
+
+    public boolean isUserfield20set() {
+        return userfield20set;
+    }
+
+    public boolean isUsernameset() {
+        return usernameset;
+    }
+
     /**
      * Set user numeric user id
      * 
      * @param userid
      */
-    public void setId(Integer userid) {
+    public void setId(final Integer userid) {
+        if (null == userid) {
+            this.idset = true;
+        }
         this.id = userid;
     }
 
@@ -351,7 +903,10 @@ public class User implements Serializable {
     /**
      * Set symbolic user identifier
      */
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
+        if (null == username) {
+            this.usernameset = true;
+        }
         this.username = username;
     }
 
@@ -366,6 +921,9 @@ public class User implements Serializable {
      * @see setPasswordMech
      */
     public void setPassword(final String passwd) {
+        if (null == password) {
+            this.passwordset = true;
+        }
         this.password = passwd;
     }
 
@@ -376,8 +934,11 @@ public class User implements Serializable {
     /**
      * Primary mail address is the default email address of the user
      */
-    public void setPrimaryEmail(String val) {
-        this.primaryEmail = val;
+    public void setPrimaryEmail(final String primaryEmail) {
+        if (null == primaryEmail) {
+            this.primaryEmailset = true;
+        }
+        this.primaryEmail = primaryEmail;
     }
 
     public String getSur_name() {
@@ -387,8 +948,11 @@ public class User implements Serializable {
     /**
      * Last name of user
      */
-    public void setSur_name(String val) {
-        this.sur_name = val;
+    public void setSur_name(final String sur_name) {
+        if (null == sur_name) {
+            this.sur_nameset = true;
+        }
+        this.sur_name = sur_name;
     }
 
     public String getGiven_name() {
@@ -398,112 +962,154 @@ public class User implements Serializable {
     /**
      * First name of user
      */
-    public void setGiven_name(String val) {
-        this.given_name = val;
+    public void setGiven_name(final String given_name) {
+        if (null == given_name) {
+            this.given_nameset = true;
+        }
+        this.given_name = given_name;
     }
 
     public Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean val) {
-        this.enabled = val;
+    public void setEnabled(final Boolean enabled) {
+        if (null == enabled) {
+            this.enabledset = true;
+        }
+        this.enabled = enabled;
     }
 
     public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date val) {
-        this.birthday = val;
+    public void setBirthday(final Date birthday) {
+        if (null == birthday) {
+            this.birthdayset = true;
+        }
+        this.birthday = birthday;
     }
 
     public Date getAnniversary() {
         return anniversary;
     }
 
-    public void setAnniversary(Date val) {
-        this.anniversary = val;
+    public void setAnniversary(final Date anniversary) {
+        if (null == anniversary) {
+            this.anniversaryset = true;
+        }
+        this.anniversary = anniversary;
     }
 
     public String getBranches() {
         return branches;
     }
 
-    public void setBranches(String val) {
-        this.branches = val;
+    public void setBranches(final String branches) {
+        if (null == branches) {
+            this.branchesset = true;
+        }
+        this.branches = branches;
     }
 
     public String getBusiness_category() {
         return business_category;
     }
 
-    public void setBusiness_category(String val) {
-        this.business_category = val;
+    public void setBusiness_category(final String business_category) {
+        if (null == business_category) {
+            this.business_categoryset = true;
+        }
+        this.business_category = business_category;
     }
 
     public String getPostal_code_business() {
         return postal_code_business;
     }
 
-    public void setPostal_code_business(String val) {
-        this.postal_code_business = val;
+    public void setPostal_code_business(final String postal_code_business) {
+        if (null == postal_code_business) {
+            this.postal_code_businessset = true;
+        }
+        this.postal_code_business = postal_code_business;
     }
 
     public String getState_business() {
         return state_business;
     }
 
-    public void setState_business(String val) {
-        this.state_business = val;
+    public void setState_business(final String state_business) {
+        if (null == state_business) {
+            this.state_businessset = true;
+        }
+        this.state_business = state_business;
     }
 
     public String getStreet_business() {
         return street_business;
     }
 
-    public void setStreet_business(String val) {
-        this.street_business = val;
+    public void setStreet_business(final String street_business) {
+        if (null == street_business) {
+            this.street_businessset = true;
+        }
+        this.street_business = street_business;
     }
 
     public String getTelephone_callback() {
         return telephone_callback;
     }
 
-    public void setTelephone_callback(String val) {
-        this.telephone_callback = val;
+    public void setTelephone_callback(final String telephone_callback) {
+        if (null == telephone_callback) {
+            this.telephone_callbackset = true;
+        }
+        this.telephone_callback = telephone_callback;
     }
 
     public String getCity_home() {
         return city_home;
     }
 
-    public void setCity_home(String val) {
-        this.city_home = val;
+    public void setCity_home(final String city_home) {
+        if (null == city_home) {
+            this.city_homeset = true;
+        }
+        this.city_home = city_home;
     }
 
     public String getCommercial_register() {
         return commercial_register;
     }
 
-    public void setCommercial_register(String val) {
-        this.commercial_register = val;
+    public void setCommercial_register(final String commercial_register) {
+        if (null == commercial_register) {
+            this.commercial_registerset = true;
+        }
+        this.commercial_register = commercial_register;
     }
 
     public String getCountry_home() {
         return country_home;
     }
 
-    public void setCountry_home(String val) {
-        this.country_home = val;
+    public void setCountry_home(final String country_home) {
+        if (null == country_home) {
+            this.country_homeset = true;
+        }
+        this.country_home = country_home;
     }
 
     public String getCompany() {
         return company;
     }
 
-    public void setCompany(String val) {
-        this.company = val;
+    public void setCompany(final String company) {
+        if (null == company) {
+            this.companyset = true;
+        }
+        this.company = company;
     }
 
     public Group getDefault_group() {
@@ -514,24 +1120,33 @@ public class User implements Serializable {
      * The default group when creating an user.
      * If not supplied, a default group is used.
      */
-    public void setDefault_group(Group val) {
-        this.default_group = val;
+    public void setDefault_group(final Group default_group) {
+        if (null == default_group) {
+            this.default_groupset = true;
+        }
+        this.default_group = default_group;
     }
 
     public String getDepartment() {
         return department;
     }
 
-    public void setDepartment(String val) {
-        this.department = val;
+    public void setDepartment(final String department) {
+        if (null == department) {
+            this.departmentset = true;
+        }
+        this.department = department;
     }
 
     public String getDisplay_name() {
         return display_name;
     }
 
-    public void setDisplay_name(String val) {
-        this.display_name = val;
+    public void setDisplay_name(final String display_name) {
+        if (null == display_name) {
+            this.display_nameset = true;
+        }
+        this.display_name = display_name;
     }
 
     public String getEmail2() {
@@ -541,8 +1156,11 @@ public class User implements Serializable {
     /**
      * Email (home)
      */
-    public void setEmail2(String val) {
-        this.email2 = val;
+    public void setEmail2(final String email2) {
+        if (null == email2) {
+            this.email2set = true;
+        }
+        this.email2 = email2;
     }
 
     public String getEmail3() {
@@ -552,8 +1170,11 @@ public class User implements Serializable {
     /**
      * Email (other)
      */
-    public void setEmail3(String val) {
-        this.email3 = val;
+    public void setEmail3(final String email3) {
+        if (null == email3) {
+            this.email3set = true;
+        }
+        this.email3 = email3;
     }
 
     public String getEmployeeType() {
@@ -563,39 +1184,51 @@ public class User implements Serializable {
     /**
      * Job title
      */
-    public void setEmployeeType(String val) {
-        this.employeeType = val;
+    public void setEmployeeType(final String employeeType) {
+        if (null == employeeType) {
+            this.employeeTypeset = true;
+        }
+        this.employeeType = employeeType;
     }
 
     public String getFax_business() {
         return fax_business;
     }
 
-    public void setFax_business(String val) {
-        this.fax_business = val;
+    public void setFax_business(final String fax_business) {
+        if (null == fax_business) {
+            this.fax_businessset = true;
+        }
+        this.fax_business = fax_business;
     }
 
     public String getFax_home() {
         return fax_home;
     }
 
-    public void setFax_home(String val) {
-        this.fax_home = val;
+    public void setFax_home(final String fax_home) {
+        if (null == fax_home) {
+            this.fax_homeset = true;
+        }
+        this.fax_home = fax_home;
     }
 
     public String getFax_other() {
         return fax_other;
     }
 
-    public void setFax_other(String val) {
-        this.fax_other = val;
+    public void setFax_other(final String fax_other) {
+        if (null == fax_other) {
+            this.fax_otherset = true;
+        }
+        this.fax_other = fax_other;
     }
 
     public int getImapPort() {
         // we should be open to the future and accept values like
         // hostname:port
         if (this.imapServer != null && this.imapServer.contains(":")) {
-            String[] sp = imapServer.split(":");
+            final String[] sp = imapServer.split(":");
             if (sp.length > 1 && sp[1].trim().length() > 0) {
                 return Integer.parseInt(sp[1]);
             }
@@ -616,23 +1249,29 @@ public class User implements Serializable {
         }
     }
 
-    public void setImapServer(String val) {
-        this.imapServer = val;
+    public void setImapServer(final String imapServer) {
+        if (null == imapServer) {
+            this.imapServerset = true;
+        }
+        this.imapServer = imapServer;
     }
 
     public String getSmtpServer() {
         return smtpServer;
     }
 
-    public void setSmtpServer(String val) {
-        this.smtpServer = val;
+    public void setSmtpServer(final String smtpServer) {
+        if (null == smtpServer) {
+            this.smtpServerset = true;
+        }
+        this.smtpServer = smtpServer;
     }
 
     public int getSmtpPort() {
         // we should be open to the future and accept values like
         // hostname:port
         if (this.smtpServer != null && this.smtpServer.contains(":")) {
-            String[] sp = smtpServer.split(":");
+            final String[] sp = smtpServer.split(":");
             if (sp.length > 1 && sp[1].trim().length() > 0) {
                 return Integer.parseInt(sp[1]);
             }
@@ -647,88 +1286,121 @@ public class User implements Serializable {
     /**
      * Instant messenger (business)
      */
-    public void setInstant_messenger1(String val) {
-        this.instant_messenger1 = val;
+    public void setInstant_messenger1(final String instant_messenger1) {
+        if (null == instant_messenger1) {
+            this.instant_messenger1set = true;
+        }
+        this.instant_messenger1 = instant_messenger1;
     }
 
     public String getInstant_messenger2() {
         return instant_messenger2;
     }
 
-    public void setInstant_messenger2(String val) {
-        this.instant_messenger2 = val;
+    public void setInstant_messenger2(final String instant_messenger2) {
+        if (null == instant_messenger2) {
+            this.instant_messenger2set = true;
+        }
+        this.instant_messenger2 = instant_messenger2;
     }
 
     public String getTelephone_ip() {
         return telephone_ip;
     }
 
-    public void setTelephone_ip(String val) {
-        this.telephone_ip = val;
+    public void setTelephone_ip(final String telephone_ip) {
+        if (null == telephone_ip) {
+            this.telephone_ipset = true;
+        }
+        this.telephone_ip = telephone_ip;
     }
 
     public String getTelephone_isdn() {
         return telephone_isdn;
     }
 
-    public void setTelephone_isdn(String val) {
-        this.telephone_isdn = val;
+    public void setTelephone_isdn(final String telephone_isdn) {
+        if (null == telephone_isdn) {
+            this.telephone_isdnset = true;
+        }
+        this.telephone_isdn = telephone_isdn;
     }
 
     public Locale getLanguage() {
         return language;
     }
 
-    public void setLanguage(Locale val) {
-        this.language = val;
+    public void setLanguage(final Locale language) {
+        if (null == language) {
+            this.languageset = true;
+        }
+        this.language = language;
     }
 
     public String getMail_folder_drafts_name() {
         return mail_folder_drafts_name;
     }
 
-    public void setMail_folder_drafts_name(String val) {
-        this.mail_folder_drafts_name = val;
+    public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
+        if (null == mail_folder_drafts_name) {
+            this.mail_folder_drafts_nameset = true;
+        }
+        this.mail_folder_drafts_name = mail_folder_drafts_name;
     }
 
     public String getMail_folder_sent_name() {
         return mail_folder_sent_name;
     }
 
-    public void setMail_folder_sent_name(String val) {
-        this.mail_folder_sent_name = val;
+    public void setMail_folder_sent_name(final String mail_folder_sent_name) {
+        if (null == mail_folder_sent_name) {
+            this.mail_folder_sent_nameset = true;
+        }
+        this.mail_folder_sent_name = mail_folder_sent_name;
     }
 
     public String getMail_folder_spam_name() {
         return mail_folder_spam_name;
     }
 
-    public void setMail_folder_spam_name(String val) {
-        this.mail_folder_spam_name = val;
+    public void setMail_folder_spam_name(final String mail_folder_spam_name) {
+        if (null == mail_folder_spam_name) {
+            this.mail_folder_spam_nameset = true;
+        }
+        this.mail_folder_spam_name = mail_folder_spam_name;
     }
 
     public String getMail_folder_trash_name() {
         return mail_folder_trash_name;
     }
 
-    public void setMail_folder_trash_name(String val) {
-        this.mail_folder_trash_name = val;
+    public void setMail_folder_trash_name(final String mail_folder_trash_name) {
+        if (null == mail_folder_trash_name) {
+            this.mail_folder_trash_nameset = true;
+        }
+        this.mail_folder_trash_name = mail_folder_trash_name;
     }
 
     public String getManager_name() {
         return manager_name;
     }
 
-    public void setManager_name(String val) {
-        this.manager_name = val;
+    public void setManager_name(final String manager_name) {
+        if (null == manager_name) {
+            this.manager_nameset = true;
+        }
+        this.manager_name = manager_name;
     }
 
     public String getMarital_status() {
         return marital_status;
     }
 
-    public void setMarital_status(String val) {
-        this.marital_status = val;
+    public void setMarital_status(final String marital_status) {
+        if (null == marital_status) {
+            this.marital_statusset = true;
+        }
+        this.marital_status = marital_status;
     }
 
     public String getCellular_telephone1() {
@@ -738,8 +1410,11 @@ public class User implements Serializable {
     /**
      * Mobile
      */
-    public void setCellular_telephone1(String val) {
-        this.cellular_telephone1 = val;
+    public void setCellular_telephone1(final String cellular_telephone1) {
+        if (null == cellular_telephone1) {
+            this.cellular_telephone1set = true;
+        }
+        this.cellular_telephone1 = cellular_telephone1;
     }
 
     public String getCellular_telephone2() {
@@ -749,40 +1424,55 @@ public class User implements Serializable {
     /**
      * Mobile 2
      */
-    public void setCellular_telephone2(String val) {
-        this.cellular_telephone2 = val;
+    public void setCellular_telephone2(final String cellular_telephone2) {
+        if (null == cellular_telephone2) {
+            this.cellular_telephone2set = true;
+        }
+        this.cellular_telephone2 = cellular_telephone2;
     }
 
     public String getInfo() {
         return info;
     }
 
-    public void setInfo(String val) {
-        this.info = val;
+    public void setInfo(final String info) {
+        if (null == info) {
+            this.infoset = true;
+        }
+        this.info = info;
     }
 
     public String getNickname() {
         return nickname;
     }
 
-    public void setNickname(String val) {
-        this.nickname = val;
+    public void setNickname(final String nickname) {
+        if (null == nickname) {
+            this.nicknameset = true;
+        }
+        this.nickname = nickname;
     }
 
     public String getNumber_of_children() {
         return number_of_children;
     }
 
-    public void setNumber_of_children(String val) {
-        this.number_of_children = val;
+    public void setNumber_of_children(final String number_of_children) {
+        if (null == number_of_children) {
+            this.number_of_childrenset = true;
+        }
+        this.number_of_children = number_of_children;
     }
 
     public String getNote() {
         return note;
     }
 
-    public void setNote(String val) {
-        this.note = val;
+    public void setNote(final String note) {
+        if (null == note) {
+            this.noteset = true;
+        }
+        this.note = note;
     }
 
     public String getNumber_of_employee() {
@@ -792,152 +1482,209 @@ public class User implements Serializable {
     /**
      * Employee ID
      */
-    public void setNumber_of_employee(String val) {
-        this.number_of_employee = val;
+    public void setNumber_of_employee(final String number_of_employee) {
+        if (null == number_of_employee) {
+            this.number_of_employeeset = true;
+        }
+        this.number_of_employee = number_of_employee;
     }
 
     public String getTelephone_pager() {
         return telephone_pager;
     }
 
-    public void setTelephone_pager(String val) {
-        this.telephone_pager = val;
+    public void setTelephone_pager(final String telephone_pager) {
+        if (null == telephone_pager) {
+            this.telephone_pagerset = true;
+        }
+        this.telephone_pager = telephone_pager;
     }
 
     public Boolean getPassword_expired() {
         return password_expired;
     }
 
-    public void setPassword_expired(Boolean val) {
-        this.password_expired = val;
+    public void setPassword_expired(final Boolean password_expired) {
+        if (null == password_expired) {
+            this.password_expiredset = true;
+        }
+        this.password_expired = password_expired;
     }
 
     public String getTelephone_assistant() {
         return telephone_assistant;
     }
 
-    public void setTelephone_assistant(String val) {
-        this.telephone_assistant = val;
+    public void setTelephone_assistant(final String telephone_assistant) {
+        if (null == telephone_assistant) {
+            this.telephone_assistantset = true;
+        }
+        this.telephone_assistant = telephone_assistant;
     }
 
     public String getTelephone_business1() {
         return telephone_business1;
     }
 
-    public void setTelephone_business1(String val) {
-        this.telephone_business1 = val;
+    public void setTelephone_business1(final String telephone_business1) {
+        if (null == telephone_business1) {
+            this.telephone_business1set = true;
+        }
+        this.telephone_business1 = telephone_business1;
     }
 
     public String getTelephone_business2() {
         return telephone_business2;
     }
 
-    public void setTelephone_business2(String val) {
-        this.telephone_business2 = val;
+    public void setTelephone_business2(final String telephone_business2) {
+        if (null == telephone_business2) {
+            this.telephone_business2set = true;
+        }
+        this.telephone_business2 = telephone_business2;
     }
 
     public String getTelephone_car() {
         return telephone_car;
     }
 
-    public void setTelephone_car(String val) {
-        this.telephone_car = val;
+    public void setTelephone_car(final String telephone_car) {
+        if (null == telephone_car) {
+            this.telephone_carset = true;
+        }
+        this.telephone_car = telephone_car;
     }
 
     public String getTelephone_company() {
         return telephone_company;
     }
 
-    public void setTelephone_company(String val) {
-        this.telephone_company = val;
+    public void setTelephone_company(final String telephone_company) {
+        if (null == telephone_company) {
+            this.telephone_companyset = true;
+        }
+        this.telephone_company = telephone_company;
     }
 
     public String getTelephone_home1() {
         return telephone_home1;
     }
 
-    public void setTelephone_home1(String val) {
-        this.telephone_home1 = val;
+    public void setTelephone_home1(final String telephone_home1) {
+        if (null == telephone_home1) {
+            this.telephone_home1set = true;
+        }
+        this.telephone_home1 = telephone_home1;
     }
 
     public String getTelephone_home2() {
         return telephone_home2;
     }
 
-    public void setTelephone_home2(String val) {
-        this.telephone_home2 = val;
+    public void setTelephone_home2(final String telephone_home2) {
+        if (null == telephone_home2) {
+            this.telephone_home2set = true;
+        }
+        this.telephone_home2 = telephone_home2;
     }
 
     public String getTelephone_other() {
         return telephone_other;
     }
 
-    public void setTelephone_other(String val) {
-        this.telephone_other = val;
+    public void setTelephone_other(final String telephone_other) {
+        if (null == telephone_other) {
+            this.telephone_otherset = true;
+        }
+        this.telephone_other = telephone_other;
     }
 
     public String getPosition() {
         return position;
     }
 
-    public void setPosition(String val) {
-        this.position = val;
+    public void setPosition(final String position) {
+        if (null == position) {
+            this.positionset = true;
+        }
+        this.position = position;
     }
 
     public String getPostal_code_home() {
         return postal_code_home;
     }
 
-    public void setPostal_code_home(String val) {
-        this.postal_code_home = val;
+    public void setPostal_code_home(final String postal_code_home) {
+        if (null == postal_code_home) {
+            this.postal_code_homeset = true;
+        }
+        this.postal_code_home = postal_code_home;
     }
 
     public String getProfession() {
         return profession;
     }
 
-    public void setProfession(String val) {
-        this.profession = val;
+    public void setProfession(final String profession) {
+        if (null == profession) {
+            this.professionset = true;
+        }
+        this.profession = profession;
     }
 
     public String getTelephone_radio() {
         return telephone_radio;
     }
 
-    public void setTelephone_radio(String val) {
-        this.telephone_radio = val;
+    public void setTelephone_radio(final String telephone_radio) {
+        if (null == telephone_radio) {
+            this.telephone_radioset = true;
+        }
+        this.telephone_radio = telephone_radio;
     }
 
     public String getRoom_number() {
         return room_number;
     }
 
-    public void setRoom_number(String val) {
-        this.room_number = val;
+    public void setRoom_number(final String room_number) {
+        if (null == room_number) {
+            this.room_numberset = true;
+        }
+        this.room_number = room_number;
     }
 
     public String getSales_volume() {
         return sales_volume;
     }
 
-    public void setSales_volume(String val) {
-        this.sales_volume = val;
+    public void setSales_volume(final String sales_volume) {
+        if (null == sales_volume) {
+            this.sales_volumeset = true;
+        }
+        this.sales_volume = sales_volume;
     }
 
     public String getCity_other() {
         return city_other;
     }
 
-    public void setCity_other(String val) {
-        this.city_other = val;
+    public void setCity_other(final String city_other) {
+        if (null == city_other) {
+            this.city_otherset = true;
+        }
+        this.city_other = city_other;
     }
 
     public String getCountry_other() {
         return country_other;
     }
 
-    public void setCountry_other(String val) {
-        this.country_other = val;
+    public void setCountry_other(final String country_other) {
+        if (null == country_other) {
+            this.country_otherset = true;
+        }
+        this.country_other = country_other;
     }
 
     public String getMiddle_name() {
@@ -947,286 +1694,391 @@ public class User implements Serializable {
     /**
      * Second name
      */
-    public void setMiddle_name(String val) {
-        this.middle_name = val;
+    public void setMiddle_name(final String middle_name) {
+        if (null == middle_name) {
+            this.middle_nameset = true;
+        }
+        this.middle_name = middle_name;
     }
 
     public String getPostal_code_other() {
         return postal_code_other;
     }
 
-    public void setPostal_code_other(String val) {
-        this.postal_code_other = val;
+    public void setPostal_code_other(final String postal_code_other) {
+        if (null == postal_code_other) {
+            this.postal_code_otherset = true;
+        }
+        this.postal_code_other = postal_code_other;
     }
 
     public String getState_other() {
         return state_other;
     }
 
-    public void setState_other(String val) {
-        this.state_other = val;
+    public void setState_other(final String state_other) {
+        if (null == state_other) {
+            this.state_otherset = true;
+        }
+        this.state_other = state_other;
     }
 
     public String getStreet_other() {
         return street_other;
     }
 
-    public void setStreet_other(String val) {
-        this.street_other = val;
+    public void setStreet_other(final String street_other) {
+        if (null == street_other) {
+            this.street_otherset = true;
+        }
+        this.street_other = street_other;
     }
 
     public String getSpouse_name() {
         return spouse_name;
     }
 
-    public void setSpouse_name(String val) {
-        this.spouse_name = val;
+    public void setSpouse_name(final String spouse_name) {
+        if (null == spouse_name) {
+            this.spouse_nameset = true;
+        }
+        this.spouse_name = spouse_name;
     }
 
     public String getState_home() {
         return state_home;
     }
 
-    public void setState_home(String val) {
-        this.state_home = val;
+    public void setState_home(final String state_home) {
+        if (null == state_home) {
+            this.state_homeset = true;
+        }
+        this.state_home = state_home;
     }
 
     public String getStreet_home() {
         return street_home;
     }
 
-    public void setStreet_home(String val) {
-        this.street_home = val;
+    public void setStreet_home(final String street_home) {
+        if (null == street_home) {
+            this.street_homeset = true;
+        }
+        this.street_home = street_home;
     }
 
     public String getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(String val) {
-        this.suffix = val;
+    public void setSuffix(final String suffix) {
+        if (null == suffix) {
+            this.suffixset = true;
+        }
+        this.suffix = suffix;
     }
 
     public String getTax_id() {
         return tax_id;
     }
 
-    public void setTax_id(String val) {
-        this.tax_id = val;
+    public void setTax_id(final String tax_id) {
+        if (null == tax_id) {
+            this.tax_idset = true;
+        }
+        this.tax_id = tax_id;
     }
 
     public String getTelephone_telex() {
         return telephone_telex;
     }
 
-    public void setTelephone_telex(String val) {
-        this.telephone_telex = val;
+    public void setTelephone_telex(final String telephone_telex) {
+        if (null == telephone_telex) {
+            this.telephone_telexset = true;
+        }
+        this.telephone_telex = telephone_telex;
     }
 
     public TimeZone getTimezone() {
         return timezone;
     }
 
-    public void setTimezone(TimeZone val) {
-        this.timezone = val;
+    public void setTimezone(final TimeZone timezone) {
+        if (null == timezone) {
+            this.timezoneset = true;
+        }
+        this.timezone = timezone;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String val) {
-        this.title = val;
+    public void setTitle(final String title) {
+        if (null == title) {
+            this.titleset = true;
+        }
+        this.title = title;
     }
 
     public String getTelephone_ttytdd() {
         return telephone_ttytdd;
     }
 
-    public void setTelephone_ttytdd(String val) {
-        this.telephone_ttytdd = val;
+    public void setTelephone_ttytdd(final String telephone_ttytdd) {
+        if (null == telephone_ttytdd) {
+            this.telephone_ttytddset = true;
+        }
+        this.telephone_ttytdd = telephone_ttytdd;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String val) {
-        this.url = val;
+    public void setUrl(final String url) {
+        if (null == url) {
+            this.urlset = true;
+        }
+        this.url = url;
     }
 
     public String getUserfield01() {
         return userfield01;
     }
 
-    public void setUserfield01(String val) {
-        this.userfield01 = val;
+    public void setUserfield01(final String userfield01) {
+        if (null == userfield01) {
+            this.userfield01set = true;
+        }
+        this.userfield01 = userfield01;
     }
 
     public String getUserfield02() {
         return userfield02;
     }
 
-    public void setUserfield02(String val) {
-        this.userfield02 = val;
+    public void setUserfield02(final String userfield02) {
+        if (null == userfield02) {
+            this.userfield02set = true;
+        }
+        this.userfield02 = userfield02;
     }
 
     public String getUserfield03() {
         return userfield03;
     }
 
-    public void setUserfield03(String val) {
-        this.userfield03 = val;
+    public void setUserfield03(final String userfield03) {
+        if (null == userfield03) {
+            this.userfield03set = true;
+        }
+        this.userfield03 = userfield03;
     }
 
     public String getUserfield04() {
         return userfield04;
     }
 
-    public void setUserfield04(String val) {
-        this.userfield04 = val;
+    public void setUserfield04(final String userfield04) {
+        if (null == userfield04) {
+            this.userfield04set = true;
+        }
+        this.userfield04 = userfield04;
     }
 
     public String getUserfield05() {
         return userfield05;
     }
 
-    public void setUserfield05(String val) {
-        this.userfield05 = val;
+    public void setUserfield05(final String userfield05) {
+        if (null == userfield05) {
+            this.userfield05set = true;
+        }
+        this.userfield05 = userfield05;
     }
 
     public String getUserfield06() {
         return userfield06;
     }
 
-    public void setUserfield06(String val) {
-        this.userfield06 = val;
+    public void setUserfield06(final String userfield06) {
+        if (null == userfield06) {
+            this.userfield06set = true;
+        }
+        this.userfield06 = userfield06;
     }
 
     public String getUserfield07() {
         return userfield07;
     }
 
-    public void setUserfield07(String val) {
-        this.userfield07 = val;
+    public void setUserfield07(final String userfield07) {
+        if (null == userfield07) {
+            this.userfield07set = true;
+        }
+        this.userfield07 = userfield07;
     }
 
     public String getUserfield08() {
         return userfield08;
     }
 
-    public void setUserfield08(String val) {
-        this.userfield08 = val;
+    public void setUserfield08(final String userfield08) {
+        if (null == userfield08) {
+            this.userfield08set = true;
+        }
+        this.userfield08 = userfield08;
     }
 
     public String getUserfield09() {
         return userfield09;
     }
 
-    public void setUserfield09(String val) {
-        this.userfield09 = val;
+    public void setUserfield09(final String userfield09) {
+        if (null == userfield09) {
+            this.userfield09set = true;
+        }
+        this.userfield09 = userfield09;
     }
 
     public String getUserfield10() {
         return userfield10;
     }
 
-    public void setUserfield10(String val) {
-        this.userfield10 = val;
+    public void setUserfield10(final String userfield10) {
+        if (null == userfield10) {
+            this.userfield10set = true;
+        }
+        this.userfield10 = userfield10;
     }
 
     public String getUserfield11() {
         return userfield11;
     }
 
-    public void setUserfield11(String val) {
-        this.userfield11 = val;
+    public void setUserfield11(final String userfield11) {
+        if (null == userfield11) {
+            this.userfield11set = true;
+        }
+        this.userfield11 = userfield11;
     }
 
     public String getUserfield12() {
         return userfield12;
     }
 
-    public void setUserfield12(String val) {
-        this.userfield12 = val;
+    public void setUserfield12(final String userfield12) {
+        if (null == userfield12) {
+            this.userfield12set = true;
+        }
+        this.userfield12 = userfield12;
     }
 
     public String getUserfield13() {
         return userfield13;
     }
 
-    public void setUserfield13(String val) {
-        this.userfield13 = val;
+    public void setUserfield13(final String userfield13) {
+        if (null == userfield13) {
+            this.userfield13set = true;
+        }
+        this.userfield13 = userfield13;
     }
 
     public String getUserfield14() {
         return userfield14;
     }
 
-    public void setUserfield14(String val) {
-        this.userfield14 = val;
+    public void setUserfield14(final String userfield14) {
+        if (null == userfield14) {
+            this.userfield14set = true;
+        }
+        this.userfield14 = userfield14;
     }
 
     public String getUserfield15() {
         return userfield15;
     }
 
-    public void setUserfield15(String val) {
-        this.userfield15 = val;
+    public void setUserfield15(final String userfield15) {
+        if (null == userfield15) {
+            this.userfield15set = true;
+        }
+        this.userfield15 = userfield15;
     }
 
     public String getUserfield16() {
         return userfield16;
     }
 
-    public void setUserfield16(String val) {
-        this.userfield16 = val;
+    public void setUserfield16(final String userfield16) {
+        if (null == userfield16) {
+            this.userfield16set = true;
+        }
+        this.userfield16 = userfield16;
     }
 
     public String getUserfield17() {
         return userfield17;
     }
 
-    public void setUserfield17(String val) {
-        this.userfield17 = val;
+    public void setUserfield17(final String userfield17) {
+        if (null == userfield17) {
+            this.userfield17set = true;
+        }
+        this.userfield17 = userfield17;
     }
 
     public String getUserfield18() {
         return userfield18;
     }
 
-    public void setUserfield18(String val) {
-        this.userfield18 = val;
+    public void setUserfield18(final String userfield18) {
+        if (null == userfield18) {
+            this.userfield18set = true;
+        }
+        this.userfield18 = userfield18;
     }
 
     public String getUserfield19() {
         return userfield19;
     }
 
-    public void setUserfield19(String val) {
-        this.userfield19 = val;
+    public void setUserfield19(final String userfield19) {
+        if (null == userfield19) {
+            this.userfield19set = true;
+        }
+        this.userfield19 = userfield19;
     }
 
     public String getUserfield20() {
         return userfield20;
     }
 
-    public void setUserfield20(String val) {
-        this.userfield20 = val;
+    public void setUserfield20(final String userfield20) {
+        if (null == userfield20) {
+            this.userfield20set = true;
+        }
+        this.userfield20 = userfield20;
     }
 
-    public void setAliases(HashSet<String> aliases) {
+    public void setAliases(final HashSet<String> aliases) {
+        if (null == aliases) {
+            this.aliasesset = true;
+        }
         this.aliases = aliases;
     }
 
-    public void addAlias(String alias) {
+    public void addAlias(final String alias) {
         if (this.aliases == null) {
             this.aliases = new HashSet<String>();
         }
         this.aliases.add(alias);
     }
 
-    public boolean removeAlias(String alias) {
+    public boolean removeAlias(final String alias) {
         if (null != this.aliases) {
             return this.aliases.remove(alias);
         } else {
@@ -1252,39 +2104,54 @@ public class User implements Serializable {
         return city_business;
     }
 
-    public void setCity_business(String businessCity) {
-        this.city_business = businessCity;
+    public void setCity_business(final String city_business) {
+        if (null == city_business) {
+            this.city_businessset = true;
+        }
+        this.city_business = city_business;
     }
 
     public String getCountry_business() {
         return country_business;
     }
 
-    public void setCountry_business(String businessCountry) {
-        this.country_business = businessCountry;
+    public void setCountry_business(final String country_business) {
+        if (null == country_business) {
+            this.country_businessset = true;
+        }
+        this.country_business = country_business;
     }
 
     public String getAssistant_name() {
         return assistant_name;
     }
 
-    public void setAssistant_name(String nameAssistant) {
-        this.assistant_name = nameAssistant;
+    public void setAssistant_name(final String assistant_name) {
+        if (null == assistant_name) {
+            this.assistant_nameset = true;
+        }
+        this.assistant_name = assistant_name;
     }
 
     public String getTelephone_primary() {
         return telephone_primary;
     }
 
-    public void setTelephone_primary(String phonePrimary) {
-        this.telephone_primary = phonePrimary;
+    public void setTelephone_primary(final String telephone_primary) {
+        if (null == telephone_primary) {
+            this.telephone_primaryset = true;
+        }
+        this.telephone_primary = telephone_primary;
     }
 
     public String getCategories() {
         return categories;
     }
 
-    public void setCategories(String categories) {
+    public void setCategories(final String categories) {
+        if (null == categories) {
+            this.categoriesset = true;
+        }
         this.categories = categories;
     }
 
@@ -1295,17 +2162,21 @@ public class User implements Serializable {
     /**
      * Email (business)
      */
-    public void setEmail1(String privateEmail1) {
-        this.email1 = privateEmail1;
+    public void setEmail1(final String email1) {
+        if (null == email1) {
+            this.email1set = true;
+        }
+        this.email1 = email1;
     }
 
+    @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder();
+        final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
-                Object ob = f.get(this);
-                String tname = f.getName();
+                final Object ob = f.get(this);
+                final String tname = f.getName();
                 if (ob != null && !tname.equals("serialVersionUID")) {
                     ret.append("  ");
                     ret.append(tname);
@@ -1313,9 +2184,9 @@ public class User implements Serializable {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }
@@ -1454,7 +2325,10 @@ public class User implements Serializable {
      * @param passwordMech
      *            the passwordMech to set
      */
-    public void setPasswordMech(PASSWORDMECH passwordMech) {
+    public void setPasswordMech(final PASSWORDMECH passwordMech) {
+        if (null == passwordMech) {
+            this.passwordMechset = true;
+        }
         this.passwordMech = passwordMech;
     }
 }
