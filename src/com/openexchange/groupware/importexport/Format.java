@@ -56,14 +56,15 @@ package com.openexchange.groupware.importexport;
  *
  */
 public enum Format {
-	CSV("Comma separated values","text/csv","csv"),
-	ICAL("iCal","text/calendar","ics"),
-	VCARD("vCard","text/x-vcard","vcf"),
-	TNEF("Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
+	CSV("CSV" , "Comma separated values","text/csv","csv"),
+	ICAL("ICAL" , "iCal","text/calendar","ics"),
+	VCARD("VCARD", "vCard","text/x-vcard","vcf"),
+	TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
 	
-	private String mimetype, longName, extension;
+	private String constantName, mimetype, longName, extension;
 	
-	private Format(final String longName, final String mimetype, final String extension){
+	private Format(final String constantName, final String longName, final String mimetype, final String extension){
+		this.constantName = constantName;
 		this.longName = longName;
 		this.mimetype = mimetype;
 		this.extension = extension;
@@ -79,6 +80,10 @@ public enum Format {
 	
 	public String getExtension(){
 		return this.extension;
+	}
+	
+	public String getConstantName(){
+		return this.constantName;
 	}
 	
 	public static Format getFormatByMimeType(String mimeType) {
