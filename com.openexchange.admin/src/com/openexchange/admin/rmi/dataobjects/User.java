@@ -61,6 +61,7 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * Class representing a user
  * 
  * @author cutmasta
+ * @author d7
  */
 public class User implements Serializable {
     /**
