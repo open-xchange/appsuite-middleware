@@ -192,14 +192,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             if (null != imapserver) {
                 stmt.setString(6, imapserver);
             } else {
-                stmt.setNull(6, java.sql.Types.VARCHAR);
+                if (usrdata.isImapServerset()) {
+                    stmt.setNull(6, java.sql.Types.VARCHAR);
+                }
             }
 
             final String smtpserver = usrdata.getSmtpServer();
             if (null != smtpserver) {
                 stmt.setString(7, smtpserver);
             } else {
-                stmt.setNull(7, java.sql.Types.VARCHAR);
+                if (usrdata.isSmtpServerset()) {
+                    stmt.setNull(7, java.sql.Types.VARCHAR);
+                }
             }
 
             stmt.setInt(8, context_id);
@@ -263,7 +267,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                         methodlist2.add(method);
                         returntypes.add(returntype);
                     }
-                } else if (returntype.equalsIgnoreCase("int")) {
+                } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                     final int result = (Integer) method.invoke(usrdata, (Object[]) null);
                     if (-1 != result) {
                         contact_query.append(Mapper.method2field.get(methodname));
@@ -271,7 +275,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                         methodlist2.add(method);
                         returntypes.add(returntype);
                     }
-                } else if (returntype.equalsIgnoreCase("boolean")) {
+                } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
                     contact_query.append(Mapper.method2field.get(methodname));
                     contact_query.append(" = ?, ");
                     methodlist2.add(method);
@@ -298,16 +302,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     if (null != result) {
                         stmt.setString(db, result);
                     } else {
-                        stmt.setNull(db, java.sql.Types.VARCHAR);
+                        final Method methodbool = getMethodforbooleanparameter(method);
+                        boolean test = (Boolean) methodbool.invoke(usrdata, (Object[])null);
+                        if (test) {
+                            stmt.setNull(db, java.sql.Types.VARCHAR);
+                        }
                     }
-                } else if (returntype.equalsIgnoreCase("int")) {
+                } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                     final int result = (Integer) method.invoke(usrdata, (Object[]) null);
                     if (-1 != result) {
                         stmt.setInt(db, result);
                     } else {
-                        stmt.setNull(db, java.sql.Types.INTEGER);
+                        final Method methodbool = getMethodforbooleanparameter(method);
+                        boolean test = (Boolean) methodbool.invoke(usrdata, (Object[])null);
+                        if (test) {
+                            stmt.setNull(db, java.sql.Types.INTEGER);
+                        }
                     }
-                } else if (returntype.equalsIgnoreCase("boolean")) {
+                } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
                     final boolean result = (Boolean) method.invoke(usrdata, (Object[]) null);
                     stmt.setBoolean(db, result);
                 } else if (returntype.equalsIgnoreCase("java.util.Date")) {
@@ -315,7 +327,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     if (null != result) {
                         stmt.setDate(db, new java.sql.Date(result.getTime()));
                     } else {
-                        stmt.setNull(db, java.sql.Types.VARCHAR);
+                        final Method methodbool = getMethodforbooleanparameter(method);
+                        boolean test = (Boolean) methodbool.invoke(usrdata, (Object[])null);
+                        if (test) {
+                            stmt.setNull(db, java.sql.Types.DATE);
+                        }
                     }
                 }
                 // TODO: d7 rewrite log
@@ -419,6 +435,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             }
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
+            log.error("Error", e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw new StorageException(e);
+        } catch (SecurityException e) {
+            log.error("Error", e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw new StorageException(e);
+        } catch (NoSuchMethodException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -570,7 +602,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                             questionmarks.append("?, ");
                             methodlist2.add(method);
                         }
-                    } else if (returntype.equalsIgnoreCase("int")) {
+                    } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                         final int result = (Integer) method.invoke(usrdata, (Object[]) null);
                         if (-1 != result) {
                             contact_query.append(Mapper.method2field.get(methodname));
@@ -578,7 +610,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                             questionmarks.append("?, ");
                             methodlist2.add(method);
                         }
-                    } else if (returntype.equalsIgnoreCase("boolean")) {
+                    } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
                         contact_query.append(Mapper.method2field.get(methodname));
                         contact_query.append(", ");
                         questionmarks.append("?, ");
@@ -627,14 +659,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                         } else {
                             stmt.setNull(index, java.sql.Types.VARCHAR);
                         }
-                    } else if (returntype.equalsIgnoreCase("int")) {
+                    } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                         final int result = (Integer) method.invoke(usrdata, (Object[]) null);
                         if (-1 != result) {
                             stmt.setInt(index, result);
                         } else {
                             stmt.setNull(index, java.sql.Types.INTEGER);
                         }
-                    } else if (returntype.equalsIgnoreCase("boolean")) {
+                    } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
                         final boolean result = (Boolean) method.invoke(usrdata, (Object[]) null);
                         stmt.setBoolean(index, result);
                     } else if (returntype.equalsIgnoreCase("java.util.Date")) {
@@ -1626,8 +1658,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         // Define the returntypes we search for
         HashSet<String> returntypes = new HashSet<String>(4);
         returntypes.add("java.lang.String");
-        returntypes.add("int");
-        returntypes.add("boolean");
+        returntypes.add("java.lang.Integer");
+        returntypes.add("java.lang.Boolean");
         returntypes.add("java.util.Date");
 
         // First we get all the getters of the user data class
@@ -1657,6 +1689,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             }
         }
         return retlist;
+    }
+
+    private Method getMethodforbooleanparameter(Method method) throws SecurityException, NoSuchMethodException {
+        final String methodname = method.getName();
+        final String boolmethodname = "is" + methodname.substring(3) + "set";
+        final Method retval = this.getClass().getMethod(boolmethodname);
+        return retval;
     }
 
 }
