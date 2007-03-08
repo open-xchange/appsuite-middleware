@@ -1512,11 +1512,8 @@ public class DatabaseImpl extends DBService {
 	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
 	
 	public void removeUser(int id, Context ctx) throws OXException {
-
-		System.out.println("IFO: START");
 		removePrivate(id,ctx);
 		assignToAdmin(id,ctx);
-		System.out.println("IFO: DONE");
 	}
 
 	private void removePrivate(int id, Context ctx) throws OXException {
