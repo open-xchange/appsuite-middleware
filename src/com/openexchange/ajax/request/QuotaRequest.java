@@ -161,9 +161,9 @@ public class QuotaRequest extends CommonRequest {
 		} catch (Exception e) {
 			handle(e);
 		} finally {
-            // FIXME What about if mi == null?
-			try {
-				mi.close(false);
+         	try {
+				if(mi != null)
+					mi.close(false);
 			} catch (OXException e) {
 				LOG.error(e);
 			}

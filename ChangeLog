@@ -1,6 +1,8 @@
 * 2007-03-08 - francisco.laguna@open-xchange.com
 
- - Fixed bug #6251: Quota inconsistencies on master-slave setup.
+   - Fixed bug #6251: Quota inconsistencies on master-slave setup.
+   - Fixed bug #6336: Added null-check to QuotaRequest.
+ 
 
 * 2007-03-08 - thorben.betten@open-xchange.com
 
