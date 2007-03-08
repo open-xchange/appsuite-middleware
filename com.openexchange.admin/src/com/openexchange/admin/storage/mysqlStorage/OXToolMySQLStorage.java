@@ -55,6 +55,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -503,6 +505,92 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
      */
     public boolean existsStore(final String url) throws StorageException {
         return selectwithstring(-1, "SELECT uri FROM filestore WHERE uri = ?", url);
+    }
+    
+    
+    /*
+     * Check if any login mapping in the given context already exists in the system
+     */
+    public static boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException {
+        if(ctx.getLoginMappings()!=null){
+            boolean retval = false;
+            // check if any sent mapping entry already exists            
+            PreparedStatement prep_check = null;
+            ResultSet rs = null;
+            try {
+                                
+                
+                HashSet<String> logmaps = ctx.getLoginMappings();
+                Iterator itr = logmaps.iterator();
+                
+                while(itr.hasNext()){
+                    String mpi = (String)itr.next();
+                    
+                    prep_check = configdb_connection.prepareStatement("SELECT cid from login2context where login_info = ?");
+                    prep_check.setString(1, mpi);
+                    rs = prep_check.executeQuery();
+                    if (rs.next()) {
+                        retval = true;                        
+                    }
+                    rs.close();
+                    prep_check.close();
+                    if(retval){
+                        break;
+                    }
+                }
+                 return retval;              
+           
+            } catch (SQLException e) {
+                log.error("SQL Error",e);
+                throw new StorageException(e);
+            } finally {
+                if (null != rs) {
+                    try {
+                        if(rs!=null){
+                            rs.close();
+                        }
+                    } catch (SQLException e) {
+                        log.error("Error closing resultset", e);
+                    }
+                }
+                try {
+                    if (null != prep_check) {
+                        prep_check.close();
+                    }
+                } catch (SQLException e) {
+                    log.error("Error closing prepared statement!", e);
+                }
+            }
+            
+        }else{
+            return false;
+        }       
+    }
+    
+    /*
+     * Check if any login mapping in the given context already exists in the system
+     */
+    public boolean existsContextLoginMappings(Context ctx) throws StorageException {
+        
+        Connection con= null;
+        
+        try{
+            con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            return existsContextLoginMappings(ctx,con); 
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        }finally{
+            try {
+                if(con!=null){
+                    cache.pushOXDBWrite(ctx.getIdAsInt(), con);
+                }
+             } catch (PoolException e) {
+                 log.error("Error pushing configdb write connection to pool!", e);
+             }
+        }
+        
+        
     }
 
     /**
