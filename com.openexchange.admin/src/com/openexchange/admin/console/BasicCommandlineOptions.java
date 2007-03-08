@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.console;
 
+import java.rmi.NotBoundException;
+
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -73,6 +75,10 @@ public abstract class BasicCommandlineOptions {
     
     protected static void printServerResponse(String msg){
         System.err.println("Server response:\n "+msg);    
+    }
+    
+    protected static void printNotBoundResponse(NotBoundException nbe){
+        printServerResponse("RMI module "+nbe.getMessage()+" not available on server");
     }
     
     protected static void printError(String msg){
