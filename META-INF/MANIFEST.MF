@@ -46,5 +46,7 @@ Export-Package: com.openexchange.admin.console,
  com.openexchange.tools,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
- org.apache.commons.cli
+ org.apache.commons.cli,
+ javax.mail,
+ com.sun.mail.imap
 Eclipse-BuddyPolicy: registered
