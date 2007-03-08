@@ -2516,7 +2516,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             stmt = configdb_write_con.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
             stmt.setInt(1, ctx.getIdAsInt());
-            stmt.setString(2, "" + ctx.getIdAsString());
+            
+            if(ctx.getName()!=null && ctx.getName().trim().length()>0){
+                stmt.setString(2, ctx.getName());
+            }else{
+                stmt.setString(2, ctx.getIdAsString());
+            }         
+                        
             stmt.setBoolean(3, true);
             stmt.setInt(4, store_id);
             stmt.setString(5, ctx.getIdAsString() + "_ctx_store");
