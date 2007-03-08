@@ -1,3 +1,7 @@
+* 2007-03-08 - tobias.prinz@open-xchange.com
+
+  - Fixed problem with ModuleTypeTranslator: Changed from RuntimeException to ImportExportException
+
 * 2007-03-08 - francisco.laguna@open-xchange.com
 
    - Fixed bug #6251: Quota inconsistencies on master-slave setup.

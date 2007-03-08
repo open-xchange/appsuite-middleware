@@ -49,8 +49,15 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
 /**
  * This sad little class translates has the sad little task to
@@ -61,27 +68,41 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
+@OXExceptionSource(
+		classId=ImportExportExceptionClasses.MODULETYPETRANSLATOR, 
+		component=Component.IMPORT_EXPORT)
+	@OXThrowsMultiple(
+		category={
+			Category.USER_INPUT,
+			Category.USER_INPUT}, 
+		desc={"",""}, 
+		exceptionId={0,1}, 
+		msg={
+			"Cannot translate id=%d to a constant from Types.",
+			"Cannot translate id=%d to a constant from FolderObject."})
+			
 public class ModuleTypeTranslator {
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ModuleTypeTranslator.class); 
 	
-	public static int getTypesConstant(final int folderObjectConstant){
+	public static int getTypesConstant(final int folderObjectConstant) throws ImportExportException{
 		switch(folderObjectConstant){
 			case FolderObject.CONTACT:		return Types.CONTACT;
 			case FolderObject.INFOSTORE: 	return Types.INFOSTORE;
 			case FolderObject.MAIL: 		return Types.EMAIL;
 			case FolderObject.TASK: 		return Types.TASK;
 			case FolderObject.CALENDAR: 	return Types.APPOINTMENT;
-			default: throw new IllegalArgumentException("Cannot translate id="+folderObjectConstant+" to a constant from Types.");
+			default: throw EXCEPTIONS.create(0,folderObjectConstant);
 		}
 	}
 	
-	public static int getFolderObjectConstant(int typeConstant){
+	public static int getFolderObjectConstant(int typeConstant) throws ImportExportException{
 		switch(typeConstant){
 			case Types.CONTACT:		return FolderObject.CONTACT;
 			case Types.INFOSTORE: 	return FolderObject.INFOSTORE;
 			case Types.EMAIL: 		return FolderObject.MAIL;
 			case Types.TASK: 		return FolderObject.TASK;
 			case Types.APPOINTMENT: return FolderObject.CALENDAR;
-			default: throw new IllegalArgumentException("Cannot translate id="+typeConstant+" to a constant from FolderObject.");
+			default: throw EXCEPTIONS.create(1,typeConstant);
 		}
 	}
 }
