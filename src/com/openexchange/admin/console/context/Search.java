@@ -63,7 +63,7 @@ public class Search extends BasicCommandlineOptions {
         } catch (RemoteException e) {            
             printServerResponse(e.getMessage());
         } catch (NotBoundException e) {
-            printServerResponse(e.getMessage());
+            printNotBoundResponse(e);
         } catch (StorageException e) {            
             printServerResponse(e.getMessage());
         } catch (InvalidCredentialsException e) {
