@@ -114,7 +114,7 @@ public class RegisterDatabase extends UtilAbstraction {
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
         } catch (final NotBoundException e) {
-            printServerResponse(e.getMessage());
+            printNotBoundResponse(e);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
         } catch (final InvalidCredentialsException e) {
