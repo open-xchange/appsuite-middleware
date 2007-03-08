@@ -90,7 +90,11 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 	 */
 	public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 
-	
+        public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
+            
+        public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
+        
+        
 	/**
 	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int, int[])
 	 */
