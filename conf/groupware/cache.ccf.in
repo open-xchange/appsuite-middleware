@@ -20,7 +20,11 @@ jcs.region.OXFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAtt
 jcs.region.OXFolderCache.cacheattributes.MaxObjects=1000000
 jcs.region.OXFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.OXFolderCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=1800
+# Disabe MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=-1
 jcs.region.OXFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderCache.elementattributes.IsEternal=false
