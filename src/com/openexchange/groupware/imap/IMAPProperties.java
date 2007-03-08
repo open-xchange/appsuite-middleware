@@ -51,6 +51,8 @@ package com.openexchange.groupware.imap;
 
 import java.util.Arrays;
 
+import com.openexchange.groupware.contexts.Context;
+
 /**
  * IMAPProperties
  * 
@@ -58,6 +60,10 @@ import java.util.Arrays;
  * 
  */
 public class IMAPProperties {
+	
+	private final int user;
+	
+	private final Context ctx;
 
 	private String imapLogin;
 
@@ -115,8 +121,10 @@ public class IMAPProperties {
 	
 	private static String defaultMimeCharset;
 
-	public IMAPProperties() {
+	public IMAPProperties(final int user, final Context ctx) {
 		super();
+		this.user = user;
+		this.ctx = ctx;
 	}
 
 	public String getImapLogin() {
@@ -165,6 +173,14 @@ public class IMAPProperties {
 
 	public void setSmtpPort(final int smtpPort) {
 		this.smtpPort = smtpPort;
+	}
+	
+	public Context getContext() {
+		return ctx;
+	}
+
+	public int getUser() {
+		return user;
 	}
 
 	public static boolean isCapabilitiesLoaded() {

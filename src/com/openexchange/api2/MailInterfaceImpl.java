@@ -190,9 +190,11 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String DISP_TO = "Disposition-Notification-To";
 
-	private static final String TRUE_STR = "true";
+	private static final String STR_TRUE = "true";
 
-	private static final String FALSE_STR = "false";
+	private static final String STR_FALSE = "false";
+	
+	private static final String STR_EMPTY = "";
 	
 	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
@@ -255,10 +257,10 @@ public class MailInterfaceImpl implements MailInterface {
 		 * errors anywhere in the stream will cause the decoder to stop decoding
 		 * so this should be used with extreme caution.
 		 */
-		IMAP_PROPS.put("mail.mime.base64.ignoreerrors", TRUE_STR);
-		IMAP_PROPS.put(PROPERTY_ALLOWREADONLYSELECT, TRUE_STR);
-		IMAP_PROPS.put("mail.mime.encodeeol.strict", TRUE_STR);
-		IMAP_PROPS.put("mail.mime.decodetext.strict", FALSE_STR);
+		IMAP_PROPS.put("mail.mime.base64.ignoreerrors", STR_TRUE);
+		IMAP_PROPS.put(PROPERTY_ALLOWREADONLYSELECT, STR_TRUE);
+		IMAP_PROPS.put("mail.mime.encodeeol.strict", STR_TRUE);
+		IMAP_PROPS.put("mail.mime.decodetext.strict", STR_FALSE);
 		IMAP_PROPS.put("mail.mime.charset", UTF8);
 		/*
 		 * Following properties define if IMAPS and/or SMTPS should be enabled
@@ -267,8 +269,8 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.isImapsEnabled()) {
 				IMAP_PROPS.put("mail.imap.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
 				IMAP_PROPS.put("mail.imap.socketFactory.port", String.valueOf(IMAPProperties.getImapsPort()));
-				IMAP_PROPS.put("mail.imap.socketFactory.fallback", FALSE_STR);
-				IMAP_PROPS.put("mail.smtp.starttls.enable", TRUE_STR);
+				IMAP_PROPS.put("mail.imap.socketFactory.fallback", STR_FALSE);
+				IMAP_PROPS.put("mail.smtp.starttls.enable", STR_TRUE);
 			}
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
@@ -277,8 +279,8 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.isSmtpsEnabled()) {
 				IMAP_PROPS.put("mail.smtp.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
 				IMAP_PROPS.put("mail.smtp.socketFactory.port", String.valueOf(IMAPProperties.getSmtpsPort()));
-				IMAP_PROPS.put("mail.smtp.socketFactory.fallback", FALSE_STR);
-				IMAP_PROPS.put("mail.smtp.starttls.enable", TRUE_STR);
+				IMAP_PROPS.put("mail.smtp.socketFactory.fallback", STR_FALSE);
+				IMAP_PROPS.put("mail.smtp.starttls.enable", STR_TRUE);
 			}
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
@@ -329,7 +331,7 @@ public class MailInterfaceImpl implements MailInterface {
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
 			IMAP_PROPS.put("mail.imap.connectiontimeout", String.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
-		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? TRUE_STR : FALSE_STR);
+		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
 
 	public final static Properties getDefaultIMAPProperties() throws OXException {
@@ -2109,7 +2111,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Cc all other original recipients
 				 */
 				final String replyallccStr = mailSession == null ? null : mailSession.getProperty("mail.replyallcc");
-				final boolean replyallcc = TRUE_STR.equalsIgnoreCase(replyallccStr);
+				final boolean replyallcc = STR_TRUE.equalsIgnoreCase(replyallccStr);
 				/*
 				 * Add recipients from To field
 				 */
@@ -2258,7 +2260,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE && ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
-						&& FALSE_STR.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, FALSE_STR))
+						&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 						&& IMAPUtils.isReadOnly(imapCon.getImapFolder())) {
 					throw new OXMailException(MailCode.READ_ONLY_FOLDER, imapCon.getImapFolder().getFullName());
 				}
@@ -2278,7 +2280,7 @@ public class MailInterfaceImpl implements MailInterface {
 		if (mode != Folder.READ_ONLY && mode != Folder.READ_WRITE) {
 			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, mode);
 		} else if (mode == Folder.READ_WRITE && ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
-				&& FALSE_STR.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, FALSE_STR))
+				&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 				&& IMAPUtils.isReadOnly(imapCon.getImapFolder())) {
 			throw new OXMailException(MailCode.READ_ONLY_FOLDER, imapCon.getImapFolder().getFullName());
 		}
@@ -2321,7 +2323,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE && ((tmpFolder.getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
-						&& FALSE_STR.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, FALSE_STR))
+						&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 						&& IMAPUtils.isReadOnly(tmpFolder)) {
 					throw new OXMailException(MailCode.READ_ONLY_FOLDER, tmpFolder.getFullName());
 				}
@@ -2341,7 +2343,7 @@ public class MailInterfaceImpl implements MailInterface {
 		if (mode != Folder.READ_ONLY && mode != Folder.READ_WRITE) {
 			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, mode);
 		} else if (mode == Folder.READ_WRITE && ((tmpFolder.getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
-				&& FALSE_STR.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, FALSE_STR))
+				&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 				&& IMAPUtils.isReadOnly(tmpFolder)) {
 			throw new OXMailException(MailCode.READ_ONLY_FOLDER, tmpFolder.getFullName());
 		}
@@ -2412,7 +2414,7 @@ public class MailInterfaceImpl implements MailInterface {
 				final JSONMessageAttachmentObject dummy = new JSONMessageAttachmentObject();
 				dummy.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 				dummy.setContentType("text/plain");
-				dummy.setContent("");
+				dummy.setContent(STR_EMPTY);
 				dummy.setDisposition(Part.INLINE);
 				dummy.setSize(0);
 				retval.addMessageAttachment(dummy);
@@ -2851,7 +2853,7 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * No copy in sent folder
 					 */
-					return "";
+					return STR_EMPTY;
 				}
 				/*
 				 * Append message to folder "SENT"
@@ -2881,7 +2883,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					LOG.error(new StringBuilder().append("Sent message could not be appended to default sent folder: ")
 							.append(e.getMessage()).toString(), e);
-					return "";
+					return STR_EMPTY;
 				} finally {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					sentFolder.close(false);
@@ -3876,7 +3878,7 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private final String getUserName() {
 		if (sessionObj == null) {
-			return "";
+			return STR_EMPTY;
 		}
 		return new StringBuilder().append(sessionObj.getUserObject().getDisplayName()).append(" (").append(
 				sessionObj.getUserObject().getId()).append(')').toString();
@@ -3886,13 +3888,18 @@ public class MailInterfaceImpl implements MailInterface {
 		return handleMessagingException(e, null);
 	}
 	
-	private static final String ERR_AUTH_FAILED = "BAD authentication failed";
+	private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
 	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps) {
 		final OXMailException oxme;
 		if (e instanceof AuthenticationFailedException) {
-			oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps == null ? "" : imapProps
-					.getImapServer());
+			if (imapProps == null) {
+				oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+			} else {
+				oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
+						com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), imapProps
+								.getContext()), imapProps.getContext().getContextId());
+			}
 		} else if (e instanceof FolderClosedException) {
 			oxme = new OXMailException(MailCode.FOLDER_CLOSED, e, e.getMessage());
 		} else if (e instanceof FolderNotFoundException) {
@@ -3907,10 +3914,10 @@ public class MailInterfaceImpl implements MailInterface {
 			oxme = new OXMailException(MailCode.NO_SUCH_PROVIDER, e, e.getMessage());
 		} else if (e instanceof ParseException) {
 			if (e instanceof AddressException) {
-				final String ref = ((AddressException) e).getRef() == null ? "" : ((AddressException) e).getRef();
+				final String ref = ((AddressException) e).getRef() == null ? STR_EMPTY : ((AddressException) e).getRef();
 				oxme = new OXMailException(MailCode.INVALID_EMAIL_ADDRESS, e, ref);
 			} else {
-				oxme = new OXMailException(MailCode.PARSE_ERROR, e, "", e.getMessage());
+				oxme = new OXMailException(MailCode.PARSE_ERROR, e, STR_EMPTY, e.getMessage());
 			}
 		} else if (e instanceof ReadOnlyFolderException) {
 			oxme = new OXMailException(MailCode.READ_ONLY_FOLDER, e, e.getMessage());
@@ -3926,7 +3933,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 * No subclass of MessagingException
 			 */
 			if (e.getNextException() instanceof BindException) {
-				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? "" : imapProps.getImapPort());
+				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : imapProps.getImapPort());
 			} else if (e.getNextException() instanceof ConnectException) {
 				OXMailException tmp = null;
 				try {
@@ -3937,11 +3944,11 @@ public class MailInterfaceImpl implements MailInterface {
 						 * in a java.net.ConnectionException
 						 */
 						mailInterfaceMonitor.changeNumTimeoutConnections(true);
-						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? "" : imapProps
+						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
 								.getImapServer());
 						tmp.setCategory(Category.TRY_AGAIN);
 					} else {
-						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? "" : imapProps
+						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
 								.getImapServer());
 					}
 				} catch (IMAPException oxExc) {
@@ -3953,10 +3960,10 @@ public class MailInterfaceImpl implements MailInterface {
 				mailInterfaceMonitor.changeNumBrokenConnections(true);
 				oxme = new OXMailException(MailCode.CONNECTION_RESET, e, new Object[0]);
 			} else if (e.getNextException() instanceof NoRouteToHostException) {
-				oxme = new OXMailException(MailCode.NO_ROUTE_TO_HOST, e, imapProps == null ? "" : imapProps
+				oxme = new OXMailException(MailCode.NO_ROUTE_TO_HOST, e, imapProps == null ? STR_EMPTY : imapProps
 						.getImapServer());
 			} else if (e.getNextException() instanceof PortUnreachableException) {
-				oxme = new OXMailException(MailCode.PORT_UNREACHABLE, e, imapProps == null ? "" : imapProps
+				oxme = new OXMailException(MailCode.PORT_UNREACHABLE, e, imapProps == null ? STR_EMPTY : imapProps
 						.getImapPort());
 			} else if (e.getNextException() instanceof SocketException) {
 				/*
@@ -3965,15 +3972,21 @@ public class MailInterfaceImpl implements MailInterface {
 				final SocketException se = (SocketException) e.getNextException();
 				if ("Socket closed".equals(se.getMessage()) || "Connection reset".equals(se.getMessage())) {
 					mailInterfaceMonitor.changeNumBrokenConnections(true);
-					oxme = new OXMailException(MailCode.BROKEN_CONNECTION, e, imapProps == null ? "" : imapProps
+					oxme = new OXMailException(MailCode.BROKEN_CONNECTION, e, imapProps == null ? STR_EMPTY : imapProps
 							.getImapServer());
 				} else {
 					oxme = new OXMailException(MailCode.SOCKET_ERROR, e, e.getMessage());
 				}
 			} else if (e.getNextException() instanceof UnknownHostException) {
 				oxme = new OXMailException(MailCode.UNKNOWN_HOST, e, e.getMessage());
-			} else if (e.getMessage().indexOf(ERR_AUTH_FAILED) != -1) {
-				oxme = new OXMailException(MailCode.LOGIN_FAILED, e, new Object[0]);
+			} else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1) {
+				if (imapProps == null) {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+				} else {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
+									imapProps.getContext()), imapProps.getContext().getContextId());
+				}
 			} else {
 				/*
 				 * Default case

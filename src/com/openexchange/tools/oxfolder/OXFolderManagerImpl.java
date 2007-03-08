@@ -1195,8 +1195,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		}
 		if (u == null) {
 			return String.valueOf(userId);
-		}
-		if (u.getDisplayName() == null) {
+		} else if (u.getDisplayName() == null) {
 			return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(
 					userId).append(')').toString();
 		}

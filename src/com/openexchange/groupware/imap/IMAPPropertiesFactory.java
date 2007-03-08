@@ -67,7 +67,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sessiond.SessionHandler;
 import com.openexchange.sessiond.SessionObject;
@@ -217,7 +216,7 @@ public class IMAPPropertiesFactory {
 
 	private static final String STR_NOTSETIN = " NOT set in ";
 
-	public static IMAPProperties getImapProperties(final Context ctx, final SessionObject sessionObj)
+	public static IMAPProperties getImapProperties(final SessionObject sessionObj)
 			throws IMAPException {
 		checkImapPropFile();
 		final String loginType = props.getProperty(PROP_LOGINTYPE);
@@ -226,7 +225,7 @@ public class IMAPPropertiesFactory {
 					.append(STR_NOTSETIN).append(PROP_FILE).toString());
 		}
 		final User userObj = sessionObj.getUserObject();
-		final IMAPProperties imapProps = new IMAPProperties();
+		final IMAPProperties imapProps = new IMAPProperties(sessionObj.getUserObject().getId(), sessionObj.getContext());
 		if (loginType.equalsIgnoreCase("global")) {
 			String imapServer = props.getProperty(PROP_IMAPSERVER);
 			if (imapServer == null) {

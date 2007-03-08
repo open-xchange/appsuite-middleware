@@ -92,7 +92,7 @@ public class SessionObjectWrapper {
 		so.setUserObject(userObj);
 		so.setUserConfiguration(UserConfiguration.loadUserConfiguration(user_id, userObj.getGroups(), ctx));
 		try {
-			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(ctx, so));
+			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(so));
 		} catch (IMAPException e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("SessionObject does not hold IMAP Info object", e);

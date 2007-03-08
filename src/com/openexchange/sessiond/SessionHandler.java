@@ -270,7 +270,7 @@ public class SessionHandler extends TimerTask {
 		
 		// Load IMAP Info
 		try {
-			sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(context, sessionobject));
+			sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(sessionobject));
 		} catch (IMAPException e) {
 			LOG.error("ERROR! IMAPException OCCURED " + e.getMessage());
 		}
