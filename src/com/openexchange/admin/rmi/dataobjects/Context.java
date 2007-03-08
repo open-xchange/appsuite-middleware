@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 
 /**
  * Class representing a context
@@ -74,6 +75,8 @@ public class Context implements Serializable {
     private Boolean enabled;
 
     private String name;
+    
+    private HashSet<String> login_mappings;
 
     public Context() {
         super();
@@ -130,6 +133,43 @@ public class Context implements Serializable {
         this.usedQuota = null;
         this.readDatabase = null;
         this.writeDatabase = null;
+        this.login_mappings = null;
+    }
+    
+    /*
+     * Add login mappings.
+     * Example:
+     * If you add here  a HashSet containing "mydomain.org", then you can later 
+     * login with <username>@ mydomain.org OR   <username>@<context_id>
+     *  
+     */    
+    public void setLoginMappings(HashSet<String> mappings) {
+        this.login_mappings = mappings;
+    }
+    
+    /*
+     * Add a single login mapping entry. 
+     */
+    public void addLoginMapping(String mapping) {
+        if (this.login_mappings == null) {
+            this.login_mappings = new HashSet<String>();
+        }
+        this.login_mappings.add(mapping);
+    }
+    
+    /*
+     * Remove a login mapping.
+     */
+    public boolean removeLoginMapping(String mapping) {
+        if (null != this.login_mappings) {
+            return this.login_mappings.remove(mapping);
+        } else {
+            return false;
+        }
+    }
+
+    public HashSet<String> getLoginMappings() {
+        return this.login_mappings;
     }
 
     public Filestore getFilestore() {
