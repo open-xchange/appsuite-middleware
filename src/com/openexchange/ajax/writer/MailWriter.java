@@ -277,10 +277,9 @@ public class MailWriter extends DataWriter {
 						}
 						if (msg instanceof MessageCacheObject) {
 							final MessageCacheObject msgco = (MessageCacheObject) msg;
-							jsonwriter.value(MessageUtils.decodeMultiEncodedHeader(msgco.getSubject()));
+							jsonwriter.value(msgco.getSubject());
 						} else {
-							jsonwriter.value(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader(
-									"Subject", null)));
+							jsonwriter.value(msg.getSubject());
 						}
 					}
 				};
@@ -481,8 +480,7 @@ public class MailWriter extends DataWriter {
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_SUBJECT);
 				}
-				jsonwriter
-						.value(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null)));
+				jsonwriter.value(msg.getSubject());
 				break Fields;
 			case JSONMessageObject.FIELD_SIZE:
 				if (withKey) {

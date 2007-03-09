@@ -420,7 +420,7 @@ public class MessageDumper {
 		/*
 		 * SUBJECT
 		 */
-		msgHandler.handleSubject(MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null)));
+		msgHandler.handleSubject(msg.getSubject());
 		/*
 		 * SENT DATE
 		 */

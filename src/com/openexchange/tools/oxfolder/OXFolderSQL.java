@@ -89,6 +89,44 @@ public class OXFolderSQL {
 	private OXFolderSQL() {
 		super();
 	}
+	
+	private static final String SQL_UPDATE_ADDR_BOOK = "UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ? AND permission_id = ?";
+	
+	public static final void updateCtxAddrBookPermission(final boolean enableAddrBookEdit) {
+		final int objectWritePermission;
+		if (enableAddrBookEdit) {
+			objectWritePermission = OCLPermission.WRITE_OWN_OBJECTS;
+		} else {
+			objectWritePermission = OCLPermission.NO_PERMISSIONS;
+		}
+		
+	}
+	
+	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
+
+	public static final int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
+			final Context ctx) throws DBPoolingException, SQLException {
+		Connection readCon = readConArg;
+		final boolean createReadCon = (readCon == null);
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (createReadCon) {
+				readCon = DBPool.pickup(ctx);
+			}
+			stmt = readCon.prepareStatement(SQL_DEFAULTFLD);
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, userId);
+			stmt.setInt(3, module);
+			rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+			return -1;
+		} finally {
+			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+		}
+	}
 
 	private static final String SQL_LOOKUPFOLDER = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fname = ? AND module = ?";
 

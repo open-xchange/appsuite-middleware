@@ -56,7 +56,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 public class EffectivePermission extends OCLPermission {
 
@@ -220,13 +220,16 @@ public class EffectivePermission extends OCLPermission {
 			if (getFuid() <= 0) {
 				return userConfigIsValid;
 			}
+			OXFolderAccess folderAccess = null;
 			if (folderType <= 0) {
-				folderType = OXFolderTools.getFolderType(getFuid(), userConfig
-						.getUserId(), userConfig.getContext());
+				folderType = (folderAccess = new OXFolderAccess(userConfig.getContext())).getFolderType(getFuid(),
+						userConfig.getUserId());
 			}
 			if (folderModule <= 0) {
-				folderModule = OXFolderTools.getFolderModule(getFuid(),
-						userConfig.getContext());
+				if (folderAccess == null) {
+					folderAccess = new OXFolderAccess(userConfig.getContext());
+				}
+				folderModule = folderAccess.getFolderModule(getFuid());
 			}
 		}
 		catch (OXException e) {
@@ -322,11 +325,10 @@ public class EffectivePermission extends OCLPermission {
 	}
 
 	public String toString() {
-		return "EffectivePermission_" + (isFolderAdmin() ? "Admin" : "")
-				+ (isGroupPermission() ? "Group" : "User") + "@"
-				+ getFolderPermission() + "|" + getReadPermission() + "|"
-				+ getWritePermission() + "|" + getDeletePermission() + "\n"
-				+ super.toString();
+		return new StringBuilder(150).append("EffectivePermission_").append((isFolderAdmin() ? "Admin" : "")).append(
+				(isGroupPermission() ? "Group" : "User")).append('@').append(getFolderPermission()).append('|').append(
+				getReadPermission()).append('|').append(getWritePermission()).append('|').append(getDeletePermission())
+				.append('\n').append(super.toString()).toString();
 	}
 
 }

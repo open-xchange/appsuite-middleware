@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -70,6 +71,7 @@ import javax.mail.Multipart;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeUtility;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
@@ -93,6 +95,8 @@ import com.openexchange.tools.mail.ContentType;
 public class MessageCacheObject extends Message implements Serializable {
 
 	private static final long serialVersionUID = -5236672658788027516L;
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageCacheObject.class);
 
 	private static final String HDR_X_PRIORITY = "X-Priority";
 
@@ -195,9 +199,8 @@ public class MessageCacheObject extends Message implements Serializable {
 		try {
 			if (pos == -1) {
 				return Integer.parseInt(priorityHdr);
-			} else {
-				return Integer.parseInt(priorityHdr.substring(0, pos));
 			}
+			return Integer.parseInt(priorityHdr.substring(0, pos));
 		} catch (NumberFormatException e) {
 			return JSONMessageObject.PRIORITY_NORMAL;
 		}
@@ -218,7 +221,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		throw new MessagingException("Missing from address");
 	}
 
-	public void setFrom(final InternetAddress[] from) throws MessagingException {
+	public void setFrom(final InternetAddress[] from) {
 		this.from = from;
 	}
 
@@ -326,8 +329,14 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	@Override
 	public String getSubject() throws MessagingException {
-		return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MessageUtils
-				.decodeMultiEncodedHeader(headers.get(HDR_SUBJECT)) : null;
+		try {
+			return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MimeUtility.decodeText(headers
+					.get(HDR_SUBJECT)) : null;
+		} catch (UnsupportedEncodingException e) {
+			LOG.error(e.getMessage(), e);
+			return headers.containsKey(HDR_SUBJECT) ? MessageUtils.decodeMultiEncodedHeader(headers.get(HDR_SUBJECT))
+					: null;
+		}
 	}
 
 	@Override
@@ -358,7 +367,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		return receivedDate;
 	}
 
-	public void setReceivedDate(final Date date) throws MessagingException {
+	public void setReceivedDate(final Date date) {
 		this.receivedDate = date;
 	}
 
@@ -373,7 +382,7 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	}
 
-	public void setFlags(final Flags flag) throws MessagingException {
+	public void setFlags(final Flags flag) {
 		this.flags = flag;
 	}
 
@@ -640,9 +649,8 @@ public class MessageCacheObject extends Message implements Serializable {
 			if (address instanceof InternetAddress) {
 				final InternetAddress ia = (InternetAddress) address;
 				return this.address.equalsIgnoreCase(ia.getAddress());
-			} else {
-				return false;
 			}
+			return false;
 		}
 
 	}

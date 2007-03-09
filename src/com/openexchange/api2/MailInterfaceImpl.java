@@ -124,6 +124,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
@@ -157,7 +158,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -1880,8 +1881,9 @@ public class MailInterfaceImpl implements MailInterface {
 								final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
 								appointmentObj.setContext(sessionObj.getContext());
 								if (defaultCalendarFolder == -1) {
-									defaultCalendarFolder = OXFolderTools.getCalendarDefaultFolder(sessionObj
-											.getUserObject().getId(), sessionObj.getContext());
+									defaultCalendarFolder = new OXFolderAccess(sessionObj.getContext())
+											.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR)
+											.getObjectID();
 								}
 								appointmentObj.setParentFolderID(defaultCalendarFolder);
 								/*
@@ -1901,8 +1903,8 @@ public class MailInterfaceImpl implements MailInterface {
 								 */
 								final Task taskObj = oxc.convertTask(vo);
 								if (defaultTaskFolder == -1) {
-									defaultTaskFolder = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject()
-											.getId(), sessionObj.getContext());
+									defaultTaskFolder = new OXFolderAccess(sessionObj.getContext()).getDefaultFolder(
+											sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
 								}
 								taskObj.setParentFolderID(defaultTaskFolder);
 								/*
@@ -1951,8 +1953,8 @@ public class MailInterfaceImpl implements MailInterface {
 					if (vo != null) {
 						try {
 							final ContactObject contactObj = oxc.convertContact(vo);
-							contactObj.setParentFolderID(OXFolderTools.getContactDefaultFolder(sessionObj
-									.getUserObject().getId(), sessionObj.getContext()));
+							contactObj.setParentFolderID(new OXFolderAccess(sessionObj.getContext()).getDefaultFolder(
+									sessionObj.getUserObject().getId(), FolderObject.CONTACT).getObjectID());
 							contactObj.setContextId(sessionObj.getContext().getContextId());
 							contactInterface.insertContactObject(contactObj);
 							/*

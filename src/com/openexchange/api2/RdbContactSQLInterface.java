@@ -89,7 +89,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLINTERFACE,
@@ -213,7 +213,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 		try {
 			ContactSql contactSQL = new ContactMySql(sessionobject);
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readCon);
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(4,folderId, ctx.getContextId(), userId);
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -309,7 +309,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			ContactSql cs = new ContactMySql(sessionobject);
 			cs.setFolder(folderId);
 
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readCon);
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
 			
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(9,folderId, ctx.getContextId(), userId);
@@ -417,7 +417,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			if (!searchobject.isAllFolders()){	
 				cs.setFolder(folderId);
 
-				EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readcon);
+				final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
 				if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 					throw EXCEPTIONS.createOXConflictException(15,folderId, ctx.getContextId(), userId);
 					//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -520,7 +520,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
 			cs.setOrder(order);
 			
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readcon);
+			final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(22,folderId, ctx.getContextId(), userId);
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -670,7 +670,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try {
 			ContactSql cs = new ContactMySql(sessionobject);
 
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readCon);
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(32,folderId, ctx.getContextId(), userId);
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -837,7 +837,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
 			}
 			
-			oclPerm = OXFolderTools.getEffectiveFolderOCL(fid,userId,memberInGroups, ctx,sessionobject.getUserConfiguration(), readcon);
+			oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(fid, userId, sessionobject.getUserConfiguration());
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(58,fuid, ctx.getContextId(), userId);
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');

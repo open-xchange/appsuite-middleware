@@ -77,9 +77,9 @@ import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -502,10 +502,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				 * Search for visible subfolders
 				 */
 				final int[] modules = { TASK, CALENDAR, CONTACT };
-				return (iter = OXFolderTools.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
+				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
 						.getAccessibleModules(), FolderObject.PUBLIC, modules, SYSTEM_PUBLIC_FOLDER_ID, ctx)).hasNext();
 			} else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
-				return (iter = OXFolderTools.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
+				return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, groups, userConfig
 						.getAccessibleModules(), FolderObject.PUBLIC, new int[] { INFOSTORE },
 						SYSTEM_INFOSTORE_FOLDER_ID, ctx)).hasNext();
 			} else if (!subfolderFlag) {
@@ -518,7 +518,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 					|| objectId == VIRTUAL_LIST_TASK_FOLDER_ID || objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
 				return subfolderFlag;
 			}
-			return (iter = OXFolderTools.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null))
+			return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null))
 					.hasNext();
 		} finally {
 			if (iter != null) {
@@ -566,19 +566,19 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		SearchIterator iter = null;
 		try {
 			if (objectId == VIRTUAL_LIST_TASK_FOLDER_ID) {
-				iter = OXFolderTools.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK, userConfig,
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK, userConfig,
 						ctx);
 			} else if (objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID) {
-				iter = OXFolderTools.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CALENDAR,
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CALENDAR,
 						userConfig, ctx);
 			} else if (objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID) {
-				iter = OXFolderTools.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CONTACT,
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CONTACT,
 						userConfig, ctx);
 			} else if (objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
-				iter = OXFolderTools.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.INFOSTORE,
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.INFOSTORE,
 						userConfig, ctx);
 			} else {
-				iter = OXFolderTools.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
+				iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
 			}
 			if (iter.hasSize()) {
 				final int size = iter.size();

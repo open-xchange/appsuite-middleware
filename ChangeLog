@@ -1,7 +1,16 @@
+* 2007-03-09 - thorben.betten@open-xchange.com
+
+ - Fixed bug with multi-mime-encoded headers
+ - Split SearchIterator functionality and OXFolder access methods into two
+   classes; no need to further use OXFolderTools (which is completely messed
+   up with all stuff)
+
 * 2007-03-08 - tobias.prinz@open-xchange.com
 
-  - Fixed problem with ModuleTypeTranslator: Changed from RuntimeException to ImportExportException
-  - Extended enum for import/export formats to contain constant name: needed for Viktor's proposed changed to import/export servlet(s)
+  - Fixed problem with ModuleTypeTranslator: Changed from RuntimeException
+    to ImportExportException
+  - Extended enum for import/export formats to contain constant name: needed
+    for Viktor's proposed changed to import/export servlet(s)
 
 * 2007-03-08 - francisco.laguna@open-xchange.com
 

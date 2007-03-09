@@ -53,6 +53,7 @@ import static com.openexchange.groupware.container.mail.parser.MessageUtils.remo
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,7 +86,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
-import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import javax.mail.search.AndTerm;
 import javax.mail.search.BodyTerm;
 import javax.mail.search.FromStringTerm;
@@ -248,7 +249,15 @@ public class IMAPUtils {
 					tmp.put(HDR_SUBJECT, new HeaderHandler() {
 						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
 								OXException {
-							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+							try {
+								msg.setSubject(MimeUtility.decodeText(hdrValue));
+							} catch (UnsupportedEncodingException e) {
+								LOG.error(e.getMessage(), e);
+								msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+							} catch (MessagingException e) {
+								LOG.error(e.getMessage(), e);
+								msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+							}
 						}
 					});
 				} else if (hdr.getName().equals(HDR_DATE)) {
@@ -1084,12 +1093,7 @@ public class IMAPUtils {
 					}
 					break;
 				case JSONMessageObject.FIELD_SUBJECT:
-					final String subject;
-					if (msg instanceof MessageCacheObject) {
-						subject = MessageUtils.decodeMultiEncodedHeader(((MessageCacheObject) msg).getSubject());
-					} else {
-						subject = MessageUtils.decodeMultiEncodedHeader(((MimeMessage) msg).getHeader("Subject", null));
-					}
+					final String subject = msg.getSubject();
 					if (subject != null) {
 						foundInCurrentField = (subject.toLowerCase(Locale.ENGLISH).indexOf(searchPatterns[i]) != -1);
 					} else {
@@ -2057,7 +2061,15 @@ public class IMAPUtils {
 						msg.setRecipients(RecipientType.CC, env.cc);
 						msg.setRecipients(RecipientType.BCC, env.bcc);
 						msg.setReplyTo(env.replyTo);
-						msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
+						try {
+							msg.setSubject(MimeUtility.decodeText(env.subject));
+						} catch (UnsupportedEncodingException e) {
+							LOG.error(e.getMessage(), e);
+							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
+						} catch (MessagingException e) {
+							LOG.error(e.getMessage(), e);
+							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
+						}
 						msg.setSentDate(env.date);
 					}
 				};
@@ -2506,10 +2518,8 @@ public class IMAPUtils {
 			case JSONMessageObject.FIELD_SUBJECT:
 				return new FieldComparer(locale) {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
-						final String sub1 = MessageUtils.decodeMultiEncodedHeader(msg1.getSubject()).toLowerCase(
-								this.locale);
-						final String sub2 = MessageUtils.decodeMultiEncodedHeader(msg2.getSubject()).toLowerCase(
-								this.locale);
+						final String sub1 = msg1.getSubject().toLowerCase(this.locale);
+						final String sub2 = msg2.getSubject().toLowerCase(this.locale);
 						return (sub1 == null ? "" : sub1).compareTo((sub2 == null ? "" : sub2));
 					}
 				};

@@ -52,7 +52,7 @@ package com.openexchange.groupware.container.mail.parser;
 import static com.openexchange.api2.MailInterfaceImpl.handleMessagingException;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -69,13 +69,13 @@ import javax.mail.Part;
 import javax.mail.Flags.Flag;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
@@ -455,13 +455,13 @@ public class JSONMessageHandler implements MessageHandler {
 		}
 		return true;
 	}
-	
+
 	private static final String MIME_PGP_SIGN = "APPLICATION/PGP-SIGNATURE";
-	
+
 	private static final String MIME_TEXT_ALL = "text/*";
-	
+
 	private static final String MIME_TEXT_RTF = "text/rtf";
-	
+
 	private static final String MIME_TEXT_HTM = "text/htm*";
 
 	/*
@@ -508,8 +508,12 @@ public class JSONMessageHandler implements MessageHandler {
 			 * Fill attachment object
 			 */
 			mao.setSize(part.getSize());
-			mao.setFileName(part.getFileName() == null ? fileName : MessageUtils.decodeMultiEncodedHeader(part
-					.getFileName()));
+			try {
+				mao.setFileName(part.getFileName() == null ? fileName : MimeUtility.decodeText(part.getFileName()));
+			} catch (UnsupportedEncodingException e) {
+				mao.setFileName(part.getFileName() == null ? fileName : MessageUtils.decodeMultiEncodedHeader(part
+						.getFileName()));
+			}
 			mao.setContentType(contentType.getBaseType());
 			mao.setDisposition(Part.ATTACHMENT);
 			if (isInline && contentType.isMimeType(MIME_TEXT_ALL)) {
@@ -563,7 +567,7 @@ public class JSONMessageHandler implements MessageHandler {
 		 */
 		return handleAttachment(part, false, baseContentType, null, id);
 	}
-	
+
 	private static final String MIME_MULTIPART_ALT = "multipart/alternative";
 
 	/*
