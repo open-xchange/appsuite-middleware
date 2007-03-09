@@ -765,6 +765,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setInt(3, internal_user_id);
                 stmt.executeUpdate();
                 stmt.close();
+                
+                // now check if gidnumber feature is enabled
+               // if yes, update user table to correct gidnumber of users default group
+               if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
+                   int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);                   
+                   stmt = write_ox_con.prepareStatement("UPDATE " +
+                           "user " +
+                           "SET " +
+                           "gidNumber = ? " +
+                           "WHERE " +
+                           "cid = ? " +
+                           "AND " +
+                           "id = ?");
+                   stmt.setInt(1,gid_number);
+                   stmt.setInt(2, ctx.getIdAsInt().intValue());
+                   stmt.setInt(3, internal_user_id);
+                   stmt.executeUpdate();
+                   stmt.close();
+               }
+                
 
                 if (mustMapAdmin) {
                     stmt = write_ox_con.prepareStatement("INSERT INTO user_setting_admin (cid,user) VALUES (?,?)");
