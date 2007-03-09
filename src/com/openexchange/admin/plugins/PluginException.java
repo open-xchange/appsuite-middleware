@@ -50,42 +50,49 @@ package com.openexchange.admin.plugins;
 
 import java.io.Serializable;
 
-public class PluginException extends Exception implements  Serializable {
+/**
+ * The exception which is thrown by any bundle/plugin. So that the exception is known
+ * in the admin core
+ * 
+ * @author d7
+ *
+ */
+public class PluginException extends Exception implements Serializable {
 
     /**
      * For serialization
      */
     private static final long serialVersionUID = -1327700290913950494L;
 
-        /**
-         * 
-         */
-        public PluginException() {
-                
-        }
+    /**
+     * 
+     */
+    public PluginException() {
 
-        /**
-         * @param message
-         */
-        public PluginException(String message) {
-                super(message);
-                
-        }
+    }
 
-        /**
-         * @param cause
-         */
-        public PluginException(Throwable cause) {
-                super(cause);
-                
-        }
+    /**
+     * @param message
+     */
+    public PluginException(String message) {
+        super(message);
 
-        /**
-         * @param message
-         * @param cause
-         */
-        public PluginException(String message, Throwable cause) {
-                super(message, cause);          
-        }
+    }
+
+    /**
+     * @param cause
+     */
+    public PluginException(Throwable cause) {
+        super(cause);
+
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public PluginException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }
