@@ -152,6 +152,8 @@ public abstract class OXToolStorageInterface {
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
 
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
+    
+    public abstract int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException;
 
     public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
 
