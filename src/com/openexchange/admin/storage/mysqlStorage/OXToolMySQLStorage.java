@@ -809,6 +809,43 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
 
         return admin_id;
     }
+    
+    public int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException {
+        int gid_number = -1;
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT gidNumber FROM groups WHERE cid=? AND id=?");
+            stmt.setInt(1, ctx.getIdAsInt().intValue());
+            stmt.setInt(2, group_id);
+            rs = stmt.executeQuery();
+            if(rs.next()){
+                gid_number = rs.getInt("gidNumber");
+            }
+            rs.close();
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if(rs!=null){
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing resultset!", e);
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+
+        return gid_number;
+    }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
