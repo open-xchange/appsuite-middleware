@@ -443,7 +443,7 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
-    public static User getTestUserObject() throws Exception {
+    public static User getTestUserObject() {
         return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange");
     }
 
