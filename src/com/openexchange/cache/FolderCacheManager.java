@@ -168,10 +168,10 @@ public class FolderCacheManager {
 			folderObj = (FolderObject) folderCache.get(new CacheKey(ctx, objectId));
 		}
 		/*
-		 * Either fromCache was false or the data object was not found.
+		 * Either fromCache was false or folder object was not found.
 		 */
 		if (folderObj == null) {
-			folderObj = loadFolderObject(objectId, ctx, readConArg);
+			return loadFolderObject(objectId, ctx, readConArg);
 		}
 		/*
 		 * Return CLONED version
