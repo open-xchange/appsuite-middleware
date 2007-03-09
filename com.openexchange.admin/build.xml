@@ -228,6 +228,10 @@
             <fileset dir="."/>
             <filterset refid="pathsubst"/>
         </copy>
+    	<chmod perm="755" file="sbin/config.ini.helper"/>
+    	<exec executable="sbin/config.ini.helper" failifexecutionfails="true" failonerror="true">
+			<arg value="${lib.dir}"/>
+		</exec>
     </target>
 
     <target name="install" depends="replacer,jar,install-plugins">
@@ -242,7 +246,7 @@
         </copy>
 		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in,linkhelper" followsymlinks="true"/>
+            <fileset dir="sbin" excludes="*.in,linkhelper,config.ini.helper" followsymlinks="true"/>
         </copy>
     	<chmod perm="755" file="sbin/linkhelper"/>
     	<exec executable="sbin/linkhelper">
