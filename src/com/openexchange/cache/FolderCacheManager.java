@@ -55,8 +55,6 @@ import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.behavior.IElementAttributes;
@@ -84,8 +82,6 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  */
 public class FolderCacheManager {
-
-	private static final Log LOG = LogFactory.getLog(FolderCacheManager.class);
 
 	private static final boolean enabled = FolderCacheProperties.isEnableFolderCache();
 
