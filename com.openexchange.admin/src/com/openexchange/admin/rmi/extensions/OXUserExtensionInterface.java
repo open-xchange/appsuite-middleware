@@ -53,24 +53,12 @@ package com.openexchange.admin.rmi.extensions;
 
 /**
  * @author choeger
- *
+ * 
  */
-public abstract class OXUserExtensionInterface {
-	protected String extensionName;
+public interface OXUserExtensionInterface {
+    /**
+     * @return the extensionName
+     */
+    public String getExtensionName();
 
-	/**
-	 * @return the extensionName
-	 */
-	public String getExtensionName() {
-		return extensionName;
-	}
-
-	/**
-	 * @param extensionName the extensionName to set
-	 */
-	public void setExtensionName(String interfaceName) {
-		this.extensionName = interfaceName;
-	}
-	
-	
 }
