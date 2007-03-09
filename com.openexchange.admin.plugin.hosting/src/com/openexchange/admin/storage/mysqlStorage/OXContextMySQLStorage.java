@@ -1291,6 +1291,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     ox_write_con.commit();
                 }
                 
+                int gid_number = -1;
+                if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
+                    gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, ox_write_con);
+                    ox_write_con.commit();
+                }
+                
                 
                 // create group users for context
                 // get display name for context default group resolved via
@@ -1299,7 +1305,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final String lang = langus.getLanguage() + "_" + langus.getCountry();
 
                 final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + lang.toUpperCase(), "Users");
-                createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id);
+                createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id,gid_number);
 
                 createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin,uid_number);
                 // create system folder for context
@@ -2765,7 +2771,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id) throws SQLException {
+    private void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id,final int gid_number) throws SQLException {
         final PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified) VALUES (?,?,'users',?,?);");
         group_stmt.setInt(1, context_id);
         group_stmt.setInt(2, group_id);
@@ -2773,6 +2779,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         group_stmt.setLong(4, System.currentTimeMillis());
         group_stmt.executeUpdate();
         group_stmt.close();
+        
+//      ok, group needs a correct gid number
+        if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
+            group_stmt = ox_write_con.prepareStatement("UPDATE " +
+                        "groups " +
+                        "set " +
+                        "gidNumber = ? " +
+                        "WHERE " +
+                        "cid = ? " +
+                        "AND " +
+                        "id = ?");
+            group_stmt.setInt(1, gid_number);
+            group_stmt.setInt(2, context_id);
+            group_stmt.setInt(3, group_id);
+        }
     }
 
     private void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException,InvalidDataException {
