@@ -135,3 +135,17 @@ CREATE TABLE sequence_webdav (
     id INT4 UNSIGNED,
     PRIMARY KEY (cid)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS sequence_uid_number;
+CREATE TABLE sequence_uid_number (
+    cid INT4 UNSIGNED,
+    id INT4 UNSIGNED,
+    PRIMARY KEY (cid)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS sequence_gid_number;
+CREATE TABLE sequence_gid_number (
+    cid INT4 UNSIGNED,
+    id INT4 UNSIGNED,
+    PRIMARY KEY (cid)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
