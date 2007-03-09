@@ -69,8 +69,6 @@ import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -173,25 +171,10 @@ public class FolderCacheManager {
 		 * Either fromCache was false or the data object was not found.
 		 */
 		if (folderObj == null) {
-			try {
-				Connection readCon = readConArg;
-				final boolean createCon = (readCon == null);
-				try {
-					if (createCon) {
-						readCon = DBPool.pickup(ctx);
-					}
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("load folder object from database: id=" + objectId);
-					}
-					folderObj = loadFolderObject(objectId, ctx, readCon);
-				} finally {
-					if (createCon && readCon != null) {
-						DBPool.closeReaderSilent(ctx, readCon);
-					}
-				}
-			} catch (DBPoolingException e) {
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, e.getMessage());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("load folder object from database: id=" + objectId);
 			}
+			folderObj = loadFolderObject(objectId, ctx, readConArg);
 		} else {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("load folder object from cache: id=" + objectId);
