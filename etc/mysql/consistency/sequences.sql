@@ -102,6 +102,16 @@ ALTER TABLE sequence_webdav
     MODIFY id INT4 UNSIGNED NOT NULL,
     ENGINE=InnoDB;
 
+ALTER TABLE sequence_uid_number
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+ENGINE=InnoDB;
+
+ALTER TABLE sequence_gid_number
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+ENGINE=InnoDB;
+
 
 DROP PROCEDURE IF EXISTS get_unique_id;
 DELIMITER //
@@ -269,6 +279,24 @@ CREATE PROCEDURE get_webdav_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIF
 BEGIN
     UPDATE sequence_webdav SET id=id+1 WHERE cid=context;
     SELECT id FROM sequence_webdav WHERE cid=context;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS get_uid_number_id;
+DELIMITER //
+CREATE PROCEDURE get_uid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
+BEGIN
+    UPDATE sequence_uid_number SET id=id+1 WHERE cid=context;
+    SELECT id FROM sequence_uid_number WHERE cid=context;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS get_gid_number_id;
+DELIMITER //
+CREATE PROCEDURE get_gid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
+BEGIN
+    UPDATE sequence_gid_number SET id=id+1 WHERE cid=context;
+    SELECT id FROM sequence_gid_number WHERE cid=context;
 END //
 DELIMITER ;
 
