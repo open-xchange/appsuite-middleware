@@ -64,6 +64,8 @@ public class AdminProperties {
 	    public static final String AUTO_LOWERCASE           = "AUTO_TO_LOWERCASE_UID";
 	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_GROUP_UID_NAMES";
+            public static final String GID_NUMBER_START        = "GID_NUMBER_START";
+            
 	}
 	
 	/**
