@@ -1284,6 +1284,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final int contact_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, ox_write_con);
                 ox_write_con.commit();
 
+                
+                int uid_number = -1;
+                if(Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"))>0){
+                    uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, ox_write_con);
+                    ox_write_con.commit();
+                }
+                
+                
                 // create group users for context
                 // get display name for context default group resolved via
                 // admins language
@@ -1293,7 +1301,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + lang.toUpperCase(), "Users");
                 createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id);
 
-                createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin);
+                createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin,uid_number);
                 // create system folder for context
                 // get lang and displayname of admin
                 String display = String.valueOf(admin_user.getId());
@@ -2767,14 +2775,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         group_stmt.close();
     }
 
-    private void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id) throws StorageException,InvalidDataException {
+    private void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException,InvalidDataException {
         // here implemente the user creation for the context
         final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
         final UserModuleAccess access = new UserModuleAccess(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         tool.checkPrimaryMail(ctx, admin_user.getPrimaryEmail());
-        oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id);
+        oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id,uid_number);
     }
 
     private void handleCreateContextRollback(final Connection configdb_write_con, final Connection ox_write_con, final int context_id) {
