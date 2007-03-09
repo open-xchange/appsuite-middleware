@@ -171,14 +171,7 @@ public class FolderCacheManager {
 		 * Either fromCache was false or the data object was not found.
 		 */
 		if (folderObj == null) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("load folder object from database: id=" + objectId);
-			}
 			folderObj = loadFolderObject(objectId, ctx, readConArg);
-		} else {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("load folder object from cache: id=" + objectId);
-			}
 		}
 		/*
 		 * Return CLONED version
