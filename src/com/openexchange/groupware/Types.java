@@ -75,6 +75,17 @@ public interface Types {
      * used to generate not intersecting identifiers for groups and users.
      */
     public static final int PRINCIPAL = 130;
+    
+    
+    /**
+     * Used for gid numbers on group create
+     */
+    public static final int GID_NUMBER = 1130;
+    
+    /**
+     * Used for uid numbers on user create
+     */
+    public static final int UID_NUMBER = 1131;
 
 	public static final int RESOURCE = 135;
 	public static final int INFOSTORE = 137;

@@ -276,6 +276,8 @@ public final class IDGenerator {
             tmp.put(Types.INFOSTORE, "{call get_infostore_id(?)}");
             tmp.put(Types.ATTACHMENT, "{call get_attachment_id(?)}");
             tmp.put(Types.WEBDAV, "{call get_webdav_id(?)}");
+            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
+            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -348,6 +350,8 @@ public final class IDGenerator {
             tmp.put(Types.INFOSTORE, "CALL get_infostore_id(?)");
             tmp.put(Types.ATTACHMENT, "CALL get_attachment_id(?)");
             tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
+            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
+            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -470,6 +474,8 @@ public final class IDGenerator {
             tmp.put(Types.INFOSTORE, "sequence_infostore");
             tmp.put(Types.ATTACHMENT, "sequence_attachment");
             tmp.put(Types.WEBDAV, "sequence_webdav");
+            tmp.put(Types.UID_NUMBER, "sequence_uid_number");
+            tmp.put(Types.GID_NUMBER, "sequence_gid_number");
             TABLES = Collections.unmodifiableMap(tmp);
         }
     }
