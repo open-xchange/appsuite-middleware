@@ -140,6 +140,26 @@ public class PropertyHandler {
         return retString; 
     }
     
+    public String getGroupProp( String key, String fallBack ) {
+        String retBool = fallBack;
+        
+        if ( groupPropValues == null ) {
+            if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
+                groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
+            } else {
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
+            }
+        }
+        
+        if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
+            retBool =  groupPropValues.get( key ).toString();
+        } else {
+            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+        }
+        
+        return retBool; 
+    }
+    
     /**
      * 
      * @param key
