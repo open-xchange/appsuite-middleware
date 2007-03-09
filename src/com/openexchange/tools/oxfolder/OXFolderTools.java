@@ -94,6 +94,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 /**
  * OXFolderTools
  * 
+ * @deprecated - use routines available in <code>OXFolderAccess</code>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXFolderTools {
