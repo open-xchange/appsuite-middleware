@@ -321,7 +321,7 @@ public class GroupTest extends AbstractTest {
     }
 
     public static int getContextID() throws Exception {
-        return 2677;
+        return 1;
     }
 
     private void createChangeGroupData(final Group group) {
