@@ -184,8 +184,6 @@ public class FolderCacheManager {
 						LOG.debug("load folder object from database: id=" + objectId);
 					}
 					folderObj = loadFolderObject(objectId, ctx, readCon);
-					LOG.error(new StringBuilder("Lade folder from database: ").append(folderObj.getFolderName())
-							.append(" (").append(folderObj.getObjectID()).append(')').toString());
 				} finally {
 					if (createCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);
