@@ -225,7 +225,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
     /**
      * 
      */
-    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id) throws StorageException;
+    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException;
 
     /**
      * 

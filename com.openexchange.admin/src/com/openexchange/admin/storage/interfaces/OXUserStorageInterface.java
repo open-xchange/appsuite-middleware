@@ -169,9 +169,10 @@ public abstract class OXUserStorageInterface {
     public abstract void changeLastModified( final int user_id, final Context ctx, final Connection write_ox_con ) throws StorageException;
     
     /** 
-     * Create new user in given connection with givem contact and user id
+     * Create new user in given connection with given contact and user id
+     * If the uid number feature is active then also supply a correct uid_number(IDGenerator with Type UID_NUMBER).Else set this to -1
      */
-    public abstract int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id ) throws StorageException;
+    public abstract int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number ) throws StorageException;
     
     /**
      * Create new user in context ctx
