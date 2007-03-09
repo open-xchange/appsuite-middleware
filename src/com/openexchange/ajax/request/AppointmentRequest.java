@@ -82,7 +82,6 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.servlet.AjaxException;
 
 import java.io.Writer;

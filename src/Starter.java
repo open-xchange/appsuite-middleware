@@ -52,23 +52,18 @@
 import java.net.ServerSocket;
 import java.text.DecimalFormat;
 import java.util.Properties;
-import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationInit;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.GroupwareInit;
 import com.openexchange.groupware.BackendServicesInit;
+import com.openexchange.groupware.GroupwareInit;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.ComfireInitWorker;
-import com.openexchange.server.ComfireListener;
-import com.openexchange.server.ComfireLogger;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.Version;
 
@@ -157,6 +152,11 @@ public class Starter {
             LOG.error("Initializing the backend services (AJP & JMX) failed.", e);
             System.exit(1);
         }
+        
+        /*
+         * TODO: Check property ENABLE_INTERNAL_USER_EDIT
+         * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
+         */
 
 		LOG.info("SYSTEM IS UP & RUNNING...");
 		
