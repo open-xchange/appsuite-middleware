@@ -2772,7 +2772,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id,final int gid_number) throws SQLException {
-        final PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified) VALUES (?,?,'users',?,?);");
+        PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified) VALUES (?,?,'users',?,?);");
         group_stmt.setInt(1, context_id);
         group_stmt.setInt(2, group_id);
         group_stmt.setString(3, display_name);
