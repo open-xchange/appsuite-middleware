@@ -66,6 +66,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,18 +90,6 @@ public class OXFolderSQL {
 
 	private OXFolderSQL() {
 		super();
-	}
-	
-	private static final String SQL_UPDATE_ADDR_BOOK = "UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ? AND permission_id = ?";
-	
-	public static final void updateCtxAddrBookPermission(final boolean enableAddrBookEdit) {
-		final int objectWritePermission;
-		if (enableAddrBookEdit) {
-			objectWritePermission = OCLPermission.WRITE_OWN_OBJECTS;
-		} else {
-			objectWritePermission = OCLPermission.NO_PERMISSIONS;
-		}
-		
 	}
 	
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
@@ -1005,6 +995,18 @@ public class OXFolderSQL {
 				} else {
 					reassignPerms.add(Integer.valueOf(fuid));
 				}
+				if (FolderCacheManager.isInitialized()) {
+					/*
+					 * Invalidate cache
+					 */
+					try {
+						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
+					} catch (FolderCacheNotEnabledException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (OXException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
 			}
 			rs.close();
 			rs = null;
@@ -1268,6 +1270,18 @@ public class OXFolderSQL {
 				} else {
 					reassignFolders.add(Integer.valueOf(fuid));
 				}
+				if (FolderCacheManager.isInitialized()) {
+					/*
+					 * Invalidate cache
+					 */
+					try {
+						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
+					} catch (FolderCacheNotEnabledException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (OXException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
 			}
 			rs.close();
 			rs = null;
@@ -1298,6 +1312,18 @@ public class OXFolderSQL {
 					deleteFolders.add(Integer.valueOf(fuid));
 				} else {
 					reassignFolders.add(Integer.valueOf(fuid));
+				}
+				if (FolderCacheManager.isInitialized()) {
+					/*
+					 * Invalidate cache
+					 */
+					try {
+						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
+					} catch (FolderCacheNotEnabledException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (OXException e) {
+						LOG.error(e.getMessage(), e);
+					}
 				}
 			}
 			/*

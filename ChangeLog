@@ -4,6 +4,7 @@
  - Split SearchIterator functionality and OXFolder access methods into two
    classes; no need to further use OXFolderTools (which is completely messed
    up with all stuff)
+ - Cache invalidation after user deletion
 
 * 2007-03-08 - tobias.prinz@open-xchange.com
 
