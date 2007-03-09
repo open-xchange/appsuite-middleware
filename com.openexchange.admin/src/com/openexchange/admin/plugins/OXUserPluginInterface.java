@@ -57,4 +57,6 @@ public interface OXUserPluginInterface {
     public void create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials cred) throws PluginException;
     
     public void delete(final Context ctx, final Integer[] user_id, final Credentials cred) throws PluginException;
+    
+    public void change(Context ctx, User usrdata, Credentials auth) throws PluginException;
 }
