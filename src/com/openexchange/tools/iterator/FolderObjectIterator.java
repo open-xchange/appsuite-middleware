@@ -118,7 +118,7 @@ public class FolderObjectIterator implements SearchIterator {
 	 *         of <code>FolderObject</code> from <code>ResultSet.next()</code>
 	 *         data
 	 */
-	public static String getFieldsForSQL(final String tableName) {
+	public static final String getFieldsForSQL(final String tableName) {
 		final StringBuilder fields = new StringBuilder();
 		final boolean useTableName = (tableName != null);
 		if (useTableName) {
