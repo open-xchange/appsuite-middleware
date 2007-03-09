@@ -2793,6 +2793,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             group_stmt.setInt(1, gid_number);
             group_stmt.setInt(2, context_id);
             group_stmt.setInt(3, group_id);
+            group_stmt.executeUpdate();
+            group_stmt.close();
         }
     }
 
