@@ -49,6 +49,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.groupware.contexts.ContextException;
@@ -485,7 +486,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         PreparedStatement return_db_id = null;
 
@@ -520,7 +521,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             try {
 
                 stmt = write_ox_con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
                 stmt.setString(4, usrdata.getPasswordMech2String());
@@ -565,6 +566,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setInt(12, contact_id);
                 stmt.executeUpdate();
                 stmt.close();
+                
+                // check if uidnumber must be set 
+                 int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"));
+                 if(startnum>0 && uid_number!=-1){                     
+                     // we should update correct uidnumbers if start number is set to higher then 0
+                     stmt = write_ox_con.prepareStatement("UPDATE " +
+                                "user " +
+                                "SET " +
+                                "uidNumber = ? " +
+                                "WHERE " +
+                                "cid = ? " +
+                                "AND " +
+                                "id = ?");
+                     stmt.setInt(1,uid_number);
+                     stmt.setInt(2, ctx.getIdAsInt().intValue());
+                     stmt.setInt(3, internal_user_id);
+                     stmt.executeUpdate();
+                     stmt.close();
+                 }
 
                 // fill up statement for prg_contacts update
 
@@ -873,6 +893,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
 
         }
     }
+    
 
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
@@ -886,8 +907,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             write_ox_con.commit();
             final int contact_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
             write_ox_con.commit();
+            
+            int uid_number = -1;
+            if(Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"))>0){
+                uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con);
+                write_ox_con.commit();
+            }
 
-            return create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id);
+            return create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id,uid_number);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             // rollback operations on ox db connection
