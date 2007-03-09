@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.io.UnsupportedEncodingException;
@@ -99,14 +97,14 @@ public class RdbAuthentication extends Authentication {
             } else {
                 testPassword = Boolean.parseBoolean(propertyValue);
             }
-            if( !testPassword ) {
+            if (!testPassword) {
                 retval = new RdbCredentials(userId);
             }
-            if( user.getPasswordMech().equals("{CRYPT}") &&
-            		UnixCrypt.matches(user.getUserPassword(),password) ) {
+            if ("{CRYPT}".equals(user.getPasswordMech())
+                && UnixCrypt.matches(user.getUserPassword(), password)) {
                 retval = new RdbCredentials(userId);
-            } else if( user.getPasswordMech().equals("{SHA}") &&
-            		hashPassword(password).equals(user.getUserPassword()) ) {
+            } else if ("{SHA}".equals(user.getPasswordMech())
+                && hashPassword(password).equals(user.getUserPassword())) {
                 retval = new RdbCredentials(userId);
             }
         }
