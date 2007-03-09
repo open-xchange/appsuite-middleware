@@ -2717,6 +2717,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // below id 20 is reserved
                     startval = 20;
                 }
+                
+                // check for the uid number feature
+                if(table.equals("sequence_uid_number")){
+                        int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"));
+                        if(startnum>0){
+                            // we use the uid number faeture
+                            // set the start number in the sequence for uid_numbers 
+                            startval = startnum;
+                        }
+                }
+                //  check for the gid number feature
+                if(table.equals("sequence_gid_number")){
+                    int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"));
+                    if(startnum>0){
+                        // we use the gid number faeture
+                        // set the start number in the sequence for gid_numbers 
+                        startval = startnum;
+                    }
+                }
+                
                 ps = con.prepareStatement("INSERT INTO " + table + " VALUES(?,?);");
                 ps.setInt(1, context_id);
                 ps.setInt(2, startval);
