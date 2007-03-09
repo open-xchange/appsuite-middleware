@@ -60,6 +60,9 @@ public abstract class BasicCommandlineOptions {
     protected static final int DEFAULT_CONTEXT=1;
     protected static final String OPT_NAME_CONTEXT_SHORT="c";
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
+    protected static final String OPT_NAME_CONTEXT_NAME_SHORT="N";
+    protected static final String OPT_NAME_CONTEXT_NAME_LONG="contextname";
+    protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION="The name of the context";
     protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context";
     protected static final String OPT_NAME_ADMINUSER_SHORT="A";
     protected static final String OPT_NAME_ADMINUSER_LONG="adminuser";
@@ -130,6 +133,12 @@ public abstract class BasicCommandlineOptions {
     protected Option getContextOption() {
         final Option retval = getShortLongOpt(OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);
         retval.setArgName("Context ID");
+        return retval;
+    }
+    
+    protected Option getContextNameOption() {
+        final Option retval = getShortLongOpt(OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, false);
+        retval.setArgName("Context Name");
         return retval;
     }
     
