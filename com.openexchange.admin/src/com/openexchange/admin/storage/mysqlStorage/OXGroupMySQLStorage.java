@@ -49,6 +49,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -306,7 +307,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
         int retval = -1;
         Connection con = null;
         PreparedStatement prep_insert = null;
-        final int context_ID = ctx.getIdAsInt();
+        final int context_ID = ctx.getIdAsInt().intValue();
         try {
             con = cache.getWRITEConnectionForContext(context_ID);
             con.setAutoCommit(false);
@@ -315,16 +316,41 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             final String displayName = grp.getDisplayname();
             final int groupID = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.PRINCIPAL, con);
             con.commit();
-            if ((null != identifier) && (null != displayName)) {
-                prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified) VALUES (?,?,?,?,?);");
-                prep_insert.setInt(1, context_ID);
-                prep_insert.setInt(2, groupID);
-                prep_insert.setString(3, identifier);
-                prep_insert.setString(4, displayName);
-                prep_insert.setLong(5, System.currentTimeMillis());
-                prep_insert.executeUpdate();
+            
+            int gid_number = -1;
+            if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
+                gid_number = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
+            
+            
+            prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified) VALUES (?,?,?,?,?);");
+            prep_insert.setInt(1, context_ID);
+            prep_insert.setInt(2, groupID);
+            prep_insert.setString(3, identifier);
+            prep_insert.setString(4, displayName);
+            prep_insert.setLong(5, System.currentTimeMillis());
+            prep_insert.executeUpdate();
+            prep_insert.close();
+            
+            if(gid_number!=-1){
+                prep_insert = con.prepareStatement("UPDATE " +
+                                "groups " +
+                                "SET " +
+                                "gidnumber = ? " +
+                                "WHERE " +
+                                "cid = ? " +
+                                "AND " +
+                                "id = ?");
+                prep_insert.setInt(1, gid_number );
+                prep_insert.setInt(2, context_ID);
+                prep_insert.setInt(3, groupID);
+                prep_insert.executeUpdate();
+                prep_insert.close();
+            }
+                
+            con.commit();
+            
             retval = groupID;
             log.info("Group " + groupID + " created!");
         } catch (final SQLException sql) {
