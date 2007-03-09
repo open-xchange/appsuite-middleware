@@ -124,8 +124,10 @@ public class StatisticTools {
                 fetchData();
             } catch (java.io.IOException sve) {
                 p2c("Can't connect to \"" + ox_jmx_url + "\"");
+                System.exit(1);
             } catch (Exception ex) {
                 ex.printStackTrace();
+                System.exit(1);
             }
 
             closeConnection();
