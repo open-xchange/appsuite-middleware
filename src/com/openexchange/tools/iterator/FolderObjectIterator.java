@@ -469,6 +469,14 @@ public class FolderObjectIterator implements SearchIterator {
 		return false;
 	}
 
+	/**
+	 * Creates a <code>java.util.Queue</code> containing all iterator's
+	 * elements. All resources are closed immediately.
+	 * 
+	 * @return iterator's content backed up by a <code>java.util.Queue</code>
+	 * @throws SearchIteratorException
+	 *             if any error occurs
+	 */
 	public Queue<FolderObject> asQueue() throws SearchIteratorException {
 		final Queue<FolderObject> retval = new LinkedList<FolderObject>();
 		if (isClosed) {
