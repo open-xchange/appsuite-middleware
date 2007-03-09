@@ -181,12 +181,7 @@ public class LoginException extends AbstractOXException {
          * database down.
          */
         DATABASE_DOWN("Database down.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
-            Source.SYSTEM, 10),
-        /**
-         * Your database is currently updated.
-         */
-        UPDATE("Your database is currently updated.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, Source.SYSTEM, 11);
+            Source.SYSTEM, 10);
 
         /**
          * Message of the exception.
