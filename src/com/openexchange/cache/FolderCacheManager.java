@@ -101,6 +101,8 @@ public class FolderCacheManager {
 
 	private final JCS folderCache;
 
+	private IElementAttributes initialAttribs;
+
 	private static final String FOLDER_CACHE_REGION_NAME = "OXFolderCache";
 
 	private FolderCacheManager() throws OXException {
@@ -182,6 +184,8 @@ public class FolderCacheManager {
 						LOG.debug("load folder object from database: id=" + objectId);
 					}
 					folderObj = loadFolderObject(objectId, ctx, readCon);
+					LOG.error(new StringBuilder("Lade folder from database: ").append(folderObj.getFolderName())
+							.append(" (").append(folderObj.getObjectID()).append(')').toString());
 				} finally {
 					if (createCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);
@@ -228,15 +232,30 @@ public class FolderCacheManager {
 		LOCK_MODIFY.lock();
 		try {
 			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
+			final CacheKey key = new CacheKey(ctx, folderId);
 			/*
-			 * Put folder into cache
+			 * Do not propagate an initial PUT
 			 */
-			folderCache.put(new CacheKey(ctx, folderId), folderObj);
+			final IElementAttributes attribs = getAppliedAttributes(key, null);
+			if (attribs == null) {
+				/*
+				 * Put folder into cache
+				 */
+				folderCache.put(key, folderObj);
+			} else {
+				/*
+				 * Disable lateral distribution for this element
+				 */
+				folderCache.put(key, folderObj, attribs);
+			}
 		} catch (CacheException e) {
 			throw new OXCachingException(Code.FAILED_PUT, e, new Object[0]);
 		} finally {
 			LOCK_MODIFY.unlock();
 		}
+		/*
+		 * Return a copy, NOT a reference to cached element
+		 */
 		return (FolderObject) folderObj.clone();
 	}
 
@@ -256,8 +275,8 @@ public class FolderCacheManager {
 			final IElementAttributes elemAttribs) throws OXException {
 		try {
 			if (!folderObj.containsObjectID()) {
-				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, "", FolderFields.ID, -1,
-						ctx.getContextId());
+				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, "", FolderFields.ID, -1, ctx
+						.getContextId());
 			}
 			final CacheKey ck = new CacheKey(ctx, folderObj.getObjectID());
 			if (!overwrite) {
@@ -279,17 +298,12 @@ public class FolderCacheManager {
 					 */
 					final IElementAttributes attribs;
 					if (elemAttribs == null) {
-						attribs = folderCache.getDefaultElementAttributes();
+						attribs = getInitialAttributes();
 					} else {
 						attribs = elemAttribs;
+						attribs.setIsLateral(false);
 					}
-					attribs.setIsLateral(false);
 					folderCache.put(ck, folderObj.clone(), attribs);
-//					if (elemAttribs == null) {
-//						folderCache.put(ck, folderObj.clone());
-//					} else {
-//						folderCache.put(ck, folderObj.clone(), elemAttribs);
-//					}
 				} finally {
 					LOCK_MODIFY.unlock();
 				}
@@ -300,24 +314,15 @@ public class FolderCacheManager {
 				 */
 				LOCK_MODIFY.lock();
 				try {
-					final IElementAttributes attribs;
-					if (elemAttribs == null) {
-						attribs = folderCache.getDefaultElementAttributes();
+					final IElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
+					if (attribs == null) {
+						/*
+						 * Put with default attributes
+						 */
+						folderCache.put(ck, folderObj.clone());
 					} else {
-						attribs = elemAttribs;
+						folderCache.put(ck, folderObj.clone(), attribs);
 					}
-					/*
-					 * Disable lateral cache distribution on initial PUT
-					 */
-					if (folderCache.get(ck) == null) {
-						attribs.setIsLateral(false);
-					}
-					folderCache.put(ck, folderObj.clone(), attribs);
-//					if (elemAttribs == null) {
-//						folderCache.put(ck, folderObj.clone());
-//					} else {
-//						folderCache.put(ck, folderObj.clone(), elemAttribs);
-//					}
 				} finally {
 					LOCK_MODIFY.unlock();
 				}
@@ -343,6 +348,30 @@ public class FolderCacheManager {
 		} catch (CacheException e) {
 			throw new OXCachingException(Code.FAILED_REMOVE, e, new Object[0]);
 		}
+	}
+
+	private final IElementAttributes getAppliedAttributes(final CacheKey key, final IElementAttributes givenAttribs)
+			throws CacheException {
+		if (folderCache.get(key) != null) {
+			/*
+			 * No intial PUT; just return given attributes
+			 */
+			return givenAttribs;
+		}
+		if (givenAttribs == null) {
+			return getInitialAttributes();
+		}
+		givenAttribs.setIsLateral(false);
+		return givenAttribs;
+	}
+
+	private final IElementAttributes getInitialAttributes() throws CacheException {
+		if (initialAttribs != null) {
+			return initialAttribs;
+		}
+		initialAttribs = folderCache.getDefaultElementAttributes();
+		initialAttribs.setIsLateral(false);
+		return initialAttribs;
 	}
 
 	public IElementAttributes getDefaultFolderObjectAttributes() throws OXException {
