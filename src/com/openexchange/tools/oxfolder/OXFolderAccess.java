@@ -54,7 +54,11 @@ import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
@@ -122,6 +126,52 @@ public class OXFolderAccess {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
 		}
 		return fo;
+	}
+	
+	/**
+	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
+	 * instances filles which match given folder IDs
+	 * 
+	 * @param folderIDs -
+	 *            the folder IDs as an <code>int</code> array
+	 * @return a <code>java.util.List</code> of <code>FolderObject</code>
+	 *         instances
+	 * @throws OXException
+	 */
+	public final List<FolderObject> getFolderObjects(final int[] folderIDs) throws OXException {
+		final List<FolderObject> retval = new ArrayList<FolderObject>(folderIDs.length);
+		for (int fuid : folderIDs) {
+			try {
+				retval.add(getFolderObject(fuid));
+			} catch (OXFolderNotFoundException e) {
+				continue;
+			}
+		}
+		return retval;
+	}
+	
+	/**
+	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
+	 * instances filles which match given folder IDs
+	 * 
+	 * @param folderIDs -
+	 *            the folder IDs backed by a <code>java.util.Collection</code>
+	 * @return a <code>java.util.List</code> of <code>FolderObject</code>
+	 *         instances
+	 * @throws OXException
+	 */
+	public final List<FolderObject> getFolderObjects(final Collection<Integer> folderIDs) throws OXException {
+		final int size = folderIDs.size();
+		final List<FolderObject> retval = new ArrayList<FolderObject>(size);
+		final Iterator<Integer> iter = folderIDs.iterator();
+		for (int i = 0; i < size; i++) {
+			try {
+				retval.add(getFolderObject(iter.next().intValue()));
+			} catch (OXFolderNotFoundException e) {
+				continue;
+			}
+		}
+		return retval;
 	}
 
 	/**

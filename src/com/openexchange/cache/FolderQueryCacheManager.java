@@ -169,7 +169,7 @@ public class FolderQueryCacheManager {
 			}
 		}
 		Map<CacheKey, LinkedList<FolderObject>> map = (Map<CacheKey, LinkedList<FolderObject>>) folderQueryCache
-				.get(createMapKey(cid, userId));
+				.getFromGroup(createUserKey(userId), createContextKey(cid));
 		final LinkedList<FolderObject> q;
 		if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
 			return null;
@@ -219,9 +219,9 @@ public class FolderQueryCacheManager {
 		LOCK_MODIFY.lock();
 		try {
 			busy = true;
-			final CacheKey mapKey = createMapKey(cid, userId);
 			boolean insertMap = false;
-			Map<CacheKey, LinkedList<FolderObject>> map = (Map<CacheKey, LinkedList<FolderObject>>) folderQueryCache.get(mapKey);
+			Map<CacheKey, LinkedList<FolderObject>> map = (Map<CacheKey, LinkedList<FolderObject>>) folderQueryCache
+					.getFromGroup(createUserKey(userId), createContextKey(cid));
 			if (map == null) {
 				map = new HashMap<CacheKey, LinkedList<FolderObject>>();
 				insertMap = true;
@@ -234,7 +234,7 @@ public class FolderQueryCacheManager {
 				tmp.addAll(q);
 			}
 			if (insertMap) {
-				folderQueryCache.put(mapKey, map);
+				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), map);
 			}
 		} catch (CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
@@ -248,20 +248,18 @@ public class FolderQueryCacheManager {
 	/**
 	 * Clears all cache entries belonging to given user
 	 */
-	public final void invalidateUserQueries(final SessionObject session) throws OXCachingException {
-		invalidateUserQueries(session.getUserObject().getId(), session.getContext().getContextId());
+	public final void invalidateUserQueries(final SessionObject session) {
+		invalidateContextQueries(session.getContext().getContextId());
 	}
 
 	/**
 	 * Clears all cache entries belonging to given user
 	 */
-	public final void invalidateUserQueries(final int userId, final int cid) throws OXCachingException {
+	public final void invalidateContextQueries(final int cid) {
 		LOCK_MODIFY.lock();
 		try {
 			busy = true;
-			folderQueryCache.remove(createMapKey(cid, userId));
-		} catch (CacheException e) {
-			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, new Object[0]);
+			folderQueryCache.invalidateGroup(createContextKey(cid));
 		} finally {
 			busy = false;
 			WAIT.signalAll();
@@ -275,8 +273,12 @@ public class FolderQueryCacheManager {
 		return new CacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
 	}
 
-	private final static CacheKey createMapKey(final int cid, final int userId) {
-		return new CacheKey(cid, Integer.valueOf(userId));
+	private final static Integer createUserKey(final int userId) {
+		return Integer.valueOf(userId);
+	}
+	
+	private final static String createContextKey(final int cid) {
+		return String.valueOf(cid);
 	}
 
 }

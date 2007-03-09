@@ -314,8 +314,8 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			/*
 			 * Fetch effective permission from storage
 			 */
-			final EffectivePermission perm = OXFolderTools.getEffectiveFolderOCL(fo.getObjectID(), user.getId(), user
-					.getGroups(), ctx, userConfig, readCon);
+			final EffectivePermission perm = new OXFolderAccess(readCon, ctx).getFolderPermission(fo.getObjectID(),
+					user.getId(), userConfig);
 			if (!perm.isFolderVisible()) {
 				if (!perm.getUnderlyingPermission().isFolderVisible()) {
 					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, PREFIX_UPDATE, getFolderName(fo),
@@ -737,11 +737,13 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		if (fo.getObjectID() <= 0) {
 			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, PREFIX_DELETE, getFolderName(fo));
 		}
+		final OXFolderAccess access = new OXFolderAccess(readCon, ctx);
 		if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
 			/*
 			 * Incomplete, wherby its existence is checked
 			 */
-			fo.setParentFolderID(OXFolderTools.getFolderParent(fo.getObjectID(), ctx, readCon));
+			fo.setParentFolderID(access.getParentFolderID(fo.getObjectID()));
+			//fo.setParentFolderID(OXFolderTools.getFolderParent(fo.getObjectID(), ctx, readCon));
 		} else {
 			/*
 			 * Check existence
@@ -760,8 +762,9 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			/*
 			 * Check permissions
 			 */
-			final EffectivePermission p = OXFolderTools.getEffectiveFolderOCL(fo.getObjectID(), user.getId(), user
-					.getGroups(), ctx, userConfig, readCon);
+			final EffectivePermission p = access.getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
+			//final EffectivePermission p = OXFolderTools.getEffectiveFolderOCL(fo.getObjectID(), user.getId(), user
+			//		.getGroups(), ctx, userConfig, readCon);
 			if (!p.isFolderVisible()) {
 				if (p.getUnderlyingPermission().isFolderVisible()) {
 					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, PREFIX_DELETE, getFolderName(fo),
@@ -793,7 +796,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final HashMap<Integer, HashMap> deleteableFolders;
 		try {
 			deleteableFolders = gatherDeleteableFolders(fo.getObjectID(), user.getId(), userConfig, StringCollection
-					.getSqlInString(user.getId(), user.getGroups()), readCon, ctx);
+					.getSqlInString(user.getId(), user.getGroups()), access, readCon, ctx);
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, PREFIX_MOVE, e, true, ctx.getContextId());
 		} catch (SQLException e) {
@@ -803,8 +806,8 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		 * Delete folders
 		 */
 		try {
-			deleteValidatedFolders(deleteableFolders, user.getId(), user.getGroups(), userConfig, lastModified, ctx,
-					writeCon, readCon);
+			deleteValidatedFolders(deleteableFolders, user.getId(), user.getGroups(), userConfig, lastModified, access,
+					ctx, writeCon, readCon);
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, PREFIX_MOVE, e, true, ctx.getContextId());
 		} catch (SQLException e) {
@@ -860,8 +863,8 @@ public class OXFolderManagerImpl implements OXFolderManager {
 
 	@SuppressWarnings("unchecked")
 	private void deleteValidatedFolders(final HashMap<Integer, HashMap> deleteableIDs, final int userId,
-			final int[] groups, final UserConfiguration userConf, final long lastModified, final Context ctx,
-			final Connection writeCon, final Connection readCon) throws OXException, DBPoolingException, SQLException {
+			final int[] groups, final UserConfiguration userConf, final long lastModified, final OXFolderAccess access,
+			final Context ctx, final Connection writeCon, final Connection readCon) throws OXException, DBPoolingException, SQLException {
 		final int deleteableIDsSize = deleteableIDs.size();
 		final Iterator<Map.Entry<Integer, HashMap>> iter = deleteableIDs.entrySet().iterator();
 		for (int i = 0; i < deleteableIDsSize; i++) {
@@ -872,14 +875,15 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			 * Delete subfolders first, if any exist
 			 */
 			if (hashMap != null) {
-				deleteValidatedFolders(hashMap, userId, groups, userConf, lastModified, ctx, writeCon, readCon);
+				deleteValidatedFolders(hashMap, userId, groups, userConf, lastModified, access, ctx, writeCon, readCon);
 			}
-			deleteValidatedFolder(folderID.intValue(), userId, groups, lastModified, ctx, writeCon, readCon);
+			deleteValidatedFolder(folderID.intValue(), userId, groups, lastModified, access, ctx, writeCon, readCon);
 		}
 	}
 
 	private void deleteValidatedFolder(final int folderID, final int userId, final int[] groups,
-			final long lastModified, final Context ctx, final Connection writeConArg, final Connection readConArg) throws OXException, SQLException, DBPoolingException {
+			final long lastModified, final OXFolderAccess access, final Context ctx, final Connection writeConArg,
+			final Connection readConArg) throws OXException, SQLException, DBPoolingException {
 		/*
 		 * Delete folder
 		 */
@@ -899,7 +903,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				writeCon.setAutoCommit(false);
 			}
 			try {
-				final int module = OXFolderTools.getFolderModule(folderID, ctx, readCon);
+				final int module = access.getFolderModule(folderID);
 				switch (module) {
 				case FolderObject.CALENDAR:
 					final CalendarSql cSql = new CalendarSql(session);
@@ -930,7 +934,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				 * Remove from cache
 				 */
 				if (FolderQueryCacheManager.isInitialized()) {
-					FolderQueryCacheManager.getInstance().invalidateUserQueries(userId, ctx.getContextId());
+					FolderQueryCacheManager.getInstance().invalidateContextQueries(ctx.getContextId());
 				}
 				if (CalendarCache.isInitialized()) {
 					CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
@@ -975,11 +979,11 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	 * Gathers all deleteable folders
 	 */
 	private final HashMap<Integer, HashMap> gatherDeleteableFolders(final int folderID, final int userId,
-			final UserConfiguration userConfig, final String permissionIDs, final Connection readConArg,
-			final Context ctx) throws OXException, DBPoolingException, SQLException {
+			final UserConfiguration userConfig, final String permissionIDs, final OXFolderAccess access,
+			final Connection readConArg, final Context ctx) throws OXException, DBPoolingException, SQLException {
 		final HashMap<Integer, HashMap> deleteableIDs = new HashMap<Integer, HashMap>();
-		gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, readConArg,
-				ctx);
+		gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, access,
+				readConArg, ctx);
 		return deleteableIDs;
 	}
 
@@ -988,7 +992,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	 */
 	private final void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs,
-			final HashMap<Integer, HashMap> deleteableIDs, final Connection readConArg, final Context ctx)
+			final HashMap<Integer, HashMap> deleteableIDs, final OXFolderAccess access, final Connection readConArg, final Context ctx)
 			throws OXException, DBPoolingException, SQLException {
 		final FolderObject delFolderWithSubfolderList = FolderObject.loadFolderObjectFromDB(folderID, ctx, readConArg,
 				true, true);
@@ -1029,7 +1033,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Check delete permission on folder's objects
 		 */
-		if (!OXFolderTools.canDeleteAllObjectsInFolder(delFolderWithSubfolderList, session, readConArg)) {
+		if (!access.canDeleteAllObjectsInFolder(delFolderWithSubfolderList, session)) {
 			throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, PREFIX_DELETE, getUserName(
 					userId, ctx), getFolderName(folderID, ctx), ctx.getContextId());
 		}
@@ -1052,7 +1056,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final Iterator<Integer> it = delFolderWithSubfolderList.getSubfolderIds().iterator();
 		for (int i = 0; i < size; i++) {
 			final int fuid = it.next().intValue();
-			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, readConArg, ctx);
+			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, access, readConArg, ctx);
 		}
 		deleteableIDs.put(Integer.valueOf(folderID), subMap);
 	}
@@ -1167,7 +1171,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 
 	public static final String getFolderName(final int folderId, final Context ctx) {
 		try {
-			return new StringBuilder().append(OXFolderTools.getFolderName(folderId, ctx, null)).append(" (").append(
+			return new StringBuilder().append(new OXFolderAccess(ctx).getFolderName(folderId)).append(" (").append(
 					folderId).append(')').toString();
 		} catch (OXException e) {
 			return String.valueOf(folderId);
