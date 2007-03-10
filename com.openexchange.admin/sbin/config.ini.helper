@@ -20,4 +20,5 @@ for jar in ${PLUGLIST[@]}; do
 done
 popd
 
-sed -e "s;^osgi.bundles=.*;osgi.bundles=$ALLBUNDLES;" < ${CINI}.in > $CINI
+sed -e "s;^osgi.bundles=.*;osgi.bundles=$ALLBUNDLES;" \
+    -e "s;@libpath@;$JPATH;" < ${CINI}.in > $CINI
