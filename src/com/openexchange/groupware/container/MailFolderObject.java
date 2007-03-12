@@ -89,6 +89,10 @@ public class MailFolderObject {
 	private char separator = '0';
 	
 	private IMAPFolder imapFolder;
+	
+	private boolean subscribed;
+	
+	private boolean b_subscribed;
 
 	public static final String DEFAULT_IMAP_FOLDER = "default";
 	
@@ -120,6 +124,8 @@ public class MailFolderObject {
 			this.unread = folder.getUnreadMessageCount();
 			this.deleted = folder.getDeletedMessageCount();
 		}
+		this.subscribed = folder.isSubscribed();
+		b_subscribed = true;
 		this.imapFolder = folder;
 	}
 	
@@ -307,6 +313,24 @@ public class MailFolderObject {
 
 	public int getUnread() {
 		return unread;
+	}
+
+	public boolean isSubscribed() {
+		return subscribed;
+	}
+	
+	public boolean containsSubscribe() {
+		return b_subscribed;
+	}
+
+	public void setSubscribed(final boolean subscribe) {
+		this.subscribed = subscribe;
+		b_subscribed = true;
+	}
+	
+	public void removeSubscribe() {
+		this.subscribed = false;
+		b_subscribed = false;
 	}
 	
 }

@@ -436,6 +436,18 @@ public class FolderWriter extends DataWriter {
 					}
 				};
 				break Fields;
+			case FolderObject.SUBSCRIBED:
+				retval[i] = new IMAPFolderFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
+							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
+							final int module) throws JSONException, OXException, MessagingException {
+						if (withKey) {
+							jsonwriter.key(FolderFields.SUBSCRIBED);
+						}
+						jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+					}
+				};
+				break Fields;
 			default:
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
@@ -595,6 +607,12 @@ public class FolderWriter extends DataWriter {
 			}
 			jsonwriter.value(JSONObject.NULL);
 			break;
+		case FolderObject.SUBSCRIBED:
+			if (withKey) {
+				jsonwriter.key(FolderFields.SUBSCRIBED);
+			}
+			jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+			break;
 		default:
 			break;
 		}
@@ -642,7 +660,7 @@ public class FolderWriter extends DataWriter {
 				FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS,
 				FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY,
 				FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD,
-				FolderObject.DELETED, FolderObject.CAPABILITIES };
+				FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED };
 	}
 
 	public final FolderFieldWriter[] getFolderFieldWriter(final int[] fields) {
@@ -919,6 +937,17 @@ public class FolderWriter extends DataWriter {
 					}
 				};
 				break Fields;
+			case FolderObject.SUBSCRIBED:
+				retval[i] = new FolderFieldWriter() {
+				public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+						final String name, final int hasSubfolders) throws JSONException, OXException {
+					if (withKey) {
+						jsonwriter.key(FolderFields.SUBSCRIBED);
+					}
+					jsonwriter.value(JSONObject.NULL);
+				}
+			};
+			break Fields;
 			default:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
@@ -1098,6 +1127,11 @@ public class FolderWriter extends DataWriter {
 		case FolderObject.CAPABILITIES:
 			if (withKey) {
 				jsonwriter.key(FolderFields.CAPABILITIES);
+			}
+			jsonwriter.value(JSONObject.NULL);
+		case FolderObject.SUBSCRIBED:
+			if (withKey) {
+				jsonwriter.key(FolderFields.SUBSCRIBED);
 			}
 			jsonwriter.value(JSONObject.NULL);
 		default:

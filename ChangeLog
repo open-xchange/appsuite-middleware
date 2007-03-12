@@ -13,6 +13,8 @@
  - CONFIG change: New property in 'imap.proeprties' to enable/disable
    allowance of folder subsription status
 #################################################
+- Implemented respect of folder subsription status: GUI can ask for field
+  314/"subsribed" to check/set folder's subsription status. 
 
 * 2007-03-09 - thorben.betten@open-xchange.com
 

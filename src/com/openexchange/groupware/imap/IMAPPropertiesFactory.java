@@ -132,6 +132,8 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_ALLOW_NESTED_DEFAULT_FOLDERS = "allowNestedDefaultFolderOnAltNamespace";
 	
 	private static final String PROP_MIME_CHARSET = "mail.mime.charset";
+	
+	private static final String PROP_IGNORE_SUBSCRIPTION = "ignoreSubscription";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
@@ -435,6 +437,11 @@ public class IMAPPropertiesFactory {
 				IMAPProperties.setDefaultMimeCharset(props.getProperty(PROP_MIME_CHARSET, "UTF-8"));
 				logBuilder.append("\tDefault MIME Charset: ").append(props.getProperty(PROP_MIME_CHARSET, "UTF-8"))
 						.append('\n');
+				
+				IMAPProperties.setIgnoreSubscription(Boolean.parseBoolean(props.getProperty(PROP_IGNORE_SUBSCRIPTION,
+						STR_FALSE)));
+				logBuilder.append("\tIgnore Folder Subscription: ").append(
+						props.getProperty(PROP_IGNORE_SUBSCRIPTION, STR_FALSE)).append('\n');
 				
 				try {
 					IMAPProperties.setPartModifierImpl(PartModifier.getImpl(props.getProperty(PROP_IMAP_PART_MODIFIER,

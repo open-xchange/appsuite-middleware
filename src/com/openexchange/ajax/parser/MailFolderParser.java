@@ -102,27 +102,30 @@ public class MailFolderParser {
 				&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {
 			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.MODULE);
 		}
-		if (jsonObj.has("permissions") && jsonObj.getJSONArray("permissions").length() > 0) {
+		if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
+			mfo.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+		}
+		if (jsonObj.has(FolderFields.PERMISSIONS) && jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
 			try {
-				final JSONArray perms = jsonObj.getJSONArray("permissions");
+				final JSONArray perms = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
 				boolean applyACLs = false;
 				ACL[] acls = new ACL[perms.length()];
 				UserStorage us = UserStorage.getInstance(sessionObj.getContext());
 				final int size = perms.length();
 				for (int i = 0; i < size; i++) {
 					final JSONObject jsonPerms = perms.getJSONObject(i);
-					if (!jsonPerms.has("entity")) {
+					if (!jsonPerms.has(FolderFields.ENTITY)) {
 						throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
 					}
-					if (!jsonPerms.has("rights")) {
+					if (!jsonPerms.has(FolderFields.RIGHTS)) {
 						throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.RIGHTS);
 					}
-					if (jsonPerms.getString("rights").length() > 0) {
+					if (jsonPerms.getString(FolderFields.RIGHTS).length() > 0) {
 						applyACLs = true;
-						final Rights entityRights = new Rights(jsonPerms.getString("rights"));
+						final Rights entityRights = new Rights(jsonPerms.getString(FolderFields.RIGHTS));
 						int entity = -1;
 						try {
-							entity = jsonPerms.getInt("entity");
+							entity = jsonPerms.getInt(FolderFields.ENTITY);
 						} catch (JSONException e) {
 							try {
 								final String entityStr = jsonPerms.getString(FolderFields.ENTITY);

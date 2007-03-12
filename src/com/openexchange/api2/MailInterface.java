@@ -310,6 +310,13 @@ public interface MailInterface {
 	 * subfolders of given folder
 	 */
 	public SearchIterator getChildFolders(String parentFolder) throws OXException;
+	
+	/**
+	 * Returns an instance of <code>SearchIterator</code> containing all
+	 * folders located beneath user's default folder regardless of their
+	 * subscription status
+	 */
+	public SearchIterator getAllFolders() throws OXException;
 
 	/**
 	 * Returns the store's folder identfied through given <code>String</code>

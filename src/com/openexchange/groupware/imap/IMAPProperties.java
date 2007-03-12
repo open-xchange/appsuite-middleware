@@ -120,6 +120,8 @@ public class IMAPProperties {
 	private static int maxNumOfIMAPConnections;
 	
 	private static String defaultMimeCharset;
+	
+	private static boolean ignoreSubscription;
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -394,6 +396,15 @@ public class IMAPProperties {
 
 	public static void setAllowNestedDefaultFolderOnAltNamespace(final boolean allowNestedDefaultFolderOnAltNamespace) {
 		IMAPProperties.allowNestedDefaultFolderOnAltNamespace = allowNestedDefaultFolderOnAltNamespace;
+	}
+
+	public static boolean isIgnoreSubscription() throws IMAPException {
+		checkGlobalImapProperties();
+		return ignoreSubscription;
+	}
+
+	public static void setIgnoreSubscription(final boolean ignoreSubscription) {
+		IMAPProperties.ignoreSubscription = ignoreSubscription;
 	}
 
 	private static final void checkGlobalImapProperties() throws IMAPException {

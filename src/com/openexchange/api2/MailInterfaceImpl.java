@@ -3373,6 +3373,8 @@ public class MailInterfaceImpl implements MailInterface {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
+	
+	private static final String PATTERN_ALL = "%";
 
 	/*
 	 * (non-Javadoc)
@@ -3383,20 +3385,24 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String parentFolder = prepareMailFolderParam(parentFolderArg);
-			final IMAPFolder parentFldr;
+			final IMAPFolder p;
 			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
-				parentFldr = (IMAPFolder) imapStore.getDefaultFolder();
-				if (!parentFldr.exists()) {
+				p = (IMAPFolder) imapStore.getDefaultFolder();
+				if (!p.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, MailFolderObject.DEFAULT_IMAP_FOLDER);
 				}
 			} else {
-				parentFldr = (IMAPFolder) imapStore.getFolder(parentFolder);
-				canLookUpFolder(parentFldr);
+				p = (IMAPFolder) imapStore.getFolder(parentFolder);
+				canLookUpFolder(p);
 			}
 			final Folder[] childFolders;
 			final long start = System.currentTimeMillis();
 			try {
-				childFolders = parentFldr.list("%");
+				if (IMAPProperties.isIgnoreSubscription()) {
+					childFolders = p.list(PATTERN_ALL);
+				} else {
+					childFolders = p.listSubscribed(PATTERN_ALL);
+				}
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
@@ -3405,6 +3411,31 @@ public class MailInterfaceImpl implements MailInterface {
 				list.add(new MailFolderObject((IMAPFolder) childFolders[i]));
 			}
 			return new SearchIteratorAdapter(list.iterator(), childFolders.length);
+		} catch (MessagingException e) {
+			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#getAllFolders()
+	 */
+	public SearchIterator getAllFolders() throws OXException {
+		try {
+			init();
+			final IMAPFolder defaultFolder = (IMAPFolder) imapStore.getDefaultFolder();
+			final Folder[] allFolders;
+			final long start = System.currentTimeMillis();
+			try {
+				allFolders = defaultFolder.list("*");
+			} finally {
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
+			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(allFolders.length);
+			for (int i = 0; i < allFolders.length; i++) {
+				list.add(new MailFolderObject((IMAPFolder) allFolders[i]));
+			}
+			return new SearchIteratorAdapter(list.iterator(), allFolders.length);
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -3483,18 +3514,19 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			if (!f.exists()) {
 				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, f.getFullName());
-			}
-			try {
-				if (IMAPProperties.isSupportsACLs() && !f.myRights().contains(Rights.Right.LOOKUP)) {
-					throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(), f.getFullName());
-				}
-			} catch (MessagingException e) {
-				/*
-				 * No rights defined on folder. Allow look up.
-				 */
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder("No rights defined for folder ").append(f.getFullName()).append(": ")
-							.append(e.getMessage()).toString());
+			} else if (IMAPProperties.isSupportsACLs()) {
+				try {
+					if (!f.myRights().contains(Rights.Right.LOOKUP)) {
+						throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(), f.getFullName());
+					}
+				} catch (MessagingException e) {
+					/*
+					 * No rights defined on folder. Allow look up.
+					 */
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder("No rights defined for folder ").append(f.getFullName()).append(": ")
+								.append(e.getMessage()).toString());
+					}
 				}
 			}
 		} catch (MessagingException e) {
@@ -3609,6 +3641,9 @@ public class MailInterfaceImpl implements MailInterface {
 						deleteFolder(updateMe);
 					}
 					updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
+				}
+				if (folderObj.containsSubscribe()) {
+					updateMe.setSubscribed(folderObj.isSubscribed());
 				}
 				if (folderObj.containsACLs()) {
 					/*
