@@ -1,3 +1,6 @@
 .classpath
 .project
 build
+build-stamp
+configure-stamp
+lib
