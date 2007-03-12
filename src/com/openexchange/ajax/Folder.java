@@ -807,6 +807,7 @@ public class Folder extends SessionServlet {
 						if (f.getName().equals("INBOX")) {
 							jsonWriter.array();
 							try {
+								// TODO: Translation for INBOX?!
 								for (int j = 0; j < writers.length; j++) {
 									writers[j].writeField(jsonWriter, f, false, "Inbox", -1);
 								}
