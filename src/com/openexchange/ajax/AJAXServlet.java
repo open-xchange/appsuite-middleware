@@ -302,7 +302,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String UPLOAD_FORMFIELD_MAIL = "json_0";
 
 	public static final String PARAMETER_IGNORE = "ignore";
-
+	
+	public static final String PARAMETER_ALL = "all";
+	
 	public static final String PARAMETER_REPLY2ALL = "reply2all";
 
 	public static final String PARAMETER_ATTACHMENT = "attachment";

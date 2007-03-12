@@ -3381,7 +3381,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * 
 	 * @see com.openexchange.api2.MailInterface#getChildFolders(java.lang.String)
 	 */
-	public SearchIterator getChildFolders(final String parentFolderArg) throws OXException {
+	public SearchIterator getChildFolders(final String parentFolderArg, final boolean all) throws OXException {
 		try {
 			init();
 			final String parentFolder = prepareMailFolderParam(parentFolderArg);
@@ -3398,7 +3398,7 @@ public class MailInterfaceImpl implements MailInterface {
 			final Folder[] childFolders;
 			final long start = System.currentTimeMillis();
 			try {
-				if (IMAPProperties.isIgnoreSubscription()) {
+				if (IMAPProperties.isIgnoreSubscription() || all) {
 					childFolders = p.list(PATTERN_ALL);
 				} else {
 					childFolders = p.listSubscribed(PATTERN_ALL);

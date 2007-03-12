@@ -309,7 +309,7 @@ public interface MailInterface {
 	 * Returns an instance of <code>SearchIterator</code> containing the
 	 * subfolders of given folder
 	 */
-	public SearchIterator getChildFolders(String parentFolder) throws OXException;
+	public SearchIterator getChildFolders(String parentFolder, boolean all) throws OXException;
 	
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all

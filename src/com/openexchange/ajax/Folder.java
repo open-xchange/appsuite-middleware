@@ -787,6 +787,11 @@ public class Folder extends SessionServlet {
 				}
 				lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
 			} else {
+				/*
+				 * Determine if all folders, regardless of their subscription
+				 * status shall be included
+				 */
+				final boolean all = (STRING_1.equals(getStringParam(paramContainer, PARAMETER_ALL, paramSrcType)));
 				SearchIterator it = null;
 				MailInterface mailInterface = null;
 				try {
@@ -795,7 +800,7 @@ public class Folder extends SessionServlet {
 					 * E-Mail folder
 					 */
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
-					it = mailInterface.getChildFolders(parentIdentifier);
+					it = mailInterface.getChildFolders(parentIdentifier, all);
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
 						final MailFolderObject f = (MailFolderObject) it.next();
