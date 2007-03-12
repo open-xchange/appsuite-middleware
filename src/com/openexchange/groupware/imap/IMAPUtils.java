@@ -2038,6 +2038,8 @@ public class IMAPUtils {
 		}
 		return retval.toArray(new MessageCacheObject[retval.size()]);
 	}
+	
+	private static final String STR_EMPTY = "";
 
 	private static final FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f) {
 		FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
@@ -2062,7 +2064,7 @@ public class IMAPUtils {
 						msg.setRecipients(RecipientType.BCC, env.bcc);
 						msg.setReplyTo(env.replyTo);
 						try {
-							msg.setSubject(MimeUtility.decodeText(env.subject));
+							msg.setSubject(env.subject == null ? STR_EMPTY : MimeUtility.decodeText(env.subject));
 						} catch (UnsupportedEncodingException e) {
 							LOG.error(e.getMessage(), e);
 							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
