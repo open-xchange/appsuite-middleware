@@ -57,7 +57,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
+import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
@@ -65,11 +65,9 @@ import javax.mail.internet.MimeMessage;
 
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.imap.DefaultIMAPConnection;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 
@@ -107,7 +105,7 @@ public class MailObject {
 	
 	private final int module;
 	
-	private DefaultIMAPConnection imapConnection;
+	private Session mailSession;
 
 	public MailObject(final SessionObject sessionObj, int objectId, int folderId, final int module) {
 		super();
@@ -117,33 +115,14 @@ public class MailObject {
 		this.module = module;
 	}
 	
-	private final void connect() throws NoSuchProviderException, MessagingException, OXException {
-		if (imapConnection != null) {
-			if (imapConnection.isConnected()) {
-				return;
-			}
-			imapConnection.connect();
-			MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+	private final void createMailSession() throws OXException {
+		if (mailSession != null) {
 			return;
 		}
 		final Properties mailProperties = getDefaultIMAPProperties();
 		mailProperties.put("mail.smtp.host", sessionObj.getIMAPProperties().getSmtpServer());
 		mailProperties.put("mail.smtp.port", String.valueOf(sessionObj.getIMAPProperties().getSmtpPort()));
-		imapConnection = new DefaultIMAPConnection();
-		imapConnection.setProperties(mailProperties);
-		imapConnection.setImapServer(sessionObj.getIMAPProperties().getImapServer(), sessionObj.getIMAPProperties().getImapPort());
-		imapConnection.setUsername(sessionObj.getIMAPProperties().getImapLogin());
-		imapConnection.setPassword(sessionObj.getIMAPProperties().getImapPassword());
-		imapConnection.connect();
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-	}
-	
-	private final void close() throws MessagingException {
-		if (imapConnection != null) {
-			imapConnection.close();
-			imapConnection = null;
-			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-		}
+		mailSession = Session.getDefaultInstance(mailProperties, null);
 	}
 	
 	private final void validateMailObject() throws OXException {
@@ -163,113 +142,108 @@ public class MailObject {
 	public final void send() throws OXException {
 		try {
 			validateMailObject();
-			try {
-				connect();
-				final MimeMessage msg = new MimeMessage(imapConnection.getSession());
-				/*
-				 * Set from
-				 */
-				InternetAddress[] internetAddrs = InternetAddress.parse(fromAddr, false);
-				msg.setFrom(internetAddrs[0]);
-				/*
-				 * Set to
-				 */
-				String tmp = Arrays.toString(toAddrs);
+			createMailSession();
+			final MimeMessage msg = new MimeMessage(mailSession);
+			/*
+			 * Set from
+			 */
+			InternetAddress[] internetAddrs = InternetAddress.parse(fromAddr, false);
+			msg.setFrom(internetAddrs[0]);
+			/*
+			 * Set to
+			 */
+			String tmp = Arrays.toString(toAddrs);
+			tmp = tmp.substring(1, tmp.length() - 1);
+			internetAddrs = InternetAddress.parse(tmp, false);
+			msg.setRecipients(RecipientType.TO, internetAddrs);
+			/*
+			 * Set cc
+			 */
+			if (ccAddrs != null && ccAddrs.length > 0) {
+				tmp = Arrays.toString(ccAddrs);
 				tmp = tmp.substring(1, tmp.length() - 1);
 				internetAddrs = InternetAddress.parse(tmp, false);
-				msg.setRecipients(RecipientType.TO, internetAddrs);
-				/*
-				 * Set cc
-				 */
-				if (ccAddrs != null && ccAddrs.length > 0) {
-					tmp = Arrays.toString(ccAddrs);
-					tmp = tmp.substring(1, tmp.length() - 1);
-					internetAddrs = InternetAddress.parse(tmp, false);
-					msg.setRecipients(RecipientType.CC, internetAddrs);
-				}
-				/*
-				 * Set bcc
-				 */
-				if (bccAddrs != null && bccAddrs.length > 0) {
-					tmp = Arrays.toString(bccAddrs);
-					tmp = tmp.substring(1, tmp.length() - 1);
-					internetAddrs = InternetAddress.parse(tmp, false);
-					msg.setRecipients(RecipientType.BCC, internetAddrs);
-				}
-				/*
-				 * Set subject
-				 */
-				msg.setSubject(subject, "UTF-8");
-				/*
-				 * Set content and its type
-				 */
-				final ContentType ct = new ContentType(contentType);
-				if ("text".equalsIgnoreCase(ct.getPrimaryType())) {
-					if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
-						msg.setContent(text, ct.toString());
-					} else if ("plain".equalsIgnoreCase(ct.getSubType())
-							|| "enriched".equalsIgnoreCase(ct.getSubType())) {
-						if (ct.getParameter("charset") == null) {
-							msg.setText(text);
-						} else {
-							msg.setText(text, ct.getParameter("charset"));
-						}
+				msg.setRecipients(RecipientType.CC, internetAddrs);
+			}
+			/*
+			 * Set bcc
+			 */
+			if (bccAddrs != null && bccAddrs.length > 0) {
+				tmp = Arrays.toString(bccAddrs);
+				tmp = tmp.substring(1, tmp.length() - 1);
+				internetAddrs = InternetAddress.parse(tmp, false);
+				msg.setRecipients(RecipientType.BCC, internetAddrs);
+			}
+			/*
+			 * Set subject
+			 */
+			msg.setSubject(subject, "UTF-8");
+			/*
+			 * Set content and its type
+			 */
+			final ContentType ct = new ContentType(contentType);
+			if ("text".equalsIgnoreCase(ct.getPrimaryType())) {
+				if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
+					msg.setContent(text, ct.toString());
+				} else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
+					if (ct.getParameter("charset") == null) {
+						msg.setText(text);
 					} else {
-						throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
+						msg.setText(text, ct.getParameter("charset"));
 					}
 				} else {
 					throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
 				}
-				/*
-				 * Disposition notification
-				 */
-				if (requestReadReceipt) {
-					msg.setHeader("Disposition-Notification-To", fromAddr);
+			} else {
+				throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
+			}
+			/*
+			 * Disposition notification
+			 */
+			if (requestReadReceipt) {
+				msg.setHeader("Disposition-Notification-To", fromAddr);
+			}
+			/*
+			 * Set priority
+			 */
+			msg.setHeader("X-Priority", "3 (normal)");
+			/*
+			 * Set ox reference
+			 */
+			if (folderId != DONT_SET) {
+				msg.setHeader("X-OX-Reminder", new StringBuilder().append(this.objectId).append(',').append(
+						this.folderId).append(',').append(module).toString());
+			}
+			/*
+			 * Set sent date
+			 */
+			if (msg.getSentDate() == null) {
+				final long current = System.currentTimeMillis();
+				final TimeZone userTimeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
+				msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
+			}
+			/*
+			 * Finally send mail
+			 */
+			Transport transport = null;
+			try {
+				transport = mailSession.getTransport("smtp");
+				final long start = System.currentTimeMillis();
+				if (IMAPProperties.isSmtpAuth()) {
+					transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
+							.getImapLogin(), sessionObj.getIMAPProperties().getImapPassword());
+				} else {
+					transport.connect();
 				}
-				/*
-				 * Set priority
-				 */
-				msg.setHeader("X-Priority", "3 (normal)");
-				/*
-				 * Set ox reference
-				 */
-				if(folderId != DONT_SET) {
-					msg.setHeader("X-OX-Reminder", new StringBuilder().append(this.objectId).append(',').append(
-							this.folderId).append(',').append(module).toString());					
-				}
-				/*
-				 * Set sent date
-				 */
-				if (msg.getSentDate() == null) {
-					final long current = System.currentTimeMillis();
-					final TimeZone userTimeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
-					msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
-				}
-				/*
-				 * Finally send mail
-				 */
-				Transport transport = null;
-				try {
-					transport = imapConnection.getSession().getTransport("smtp");
-					final long start = System.currentTimeMillis();
-					if (IMAPProperties.isSmtpAuth()) {
-						transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-								.getImapLogin(), sessionObj.getIMAPProperties().getImapPassword());
-					} else {
-						transport.connect();
-					}
-					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
-					msg.saveChanges();
-					transport.sendMessage(msg, msg.getAllRecipients());
-					MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				} finally {
-					if (transport != null) {
-						transport.close();
-						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-					}
-				}
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+				msg.saveChanges();
+				transport.sendMessage(msg, msg.getAllRecipients());
+				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			} finally {
-				close();
+				if (transport != null) {
+					transport.close();
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				}
 			}
 		} catch (MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e);
@@ -352,7 +326,7 @@ public class MailObject {
 		this.subject = subject;
 	}
 
-	private String[] addAddr(final String addr, String[] arr) {
+	private static final String[] addAddr(final String addr, String[] arr) {
 		if (arr == null) {
 			return new String[] { addr };
 		}

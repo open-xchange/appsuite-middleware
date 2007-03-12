@@ -4,6 +4,10 @@
    release held connections
  - Fixed bug #6346: Added lock mechanism to support multiple threads
  - Enhanced error logging in AJPv13Server
+ - Fixed bug #6374: Checking if internal date is not null
+ - Ensured closing of IMAP connections
+ - Avoid unnecessary IMAP connection in MailObject.java, only Transport is
+   needed
 
 * 2007-03-09 - thorben.betten@open-xchange.com
 

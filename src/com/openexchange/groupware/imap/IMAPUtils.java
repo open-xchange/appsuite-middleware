@@ -2483,6 +2483,20 @@ public class IMAPUtils {
 				return "";
 			}
 		}
+		
+		private static final Integer compareReferences(final Object o1, final Object o2) {
+			if (o1 == null && o2 != null) {
+				return Integer.valueOf(-1);
+			} else if (o1 != null && o2 == null) {
+				return Integer.valueOf(1);
+			} else if (o1 == null && o2 == null) {
+				return Integer.valueOf(0);
+			}
+			/*
+			 * Both references are not null
+			 */
+			return null;
+		}
 
 		private static final FieldComparer createFieldComparer(final int sortCol, final Locale locale) {
 			switch (sortCol) {
@@ -2491,7 +2505,8 @@ public class IMAPUtils {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						final Date d1 = msg1.getSentDate();
 						final Date d2 = msg2.getSentDate();
-						return (d1.compareTo(d2) * (-1));
+						final Integer refComp = compareReferences(d1, d2);
+						return refComp == null ? (d1.compareTo(d2) * (-1)) : refComp.intValue();
 					}
 				};
 			case JSONMessageObject.FIELD_RECEIVED_DATE:
@@ -2499,7 +2514,8 @@ public class IMAPUtils {
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						final Date d1 = msg1.getReceivedDate();
 						final Date d2 = msg2.getReceivedDate();
-						return (d1.compareTo(d2) * (-1));
+						final Integer refComp = compareReferences(d1, d2);
+						return refComp == null ? (d1.compareTo(d2) * (-1)) : refComp.intValue();
 					}
 				};
 			case JSONMessageObject.FIELD_FROM:

@@ -732,8 +732,13 @@ public class MailInterfaceImpl implements MailInterface {
 			tmpRights = null;
 			sessionObj.setMailSession(null);
 			if (tmpFolder != null && tmpFolder.isOpen()) {
-				tmpFolder.close(true);
-				mailInterfaceMonitor.changeNumActive(false);
+				try {
+					tmpFolder.close(true); //expunge
+				} catch (MessagingException e) {
+					LOG.error(e.getMessage(), e);
+					mailInterfaceMonitor.changeNumActive(false);
+					tmpFolder = null;
+				}
 			}
 			closeIMAPConnection(putIntoCache, sessionObj, imapCon);
 			this.imapStore = null;
@@ -744,13 +749,12 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	public static final boolean closeIMAPConnection(final DefaultIMAPConnection imapCon) throws OXException,
-			MessagingException {
+	public static final boolean closeIMAPConnection(final DefaultIMAPConnection imapCon) throws MessagingException {
 		return closeIMAPConnection(false, null, imapCon);
 	}
 
 	private static final boolean closeIMAPConnection(final boolean putIntoCache, final SessionObject sessionObj,
-			final DefaultIMAPConnection imapCon) throws MessagingException, OXException {
+			final DefaultIMAPConnection imapCon) throws MessagingException {
 		if (imapCon != null) {
 			/*
 			 * Expunge folder
@@ -758,11 +762,23 @@ public class MailInterfaceImpl implements MailInterface {
 			try {
 				expungeDefaultIMAPConnection(imapCon);
 			} catch (MessagingException e) {
-				LOG.error(new StringBuilder(100).append("Mail folder ").append(imapCon.getImapFolder().getFullName())
-						.append(" could NOT be expunged").toString(), e);
+				LOG.error(
+						new StringBuilder(100).append("Mail folder ").append(imapCon.getImapFolder().getFullName())
+								.append(" could NOT be expunged for user ").append(
+										com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj))
+								.toString(), e);
 			}
-			final boolean cached = putIntoCache
-					&& IMAPConnectionCacheManager.getInstance().putIMAPConnection(sessionObj, imapCon);
+			boolean cached = false;
+			try {
+				cached = putIntoCache
+						&& IMAPConnectionCacheManager.getInstance().putIMAPConnection(sessionObj, imapCon);
+			} catch (OXException e) {
+				LOG.error(e.getMessage(), e);
+				cached = false;
+			}
+			/*
+			 * Return immediately if connection could be put into cache
+			 */
 			if (cached) {
 				return false;
 			}

@@ -55,7 +55,6 @@ import org.apache.jcs.engine.CacheElement;
 import org.apache.jcs.engine.control.event.ElementEvent;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.imap.DefaultIMAPConnection;
 
 /**
@@ -121,8 +120,6 @@ public class IMAPConnectionEventHandler extends ElementEventHandlerWrapper {
 		try {
 			MailInterfaceImpl.closeIMAPConnection(imapCon);
 		} catch (MessagingException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
