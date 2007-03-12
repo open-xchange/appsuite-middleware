@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -60,6 +58,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,6 +91,11 @@ public final class AssignmentStorage {
         + "FROM context_server2db_pool "
         + "WHERE server_id=? AND cid=?";
 
+    /**
+     * Lock for the cache.
+     */
+    private static final Lock CACHE_LOCK = new ReentrantLock(true);
+
     private static Assignment CONFIG_DB;
 
     private static JCS CACHE;
@@ -117,16 +122,21 @@ public final class AssignmentStorage {
         if (null == CACHE) {
             retval = loadAssignment(contextId);
         } else {
-            retval = (Assignment) CACHE.get(new CacheKey(contextId,
-                Server.getServerId()));
-            if (null == retval) {
-                retval = loadAssignment(contextId);
-                try {
-                    CACHE.put(new CacheKey(contextId, Server.getServerId()),
-                        retval);
-                } catch (CacheException e) {
-                    LOG.error("Can't put database assignment into cache.", e);
+            final CacheKey key = new CacheKey(contextId, Server.getServerId());
+            CACHE_LOCK.lock();
+            try {
+                retval = (Assignment) CACHE.get(key);
+                if (null == retval) {
+                    retval = loadAssignment(contextId);
+                    try {
+                        CACHE.putSafe(key, retval);
+                    } catch (CacheException e) {
+                        LOG.error("Can't put database assignment into cache.",
+                            e);
+                    }
                 }
+            } finally {
+                CACHE_LOCK.unlock();
             }
         }
         return retval;
