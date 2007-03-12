@@ -350,8 +350,8 @@ public final class IDGenerator {
             tmp.put(Types.INFOSTORE, "CALL get_infostore_id(?)");
             tmp.put(Types.ATTACHMENT, "CALL get_attachment_id(?)");
             tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
-            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
-            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
+            tmp.put(Types.UID_NUMBER, "CALL get_uid_number_id(?)");
+            tmp.put(Types.GID_NUMBER, "CALL get_gid_number_id(?)");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
