@@ -729,6 +729,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
             int prep_index = 2;
             for (int element : user_ids) {
                 prep.setInt(prep_index, element);
+                prep_index++;
             }
 
             rs = prep.executeQuery();
