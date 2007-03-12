@@ -9,6 +9,10 @@
  - Avoid unnecessary IMAP connection in MailObject.java, only Transport is
    needed
  - Fixed bug #6244: Enhanced error logging on connect error
+ #################### ATTENTION ! #####################
+ - CONFIG change: New property in 'imap.proeprties' to enable/disable
+   allowance of folder subsription status
+#################################################
 
 * 2007-03-09 - thorben.betten@open-xchange.com
 
