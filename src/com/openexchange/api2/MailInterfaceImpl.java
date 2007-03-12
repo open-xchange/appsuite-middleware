@@ -3969,11 +3969,11 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						mailInterfaceMonitor.changeNumTimeoutConnections(true);
 						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
-								.getImapServer());
+								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 						tmp.setCategory(Category.TRY_AGAIN);
 					} else {
 						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
-								.getImapServer());
+								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 					}
 				} catch (IMAPException oxExc) {
 					LOG.error(oxExc.getMessage(), e);

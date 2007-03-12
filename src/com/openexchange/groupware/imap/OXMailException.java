@@ -72,7 +72,7 @@ public class OXMailException extends OXException {
 		 * listening on the remote address/port).
 		 * </p>
 		 */
-		CONNECT_ERROR("Connection was refused or timed out while attempting to connect to remote server: %s",
+		CONNECT_ERROR("Connection was refused or timed out while attempting to connect to remote server %s for user %s",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
 		/**
 		 * No route to host: IMAP server %s cannot be reached
