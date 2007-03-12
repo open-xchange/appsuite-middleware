@@ -122,14 +122,7 @@
 
     <target name="compile_libs" depends="replacer">
         <mkdir dir="classes"/>
-        <javac failonerror="true" srcdir="src/com/openexchange/admin/dataSource" debug="true" destdir="classes">
-            <exclude name="*ResourceGroup*"/>
-            <include name="I_*.java"/>
-        	<classpath>
-                <path refid="project.classpath"/>
-            </classpath>
-        </javac>
-        <javac failonerror="true" srcdir="src/com/openexchange/admin/exceptions" debug="true" destdir="classes">
+        <javac failonerror="true" srcdir="src/com/openexchange/admin/rmi" debug="true" destdir="classes">
             <exclude name="*ResourceGroup*"/>
             <include name="**.java"/>
         	<classpath>
