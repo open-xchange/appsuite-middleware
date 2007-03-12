@@ -432,15 +432,19 @@ public class OXFolderIteratorSQL {
 	
 	private static final String SQL_SELPBFLD = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND fuid NOT IN #IDS#";
 	
+	/**
+	 * Returns all visible public folders that are not visible in hierarchic
+	 * tree-view (because any ancestor folder is not visible)
+	 */
 	public final static SearchIterator getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups,
-			final UserConfiguration userConfig, final Context ctx) throws OXException/*, SearchIteratorException*/ {
+			final UserConfiguration userConfig, final Context ctx) throws OXException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			readCon = DBPool.pickup(ctx);
 			/*
-			 * 1.) Select all user-visible public folders ordered by module, fuid
+			 * 1.) Select all user-visible public folders
 			 */
 			StringBuilder condBuilder = new StringBuilder("AND ot.type = ").append(FolderObject.PUBLIC);
 			String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT),
@@ -529,11 +533,9 @@ public class OXFolderIteratorSQL {
 		} catch (Throwable t) {
 //			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
-		}
-		finally {
+		} finally {
 			closeResources(rs, stmt, readCon, true, ctx);
 		}
-		
 		//return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
 	

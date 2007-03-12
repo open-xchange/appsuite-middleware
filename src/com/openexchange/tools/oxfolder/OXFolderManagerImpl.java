@@ -763,8 +763,6 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			 * Check permissions
 			 */
 			final EffectivePermission p = access.getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
-			//final EffectivePermission p = OXFolderTools.getEffectiveFolderOCL(fo.getObjectID(), user.getId(), user
-			//		.getGroups(), ctx, userConfig, readCon);
 			if (!p.isFolderVisible()) {
 				if (p.getUnderlyingPermission().isFolderVisible()) {
 					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, PREFIX_DELETE, getFolderName(fo),
@@ -784,19 +782,14 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Get parent
 		 */
-		final FolderObject parentObj;
-		if (FolderCacheManager.isEnabled()) {
-			parentObj = FolderCacheManager.getInstance().getFolderObject(fo.getParentFolderID(), true, ctx, readCon);
-		} else {
-			parentObj = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, readCon);
-		}
+		final FolderObject parentObj = access.getFolderObject(fo.getParentFolderID());
 		/*
 		 * Gather all deleteable subfolders
 		 */
 		final HashMap<Integer, HashMap> deleteableFolders;
 		try {
 			deleteableFolders = gatherDeleteableFolders(fo.getObjectID(), user.getId(), userConfig, StringCollection
-					.getSqlInString(user.getId(), user.getGroups()), access, readCon, ctx);
+					.getSqlInString(user.getId(), user.getGroups()), access, ctx);
 		} catch (DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, PREFIX_MOVE, e, true, ctx.getContextId());
 		} catch (SQLException e) {
@@ -980,10 +973,10 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	 */
 	private final HashMap<Integer, HashMap> gatherDeleteableFolders(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs, final OXFolderAccess access,
-			final Connection readConArg, final Context ctx) throws OXException, DBPoolingException, SQLException {
+			final Context ctx) throws OXException, DBPoolingException, SQLException {
 		final HashMap<Integer, HashMap> deleteableIDs = new HashMap<Integer, HashMap>();
 		gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, access,
-				readConArg, ctx);
+				ctx);
 		return deleteableIDs;
 	}
 
@@ -992,10 +985,11 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	 */
 	private final void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs,
-			final HashMap<Integer, HashMap> deleteableIDs, final OXFolderAccess access, final Connection readConArg, final Context ctx)
+			final HashMap<Integer, HashMap> deleteableIDs, final OXFolderAccess access, final Context ctx)
 			throws OXException, DBPoolingException, SQLException {
-		final FolderObject delFolderWithSubfolderList = FolderObject.loadFolderObjectFromDB(folderID, ctx, readConArg,
-				true, true);
+		final FolderObject delFolderWithSubfolderList = access.getFolderObject(folderID);
+//		final FolderObject delFolderWithSubfolderList = FolderObject.loadFolderObjectFromDB(folderID, ctx, readConArg,
+//				true, true);
 		/*
 		 * Check if shared
 		 */
@@ -1013,8 +1007,9 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Check user's effective permission
 		 */
-		final EffectivePermission effectivePerm = delFolderWithSubfolderList.getEffectiveUserPermission(userId,
-				userConfig, readConArg);
+		final EffectivePermission effectivePerm = access.getFolderPermission(folderID, userId, userConfig);
+//		final EffectivePermission effectivePerm = delFolderWithSubfolderList.getEffectiveUserPermission(userId,
+//				userConfig, readConArg);
 		if (!effectivePerm.isFolderVisible()) {
 			if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
 				throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, PREFIX_DELETE, getFolderName(folderID,
@@ -1056,7 +1051,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final Iterator<Integer> it = delFolderWithSubfolderList.getSubfolderIds().iterator();
 		for (int i = 0; i < size; i++) {
 			final int fuid = it.next().intValue();
-			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, access, readConArg, ctx);
+			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, access, ctx);
 		}
 		deleteableIDs.put(Integer.valueOf(folderID), subMap);
 	}
