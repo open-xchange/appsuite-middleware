@@ -51,6 +51,7 @@ package com.openexchange.admin.daemons;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXGroupInterface;
 //import com.openexchange.admin.rmi.OXResourceGroupInterface;
+import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 
@@ -86,7 +87,7 @@ public class AdminDaemon {
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
-//    private static com.openexchange.admin.rmi.impl.OXResourceGroup oxresgrp_v2 = null;
+    private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
 
     public void registerBundleListener(final BundleContext context) {
         BundleListener bl = new BundleListener() {
@@ -140,6 +141,9 @@ public class AdminDaemon {
             oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
             OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
             
+            oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin();
+            OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
+            
 //            oxresgrp_v2 = new com.openexchange.admin.rmi.impl.OXResourceGroup();
 //            OXResourceGroupInterface oxresgrp_stub_v2 = (OXResourceGroupInterface) UnicastRemoteObject.exportObject(oxresgrp_v2, 0);
 
@@ -149,6 +153,7 @@ public class AdminDaemon {
     	    registry.bind(OXUserInterface.RMI_NAME, oxuser_stub_v2);
     	    registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
     	    registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
+    	    registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
 //            registry.bind(OXResourceGroupInterface.RMI_NAME, oxresgrp_stub_v2);
 
     	} catch (RemoteException e) {
@@ -163,6 +168,7 @@ public class AdminDaemon {
             registry.unbind(OXUserInterface.RMI_NAME);
             registry.unbind(OXGroupInterface.RMI_NAME);
             registry.unbind(OXResourceInterface.RMI_NAME);
+            registry.unbind(OXLoginInterface.RMI_NAME);
 //            registry.unbind(OXResourceGroupInterface.RMI_NAME);
             
         } catch (AccessException e) {
