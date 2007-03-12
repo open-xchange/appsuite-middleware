@@ -152,7 +152,7 @@ public class AJPv13Server implements Runnable {
 		try {
 			serverSocket = new ServerSocket(AJP13_PORT);
 		} catch (IOException ex) {
-			LOG.error(ex);
+			LOG.error(ex.getMessage(), ex);
 		}
 	}
 
@@ -268,7 +268,7 @@ public class AJPv13Server implements Runnable {
 				final long useTime = System.currentTimeMillis() - start;
 				ajpv13ServerThreadsMonitor.addUseTime(useTime);
 			} catch (IOException ex) {
-				LOG.error(ex);
+				LOG.error(ex.getMessage(), ex);
 			}
 		}
 	}
