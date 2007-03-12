@@ -184,8 +184,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     stmt.setString(3, DEFAULT_TIMEZONE_CREATE);    
                 }
             }
-
-            stmt.setBoolean(4, usrdata.getEnabled());
+            if(usrdata.getEnabled()!=null){
+                stmt.setBoolean(4, usrdata.getEnabled().booleanValue());
+            }else{
+                stmt.setBoolean(4, false);               
+            }
 
             stmt.setInt(5, getintfrombool(usrdata.getPassword_expired()));
 
@@ -548,7 +551,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 if( usrdata.getEnabled() == null ) {
                 	usrdata.setEnabled(true);
                 }
-                stmt.setBoolean(9, usrdata.getEnabled());
+                stmt.setBoolean(9, usrdata.getEnabled().booleanValue());
 
                 // imap and smtp server
                 if (usrdata.getImapServer() != null) {
