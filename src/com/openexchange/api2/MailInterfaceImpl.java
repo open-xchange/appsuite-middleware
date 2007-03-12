@@ -335,6 +335,12 @@ public class MailInterfaceImpl implements MailInterface {
 		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
 
+	/**
+	 * Creates a <b>cloned</b> version of default IMAP properties
+	 * 
+	 * @return a cloned version of default IMAP properties
+	 * @throws OXException
+	 */
 	public final static Properties getDefaultIMAPProperties() throws OXException {
 		if (!imapPropsInitialized) {
 			initializeIMAPProperties();
@@ -420,9 +426,9 @@ public class MailInterfaceImpl implements MailInterface {
 			retval.imapCon = imapCon;
 			retval.imapStore = imapCon.connect();
 		} catch (NoSuchProviderException e) {
-			throw handleMessagingException(e);
+			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (MessagingException e) {
-			throw handleMessagingException(e);
+			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 		return retval;
 	}
@@ -2591,7 +2597,7 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Define text content
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
-		text.setText(strHelper.getString(MailStrings.ACK_RECEIPT_TEXT), UTF8);
+		text.setText(strHelper.getString(MailStrings.ACK_RECEIPT_TEXT), IMAPProperties.getDefaultMimeCharset());
 		text.setHeader("MIME-Version", "1.0");
 		text.setHeader("Content-Type", ct.toString());
 		mixedMultipart.addBodyPart(text);
@@ -2601,7 +2607,7 @@ public class MailInterfaceImpl implements MailInterface {
 		ct.setContentType("text/plain; name=MDNPart1.txt; charset=UTF-8");
 		final MimeBodyPart ack = new MimeBodyPart();
 		ack.setText(strHelper.getString(MailStrings.ACK_TEXT).replaceFirst("#FROM#", fromAddr).replaceFirst("#MSG ID#",
-				msgID), UTF8);
+				msgID), IMAPProperties.getDefaultMimeCharset());
 		ack.setHeader("MIME-Version", "1.0");
 		ack.setHeader("Content-Type", ct.toString());
 		ack.setHeader("Content-Disposition", "attachment; filename=MDNPart1.txt");
