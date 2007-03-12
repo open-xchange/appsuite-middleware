@@ -212,7 +212,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage {
             final String displayName = res.getDisplayname();
 
             int available;
-            if (res.isAvailable()) {
+            if (res!=null &&res.isAvailable()) {
                 available = 1;
             } else {
                 available = 0;
