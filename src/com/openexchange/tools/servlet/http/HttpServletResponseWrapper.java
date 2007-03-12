@@ -219,7 +219,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		/*
 		 * Retrieve groupware session, if user is logged in
 		 */
-		final SessionObject groupwareSession = (SessionObject) request.getAttribute(SessionServlet._sessionObject);
+		final SessionObject groupwareSession = (SessionObject) request.getAttribute(SessionServlet.SESSION_KEY);
 		/*
 		 * Check for HTTP session: First look for JSESSIONID cookie, if none
 		 * found check if HTTP session was created.

@@ -1,3 +1,7 @@
+* 2007-03-12 - marcus.klein@open-xchange.com
+
+  - Bugfix #6127 Improved error message handling if session is not found.
+
 * 2007-03-12 - thorben.betten@open-xchange.com
 
  - Fixed bug #5840: Slow query splitted into smaller parts that faster

@@ -302,7 +302,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String UPLOAD_FORMFIELD_MAIL = "json_0";
 
 	public static final String PARAMETER_IGNORE = "ignore";
-	
+
 	public static final String PARAMETER_ALL = "all";
 	
 	public static final String PARAMETER_REPLY2ALL = "reply2all";
@@ -578,21 +578,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			retval.put(STR_ERROR_PARAMS, arr);
 		}
 		return retval;
-	}
-
-	/**
-	 * Returns the session object for the given session id.
-	 * 
-	 * @param sessionId
-	 *            Identifier of the session.
-	 * @return the session object or <code>null</code> if the session doesn't
-	 *         exist.
-	 */
-	protected static SessionObject getSession(final String sessionId) {
-		if (null == sessionId) {
-			return null;
-		}
-		return SessiondConnector.getInstance().getSession(sessionId);
 	}
 
 	protected static String getAction(final HttpServletRequest req) throws OXConflictException {

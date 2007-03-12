@@ -226,7 +226,11 @@ public enum Component {
     /**
      * Update
      */
-    UPDATE("UPD");
+    UPDATE("UPD"),
+    /**
+     * Session.
+     */
+    SESSION("SES");
 
     /**
      * The abbrevation for components.

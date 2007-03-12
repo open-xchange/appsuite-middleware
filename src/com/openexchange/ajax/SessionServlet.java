@@ -52,93 +52,178 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
+import com.openexchange.sessiond.exception.Classes;
+import com.openexchange.sessiond.exception.SessionException;
+import com.openexchange.sessiond.exception.SessionExceptionFactory;
+import com.openexchange.tools.servlet.http.Tools;
+
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 
-public abstract class SessionServlet extends AJAXServlet {
-	
-	public static final String _sessionObject = "sessionObject";
-	
-	private static final String ERROR_MISSING_COOKIE_ID = "Missing cookie ID";
-	
-	private static final String ERROR_MISSING_SESSION_COOKIE = "Missing session cookie";
-	
-	private static final String ERROR_NO_SESSION_OBJECT_FOUND = "No SessionObject found for ID: ";
+import org.json.JSONException;
 
-	/**
-	 * Checks the session ID supplied as a query parameter in the request URI.
-	 * Intended usage:
-	 *
-	 * <pre>
-	 * if (isInvalidSession(req, w))
-	 * 	return;
-	 * </pre>
-	 *
-	 * at the beginning of {@link #doGet}, {@link #doPost} etc.
-	 *
-	 * @param req
-	 *            The HttpServletRequest object containing the session ID as URI
-	 *            parameter.
-	 * @param w
-	 *            The PrintWriter object returned by
-	 *            {@link HttpServletResponse#getWriter} which is used to send a
-	 *            JSON error object if the session ID is invalid.
-	 * @return true if the session ID is invalid, false if the session ID is
-	 *         valid.
-	 * @throws IOException
-	 */
-	
-	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        /*
-		 * The magic spell to disable caching
-		 */
-		resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-		resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-		resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-		resp.setHeader("Pragma", "no-cache");
-		
-		final String cookieId = req.getParameter(PARAMETER_SESSION);
-		String session = null;
-		if (cookieId == null) {
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ERROR_MISSING_COOKIE_ID);
-			return;
-		}
-		
-		boolean isCookieSet = false;
-		
-		final Cookie[] cookie = req.getCookies();
-		if (cookie != null) {
-			for (int a = 0; a < cookie.length; a++) {
-				if (cookie[a].getName().equals(Login.cookiePrefix + cookieId)) {
-					session = cookie[a].getValue();
-					isCookieSet = true;
-					break;
-				}
-			}
-		}
-		
-		if (!isCookieSet) {
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ERROR_MISSING_SESSION_COOKIE);
-			return;
-		}
-		
-		/*
-		 * Retrieve session object and corresponding context
-		 */
-		final SessionObject sessionObj = SessiondConnector.getInstance().getSession(session, true);
-		if (sessionObj == null) {
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ERROR_NO_SESSION_OBJECT_FOUND + session);
-			return;
-		}
-		req.setAttribute(_sessionObject, sessionObj);
-		
-		super.service(req, resp);
-	}
-	
-	protected SessionObject getSessionObject(final HttpServletRequest req) {
-		return (SessionObject)req.getAttribute(_sessionObject);
-	}
+/**
+ * Overriden service method that checks if a valid session can be found for the
+ * request.
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+@OXExceptionSource(
+    classId = Classes.SESSION_SERVLET,
+    component = Component.SESSION
+)
+public abstract class SessionServlet extends AJAXServlet {
+
+    /**
+     * Factory for creating exceptions.
+     */
+    private static final SessionExceptionFactory EXCEPTION =
+        new SessionExceptionFactory(SessionServlet.class);
+
+    /**
+     * Name of the key to remember the session for the request.
+     */
+    public static final String SESSION_KEY = "sessionObject";
+
+    /**
+     * Default constructor.
+     */
+    protected SessionServlet() {
+        super();
+    }
+
+    /**
+     * Checks the session ID supplied as a query parameter in the request URI.
+     * {@inheritDoc}
+     */
+    protected void service(final HttpServletRequest req,
+        final HttpServletResponse resp) throws ServletException, IOException {
+        Tools.disableCaching(resp);
+
+        final Response response;
+        try {
+            final String cookieId = getCookieId(req);
+            final String sessionId = getSessionId(req, cookieId);
+            final SessionObject session = getSession(sessionId);
+            rememberSession(req, session);
+            super.service(req, resp);
+        } catch (SessionException e) {
+            response = new Response();
+            response.setException(e);
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            try {
+                Response.write(response, resp.getWriter());
+            } catch (JSONException e1) {
+                log(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        }
+    }
+
+    /**
+     * Gets the cookie identifier from the request.
+     * @param req servlet request.
+     * @return the cookie identifier.
+     * @throws SessionException if the cookie identifier can not be found.
+     */
+    @OXThrows(
+        category = Category.PROGRAMMING_ERROR,
+        desc = "Every AJAX request must contain a parameter named session "
+            + "that value contains the identifier of the session cookie.",
+        exceptionId = 1,
+        msg = "The session parameter is missing."
+    )
+    private static String getCookieId(final ServletRequest req)
+        throws SessionException {
+        final String retval = req.getParameter(PARAMETER_SESSION);
+        if (null == retval) {
+            throw EXCEPTION.create(1);
+        }
+        return retval;
+    }
+
+    /**
+     * Gets the session identifier from the request.
+     * @param req HTTP servlet request.
+     * @param cookieId Identifier of the cookie.
+     * @return the session identifier.
+     * @throws SessionException if the session identifier can not be found in a
+     * cookie.
+     */
+    @OXThrows(
+        category = Category.PROGRAMMING_ERROR,
+        desc = "Your browser does not send the cookie for identifying your "
+            + "session.",
+        exceptionId = 2,
+        msg = "The cookie with the session identifier is missing."
+    )
+    private static String getSessionId(final HttpServletRequest req,
+        final String cookieId) throws SessionException {
+        final Cookie[] cookie = req.getCookies();
+        String retval = null;
+        if (cookie != null) {
+            final String cookieName = Login.cookiePrefix + cookieId;
+            for (int a = 0; a < cookie.length && retval == null; a++) {
+                if (cookieName.equals(cookie[a].getName())) {
+                    retval = cookie[a].getValue();
+                }
+            }
+        }
+        if (null == retval) {
+            throw EXCEPTION.create(2);
+        }
+        return retval;
+    }
+
+    /**
+     * Finds the session.
+     * @param sessionId identifier of the session.
+     * @return the session.
+     * @throws SessionException if the session can not be found.
+     */
+    @OXThrows(
+        category = Category.TRY_AGAIN,
+        desc = "A session with the given identifier can not be found.",
+        exceptionId = 3,
+        msg = "Your session expired. Please start a new browser session."
+    )
+    private static SessionObject getSession(final String sessionId)
+        throws SessionException {
+        final SessionObject retval = SessiondConnector.getInstance()
+            .getSession(sessionId);
+        if (null == retval) {
+            throw EXCEPTION.create(3);
+        }
+        return retval;
+    }
+
+    /**
+     * Convenience method to remember the session for a request in the servlet
+     * attributes.
+     * @param req servlet request.
+     * @param session session to remember.
+     */
+    public static void rememberSession(final ServletRequest req,
+        final SessionObject session) {
+        req.setAttribute(SESSION_KEY, session);
+    }
+
+    /**
+     * Returns the remembered session.
+     * @param req servlet request.
+     * @return the remembered session.
+     */
+    protected SessionObject getSessionObject(final ServletRequest req) {
+        return (SessionObject) req.getAttribute(SESSION_KEY);
+    }
 }

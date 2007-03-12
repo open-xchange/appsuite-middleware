@@ -172,7 +172,7 @@ public class Login extends AJAXServlet {
                 response.setException(new LoginException(LoginException.Code
                     .DATABASE_DOWN, e));
             }
-            req.setAttribute(SessionServlet._sessionObject, sessionObj);
+            SessionServlet.rememberSession(req, sessionObj);
             /*
              * Write response
              */
