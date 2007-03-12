@@ -98,7 +98,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage {
             // update status of resource availability
             editres = con.prepareStatement("UPDATE resource SET available = ? WHERE cid = ? AND id = ?");
             try {
-                if (res.isAvailable()) {
+                if (res!=null && res.isAvailable()) {
                     editres.setInt(1, 1);
                 } else {
                     editres.setInt(1, 0);
