@@ -252,9 +252,8 @@ public class MailFolderObject {
 	public char getSeparator() throws MessagingException {
 		if (separator != '0') {
 			return separator;
-		} else {
-			throw new MessagingException("IMAP delimiter not specified!");
 		}
+		throw new MessagingException("IMAP delimiter not specified!");
 	}
 
 	public void setSeparator(final char separator) {
