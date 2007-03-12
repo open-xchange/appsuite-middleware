@@ -2,6 +2,7 @@
 
  - Fixed bug #5840: Slow query splitted into smaller parts that faster
    release held connections
+ - Fixed bug #6346: Added lock mechanism to support multiple threads
 
 * 2007-03-09 - thorben.betten@open-xchange.com
 

@@ -48,7 +48,6 @@
  */
 
 
-
 package com.openexchange.groupware.imap;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
@@ -180,10 +179,13 @@ public class UserSettingMail implements DeleteListener {
 	
 	private final Lock stdFolderCreationLock;
 	
+	private final Lock accessLock;
+	
 	public UserSettingMail() {
 		super();
 		stdFolderFullnames = new String[4];
 		stdFolderCreationLock = new ReentrantLock();
+		accessLock = new ReentrantLock();
 	}
 	
 	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " +
@@ -206,6 +208,7 @@ public class UserSettingMail implements DeleteListener {
 	}
 	
 	public final void saveUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
+		accessLock.lock();
 		try {
 			Connection writeCon = writeConArg;
 			final boolean createCon = (writeCon == null);
@@ -289,6 +292,8 @@ public class UserSettingMail implements DeleteListener {
 		} catch (DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+		} finally {
+			accessLock.unlock();
 		}
 	}
 	
@@ -297,8 +302,9 @@ public class UserSettingMail implements DeleteListener {
 	}
 	
 	public final void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
-		Connection writeCon = writeConArg;
+		accessLock.lock();
 		try {
+			Connection writeCon = writeConArg;
 			final boolean createWriteCon = (writeCon == null);
 			PreparedStatement stmt = null;
 			try {
@@ -332,6 +338,8 @@ public class UserSettingMail implements DeleteListener {
 		} catch (DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+		} finally {
+			accessLock.unlock();
 		}
 	}
 	
@@ -340,8 +348,10 @@ public class UserSettingMail implements DeleteListener {
 		loadUserSettingMail(user, ctx, null);
 	}
 	
-	public final void loadUserSettingMail(final int user, final Context ctx, Connection readCon) throws OXException {
+	public final void loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
+		accessLock.lock();
 		try {
+			Connection readCon = readConArg;
 			final boolean createCon = (readCon == null);
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
@@ -406,6 +416,8 @@ public class UserSettingMail implements DeleteListener {
 		} catch (DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+		} finally {
+			accessLock.unlock();
 		}
 	}
 	
