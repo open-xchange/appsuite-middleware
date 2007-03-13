@@ -64,6 +64,13 @@ public class MailFolderObject {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderObject.class);
 	
+	private static final String STR_EMPTY = "";
+	
+	/**
+	 * New mailbox attribute added by the "LIST-EXTENDED" extension
+	 */
+	private static final String ATTRIBUTE_NON_EXISTENT = "\\NonExistent";
+	
 	private String fullName;
 	
 	private String parentFullName;
@@ -109,12 +116,19 @@ public class MailFolderObject {
 	public MailFolderObject(final IMAPFolder folder) throws MessagingException, OXException {
 		super();
 		this.exists = folder.exists();
+		final String[] attrs = folder.getAttributes();
+		Attribs: for (String attribute : attrs) {
+			if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
+				this.exists = false;
+				break Attribs;
+			}
+		}
 		this.fullName = prepareFullname(folder.getFullName(), folder.getSeparator());
 		this.name = folder.getName();
 		this.parentFullName = prepareParentFullname(folder.getParent());
 		this.separator = folder.getSeparator();
 		this.hasSubfolders = IMAPUtils.hasSubfolders(folder);
-		this.ownRights = getOwnRights(folder);
+		this.ownRights = this.exists ? getOwnRightsInternal(folder) : STR_EMPTY;
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) {
 			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
@@ -126,9 +140,18 @@ public class MailFolderObject {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		if (IMAPProperties.isSupportsACLs() && !(folder instanceof DefaultFolder)) {
-			this.acls = folder.getACL();
-			b_acls = true;
+		if (IMAPProperties.isSupportsACLs() && this.exists && !(folder instanceof DefaultFolder)) {
+			try {
+				this.acls = folder.getACL();
+				b_acls = true;
+			} catch (final MessagingException e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder("ACL could not be requested for folder ").append(folder.getFullName()),
+							e);
+				}
+				this.acls = null;
+				b_acls = false;
+			}
 		}
 		this.imapFolder = folder;
 	}
@@ -137,7 +160,7 @@ public class MailFolderObject {
 	
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 	
-	private static final String getOwnRights(final IMAPFolder folder) throws MessagingException, OXException {
+	private static final String getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}
@@ -162,14 +185,14 @@ public class MailFolderObject {
 				 * Write empty string as rights. Nevertheless user may see
 				 * folder!
 				 */
-				return "";
+				return STR_EMPTY;
 			} catch (Throwable t) {
 				LOG.error(t.getMessage(), t);
 				/*
 				 * Write empty string as rights.
 				 * Nevertheless user may see folder!
 				 */
-				return "";
+				return STR_EMPTY;
 			}
 		} else {
 			/*
@@ -182,12 +205,12 @@ public class MailFolderObject {
 				/*
 				 * NoInferiors detected: No create access
 				 */
-				rights = rights.replaceFirst("c", "");
+				rights = rights.replaceFirst("c", STR_EMPTY);
 			} else if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
 				/*
 				 * NoSelect detected: No read access
 				 */
-				rights = rights.replaceFirst("r", "");
+				rights = rights.replaceFirst("r", STR_EMPTY);
 			}
 		}
 		if (IMAPProperties.isUserFlagsEnabled() && (IMAPUtils.supportsUserDefinedFlags(folder))) {

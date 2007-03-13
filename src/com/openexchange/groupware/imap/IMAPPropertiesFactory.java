@@ -134,6 +134,8 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_MIME_CHARSET = "mail.mime.charset";
 	
 	private static final String PROP_IGNORE_SUBSCRIPTION = "ignoreSubscription";
+	
+	private static final String PROP_SET_SMTP_ENVELOPE_FROM = "setSMTPEnvelopeFrom";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
@@ -367,82 +369,82 @@ public class IMAPPropertiesFactory {
 				final StringBuilder logBuilder = new StringBuilder();
 				logBuilder.append("\nLoading global IMAP properties...\n");
 				IMAPProperties.setImapSort(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSORT)));
-				logBuilder.append("\tIMAP-Sort: ").append(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSORT)))
-						.append('\n');
-				
+				logBuilder.append("\tIMAP-Sort: ").append(IMAPProperties.isImapSortInternal()).append('\n');
+
 				IMAPProperties.setImapSearch(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSEARCH)));
-				logBuilder.append("\tIMAP-Search: ").append(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSEARCH)))
-						.append('\n');
-				
+				logBuilder.append("\tIMAP-Search: ").append(IMAPProperties.isImapSearchInternal()).append('\n');
+
 				IMAPProperties.setMessageFetchLimit(Integer.parseInt(props.getProperty(PROP_IMAP_MESSAGE_FETCH_LIMIT,
 						"1000")));
-				logBuilder.append("\tMessage Fetch Limit: ").append(
-						Integer.parseInt(props.getProperty(PROP_IMAP_MESSAGE_FETCH_LIMIT, "1000"))).append('\n');
-				
+				logBuilder.append("\tMessage Fetch Limit: ").append(IMAPProperties.getMessageFetchLimitInternal())
+						.append('\n');
+
 				IMAPProperties.setAttachmentDisplaySizeLimit(Integer.parseInt(props.getProperty(
 						PROP_IMAP_ATTACHMENT_DISPLAY_SIZE_LIMIT, "8192")));
 				logBuilder.append("\tAttachment Display Size Limit: ").append(
-						Integer.parseInt(props.getProperty(PROP_IMAP_ATTACHMENT_DISPLAY_SIZE_LIMIT, "8192"))).append('\n');
-				
-				IMAPProperties.setSmtpAuth(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SMTP_AUTH, STR_FALSE)));
-				logBuilder.append("\tSMTP Authentication: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SMTP_AUTH, STR_FALSE))).append('\n');
-				
-				IMAPProperties.setImapsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAPS_ENABLED, STR_FALSE)));
-				logBuilder.append("\tIMAP/S enabled: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAPS_ENABLED, STR_FALSE))).append('\n');
-				
-				IMAPProperties.setImapsPort(Integer.parseInt(props.getProperty(PROP_IMAPS_PORT, "993")));
-				logBuilder.append("\tIMAP/S port: ").append(
-						Integer.parseInt(props.getProperty(PROP_IMAPS_PORT, "993"))).append('\n');
-				
-				IMAPProperties.setSmtpsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_SMTPS_ENABLED, STR_FALSE)));
-				logBuilder.append("\tSMTP/S enabled: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_SMTPS_ENABLED, STR_FALSE))).append('\n');
-				
-				IMAPProperties.setSmtpsPort(Integer.parseInt(props.getProperty(PROP_SMTPS_PORT, "465")));
-				logBuilder.append("\tSMTP/S port: ").append(
-						Integer.parseInt(props.getProperty(PROP_SMTPS_PORT, "465"))).append('\n');
-				
-				IMAPProperties.setSupportsACLs(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SUPPORTS_ACL, STR_FALSE)));
-				logBuilder.append("\tSupport ACLs: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SUPPORTS_ACL, STR_FALSE))).append('\n');
-				
-				IMAPProperties.setImapConnectionTimeout(Integer.parseInt(props.getProperty(PROP_IMAP_CONNECTION_TIMEOUT,
-						"0")));
-				logBuilder.append("\tIMAP Connection Timeout: ").append(
-						Integer.parseInt(props.getProperty(PROP_IMAP_CONNECTION_TIMEOUT, "0"))).append('\n');
-				
-				IMAPProperties.setUserFlagsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_USER_FLAGS_ENABLED,
+						IMAPProperties.getAttachmentDisplaySizeLimitInternal()).append('\n');
+
+				IMAPProperties
+						.setSmtpAuth(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SMTP_AUTH, STR_FALSE)));
+				logBuilder.append("\tSMTP Authentication: ").append(IMAPProperties.isSmtpAuthInternal()).append('\n');
+
+				IMAPProperties.setImapsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAPS_ENABLED,
 						STR_FALSE)));
-				logBuilder.append("\tUser Flags Enabled: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_USER_FLAGS_ENABLED, STR_FALSE))).append('\n');
-				
-				IMAPProperties.setMaxIMAPConnectionIdleTime(Integer.parseInt(props.getProperty(PROP_MAX_IMAP_CON_IDLE_TIME,
-						"60000")));
+				logBuilder.append("\tIMAP/S enabled: ").append(IMAPProperties.isImapsEnabledInternal()).append('\n');
+
+				IMAPProperties.setImapsPort(Integer.parseInt(props.getProperty(PROP_IMAPS_PORT, "993")));
+				logBuilder.append("\tIMAP/S port: ").append(IMAPProperties.getImapsPortInternal()).append('\n');
+
+				IMAPProperties.setSmtpsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_SMTPS_ENABLED,
+						STR_FALSE)));
+				logBuilder.append("\tSMTP/S enabled: ").append(IMAPProperties.isSmtpsEnabledInternal()).append('\n');
+
+				IMAPProperties.setSmtpsPort(Integer.parseInt(props.getProperty(PROP_SMTPS_PORT, "465")));
+				logBuilder.append("\tSMTP/S port: ").append(IMAPProperties.getSmtpsPortInternal()).append('\n');
+
+				IMAPProperties.setSupportsACLs(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SUPPORTS_ACL,
+						STR_FALSE)));
+				logBuilder.append("\tSupport ACLs: ").append(IMAPProperties.isSupportsACLsInternal()).append('\n');
+
+				IMAPProperties.setImapConnectionTimeout(Integer.parseInt(props.getProperty(
+						PROP_IMAP_CONNECTION_TIMEOUT, "0")));
+				logBuilder.append("\tIMAP Connection Timeout: ").append(
+						IMAPProperties.getImapConnectionTimeoutInternal()).append('\n');
+
+				IMAPProperties.setUserFlagsEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(
+						PROP_IMAP_USER_FLAGS_ENABLED, STR_FALSE)));
+				logBuilder.append("\tUser Flags Enabled: ").append(IMAPProperties.isUserFlagsEnabledInternal()).append(
+						'\n');
+
+				IMAPProperties.setMaxIMAPConnectionIdleTime(Integer.parseInt(props.getProperty(
+						PROP_MAX_IMAP_CON_IDLE_TIME, "60000")));
 				logBuilder.append("\tMax IMAP Connection Idle Time: ").append(
-						Integer.parseInt(props.getProperty(PROP_MAX_IMAP_CON_IDLE_TIME, "60000"))).append('\n');
-				
+						IMAPProperties.getMaxIMAPConnectionIdleTimeInternal()).append('\n');
+
 				IMAPProperties.setMaxNumOfIMAPConnections(Integer.parseInt(props.getProperty(PROP_MAX_NUM_OF_IMAP_CONS,
 						"0")));
 				logBuilder.append("\tMax Number Of IMAP Connections: ").append(
-						Integer.parseInt(props.getProperty(PROP_MAX_NUM_OF_IMAP_CONS, "0"))).append('\n');
-				
+						IMAPProperties.getMaxNumOfIMAPConnectionsInternal()).append('\n');
+
 				IMAPProperties.setAllowNestedDefaultFolderOnAltNamespace(STR_TRUE.equalsIgnoreCase(props.getProperty(
 						PROP_ALLOW_NESTED_DEFAULT_FOLDERS, STR_FALSE)));
 				logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(
-						STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_ALLOW_NESTED_DEFAULT_FOLDERS, STR_FALSE))).append(
-						'\n');
-				
+						IMAPProperties.isAllowNestedDefaultFolderOnAltNamespaceInternal()).append('\n');
+
 				IMAPProperties.setDefaultMimeCharset(props.getProperty(PROP_MIME_CHARSET, "UTF-8"));
-				logBuilder.append("\tDefault MIME Charset: ").append(props.getProperty(PROP_MIME_CHARSET, "UTF-8"))
+				logBuilder.append("\tDefault MIME Charset: ").append(IMAPProperties.getDefaultMimeCharsetInternal())
 						.append('\n');
-				
+
 				IMAPProperties.setIgnoreSubscription(Boolean.parseBoolean(props.getProperty(PROP_IGNORE_SUBSCRIPTION,
 						STR_FALSE)));
 				logBuilder.append("\tIgnore Folder Subscription: ").append(
-						props.getProperty(PROP_IGNORE_SUBSCRIPTION, STR_FALSE)).append('\n');
-				
+						IMAPProperties.isIgnoreSubscriptionInternal()).append('\n');
+
+				IMAPProperties.setSMTPEnvelopeFrom(Boolean.parseBoolean(props.getProperty(PROP_SET_SMTP_ENVELOPE_FROM,
+						STR_FALSE)));
+				logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(IMAPProperties.isSMTPEnvelopeFromInternal())
+						.append('\n');
+
 				try {
 					IMAPProperties.setPartModifierImpl(PartModifier.getImpl(props.getProperty(PROP_IMAP_PART_MODIFIER,
 							"com.openexchange.groupware.imap.DummyPartModifier")));
@@ -451,9 +453,8 @@ public class IMAPPropertiesFactory {
 					IMAPProperties.setPartModifierImpl(new DummyPartModifier());
 				}
 				logBuilder.append("\tPartModifier Implementation: ").append(
-						props.getProperty(PROP_IMAP_PART_MODIFIER, "com.openexchange.groupware.imap.DummyPartModifier"))
-						.append('\n');
-				
+						IMAPProperties.getPartModifierImplInternal().getClass().getName()).append('\n');
+
 				final String quoteColors = props.getProperty(PROP_IMAP_QUOTE_LINE_COLORS, "#666666");
 				logBuilder.append("\tHTML Quote Colors: ").append(quoteColors).append('\n');
 				final String[] colors = quoteColors.split(" *, *");

@@ -1,3 +1,12 @@
+* 2007-03-13 - thorben.betten@open-xchange.com
+
+ - New Property to enable/disable setting of SMTP header 'ENVELPE-FROM'
+   with user's primary email address
+ #################### ATTENTION ! #####################
+  - CONFIG change: New property in 'imap.properties' to enable/disable
+   setting of SMTP header 'ENVELPE-FROM'
+#################################################
+
 * 2007-03-13 - choeger@open-xchange.com
 
   - Bugfix #6341 StartupScript (open-xchange-groupware) doesnt work good

@@ -122,6 +122,8 @@ public class IMAPProperties {
 	private static String defaultMimeCharset;
 	
 	private static boolean ignoreSubscription;
+	
+	private static boolean smtpEnvelopeFrom;
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -208,6 +210,10 @@ public class IMAPProperties {
 		}
 		return imapSort;
 	}
+	
+	static boolean isImapSortInternal() {
+		return imapSort;
+	}
 
 	public static void setImapSort(final boolean imapSort) {
 		IMAPProperties.imapSort = imapSort;
@@ -220,6 +226,10 @@ public class IMAPProperties {
 		}
 		return imapSearch;
 	}
+	
+	static boolean isImapSearchInternal() {
+		return imapSearch;
+	}
 
 	public static void setImapSearch(final boolean imapSearch) {
 		IMAPProperties.imapSearch = imapSearch;
@@ -229,6 +239,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return messageFetchLimit;
 	}
+	
+	static int getMessageFetchLimitInternal() {
+		return messageFetchLimit;
+	}
 
 	public static void setMessageFetchLimit(final int messageFetchLimit) {
 		IMAPProperties.messageFetchLimit = messageFetchLimit;
@@ -236,6 +250,10 @@ public class IMAPProperties {
 
 	public static int getAttachmentDisplaySizeLimit() throws IMAPException {
 		checkGlobalImapProperties();
+		return attachmentDisplaySizeLimit;
+	}
+	
+	static int getAttachmentDisplaySizeLimitInternal() {
 		return attachmentDisplaySizeLimit;
 	}
 
@@ -260,6 +278,10 @@ public class IMAPProperties {
 		if (capabilitiesLoaded) {
 			return imapCapabilities.hasACL();
 		}
+		return supportsACLs;
+	}
+	
+	static boolean isSupportsACLsInternal() {
 		return supportsACLs;
 	}
 
@@ -288,6 +310,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return partModifierImpl;
 	}
+	
+	static PartModifier getPartModifierImplInternal() {
+		return partModifierImpl;
+	}
 
 	public static void setPartModifierImpl(final PartModifier partModifierImpl) {
 		IMAPProperties.partModifierImpl = partModifierImpl;
@@ -295,6 +321,10 @@ public class IMAPProperties {
 
 	public static boolean isSmtpAuth() throws IMAPException {
 		checkGlobalImapProperties();
+		return smtpAuth;
+	}
+	
+	static boolean isSmtpAuthInternal() {
 		return smtpAuth;
 	}
 
@@ -306,6 +336,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapConnectionTimeout;
 	}
+	
+	static int getImapConnectionTimeoutInternal() {
+		return imapConnectionTimeout;
+	}
 
 	public static void setImapConnectionTimeout(final int imapConnectionTimeout) {
 		IMAPProperties.imapConnectionTimeout = imapConnectionTimeout;
@@ -313,6 +347,10 @@ public class IMAPProperties {
 
 	public static boolean isUserFlagsEnabled() throws IMAPException {
 		checkGlobalImapProperties();
+		return userFlagsEnabled;
+	}
+	
+	static boolean isUserFlagsEnabledInternal() {
 		return userFlagsEnabled;
 	}
 
@@ -324,6 +362,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return maxIMAPConnectionIdleTime;
 	}
+	
+	static long getMaxIMAPConnectionIdleTimeInternal() {
+		return maxIMAPConnectionIdleTime;
+	}
 
 	public static void setMaxIMAPConnectionIdleTime(final long maxIMAPConnectionIdleTime) {
 		IMAPProperties.maxIMAPConnectionIdleTime = maxIMAPConnectionIdleTime;
@@ -333,6 +375,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return maxNumOfIMAPConnections;
 	}
+	
+	static int getMaxNumOfIMAPConnectionsInternal() {
+		return maxNumOfIMAPConnections;
+	}
 
 	public static void setMaxNumOfIMAPConnections(final int maxNumOfIMAPConnections) {
 		IMAPProperties.maxNumOfIMAPConnections = maxNumOfIMAPConnections;
@@ -340,6 +386,10 @@ public class IMAPProperties {
 
 	public static String getDefaultMimeCharset() throws IMAPException {
 		checkGlobalImapProperties();
+		return defaultMimeCharset;
+	}
+	
+	static String getDefaultMimeCharsetInternal() {
 		return defaultMimeCharset;
 	}
 	
@@ -358,6 +408,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapsEnabled;
 	}
+	
+	static boolean isImapsEnabledInternal() {
+		return imapsEnabled;
+	}
 
 	public static void setImapsEnabled(final boolean imapsEnables) {
 		IMAPProperties.imapsEnabled = imapsEnables;
@@ -365,6 +419,10 @@ public class IMAPProperties {
 
 	public static int getImapsPort() throws IMAPException {
 		checkGlobalImapProperties();
+		return imapsPort;
+	}
+	
+	static int getImapsPortInternal() {
 		return imapsPort;
 	}
 
@@ -376,6 +434,10 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpsEnabled;
 	}
+	
+	static boolean isSmtpsEnabledInternal() {
+		return smtpsEnabled;
+	}
 
 	public static void setSmtpsEnabled(final boolean smtpsEnabled) {
 		IMAPProperties.smtpsEnabled = smtpsEnabled;
@@ -385,12 +447,21 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpsPort;
 	}
+	
+	static int getSmtpsPortInternal() {
+		return smtpsPort;
+	}
 
 	public static void setSmtpsPort(final int smtpsPort) {
 		IMAPProperties.smtpsPort = smtpsPort;
 	}
 
-	public static boolean isAllowNestedDefaultFolderOnAltNamespace() {
+	public static boolean isAllowNestedDefaultFolderOnAltNamespace() throws IMAPException {
+		checkGlobalImapProperties();
+		return allowNestedDefaultFolderOnAltNamespace;
+	}
+	
+	static boolean isAllowNestedDefaultFolderOnAltNamespaceInternal() {
 		return allowNestedDefaultFolderOnAltNamespace;
 	}
 
@@ -402,9 +473,26 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return ignoreSubscription;
 	}
+	
+	static boolean isIgnoreSubscriptionInternal() {
+		return ignoreSubscription;
+	}
 
 	public static void setIgnoreSubscription(final boolean ignoreSubscription) {
 		IMAPProperties.ignoreSubscription = ignoreSubscription;
+	}
+
+	public static boolean isSMTPEnvelopeFrom() throws IMAPException {
+		checkGlobalImapProperties();
+		return smtpEnvelopeFrom;
+	}
+	
+	static boolean isSMTPEnvelopeFromInternal() {
+		return smtpEnvelopeFrom;
+	}
+
+	public static void setSMTPEnvelopeFrom(final boolean setSMTPEnvelopeFrom) {
+		IMAPProperties.smtpEnvelopeFrom = setSMTPEnvelopeFrom;
 	}
 
 	private static final void checkGlobalImapProperties() throws IMAPException {

@@ -2847,10 +2847,9 @@ public class MailInterfaceImpl implements MailInterface {
 					newSMTPMsg.setSubject(MailStrings.DEFAULT_SUBJECT);
 				}
 				/*
-				 * TODO: Fill in property value that defines, if ENVELOPE-FROM
-				 * should be set or not
+				 * ENVELOPE-FROM
 				 */
-				if (false) {
+				if (IMAPProperties.isSMTPEnvelopeFrom()) {
 					/*
 					 * Set ENVELOPE-FROM in SMTP message to user's primary email
 					 * address

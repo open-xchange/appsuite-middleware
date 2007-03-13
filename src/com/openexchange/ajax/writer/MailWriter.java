@@ -93,6 +93,8 @@ public class MailWriter extends DataWriter {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailWriter.class);
+	
+	private static final String MIME_MULTIPART_MIXED = "multipart/mixed";
 
 	public static interface MailFieldWriter {
 		public void writeField(JSONWriter jsonwriter, Message msg, int level, boolean withKey) throws OXException,
@@ -220,7 +222,7 @@ public class MailWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_HAS_ATTACHMENTS);
 						}
-						jsonwriter.value(msg.isMimeType("multipart/*"));
+						jsonwriter.value(msg.isMimeType(MIME_MULTIPART_MIXED));
 					}
 				};
 				break Fields;
@@ -449,7 +451,7 @@ public class MailWriter extends DataWriter {
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_HAS_ATTACHMENTS);
 				}
-				jsonwriter.value(msg.isMimeType("multipart/*"));
+				jsonwriter.value(msg.isMimeType(MIME_MULTIPART_MIXED));
 				// jsonwriter.value(msg.isMimeType("multipart/mixed"));
 				break Fields;
 			case JSONMessageObject.FIELD_FROM:
