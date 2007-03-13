@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 
@@ -152,8 +151,6 @@ public class Folder extends SessionServlet {
 	private static final String STRING_EMAIL = "E-Mail";
 
 	private static final String STRING_1 = "1";
-	
-	private static final String STRING_TRUE = "true";
 	
 	private static final String STRING_EMPTY = "";
 
@@ -780,8 +777,7 @@ public class Folder extends SessionServlet {
 				 * Determine if all folders, regardless of their subscription
 				 * status, shall be included
 				 */
-				final boolean all = (STRING_1.equals(getStringParam(paramContainer, PARAMETER_ALL, paramSrcType)) || STRING_TRUE
-						.equals(getStringParam(paramContainer, PARAMETER_ALL, paramSrcType).toLowerCase(Locale.ENGLISH)));
+				final boolean all = (STRING_1.equals(getStringParam(paramContainer, PARAMETER_ALL, paramSrcType)));
 				SearchIterator it = null;
 				MailInterface mailInterface = null;
 				try {

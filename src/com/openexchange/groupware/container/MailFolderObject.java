@@ -126,8 +126,10 @@ public class MailFolderObject {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		this.acls = folder.getACL();
-		b_acls = true;
+		if (IMAPProperties.isSupportsACLs() && !(folder instanceof DefaultFolder)) {
+			this.acls = folder.getACL();
+			b_acls = true;
+		}
 		this.imapFolder = folder;
 	}
 	
