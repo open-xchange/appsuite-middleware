@@ -662,7 +662,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setInt(1, ctx.getIdAsInt());
                 stmt.setInt(2, internal_user_id);
                 stmt.setLong(3, System.currentTimeMillis());
-                stmt.setInt(4, admin_id);
+                stmt.setInt(4, internal_user_id);
                 stmt.setLong(5, System.currentTimeMillis());
                 stmt.setLong(6, 6); // fid = 6 cause internal user
 
