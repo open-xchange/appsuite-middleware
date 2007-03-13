@@ -6,7 +6,7 @@
  - Fixed bug #6417: Preprocessing html content to display links
  #################### ATTENTION ! #####################
   - CONFIG change: New property in 'imap.properties' to enable/disable
-   setting of SMTP header 'ENVELOPE-FROM'
+   setting of SMTP header 'ENVELPE-FROM'
 #################################################
 
 * 2007-03-13 - choeger@open-xchange.com
