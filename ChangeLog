@@ -2,6 +2,7 @@
 
  - New Property to enable/disable setting of SMTP header 'ENVELPE-FROM'
    with user's primary email address
+ - Fixed bug #6394: Sending JSON response on error.
  #################### ATTENTION ! #####################
   - CONFIG change: New property in 'imap.properties' to enable/disable
    setting of SMTP header 'ENVELPE-FROM'
