@@ -138,8 +138,9 @@ public final class Tools {
     }
     
     /**
-	 * Reset response header values if we are going to * write directly into
-	 * servlet's output stream cause some browsers do not allow header "Pragma"
+	 * Remove <tt>Pragma</tt> response header value if we are going to write
+	 * directly into servlet's output stream cause then some browsers do not
+	 * allow this header
 	 * 
 	 * @param resp
 	 *            the servlet response.
