@@ -154,6 +154,6 @@ public final class Tools {
         HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale
             .ENGLISH);
         HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-        EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date());
+        EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
 }

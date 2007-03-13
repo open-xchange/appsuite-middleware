@@ -118,6 +118,7 @@ public abstract class SessionServlet extends AJAXServlet {
             rememberSession(req, session);
             super.service(req, resp);
         } catch (SessionException e) {
+            LOG.debug(e.getMessage(), e);
             response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
