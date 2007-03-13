@@ -52,10 +52,7 @@
 package com.openexchange.tools.servlet.http;
 
 import java.security.Principal;
-import java.text.DateFormatSymbols;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -75,39 +72,6 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpServletRequestWrapper.class);
-
-	private static final String HTTP_HEADER_DATE_FORMAT = "EEE',' dd MMMM yyyy hh:mm:ss z";
-
-	private static final SimpleDateFormat HEADER_DATEFORMAT;
-
-	static {
-		HEADER_DATEFORMAT = new SimpleDateFormat(HTTP_HEADER_DATE_FORMAT);
-		DateFormatSymbols dfs = HEADER_DATEFORMAT.getDateFormatSymbols();
-		String[] shortWeekdays = new String[8];
-		shortWeekdays[Calendar.SUNDAY] = "Sun";
-		shortWeekdays[Calendar.MONDAY] = "Mon";
-		shortWeekdays[Calendar.TUESDAY] = "Tue";
-		shortWeekdays[Calendar.WEDNESDAY] = "Wed";
-		shortWeekdays[Calendar.THURSDAY] = "Thu";
-		shortWeekdays[Calendar.FRIDAY] = "Fri";
-		shortWeekdays[Calendar.SATURDAY] = "Sat";
-		dfs.setShortWeekdays(shortWeekdays);
-		String[] shortMonths = new String[12];
-		shortMonths[Calendar.JANUARY] = "Jan";
-		shortMonths[Calendar.FEBRUARY] = "Feb";
-		shortMonths[Calendar.MARCH] = "Mar";
-		shortMonths[Calendar.APRIL] = "April";
-		shortMonths[Calendar.MAY] = "May";
-		shortMonths[Calendar.JUNE] = "June";
-		shortMonths[Calendar.JULY] = "July";
-		shortMonths[Calendar.AUGUST] = "Aug";
-		shortMonths[Calendar.SEPTEMBER] = "Sep";
-		shortMonths[Calendar.OCTOBER] = "Oct";
-		shortMonths[Calendar.NOVEMBER] = "Nov";
-		shortMonths[Calendar.DECEMBER] = "Dec";
-		dfs.setShortMonths(shortMonths);
-		HEADER_DATEFORMAT.setDateFormatSymbols(dfs);
-	}
 
 	private String authType;
 
@@ -221,7 +185,9 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	}
 
 	public boolean isUserInRole(final String role) {
-		System.err.println("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
+		}
 		return false;
 	}
 
@@ -333,9 +299,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private long getDateValueFromHeaderField(final String headerValue) {
 		try {
-			synchronized (HEADER_DATEFORMAT) {
-				return HEADER_DATEFORMAT.parse(headerValue).getTime();
-			}
+			return Tools.parseHeaderDate(headerValue).getTime();
 		} catch (ParseException e) {
 			LOG.error(e.getMessage(), e);
 			throw new IllegalArgumentException(e.getMessage());
