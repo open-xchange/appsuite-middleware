@@ -18,8 +18,7 @@ ox_set_JAVA_BIN
 
 JAVA_OPTS="-ms20M -mx280M \
 -Dopenexchange.propfile=$SYSTEMPROPERTIES \
--Djava.util.logging.config.file=$LOGGINGPROPERTIES \
--Djava.library.path=@oxlibdir@"
+-Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
 CLASSPATH="-classpath \
 @jdbcjar@:\
