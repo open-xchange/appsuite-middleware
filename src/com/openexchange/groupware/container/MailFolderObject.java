@@ -126,6 +126,8 @@ public class MailFolderObject {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
+		this.acls = folder.getACL();
+		b_acls = true;
 		this.imapFolder = folder;
 	}
 	
@@ -234,7 +236,9 @@ public class MailFolderObject {
 	}
 
 	public ACL[] getACL() {
-		return acls;
+		final ACL[] retval = new ACL[acls.length];
+		System.arraycopy(acls, 0, retval, 0, acls.length);
+		return retval;
 	}
 	
 	public boolean containsACLs() {
@@ -242,8 +246,21 @@ public class MailFolderObject {
 	}
 
 	public void setACL(final ACL[] acls) {
-		this.acls = acls;
+		this.acls = new ACL[acls.length];
+		System.arraycopy(acls, 0, this.acls, 0, acls.length);
 		b_acls = true;
+	}
+	
+	public void addACL(final ACL acl) {
+		if (acls == null) {
+			this.acls = new ACL[1];
+			this.acls[0] = acl;
+			return;
+		}
+		final ACL[] tmp = this.acls;
+		this.acls = new ACL[tmp.length + 1];
+		System.arraycopy(tmp, 0, acls, 0, tmp.length);
+		acls[acls.length - 1] = acl;
 	}
 	
 	public void removeACL() {
