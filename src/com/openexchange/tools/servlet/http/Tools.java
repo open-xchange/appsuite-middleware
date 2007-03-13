@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet.http;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -145,6 +146,15 @@ public final class Tools {
         DATEFORMAT_LOCK.lock();
         try {
             return HEADER_DATEFORMAT.format(date);
+        } finally {
+            DATEFORMAT_LOCK.unlock();
+        }
+    }
+    
+    public static Date parseHeaderDate(final String str) throws ParseException {
+        DATEFORMAT_LOCK.lock();
+        try {
+        	return HEADER_DATEFORMAT.parse(str);
         } finally {
             DATEFORMAT_LOCK.unlock();
         }
