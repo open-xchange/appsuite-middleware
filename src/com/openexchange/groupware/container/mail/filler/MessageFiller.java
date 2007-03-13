@@ -109,6 +109,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
+import com.openexchange.tools.mail.MailTools;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -283,7 +284,7 @@ public class MessageFiller {
 					 * Define html content
 					 */
 					final String ct = HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
-					html.setContent(performLineWrap(insertColorQuotes(mailText), true, linewrap), ct);
+					html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), ct);
 					html.setHeader(MIME_VERSION, VERSION);
 					html.setHeader(CONTENT_TYPE, ct);
 					/*
@@ -369,7 +370,7 @@ public class MessageFiller {
 						mailText = performLineWrap(CONVERTER.convertWithQuotes((String) mailTextMao.getContent()),
 								false, linewrap);
 					} else {
-						mailText = performLineWrap(insertColorQuotes((String) mailTextMao.getContent()), true, linewrap);
+						mailText = performLineWrap(insertColorQuotes(MailTools.formatHrefLinks((String) mailTextMao.getContent())), true, linewrap);
 					}
 					newMimeMessage.setContent(mailText, ct.toString());
 					newMimeMessage.setHeader(MIME_VERSION, VERSION);
@@ -475,7 +476,7 @@ public class MessageFiller {
 		 */
 		String htmlCT = HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
-		html.setContent(performLineWrap(insertColorQuotes(mailText), true, linewrap), htmlCT);
+		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), htmlCT);
 		html.setHeader(MIME_VERSION, VERSION);
 		html.setHeader(CONTENT_TYPE, htmlCT);
 		htmlCT = null;
