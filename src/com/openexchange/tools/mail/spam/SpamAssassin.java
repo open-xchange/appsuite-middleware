@@ -206,8 +206,7 @@ public class SpamAssassin {
 	private static final InputStream getRawMessageInputStream(final Message msg) throws IOException, MessagingException {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		msg.writeTo(baos);
-		final byte[] buf = baos.toByteArray();
-		return new ByteArrayInputStream(buf);
+		return new ByteArrayInputStream(baos.toByteArray());
 	}
 
 }

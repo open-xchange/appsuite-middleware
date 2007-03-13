@@ -139,8 +139,12 @@ public class CommandExecutor {
 	 * Wait until all output and/or error data have been read
 	 */
 	private final void waitForThreads() throws InterruptedException {
-		outSucker.join();
-		errSucker.join();
+		if (outSucker.isAlive()) {
+			outSucker.join();
+		}
+		if (errSucker.isAlive()) {
+			errSucker.join();
+		}
 	}
 
 	/**
