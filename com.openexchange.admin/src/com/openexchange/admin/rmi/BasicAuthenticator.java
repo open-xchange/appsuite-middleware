@@ -72,7 +72,7 @@ public class BasicAuthenticator {
         fileAuth = AuthenticationFactory.getInstanceFile();
     }
     
-    public void doAuthentication(Credentials authdata) throws InvalidCredentialsException, StorageException{
+    public void doAuthentication(Credentials authdata) throws InvalidCredentialsException{
         if(!fileAuth.authenticate(authdata)){
             throw new InvalidCredentialsException("Authentication failed");
         }

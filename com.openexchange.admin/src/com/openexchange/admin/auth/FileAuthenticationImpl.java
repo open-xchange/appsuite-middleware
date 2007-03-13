@@ -72,7 +72,7 @@ public class FileAuthenticationImpl implements AuthenticationInterface {
      * Authenticates against a textfile
      * 
      */
-    public boolean authenticate(final Credentials authdata) throws StorageException {
+    public boolean authenticate(final Credentials authdata) {
         Credentials master = ClientAdminThread.cache.getMasterCredentials();
         if(master != null && authdata != null &&
            master.getLogin() != null && authdata.getLogin() != null &&
