@@ -91,6 +91,8 @@ public final class AssignmentStorage {
         + "FROM context_server2db_pool "
         + "WHERE server_id=? AND cid=?";
 
+    private static final String CACHE_NAME = "OXDBPoolCache";
+
     /**
      * Lock for the cache.
      */
@@ -217,11 +219,15 @@ public final class AssignmentStorage {
     }
 
     static Assignment getConfigDBAssignment() {
-        init();
         return CONFIG_DB;
     }
 
-    private static void init() {
+    /**
+     * Initializes the static configdb assignment and caching of database
+     * assignments.
+     * @throws DBPoolingException if initialization fails.
+     */
+    public static void init() throws DBPoolingException {
         synchronized (AssignmentStorage.class) {
             if (null == CONFIG_DB) {
                 CONFIG_DB = new Assignment();
@@ -237,11 +243,13 @@ public final class AssignmentStorage {
                     Property.CACHE))) {
                     try {
                         Configuration.load();
-                        CACHE = JCS.getInstance("OXDBPoolCache");
+                        CACHE = JCS.getInstance(CACHE_NAME);
                     } catch (CacheException e) {
-                        throw new RuntimeException(e);
+                        throw new DBPoolingException(DBPoolingException.Code
+                            .NOT_INITIALIZED, e, CACHE_NAME);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new DBPoolingException(DBPoolingException.Code
+                            .NOT_INITIALIZED, e, CACHE_NAME);
                     }
                 }
             }
