@@ -4,3 +4,5 @@ classes
 jar
 .project
 doc
+build-stamp
+configure-stamp
