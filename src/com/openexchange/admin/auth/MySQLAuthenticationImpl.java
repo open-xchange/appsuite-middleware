@@ -78,7 +78,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
     public MySQLAuthenticationImpl() {
     }
 
-    public boolean authenticate(Credentials authdata) throws StorageException {
+    public boolean authenticate(Credentials authdata) {
         return false;
     }
 
