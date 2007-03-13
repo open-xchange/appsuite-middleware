@@ -69,6 +69,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Tools;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -126,7 +127,7 @@ public class Contact extends DataServlet {
 					 * write into servlet's output stream and then some browsers do
 					 * not allow header "Pragma"
 					 */
-					httpServletResponse.setHeader("Pragma", null);
+					Tools.removeHeaderPragma(httpServletResponse);
 					os = httpServletResponse.getOutputStream();
 					if (contactObj.getImage1() != null) {
 						os.write(contactObj.getImage1());
@@ -141,17 +142,15 @@ public class Contact extends DataServlet {
 				}
 				
 				return;
-			} else {
-				final StringWriter sw = new StringWriter();
-				final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
-				contactRequest.action(action, jsonObj);
-				response.setTimestamp(contactRequest.getTimestamp());
-				try {
-					response.setData(new JSONArray(sw.toString()));	
-				} catch (JSONException e) {
-					response.setData(new JSONObject(sw.toString()));
-				}
-
+			} 
+			final StringWriter sw = new StringWriter();
+			final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
+			contactRequest.action(action, jsonObj);
+			response.setTimestamp(contactRequest.getTimestamp());
+			try {
+				response.setData(new JSONArray(sw.toString()));	
+			} catch (JSONException e) {
+				response.setData(new JSONObject(sw.toString()));
 			}
 
 		} catch (OXMandatoryFieldException e) {

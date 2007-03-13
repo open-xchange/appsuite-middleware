@@ -136,12 +136,25 @@ public final class Tools {
         resp.addHeader(CACHE_CONTROL_KEY, CACHE_VALUE2);
         resp.addHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
+    
+    /**
+	 * Reset response header values if we are going to * write directly into
+	 * servlet's output stream cause some browsers do not allow header "Pragma"
+	 * 
+	 * @param resp
+	 *            the servlet response.
+	 */
+	public static void removeHeaderPragma(final HttpServletResponse resp) {
+		resp.addHeader(PRAGMA_KEY, null);
+	}
 
     /**
-     * Formats a date for http headers.
-     * @param date date to format.
-     * @return the string with the formated date.
-     */
+	 * Formats a date for http headers.
+	 * 
+	 * @param date
+	 *            date to format.
+	 * @return the string with the formated date.
+	 */
     public static String formatHeaderDate(final Date date) {
         DATEFORMAT_LOCK.lock();
         try {
@@ -151,14 +164,22 @@ public final class Tools {
         }
     }
     
-    public static Date parseHeaderDate(final String str) throws ParseException {
-        DATEFORMAT_LOCK.lock();
-        try {
-        	return HEADER_DATEFORMAT.parse(str);
-        } finally {
-            DATEFORMAT_LOCK.unlock();
-        }
-    }
+    /**
+	 * Parses a date from a http date header
+	 * 
+	 * @param str -
+	 *            the http date header value
+	 * @return parsed <code>java.util.Date</code> object
+	 * @throws ParseException
+	 */
+	public static Date parseHeaderDate(final String str) throws ParseException {
+		DATEFORMAT_LOCK.lock();
+		try {
+			return HEADER_DATEFORMAT.parse(str);
+		} finally {
+			DATEFORMAT_LOCK.unlock();
+		}
+	}
 
     static {
         HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale

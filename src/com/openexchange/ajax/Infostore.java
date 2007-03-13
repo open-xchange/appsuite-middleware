@@ -100,6 +100,7 @@ import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
+import com.openexchange.tools.servlet.http.Tools;
 
 public class Infostore extends PermissionServlet {
 	
@@ -523,7 +524,7 @@ public class Infostore extends PermissionServlet {
 			// Browsers doesn't like the Pragma header the way we usually set
             // this. Especially if files are sent to the browser. So removing
             // pragma header
-			res.setHeader("Pragma", null);
+			Tools.removeHeaderPragma(res);
 			
 			final byte[] buffer = new byte[200];
 			int bytesRead = 0;
