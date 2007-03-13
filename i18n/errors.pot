@@ -331,7 +331,7 @@ msgstr ""
 
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
-"server: %s"
+"server %s for user %s"
 msgstr ""
 
 msgid "Connection was reset. Please try again."
@@ -650,7 +650,7 @@ msgid "Folder cache has not been enabled in config file %s"
 msgstr ""
 
 msgid ""
-"Folder existence cannot be checked due to unsufficient folder information:"
+"Folder existence cannot be checked due to unsufficient folder information)"
 msgstr ""
 
 msgid "Folder is closed: %s"
@@ -813,7 +813,7 @@ msgstr ""
 msgid "Invalid integer value %s"
 msgstr ""
 
-msgid "Invalid method on a expunged message: %s"
+msgid "Invalid method on an expunged message: %s"
 msgstr ""
 
 msgid "Invalid object ID %s"
@@ -835,6 +835,14 @@ msgid "Invalid task state %d."
 msgstr ""
 
 msgid "Invalid unique message identifier: %s"
+msgstr ""
+
+msgid "Link is not implemented."
+msgstr ""
+
+msgid ""
+"Login to imap server %s failed for user %s in context %s. Please try again "
+"later"
 msgstr ""
 
 msgid "Mail folder \"%s\" could not be created"
@@ -1133,6 +1141,9 @@ msgstr ""
 msgid "SQL problem while updating task: %s."
 msgstr ""
 
+msgid "SQL problem: %1$s."
+msgstr ""
+
 msgid "SearchIterator NULL"
 msgstr ""
 
@@ -1217,6 +1228,9 @@ msgstr ""
 msgid "The attribute %1$s has been truncated."
 msgstr ""
 
+msgid "The cookie with the session identifier is missing."
+msgstr ""
+
 msgid "The default element attributes could not be retrieved"
 msgstr ""
 
@@ -1282,6 +1296,9 @@ msgstr ""
 msgid "The required value \"interval\" is missing or wrong"
 msgstr ""
 
+msgid "The session parameter is missing."
+msgstr ""
+
 msgid ""
 "The task has been changed in the meantime. Task changing date: %1$d, your "
 "task changing date: %2$d."
@@ -1325,7 +1342,7 @@ msgstr ""
 msgid "UNKNOWN EXCEPTION"
 msgstr ""
 
-msgid "URL \"%s\" provided by OxAdapter is malformed."
+msgid "URL \"%s\" is malformed."
 msgstr ""
 
 msgid ""
@@ -1650,7 +1667,7 @@ msgstr ""
 msgid "Wrong message %sheader: %s"
 msgstr ""
 
-msgid "Wrong or missing login data to access server (%s)"
+msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
 msgstr ""
 
 msgid "You are not allowed to create objects in the target folder."
@@ -1732,6 +1749,9 @@ msgid "You need write permissions to unlock a document."
 msgstr ""
 
 msgid "Your database is currently updated."
+msgstr ""
+
+msgid "Your session expired. Please start a new browser session."
 msgstr ""
 
 msgid "clientLastModified IS NULL. Abort action!"
