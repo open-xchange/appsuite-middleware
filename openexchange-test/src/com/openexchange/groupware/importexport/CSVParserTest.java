@@ -60,7 +60,11 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 import junit.framework.JUnit4TestAdapter;
 
-
+/**
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ *
+ */
 public class CSVParserTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(CSVParserTest.class);
@@ -70,6 +74,7 @@ public class CSVParserTest {
 	private static final String ESCAPED_TEST = "\"title 1\", \"title 2\", \"title3\"\r\n\"content \"\"1\"\"\", \"content,2\", \"content\n3\"";
 	private static final String UNEVEN_TEST = "title1, title 2\ncontent 1\ncontent1, content2,content3";
 	private List< List<String> > result;
+	private CSVParser parser;
 	
 	@Test public void parseUnescaped() throws ImportExportException{
 		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3);
@@ -86,17 +91,15 @@ public class CSVParserTest {
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3);
 	}
 	
-	@Test public void parseBugged(){
-		try {
-			CSVParser.parse( UNEVEN_TEST );
-			fail("Should not be able to parse uneven amount of cells");
-		} catch (ImportExportException e) {
-			assertTrue("Cannot parse uneven amount of cells" , true);
-		}
+	@Test public void parseBugged() throws ImportExportException{
+		parser = new CSVParser(UNEVEN_TEST );
+		parser.parse();
+		assertEquals("Should have two unparsable lines", parser.getUnparsableLineNumbers().size(), 2);
 	}
 	
 	protected void doAsserts(String line, String comment, int lines, int cells) throws ImportExportException{
-		result = CSVParser.parse(line);
+		parser = new CSVParser(line);
+		result = parser.parse();
 		assertEquals(comment + ":: Number of lines",result.size(), lines);
 		for(List<String> currList : result){
 			assertEquals(comment + ":: Number of cells", currList.size() , cells);

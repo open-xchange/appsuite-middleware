@@ -58,27 +58,21 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.importexport.AbstractCSVContactTest;
 import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.webdav.xml.FolderTest;
 
@@ -90,9 +84,11 @@ import com.openexchange.webdav.xml.FolderTest;
  *
  */
 public class ImportExportServletTest extends AbstractAJAXTest {
-	private SessionObject sessObj;
+	//private SessionObject sessObj;
 	public static final String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
 	public static final String IMPORTED_CSV = CSVContactImportTest.IMPORT_MULTIPLE;
+	public static final String EXPORT_SERVLET = "export";
+	public static final String IMPORT_SERVLET = "import";
 	
 	public ImportExportServletTest(String name){
 		super(name);
@@ -102,9 +98,9 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		super.setUp();
 		Init.initDB();
 		ContactConfig.init();
-		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	    final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-		sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
+	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
 	}
 	
 	public void tearDown() throws Exception{
@@ -122,21 +118,24 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		//test: import
 		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 		WebConversation webconv = getWebConversation();
-		WebRequest req = new PutMethodWebRequest(
-				getUrl(folderId, type, format), 
-				is, 
-				Format.CSV.getMimeType());
+		WebRequest req = new PostMethodWebRequest(
+				getUrl(IMPORT_SERVLET, folderId, type, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "contacts.csv", is, format.getMimeType());
 		WebResponse webRes = webconv.sendRequest(req);
 		//Response res = Response.parse(webRes.getText());
 		
 		//test: export
 		webconv =  getWebConversation();
-		req = new GetMethodWebRequest( getUrl(folderId, type, format) );
+		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, type, format) );
 		webRes = webconv.sendRequest(req);
 		is = webRes.getInputStream();
 		String resultingCSV = AbstractCSVContactTest.readStreamAsString(is);
 		//finally: checking
-		assertEquals("input == output ?" , CSVParser.parse(insertedCSV) , CSVParser.parse(resultingCSV));
+		CSVParser parser1 = new CSVParser(insertedCSV);
+		CSVParser parser2 = new CSVParser(resultingCSV);
+		assertEquals("input == output ?" , parser1.parse() , parser2.parse());
 		
 		//clean up
 		removeFolder(folderId);
@@ -150,14 +149,16 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		return folderObj.getCreatedBy();
 	}
 
-	public String getUrl(int folderId, int type, Format format) throws IOException, SAXException, JSONException{
+	public String getUrl(String servlet, int folderId, int type, Format format) throws IOException, SAXException, JSONException{
 		StringBuilder bob = new StringBuilder("http://");
 		bob.append(getHostName());
-		bob.append("/ajax/importexport?session=");
+		bob.append("/ajax/");
+		bob.append(servlet);
+		bob.append("?session=");
 		bob.append(getSessionId());
 		addParam(bob, ImportExport.PARAMETER_FOLDERID, folderId ) ;
+		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
 		addParam(bob, ImportExport.AJAX_TYPE, type);
-		addParam(bob, ImportExport.PARAMETER_CONTENT_TYPE, format.getMimeType());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
 		return bob.toString();

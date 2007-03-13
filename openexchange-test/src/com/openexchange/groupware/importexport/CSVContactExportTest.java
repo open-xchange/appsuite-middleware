@@ -125,7 +125,8 @@ public class CSVContactExportTest extends AbstractCSVContactTest {
 		
 		//exporting and asserting
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), type, TEST2_BASE, null);
-		assertEquals("Two imports", CSVParser.parse(TEST2_RESULT), CSVParser.parse(readStreamAsString(is)) );
+		CSVParser parser = new CSVParser();
+		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(readStreamAsString(is)) );
 		
 		//cleaning up
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
