@@ -99,7 +99,6 @@ import com.openexchange.groupware.upload.UploadListener;
 import com.openexchange.groupware.upload.UploadRegistry;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
 
