@@ -2134,9 +2134,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (UploadException e) {
 			LOG.error(e.getMessage(), e);
+			JSONObject responseObj = null;
+			try {
+				responseObj = new JSONObject().put("error", e.getMessage());
+			} catch (JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+				responseObj = null;
+			}
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-					Matcher.quoteReplacement(e.getMessage())).replaceFirst(JS_FRAGMENT_ACTION,
-					e.getAction() == null ? "null" : e.getAction()), e.getMessage(), e);
+					responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, e.getAction() == null ? "null" : e.getAction()), e.getMessage(), e);
 		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			sendErrorAsJS(resp, e.getMessage());
@@ -2531,16 +2538,30 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
 					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
 							uploadQuotaPerFile, uploadFile.getFileName(), uploadFile.getSize());
+					JSONObject responseObj = null;
+					try {
+						responseObj = new JSONObject().put("error", oxme.getMessage());
+					} catch (JSONException e) {
+						LOG.error(e.getMessage(), e);
+						responseObj = null;
+					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-							Matcher.quoteReplacement(oxme.getMessage())).replaceFirst(JS_FRAGMENT_ACTION, actionStr),
-							oxme.getMessage(), oxme);
+							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))
+							.replaceFirst(JS_FRAGMENT_ACTION, actionStr), oxme.getMessage(), oxme);
 				}
 				size += uploadFile.getSize();
 				if (uploadQuota > 0 && size > uploadQuota) {
 					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED, uploadQuota);
+					JSONObject responseObj = null;
+					try {
+						responseObj = new JSONObject().put("error", oxme.getMessage());
+					} catch (JSONException e) {
+						LOG.error(e.getMessage(), e);
+						responseObj = null;
+					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-							Matcher.quoteReplacement(oxme.getMessage())).replaceFirst(JS_FRAGMENT_ACTION, actionStr),
-							oxme.getMessage(), oxme);
+							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))
+							.replaceFirst(JS_FRAGMENT_ACTION, actionStr), oxme.getMessage(), oxme);
 				}
 			}
 			return true;
