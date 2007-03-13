@@ -799,12 +799,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 					throw new UploadException(UploadCode.MISSING_AFFILIATION_ID, action);
 				}
 				return uploadEvent;
-			} else {
-				throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
 			}
-		} else {
-			throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
+			throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
 		}
+		throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
 	}
 
 	private UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
