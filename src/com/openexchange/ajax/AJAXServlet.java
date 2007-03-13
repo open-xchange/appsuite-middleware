@@ -763,7 +763,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			}
 			if (action != null
 					&& (action.equals(ACTION_NEW) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE)
-							|| action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY))) {
+							|| action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY)
+							|| com.openexchange.groupware.importexport.Format.containsConstantName(action))) {
 				uploadEvent.setAction(action);
 				/*
 				 * Set affiliation to mail upload

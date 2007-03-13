@@ -137,7 +137,7 @@ public class ImporterExporter {
 	 * @param sessObj: Session object used to determine access rights
 	 * @param format: Format the imported data is in
 	 * @param is: InputStream containing the data to be imported
-	 * @param folders: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
+	 * @param folderMapping: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 */
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams) throws ImportExportException{

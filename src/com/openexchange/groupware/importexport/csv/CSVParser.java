@@ -64,8 +64,10 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  * This class represents a combined parser and lexer for CSV files.
  * It is designed rather simple with speed in mind. 
  * 
- * Note: It does not do any guessing, so make sure it gets a proper 
- * CSV file with the dimensions M x N.
+ * Note: Proper CSV files should have the dimensions M x N. If this
+ * parser encounters a line that has not as many columns as the others,
+ * it will not parse it but add it to a list you can access via
+ * getUnparsableLineNumbers() 
  * 
  * Note: See also RFC 4180
  * 
@@ -89,8 +91,28 @@ public class CSVParser {
 	public static final char LINE_DELIMITER = '\n';
 	public static final char CELL_DELIMITER = ',';
 	public static final char ESCAPER = '"';
+	private List<Integer> unparsableLines;
+	private String file;
 	
-	public static List< List<String> > parse(String file) throws ImportExportException{
+	public CSVParser(String file){
+		this();
+		this.file = file;
+	}
+	
+	public CSVParser(){
+		this.unparsableLines = new LinkedList<Integer>();
+	}
+
+	public List< List<String> > parse(String str) throws ImportExportException{
+		this.file = str;
+		this.unparsableLines = new LinkedList<Integer>();
+		return parse();
+	}
+	
+	public List< List<String> > parse() throws ImportExportException{
+		if(file == null){
+			return null;
+		}
 		//changing all possible formats (Mac, DOS) to Unix
 		file = file.replace("\r\n", "\n").replace("\r", "\n");
 		//adding ending to create well-formed file
@@ -105,6 +127,7 @@ public class CSVParser {
 		List<String> currentLine = new LinkedList<String>();
 		List< List<String> > structure = new LinkedList<List <String> >();
 		
+		
 		for(int i = 0; i < arr.length; i++){
 			switch(arr[i]){
 				case LINE_DELIMITER: 
@@ -116,10 +139,13 @@ public class CSVParser {
 						currentCell = new StringBuilder();
 						if(numberOfCells == -1 ){
 							numberOfCells = currentLine.size();
+							structure.add(currentLine);
 						} else if(numberOfCells != currentLine.size() ){
-							throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+							//throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+							unparsableLines.add(currentLineNumber);
+						} else {
+							structure.add(currentLine);
 						}
-						structure.add(currentLine);
 						currentLine = new LinkedList<String>();
 					}
 				break;
@@ -155,19 +181,15 @@ public class CSVParser {
 		if( ! (currentCell.length() == 0 && currentLine.size() == 0) ){
 			throw EXCEPTIONS.create(1);
 		}
-		/*if(currentCell.length() != 0){
-			currentLine.add( currentCell.toString().trim() );
-		}
-		if(currentLine.size() != 0){
-			currentLineNumber++;
-			if(numberOfCells == -1 ){
-				numberOfCells = currentLine.size();
-			} else if(numberOfCells != currentLine.size() ){
-				throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
-			}
-			structure.add( currentLine );
-		}*/
 		
 		return structure;
+	}
+	
+	public List<Integer> getUnparsableLineNumbers(){
+		return this.unparsableLines;
+	}
+	
+	public void setFileContent(String content){
+		this.file = content;
 	}
 }

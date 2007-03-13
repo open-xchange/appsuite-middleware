@@ -1,3 +1,14 @@
+* 2007-03-13 - tobias.prinz@open-xchange.com
+
+  - Split the infamous ImportExport servlet into two servlets, changed 
+    parameter setup according to rest of the HTTP API, changed Format,
+    changed tests accordingly. Changed AJAXServlet to handle uploads
+    from servlets.
+  - ###CHANGED SERVLETMAPPING.PROPERTIES!### to
+    refer to two servlets now instead of one.
+  - Changed CSVParser to list lines it could not parse instead from 
+    breaking.
+
 * 2007-03-13 - thorben.betten@open-xchange.com
 
  - New Property to enable/disable setting of SMTP header 'ENVELPE-FROM'
@@ -6,7 +17,7 @@
  - Fixed bug #6417: Preprocessing html content to display links
  #################### ATTENTION ! #####################
   - CONFIG change: New property in 'imap.properties' to enable/disable
-   setting of SMTP header 'ENVELPE-FROM'
+   setting of SMTP header 'ENVELOPE-FROM'
 #################################################
 
 * 2007-03-13 - choeger@open-xchange.com
@@ -29,7 +40,7 @@
    needed
  - Fixed bug #6244: Enhanced error logging on connect error
  #################### ATTENTION ! #####################
- - CONFIG change: New property in 'imap.proeprties' to enable/disable
+ - CONFIG change: New property in 'imap.properties' to enable/disable
    allowance of folder subsription status
 #################################################
 - Implemented respect of folder subsription status: GUI can ask for field

@@ -52,46 +52,31 @@
 package com.openexchange.ajax;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONWriter;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
-import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.ImporterExporter;
-import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 
 /**
- * ImportExport
+ * Abtract class for both importers and exporters that does 
+ * the configuration via Spring. 
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration)
  */
 
-public class ImportExport extends SessionServlet {
+public abstract class ImportExport extends SessionServlet {
 
 	private static final long serialVersionUID = -7502282736897750395L;
 
 	public static final String AJAX_TYPE = "type";
 	
-	private static final Log LOG = LogFactory.getLog(ImportExport.class);
+	protected static Log LOG;
 	
-	private ImporterExporter importerExporter = null;
+	protected ImporterExporter importerExporter = null;
 	
 	
 	public ImportExport(){
@@ -102,90 +87,6 @@ public class ImportExport extends SessionServlet {
 			importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
 		} else {
 			LOG.error("missing property: IMPORTEREXPORTER");
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		try {
-			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
-			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
-			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
-			
-			final String mimeType = req.getContentType();
-			Format f = Format.getFormatByMimeType(mimeType);
-			if(f == null){
-				f = Format.getFormatByMimeType(
-					DataServlet.parseMandatoryStringParameter(req, PARAMETER_CONTENT_TYPE));
-			}
-			
-			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), f, folder, type, fieldsToBeExported, req.getParameterMap());
-			
-			final OutputStream outputStream = resp.getOutputStream();
-			resp.setContentLength((int) inputStream.getSize());
-			resp.setContentType(inputStream.getFormat().getMimeType());
-			
-			final byte[] b = new byte[1024];
-			int i = 0; 
-			while ((i = inputStream.read(b)) != -1) {
-				outputStream.write(b, 0, i);
-				outputStream.flush();
-			}		
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}		
-	}
-	
-	@SuppressWarnings({ "unchecked", "deprecation" })
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		try {
-			final int[] type = DataServlet.parseMandatoryIntParameterArray(req, AJAX_TYPE);
-			final String[] folder = DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID);
-			
-			final String mimeType = req.getContentType();
-			Format f = Format.getFormatByMimeType(mimeType);
-			if(f == null){
-				f = Format.getFormatByMimeType(
-					DataServlet.parseMandatoryStringParameter(req, PARAMETER_CONTENT_TYPE));
-			}
-			
-			final HashMap <String, Integer> hashMap = new HashMap<String, Integer>();
-			if (type.length != folder.length) {
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "invalid data in request");
-				return;
-			}
-			
-			for (int a = 0; a < type.length; a++) {
-				hashMap.put(folder[a], type[a]);
-			}
-			
-			final List<ImportResult> importResult = importerExporter.importData(getSessionObject(req), f, req.getInputStream(), hashMap, req.getParameterMap());
-			final StringWriter stringWriter = new StringWriter();
-			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
-			
-			final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
-			
-			jsonWriter.array();
-			for (int a = 0; a < importResult.size(); a++) {
-				importExportWriter.writeObject(importResult.get(a));
-			}
-			jsonWriter.endArray();
-			
-			final OutputStream outputStream = resp.getOutputStream();
-			
-			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			
-			final String content = stringWriter.toString();
-			resp.setContentLength(content.length());
-			
-			outputStream.write(content.getBytes("UTF-8"));
-			outputStream.flush();
-		} catch (ImportExportException ex) {
-			LOG.error(ex.toString(), ex);
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
-		} catch (Exception ex) {
-			LOG.error(ex.toString(), ex);
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
 		}
 	}
 }

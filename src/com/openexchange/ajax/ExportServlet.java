@@ -47,70 +47,64 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.ajax;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.SizedInputStream;
 
 /**
- * This enumeration lists formats for import or export.
- * 
- * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
+ * Servlet for doing exports of data like contacts in CSV format.
  *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration and refactoring)
  */
-public enum Format {
-	CSV("CSV" , "Comma separated values","text/csv","csv"),
-	OUTLOOK_CSV("OUTLOOK_CSV" , "Comma separated values","text/csv","csv"),
-	ICAL("ICAL" , "iCal","text/calendar","ics"),
-	VCARD("VCARD", "vCard","text/x-vcard","vcf"),
-	TNEF("TNEF" , "Transport Neutral Encapsulation Format" , "application/ms-tnef", "tnef");
+public class ExportServlet extends ImportExport {
 	
-	private String constantName, mimetype, longName, extension;
-	
-	private Format(final String constantName, final String longName, final String mimetype, final String extension){
-		this.constantName = constantName;
-		this.longName = longName;
-		this.mimetype = mimetype;
-		this.extension = extension;
+	private static final long serialVersionUID = -4391378107330348835L;
+
+	public ExportServlet(){
+		super();
+		LOG = LogFactory.getLog(ExportServlet.class);
 	}
 	
-	public String getFullName(){
-		return this.longName;
-	}
-	
-	public String getMimeType(){
-		return this.mimetype;
-	}
-	
-	public String getExtension(){
-		return this.extension;
-	}
-	
-	public String getConstantName(){
-		return this.constantName;
-	}
-	
-	public static Format getFormatByMimeType(String mimeType) {
-		for (Format f : Format.values()) {
-			if (f.getMimeType().equals(mimeType)) {
-				return f;
+	@SuppressWarnings("unchecked")
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
+			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
+			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
+			
+			//checking format
+			final Format format = Format.getFormatByConstantName(
+					DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION));
+			if(format == null){
+				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
 			}
-		}
-		return null;
+			
+			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), format, folder, type, fieldsToBeExported, req.getParameterMap());
+			
+			final OutputStream outputStream = resp.getOutputStream();
+			resp.setContentLength((int) inputStream.getSize());
+			resp.setContentType(inputStream.getFormat().getMimeType());
+			
+			final byte[] b = new byte[1024];
+			int i = 0; 
+			while ((i = inputStream.read(b)) != -1) {
+				outputStream.write(b, 0, i);
+				outputStream.flush();
+			}		
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}		
 	}
-	
-	public static Format getFormatByConstantName(String constantName) {
-		for (Format f : Format.values()) {
-			if (f.getConstantName().equals(constantName)) {
-				return f;
-			}
-		}
-		return null;
-	}
-	
-	public static boolean containsConstantName(String name){
-		for(Format f: Format.values()){
-			if(name.equals( f.constantName )){
-				return true;
-			}
-		}
-		return false;
-	}
+
 }

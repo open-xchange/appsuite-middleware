@@ -152,7 +152,7 @@ public class CSVContactImporter implements Importer {
 		}
 		String folder = getFolder(folderMappings);
 		String csvStr = transformInputStreamToString(is);
-		List <List <String> >csv = CSVParser.parse(csvStr);
+		List <List <String> >csv = new CSVParser().parse(csvStr);
 		Iterator< List<String> > iter = csv.iterator();
 		//get header fields
 		List<String> fields = (List<String>) iter.next();
