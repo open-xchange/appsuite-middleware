@@ -70,6 +70,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 /**
@@ -83,6 +85,11 @@ import org.json.JSONException;
     component = Component.SESSION
 )
 public abstract class SessionServlet extends AJAXServlet {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(SessionServlet.class);
 
     /**
      * Factory for creating exceptions.
