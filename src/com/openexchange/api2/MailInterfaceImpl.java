@@ -170,6 +170,7 @@ import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * MailInterfaceImpl
@@ -2663,7 +2664,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throws OXException {
 		try {
 			init();
-			final MimeMessage newMsg = new MimeMessage(imapCon.getSession());
+			final SMTPMessage newSMTPMsg = new SMTPMessage(imapCon.getSession());
 			IMAPFolder originalMsgFolder = null;
 			MimeMessage originalMsg = null;
 			MessageFiller msgFiller = null;
@@ -2711,7 +2712,7 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						final String pMsgId = originalMsg.getHeader("Message-Id", null);
 						if (pMsgId != null) {
-							newMsg.setHeader("In-Reply-To", pMsgId);
+							newSMTPMsg.setHeader("In-Reply-To", pMsgId);
 						}
 						/*
 						 * Set References header field
@@ -2751,7 +2752,7 @@ public class MailInterfaceImpl implements MailInterface {
 							 * "In-Reply-To:", or "Message-ID:" fields, then the
 							 * new message will have no "References:" field.
 							 */
-							newMsg.setHeader("References", refBuilder.toString());
+							newSMTPMsg.setHeader("References", refBuilder.toString());
 						}
 						/*
 						 * Mark original message as answered
@@ -2779,13 +2780,13 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Fill message
 					 */
 					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
-					msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
+					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
 						draftFolder.open(Folder.READ_WRITE);
 						mailInterfaceMonitor.changeNumActive(true);
 					}
-					newMsg.setFlag(Flags.Flag.DRAFT, true);
+					newSMTPMsg.setFlag(Flags.Flag.DRAFT, true);
 					long uidNext = draftFolder.getUIDNext();
 					if (uidNext == -1) {
 						/*
@@ -2793,10 +2794,10 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						uidNext = IMAPUtils.getUIDNext(draftFolder);
 					}
-					newMsg.saveChanges();
+					newSMTPMsg.saveChanges();
 					final long start = System.currentTimeMillis();
 					try {
-						draftFolder.appendMessages(new Message[] { newMsg });
+						draftFolder.appendMessages(new Message[] { newSMTPMsg });
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);
@@ -2812,11 +2813,11 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
-				msgFiller.fillMessage(msgObj, newMsg, uploadEvent, sendType);
+				msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 				/*
 				 * Check recipients
 				 */
-				final Address[] allRecipients = newMsg.getAllRecipients();
+				final Address[] allRecipients = newSMTPMsg.getAllRecipients();
 				if (allRecipients == null || allRecipients.length == 0) {
 					throw new OXMailException(MailCode.MISSING_RECIPIENTS);
 				}
@@ -2831,19 +2832,30 @@ public class MailInterfaceImpl implements MailInterface {
 				} else {
 					ia = InternetAddress.parse(usm.getReplyToAddr(), false);
 				}
-				newMsg.setReplyTo(ia);
+				newSMTPMsg.setReplyTo(ia);
 				/*
 				 * Set sent date if not done, yet
 				 */
-				if (newMsg.getSentDate() == null) {
-					newMsg.setSentDate(new Date());
+				if (newSMTPMsg.getSentDate() == null) {
+					newSMTPMsg.setSentDate(new Date());
 				}
 				/*
 				 * Set default subject if none set
 				 */
 				final String subject;
-				if ((subject = newMsg.getSubject()) == null || subject.length() == 0) {
-					newMsg.setSubject(MailStrings.DEFAULT_SUBJECT);
+				if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
+					newSMTPMsg.setSubject(MailStrings.DEFAULT_SUBJECT);
+				}
+				/*
+				 * TODO: Fill in property value that defines, if ENVELOPE-FROM
+				 * should be set or not
+				 */
+				if (false) {
+					/*
+					 * Set ENVELOPE-FROM in SMTP message to user's primary email
+					 * address
+					 */
+					newSMTPMsg.setEnvelopeFrom(sessionObj.getUserObject().getMail());
 				}
 				try {
 					final long start = System.currentTimeMillis();
@@ -2858,8 +2870,8 @@ public class MailInterfaceImpl implements MailInterface {
 							transport.connect();
 						}
 						mailInterfaceMonitor.changeNumActive(true);
-						newMsg.saveChanges();
-						transport.sendMessage(newMsg, allRecipients);
+						newSMTPMsg.saveChanges();
+						transport.sendMessage(newSMTPMsg, allRecipients);
 					} finally {
 						if (transport != null) {
 							transport.close();
@@ -2868,7 +2880,7 @@ public class MailInterfaceImpl implements MailInterface {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 					if (LOG.isInfoEnabled()) {
-						LOG.info("Message successfully sent ! ! ! (subject=" + newMsg.getSubject() + ')');
+						LOG.info("Message successfully sent ! ! ! (subject=" + newSMTPMsg.getSubject() + ')');
 					}
 				} catch (MessagingException e) {
 					throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -2894,10 +2906,10 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					uidNext = IMAPUtils.getUIDNext(sentFolder);
 				}
-				newMsg.setFlag(Flags.Flag.SEEN, true);
+				newSMTPMsg.setFlag(Flags.Flag.SEEN, true);
 				final long start = System.currentTimeMillis();
 				try {
-					sentFolder.appendMessages(new Message[] { newMsg });
+					sentFolder.appendMessages(new Message[] { newSMTPMsg });
 				} catch (MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
