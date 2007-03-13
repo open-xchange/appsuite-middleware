@@ -1,3 +1,7 @@
+* 2007-03-13 - choeger@open-xchange.com
+
+  - Bugfix #6341 StartupScript (open-xchange-groupware) doesnt work good
+
 * 2007-03-12 - marcus.klein@open-xchange.com
 
   - Bugfix #6127 Improved error message handling if session is not found.
