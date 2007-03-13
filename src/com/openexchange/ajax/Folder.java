@@ -104,6 +104,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Folder
@@ -165,7 +166,7 @@ public class Folder extends SessionServlet {
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-		disableBrowserCache(resp);
+		Tools.disableCaching(resp);
 		try {
 			actionGet(req, resp);
 		} catch (Exception e) {
@@ -183,28 +184,13 @@ public class Folder extends SessionServlet {
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-		disableBrowserCache(resp);
+		Tools.disableCaching(resp);
 		try {
 			actionPut(req, resp);
 		} catch (Exception e) {
 			LOG.error("doGet", e);
 			writeError(e.toString(), new JSONWriter(resp.getWriter()));
 		}
-	}
-
-	/**
-	 * The magic header values to disable caching
-	 * 
-	 * @param resp
-	 */
-	private final static void disableBrowserCache(final HttpServletResponse resp) {
-		/*
-		 * The magic spell to disable caching
-		 */
-		resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-		resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-		resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-		resp.setHeader("Pragma", "no-cache");
 	}
 
 	/**

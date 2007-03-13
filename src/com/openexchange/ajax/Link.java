@@ -57,6 +57,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Tools;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -125,13 +126,9 @@ public class Link extends DataServlet {
 
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
-		 * The magic spell to disable caching
-		 * stolen from folder api
+		 * Disable browser caching
 		 */
-		httpServletResponse.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-		httpServletResponse.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-		httpServletResponse.setHeader("Cache-Control", "post-check=0, pre-check=0");
-		httpServletResponse.setHeader("Pragma", "no-cache");
+		Tools.disableCaching(httpServletResponse);
 		try {
 			final StringWriter sw = new StringWriter();
 

@@ -78,6 +78,7 @@ import com.openexchange.sessiond.LoginException.Code;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.tools.servlet.http.Tools;
 
 public class Login extends AJAXServlet {
 	
@@ -190,10 +191,7 @@ public class Login extends AJAXServlet {
             /*
              * The magic spell to disable caching
              */
-            resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-            resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-            resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-            resp.setHeader("Pragma", "no-cache");
+            Tools.disableCaching(resp);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             if (!response.hasError()) { 
                 writeCookie(resp, sessionObj);
@@ -209,10 +207,10 @@ public class Login extends AJAXServlet {
                 sendError(resp);
             }
 		} else if (action.equals(ACTION_LOGOUT)) {
-            resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-            resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-            resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-            resp.setHeader("Pragma", "no-cache");
+			/*
+             * The magic spell to disable caching
+             */
+            Tools.disableCaching(resp);
 			final String cookieId = req.getParameter(PARAMETER_SESSION);
 			if (cookieId == null) {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -244,10 +242,10 @@ public class Login extends AJAXServlet {
 				LOG.debug("no session cookie found in request!");
 			}
 		} else if (action.equals(ACTION_REDIRECT)) {
-            resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-            resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-            resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-            resp.setHeader("Pragma", "no-cache");
+			/*
+             * The magic spell to disable caching
+             */
+			Tools.disableCaching(resp);
 			final String randomToken = req.getParameter(_random);
 			if (randomToken == null) {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -270,7 +268,7 @@ public class Login extends AJAXServlet {
 				final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
 				for (int a = 0; a < cookie.length; a++) {
 					final String cookieName = cookie[a].getName();
-					if (cookie[a].getName().startsWith(cookiePrefix)) {
+					if (cookieName.startsWith(cookiePrefix)) {
 						final String session = cookie[a].getValue();
 						if (sessiondConnector.refreshSession(session)) {
 							final SessionObject sessionObj = sessiondConnector.getSession(session);
@@ -283,13 +281,12 @@ public class Login extends AJAXServlet {
                                 response.setException(oje);
                             }
 							break;
-						} else {
-                            final Cookie respCookie = new Cookie(cookie[a]
-                                .getName(), cookie[a].getValue());
-                            respCookie.setPath("/");
-                            respCookie.setMaxAge(0); // delete
-                            resp.addCookie(respCookie);
-                        }
+						}
+                        final Cookie respCookie = new Cookie(cookie[a]
+                            .getName(), cookie[a].getValue());
+                        respCookie.setPath("/");
+                        respCookie.setMaxAge(0); // delete
+                        resp.addCookie(respCookie);
 					}
 				}
                 if (null == login) {
@@ -300,10 +297,10 @@ public class Login extends AJAXServlet {
                 response.setException(new OXJSONException(
                     OXJSONException.Code.INVALID_COOKIE, null));
             }
-            resp.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-            resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-            resp.setHeader("Cache-Control", "post-check=0, pre-check=0");
-            resp.setHeader("Pragma", "no-cache");
+			/*
+             * The magic spell to disable caching
+             */
+			Tools.disableCaching(resp);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             try {
