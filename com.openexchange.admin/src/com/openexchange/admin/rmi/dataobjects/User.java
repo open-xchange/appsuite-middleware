@@ -50,6 +50,7 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
@@ -69,7 +70,7 @@ public class User implements Serializable {
      */
     private static final long serialVersionUID = -4492376747507390066L;
 
-    private final OXUserExtensionInterface[] extensions = null;
+    private ArrayList<OXUserExtensionInterface> extensions = null;
     private final boolean extensionsset = false;
 
     private Integer id;
@@ -2174,7 +2175,7 @@ public class User implements Serializable {
             try {
                 final Object ob = f.get(this);
                 final String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID")) {
+                if (ob != null && !tname.equals("serialVersionUID") && !tname.endsWith("set")) {
                     ret.append("  ");
                     ret.append(tname);
                     ret.append(": ");
@@ -2192,6 +2193,7 @@ public class User implements Serializable {
     }
 
     private void init() {
+        this.extensions = new ArrayList<OXUserExtensionInterface>();
         this.id = null;
         this.username = null;
         this.password = null;
@@ -2303,10 +2305,10 @@ public class User implements Serializable {
     }
 
     public void addExtension(final OXUserExtensionInterface extension) {
-
+        this.extensions.add(extension);
     }
 
-    public OXUserExtensionInterface[] getExtensions() {
+    public ArrayList<OXUserExtensionInterface> getExtensions() {
         return this.extensions;
     }
 
@@ -2328,4 +2330,5 @@ public class User implements Serializable {
         }
         this.passwordMech = passwordMech;
     }
+    
 }
