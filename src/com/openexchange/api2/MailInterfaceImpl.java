@@ -3659,6 +3659,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				if (folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
+					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
 				}
 				if (folderObj.containsACLs()) {
 					/*
@@ -3689,10 +3690,6 @@ public class MailInterfaceImpl implements MailInterface {
 					for (int i = 0; i < folderObj.getACL().length; i++) {
 						updateMe.addACL(folderObj.getACL()[i]);
 					}
-				}
-				if (!updateMe.isSubscribed()) {
-					updateMe.setSubscribed(true);
-					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), true);
 				}
 				retval = updateMe.getFullName();
 			} else {
