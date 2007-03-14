@@ -154,7 +154,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				provider.releaseWriteConnection(sessionHolder.getSessionObject().getContext(), con);
 			}
 		}
-		for(OXWebdavResource res : children) {
+		for(OXWebdavResource res : new HashSet<OXWebdavResource>(children)) {
 			res.removedParent();
 		}
 	}
