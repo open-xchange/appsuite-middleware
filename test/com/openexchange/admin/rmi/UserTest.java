@@ -78,26 +78,22 @@ public class UserTest extends AbstractTest {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
     }
     
-    private Context getTestContext() throws Exception{
-        return new Context(1);
-    }
-    
     public void testCreate() throws Exception {        
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
-        final Credentials cred = DummyCredentials();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));        
-        int[] id = {urs.getId()};
+        final int[] id = {urs.getId()};
         
         // now load user from server and check if data is correct, else fail
-        User[] srv_response = oxu.getData(ctx,id,cred);
-        User srv_loaded = srv_response[0];
+        final User[] srv_response = oxu.getData(ctx,id,cred);
+        final User srv_loaded = srv_response[0];
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -109,12 +105,13 @@ public class UserTest extends AbstractTest {
     public void testDelete() throws Exception {
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final Credentials cred = DummyCredentials();
+        
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));             
         
@@ -134,18 +131,18 @@ public class UserTest extends AbstractTest {
     public void testGetData() throws Exception {
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();   
-        final Credentials cred = DummyCredentials();
+        
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
-        
         // now load user from server and check if data is correct, else fail
-        User[] srv_response = oxu.getData(ctx,new int[]{urs.getId()},cred);
-        User srv_loaded = srv_response[0];
+        final User[] srv_response = oxu.getData(ctx,new int[]{urs.getId()},cred);
+        final User srv_loaded = srv_response[0];
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -156,18 +153,19 @@ public class UserTest extends AbstractTest {
 
     public void testGetDataByUsername() throws Exception {
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final Credentials cred = DummyCredentials();
+        
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         
         // now load user from server and check if data is correct, else fail
-        User[] srv_response = oxu.getData(ctx,new User[]{urs},cred);
-        User srv_loaded = srv_response[0];
+        final User[] srv_response = oxu.getData(ctx,new User[]{urs},cred);
+        final User srv_loaded = srv_response[0];
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -179,17 +177,17 @@ public class UserTest extends AbstractTest {
     public void testGetModuleAccess() throws Exception {        
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess(); 
-        final Credentials cred = DummyCredentials();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         // get module access 
-        UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);        
@@ -199,17 +197,17 @@ public class UserTest extends AbstractTest {
     public void testChangeModuleAccess() throws Exception {
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final Credentials cred = DummyCredentials();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         // get module access 
-        UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);  
@@ -238,7 +236,7 @@ public class UserTest extends AbstractTest {
         oxu.changeModuleAccess(ctx,urs.getId(),srv_response,cred);        
         
         // load again and verify
-        UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx,urs.getId(),cred);
         
         // test if module access was set correctly
         compareUserAccess(srv_response,srv_response_changed);          
@@ -248,21 +246,21 @@ public class UserTest extends AbstractTest {
     public void testGetAll() throws Exception {
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final Credentials cred = DummyCredentials();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
-        int[] srv_response = oxu.getAll(ctx,cred);
+        final int[] srv_response = oxu.getAll(ctx,cred);
         
         assertTrue("Expected list size > 0 ",srv_response.length>0);
         
         boolean founduser = false;
-        for(int element: srv_response){
+        for(final int element: srv_response){
             if(element==urs.getId()){
                 founduser = true;
             }
@@ -274,18 +272,18 @@ public class UserTest extends AbstractTest {
     public void testChange() throws Exception {
         
         // get context to create an user
-        Context ctx = getTestContext();
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         
         // create new user
-        OXUserInterface oxu = getUserClient();
-        final Credentials cred = DummyCredentials();
+        final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         
         // now load user from server and check if data is correct, else fail
         User[] srv_response = oxu.getData(ctx,new int[]{urs.getId()},cred);
-        User srv_loaded = srv_response[0];
+        final User srv_loaded = srv_response[0];
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -302,7 +300,7 @@ public class UserTest extends AbstractTest {
         
         // load again
         srv_response = oxu.getData(ctx,new int[]{srv_loaded.getId()},cred);
-        User user_changed_loaded = srv_response[0];
+        final User user_changed_loaded = srv_response[0];
         if(srv_loaded.getId().equals(user_changed_loaded.getId())){
             //verify data
             compareUser(srv_loaded,user_changed_loaded);
@@ -330,7 +328,7 @@ public class UserTest extends AbstractTest {
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
 
-        HashSet<String> aliase = new HashSet<String>();
+        final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         aliase.add("alias2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         aliase.add("alias3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -582,9 +580,9 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
     
-    public static int addUser(Context ctx,User usr,UserModuleAccess access) throws Exception{
+    public static int addUser(final Context ctx,final User usr,final UserModuleAccess access) throws Exception{
         // create new user
-        OXUserInterface oxu = getUserClient();        
+        final OXUserInterface oxu = getUserClient();        
         return oxu.create(ctx,usr,access,DummyCredentials());
     }
     
