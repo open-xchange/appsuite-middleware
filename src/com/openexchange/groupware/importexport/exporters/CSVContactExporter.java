@@ -71,7 +71,6 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
@@ -225,8 +223,8 @@ public class CSVContactExporter implements Exporter {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
 	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 	
-	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final int type, Map <String, String[]> optionalParams)  throws ImportExportException {
-		if( !(type == Types.CONTACT && format.equals(Format.CSV)) ){
+	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, Map <String, String[]> optionalParams)  throws ImportExportException {
+		if( !format.equals(Format.CSV) ){
 			return false;
 		}
 		FolderObject fo;
@@ -236,7 +234,7 @@ public class CSVContactExporter implements Exporter {
 			return false;
 		}
 		//check format of folder
-		if ( fo.getModule() != ModuleTypeTranslator.getFolderObjectConstant(type) ){
+		if ( fo.getModule() != FolderObject.CONTACT ){
 			return false;
 		}
 		//check read access to folder
@@ -252,9 +250,9 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type,
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
 			final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
-		if(! canExport(sessObj, format, folder, type, optionalParams)){
+		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
 		}
 		final int folderId = getFolderId(folder);
@@ -301,8 +299,8 @@ public class CSVContactExporter implements Exporter {
 
 	
 	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
-			final int type, final int objectId,	final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
-		if(! canExport(sessObj, format, folder, type, optionalParams)){
+			final int objectId,	final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
+		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
 		}
 		final int folderId = getFolderId(folder);

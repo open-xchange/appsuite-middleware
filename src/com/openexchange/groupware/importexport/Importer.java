@@ -69,12 +69,12 @@ public interface Importer {
 	 *
 	 * @param sessObj: Session object enabling us to check write access.
 	 * @param format: Format of the data that is meant to be imported
-	 * @param foldermapping: Those folders (plus their type stored as int as defined in the class Types) the data is meant to be imported int
+	 * @param folders: Those folders the data is meant to be imported int
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract boolean canImport(SessionObject sessObj, Format format, Map<String, Integer> folderMappings, Map<String, String[]> optionalParams) throws ImportExportException;
+	public abstract boolean canImport(SessionObject sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 
@@ -91,7 +91,7 @@ public interface Importer {
 			SessionObject sessObj,
 			Format format,
 			InputStream is,
-			Map<String, Integer> folderMappings, 
+			List<String> folders, 
 			Map<String, String[]> optionalParams ) throws ImportExportException;
 
 }

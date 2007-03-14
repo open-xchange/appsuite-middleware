@@ -137,16 +137,16 @@ public class ImporterExporter {
 	 * @param sessObj: Session object used to determine access rights
 	 * @param format: Format the imported data is in
 	 * @param is: InputStream containing the data to be imported
-	 * @param folderMapping: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
+	 * @param folders: One or more folders the data is to be imported to (usually one, but iCal may contain both tasks and appointments and future formats might contain even more)
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 */
-	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams) throws ImportExportException{
+	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Importer imp : getImporters()){
-			if(imp.canImport(sessObj, format, folderMapping, optionalParams)){
-				return imp.importData(sessObj, format, is, folderMapping, optionalParams);
+			if(imp.canImport(sessObj, format, folders, optionalParams)){
+				return imp.importData(sessObj, format, is, folders, optionalParams);
 			}
 		}
-		throw EXCEPTIONS.create(0, format, folderMapping.keySet());
+		throw EXCEPTIONS.create(0, format, folders);
 	}
 
 	/**
@@ -160,10 +160,10 @@ public class ImporterExporter {
 	 * @return InputStream containing the exported data in given format
 	 * @throws ImportExportException in case of a missing exporter for that kind of data 
 	 */
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: getExporters()){
-			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
-				return exp.exportData(sessObj, format, folder, type, fieldsToBeExported, optionalParams);
+			if(exp.canExport(sessObj, format, folder, optionalParams)){
+				return exp.exportData(sessObj, format, folder, fieldsToBeExported, optionalParams);
 			}
 		}
 		throw EXCEPTIONS.create(1, folder, format);
@@ -182,9 +182,9 @@ public class ImporterExporter {
 	 * @return
 	 * @throws ImportExportException
 	 */
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int type, final int objectId, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException{
 		for(Exporter exp: exporters){
-			if(exp.canExport(sessObj, format, folder, type, optionalParams)){
+			if(exp.canExport(sessObj, format, folder,  optionalParams)){
 				return exp.exportData(sessObj, format, folder, objectId, fieldsToBeExported, optionalParams);
 			}
 		}
@@ -202,12 +202,12 @@ public class ImporterExporter {
 	 * @return A set of possible formats this folder can be exported to
 	 * @throws ImportExportException 
 	 */
-	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, final int type, Map<String, String[]> optionalParams) throws ImportExportException{
+	public Set<Format> getPossibleExportFormats(final SessionObject sessObj, final String folder, Map<String, String[]> optionalParams) throws ImportExportException{
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Exporter exp: exporters){
-				if(exp.canExport(sessObj, format, folder, type, optionalParams)){
+				if(exp.canExport(sessObj, format, folder, optionalParams)){
 					res.add(format);
 					break;
 				}
@@ -225,12 +225,12 @@ public class ImporterExporter {
 	 * @return A set of possible formats this folder can import
 	 * @throws ImportExportException 
 	 */
-	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final Map<String, Integer> folderMapping, Map<String, String[]> optionalParams) throws ImportExportException{
+	public Set<Format> getPossibleImportFormats(final SessionObject sessObj, final List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException{
 		Set<Format> res = new HashSet<Format>();
 		
 		for(Format format: Format.values()){
 			for(Importer imp: importers){
-				if(imp.canImport(sessObj, format, folderMapping, optionalParams)){
+				if(imp.canImport(sessObj, format, folders, optionalParams)){
 					res.add(format);
 					break;
 				}

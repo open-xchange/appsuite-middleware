@@ -1,3 +1,8 @@
+* 2007-03-14 - tobias.prinz@open-xchange.com
+
+ - removed required parameter "type" from both importer and exporter
+   interface, changed all implementors and tests.
+
 * 2007-03-14 - thorben.betten@open-xchange.com
 
  - FolderQueryCache only caches folder UIDs now; referenced objects are

@@ -53,7 +53,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -89,24 +89,16 @@ public class ImportServlet extends ImportExport {
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final int[] type = DataServlet.parseMandatoryIntParameterArray(req, AJAX_TYPE);
-			final String[] folder = DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID);
 			//checking format
 			final Format format = Format.getFormatByConstantName(
 					DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION));
 			if(format == null){
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
 			}
-			//
-			final HashMap <String, Integer> hashMap = new HashMap<String, Integer>();
-			if (type.length != folder.length) {
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "invalid data in request");
-				return;
-			}
+			//getting folders
+			final List <String> folders = Arrays.asList(
+				DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID));
 			
-			for (int a = 0; a < type.length; a++) {
-				hashMap.put(folder[a], type[a]);
-			}
 			//getting file
 			final UploadEvent ue = processUpload(req, resp);
 			Iterator<UploadFile> iter = ue.getUploadFilesIterator();
@@ -120,7 +112,7 @@ public class ImportServlet extends ImportExport {
 				getSessionObject(req), 
 				format, 
 				new FileInputStream(uf.getTmpFile()), 
-				hashMap, 
+				folders, 
 				req.getParameterMap());
 			//writing response
 			final StringWriter stringWriter = new StringWriter();

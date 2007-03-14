@@ -67,24 +67,22 @@ public interface Exporter {
 	 * @param sessObj: The session object to be able to check permissions.
 	 * @param format: Format the exported data is supposed to be in
 	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type
-	 * @param type: Type of folder, as defined in class Types
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return true, if the given folders can be exported in the given format; false otherwise
 	 */
-	public abstract boolean canExport(SessionObject sessObj, Format format, String folder, int type, Map<String, String[]> optionalParams) throws ImportExportException;
+	public abstract boolean canExport(SessionObject sessObj, Format format, String folder, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 
 	 * @param sessObj: The session object to be able to check permissions.
 	 * @param format: Format the returned InputStream should be in.
 	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
-	 * @param type: Type of folder, as defined in class Types
 	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type,
+	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, 
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
@@ -92,14 +90,13 @@ public interface Exporter {
 	 * @param sessObj: The session object to be able to check permissions.
 	 * @param format: Format the returned InputStream should be in.
 	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
-	 * @param type: Type of folder, as defined in class Types
 	 * @param objectId: Id of an entry in that folder that is to be exported.
 	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int type, int objectId,
+	public abstract SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int objectId,
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 }

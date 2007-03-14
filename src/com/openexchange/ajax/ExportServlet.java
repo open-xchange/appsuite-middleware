@@ -79,7 +79,6 @@ public class ExportServlet extends ImportExport {
 	@SuppressWarnings("unchecked")
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final int type = DataServlet.parseMandatoryIntParameter(req, AJAX_TYPE);
 			final String folder = DataServlet.parseMandatoryStringParameter(req, PARAMETER_FOLDERID);
 			final int[] fieldsToBeExported = DataServlet.parsIntParameterArray(req, PARAMETER_COLUMNS);
 			
@@ -90,7 +89,7 @@ public class ExportServlet extends ImportExport {
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
 			}
 			
-			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), format, folder, type, fieldsToBeExported, req.getParameterMap());
+			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), format, folder, fieldsToBeExported, req.getParameterMap());
 			
 			final OutputStream outputStream = resp.getOutputStream();
 			resp.setContentLength((int) inputStream.getSize());

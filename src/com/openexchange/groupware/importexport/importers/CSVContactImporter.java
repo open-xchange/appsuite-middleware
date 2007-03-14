@@ -65,7 +65,6 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
-import com.openexchange.groupware.importexport.ModuleTypeTranslator;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
@@ -104,17 +102,15 @@ public class CSVContactImporter implements Importer {
 	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
 	public boolean canImport(SessionObject sessObj, Format format,
-			Map<String, Integer> folderMappings,
+			List<String> folders,
 			Map<String, String[]> optionalParams) throws ImportExportException {
-		int type;
 		String folder;
-		if(folderMappings.size() != 1){
+		if(folders.size() != 1){
 			throw EXCEPTIONS.create(0);
 		} else {
-			folder = folderMappings.keySet().iterator().next();
-			type = folderMappings.get(folder);
+			folder = folders.get(0);
 		}
-		if(! (type == Types.CONTACT && format.equals(Format.CSV)) ){
+		if(! format.equals(Format.CSV) ){
 			return false;
 		}
 		FolderObject fo = null;
@@ -128,7 +124,7 @@ public class CSVContactImporter implements Importer {
 			return false;
 		}
 		//check format of folder
-		if ( fo.getModule() != ModuleTypeTranslator.getFolderObjectConstant(type) ){
+		if ( fo.getModule() != FolderObject.CONTACT ){
 			return false;
 		}
 		//check read access to folder
@@ -145,12 +141,12 @@ public class CSVContactImporter implements Importer {
 	
 
 	public List<ImportResult> importData(SessionObject sessObj, Format format,
-			InputStream is, Map<String, Integer> folderMappings,
+			InputStream is, List<String> folders,
 			Map<String, String[]> optionalParams) throws ImportExportException {
-		if(! canImport(sessObj, format, folderMappings, optionalParams)){
+		if(! canImport(sessObj, format, folders, optionalParams)){
 			throw EXCEPTIONS.create(1);
 		}
-		String folder = getFolder(folderMappings);
+		String folder = folders.get(0);
 		String csvStr = transformInputStreamToString(is);
 		List <List <String> >csv = new CSVParser().parse(csvStr);
 		Iterator< List<String> > iter = csv.iterator();
@@ -190,16 +186,4 @@ public class CSVContactImporter implements Importer {
 		
 		return results;
 	}
-	
-	/**
-	 * Gets the folder name from the map.
-	 * Note: Assumes there is one and only one folder given
-	 * 
-	 * @param folderMappings
-	 * @return
-	 */
-	protected String getFolder(Map<String, Integer> folderMappings){
-		return folderMappings.keySet().iterator().next();
-	}
-
 }
