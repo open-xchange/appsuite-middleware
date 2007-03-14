@@ -90,7 +90,7 @@ public class FolderWriter extends DataWriter {
 	
 	private static final String STR_EMPTY = "";
 	
-	private static final String STR_INBOX = "INBOX";
+	private static final String FULLNAME_INBOX = "INBOX";
 
 	private final User userObj;
 
@@ -446,8 +446,8 @@ public class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
 						}
-						final String fn = fullName == null ? folder.getFullName() : fullName;
-						if (fn != null && fn.endsWith(STR_INBOX)) {
+						final String fn = folder.getImapFolder().getFullName();
+						if (FULLNAME_INBOX.equals(fn)) {
 							jsonwriter.value(true);
 						} else {
 							jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
@@ -618,8 +618,8 @@ public class FolderWriter extends DataWriter {
 			if (withKey) {
 				jsonwriter.key(FolderFields.SUBSCRIBED);
 			}
-			final String fn = fullName == null ? folder.getFullName() : fullName;
-			if (STR_INBOX.equals(fn)) {
+			final String fn = folder.getImapFolder().getFullName();
+			if (FULLNAME_INBOX.equals(fn)) {
 				jsonwriter.value(true);
 			} else {
 				jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
