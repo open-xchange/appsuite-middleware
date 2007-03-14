@@ -83,23 +83,23 @@ public abstract class AbstractTest extends TestCase{
         return new Credentials("oxadmin","secret");
     }    
     
-    public static Context getTestContextObject(Credentials cred) throws Exception {
+    public static Context getTestContextObject(final Credentials cred) throws Exception {
         return getTestContextObject(1, 50);
     }
 
-    public static Context getTestContextObject(long quota_max_in_mb) {
+    public static Context getTestContextObject(final long quota_max_in_mb) {
         return getTestContextObject(1, quota_max_in_mb);
     }
 
-    public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
-        Context ctx = new Context(context_id);        
+    public static Context getTestContextObject(final int context_id, final long quota_max_in_mb) {
+        final Context ctx = new Context(context_id);        
         final Filestore filestore = new Filestore();
         filestore.setQuota_max(quota_max_in_mb);
         ctx.setFilestore(filestore);
         return ctx;
     }
 
-    public static int addContext(Context ctx, String host, Credentials cred) throws Exception {
+    public static int addContext(final Context ctx, final String host, final Credentials cred) throws Exception {
         return 1;
     }
 }
