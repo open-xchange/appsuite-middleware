@@ -186,6 +186,10 @@ public class MessageUtils {
 	
 	private static final String STR_EMPTY = "";
 	
+	private static final char CHAR_BREAK = '\n';
+	
+	private static final char CHAR_CONTROL = '\r';
+	
 	public static final String removeHdrLineBreak(final String hdrVal) {
 		return PATTERN_RMV_HDR_BR.matcher(hdrVal).replaceAll(STR_EMPTY);
 	}
@@ -229,7 +233,7 @@ public class MessageUtils {
 		String line = null;
 		try {
 			while ((line = reader.readLine()) != null) {
-				sb.append(wrapTextLine(line, linewrap)).append("\n");
+				sb.append(wrapTextLine(line, linewrap)).append(CHAR_BREAK);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
@@ -244,13 +248,13 @@ public class MessageUtils {
 		}
 		final char[] chars = line.toCharArray();
 		final char c = chars[linewrap];
-		if (Character.isWhitespace(c) && c != '\n' && c != '\r') {
+		if (Character.isWhitespace(c) && c != CHAR_BREAK && c != CHAR_CONTROL) {
 			/*
 			 * Find last non-whitespace character before
 			 */
 			for (int i = linewrap - 1; i >= 0; i--) {
 				if (!Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i + 1)).append('\n').append(
+					return new StringBuilder(length + 5).append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
 							wrapTextLine(line.substring(i + 1), linewrap)).toString();
 				}
 			}
@@ -260,12 +264,12 @@ public class MessageUtils {
 			 */
 			for (int i = linewrap - 1; i >= 0; i--) {
 				if (Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i)).append('\n').append(
+					return new StringBuilder(length + 5).append(line.substring(0, i)).append(CHAR_BREAK).append(
 							wrapTextLine(line.substring(i + 1), linewrap)).toString();
 				}
 			}
 		}
-		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append('\n').append(
+		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
 				wrapTextLine(line.substring(linewrap), linewrap)).toString();
 	}
 
@@ -496,7 +500,7 @@ public class MessageUtils {
 				formattedText.append(filterInlineImages(htmlContent, session, msgUID));
 			} else {
 				formattedText.append(htmlContent);
-				formattedText.append('\n');
+				formattedText.append(CHAR_BREAK);
 			}
 			return formattedText.toString();
 		}
@@ -650,7 +654,7 @@ public class MessageUtils {
 						htmlBuffer.append("</blockquote>");
 					}
 				}
-				htmlBuffer.append(line).append('\n');
+				htmlBuffer.append(line).append(CHAR_BREAK);
 				quotelevel_before = quotelevel;
 			}
 			return htmlBuffer.toString();
@@ -670,6 +674,8 @@ public class MessageUtils {
 	}
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName(ServerConfig.getProperty(Property.DefaultEncoding));
+	
+	private static final String STR_CHARSET = "charset";
 
 	/**
 	 * Delivers the <code>java.lang.String</code> object created from given
@@ -681,7 +687,7 @@ public class MessageUtils {
 	public static final String getStringObject(final Part p) throws MessagingException, OXException {
 		final StringBuilder sb = new StringBuilder(1000);
 		BufferedReader br = null;
-		final String charsetStr = new ContentType(p.getContentType()).getParameter("charset");
+		final String charsetStr = new ContentType(p.getContentType()).getParameter(STR_CHARSET);
 		Charset charset = null;
 		try {
 			charset = charsetStr == null ? DEFAULT_CHARSET : Charset.forName(charsetStr);
@@ -700,14 +706,14 @@ public class MessageUtils {
 			br = new BufferedReader(new InputStreamReader(p.getInputStream(), charset));
 			String contentLine = null;
 			while ((contentLine = br.readLine()) != null) {
-				sb.append(contentLine).append('\n');
+				sb.append(contentLine).append(CHAR_BREAK);
 			}
 		} catch (Throwable t) {
 			try {
 				br = getBufferedReaderFromPart(p, charset);
 				String contentLine = null;
 				while ((contentLine = br.readLine()) != null) {
-					sb.append(contentLine).append('\n');
+					sb.append(contentLine).append(CHAR_BREAK);
 				}
 			} catch (IOException innerExc) {
 				/*
