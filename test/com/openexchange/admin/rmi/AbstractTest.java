@@ -83,6 +83,8 @@ public abstract class AbstractTest extends TestCase{
         return new Credentials("oxadmin","secret");
     }    
     
+    // The throwing of the exception is necessary to be able to let methods which override
+    // this one throw exceptions. So don't remove this
     public static Context getTestContextObject(final Credentials cred) throws Exception {
         return getTestContextObject(1, 50);
     }
