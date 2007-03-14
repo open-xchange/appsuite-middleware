@@ -447,7 +447,7 @@ public class FolderWriter extends DataWriter {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
 						}
 						final String fn = fullName == null ? folder.getFullName() : fullName;
-						if (STR_INBOX.equals(fn)) {
+						if (fn != null && fn.endsWith(STR_INBOX)) {
 							jsonwriter.value(true);
 						} else {
 							jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
