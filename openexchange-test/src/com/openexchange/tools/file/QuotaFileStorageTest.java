@@ -176,14 +176,16 @@ public class QuotaFileStorageTest extends TestCase {
 		}
 
 		@Override
-		public long getUsage() throws QuotaFileStorageException {
+		protected long getUsage(boolean write) throws QuotaFileStorageException {
 			return usage;
 		}
 
 		@Override
 		protected void storeUsage(long usage) throws QuotaFileStorageException {
 			this.usage = usage;
-		}	
+		}
+
+		
 	}
 	
 	private static final class AddAndRemoveThread extends Thread{

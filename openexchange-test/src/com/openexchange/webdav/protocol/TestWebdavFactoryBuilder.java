@@ -3,6 +3,7 @@ package com.openexchange.webdav.protocol;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;

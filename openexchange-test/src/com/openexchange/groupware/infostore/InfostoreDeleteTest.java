@@ -46,10 +46,8 @@ public class InfostoreDeleteTest extends TestCase {
 			if(con != null)
 				provider.releaseWriteConnection(session.getContext(), con);
 		}
-		
-		metadata = database.getDocumentMetadata(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration());
-		assertEquals(session.getContext().getMailadmin(), metadata.getCreatedBy());
-		assertEquals(session.getContext().getMailadmin(), metadata.getModifiedBy());
+		assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration()));
+	
 	}
 
 	private DocumentMetadataImpl createMetadata() throws Exception {

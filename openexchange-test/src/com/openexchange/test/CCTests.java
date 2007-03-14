@@ -60,11 +60,11 @@ public class CCTests
 			
 		TestSuite tests = new TestSuite();
 
-        tests.addTestSuite(com.openexchange.ajax.LoginTest.class); 	 
-        tests.addTestSuite(com.openexchange.ajax.FolderTest.class); 	 
-        tests.addTest(ReminderAJAXSuite.suite()); 	 
-        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite()); 	 
-        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite()); 	 
+        tests.addTestSuite(com.openexchange.ajax.LoginTest.class);
+        tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
+        tests.addTest(ReminderAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentBugTestSuite.suite());
 		
@@ -125,11 +125,11 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
-		tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
+		//tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
 		
 		
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
-		tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
+		//tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
 		
 		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
