@@ -51,11 +51,13 @@
  */
 package com.openexchange.admin.rmi.extensions;
 
+import java.io.Serializable;
+
 /**
  * @author choeger
  * 
  */
-public interface OXUserExtensionInterface {
+public interface OXUserExtensionInterface extends Serializable {
     /**
      * @return the extensionName
      */
