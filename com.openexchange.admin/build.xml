@@ -293,14 +293,14 @@
                 <pathelement location="classes" />
             </classpath>
 
-            <sysproperty key="config" value="etc/AdminDaemon.properties"/>
-            <sysproperty key="openexchange.propfile" value="etc/system.properties"/>
+            <sysproperty key="config" value="/opt/open-xchange/etc/admindaemon/AdminDaemon.properties"/>
+            <sysproperty key="openexchange.propfile" value="/opt/open-xchange/etc/admindaemon/system.properties"/>
 	
-            <test name="com.openexchange.admin.ContextTest" todir="${test.xml.dir}" />
-            <test name="com.openexchange.admin.GroupTest" todir="${test.xml.dir}" />
-            <test name="com.openexchange.admin.ResourceTest" todir="${test.xml.dir}" />
-            <test name="com.openexchange.admin.UserTest" todir="${test.xml.dir}" />
-            <test name="com.openexchange.admin.UtilTest" todir="${test.xml.dir}" />
+            <!--test name="com.openexchange.admin.ContextTest" todir="${test.xml.dir}" /-->
+            <test name="com.openexchange.admin.rmi.GroupTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.rmi.ResourceTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.admin.rmi.UserTest" todir="${test.xml.dir}" />
+            <!-- test name="com.openexchange.admin.UtilTest" todir="${test.xml.dir}" /-->
 
             <formatter type="brief" usefile="false" />
             <formatter type="xml" />
