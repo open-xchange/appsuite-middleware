@@ -183,9 +183,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	@Override
 	public WebdavResource move(String dest, boolean noroot, boolean overwrite) throws WebdavException {
 		FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
-		if(coll.exists())
-			return mergeTo(coll, true, overwrite);
-		
+		if(coll.exists()) {
+			WebdavResource res = mergeTo(coll, true, overwrite);
+			delete();
+			return res;
+		}
 		loadFolder();
 		int index = dest.lastIndexOf('/');
 		String name = dest.substring(index+1);
