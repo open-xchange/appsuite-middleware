@@ -69,12 +69,12 @@ import java.util.TimeZone;
 public class UserTest extends AbstractTest {
 
     // list of chars that must be valid
-    private static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
+    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
     // global setting for stored password
-    private static final String pass = "foo-user-pass";
+    protected static final String pass = "foo-user-pass";
 
-    private static OXUserInterface getUserClient() throws Exception{
+    protected static OXUserInterface getUserClient() throws Exception{
         return (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
     }
     
@@ -452,7 +452,7 @@ public class UserTest extends AbstractTest {
 //        return id;
 //    }
 
-    private void compareUser(final User a, final User b) {
+    protected void compareUser(final User a, final User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
         
