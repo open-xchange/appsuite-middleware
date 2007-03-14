@@ -2,6 +2,7 @@
 
  - FolderQueryCache only caches folder UIDs now; referenced objects are
    fetched from FolderObjectCache
+ - Removed unnecessary parameters during folder deletion
 
 * 2007-03-13 - tobias.prinz@open-xchange.com
 

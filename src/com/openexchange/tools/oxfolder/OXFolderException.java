@@ -401,7 +401,7 @@ public class OXFolderException extends OXException {
 		 */
 		LDAP_ERROR("A LDAP error occurred in context %s", Category.PROGRAMMING_ERROR, 47),
 		/**
-		 * Attribute \"%s\" is not set in FolderObject instance
+		 * Attribute \"%s\" is not set in FolderObject instance %s in context %s
 		 */
 		ATTRIBUTE_NOT_SET("Attribute \"%s\" is not set in FolderObject instance %s in context %s",
 				Category.PROGRAMMING_ERROR, 48),

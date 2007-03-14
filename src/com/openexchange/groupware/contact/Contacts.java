@@ -2171,7 +2171,7 @@ public class Contacts implements DeleteListener {
 	} 
 	
 	public static void deleteContactsFromFolder(int fid, int user, int[] group, SessionObject so, Connection readcon, Connection writecon) throws OXException {
-		trashContactsFromFolder(fid, user, group, so, readcon, writecon, true);
+		trashContactsFromFolder(fid, so, readcon, writecon, true);
 	}	
 	
 	@OXThrowsMultiple(
@@ -2188,7 +2188,7 @@ public class Contacts implements DeleteListener {
 							"Unable to trigger Object Events: Context %1$d Folder %2$d"
 						}
 	)
-	public static void trashContactsFromFolder(int fid,  int user, int[] group, SessionObject so, Connection readcon, Connection writecon, boolean delit) throws OXException {
+	public static void trashContactsFromFolder(int fid,  SessionObject so, Connection readcon, Connection writecon, boolean delit) throws OXException {
 
 		Statement read = null; 
 		Statement del = null;
@@ -2206,7 +2206,7 @@ public class Contacts implements DeleteListener {
 					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
 				}
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(42, fid, so.getContext().getContextId(), user);
+					throw EXCEPTIONS.createOXConflictException(42, fid, so.getContext().getContextId(), so.getUserObject().getId());
 					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" fid="+fid);
 				}
 				if (contactFolder.getType() == FolderObject.PRIVATE){
