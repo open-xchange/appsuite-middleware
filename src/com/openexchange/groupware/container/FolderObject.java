@@ -772,7 +772,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			}
 		} else if (containsParentFolderID() && containsFolderName() && containsModule()) {
 			try {
-				return OXFolderSQL.lookUpFolder(getParentFolderID(), getFolderName(), getModule(), null, ctx);
+				final int fuid = OXFolderSQL.lookUpFolder(getParentFolderID(), getFolderName(), getModule(), null, ctx);
+				if (fuid == -1) {
+					return false;
+				}
+				this.setObjectID(fuid);
+				return true;
 			} catch (DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
 			} catch (SQLException e) {

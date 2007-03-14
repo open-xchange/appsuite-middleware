@@ -124,10 +124,9 @@ public class OXFolderSQL {
 	 * Checks for a duplicate folder in parental folder. A folder is treated as
 	 * a duplicate if name and module are equal.
 	 * 
-	 * @return <tt>true</tt> if a duplicate folder exists, otherwise
-	 *         <tt>false</tt>
+	 * @return folder id or <tt>-1</tt> if none found
 	 */
-	public static final boolean lookUpFolder(final int parent, final String folderName, final int module,
+	public static final int lookUpFolder(final int parent, final String folderName, final int module,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		final boolean createReadCon = (readCon == null);
@@ -143,7 +142,7 @@ public class OXFolderSQL {
 			stmt.setString(3, folderName); // fname
 			stmt.setInt(4, module); // module
 			rs = stmt.executeQuery();
-			return rs.next();
+			return rs.next() ? rs.getInt(1) : -1;
 		} finally {
 			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
 		}
