@@ -89,6 +89,8 @@ public class FolderWriter extends DataWriter {
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 	
 	private static final String STR_EMPTY = "";
+	
+	private static final String STR_INBOX = "INBOX";
 
 	private final User userObj;
 
@@ -444,7 +446,12 @@ public class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
 						}
-						jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+						final String fn = fullName == null ? folder.getFullName() : fullName;
+						if (STR_INBOX.equals(fn)) {
+							jsonwriter.value(true);
+						} else {
+							jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+						}
 					}
 				};
 				break Fields;
@@ -611,7 +618,12 @@ public class FolderWriter extends DataWriter {
 			if (withKey) {
 				jsonwriter.key(FolderFields.SUBSCRIBED);
 			}
-			jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+			final String fn = fullName == null ? folder.getFullName() : fullName;
+			if (STR_INBOX.equals(fn)) {
+				jsonwriter.value(true);
+			} else {
+				jsonwriter.value(folder.containsSubscribe() ? folder.isSubscribed() : JSONObject.NULL);
+			}
 			break;
 		default:
 			break;
