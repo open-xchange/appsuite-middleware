@@ -55,9 +55,9 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.JUnit4TestAdapter;
 
@@ -65,7 +65,6 @@ import org.junit.Test;
 
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
@@ -87,37 +86,28 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	}
 	
 	@Test public void canImport() throws ImportExportException{
+		List <String> folders = new LinkedList<String>();
+		folders.add(Integer.toString(folderId));
 		//normal case
-		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
-		folderMappings.put(folderId + "", new Integer(Types.CONTACT) );
-		assertTrue("Can import?", imp.canImport(sessObj, Format.CSV, folderMappings, null));
+		assertTrue("Can import?", imp.canImport(sessObj, Format.CSV, folders, null));
 		
-		//too many 
+		//too many
+		folders.add("blaFolder");
 		try{
-			folderMappings.put("blaFolder", new Integer(Types.CONTACT));
-			imp.canImport(sessObj, Format.ICAL, folderMappings, null);
-			fail("Could import ICAL, but should not");
+			imp.canImport(sessObj, Format.ICAL, folders, null);
+			fail("Could import two foldersL, but should not");
 		} catch (ImportExportException e){
-			assertTrue("Cannot import ICAL", true);
+			assertTrue("Cannot import more than one folder", true);
 		}
 		
 		//wrong export type
+		folders.remove("blaFolder");
 		try{
-			imp.canImport(sessObj, Format.ICAL, folderMappings, null);
-			fail("Could import ICAL, but should not");
+			assertTrue("Cannot import ICAL" , !imp.canImport(sessObj, Format.ICAL, folders, null) );
 		} catch (ImportExportException e){
-			assertTrue("Cannot import ICAL", true);
+			fail("Exception caught, but only 'false' value expected");
 		}
-		
-		//wrong folder
-		try{
-			folderMappings.remove(folderId+"");
-			folderMappings.put(folderId + "" , new Integer(Types.APPOINTMENT) );
-			imp.canImport(sessObj, Format.CSV, folderMappings, null);
-			fail("Could import CSV into designated appointment folder, but should not");
-		} catch (ImportExportException e){
-			assertTrue("Cannot import CSV into designated appointment folder", true);
-		}
+
 	}
 	
 	@Test public void importOneContact() throws NumberFormatException, Exception{
@@ -177,10 +167,9 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	}
 	
 	protected List<ImportResult> importStuff(String csv) throws ImportExportException{
-		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
-		folderMappings.put(folderId + "", new Integer(Types.CONTACT) );
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		InputStream is = new ByteArrayInputStream( csv.getBytes() );
-		return imp.importData(sessObj, Format.CSV, is, folderMappings, null);
+		return imp.importData(sessObj, Format.CSV, is, folders, null);
 
 	}
 }

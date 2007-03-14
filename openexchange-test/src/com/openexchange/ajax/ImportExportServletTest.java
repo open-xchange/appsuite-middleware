@@ -64,7 +64,6 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
@@ -109,7 +108,6 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 	
 	public void testCSVRoundtrip() throws Exception{
 		//preparations
-		final int type = Types.CONTACT;
 		final String insertedCSV = IMPORTED_CSV;
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
@@ -119,7 +117,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 		WebConversation webconv = getWebConversation();
 		WebRequest req = new PostMethodWebRequest(
-				getUrl(IMPORT_SERVLET, folderId, type, format)
+				getUrl(IMPORT_SERVLET, folderId, format)
 				);
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
@@ -128,7 +126,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		
 		//test: export
 		webconv =  getWebConversation();
-		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, type, format) );
+		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
 		webRes = webconv.sendRequest(req);
 		is = webRes.getInputStream();
 		String resultingCSV = AbstractCSVContactTest.readStreamAsString(is);
@@ -149,7 +147,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		return folderObj.getCreatedBy();
 	}
 
-	public String getUrl(String servlet, int folderId, int type, Format format) throws IOException, SAXException, JSONException{
+	public String getUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
 		StringBuilder bob = new StringBuilder("http://");
 		bob.append(getHostName());
 		bob.append("/ajax/");
@@ -158,7 +156,6 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		bob.append(getSessionId());
 		addParam(bob, ImportExport.PARAMETER_FOLDERID, folderId ) ;
 		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
-		addParam(bob, ImportExport.AJAX_TYPE, type);
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
 		return bob.toString();

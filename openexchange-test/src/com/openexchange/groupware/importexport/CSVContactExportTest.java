@@ -56,6 +56,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -100,33 +101,32 @@ public class CSVContactExportTest extends AbstractCSVContactTest {
 	}
 	
 	@Test public void canExport() throws ImportExportException, IOException{
-		int type = Types.CONTACT;
 		assertTrue(
 			"Can export?" , 
-			exp.canExport(sessObj, Format.CSV, folderId + "", type, null));
+			exp.canExport(sessObj, Format.CSV, Integer.toString(folderId), null));
 	}
 	
 	@Test public void exportHead() throws ImportExportException, IOException{
-		int type = Types.CONTACT;
-		InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), type, TEST1_BASE, null);
+		InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
 		assertEquals("Head only", TEST1_RESULT, readStreamAsString(is) );
 	}
 	
 	@Test public void exportData() throws NumberFormatException, Exception{
-		int type = Types.CONTACT;
 		final Importer imp = new CSVContactImporter();
 		InputStream is;
 		
 		//importing prior to export test
 		is = new ByteArrayInputStream( TEST2_RESULT.getBytes() ); 
 		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
-		folderMappings.put(folderId + "", new Integer(Types.CONTACT) );
-		List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, folderMappings, null);
+		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
+		List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
 		
 		//exporting and asserting
-		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), type, TEST2_BASE, null);
+		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST2_BASE, null);
 		CSVParser parser = new CSVParser();
-		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(readStreamAsString(is)) );
+		String resStr = readStreamAsString(is);
+		System.out.println(resStr);
+		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);

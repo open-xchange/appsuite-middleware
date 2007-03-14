@@ -53,11 +53,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactConfig;
@@ -214,11 +217,24 @@ public class AbstractCSVContactTest {
 		fo.setPermissionsAsArray(new OCLPermission[] { ocl });
 		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
 		int tempFolderId = -1;
+		//deleting old folder if existing
+		try {
+			if(fo.exists(sessObj.getContext())){
+				deleteTestFolder(fo.getObjectID());
+			}
+		} catch (OXException e) {
+			System.out.println("Could not find or delete old folder");
+			e.printStackTrace();
+		}
+		//creating new folder
 		try {
 			tempFolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 		} catch (OXException e) {
-			System.out.println("Folder did exist already. Did you do then clean-up last time?");
-		} 
+			System.out.println("Could not create test folder");
+			e.printStackTrace();
+		}
+		
+		
 		return tempFolderId; 
 	}
 
