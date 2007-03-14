@@ -1,4 +1,3 @@
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -65,13 +64,39 @@ public class OXUser2IMAPLogin {
 		super();
 	}
 
+	/**
+	 * Determines the IMAP login of the user whose ID matches given
+	 * <code>userId</code>.
+	 * 
+	 * @param userId -
+	 *            the user ID
+	 * @param ctx -
+	 *            the context
+	 * @return the IMAP login of the user whose ID matches given
+	 *         <code>userId</code>
+	 * @throws LdapException
+	 */
 	public static String getIMAPLogin(final int userId, final Context ctx) throws LdapException {
 		final UserStorage us = UserStorage.getInstance(ctx);
 		return us.getUser(userId).getImapLogin();
 	}
 
-	public static String getLocalIMAPLogin(final SessionObject session) {
-		String imapLogin = session.getUserObject().getImapLogin();
+	/**
+	 * Determines IMAP login for session-associated user. If
+	 * <code>loginFromDB</code> is <code>true</code>, this routine tries to
+	 * fetch the IMAP login from <code>User.getImapLogin()</code> and falls
+	 * back to session-supplied user login info. Otherwise session-supplied user
+	 * login info is directly taken as return value.
+	 * 
+	 * @param session -
+	 *            the user's session
+	 * @param loginFromDB -
+	 *            determines whether to look up <code>User.getImapLogin()</code>
+	 *            or not
+	 * @return current user's IMAP login
+	 */
+	public static String getLocalIMAPLogin(final SessionObject session, final boolean loginFromDB) {
+		String imapLogin = loginFromDB ? null : session.getUserObject().getImapLogin();
 		if (imapLogin == null || imapLogin.length() == 0) {
 			imapLogin = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
 					: session.getUsername();
@@ -79,6 +104,20 @@ public class OXUser2IMAPLogin {
 		return imapLogin;
 	}
 
+	/**
+	 * Determines the user ID whose IMAP login mtaches given
+	 * <code>imapLogin</code>. <b>NOTE:</b> this routine returns
+	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
+	 * if ACLs are disabled per config file (imap.properties).
+	 * 
+	 * @param imapLogin -
+	 *            the IMAP login
+	 * @param ctx -
+	 *            the context
+	 * @return the user ID whose IMAP login mtaches given <code>imapLogin</code>
+	 * @throws IMAPException
+	 * @throws LdapException
+	 */
 	public static int getUserID(final String imapLogin, final Context ctx) throws IMAPException, LdapException {
 		if (!IMAPProperties.isSupportsACLs()) {
 			return -1;

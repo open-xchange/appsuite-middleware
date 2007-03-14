@@ -289,16 +289,13 @@ public class IMAPPropertiesFactory {
 			imapProps.setSmtpPort(smtpPort);
 			if (credSrc == null || credSrc.equalsIgnoreCase("session")) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps
-						.setImapLogin(sessionObj.getUserlogin() != null && sessionObj.getUserlogin().length() > 0 ? sessionObj
-								.getUserlogin()
-								: sessionObj.getUsername());
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
 			} else if (credSrc.equalsIgnoreCase("other")) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
 			} else if (credSrc.equalsIgnoreCase("session.loginfromDB")) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(userObj.getImapLogin());
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
 			}
 		} else if (loginType.equalsIgnoreCase("anonymous")) {
 			String imapServer = userObj.getImapServer();
