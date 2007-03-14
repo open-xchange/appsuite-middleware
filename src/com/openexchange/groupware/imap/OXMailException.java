@@ -232,9 +232,9 @@ public class OXMailException extends OXException {
 		 */
 		NO_INSERT_ACCESS("User %s has no insert access to mail folder %s", Category.PERMISSION, 28),
 		/**
-		 * Message %s could not be found in folder %s
+		 * Message(s) %s could not be found in folder %s
 		 */
-		MESSAGE_NOT_FOUND("Message %s could not be found in folder %s", Category.PROGRAMMING_ERROR, 29),
+		MESSAGE_NOT_FOUND("Message(s) %s could not be found in folder %s", Category.PROGRAMMING_ERROR, 29),
 		/**
 		 * User %s has no lookup access on IMAP-Folder %s
 		 */

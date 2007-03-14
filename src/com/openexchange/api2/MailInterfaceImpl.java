@@ -1839,6 +1839,10 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#saveVersitAttachment(java.lang.String, long, java.lang.String)
+	 */
 	public CommonObject[] saveVersitAttachment(final String folderArg, final long msgUID, final String partIdentifier)
 			throws OXException {
 		try {
@@ -3037,10 +3041,10 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
-			if (msgs == null || msgs.length == 0) {
-				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUIDs, imapCon.getImapFolder().getFullName());
-			}
 			msgs = cleanMessageArray(msgs);
+			if (msgs == null || msgs.length == 0) {
+				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, Arrays.toString(msgUIDs), imapCon.getImapFolder().getFullName());
+			}
 			/*
 			 * Perform "soft delete", means to copy message to default trash
 			 * folder
@@ -3170,10 +3174,10 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
-			if (msgs == null || msgs.length == 0) {
-				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUIDs, sourceFolder);
-			}
 			msgs = cleanMessageArray(msgs);
+			if (msgs == null || msgs.length == 0) {
+				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, Arrays.toString(msgUIDs), sourceFolder);
+			}
 			/*
 			 * Perform "move" or "copy" operation
 			 */

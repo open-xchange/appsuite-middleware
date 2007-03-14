@@ -59,6 +59,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -200,12 +201,12 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		return permissionBits == STANDARD_VERSION;
 	}
 
-	public void setStandardVersion(final boolean standardVersion) throws OXException {
+	public void setStandardVersion() {
 		this.permissionBits = STANDARD_VERSION;
 		downgradeUser();
 	}
 
-	public void setPremiumVersion(final boolean standardVersion) throws OXException {
+	public void setPremiumVersion() throws OXException {
 		this.permissionBits = PREMIUM_VERSION;
 		upgradeUser();
 	}
@@ -345,9 +346,13 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		setPermission(enableSyncML, SYNCML);
 	}
 
+	/**
+	 * @return a sorted array of <tt>int</tt> representing user's accessible
+	 *         modules
+	 */
 	public int[] getAccessibleModules() {
 		if (accessibleModulesComputed) {
-			return accessibleModules;
+			return cloneAccessibleModules();
 		}
 		final SmartIntArray array = new SmartIntArray(6);
 		if (hasTask()) {
@@ -368,7 +373,15 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		array.append(FolderObject.SYSTEM_MODULE);
 		array.append(FolderObject.UNBOUND);
 		accessibleModulesComputed = true;
-		return (accessibleModules = array.toArray());
+		accessibleModules = array.toArray();
+		Arrays.sort(accessibleModules);
+		return cloneAccessibleModules();
+	}
+	
+	private final int[] cloneAccessibleModules() {
+		final int[] clone = new int[accessibleModules.length];
+		System.arraycopy(accessibleModules, 0, clone, 0, clone.length);
+		return clone;
 	}
 
 	/**
@@ -425,7 +438,9 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	}
 
 	public int[] getGroups() {
-		return groups;
+		final int[] clone = new int[groups.length];
+		System.arraycopy(groups, 0, clone, 0, clone.length);
+		return clone;
 	}
 
 	public Context getContext() {
@@ -523,7 +538,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	 * This method performs some necessary changes if a user is downgraded to a
 	 * standard user.
 	 */
-	private void downgradeUser() throws OXException {
+	private void downgradeUser() {
 		/*
 		 * TODO: Some changes due to user's downgrade to standard version
 		 */
@@ -656,9 +671,8 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			rs = stmt.executeQuery();
 			if (rs.next()) {
 				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
-			} else {
-				return new UserConfiguration(0, userId, groups, ctx);
 			}
+			return new UserConfiguration(0, userId, groups, ctx);
 		} finally {
 			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
 		}
@@ -701,13 +715,13 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		return loadUserConfiguration(userId, null, ctx, null);
 	}
 
-	public static void deleteUserConfiguration(final int userId, final Context ctx) throws SQLException, LdapException,
+	public static void deleteUserConfiguration(final int userId, final Context ctx) throws SQLException,
 			DBPoolingException {
 		deleteUserConfiguration(userId, null, ctx);
 	}
 
 	public static void deleteUserConfiguration(final int userId, final Connection writeConArg, final Context ctx)
-			throws SQLException, LdapException, DBPoolingException {
+			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
 		final boolean createWriteCon = (writeCon == null);
 		PreparedStatement stmt = null;

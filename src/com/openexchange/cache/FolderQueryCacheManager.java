@@ -64,7 +64,6 @@ import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -141,7 +140,7 @@ public class FolderQueryCacheManager {
 	 * 
 	 * @return query result if present, otherwise <code>null</code>
 	 */
-	public final LinkedList<FolderObject> getFolderQuery(final int queryNum, final SessionObject session) {
+	public final LinkedList<Integer> getFolderQuery(final int queryNum, final SessionObject session) {
 		return getFolderQuery(queryNum, session.getUserObject().getId(), session.getContext().getContextId());
 	}
 
@@ -152,7 +151,7 @@ public class FolderQueryCacheManager {
 	 * @return query result if present, otherwise <code>null</code>
 	 */
 	@SuppressWarnings("unchecked")
-	public final LinkedList<FolderObject> getFolderQuery(final int queryNum, final int userId, final int cid) {
+	public final LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
 		if (busy) {
 			/*
 			 * Another thread performs a PUT at the moment
@@ -168,19 +167,19 @@ public class FolderQueryCacheManager {
 				LOCK_MODIFY.unlock();
 			}
 		}
-		Map<CacheKey, LinkedList<FolderObject>> map = (Map<CacheKey, LinkedList<FolderObject>>) folderQueryCache
+		Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
 				.getFromGroup(createUserKey(userId), createContextKey(cid));
-		final LinkedList<FolderObject> q;
+		final LinkedList<Integer> q;
 		if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
 			return null;
 		}
-		return (LinkedList<FolderObject>) q.clone();
+		return (LinkedList<Integer>) q.clone();
 	}
 
 	/**
 	 * Puts a query result into cache
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<FolderObject> q, final SessionObject session)
+	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session)
 			throws OXException {
 		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId());
 	}
@@ -188,7 +187,7 @@ public class FolderQueryCacheManager {
 	/**
 	 * Puts a query result into cache
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<FolderObject> q, final int userId, final int cid)
+	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
 			throws OXException {
 		putFolderQuery(queryNum, q, userId, cid, false);
 	}
@@ -199,7 +198,7 @@ public class FolderQueryCacheManager {
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<FolderObject> q, final SessionObject session,
+	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session,
 			final boolean append) throws OXException {
 		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId(), append);
 	}
@@ -211,7 +210,7 @@ public class FolderQueryCacheManager {
 	 * entries are replaced.
 	 */
 	@SuppressWarnings("unchecked")
-	public final void putFolderQuery(final int queryNum, final LinkedList<FolderObject> q, final int userId, final int cid,
+	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
 			final boolean append) throws OXException {
 		if (q == null) {
 			return;
@@ -220,18 +219,18 @@ public class FolderQueryCacheManager {
 		try {
 			busy = true;
 			boolean insertMap = false;
-			Map<CacheKey, LinkedList<FolderObject>> map = (Map<CacheKey, LinkedList<FolderObject>>) folderQueryCache
+			Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
 					.getFromGroup(createUserKey(userId), createContextKey(cid));
 			if (map == null) {
-				map = new HashMap<CacheKey, LinkedList<FolderObject>>();
+				map = new HashMap<CacheKey, LinkedList<Integer>>();
 				insertMap = true;
 			}
 			final CacheKey queryKey = createQueryKey(queryNum);
-			final LinkedList<FolderObject> tmp = map.get(queryKey);
+			final LinkedList<Integer> tmp = map.get(queryKey);
 			if (tmp == null || !append) {
-				map.put(queryKey, q);
+				map.put(queryKey, (LinkedList<Integer>) q.clone());
 			} else {
-				tmp.addAll(q);
+				tmp.addAll((LinkedList<Integer>) q.clone());
 			}
 			if (insertMap) {
 				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), map);
@@ -246,14 +245,14 @@ public class FolderQueryCacheManager {
 	}
 
 	/**
-	 * Clears all cache entries belonging to given user
+	 * Clears all cache entries belonging to given context
 	 */
 	public final void invalidateUserQueries(final SessionObject session) {
 		invalidateContextQueries(session.getContext().getContextId());
 	}
 
 	/**
-	 * Clears all cache entries belonging to given user
+	 * Clears all cache entries belonging to given context
 	 */
 	public final void invalidateContextQueries(final int cid) {
 		LOCK_MODIFY.lock();
