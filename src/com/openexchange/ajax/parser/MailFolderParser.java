@@ -105,7 +105,8 @@ public class MailFolderParser {
 		if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
 			mfo.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
 		}
-		if (jsonObj.has(FolderFields.PERMISSIONS) && jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
+		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)
+				&& jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
 			try {
 				final JSONArray perms = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
 				boolean applyACLs = false;

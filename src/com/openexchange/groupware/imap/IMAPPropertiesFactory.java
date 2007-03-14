@@ -288,13 +288,7 @@ public class IMAPPropertiesFactory {
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
 			if (credSrc == null || credSrc.equalsIgnoreCase("session")) {
-				/*
-				 * TODO: Set IMAP-specific password
-				 */
 				imapProps.setImapPassword(sessionObj.getPassword());
-				/*
-				 * TODO: Set IMAP-specific login
-				 */
 				imapProps
 						.setImapLogin(sessionObj.getUserlogin() != null && sessionObj.getUserlogin().length() > 0 ? sessionObj
 								.getUserlogin()

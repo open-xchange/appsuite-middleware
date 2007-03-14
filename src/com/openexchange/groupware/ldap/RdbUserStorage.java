@@ -146,6 +146,13 @@ public class RdbUserStorage extends UserStorage {
         }
         return userId;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public int getUserIdByIMAPLogin(final String imapLogin) throws LdapException {
+    	return -1;
+    }
 
     /**
      * {@inheritDoc}

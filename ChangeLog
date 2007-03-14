@@ -8,6 +8,8 @@
  - FolderQueryCache only caches folder UIDs now; referenced objects are
    fetched from FolderObjectCache
  - Removed unnecessary parameters during folder deletion
+ - New class to map an user ID to his IMAP login and vice versa
+ - Extended abstract class 'UserStorage' by method "getUserIdByIMAPLogin()"
 
 * 2007-03-13 - tobias.prinz@open-xchange.com
 

@@ -754,8 +754,6 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			 * Incomplete, wherby its existence is checked
 			 */
 			fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
-			// fo.setParentFolderID(OXFolderTools.getFolderParent(fo.getObjectID(),
-			// ctx, readCon));
 		} else {
 			/*
 			 * Check existence
