@@ -305,6 +305,12 @@ public class MailInterfaceImpl implements MailInterface {
 				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
 				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
 				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
+				try {
+					imapCaps.setHasSubscription(!IMAPProperties.isIgnoreSubscription());
+				} catch (IMAPException e) {
+					LOG.error(e.getMessage(), e);
+					imapCaps.setHasSubscription(false);
+				}
 				IMAPProperties.setImapCapabilities(imapCaps);
 				IMAPProperties.setCapabilitiesLoaded(true);
 			} finally {
