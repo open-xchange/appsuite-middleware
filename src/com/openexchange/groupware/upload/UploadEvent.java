@@ -217,12 +217,14 @@ public class UploadEvent {
 		while (iter.hasNext()) {
 			final UploadFile uploadFile = iter.next();
 			final File tmpFile = uploadFile.getTmpFile();
-			try {
-				if (!tmpFile.delete()) {
-					LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
+			if (tmpFile.exists()) {
+				try {
+					if (!tmpFile.delete()) {
+						LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
+					}
+				} catch (SecurityException e) {
+					LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
 				}
-			} catch (SecurityException e) {
-				LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
 			}
 		}
 	}
