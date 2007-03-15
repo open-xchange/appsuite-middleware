@@ -452,7 +452,7 @@ public class UserTest extends AbstractTest {
 //        return id;
 //    }
 
-    protected void compareUser(final User a, final User b) {
+    public static void compareUser(final User a, final User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
         
