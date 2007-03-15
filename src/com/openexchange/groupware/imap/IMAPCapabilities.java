@@ -94,6 +94,8 @@ public class IMAPCapabilities {
 	
 	public static final int BIT_SORT = 128;
 	
+	public static final int BIT_SUBSCRIPTION = 256;
+	
 	/*
 	 * Members
 	 */
@@ -112,6 +114,8 @@ public class IMAPCapabilities {
 	private boolean hasIMAP4rev1;
 	
 	private boolean hasUIDPlus;
+	
+	private boolean hasSubscription;
 
 	public IMAPCapabilities() {
 		super();
@@ -181,6 +185,14 @@ public class IMAPCapabilities {
 		this.hasUIDPlus = hasUIDPlus;
 	}
 	
+	public boolean hasSubscription() {
+		return hasSubscription;
+	}
+
+	public void setHasSubscription(final boolean hasSubscription) {
+		this.hasSubscription = hasSubscription;
+	}
+
 	public final int getCapabilities() {
 		int retval = 0;
 		retval |= hasACL ? BIT_ACL : 0;
@@ -191,6 +203,7 @@ public class IMAPCapabilities {
 		retval |= hasThreadOrderedSubject ? BIT_THREAD_ORDEREDSUBJECT : 0;
 		retval |= hasThreadReferences ? BIT_THREAD_REFERENCES : 0;
 		retval |= hasUIDPlus ? BIT_UIDPLUS : 0;
+		retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
 		return retval;
 	}
 	
@@ -203,6 +216,7 @@ public class IMAPCapabilities {
 		hasThreadOrderedSubject = ((caps & BIT_THREAD_ORDEREDSUBJECT) > 0);
 		hasThreadReferences = ((caps & BIT_THREAD_REFERENCES) > 0);
 		hasUIDPlus = ((caps & BIT_UIDPLUS) > 0);
+		hasSubscription = ((caps & BIT_SUBSCRIPTION) > 0);
 	}
 
 }
