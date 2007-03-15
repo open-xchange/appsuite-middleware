@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.delete;
 
 import java.sql.SQLException;
@@ -63,33 +61,32 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 
-
 /**
  * DeleteEvent
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class DeleteEvent extends EventObject {
-	
+
 	public static final int TYPE_USER = 1;
-	
+
 	public static final int TYPE_GROUP = 2;
-	
+
 	public static final int TYPE_RESOURCE = 3;
-	
+
 	public static final int TYPE_RESOURCE_GROUP = 4;
 
 	private static final long serialVersionUID = 2636570955675454470L;
-	
+
 	private final Context ctx;
-	
+
 	private final int id;
-	
+
 	private final int type;
-	
+
 	private SessionObject session;
-	
+
 	public DeleteEvent(Object source, int id, int type, int cid) throws ContextException {
 		super(source);
 		this.id = id;
@@ -103,11 +100,19 @@ public class DeleteEvent extends EventObject {
 		this.type = type;
 		this.ctx = ctx;
 	}
-	
+
+	/**
+	 * @return the context
+	 */
 	public Context getContext() {
 		return ctx;
 	}
 
+	/**
+	 * @return the unique ID of entity (either group or user) that ought to be
+	 *         deleted
+	 * @see <code>getType()</code> to determine entity type
+	 */
 	public int getId() {
 		return id;
 	}
@@ -121,7 +126,7 @@ public class DeleteEvent extends EventObject {
 	public int getType() {
 		return type;
 	}
-	
+
 	/**
 	 * 
 	 * @return a SessionObject belonging to context's mailadmin
@@ -132,5 +137,5 @@ public class DeleteEvent extends EventObject {
 		}
 		return session;
 	}
-	
+
 }
