@@ -97,15 +97,15 @@ public class UploadEvent {
 		this.parameters = new HashMap<String,Object>();
 	}
 	
-	public int getAffiliationId() {
+	public final int getAffiliationId() {
 		return affiliationId;
 	}
 
-	public void setAffiliationId(final int affiliationId) {
+	public final void setAffiliationId(final int affiliationId) {
 		this.affiliationId = affiliationId;
 	}
 	
-	public void addUploadFile(final UploadFile uploadFile) {
+	public final void addUploadFile(final UploadFile uploadFile) {
 		if (uploadFiles.containsKey(uploadFile.getFileName())) {
 			UploadFile current = uploadFiles.get(uploadFile.getFileName());
 			while (current.getHomonymous() != null) {
@@ -117,15 +117,27 @@ public class UploadEvent {
 		}
 	}
 	
-	public UploadFile removeUploadFile(final String fileName) {
-		return uploadFiles.remove(fileName);
+	public final void removeUploadFile(final String fileName) {
+		UploadFile uploadFile = uploadFiles.remove(fileName);
+		while (uploadFile != null) {
+			if (uploadFile.getTmpFile().exists()) {
+				try {
+					if (!uploadFile.getTmpFile().delete()) {
+						LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()));
+					}
+				} catch (SecurityException e) {
+					LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()), e);
+				}
+			}
+			uploadFile = uploadFile.getHomonymous();
+		}
 	}
 	
-	public UploadFile getUploadFile(final String fileName) {
+	public final UploadFile getUploadFile(final String fileName) {
 		return uploadFiles.get(fileName);
 	}
 	
-	public UploadFile getUploadFileByFieldName(final String fieldName) {
+	public final UploadFile getUploadFileByFieldName(final String fieldName) {
 		final int size = uploadFiles.size();
 		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
@@ -140,17 +152,25 @@ public class UploadEvent {
 		return null;
 	}
 	
-	public void clearUploadFiles() {
-		uploadFiles.clear();
+	public final void clearUploadFiles() {
+		cleanUp();
 	}
 	
-	public int getNumberOfUploadFiles() {
-		return uploadFiles.size();
+	public final int getNumberOfUploadFiles() {
+		int count = 0;
+		final Iterator<UploadFile> iter = getUploadFilesIterator();
+		while (iter.hasNext()) {
+			count++;
+		}
+		return count;
 	}
 	
-	public Iterator<UploadFile> getUploadFilesIterator() {
-		final List<UploadFile> retvalList = new ArrayList<UploadFile>();
+	public final Iterator<UploadFile> getUploadFilesIterator() {
 		final int size = uploadFiles.size();
+		if (size == 0) {
+			return new ArrayList<UploadFile>(0).iterator();
+		}
+		final List<UploadFile> retvalList = new ArrayList<UploadFile>(size);
 		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			UploadFile uf = iter.next().getValue();
@@ -162,45 +182,45 @@ public class UploadEvent {
 		return retvalList.iterator();
 	}
 
-	public void addFormField(final String fieldName, final String fieldValue) {
+	public final void addFormField(final String fieldName, final String fieldValue) {
 		formFields.put(fieldName, fieldValue);
 	}
 
-	public String removeFormField(final String fieldName) {
+	public final String removeFormField(final String fieldName) {
 		return formFields.remove(fieldName);
 	}
 
-	public String getFormField(final String fieldName) {
+	public final String getFormField(final String fieldName) {
 		return formFields.get(fieldName);
 	}
 
-	public void clearFormFields() {
+	public final void clearFormFields() {
 		formFields.clear();
 	}
 
-	public Iterator getFormFieldNames() {
+	public final Iterator getFormFieldNames() {
 		return formFields.keySet().iterator();
 	}
 
-	public String getAction() {
+	public final String getAction() {
 		return action;
 	}
 
-	public void setAction(final String action) {
+	public final void setAction(final String action) {
 		this.action = action;
 	}
 
-	public Object getParameter(final String name) {
+	public final Object getParameter(final String name) {
 		return name == null ? null : parameters.get(name);
 	}
 
-	public void setParameter(final String name, final Object value) {
+	public final void setParameter(final String name, final Object value) {
 		if (name != null && value != null) {
 			parameters.put(name, value);
 		}
 	}
 	
-	public void removeParameter(final String name) {
+	public final void removeParameter(final String name) {
 		if (name != null) {
 			parameters.remove(name);
 		}
@@ -210,9 +230,9 @@ public class UploadEvent {
 
 	/**
 	 * Deletes all created temporary files created through this
-	 * <code>DeleteEvent</code> instance
+	 * <code>DeleteEvent</code> instance and clears upload files.
 	 */
-	public void cleanUp() {
+	public final void cleanUp() {
 		final Iterator<UploadFile> iter = getUploadFilesIterator();
 		while (iter.hasNext()) {
 			final UploadFile uploadFile = iter.next();
@@ -227,6 +247,7 @@ public class UploadEvent {
 				}
 			}
 		}
+		uploadFiles.clear();
 	}
 	
 }
