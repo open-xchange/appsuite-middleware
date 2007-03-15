@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.rmi.impl;
 
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
@@ -154,7 +155,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         usr.setId(retval);
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
-        final Bundle[] bundles = context.getBundles();
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
@@ -379,7 +380,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
-        final Bundle[] bundles = context.getBundles();
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
