@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.groupware.upload;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.tools.servlet.UploadServletException;
 
@@ -72,10 +69,40 @@ public interface UploadRegistry {
 	 * no duplicate listener implementation is added
 	 */
 	public void addUploadListener(UploadListener uploadListener);
-	
+
+	/**
+	 * Checks if given upload listener is already registered
+	 * 
+	 * @param uploadListener -
+	 *            the upload listener
+	 * @return <code>true</code> if given upload listener is already
+	 *         registered; <code>false</code> otherwise
+	 */
 	public boolean containsUploadListener(UploadListener uploadListener);
-	
+
+	/**
+	 * Fires the upload event by delegating this event to all registered
+	 * listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
+	 * invoked to delete temporary files from disk.
+	 * 
+	 * @param uploadEvent -
+	 *            the upload event
+	 * 
+	 * @throws UploadServletException
+	 *             if an error like over quota occurs
+	 */
 	public void fireUploadEvent(UploadEvent uploadEvent) throws UploadServletException;
-	
-	public UploadEvent processUpload(HttpServletRequest req, HttpServletResponse resp) throws UploadException;
+
+	/**
+	 * Create an <code>UpdateEvent</code> object from incoming multipart form
+	 * data
+	 * 
+	 * @param req -
+	 *            the corresponding instance of <code>HttpServletRequest</code>
+	 * @return an <code>UpdateEvent</code> object from incoming multipart form
+	 *         data
+	 * @throws UploadException
+	 *             if an error like over quota occurs
+	 */
+	public UploadEvent processUpload(HttpServletRequest req) throws UploadException;
 }
