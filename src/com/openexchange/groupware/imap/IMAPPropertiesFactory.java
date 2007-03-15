@@ -293,7 +293,7 @@ public class IMAPPropertiesFactory {
 			} else if (credSrc.equalsIgnoreCase("other")) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
-			} else if (credSrc.equalsIgnoreCase("session.loginfromDB")) {
+			} else if (credSrc.equalsIgnoreCase("user.imapLogin")) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
 			}

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.imap;
 
 import com.openexchange.groupware.contexts.Context;
@@ -78,25 +79,25 @@ public class OXUser2IMAPLogin {
 	 */
 	public static String getIMAPLogin(final int userId, final Context ctx) throws LdapException {
 		final UserStorage us = UserStorage.getInstance(ctx);
-		return us.getUser(userId).getImapLogin();
+		return us.getUser(userId).getLoginInfo();
 	}
 
 	/**
 	 * Determines IMAP login for session-associated user. If
-	 * <code>loginFromDB</code> is <code>true</code>, this routine tries to
-	 * fetch the IMAP login from <code>User.getImapLogin()</code> and falls
-	 * back to session-supplied user login info. Otherwise session-supplied user
-	 * login info is directly taken as return value.
+	 * <code>lookUpIMAPLogin</code> is <code>true</code>, this routine
+	 * tries to fetch the IMAP login from <code>User.getImapLogin()</code> and
+	 * falls back to session-supplied user login info. Otherwise
+	 * session-supplied user login info is directly taken as return value.
 	 * 
 	 * @param session -
 	 *            the user's session
-	 * @param loginFromDB -
+	 * @param lookUpIMAPLogin -
 	 *            determines whether to look up <code>User.getImapLogin()</code>
 	 *            or not
 	 * @return current user's IMAP login
 	 */
-	public static String getLocalIMAPLogin(final SessionObject session, final boolean loginFromDB) {
-		String imapLogin = loginFromDB ? null : session.getUserObject().getImapLogin();
+	public static String getLocalIMAPLogin(final SessionObject session, final boolean lookUpIMAPLogin) {
+		String imapLogin = lookUpIMAPLogin ? null : session.getUserObject().getImapLogin();
 		if (imapLogin == null || imapLogin.length() == 0) {
 			imapLogin = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
 					: session.getUsername();
@@ -123,7 +124,7 @@ public class OXUser2IMAPLogin {
 			return -1;
 		}
 		final UserStorage us = UserStorage.getInstance(ctx);
-		return us.getUserIdByIMAPLogin(imapLogin);
+		return us.getUserId(imapLogin);
 	}
 
 }
