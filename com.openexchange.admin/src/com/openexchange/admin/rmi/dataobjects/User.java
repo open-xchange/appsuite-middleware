@@ -2171,11 +2171,21 @@ public class User implements Serializable {
     public String toString() {
         final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
+        for (final OXUserExtensionInterface usrext : extensions) {
+            ret.append("  ");
+            ret.append("Extension ");
+            ret.append(usrext.getExtensionName());
+            ret.append(" contains: \n");
+            ret.append("  ");
+            ret.append(usrext.toString());
+            ret.append("\n");
+        }
+
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
                 final Object ob = f.get(this);
                 final String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID") && !tname.endsWith("set")) {
+                if (ob != null && !tname.equals("serialVersionUID") && !tname.equals("extensions") && !tname.endsWith("set")) {
                     ret.append("  ");
                     ret.append(tname);
                     ret.append(": ");
