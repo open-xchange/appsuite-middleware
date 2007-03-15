@@ -51,6 +51,8 @@ package com.openexchange.groupware.contact.helpers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -116,7 +118,7 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 
 	public Object anniversary(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.anniversary( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] ,  "Anniversary", e);
 		}
@@ -124,7 +126,7 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 
 	public Object birthday(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.birthday( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] ,  "Birthday", e);
 		}
@@ -132,7 +134,7 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 
 	public Object imagelastmodified(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.imagelastmodified( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] ,  "ImageLastModified", e);
 		}
@@ -140,7 +142,7 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 
 	public Object lastmodified(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.lastmodified( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] ,  "LastModified", e);
 		}

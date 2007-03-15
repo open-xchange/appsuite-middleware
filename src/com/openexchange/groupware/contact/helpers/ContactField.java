@@ -245,7 +245,7 @@ public static ContactField getByValue(final int value){
 
 public static ContactField getByOutlookName(final String outlook){
 	for(ContactField field: values()){
-		if(outlook.equals( field.getNumber() ) ){
+		if(outlook.equals( field.getOutlookName() ) ){
 			return field;
 		}
 	}

@@ -79,10 +79,10 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
  */
 public class ContactSwitcherForTimestamp implements ContactSwitcher {
 
-	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
-	private ContactSwitcher delegate;
+	protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
+	protected ContactSwitcher delegate;
 	
-	private Object[] makeDate(Object... objects) throws ParseException{
+	protected Object[] makeDate(Object... objects) throws ParseException{
 		objects[1] = new Date( (Long) objects[1]);
 		return objects;
 	}
@@ -107,7 +107,7 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 
 	public Object anniversary(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.anniversary( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] , (String) objects[2] ,  "Anniversary", e);
 		}
@@ -115,7 +115,7 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 
 	public Object birthday(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.birthday( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] , (String) objects[2] ,  "Birthday", e);
 		}
@@ -123,7 +123,7 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 
 	public Object imagelastmodified(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.imagelastmodified( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] , (String) objects[2] ,  "ImageLastModified", e);
 		}
@@ -131,7 +131,7 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 
 	public Object lastmodified(Object... objects) throws ContactException {
 		try {
-			return delegate.creationdate( makeDate(objects) );
+			return delegate.lastmodified( makeDate(objects) );
 		} catch (ParseException e) {
 			throw EXCEPTIONS.create(0, (String) objects[1] , (String) objects[2] ,  "LastModified", e);
 		}

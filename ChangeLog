@@ -1,3 +1,9 @@
+* 2007-03-15 - tobias.prinz@open-xchange.com
+
+ - fixed bug when setting date in "ContactSwitcher" and related classes.
+ - added Importer for CSV Outlook data (using Windows encoding).
+ - added tests for CSV Outlook data import.
+
 * 2007-03-15 - thorben.betten@open-xchange.com
 
  - New method to clean up UploadEvent

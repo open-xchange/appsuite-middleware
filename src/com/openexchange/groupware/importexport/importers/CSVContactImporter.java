@@ -156,34 +156,41 @@ public class CSVContactImporter implements Importer {
 		//reading entries...
 		List<ImportResult> results = new LinkedList<ImportResult>();
 		ContactSetter conSet = new ContactSetter();
-		List<String> currRow;
-		ContactField currField;
-		ContactObject currObj;
-		ImportResult currResult;
 		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
 		while(iter.hasNext()){
-			currResult = new ImportResult();
-			currObj = new ContactObject();
-			currRow = (List<String>) iter.next();
-			currResult.setFolder(folder);
-			try{
-				for(int i = 0; i < fields.size(); i ++){
-					currField = ContactField.getByDisplayName(fields.get(i));
-					currField.doSwitch(conSet, currObj, currRow.get(i));
-				}
-				currObj.setParentFolderID(Integer.parseInt( folder.trim() ));
-				//...and writing them
-				contactsql.insertContactObject(currObj);
-				currResult.setDate( currObj.getLastModified() );
-				currResult.setObjectId( Integer.toString( currObj.getObjectID() ) );
-			} catch (ContactException e) {
-				currResult.setException(e);
-			} catch (OXException e) {
-				currResult.setException(e);
-			}
-			results.add(currResult);
+			//...and writing them
+			results.add( writeEntry(fields, iter.next(), folder, contactsql, conSet));
 		}
-		
 		return results;
+	}
+	
+	/**
+	 * 
+	 * @param fields Headers of the table; column title
+	 * @param entry A list of row cells.
+	 * @param folder The folder this is line meant to be written into
+	 * @param contactsql The interface to store data in the OX
+	 * @param conSet The ContactSetter used for translating the given data 
+	 * @return a report containing either the object ID of the entry created OR an error message
+	 */
+	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSetter conSet){
+		final ImportResult result = new ImportResult();
+		final ContactObject contactObj = new ContactObject();
+		result.setFolder( folder );
+		try{
+			for(int i = 0; i < fields.size(); i ++){
+				final ContactField currField = ContactField.getByDisplayName(fields.get(i));
+				currField.doSwitch(conSet, contactObj, entry.get(i));
+			}
+			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
+			contactsql.insertContactObject(contactObj);
+			result.setDate( contactObj.getLastModified() );
+			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
+		} catch (ContactException e) {
+			result.setException(e);
+		} catch (OXException e) {
+			result.setException(e);
+		}
+		return result;
 	}
 }
