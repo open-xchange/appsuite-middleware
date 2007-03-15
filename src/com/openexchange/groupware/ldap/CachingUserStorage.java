@@ -164,13 +164,6 @@ public class CachingUserStorage extends UserStorage {
         }
         return identifier;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public int getUserIdByIMAPLogin(final String imapLogin) throws LdapException {
-    	return -1;
-    }
 
     /**
      * {@inheritDoc}

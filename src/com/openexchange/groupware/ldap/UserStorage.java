@@ -177,15 +177,6 @@ public abstract class UserStorage {
      * user doesn't exist.
      */
     public abstract int getUserId(String loginInfo) throws LdapException;
-    
-    /**
-     * Searches for a user whose IMAP login matches the given login info
-     * @param imapLogin the IMAP login to search for
-     * @return The unique identifier of the user.
-     * @throws LdapException if an error occurs while searching the user or the
-     * user doesn't exist.
-     */
-    public abstract int getUserIdByIMAPLogin(String imapLogin) throws LdapException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
