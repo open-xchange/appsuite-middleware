@@ -95,7 +95,11 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
-                bundlelist.add(event.getBundle());
+                if (event.getType() == BundleEvent.STARTED) {
+                    bundlelist.add(event.getBundle());
+                } else if (event.getType() == BundleEvent.STOPPED) {
+                    bundlelist.remove(event.getBundle());
+                }
                 log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
             }
         };
