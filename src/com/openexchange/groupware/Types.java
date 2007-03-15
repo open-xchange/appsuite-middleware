@@ -78,11 +78,13 @@ public interface Types {
     
     
     /**
+     * TODO: EXTRACT to admin 
      * Used for gid numbers on group create
      */
     public static final int GID_NUMBER = 1130;
     
     /**
+     * TODO: EXTRACT to admin 
      * Used for uid numbers on user create
      */
     public static final int UID_NUMBER = 1131;
@@ -91,4 +93,10 @@ public interface Types {
 	public static final int INFOSTORE = 137;
 	public static final int ATTACHMENT = 138;
     public static final int WEBDAV = 139;
+    
+    /**
+     * TODO: EXTRACT to admin 
+     * Used for generating ids for mail service 
+     */
+    public static final int MAIL_SERVICE = 1132;
 }

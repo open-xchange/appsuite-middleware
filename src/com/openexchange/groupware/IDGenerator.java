@@ -278,6 +278,7 @@ public final class IDGenerator {
             tmp.put(Types.WEBDAV, "{call get_webdav_id(?)}");
             tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
             tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
+            tmp.put(Types.MAIL_SERVICE, "{call get_mail_service_id(?)}");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -352,6 +353,7 @@ public final class IDGenerator {
             tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
             tmp.put(Types.UID_NUMBER, "CALL get_uid_number_id(?)");
             tmp.put(Types.GID_NUMBER, "CALL get_gid_number_id(?)");
+            tmp.put(Types.MAIL_SERVICE, "CALL get_mail_service_id(?)");
             TYPES = Collections.unmodifiableMap(tmp);
         }
     }
@@ -476,6 +478,7 @@ public final class IDGenerator {
             tmp.put(Types.WEBDAV, "sequence_webdav");
             tmp.put(Types.UID_NUMBER, "sequence_uid_number");
             tmp.put(Types.GID_NUMBER, "sequence_gid_number");
+            tmp.put(Types.MAIL_SERVICE, "sequence_mail_service");
             TABLES = Collections.unmodifiableMap(tmp);
         }
     }
