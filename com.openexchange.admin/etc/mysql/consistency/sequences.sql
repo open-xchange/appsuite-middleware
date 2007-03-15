@@ -112,6 +112,11 @@ ALTER TABLE sequence_gid_number
     MODIFY id INT4 UNSIGNED NOT NULL,
 ENGINE=InnoDB;
 
+ALTER TABLE sequence_mail_service
+    MODIFY cid INT4 UNSIGNED NOT NULL,
+    MODIFY id INT4 UNSIGNED NOT NULL,
+ENGINE=InnoDB;
+
 
 DROP PROCEDURE IF EXISTS get_unique_id;
 DELIMITER //
@@ -299,4 +304,14 @@ BEGIN
     SELECT id FROM sequence_gid_number WHERE cid=context;
 END //
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS get_mail_service_id;
+DELIMITER //
+CREATE PROCEDURE get_mail_service_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA
+BEGIN
+    UPDATE get_mail_service_id SET id=id+1 WHERE cid=context;
+    SELECT id FROM get_mail_service_id WHERE cid=context;
+END //
+DELIMITER ;
+
 

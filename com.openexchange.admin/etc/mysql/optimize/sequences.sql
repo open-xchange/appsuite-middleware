@@ -149,3 +149,11 @@ CREATE TABLE sequence_gid_number (
     id INT4 UNSIGNED,
     PRIMARY KEY (cid)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS sequence_mail_service;
+CREATE TABLE sequence_mail_service (
+    cid INT4 UNSIGNED,
+    id INT4 UNSIGNED,
+    PRIMARY KEY (cid)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
