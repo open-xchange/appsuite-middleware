@@ -77,21 +77,21 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 public class CSVContactExportTest extends AbstractCSVContactTest {
 
 	public static Exporter exp = new CSVContactExporter();
-	public static final String TEST1_RESULT = 
+	public static String TEST1_RESULT = 
 		"\"Object id\"," +
 		"\"Folder id\"," +
 		"\"Given name\"\n";
-	public static final int[] TEST1_BASE = {
+	public static int[] TEST1_BASE = {
 		ContactField.OBJECT_ID.getNumber(),
 		ContactField.FOLDER_ID.getNumber(),
 		ContactField.GIVEN_NAME.getNumber(),
 		7000};
-	public static final String TEST2_RESULT = 
+	public static String TEST2_RESULT = 
 		"Given name, " +
 		"Email 1\n" +
 		"Prinz, tobias.prinz@open-xchange.com\n" +
 		"Laguna, francisco.laguna@open-xchange.com";
-	public static final int[] TEST2_BASE ={
+	public static int[] TEST2_BASE ={
 		ContactField.GIVEN_NAME.getNumber(), 
 		ContactField.EMAIL1.getNumber()}; 
 	
@@ -125,7 +125,6 @@ public class CSVContactExportTest extends AbstractCSVContactTest {
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST2_BASE, null);
 		CSVParser parser = new CSVParser();
 		String resStr = readStreamAsString(is);
-		System.out.println(resStr);
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 		
 		//cleaning up

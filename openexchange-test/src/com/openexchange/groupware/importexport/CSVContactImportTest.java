@@ -64,8 +64,10 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 
@@ -75,10 +77,15 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
  *
  */
 public class CSVContactImportTest extends AbstractCSVContactTest {
-	protected static final Importer imp = new CSVContactImporter();
-	public static final String IMPORT_ONE = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\nTobias Prinz, tobias.prinz@open-xchange.com";
-	public static final String IMPORT_MULTIPLE = IMPORT_ONE + "\nLaguna, francisco.laguna@open-xchange.com\n";
-	public static final String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com\n";
+	protected Importer imp = new CSVContactImporter();
+	public static String NAME1 = "Prinz";
+	public static String EMAIL1 = "tobias.prinz@open-xchange.com";
+	public static String NAME2 = "Laguna";
+	public static String EMAIL2 = "francisco.laguna@open-xchange.com";
+	public static String IMPORT_ONE = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\n"+NAME1+", "+EMAIL1;
+	public static String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+"\n";
+	public static String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com\n";
+	public boolean doDebugging = false;
 	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
@@ -119,8 +126,14 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		}
 		assertTrue( res.isCorrect() );
 
+		//basic check: 1 entry in folder
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		assertEquals("One contact in folder?", 1, contactSql.getNumberOfContacts(folderId));
+
+		//detailed check:
+		checkFirstResult(
+			Integer.parseInt(
+				res.getObjectId()));
 		
 		//cleaning up
 		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
@@ -136,6 +149,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 			assertTrue( res.isCorrect() );
 		}
 		
+		//basic check
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		assertEquals("Two contacts in folder?", 2, contactSql.getNumberOfContacts(folderId));
 		
@@ -157,6 +171,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 			}
 			assertTrue( res.isCorrect() );
 		}
+
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		assertEquals("Three contacts in folder?", contactSql.getNumberOfContacts(folderId) , 3);
 		
@@ -168,8 +183,38 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	
 	protected List<ImportResult> importStuff(String csv) throws ImportExportException{
 		List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		InputStream is = new ByteArrayInputStream( csv.getBytes() );
-		return imp.importData(sessObj, Format.CSV, is, folders, null);
+		InputStream is = new ByteArrayInputStream( debug(csv).getBytes() );
+		return debug(imp.importData(sessObj, Format.CSV, is, folders, null));
 
+	}
+
+	protected String debug(String str){
+		if(doDebugging){
+			System.out.println(str);
+		}
+		return str;
+	}
+	
+	protected List<ImportResult> debug(List<ImportResult> results){
+		if(doDebugging){
+			System.out.println("Result---BEGIN");
+			for(ImportResult res: results){
+				if(res.hasError()){
+					System.out.println("Error: BEGIN---");
+					res.getException().printStackTrace();
+					System.out.println("---END");
+				} else {
+					System.out.println("Worked: id = " + res.getObjectId());
+				}
+			}
+			System.out.println("Result---END\n");
+		}
+		return results;
+	}
+	
+	protected void checkFirstResult(int objectID ) throws OXException{
+		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
+		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
+		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
 	}
 }

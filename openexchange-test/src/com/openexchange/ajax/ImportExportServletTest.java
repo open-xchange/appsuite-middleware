@@ -84,10 +84,10 @@ import com.openexchange.webdav.xml.FolderTest;
  */
 public class ImportExportServletTest extends AbstractAJAXTest {
 	//private SessionObject sessObj;
-	public static final String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
-	public static final String IMPORTED_CSV = CSVContactImportTest.IMPORT_MULTIPLE;
-	public static final String EXPORT_SERVLET = "export";
-	public static final String IMPORT_SERVLET = "import";
+	public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
+	public String IMPORTED_CSV = CSVContactImportTest.IMPORT_MULTIPLE;
+	public String EXPORT_SERVLET = "export";
+	public String IMPORT_SERVLET = "import";
 	
 	public ImportExportServletTest(String name){
 		super(name);
