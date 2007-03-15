@@ -161,13 +161,6 @@ public class RdbUserStorage extends UserStorage {
     /**
      * {@inheritDoc}
      */
-    public int getUserIdByIMAPLogin(final String imapLogin) throws LdapException {
-    	return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public User getUser(final int userId) throws LdapException {
         Connection con = null;
         try {
