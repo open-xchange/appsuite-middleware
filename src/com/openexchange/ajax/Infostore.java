@@ -228,41 +228,48 @@ public class Infostore extends PermissionServlet {
 		try {
 			checkSize(req.getContentLength(), sessionObj.getUserConfiguration());
 			if(action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
-				final UploadEvent upload = processUpload(req,res);
-				final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
-				if(null != uploadFile)
-					checkSize(uploadFile.getSize(), sessionObj.getUserConfiguration());
-				final String obj = upload.getFormField("json");
-				if(obj == null) {
-					missingParameter("json",res, true, action);
-					return;
-				}
-				
-				
-				final DocumentMetadata metadata = PARSER.getDocumentMetadata(obj);
-				if(action.equals(ACTION_NEW)){
-					newDocument(metadata,res, uploadFile,ctx, user, userConfig, sessionObj);
-				} else {
-					if(!checkRequired(req,res,true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)){
-						return;
-					}
-					final int id = Integer.valueOf(req.getParameter(PARAMETER_ID));
-					final long timestamp = new Long(req.getParameter(PARAMETER_TIMESTAMP));
-					
-					metadata.setId(id);
-					Metadata[] presentFields = null;
-					
-					try {
-						presentFields = PARSER.findPresentFields(obj);
-					} catch (UnknownMetadataException x) {
-						unknownColumn(res,"BODY",x.getColumnId(), true, action);
+				UploadEvent upload = null;
+				try {
+					upload = processUpload(req);
+					final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
+					if(null != uploadFile)
+						checkSize(uploadFile.getSize(), sessionObj.getUserConfiguration());
+					final String obj = upload.getFormField("json");
+					if(obj == null) {
+						missingParameter("json",res, true, action);
 						return;
 					}
 					
-					if(action.equals(ACTION_UPDATE))
-						update(res, id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
-					else
-						copy(res,id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+					
+					final DocumentMetadata metadata = PARSER.getDocumentMetadata(obj);
+					if(action.equals(ACTION_NEW)){
+						newDocument(metadata,res, uploadFile,ctx, user, userConfig, sessionObj);
+					} else {
+						if(!checkRequired(req,res,true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)){
+							return;
+						}
+						final int id = Integer.valueOf(req.getParameter(PARAMETER_ID));
+						final long timestamp = new Long(req.getParameter(PARAMETER_TIMESTAMP));
+						
+						metadata.setId(id);
+						Metadata[] presentFields = null;
+						
+						try {
+							presentFields = PARSER.findPresentFields(obj);
+						} catch (UnknownMetadataException x) {
+							unknownColumn(res,"BODY",x.getColumnId(), true, action);
+							return;
+						}
+						
+						if(action.equals(ACTION_UPDATE))
+							update(res, id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+						else
+							copy(res,id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+					}
+				} finally {
+					if (upload != null) {
+						upload.cleanUp();
+					}
 				}
 			} 
 		} catch (OXException x) {

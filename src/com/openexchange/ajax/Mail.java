@@ -2114,7 +2114,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Create and fire upload event
 					 */
-					final UploadEvent uploadEvent = ((UploadListener) this).getRegistry().processUpload(req, resp);
+					final UploadEvent uploadEvent = ((UploadListener) this).getRegistry().processUpload(req);
 					uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface); // MailInterfaceImpl.getInstance(sessionObj));
 					uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
 					uploadEvent.setParameter(UPLOAD_PARAM_SESSION, sessionObj);
@@ -2230,8 +2230,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.write(jsResponse);
 				writer.flush();
 				return true;
-			} finally {
-				uploadEvent.cleanUp();
 			}
 			return false;
 		} catch (JSONException e) {

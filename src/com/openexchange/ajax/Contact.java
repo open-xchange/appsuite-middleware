@@ -280,74 +280,88 @@ public class Contact extends DataServlet {
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			if (action.equals(ACTION_NEW)) {
-				final UploadEvent upload = processUpload(httpServletRequest, httpServletResponse);
-				final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
-				
-				if (uploadFile == null) {
-					throw new AjaxException(AjaxException.Code.NoUploadImage);
+				UploadEvent upload = null;
+				try {
+					upload = processUpload(httpServletRequest);
+					final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
+					
+					if (uploadFile == null) {
+						throw new AjaxException(AjaxException.Code.NoUploadImage);
+					}
+					
+					final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
+					if(obj == null) {
+						throw new AjaxException(AjaxException.Code.NoField, "form");
+					}
+					
+					final ContactObject contactobject = new ContactObject();
+					final JSONObject jsonobject = new JSONObject(obj);
+					
+					final ContactParser contactparser = new ContactParser(sessionObj);
+					contactparser.parse(contactobject, jsonobject);
+					
+					if (!contactobject.containsParentFolderID()) {
+						throw new OXMandatoryFieldException("missing folder");
+					}
+					
+					final byte[] b = new byte[(int)uploadFile.getSize()];
+					final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
+					fis.read(b);
+					contactobject.setImageContentType(uploadFile.getContentType());
+					contactobject.setImage1(b);
+					
+					final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+					contactsql.insertContactObject(contactobject);
+					
+					final JSONObject jData = new JSONObject();
+					jData.put(ContactFields.ID, contactobject.getObjectID());
+					
+					response.setData(jData);
+				} finally {
+					if (upload != null) {
+						upload.cleanUp();
+					}
 				}
-				
-				final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
-				if(obj == null) {
-					throw new AjaxException(AjaxException.Code.NoField, "form");
-				}
-				
-				final ContactObject contactobject = new ContactObject();
-				final JSONObject jsonobject = new JSONObject(obj);
-				
-				final ContactParser contactparser = new ContactParser(sessionObj);
-				contactparser.parse(contactobject, jsonobject);
-				
-				if (!contactobject.containsParentFolderID()) {
-					throw new OXMandatoryFieldException("missing folder");
-				}
-				
-				final byte[] b = new byte[(int)uploadFile.getSize()];
-				final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
-				fis.read(b);
-				contactobject.setImageContentType(uploadFile.getContentType());
-				contactobject.setImage1(b);
-				
-				final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-				contactsql.insertContactObject(contactobject);
-				
-				final JSONObject jData = new JSONObject();
-				jData.put(ContactFields.ID, contactobject.getObjectID());
-				
-				response.setData(jData);
 			} else if (action.equals(ACTION_UPDATE)) {
 				final int id = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_ID);
 				final int inFolder = parseMandatoryIntParameter(httpServletRequest, AJAXServlet.PARAMETER_INFOLDER);
 				final Date timestamp = parseMandatoryDateParameter(httpServletRequest, AJAXServlet.PARAMETER_TIMESTAMP);
 				
-				final UploadEvent upload = processUpload(httpServletRequest, httpServletResponse);
-				final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
-				
-				final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
-				if(obj == null) {
-					throw new AjaxException(AjaxException.Code.NoField, "form");
+				UploadEvent upload = null;
+				try {
+					upload = processUpload(httpServletRequest);
+					final UploadFile uploadFile = upload.getUploadFileByFieldName(AJAXServlet.PARAMETER_FILE);
+					
+					final String obj = upload.getFormField(AJAXServlet.PARAMETER_JSON);
+					if(obj == null) {
+						throw new AjaxException(AjaxException.Code.NoField, "form");
+					}
+					
+					final ContactObject contactobject = new ContactObject();
+					final JSONObject jsonobject = new JSONObject(obj);
+					
+					final ContactParser contactparser = new ContactParser(sessionObj);
+					contactparser.parse(contactobject, jsonobject);
+					
+					contactobject.setObjectID(id);
+					
+					if (null == uploadFile) {
+	                    contactobject.setImage1(null);
+	                } else {
+	                    final byte[] b = new byte[(int)uploadFile.getSize()];
+	    				final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
+	    				fis.read(b);
+	    				contactobject.setImageContentType(uploadFile.getContentType());
+	    				contactobject.setImage1(b);
+	                }
+					
+					final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+					contactsql.updateContactObject(contactobject, inFolder, timestamp);
+				} finally {
+					if (upload != null) {
+						upload.cleanUp();
+					}
 				}
-				
-				final ContactObject contactobject = new ContactObject();
-				final JSONObject jsonobject = new JSONObject(obj);
-				
-				final ContactParser contactparser = new ContactParser(sessionObj);
-				contactparser.parse(contactobject, jsonobject);
-				
-				contactobject.setObjectID(id);
-				
-				if (null == uploadFile) {
-                    contactobject.setImage1(null);
-                } else {
-                    final byte[] b = new byte[(int)uploadFile.getSize()];
-    				final FileInputStream fis = new FileInputStream(uploadFile.getTmpFile());
-    				fis.read(b);
-    				contactobject.setImageContentType(uploadFile.getContentType());
-    				contactobject.setImage1(b);
-                }
-				
-				final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-				contactsql.updateContactObject(contactobject, inFolder, timestamp);
 			} else {
 				throw new AjaxException(AjaxException.Code.UnknownAction, action);
 			}

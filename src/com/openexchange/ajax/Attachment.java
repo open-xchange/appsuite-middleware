@@ -207,37 +207,43 @@ public class Attachment extends PermissionServlet {
 		try {
 			checkSize(req.getContentLength(), session.getUserConfiguration());
 			if (ACTION_ATTACH.equals(action)) {
-				final UploadEvent upload = processUpload(req, res);
-				
-				List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
-				List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
-				
-				long sum = 0;
-				for(Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
-					UploadFile uploadFile = iter.next();
-					String fileField = uploadFile.getFieldName();
-					int index = Integer.valueOf(fileField.substring(5));
-					final String obj = upload.getFormField("json_"+index);
-					if (obj == null || obj.length() == 0) {
-						continue;
-					}
-					final JSONObject json = new JSONObject(obj);
-					for(AttachmentField required : REQUIRED){
-						if(!json.has(required.getName())) {
-							missingParameter(required.getName(),res, true, action);
+				UploadEvent upload = null;
+				try {
+					upload = processUpload(req);
+					List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+					List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
+					
+					long sum = 0;
+					for(Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
+						UploadFile uploadFile = iter.next();
+						String fileField = uploadFile.getFieldName();
+						int index = Integer.valueOf(fileField.substring(5));
+						final String obj = upload.getFormField("json_"+index);
+						if (obj == null || obj.length() == 0) {
+							continue;
 						}
+						final JSONObject json = new JSONObject(obj);
+						for(AttachmentField required : REQUIRED){
+							if(!json.has(required.getName())) {
+								missingParameter(required.getName(),res, true, action);
+							}
+						}
+						
+						final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
+						assureSize(index, attachments, uploadFiles);
+						
+						attachments.set(index, attachment);
+						uploadFiles.set(index, uploadFile);
+						sum += uploadFile.getSize();
+						checkSingleSize(uploadFile.getSize(), session.getUserConfiguration());
+						checkSize(sum, session.getUserConfiguration());
 					}
-					
-					final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
-					assureSize(index, attachments, uploadFiles);
-					
-					attachments.set(index, attachment);
-					uploadFiles.set(index, uploadFile);
-					sum += uploadFile.getSize();
-					checkSingleSize(uploadFile.getSize(), session.getUserConfiguration());
-					checkSize(sum, session.getUserConfiguration());
+					attach(res,attachments,uploadFiles,ctx,user,userConfig);
+				} finally {
+					if (upload != null) {
+						upload.cleanUp();
+					}
 				}
-				attach(res,attachments,uploadFiles,ctx,user,userConfig);
 			}
 		}catch (UploadException x) {
 			Response resp = new Response();

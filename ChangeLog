@@ -3,6 +3,8 @@
  - New method to clean up UploadEvent
  - Changed value 'session.loginFromDB' to 'user.imapLogin'
  - Applied new class to map: User ID <-> IMAP Login
+ - Added automatic UploadEvent clean up for registered listeners and manual
+   for those classes which do not register but create an UploadEvent anyway
 
 * 2007-03-14 - marcus.klein@open-xchange.com
 

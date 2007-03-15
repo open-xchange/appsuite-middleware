@@ -623,8 +623,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
-	protected static void sendErrorAsJS(final PrintWriter w, final String errorMessage) throws IOException,
-			ServletException {
+	protected static void sendErrorAsJS(final PrintWriter w, final String errorMessage) throws ServletException {
 		try {
 			final JSONWriter jw = new JSONWriter(w);
 			jw.object();
@@ -722,12 +721,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	/* --------------------- STUFF FOR UPLOAD --------------------- */
 
-	/**
-	 * Create an UpdateEvent object from incoming multipart form data and fire
-	 * the event
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.upload.UploadRegistry#processUpload(javax.servlet.http.HttpServletRequest)
 	 */
 	@SuppressWarnings("unchecked")
-	public UploadEvent processUpload(final HttpServletRequest req, final HttpServletResponse resp)
+	public UploadEvent processUpload(final HttpServletRequest req)
 			throws UploadException {
 		final boolean isMultipart = ServletFileUpload.isMultipartContent(new ServletRequestContext(req));
 		if (isMultipart) {
@@ -818,12 +817,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return retval;
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.upload.UploadRegistry#addUploadListener(com.openexchange.groupware.upload.UploadListener)
+	 */
 	public void addUploadListener(final UploadListener uploadListener) {
 		if (!containsUploadListener(uploadListener)) {
 			registeredUploadListeners.add(uploadListener);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.upload.UploadRegistry#containsUploadListener(com.openexchange.groupware.upload.UploadListener)
+	 */
 	public boolean containsUploadListener(final UploadListener uploadListener) {
 		final int size = registeredUploadListeners.size();
 		final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
@@ -836,25 +843,29 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.upload.UploadRegistry#fireUploadEvent(com.openexchange.groupware.upload.UploadEvent)
+	 */
 	public void fireUploadEvent(final UploadEvent uploadEvent) throws UploadServletException {
-		final int size = registeredUploadListeners.size();
-		final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
-		for (int i = 0; i < size; i++) {
-			final UploadListener uploadListener = iter.next();
-			try {
-				uploadListener.action(uploadEvent);
-			} catch (OXException e) {
-				LOG.error(new StringBuilder("ERROR: Upload method \"action()\" failed for UploadListener ")
-						.append(uploadListener.getClass()), e);
+		try {
+			final int size = registeredUploadListeners.size();
+			final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
+			for (int i = 0; i < size; i++) {
+				final UploadListener uploadListener = iter.next();
+				try {
+					uploadListener.action(uploadEvent);
+				} catch (OXException e) {
+					LOG.error(new StringBuilder("ERROR: Upload method \"action()\" failed for UploadListener ")
+							.append(uploadListener.getClass()), e);
+				}
 			}
+		} finally {
+			uploadEvent.cleanUp();
 		}
 	}
 
-	public static void startResponse(final JSONWriter jsonWriter) throws JSONException {
-		startResponse(null, jsonWriter);
-	}
-
-	public static void startResponse(final HttpServletResponse resp, final JSONWriter jsonwriter) throws JSONException {
+	public static void startResponse(final JSONWriter jsonwriter) throws JSONException {
 		jsonwriter.object();
 		jsonwriter.key("data");
 	}

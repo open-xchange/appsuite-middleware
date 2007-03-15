@@ -100,41 +100,48 @@ public class ImportServlet extends ImportExport {
 				DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID));
 			
 			//getting file
-			final UploadEvent ue = processUpload(req, resp);
-			Iterator<UploadFile> iter = ue.getUploadFilesIterator();
-			if(ue.getNumberOfUploadFiles() != 1){
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "can handle one and only one file in request");
-				return;
+			UploadEvent ue = null;
+			try {
+				ue = processUpload(req);
+				Iterator<UploadFile> iter = ue.getUploadFilesIterator();
+				if(ue.getNumberOfUploadFiles() != 1){
+					resp.sendError(HttpServletResponse.SC_CONFLICT, "can handle one and only one file in request");
+					return;
+				}
+				final UploadFile uf = iter.next();
+				//actual import
+				final List<ImportResult> importResult = importerExporter.importData(
+					getSessionObject(req), 
+					format, 
+					new FileInputStream(uf.getTmpFile()), 
+					folders, 
+					req.getParameterMap());
+				//writing response
+				final StringWriter stringWriter = new StringWriter();
+				final JSONWriter jsonWriter = new JSONWriter(stringWriter);
+				
+				final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
+				
+				jsonWriter.array();
+				for (int a = 0; a < importResult.size(); a++) {
+					importExportWriter.writeObject(importResult.get(a));
+				}
+				jsonWriter.endArray();
+				
+				final OutputStream outputStream = resp.getOutputStream();
+				
+				resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+				
+				final String content = stringWriter.toString();
+				resp.setContentLength(content.length());
+				
+				outputStream.write(content.getBytes("UTF-8"));
+				outputStream.flush();
+			} finally {
+				if (ue != null) {
+					ue.cleanUp();
+				}
 			}
-			final UploadFile uf = iter.next();
-			//actual import
-			final List<ImportResult> importResult = importerExporter.importData(
-				getSessionObject(req), 
-				format, 
-				new FileInputStream(uf.getTmpFile()), 
-				folders, 
-				req.getParameterMap());
-			//writing response
-			final StringWriter stringWriter = new StringWriter();
-			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
-			
-			final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
-			
-			jsonWriter.array();
-			for (int a = 0; a < importResult.size(); a++) {
-				importExportWriter.writeObject(importResult.get(a));
-			}
-			jsonWriter.endArray();
-			
-			final OutputStream outputStream = resp.getOutputStream();
-			
-			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-			
-			final String content = stringWriter.toString();
-			resp.setContentLength(content.length());
-			
-			outputStream.write(content.getBytes("UTF-8"));
-			outputStream.flush();
 		} catch (ImportExportException ex) {
 			LOG.error(ex.toString(), ex);
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
