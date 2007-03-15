@@ -63,4 +63,9 @@ public interface OXUserExtensionInterface extends Serializable {
      */
     public String getExtensionName();
 
+    /**
+     * Used to return a string representation of the underlying object
+     * @return
+     */
+    public String toString();
 }
