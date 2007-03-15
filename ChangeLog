@@ -1,3 +1,7 @@
+* 2007-03-14 - marcus.klein@open-xchange.com
+
+  - Added login information to user object.
+
 * 2007-03-14 - tobias.prinz@open-xchange.com
 
  - removed required parameter "type" from both importer and exporter

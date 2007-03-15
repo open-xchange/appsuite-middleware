@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.io.Serializable;
@@ -143,8 +141,11 @@ public class UserImpl implements Serializable, User, Cloneable {
      */
     private String userPassword = "x";
 
+    /**
+     * Password encryption mechanism.
+     */
     private String passwordMech = "{CRYPT}";
-    
+
     /**
      * Determines if the user is enabled or disabled.
      */
@@ -159,6 +160,11 @@ public class UserImpl implements Serializable, User, Cloneable {
      * Groups this user is member of.
      */
     private int[] groups;
+
+    /**
+     * Login information of this user.
+     */
+    private String loginInfo;
 
     /**
      * Default constructor.
@@ -252,6 +258,9 @@ public class UserImpl implements Serializable, User, Cloneable {
         this.shadowLastChange = shadowLastChange;
     }
 
+    /**
+     * @param passwordMech password encryption mechanism.
+     */
     void setPasswordMech(final String passwordMech) {
         this.passwordMech = passwordMech;
     }
@@ -416,14 +425,15 @@ public class UserImpl implements Serializable, User, Cloneable {
         for (int group : groups) {
             contained = group == GROUP_ALL;
         }
+        final int[] retval;
         if (contained) {
-            return groups;
+            retval = groups;
         } else {
-            final int[] newgroups = new int[groups.length + 1];
-            newgroups[0] = GROUP_ALL;
-            System.arraycopy(groups, 0, newgroups, 1, groups.length);
-            return newgroups;
+            retval = new int[groups.length + 1];
+            retval[0] = GROUP_ALL;
+            System.arraycopy(groups, 0, retval, 1, groups.length);
         }
+        return retval;
     }
 
     /**
@@ -486,7 +496,24 @@ public class UserImpl implements Serializable, User, Cloneable {
         this.aliases = aliases;
     }
 
-	public String getPasswordMech() {
-		return passwordMech;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public String getPasswordMech() {
+        return passwordMech;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLoginInfo() {
+        return loginInfo;
+    }
+
+    /**
+     * @param loginInfo the login information.
+     */
+    void setLoginInfo(final String loginInfo) {
+        this.loginInfo = loginInfo;
+    }
 }

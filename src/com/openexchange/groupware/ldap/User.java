@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 /**
@@ -63,8 +61,11 @@ public interface User {
      */
     String getUserPassword();
 
+    /**
+     * @return the mechanism for encrypting the password.
+     */
     String getPasswordMech();
-    
+
     /**
      * Getter for uid.
      * @return User identifier.
@@ -162,4 +163,8 @@ public interface User {
      */
     int getContactId();
 
+    /**
+     * @return the login information of the user.
+     */
+    String getLoginInfo();
 }

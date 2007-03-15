@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -80,9 +78,12 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_USER = "SELECT " + USERPASSWORD + ','
         + MAILENABLED + ',' + IMAPSERVER + ",imapLogin," + SMTPSERVER + ','
         + MAILDOMAIN + ',' + SHADOWLASTCHANGE + ',' + MAIL + ',' +  TIMEZONE
-        + ',' + LANGUAGE + ",passwordMech,contactId FROM user WHERE user.cid=? AND "
-        + IDENTIFIER + "=?";
+        + ',' + LANGUAGE + ",passwordMech,contactId FROM user WHERE user.cid=? "
+        + "AND " + IDENTIFIER + "=?";
 
+    /**
+     * SQL statement for selecting aliases for a user.
+     */
     private static final String SELECT_ALIAS = "SELECT value FROM "
         + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=? AND name=?";
 
@@ -92,6 +93,18 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_CONTACT = "SELECT " + GIVENNAME + ','
         + SURENAME + ',' + DISPLAYNAME + " FROM prg_contacts WHERE cid=? "
         + "AND intfield01=?";
+
+    /**
+     * SQL statement for resolving the identifier of a user.
+     */
+    private static final String SELECT_ID = "SELECT " + IDENTIFIER
+        + " FROM login2user WHERE cid=? AND " + UID + "=?";
+
+    /**
+     * SQL statement for reading the login info for a user.
+     */
+    private static final String SELECT_LOGIN = "SELECT " + UID
+        + " FROM login2user where cid=? AND " + IDENTIFIER + "=?";
 
     /**
      * Reference to the context.
@@ -117,13 +130,11 @@ public class RdbUserStorage extends UserStorage {
         } catch (DBPoolingException e) {
             throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
         }
-        final String sql = "SELECT id FROM login2user WHERE cid=? AND " + UID
-            + "=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
         int userId = -1;
         try {
-            stmt = con.prepareStatement(sql);
+            stmt = con.prepareStatement(SELECT_ID);
             stmt.setLong(1, context.getContextId());
             stmt.setString(2, uid);
             result = stmt.executeQuery();
@@ -146,7 +157,7 @@ public class RdbUserStorage extends UserStorage {
         }
         return userId;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -202,10 +213,42 @@ public class RdbUserStorage extends UserStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
+        loadLoginInfo(retval);
         loadContact(retval);
         loadGroups(retval);
         loadAliases(retval);
         return retval;
+    }
+
+    /**
+     * Reads the login information for a user.
+     * @param user User object.
+     * @throws LdapException if reading fails.
+     */
+    private void loadLoginInfo(final UserImpl user) throws LdapException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (DBPoolingException e) {
+            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_LOGIN);
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, user.getId());
+            result = stmt.executeQuery();
+            if (result.next()) {
+                user.setLoginInfo(result.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+                e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
     }
 
     /**
