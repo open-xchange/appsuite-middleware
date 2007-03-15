@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -2232,7 +2231,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.flush();
 				return true;
 			} finally {
-				tidyUp(uploadEvent);
+				uploadEvent.cleanUp();
 			}
 			return false;
 		} catch (JSONException e) {
@@ -2316,17 +2315,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} catch (Exception e) {
 				LOG.error(e, e);
 				continue NextDoc;
-			}
-		}
-	}
-
-	private final void tidyUp(final UploadEvent uploadEvent) {
-		final Iterator<UploadFile> iter = uploadEvent.getUploadFilesIterator();
-		while (iter.hasNext()) {
-			final UploadFile uploadFile = iter.next();
-			final File tmpFile = uploadFile.getTmpFile();
-			if (!tmpFile.delete()) {
-				LOG.error(new StringBuilder("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
 			}
 		}
 	}

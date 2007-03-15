@@ -51,6 +51,7 @@
 
 package com.openexchange.groupware.upload;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,6 +66,9 @@ import java.util.Map;
  * 
  */
 public class UploadEvent {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+		.getLog(UploadEvent.class);
 	
 	public static final int MAIL_UPLOAD = 1;
 	
@@ -199,6 +203,27 @@ public class UploadEvent {
 	public void removeParameter(final String name) {
 		if (name != null) {
 			parameters.remove(name);
+		}
+	}
+	
+	private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
+
+	/**
+	 * Deletes all created temporary files created through this
+	 * <code>DeleteEvent</code> instance
+	 */
+	public void cleanUp() {
+		final Iterator<UploadFile> iter = getUploadFilesIterator();
+		while (iter.hasNext()) {
+			final UploadFile uploadFile = iter.next();
+			final File tmpFile = uploadFile.getTmpFile();
+			try {
+				if (!tmpFile.delete()) {
+					LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
+				}
+			} catch (SecurityException e) {
+				LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
+			}
 		}
 	}
 	
