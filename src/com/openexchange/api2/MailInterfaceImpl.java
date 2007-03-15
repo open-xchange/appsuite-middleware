@@ -3657,7 +3657,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
 				}
-				if (folderObj.containsSubscribe()) {
+				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
 					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
 				}

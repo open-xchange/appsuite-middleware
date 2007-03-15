@@ -446,6 +446,10 @@ public class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
 						}
+						if (IMAPProperties.isIgnoreSubscription()) {
+							jsonwriter.value(true);
+							return;
+						}
 						final String fn = folder.getImapFolder().getFullName();
 						if (FULLNAME_INBOX.equals(fn)) {
 							jsonwriter.value(true);
@@ -617,6 +621,10 @@ public class FolderWriter extends DataWriter {
 		case FolderObject.SUBSCRIBED:
 			if (withKey) {
 				jsonwriter.key(FolderFields.SUBSCRIBED);
+			}
+			if (IMAPProperties.isIgnoreSubscription()) {
+				jsonwriter.value(true);
+				break;
 			}
 			final String fn = folder.getImapFolder().getFullName();
 			if (FULLNAME_INBOX.equals(fn)) {
