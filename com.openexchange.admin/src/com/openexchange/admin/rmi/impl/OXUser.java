@@ -170,7 +170,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                 interfacelist.add(oxuser);
                             } catch (PluginException e) {
                                 log.error("Error while calling create for plugin: " + bundlename, e);
-                                log.info("Now doing rollback for all everything until now...");
+                                log.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new Integer[]{usr.getId()}, auth);
