@@ -64,9 +64,11 @@ import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.Permission;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -83,6 +85,7 @@ public class AdminDaemon {
     private static PropertyHandler prop = null;
     private AdminCache cache = null;
     private static Registry registry = null;
+    private static ArrayList<Bundle> bundlelist = null;
     
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
@@ -92,6 +95,7 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
+                bundlelist.add(event.getBundle());
                 log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
             }
         };
@@ -99,7 +103,7 @@ public class AdminDaemon {
     }
 
     public void initCache(final BundleContext context) {
-
+        bundlelist = new ArrayList<Bundle>();
         cache = new AdminCache();
         cache.initCache();
         ClientAdminThread.cache = cache;
@@ -182,5 +186,9 @@ public class AdminDaemon {
 
     public static PropertyHandler getProp() {
         return prop;
+    }
+
+    public static final ArrayList<Bundle> getBundlelist() {
+        return bundlelist;
     }
 }
