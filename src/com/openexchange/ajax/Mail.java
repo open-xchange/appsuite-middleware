@@ -2173,11 +2173,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final PrintWriter writer = (PrintWriter) uploadEvent.getParameter(UPLOAD_PARAM_WRITER);
 			final SessionObject sessionObj = (SessionObject) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
 			final String actionStr = (String) uploadEvent.getParameter(PARAMETER_ACTION);
-			final String mailStr = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
+			String mailStr = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
 			if (mailStr == null) {
 				throw new OXMailException(MailCode.MISSING_PARAM, UPLOAD_FORMFIELD_MAIL);
 			}
 			final JSONObject jsonMailObj = new JSONObject(mailStr);
+			mailStr = null;
 			final int sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? jsonMailObj.getInt(PARAMETER_SEND_TYPE) : MailInterfaceImpl.SENDTYPE_NEW;
 			int[] infostoreDocIDs = null;
 			if (jsonMailObj.has(JSONMessageObject.JSON_INFOSTORE_IDS)) {

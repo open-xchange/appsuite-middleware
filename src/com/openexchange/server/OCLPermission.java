@@ -190,6 +190,18 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		this.entity = entity;
 		this.fuid = fuid;
 	}
+	
+	public void reset() {
+		name = null;
+		fuid = 0;
+		entity = -1;
+		fp = 0;
+		orp = 0;
+		owp = 0;
+		odp = 0;
+		folderAdmin = false;
+		groupPermission = false;
+	}
 
 	public void setName(final String name) {
 		this.name = name;

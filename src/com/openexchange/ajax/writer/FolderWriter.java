@@ -62,21 +62,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.openexchange.IMAPPermission;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
+import com.openexchange.groupware.imap.IMAPUtils;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.sun.mail.imap.ACL;
 
 /**
  * FolderWriter
@@ -85,12 +91,16 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  */
 public class FolderWriter extends DataWriter {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 	
 	private static final String STR_EMPTY = "";
 	
 	private static final String FULLNAME_INBOX = "INBOX";
+	
+	private static final int BIT_USER_FLAG = (1 << 29);
 
 	private final User userObj;
 
@@ -323,13 +333,22 @@ public class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.OWN_RIGHTS);
 						}
+						int permissionBits = 0;
 						if (folder.isRootFolder()) {
-							jsonwriter.value(createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
+							permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
 									OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-									OCLPermission.NO_PERMISSIONS, false));
+									OCLPermission.NO_PERMISSIONS, false);
 						} else {
-							jsonwriter.value(folder.getOwnRights());
+							final IMAPPermission imapPerm = new IMAPPermission(ctx);
+							imapPerm.setEntity(userObj.getId());
+							imapPerm.parseRights(folder.getOwnRights());
+							permissionBits = createPermissionBits(imapPerm);
+							if (IMAPProperties.isUserFlagsEnabled()
+									&& (IMAPUtils.supportsUserDefinedFlags(folder.getImapFolder()))) {
+								permissionBits |= BIT_USER_FLAG;
+							}
 						}
+						jsonwriter.value(permissionBits);
 					}
 				};
 				break Fields;
@@ -341,8 +360,33 @@ public class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.PERMISSIONS);
 						}
-						jsonwriter.value(JSONObject.NULL);
-						ctx.getContextId();
+						if (!folder.containsACLs()) {
+							jsonwriter.value(JSONObject.NULL);
+							return;
+						}
+						final JSONArray ja = new JSONArray();
+						final ACL[] acls = folder.getACL();
+						for (int j = 0; j < acls.length; j++) {
+							final IMAPPermission imapPerm = new IMAPPermission(ctx);
+							boolean error = false;
+							try {
+								imapPerm.parseACL(acls[j]);
+							} catch (IMAPException e) {
+								LOG.error(e.getMessage(), e);
+								error = true;
+							} catch (LdapException e) {
+								LOG.error(e.getMessage(), e);
+								error = true;
+							}
+							if (!error) {
+								final JSONObject jo = new JSONObject();
+								jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
+								jo.put(FolderFields.ENTITY, imapPerm.getEntity());
+								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
+								ja.put(jo);
+							}
+						}
+						jsonwriter.value(ja);
 					}
 				};
 				break Fields;
@@ -547,26 +591,58 @@ public class FolderWriter extends DataWriter {
 			if (withKey) {
 				jsonwriter.key(FolderFields.OWN_RIGHTS);
 			}
+			int permissionBits = 0;
 			if (folder.isRootFolder()) {
-				jsonwriter.value(createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS,
-						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false));
+				permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
+						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+						OCLPermission.NO_PERMISSIONS, false);
 			} else {
-				jsonwriter.value(folder.getOwnRights());
+				final IMAPPermission imapPerm = new IMAPPermission(ctx);
+				imapPerm.setEntity(userObj.getId());
+				imapPerm.parseRights(folder.getOwnRights());
+				permissionBits = createPermissionBits(imapPerm);
+				try {
+					if (IMAPProperties.isUserFlagsEnabled()
+							&& (IMAPUtils.supportsUserDefinedFlags(folder.getImapFolder()))) {
+						permissionBits |= BIT_USER_FLAG;
+					}
+				} catch (MessagingException e) {
+					throw MailInterfaceImpl.handleMessagingException(e);
+				}
 			}
+			jsonwriter.value(permissionBits);
 			break;
 		case FolderObject.PERMISSIONS_BITS:
 			if (withKey) {
 				jsonwriter.key(FolderFields.PERMISSIONS);
 			}
-			jsonwriter.value(JSONObject.NULL);
-			ctx.getContextId();
-			/*
-			 * JSONArray ja = new JSONArray(); ACL[] aclArr =
-			 * imapFolder.getACL(); for (int i = 0; i < aclArr.length; i++) {
-			 * ACL current = aclArr[i]; JSONObject jo = new JSONObject();
-			 * //TODO: Determine user/group id from given ACL name }
-			 * jsonwriter.value(ja);
-			 */
+			if (!folder.containsACLs()) {
+				jsonwriter.value(JSONObject.NULL);
+				break;
+			}
+			final JSONArray ja = new JSONArray();
+			final ACL[] acls = folder.getACL();
+			for (int j = 0; j < acls.length; j++) {
+				final IMAPPermission imapPerm = new IMAPPermission(ctx);
+				boolean error = false;
+				try {
+					imapPerm.parseACL(acls[j]);
+				} catch (IMAPException e) {
+					LOG.error(e.getMessage(), e);
+					error = true;
+				} catch (LdapException e) {
+					LOG.error(e.getMessage(), e);
+					error = true;
+				}
+				if (!error) {
+					final JSONObject jo = new JSONObject();
+					jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
+					jo.put(FolderFields.ENTITY, imapPerm.getEntity());
+					jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
+					ja.put(jo);
+				}
+			}
+			jsonwriter.value(ja);
 			break;
 		case FolderObject.SUMMARY:
 			if (withKey) {
@@ -869,9 +945,7 @@ public class FolderWriter extends DataWriter {
 						final OCLPermission[] perms = fo.getPermissionsAsArray();
 						for (int i = 0; i < perms.length; i++) {
 							final JSONObject jo = new JSONObject();
-							jo.put(FolderFields.BITS, createPermissionBits(perms[i].getFolderPermission(), perms[i]
-									.getReadPermission(), perms[i].getWritePermission(),
-									perms[i].getDeletePermission(), perms[i].isFolderAdmin()));
+							jo.put(FolderFields.BITS, createPermissionBits(perms[i]));
 							jo.put(FolderFields.ENTITY, perms[i].getEntity());
 							jo.put(FolderFields.GROUP, perms[i].isGroupPermission());
 							ja.put(jo);
@@ -1099,9 +1173,7 @@ public class FolderWriter extends DataWriter {
 			final OCLPermission[] perms = fo.getPermissionsAsArray();
 			for (int i = 0; i < perms.length; i++) {
 				final JSONObject jo = new JSONObject();
-				jo.put(FolderFields.BITS, createPermissionBits(perms[i].getFolderPermission(), perms[i]
-						.getReadPermission(), perms[i].getWritePermission(), perms[i].getDeletePermission(), perms[i]
-						.isFolderAdmin()));
+				jo.put(FolderFields.BITS, createPermissionBits(perms[i]));
 				jo.put(FolderFields.ENTITY, perms[i].getEntity());
 				jo.put(FolderFields.GROUP, perms[i].isGroupPermission());
 				ja.put(jo);
@@ -1158,9 +1230,14 @@ public class FolderWriter extends DataWriter {
 			break;
 		}
 	}
+	
+	private static int createPermissionBits(final OCLPermission perm) throws OXException {
+		return createPermissionBits(perm.getFolderPermission(), perm.getReadPermission(), perm.getWritePermission(),
+				perm.getDeletePermission(), perm.isFolderAdmin());
+	}
 
-	private int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag)
-			throws OXException {
+	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp,
+			final boolean adminFlag) throws OXException {
 		int[] perms = new int[5];
 		perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
 		perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
@@ -1170,6 +1247,33 @@ public class FolderWriter extends DataWriter {
 		return createPermissionBits(perms);
 	}
 
+	private static int createPermissionBits(final int[] permission) throws OXException {
+		int retval = 0;
+		boolean first = true;
+		for (int i = permission.length - 1; i >= 0; i--) {
+			final int shiftVal = (i * 7); // Number of bits to be shifted
+			if (first) {
+				retval += permission[i] << shiftVal;
+				first = false;
+			} else {
+				if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
+					retval += Folder.MAX_PERMISSION << shiftVal;
+				} else {
+					try {
+						retval += mapping[permission[i]] << shiftVal;
+					} catch (Exception e) {
+						throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, permission[i]);
+					}
+				}
+			}
+		}
+		return retval;
+	}
+
+	private long addTimeZoneOffset(final long date) {
+		return (date + TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(date));
+	}
+	
 	public static String getModuleString(final int module, final int objectId) {
 		String moduleStr = null;
 		switch (module) {
@@ -1207,33 +1311,6 @@ public class FolderWriter extends DataWriter {
 			break;
 		}
 		return moduleStr;
-	}
-
-	private int createPermissionBits(final int[] permission) throws OXException {
-		int retval = 0;
-		boolean first = true;
-		for (int i = permission.length - 1; i >= 0; i--) {
-			final int shiftVal = (i * 7); // Number of bits to be shifted
-			if (first) {
-				retval += permission[i] << shiftVal;
-				first = false;
-			} else {
-				if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
-					retval += Folder.MAX_PERMISSION << shiftVal;
-				} else {
-					try {
-						retval += mapping[permission[i]] << shiftVal;
-					} catch (Exception e) {
-						throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, permission[i]);
-					}
-				}
-			}
-		}
-		return retval;
-	}
-
-	private long addTimeZoneOffset(final long date) {
-		return (date + TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(date));
 	}
 
 }

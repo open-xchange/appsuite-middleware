@@ -485,7 +485,11 @@ public class OXFolderException extends OXException {
 		/**
 		 * A runtime error occured in context %s
 		 */
-		RUNTIME_ERROR("A runtime error occured in context %s", Category.INTERNAL_ERROR, 67);
+		RUNTIME_ERROR("A runtime error occured in context %s", Category.INTERNAL_ERROR, 67),
+		/**
+		 * This method is not applicable to an IMAP permission
+		 */
+		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.PROGRAMMING_ERROR, 68);
 
 		/**
 		 * Message of the exception.

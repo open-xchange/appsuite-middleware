@@ -59,12 +59,13 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.Rights;
 
 public class MailFolderObject {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderObject.class);
 	
-	private static final String STR_EMPTY = "";
+	private static final Rights RIGHTS_EMPTY = new Rights();
 	
 	/**
 	 * New mailbox attribute added by the "LIST-EXTENDED" extension
@@ -79,7 +80,7 @@ public class MailFolderObject {
 	
 	private boolean hasSubfolders;
 	
-	private String ownRights;
+	private Rights ownRights;
 	
 	private boolean rootFolder;
 	
@@ -128,7 +129,7 @@ public class MailFolderObject {
 		this.parentFullName = prepareParentFullname(folder.getParent());
 		this.separator = folder.getSeparator();
 		this.hasSubfolders = IMAPUtils.hasSubfolders(folder);
-		this.ownRights = this.exists ? getOwnRightsInternal(folder) : STR_EMPTY;
+		this.ownRights = this.exists ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) {
 			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
@@ -160,14 +161,14 @@ public class MailFolderObject {
 	
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 	
-	private static final String getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
+	private static final Rights getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}
-		String rights = null;
+		final Rights retval;
 		if (IMAPProperties.isSupportsACLs()) {
 			try {
-				rights = folder.myRights().toString();
+				retval = folder.myRights();
 			} catch (MessagingException e) {
 				if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
 						&& e.getNextException().getMessage().indexOf(STR_MAILBOX_NOT_EXISTS) != -1) {
@@ -185,38 +186,33 @@ public class MailFolderObject {
 				 * Write empty string as rights. Nevertheless user may see
 				 * folder!
 				 */
-				return STR_EMPTY;
+				return (Rights) RIGHTS_EMPTY.clone();
 			} catch (Throwable t) {
 				LOG.error(t.getMessage(), t);
 				/*
 				 * Write empty string as rights.
 				 * Nevertheless user may see folder!
 				 */
-				return STR_EMPTY;
+				return (Rights) RIGHTS_EMPTY.clone();
 			}
 		} else {
 			/*
 			 * No ACLs enabled. User has full access.
 			 */
-			rights = STR_FULL_RIGHTS;
+			retval = new Rights(STR_FULL_RIGHTS);
 		}
-		if (rights.length() > 0) {
-			if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
-				/*
-				 * NoInferiors detected: No create access
-				 */
-				rights = rights.replaceFirst("c", STR_EMPTY);
-			} else if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
-				/*
-				 * NoSelect detected: No read access
-				 */
-				rights = rights.replaceFirst("r", STR_EMPTY);
-			}
+		if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
+			/*
+			 * NoInferiors detected: No create access
+			 */
+			retval.remove(Rights.Right.CREATE);
+		} else if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) == 0) {
+			/*
+			 * NoSelect detected: No read access
+			 */
+			retval.remove(Rights.Right.READ);
 		}
-		if (IMAPProperties.isUserFlagsEnabled() && (IMAPUtils.supportsUserDefinedFlags(folder))) {
-			rights = new StringBuilder(rights).append('u').toString();
-		}
-		return rights;
+		return retval;
 	}
 	
 	public static final String prepareFullname(final String fullname, final char sep) {
@@ -337,7 +333,7 @@ public class MailFolderObject {
 		return newi;
 	}
 
-	public String getOwnRights() {
+	public Rights getOwnRights() {
 		return ownRights;
 	}
 

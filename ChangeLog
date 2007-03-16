@@ -1,3 +1,7 @@
+* 2007-03-16 - thorben.betten@open-xchange.com
+
+ - Added possiblity to set/deliver ACLs of an IMAP folder
+
 * 2007-03-15 - tobias.prinz@open-xchange.com
 
  - fixed bug when setting date in "ContactSwitcher" and related classes.

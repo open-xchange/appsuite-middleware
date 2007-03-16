@@ -72,10 +72,13 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class FolderParser {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderParser.class);
+
 	private final UserConfiguration userConfig;
 
 	private static final int[] mapping = { 0, 2, 4, -1, 8 };
-	
+
 	private static final String STR_EMPTY = "";
 
 	public FolderParser(UserConfiguration userConfig) {
@@ -123,8 +126,7 @@ public class FolderParser {
 			JSONException {
 		if (jsonObj.has(FolderFields.ID)) {
 			if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(FolderFields.ID)) {
-				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, STR_EMPTY, FolderFields.ID,
-						FolderFields.ID);
+				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, STR_EMPTY, FolderFields.ID, FolderFields.ID);
 			}
 			if (!fo.containsObjectID()) {
 				fo.setObjectID(jsonObj.getInt(FolderFields.ID));
@@ -149,10 +151,11 @@ public class FolderParser {
 		if (jsonObj.has(FolderFields.STANDARD_FOLDER)) {
 			fo.setDefaultFolder(jsonObj.getBoolean(FolderFields.STANDARD_FOLDER));
 		}
-		if (jsonObj.has(FolderFields.PERMISSIONS)) {
+		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)
+				&& jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
 			final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
-			OCLPermission[] perms = new OCLPermission[jsonArr.length()];
 			final int arrayLength = jsonArr.length();
+			OCLPermission[] perms = new OCLPermission[arrayLength];
 			for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
@@ -167,6 +170,7 @@ public class FolderParser {
 						final UserStorage us = UserStorage.getInstance(userConfig.getContext());
 						entity = us.getUserId(entityStr);
 					} catch (LdapException e1) {
+						LOG.error(e.getMessage(), e);
 						throw new OXException(e1);
 					}
 				}
@@ -195,7 +199,7 @@ public class FolderParser {
 		}
 	}
 
-	private int[] parsePermissionBits(final int bitsArg) {
+	private static final int[] parsePermissionBits(final int bitsArg) {
 		int bits = bitsArg;
 		int[] retval = new int[5];
 		for (int i = retval.length - 1; i >= 0; i--) {
