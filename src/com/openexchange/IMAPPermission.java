@@ -330,5 +330,20 @@ public class IMAPPermission extends OCLPermission {
 			setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone() {
+		try {
+			final IMAPPermission clone = (IMAPPermission) super.clone();
+			clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
 
 }

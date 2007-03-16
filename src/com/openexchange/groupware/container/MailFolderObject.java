@@ -51,11 +51,15 @@ package com.openexchange.groupware.container;
 
 import javax.mail.MessagingException;
 
+import com.openexchange.IMAPPermission;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.groupware.ldap.LdapException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -287,6 +291,21 @@ public class MailFolderObject {
 	public void removeACL() {
 		this.acls = null;
 		b_acls = false;
+	}
+	
+	public IMAPPermission[] getIMAPPermissions(final Context ctx) throws IMAPException, LdapException {
+		if (!b_acls) {
+			return null;
+		}
+		final IMAPPermission[] retval = new IMAPPermission[acls.length];
+		final String fn = imapFolder == null ? null : imapFolder.getFullName();
+		for (int i = 0; i < retval.length; i++) {
+			final IMAPPermission ip = new IMAPPermission(ctx);
+			ip.setFolderFullname(fn);
+			ip.parseACL(acls[i]);
+			retval[i] = ip;
+		}
+		return retval;
 	}
 	
 	public boolean exists() {
