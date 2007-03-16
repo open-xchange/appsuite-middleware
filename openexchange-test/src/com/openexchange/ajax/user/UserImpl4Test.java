@@ -47,6 +47,8 @@ public class UserImpl4Test implements User {
 	
 	private String preferedLanguage = null;
 	
+	private String loginInfo = null;
+	
 	public UserImpl4Test() {
 		
 	}
@@ -129,5 +131,13 @@ public class UserImpl4Test implements User {
 	
 	public int getContactId() {
 		return -1;
+	}
+
+	public String getLoginInfo() {
+		return loginInfo;
+	}
+	
+	public void setLoginInfo(String loginInfo) {
+		this.loginInfo = loginInfo;
 	}
 }

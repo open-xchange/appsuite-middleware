@@ -106,6 +106,8 @@ public class MockUser implements User {
      */
     
     private String passwordMech;
+
+	private String loginInfo;
     
     /**
      * Getter for userPassword.
@@ -420,5 +422,13 @@ public class MockUser implements User {
 
 	public void setPasswordMech(String passwordMech) {
 		this.passwordMech = passwordMech;
+	}
+	
+	public void setLoginInfo(String loginInfo) {
+		this.loginInfo = loginInfo;
+	}
+
+	public String getLoginInfo() {
+		return loginInfo;
 	}
 }
