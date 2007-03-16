@@ -16,11 +16,7 @@ public class AllTest extends InfostoreAJAXTest {
 	public AllTest(String name) {
 		super(name);
 	}
-	
-	public void testCruiseControlFuerCommunityEdition(){
-		fail("Ahoy!\n\nDas CruiseControl für die Community Edition ist jetzt fertig, und wird euch eifrig mit Mails überfluten. \n\n Gentle Breezes\n\tDer Cisco\n--\n  /home/crasher/");
-	}
-	
+		
 	public void testBasic() throws Exception{
 		
 		Response res = this.all(getWebConversation(),getHostName(),sessionId, folderId, new int[]{Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID});
