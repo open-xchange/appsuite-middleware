@@ -105,65 +105,131 @@ public class IMAPPermission extends OCLPermission {
 		super.setEntity(entity);
 	}
 
+	/**
+	 * @return fullname of associated IMAP folder
+	 */
 	public final String getFolderFullname() {
 		return folderFullname;
 	}
 
+	/**
+	 * Sets the fullname of associated IMAP folder
+	 * 
+	 * @param folderFullname -
+	 *            the fullname of associated IMAP folder
+	 */
 	public final void setFolderFullname(final String folderFullname) {
 		this.folderFullname = folderFullname;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setEntity(int)
+	 */
 	public void setEntity(final int entity) {
 		super.setEntity(entity);
 		this.acl = null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setFolderAdmin(boolean)
+	 */
 	public void setFolderAdmin(final boolean folderAdmin) {
 		super.setFolderAdmin(folderAdmin);
 		this.acl = null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setGroupPermission(boolean)
+	 */
 	public void setGroupPermission(final boolean groupPermission) {
 		super.setGroupPermission(groupPermission);
 		this.acl = null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setFolderPermission(int)
+	 */
 	public boolean setFolderPermission(final int p) {
 		this.acl = null;
 		return super.setFolderPermission(p);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setReadObjectPermission(int)
+	 */
 	public boolean setReadObjectPermission(final int p) {
 		this.acl = null;
 		return super.setReadObjectPermission(p);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setWriteObjectPermission(int)
+	 */
 	public boolean setWriteObjectPermission(final int p) {
 		this.acl = null;
 		return super.setWriteObjectPermission(p);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setDeleteObjectPermission(int)
+	 */
 	public boolean setDeleteObjectPermission(final int p) {
 		this.acl = null;
 		return super.setDeleteObjectPermission(p);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int,
+	 *      int, int)
+	 */
 	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
 		this.acl = null;
 		return super.setAllObjectPermission(pr, pw, pd);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setAllPermission(int, int,
+	 *      int, int)
+	 */
 	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
 		this.acl = null;
 		return super.setAllPermission(fp, opr, opw, opd);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#setFuid(int)
+	 */
 	public void setFuid(final int pid) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#getFuid()
+	 */
 	public int getFuid() {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -171,12 +237,24 @@ public class IMAPPermission extends OCLPermission {
 		return -1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
+	 *      java.sql.Connection, boolean)
+	 */
 	public void storePermissions(final Context ctx, final Connection writeCon, final boolean insert) throws Exception {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
+	 *      java.sql.Connection, int, boolean)
+	 */
 	public void storePermissions(final Context ctx, final Connection writeConArg, final int fuid, final boolean insert)
 			throws Exception {
 		if (LOG.isWarnEnabled()) {
@@ -184,6 +262,12 @@ public class IMAPPermission extends OCLPermission {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#deletePermission(com.openexchange.groupware.contexts.Context,
+	 *      java.sql.Connection)
+	 */
 	public void deletePermission(final Context ctx, final Connection writeConArg) throws SQLException,
 			DBPoolingException {
 		if (LOG.isWarnEnabled()) {
@@ -191,6 +275,12 @@ public class IMAPPermission extends OCLPermission {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#loadPermissions(com.openexchange.groupware.contexts.Context,
+	 *      java.sql.Connection)
+	 */
 	public boolean loadPermissions(final Context ctx, final Connection conArg) throws SQLException, DBPoolingException {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -198,6 +288,11 @@ public class IMAPPermission extends OCLPermission {
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.OCLPermission#reset()
+	 */
 	public void reset() {
 		super.reset();
 		folderFullname = null;
@@ -241,6 +336,13 @@ public class IMAPPermission extends OCLPermission {
 
 	private static final Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
 
+	/**
+	 * Maps this permission to IMAP rights and fills them into an
+	 * <code>ACL</code> instance
+	 * 
+	 * @return mapped <code>ACL</code> instance
+	 * @throws LdapException
+	 */
 	public ACL getPermissionACL() throws LdapException {
 		if (this.acl != null) {
 			/*
@@ -282,12 +384,27 @@ public class IMAPPermission extends OCLPermission {
 		return (acl = new ACL(OXUser2IMAPLogin.getIMAPLogin(getEntity(), ctx), rights));
 	}
 
+	/**
+	 * Parses the rights given through <code>ACL</code> instance into this
+	 * permission object
+	 * 
+	 * @param acl -
+	 *            the <code>ACL</code> instance
+	 * @throws IMAPException
+	 * @throws LdapException
+	 */
 	public final void parseACL(final ACL acl) throws IMAPException, LdapException {
 		this.acl = acl;
 		setEntity(OXUser2IMAPLogin.getUserID(acl.getName(), ctx));
 		parseRights(acl.getRights());
 	}
-	
+
+	/**
+	 * Parses given rights into this permission object
+	 * 
+	 * @param rights -
+	 *            the rights
+	 */
 	public final void parseRights(final Rights rights) {
 		/*
 		 * Folder admin
@@ -330,8 +447,9 @@ public class IMAPPermission extends OCLPermission {
 			setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
