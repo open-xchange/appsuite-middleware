@@ -50,7 +50,6 @@ package com.openexchange.admin.rmi.impl;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -72,10 +71,6 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
@@ -112,19 +107,19 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public OXUser(final BundleContext context) throws RemoteException {
         super();
         this.context = context;
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
+        this.cache = ClientAdminThread.cache;
+        this.prop = this.cache.getProperties();
         log.info("Class loaded: " + this.getClass().getName());
     }
     
-    public static Locale getLanguage(User usr){
+    public static Locale getLanguage(final User usr){
         if(usr.getLanguage()==null){
             usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE,FALLBACK_COUNTRY_CREATE));
         }
         return usr.getLanguage();
     }
 
-    public int create(Context ctx, User usr, UserModuleAccess access, Credentials auth) 
+    public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
 
         if(ctx==null || usr==null || access==null){
@@ -135,13 +130,13 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
         
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
         }
 
-        checkCreateUserData(ctx, usr, prop);
+        checkCreateUserData(ctx, usr, this.prop);
 
         if (tools.existsUser(ctx, usr.getUsername())) {
             throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
@@ -164,24 +159,24 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     for (final ServiceReference servicereference : servicereferences) {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) context.getService(servicereference);
+                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
                                 log.info("Calling create for plugin: " + bundlename);
                                 oxuser.create(ctx, usr, access, auth);
                                 interfacelist.add(oxuser);
-                            } catch (PluginException e) {
+                            } catch (final PluginException e) {
                                 log.error("Error while calling create for plugin: " + bundlename, e);
                                 log.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new User[]{usr}, auth);
-                                    } catch (PluginException e1) {
+                                    } catch (final PluginException e1) {
                                         log.error("Error doing rollback for plugin: " + bundlename, e1);
                                     }
                                 }
                                 try {
                                     oxu.delete(ctx, new int[]{usr.getId()});
-                                } catch (StorageException e1) {
+                                } catch (final StorageException e1) {
                                     log.error("Error doing rollback for creating user in database", e1);
                                 }
                                 throw new StorageException(e);
@@ -195,7 +190,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return retval;
     }
 
-    public void checkCreateUserData(Context ctx, User usr, PropertyHandler prop) throws InvalidDataException {
+    public void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
 
         if (!usr.attributesforcreateset()) {
             throw new InvalidDataException("Mandatory fields not set");
@@ -204,7 +199,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
             try {
                 validateUserName(usr.getUsername());
-            } catch (OXUserException oxu) {
+            } catch (final OXUserException oxu) {
                 throw new InvalidDataException("Invalid username");
             }
         }
@@ -233,7 +228,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
     
 
-    public void change(Context ctx, User usrdata, Credentials auth) 
+    public void change(final Context ctx, final User usrdata, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null || usrdata==null){
@@ -245,7 +240,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+" - "+usrdata.toString()+" - "+auth.toString());
         
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -255,14 +250,41 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
         }
 
-        checkChangeUserData(ctx, usrdata, prop);
+        checkChangeUserData(ctx, usrdata, this.prop);
 
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.change(ctx, usrdata);
+
+        final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
+                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
+                            try {
+                                log.info("Calling change for plugin: " + bundlename);
+                                oxuser.change(ctx, usrdata, auth);
+                                interfacelist.add(oxuser);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
 
     }
 
-    private void checkChangeUserData(Context ctx, User usrdata, PropertyHandler prop) throws StorageException,InvalidDataException {
+    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException,InvalidDataException {
 
         // MAIL ATTRIBUTE CHANGE SUPPORTED?? - currently disabled cause of a
         // discussion
@@ -292,38 +314,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (usrdata.getAliases() != null) {
             aliases = usrdata.getAliases();
         } else {
-            // fetch aliases from db and check if email1,email2,email3(only if
-            // they are sent by the client) are set in the aliases
-            Connection oxwrite_con = null;
-            PreparedStatement stmt = null;
-            try {
-                oxwrite_con = ClientAdminThread.cache.getWRITEConnectionForContext(ctx.getIdAsInt());
-                stmt = oxwrite_con.prepareStatement("SELECT value FROM user_attribute WHERE cid = ? AND id = ? AND name = \"alias\"");
-                stmt.setInt(1, ctx.getIdAsInt());
-                stmt.setInt(2, usrdata.getId());
-                ResultSet rs3 = stmt.executeQuery();
-                while (rs3.next()) {
-                    aliases.add(rs3.getString("value"));
-                }
-                rs3.close();
-            } catch (SQLException ex) {
-                throw new StorageException(ex);
-            } catch (PoolException pe) {
-                throw new StorageException(pe);
-            } finally {
-                try {
-                    if (stmt != null) {
-                        stmt.close();
-                    }
-                } catch (Exception e) {
-                    log.error("Error closing prepared statement!", e);
-                }
-                try {
-                    ClientAdminThread.cache.pushOXDBWrite(ctx.getIdAsInt(), oxwrite_con);
-                } catch (Exception e) {
-                    log.error("Error pushing ox db write connection to pool!", e);
-                }
-            }
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final User[] usr = oxu.getData(ctx, new User[]{usrdata});
+            aliases = usr[0].getAliases();
         }
 
         if (usrdata.getPrimaryEmail() != null) {
@@ -347,7 +340,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     }
 
-    public void delete(Context ctx, int[] user_ids, Credentials auth) 
+    public void delete(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null || user_ids ==null){
@@ -358,7 +351,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString() + " - " + Arrays.toString(user_ids)+" - "+auth.toString());
 
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -369,7 +362,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("No such user " + Arrays.toString(user_ids) + " in context " + ctx.getIdAsInt());
             
         }
-        for (int element : user_ids) {
+        for (final int element : user_ids) {
             if (tools.isContextAdmin(ctx, element)) {
                 throw new InvalidDataException("Admin delete not supported");              
             }
@@ -394,12 +387,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     for (final ServiceReference servicereference : servicereferences) {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) context.getService(servicereference);
+                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
                                 log.info("Calling create for plugin: " + bundlename);
                                 oxuser.delete(ctx, users, auth);
                                 interfacelist.add(oxuser);
-                            } catch (PluginException e) {
+                            } catch (final PluginException e) {
                                 //TODO: Do rollback here
 //                                log.error("Error while calling create for plugin: " + bundlename, e);
 //                                log.info("Now doing rollback for all everything until now...");
@@ -426,7 +419,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    public UserModuleAccess getModuleAccess(Context ctx, int user_id, Credentials auth)
+    public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null){
@@ -437,7 +430,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+ " - " + user_id+" - "+auth.toString());
 
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
             
@@ -448,12 +441,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
            
         }
 
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getModuleAccess(ctx, user_id);
 
     }
 
-    public void changeModuleAccess(Context ctx, int user_id, UserModuleAccess moduleAccess, Credentials auth) 
+    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
     
         if(ctx==null || moduleAccess ==null){
@@ -464,7 +457,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString() + " - " + user_id + " - " + moduleAccess.toString()+" - "+auth.toString());
 
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -476,12 +469,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
         }
 
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.changeModuleAccess(ctx, user_id, moduleAccess);
 
     }
 
-    public int[] getAll(Context ctx, Credentials auth) 
+    public int[] getAll(final Context ctx, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
 
         if(ctx==null){
@@ -492,18 +485,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+" - "+auth.toString());
 
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
            
         }
 
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getAll(ctx);
 
     }
 
-    public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
+    public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
         
@@ -515,18 +508,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+" - "+Arrays.toString(user_ids)+" - "+auth.toString());
         
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
             
         }
-        for (int element : user_ids) {
+        for (final int element : user_ids) {
             if (!tools.existsUser(ctx, element)) {
                 throw new InvalidDataException("No such user " + element + " in context " + ctx.getIdAsInt());
                 
             }
         }
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         final User[] users = new User[user_ids.length];
         for (int i = 0; i < user_ids.length; i++) {
             users[i] = new User(user_ids[i]);
@@ -534,7 +527,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return oxu.getData(ctx, users);
     }
 
-    public User[] getData(Context ctx, User[] users, Credentials auth) 
+    public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {        
       
         
@@ -546,25 +539,25 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         log.debug(ctx.toString()+" - "+Arrays.toString(users)+" - "+auth.toString());
         
-        OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
             
         }
-        for (User element : users) {
+        for (final User element : users) {
             if (!tools.existsUser(ctx, element.getUsername())) {
                 throw new InvalidDataException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
                 
             }
         }
-        OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getData(ctx, users);
     }
 
-    private void validateUserName( String userName ) throws OXUserException {
+    private void validateUserName( final String userName ) throws OXUserException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        String illegal = userName.replaceAll("[$@%\\.+a-zA-Z0-9_-]", "");
+        final String illegal = userName.replaceAll("[$@%\\.+a-zA-Z0-9_-]", "");
         if( illegal.length() > 0 ) {
             throw new OXUserException( OXUserException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
