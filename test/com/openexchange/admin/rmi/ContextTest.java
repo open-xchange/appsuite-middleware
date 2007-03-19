@@ -48,10 +48,15 @@
  */
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+
+import org.junit.Test;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -75,7 +80,7 @@ public class ContextTest extends AbstractTest {
         return new Credentials("oxadminmaster","secret");
     }
     
-    
+    @Test
     public void testChangeStorageData() throws Exception {
         final Credentials cred = DummyMasterCredentials();        
         final int ctsid = createNewContextID(cred);
@@ -89,6 +94,7 @@ public class ContextTest extends AbstractTest {
         changeStorageData(ctxset, hosturl, cred);
     }
 
+    @Test
     public void testGetContext() throws Exception {
         fail("NOT IMPLEMENTED");
         final Credentials cred = DummyMasterCredentials();
@@ -115,6 +121,7 @@ public class ContextTest extends AbstractTest {
         // fail("not completely implemented in testsuite");
     }
 
+    @Test
     public void testSearchContextByDatabase() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -130,6 +137,7 @@ public class ContextTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testSearchContextByFilestore() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -151,6 +159,7 @@ public class ContextTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testDisableContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -180,6 +189,7 @@ public class ContextTest extends AbstractTest {
 
     }
 
+    @Test
     public void testEnableContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -220,12 +230,14 @@ public class ContextTest extends AbstractTest {
         assertTrue("context could be not enabled", ctx_ensabled);
     }
 
+    @Test
     public void testAddContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
     }
 
+    @Test
     public void testDeleteContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         int ctxid = createNewContextID(cred);
@@ -235,6 +247,7 @@ public class ContextTest extends AbstractTest {
         deleteContext(ctx, hosturl, cred);
     }
 
+    @Test
     public void testSearchContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         int ctxid = createNewContextID(cred);
