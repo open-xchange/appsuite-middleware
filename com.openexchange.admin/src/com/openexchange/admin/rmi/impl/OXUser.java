@@ -174,7 +174,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                 log.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
-                                        oxuserinterface.delete(ctx, new Integer[]{usr.getId()}, auth);
+                                        oxuserinterface.delete(ctx, new User[]{usr}, auth);
                                     } catch (PluginException e1) {
                                         log.error("Error doing rollback for plugin: " + bundlename, e1);
                                     }
@@ -376,6 +376,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final User[] usersfromid = new User[user_ids.length];
+        for (int i = 0; i < user_ids.length; i++) {
+            usersfromid[i] = new User(user_ids[i]);
+        }
+        final User[] users = oxu.getData(ctx, usersfromid);
         oxu.delete(ctx, user_ids);
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
@@ -392,11 +397,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) context.getService(servicereference);
                             try {
                                 log.info("Calling create for plugin: " + bundlename);
-                                final Integer[] user_ids_integer = new Integer[user_ids.length];
-                                for (int i = 0; i < user_ids.length; i++) {
-                                    user_ids_integer[i] = user_ids[i];
-                                }
-                                oxuser.delete(ctx, user_ids_integer, auth);
+                                oxuser.delete(ctx, users, auth);
                                 interfacelist.add(oxuser);
                             } catch (PluginException e) {
                                 //TODO: Do rollback here
