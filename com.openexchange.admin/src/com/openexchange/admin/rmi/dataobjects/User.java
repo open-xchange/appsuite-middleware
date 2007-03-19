@@ -433,7 +433,7 @@ public class User implements Serializable {
             return "{SHA}";
 
         default:
-            return "{CRYPT}";
+            return null;
         }
     }
     

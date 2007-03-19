@@ -155,7 +155,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             write_ox_con.setAutoCommit(false);
 
             // fill up statement for user data update
-            final String sb = new String("UPDATE user SET mail = ?, preferredlanguage = ?, timezone = ?, mailEnabled = ?, shadowLastChange = ?, imapserver = ?, smtpserver = ? WHERE cid = ? AND id = ?");
+            final String sb = new String("UPDATE user SET mail = ?, preferredlanguage = ?, timezone = ?, mailEnabled = ?, shadowLastChange = ?, imapserver = ?, smtpserver = ?, userPassword = ?, passwordMech = ?, WHERE cid = ? AND id = ?");
             stmt = write_ox_con.prepareStatement(sb);
 
             final String mail = usrdata.getPrimaryEmail();
@@ -210,8 +210,27 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 }
             }
 
-            stmt.setInt(8, context_id);
-            stmt.setInt(9, user_id);
+            String passwd = usrdata.getPassword();
+            if (null != passwd) {
+                passwd = password2crypt(usrdata);
+                stmt.setString(8, passwd);
+            } else {
+                if (usrdata.isPasswordset()) {
+                    stmt.setNull(8, java.sql.Types.VARCHAR);
+                }
+            }
+
+            String passwdMech = usrdata.getPasswordMech2String();
+            if (null != passwdMech) {
+                stmt.setString(9, passwdMech);
+            } else {
+                if (usrdata.isPasswordMechset() ) {
+                    stmt.setNull(9, java.sql.Types.VARCHAR);
+                }
+            }
+
+            stmt.setInt(10, context_id);
+            stmt.setInt(11, user_id);
 
             stmt.executeUpdate();
             stmt.close();
@@ -462,6 +481,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Error", e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw new StorageException(e);
         } finally {
             try {
                 if (folder_update != null) {
@@ -488,6 +515,28 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         }
     }
 
+    /**
+     * @param user
+     * @return
+     * @throws StorageException
+     * @throws NoSuchAlgorithmException
+     */
+    private String password2crypt(User user) throws StorageException, NoSuchAlgorithmException {
+        String passwd = null;
+        if( user.getPasswordMech() == null ) {
+                //TODO: configurable in AdminDaemon.properties
+                user.setPasswordMech(User.PASSWORDMECH.CRYPT);
+        }
+        if( user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
+                passwd = UnixCrypt.crypt(user.getPassword());
+        } else if(user.getPasswordMech() == User.PASSWORDMECH.SHA ) {
+                passwd = makeSHAPasswd(user.getPassword());
+        } else {
+                throw new StorageException("unsupported password mechanism: "+ user.getPasswordMech());
+        }
+        return passwd;
+    }
+    
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException {
         PreparedStatement ps = null;
@@ -507,18 +556,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             }
             rs.close();
 
-            final String passwd;
-            if( usrdata.getPasswordMech() == null ) {
-            	//TODO: configurable in AdminDaemon.properties
-            	usrdata.setPasswordMech(User.PASSWORDMECH.CRYPT);
-            }
-            if( usrdata.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
-            	passwd = UnixCrypt.crypt(usrdata.getPassword());
-            } else if(usrdata.getPasswordMech() == User.PASSWORDMECH.SHA ) {
-            	passwd = makeSHAPasswd(usrdata.getPassword());
-            } else {
-            	throw new StorageException("unsupported password mechanism: "+ usrdata.getPasswordMech());
-            }
+            final String passwd = password2crypt(usrdata);
 
             PreparedStatement stmt = null;
             try {
