@@ -1218,8 +1218,9 @@ public class Folder extends SessionServlet {
 				folderWriter.writeOXFolderFieldsAsObject(columns, fo);
 				valueWritten = true;
 			} else {
-				final MailInterface mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+				MailInterface mailInterface = null;
 				try {
+					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 					final MailFolderObject f = mailInterface.getFolder(folderIdentifier, true);
 					valueWritten = false;
 					folderWriter.writeIMAPFolderAsObject(columns, f);

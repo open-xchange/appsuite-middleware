@@ -119,6 +119,7 @@ import sun.net.ConnectionResetException;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.cache.IMAPConnectionCacheManager;
+import com.openexchange.groupware.AccountExistenceException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -367,12 +368,39 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.NO_MAIL_MODULE_ACCESS, getUserName());
 		}
 	}
-	
+
+	/**
+	 * Creates an instance of <code>MailInterface</code> that tries to fetch a
+	 * cached connection. If none available a new connection to IMAP server is
+	 * going to be established.
+	 * 
+	 * @param sessionObj -
+	 *            the groupware session
+	 * @return an instance of <code>MailInterface</code>
+	 * @throws OXException
+	 */
 	public static final MailInterface getInstance(final SessionObject sessionObj) throws OXException {
 		return getInstance(sessionObj, true);
 	}
 
-	public static final MailInterface getInstance(final SessionObject sessionObj, final boolean fetchCachedCon) throws OXException {
+	/**
+	 * Creates an instance of <code>MailInterface</code>.
+	 * 
+	 * @param sessionObj -
+	 *            the groupware session
+	 * @param fetchCachedCon -
+	 *            <code>true</code> if a cached connection should be used;
+	 *            <code>false</code> otherwise
+	 * @return an instance of <code>MailInterface</code>
+	 * @throws OXException
+	 */
+	public static final MailInterface getInstance(final SessionObject sessionObj, final boolean fetchCachedCon)
+			throws OXException {
+		if (/* IMAPProperties.noAdminMailbox() && */sessionObj.getUserObject().getId() == sessionObj.getContext()
+				.getMailadmin()) {
+			throw new AccountExistenceException(com.openexchange.tools.oxfolder.OXFolderManagerImpl
+					.getUserName(sessionObj), sessionObj.getContext().getContextId());
+		}
 		DefaultIMAPConnection imapCon = fetchCachedCon ? getCachedConnection(sessionObj) : null;
 		if (imapCon != null) {
 			final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
@@ -390,8 +418,7 @@ public class MailInterfaceImpl implements MailInterface {
 			return retval;
 		}
 		/*
-		 * No cached connection available, check if a new one may be
-		 * established
+		 * No cached connection available, check if a new one may be established
 		 */
 		if (IMAPProperties.getMaxNumOfIMAPConnections() > 0
 				&& DefaultIMAPConnection.getCounter() > IMAPProperties.getMaxNumOfIMAPConnections()) {
@@ -422,8 +449,7 @@ public class MailInterfaceImpl implements MailInterface {
 		if (imapCon == null) {
 			/*
 			 * Return a new instance with an empty connection. Thus a new
-			 * connection is going to be created through calling init()
-			 * method
+			 * connection is going to be created through calling init() method
 			 */
 			return new MailInterfaceImpl(sessionObj);
 		}

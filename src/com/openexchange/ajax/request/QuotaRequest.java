@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
@@ -63,15 +62,12 @@ import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.AccountExistenceException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.FileStorageException.Code;
 
 /**
  * FIXME replace QuotaFileStorage FileStorage
@@ -84,7 +80,7 @@ public class QuotaRequest extends CommonRequest {
 	
 	private AbstractOXException fsException;
 
-	private SessionObject session;
+	private final SessionObject session;
 
 	public QuotaRequest(SessionObject sessionObj,PrintWriter w) {
 		super(w);
@@ -97,7 +93,7 @@ public class QuotaRequest extends CommonRequest {
 		this.session = sessionObj;
 	}
 	
-	public boolean action(String action, SimpleRequest req){
+	public boolean action(final String action, final SimpleRequest req){
 		if (action.equals(AJAXServlet.ACTION_GET)) {
 			filestore();
 			return true;
@@ -112,8 +108,8 @@ public class QuotaRequest extends CommonRequest {
 	
 	}
 	
-	private void exception(AbstractOXException exception){
-		Response resp = new Response();
+	private void exception(final AbstractOXException exception){
+		final Response resp = new Response();
 		resp.setException(exception);
 		try {
 			LOG.error(exception.getMessage(), exception);
@@ -144,26 +140,31 @@ public class QuotaRequest extends CommonRequest {
 	
 	private void mail() {
 		MailInterface mi = null;
-		
 		try {
-			mi = MailInterfaceImpl.getInstance(this.session);
-			long[] quotaInfo = mi.getQuota();
-			long quota = quotaInfo[0];
-			long use = quotaInfo[1];
-			JSONObject res = new JSONObject();
-			JSONObject data = new JSONObject();
-			data.put("quota",quota*1024);
-			data.put("use",use*1024);
-			res.put("data",data);
+			long[] quotaInfo = null;
+			try {
+				mi = MailInterfaceImpl.getInstance(this.session);
+				quotaInfo = mi.getQuota();
+			} catch (AccountExistenceException e) {
+				quotaInfo = new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+			}
+			final long quota = quotaInfo[0];
+			final long use = quotaInfo[1];
+			final JSONObject res = new JSONObject();
+			final JSONObject data = new JSONObject();
+			data.put("quota", quota * 1024);
+			data.put("use", use * 1024);
+			res.put("data", data);
 			w.write(res.toString());
 		} catch (OXException e) {
 			exception(e);
 		} catch (Exception e) {
 			handle(e);
 		} finally {
-         	try {
-				if(mi != null)
+			try {
+				if (mi != null) {
 					mi.close(false);
+				}
 			} catch (OXException e) {
 				LOG.error(e);
 			}
