@@ -56,7 +56,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.LdapException;
@@ -75,6 +74,8 @@ public class MailFolderObject {
 	 * New mailbox attribute added by the "LIST-EXTENDED" extension
 	 */
 	private static final String ATTRIBUTE_NON_EXISTENT = "\\NonExistent";
+	
+	private static final String ATTRIBUTE_HAS_CHILDREN = "\\HasChildren";
 	
 	private String fullName;
 	
@@ -132,7 +133,20 @@ public class MailFolderObject {
 		this.name = folder.getName();
 		this.parentFullName = prepareParentFullname(folder.getParent());
 		this.separator = folder.getSeparator();
-		this.hasSubfolders = IMAPUtils.hasSubfolders(folder);
+		/*
+		 * Determine if subfolders exist
+		 */
+		if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
+			this.hasSubfolders = false;
+		} else {
+			this.hasSubfolders = false;
+			Attribs: for (String attribute : attrs) {
+				if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+					this.hasSubfolders = true;
+					break Attribs;
+				}
+			}
+		}
 		this.ownRights = this.exists ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) {

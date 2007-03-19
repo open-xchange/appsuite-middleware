@@ -3966,16 +3966,29 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 	
 	private static final String ERR_AUTH_FAILED = "bad authentication failed";
+	
+	private static final String ERR_TMP = "temporary error, please try again later";
 
 	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps) {
 		final OXMailException oxme;
 		if (e instanceof AuthenticationFailedException) {
+			final boolean temporary = ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 			if (imapProps == null) {
-				oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+				if (temporary) {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+				} else {
+					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+				}
 			} else {
-				oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
-						com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), imapProps
-								.getContext()), imapProps.getContext().getContextId());
+				if (temporary) {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
+									imapProps.getContext()), imapProps.getContext().getContextId());
+				} else {
+					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
+									imapProps.getContext()), imapProps.getContext().getContextId());
+				}
 			}
 		} else if (e instanceof FolderClosedException) {
 			oxme = new OXMailException(MailCode.FOLDER_CLOSED, e, e.getMessage());
@@ -3991,7 +4004,8 @@ public class MailInterfaceImpl implements MailInterface {
 			oxme = new OXMailException(MailCode.NO_SUCH_PROVIDER, e, e.getMessage());
 		} else if (e instanceof ParseException) {
 			if (e instanceof AddressException) {
-				final String ref = ((AddressException) e).getRef() == null ? STR_EMPTY : ((AddressException) e).getRef();
+				final String ref = ((AddressException) e).getRef() == null ? STR_EMPTY : ((AddressException) e)
+						.getRef();
 				oxme = new OXMailException(MailCode.INVALID_EMAIL_ADDRESS, e, ref);
 			} else {
 				oxme = new OXMailException(MailCode.PARSE_ERROR, e, STR_EMPTY, e.getMessage());
@@ -4010,7 +4024,8 @@ public class MailInterfaceImpl implements MailInterface {
 			 * No subclass of MessagingException
 			 */
 			if (e.getNextException() instanceof BindException) {
-				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : imapProps.getImapPort());
+				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
+						.getImapPort());
 			} else if (e.getNextException() instanceof ConnectException) {
 				OXMailException tmp = null;
 				try {

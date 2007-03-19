@@ -1,3 +1,8 @@
+* 2007-03-19 - thorben.betten@open-xchange.com
+
+ - Fixed bug #5903: Added information to error, that its origin is
+   temporary, if exception indicates a temporary error
+
 * 2007-03-16 - thorben.betten@open-xchange.com
 
  - Added possiblity to set/deliver ACLs of an IMAP folder

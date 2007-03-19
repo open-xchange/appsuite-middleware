@@ -322,30 +322,6 @@ public class IMAPUtils {
 		super();
 	}
 
-	private static final String STRING_HAS_CHILDREN = "\\HasChildren";
-
-	/**
-	 * @return <code>true</code> if given folder indicates to hold subfolder,
-	 *         <code>false</code> otherwise
-	 */
-	public final static boolean hasSubfolders(final IMAPFolder imapFolder) throws MessagingException {
-		boolean containsSubDir;
-		if ((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
-			containsSubDir = false;
-		} else {
-			containsSubDir = false;
-			final String[] attributes = imapFolder.getAttributes();
-			boolean next = true;
-			for (int j = 0; j < attributes.length && next; j++) {
-				if (STRING_HAS_CHILDREN.equalsIgnoreCase(attributes[j])) {
-					containsSubDir = true;
-					next = false;
-				}
-			}
-		}
-		return containsSubDir;
-	}
-
 	private static final String ROOT_PATTERN = "*";
 
 	/**

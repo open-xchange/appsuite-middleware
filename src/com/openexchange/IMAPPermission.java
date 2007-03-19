@@ -56,6 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.OXUser2IMAPLogin;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -80,6 +81,8 @@ public class IMAPPermission extends OCLPermission {
 	private final Context ctx;
 
 	private ACL acl;
+
+	private UserStorage userStorage;
 
 	/**
 	 * Constructor
@@ -297,7 +300,20 @@ public class IMAPPermission extends OCLPermission {
 		super.reset();
 		folderFullname = null;
 		this.acl = null;
+	}
 
+	/**
+	 * @return <code>UserStorage</code> implementation
+	 * @throws LdapException
+	 */
+	private final UserStorage getUserStorage() throws LdapException {
+		if (userStorage != null) {
+			/*
+			 * Return cached value
+			 */
+			return userStorage;
+		}
+		return (userStorage = UserStorage.getInstance(ctx));
 	}
 
 	/*
@@ -381,7 +397,7 @@ public class IMAPPermission extends OCLPermission {
 		if (hasAnyRights) {
 			rights.add(RIGHTS_UNMAPPABLE);
 		}
-		return (acl = new ACL(OXUser2IMAPLogin.getIMAPLogin(getEntity(), ctx), rights));
+		return (acl = new ACL(OXUser2IMAPLogin.getIMAPLogin(getEntity(), getUserStorage()), rights));
 	}
 
 	/**
@@ -395,7 +411,7 @@ public class IMAPPermission extends OCLPermission {
 	 */
 	public final void parseACL(final ACL acl) throws IMAPException, LdapException {
 		this.acl = acl;
-		setEntity(OXUser2IMAPLogin.getUserID(acl.getName(), ctx));
+		setEntity(OXUser2IMAPLogin.getUserID(acl.getName(), getUserStorage()));
 		parseRights(acl.getRights());
 	}
 

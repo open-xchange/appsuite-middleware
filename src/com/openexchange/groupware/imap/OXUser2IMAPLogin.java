@@ -83,6 +83,22 @@ public class OXUser2IMAPLogin {
 	}
 
 	/**
+	 * Determines the IMAP login of the user whose ID matches given
+	 * <code>userId</code>.
+	 * 
+	 * @param userId -
+	 *            the user ID
+	 * @param userStorage -
+	 *            associated user storage implementation
+	 * @return the IMAP login of the user whose ID matches given
+	 *         <code>userId</code>
+	 * @throws LdapException
+	 */
+	public static String getIMAPLogin(final int userId, final UserStorage userStorage) throws LdapException {
+		return userStorage.getUser(userId).getLoginInfo();
+	}
+
+	/**
 	 * Determines IMAP login for session-associated user. If
 	 * <code>lookUpIMAPLogin</code> is <code>true</code>, this routine
 	 * tries to fetch the IMAP login from <code>User.getImapLogin()</code> and
@@ -125,6 +141,28 @@ public class OXUser2IMAPLogin {
 		}
 		final UserStorage us = UserStorage.getInstance(ctx);
 		return us.getUserId(imapLogin);
+	}
+
+	/**
+	 * Determines the user ID whose IMAP login mtaches given
+	 * <code>imapLogin</code>. <b>NOTE:</b> this routine returns
+	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
+	 * if ACLs are disabled per config file (imap.properties).
+	 * 
+	 * @param imapLogin -
+	 *            the IMAP login
+	 * @param userStorage -
+	 *            the associated user storage implementation
+	 * @return the user ID whose IMAP login mtaches given <code>imapLogin</code>
+	 * @throws IMAPException
+	 * @throws LdapException
+	 */
+	public static int getUserID(final String imapLogin, final UserStorage userStorage) throws IMAPException,
+			LdapException {
+		if (!IMAPProperties.isSupportsACLs()) {
+			return -1;
+		}
+		return userStorage.getUserId(imapLogin);
 	}
 
 }
