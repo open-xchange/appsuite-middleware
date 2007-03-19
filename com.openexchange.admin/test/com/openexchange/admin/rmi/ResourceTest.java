@@ -49,6 +49,10 @@
 
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -56,6 +60,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+
+import org.junit.Test;
 
 /**
  *
@@ -67,6 +73,7 @@ public class ResourceTest extends AbstractTest{
         return (OXResourceInterface)Naming.lookup(getRMIHostUrl()+OXResourceInterface.RMI_NAME);
     }
     
+    @Test
     public void testCreate() throws Exception {
         OXResourceInterface oxres = getResourceClient();
         final int context_id = GroupTest.getContextID();
@@ -92,6 +99,7 @@ public class ResourceTest extends AbstractTest{
         assertTrue("Expected to find resource with correct data",found_resource);
     }
     
+    @Test
     public void testChange() throws Exception {
         
         OXResourceInterface oxres = getResourceClient();
@@ -139,6 +147,7 @@ public class ResourceTest extends AbstractTest{
         
     }
     
+    @Test
     public void testGet() throws Exception {
         OXResourceInterface oxres = getResourceClient();
         final int context_id = GroupTest.getContextID();
@@ -155,6 +164,7 @@ public class ResourceTest extends AbstractTest{
         assertEquals(res.getName(),srv_res.getName());
     }
     
+    @Test
     public void testDelete() throws Exception {
         OXResourceInterface oxres = getResourceClient();
         final int context_id = GroupTest.getContextID();
@@ -182,6 +192,7 @@ public class ResourceTest extends AbstractTest{
         
     }
     
+    @Test
     public void testList() throws Exception {
        OXResourceInterface oxres = getResourceClient();
         final int context_id = GroupTest.getContextID();

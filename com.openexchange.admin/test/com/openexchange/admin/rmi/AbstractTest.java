@@ -52,13 +52,11 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
-import junit.framework.TestCase;
-
 /**
  *
  * @author cutmasta
  */
-public abstract class AbstractTest extends TestCase{
+public abstract class AbstractTest {
     
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String change_suffix = "_changed";
