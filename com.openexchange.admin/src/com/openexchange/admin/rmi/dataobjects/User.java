@@ -426,13 +426,17 @@ public class User implements Serializable {
      * @return String representation of PASSWORDMECH
      */
     public String getPasswordMech2String() {
-        switch (this.passwordMech) {
-        case CRYPT:
-            return "{CRYPT}";
-        case SHA:
-            return "{SHA}";
+        if (null != this.passwordMech) {
+            switch (this.passwordMech) {
+                case CRYPT:
+                    return "{CRYPT}";
+                case SHA:
+                    return "{SHA}";
 
-        default:
+                default:
+                    return null;
+            }
+        } else {
             return null;
         }
     }
