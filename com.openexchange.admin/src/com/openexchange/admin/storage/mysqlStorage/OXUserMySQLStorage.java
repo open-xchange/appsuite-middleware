@@ -155,83 +155,118 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             write_ox_con.setAutoCommit(false);
 
             // fill up statement for user data update
-            final String sb = new String("UPDATE user SET mail = ?, preferredlanguage = ?, timezone = ?, mailEnabled = ?, shadowLastChange = ?, imapserver = ?, smtpserver = ?, userPassword = ?, passwordMech = ?, WHERE cid = ? AND id = ?");
-            stmt = write_ox_con.prepareStatement(sb);
+            final StringBuilder sb = new StringBuilder("UPDATE user SET ");
 
             final String mail = usrdata.getPrimaryEmail();
-            if (null != mail) {
-                stmt.setString(1, mail);
-            } else {
-                if (usrdata.isPrimaryEmailset()) {
-                    stmt.setNull(1, java.sql.Types.VARCHAR);
-                }
-            }
-
             final Locale locale = usrdata.getLanguage();
-            if (null != locale) {
-                stmt.setString(2, usrdata.getLanguage().getLanguage() + "_" + usrdata.getLanguage().getCountry());
-            } else {
-                if (usrdata.isLanguageset()) {
-                    stmt.setNull(2, java.sql.Types.VARCHAR);    
-                }
-            }
-
             final TimeZone timezone = usrdata.getTimezone();
-            if (null != timezone) {
-                stmt.setString(3, timezone.getID());
-            } else {
-                if (usrdata.isTimezoneset()) {
-                    stmt.setString(3, DEFAULT_TIMEZONE_CREATE);    
-                }
-            }
-            if(usrdata.getEnabled()!=null){
-                stmt.setBoolean(4, usrdata.getEnabled().booleanValue());
-            }else{
-                stmt.setBoolean(4, false);               
-            }
-
-            stmt.setInt(5, getintfrombool(usrdata.getPassword_expired()));
-
             final String imapserver = usrdata.getImapServer();
-            if (null != imapserver) {
-                stmt.setString(6, imapserver);
-            } else {
-                if (usrdata.isImapServerset()) {
-                    stmt.setNull(6, java.sql.Types.VARCHAR);
-                }
-            }
-
             final String smtpserver = usrdata.getSmtpServer();
+            final String passwd = usrdata.getPassword();
+            final String passwdMech = usrdata.getPasswordMech2String();
+            
+            final boolean primaryEmailset = usrdata.isPrimaryEmailset();
+            final boolean languageset = usrdata.isLanguageset();
+            final boolean timezoneset = usrdata.isTimezoneset();
+            final boolean imapServerset = usrdata.isImapServerset();
+            final boolean smtpServerset = usrdata.isSmtpServerset();
+            final boolean passwordset = usrdata.isPasswordset();
+            final boolean passwordMechset = usrdata.isPasswordMechset();
+
+            if (null != mail || primaryEmailset){
+                sb.append("mail = ?, ");
+            }
+            if (null != locale || languageset) {
+                sb.append("preferredlanguage = ?, ");
+            }
+            if (null != timezone || timezoneset) {
+                sb.append("timezone = ?, ");
+            }
+            sb.append("mailEnabled = ?, shadowLastChange = ?, ");
+            if (null != imapserver || imapServerset) {
+                sb.append("imapserver = ?, ");
+            }
+            if (null != smtpserver || smtpServerset) {
+                sb.append("smtpserver = ?, ");
+            }
+            if (null != passwd || passwordset) {
+                sb.append("userPassword = ?, ");
+            }
+            if (null != passwdMech || passwordMechset) {
+                sb.append("passwordMech = ? ");
+            }
+            sb.deleteCharAt(sb.length()-2);
+
+            sb.append("WHERE cid = ? AND id = ?");
+            stmt = write_ox_con.prepareStatement(sb.toString());
+
+            int o = 1;
+            if (null != mail) {
+                stmt.setString(o++, mail);
+            } else {
+                if (primaryEmailset) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);
+                }
+            }
+
+            if (null != locale) {
+                stmt.setString(o++, usrdata.getLanguage().getLanguage() + "_" + usrdata.getLanguage().getCountry());
+            } else {
+                if (languageset) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);    
+                }
+            }
+
+            if (null != timezone) {
+                stmt.setString(o++, timezone.getID());
+            } else {
+                if (timezoneset) {
+                    stmt.setString(o++, DEFAULT_TIMEZONE_CREATE);    
+                }
+            }
+            if (null != usrdata.getEnabled()) {
+                stmt.setBoolean(o++, usrdata.getEnabled().booleanValue());
+            } else {
+                stmt.setBoolean(o++, false);               
+            }
+
+            stmt.setInt(o++, getintfrombool(usrdata.getPassword_expired()));
+
+            if (null != imapserver) {
+                stmt.setString(o++, imapserver);
+            } else {
+                if (imapServerset) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);
+                }
+            }
+
             if (null != smtpserver) {
-                stmt.setString(7, smtpserver);
+                stmt.setString(o++, smtpserver);
             } else {
-                if (usrdata.isSmtpServerset()) {
-                    stmt.setNull(7, java.sql.Types.VARCHAR);
+                if (smtpServerset) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);
                 }
             }
 
-            String passwd = usrdata.getPassword();
             if (null != passwd) {
-                passwd = password2crypt(usrdata);
-                stmt.setString(8, passwd);
+                stmt.setString(o++, password2crypt(usrdata));
             } else {
-                if (usrdata.isPasswordset()) {
-                    stmt.setNull(8, java.sql.Types.VARCHAR);
+                if (passwordset) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);
                 }
             }
 
-            String passwdMech = usrdata.getPasswordMech2String();
             if (null != passwdMech) {
-                stmt.setString(9, passwdMech);
+                stmt.setString(o++, passwdMech);
             } else {
-                if (usrdata.isPasswordMechset() ) {
-                    stmt.setNull(9, java.sql.Types.VARCHAR);
+                if (passwordMechset ) {
+                    stmt.setNull(o++, java.sql.Types.VARCHAR);
                 }
             }
 
-            stmt.setInt(10, context_id);
-            stmt.setInt(11, user_id);
-
+            stmt.setInt(o++, context_id);
+            stmt.setInt(o++, user_id);
+            
             stmt.executeUpdate();
             stmt.close();
 
