@@ -49,6 +49,11 @@
 package com.openexchange.admin.rmi;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -60,6 +65,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Vector;
+
+import org.junit.Test;
 
 /**
  *
@@ -107,6 +114,7 @@ public class UtilTest extends AbstractTest {
         return client_db;
     }
     
+    @Test
     public void testAddMaintenanceReason() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -132,6 +140,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testDeleteMaintenanceReason() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -155,6 +164,7 @@ public class UtilTest extends AbstractTest {
         }
     }
     
+    @Test
     public void testGetMaintenanceReasons() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -179,6 +189,7 @@ public class UtilTest extends AbstractTest {
         assertEquals(mr1.getText(),getmrs[0].getText());
     }
     
+    @Test
     public void testGetAllMaintenanceReasons() throws Exception {
         
         OXUtilInterface oxu = getUtilClient();
@@ -214,6 +225,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testGetAllMaintenanceReasonIds() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -238,6 +250,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testRegisterServer() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -258,6 +271,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected 1 server",resp==1);
     }
     
+    @Test
     public void testUnregisterServer() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -291,6 +305,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected that server is not found",resp==0);
     }
     
+    @Test
     public void testRegisterDatabase() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -323,6 +338,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testChangeDatabase() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -388,6 +404,7 @@ public class UtilTest extends AbstractTest {
         }        
     }   
     
+    @Test
     public void testUnregisterDatabase() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -437,6 +454,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testSearchForDatabase() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -472,6 +490,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected to find registered db with data",found_db);
     }
     
+    @Test
     public void testSearchForServer() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -493,6 +512,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testRegisterFilestore() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -533,6 +553,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected to find registered filestore with data",found_store);
     }
     
+    @Test
     public void testChangeFilestore() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
@@ -582,6 +603,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
+    @Test
     public void testListFilestores() throws Exception {
        OXUtilInterface oxu = getUtilClient();
         
@@ -594,6 +616,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected list size > 0 ",srv_stores.length>0);
     }
     
+    @Test
     public void testUnregisterFilestore() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
