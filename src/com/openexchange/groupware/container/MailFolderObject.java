@@ -147,9 +147,10 @@ public class MailFolderObject {
 				}
 			}
 		}
-		this.ownRights = this.exists ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
+		final boolean holdsMessages = ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0);
+		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
-		if ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) {
+		if (holdsMessages) {
 			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
 					folder.getUnreadMessageCount()).append(')').toString();
 			this.total = folder.getMessageCount();
@@ -159,7 +160,7 @@ public class MailFolderObject {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		if (IMAPProperties.isSupportsACLs() && this.exists && !(folder instanceof DefaultFolder)) {
+		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists && !(folder instanceof DefaultFolder)) {
 			try {
 				this.acls = folder.getACL();
 				b_acls = true;

@@ -111,10 +111,9 @@ public class HttpServletManager {
 					if (servletInst == null) {
 						return new HttpErrorServlet(new StringBuilder(100).append("Servlet ").append(id).append(
 								" could NOT be created").toString());
-					} else {
-						numberOfWorkingServlets++;
-						return servletInst;
 					}
+					numberOfWorkingServlets++;
+					return servletInst;
 				}
 				final HttpServlet servletInstance = servletQueue.get();
 				if (servletInstance instanceof SingleThreadModel) {

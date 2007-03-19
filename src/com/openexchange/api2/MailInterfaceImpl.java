@@ -166,6 +166,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -3667,11 +3668,16 @@ public class MailInterfaceImpl implements MailInterface {
 					updateMe.setSubscribed(folderObj.isSubscribed());
 					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
 				}
-				if (folderObj.containsACLs()) {
+				ACLS: if (folderObj.containsACLs()) {
 					/*
 					 * Wrapper object contains rights. No simple rename but a
 					 * whole ACL re-set
 					 */
+					ACL[] oldACLs = updateMe.getACL();
+					ACL[] newACLs = folderObj.getACL();
+					if (equals(oldACLs, newACLs)) {
+						break ACLS;
+					}
 					try {
 						if (IMAPProperties.isSupportsACLs() && !updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
 							throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(), updateMe
@@ -3683,19 +3689,22 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Delete old ACLs
 					 */
-					String[] identifier = new String[updateMe.getACL().length];
-					for (int i = 0; i < updateMe.getACL().length; i++) {
-						identifier[i] = updateMe.getACL()[i].getName();
+					String[] oldNames = new String[oldACLs.length];
+					for (int i = 0; i < oldACLs.length; i++) {
+						oldNames[i] = oldACLs[i].getName();
 					}
-					for (int i = 0; i < identifier.length; i++) {
-						updateMe.removeACL(identifier[i]);
+					oldACLs = null;
+					for (int i = 0; i < oldNames.length; i++) {
+						updateMe.removeACL(oldNames[i]);
 					}
+					oldNames = null;
 					/*
 					 * Add new ACLs from folderObj
 					 */
-					for (int i = 0; i < folderObj.getACL().length; i++) {
-						updateMe.addACL(folderObj.getACL()[i]);
+					for (int i = 0; i < newACLs.length; i++) {
+						updateMe.addACL(newACLs[i]);
 					}
+					newACLs = null;
 				}
 				retval = updateMe.getFullName();
 			} else {
@@ -3756,6 +3765,28 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
+	}
+	
+	private static final boolean equals(final ACL[] acls1, final ACL[] acls2) {
+		if (acls1.length != acls2.length) {
+			return false;
+		}
+		for ( ACL acl1 : acls1 ) {
+			boolean found = false;
+			Inner: for (ACL acl2 : acls2) {
+				if (acl1.getName().equals(acl2.getName())) {
+					found = true;
+					if (!acl1.getRights().equals(acl2.getRights())) {
+						return false;
+					}
+					break Inner;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private final IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName)
