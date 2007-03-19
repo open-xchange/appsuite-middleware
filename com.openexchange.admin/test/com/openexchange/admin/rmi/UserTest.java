@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.*;
+
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -60,6 +62,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import org.junit.Test;
 
 /**
  * 
@@ -78,6 +82,7 @@ public class UserTest extends AbstractTest {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
     }
     
+    @Test
     public void testCreate() throws Exception {        
         
         // get context to create an user
@@ -102,6 +107,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testDelete() throws Exception {
         
         // get context to create an user
@@ -128,6 +134,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testGetData() throws Exception {
         
         // get context to create an user
@@ -151,6 +158,7 @@ public class UserTest extends AbstractTest {
         }       
     }
 
+    @Test
     public void testGetDataByUsername() throws Exception {
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -174,6 +182,7 @@ public class UserTest extends AbstractTest {
         }    
     }
 
+    @Test
     public void testGetModuleAccess() throws Exception {        
         
         // get context to create an user
@@ -194,6 +203,7 @@ public class UserTest extends AbstractTest {
         
     }
 
+    @Test
     public void testChangeModuleAccess() throws Exception {
         
         // get context to create an user
@@ -243,6 +253,7 @@ public class UserTest extends AbstractTest {
         
     }
 
+    @Test
     public void testGetAll() throws Exception {
         
         // get context to create an user
@@ -269,6 +280,7 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list",founduser);
     }
 
+    @Test
     public void testChange() throws Exception {
         
         // get context to create an user
@@ -308,9 +320,6 @@ public class UserTest extends AbstractTest {
             fail("Expected to get correct changed user data");
         } 
     }
-
-    
-   
 
     public static User getTestUserObject(final String ident, final String password) {
         final User usr = new User();

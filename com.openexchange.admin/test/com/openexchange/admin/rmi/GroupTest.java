@@ -48,6 +48,11 @@
  */
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -55,6 +60,8 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 import java.rmi.Naming;
+
+import org.junit.Test;
 
 /**
  * 
@@ -68,6 +75,7 @@ public class GroupTest extends AbstractTest {
 
     private static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
+    @Test
     public void testAddGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -76,6 +84,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", id > 0);
     }
 
+    @Test
     public void testSearchGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -87,6 +96,7 @@ public class GroupTest extends AbstractTest {
         assertEquals("invalid search result", 1, grps.length);
     }
 
+    @Test
     public void testDeleteGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -108,6 +118,7 @@ public class GroupTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testLoadGroup() throws Exception {
         
         final int context_id = getContextID();
@@ -129,6 +140,7 @@ public class GroupTest extends AbstractTest {
         assertEquals("email not equal", addgroup.getEmail(), srv_group.getEmail());
     }
 
+    @Test
     public void testAddMemberToGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -161,6 +173,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("member not added to group", foundmember);
     }
 
+    @Test
     public void testRemoveMemberFromGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -207,6 +220,7 @@ public class GroupTest extends AbstractTest {
 
     }
 
+    @Test
     public void testChangeGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
@@ -242,6 +256,7 @@ public class GroupTest extends AbstractTest {
         assertEquals("email not equal", addgroup.getEmail(),remote_grp.getEmail());  
     }
 
+    @Test
     public void testGetMembers() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
