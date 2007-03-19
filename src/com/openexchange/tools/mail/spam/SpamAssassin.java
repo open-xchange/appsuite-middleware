@@ -60,6 +60,8 @@ import java.util.Map;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import com.openexchange.api2.OXException;
+
 /**
  * SpamAssassin - Offers methods for spam detection and learning.
  * 
@@ -122,7 +124,7 @@ public class SpamAssassin {
 		}
 	}
 
-	public SpamAssassin() {
+	private SpamAssassin() {
 		super();
 	}
 
@@ -132,7 +134,7 @@ public class SpamAssassin {
 	 * @return <code>true</code> if message is treated as spam,
 	 *         <code>false</code> otherwise
 	 */
-	public boolean scoreMessage(final Message msg) {
+	public static final boolean scoreMessage(final Message msg) throws OXException {
 		try {
 			/*
 			 * Initialize process to execute command
@@ -167,15 +169,15 @@ public class SpamAssassin {
 		return false;
 	}
 
-	public void trainMessageAsSpam(final Message msg) {
+	public static final void trainMessageAsSpam(final Message msg) throws OXException {
 		trainMessage(msg, true);
 	}
 
-	public void trainMessageAsHam(final Message msg) {
+	public static final void trainMessageAsHam(final Message msg) throws OXException {
 		trainMessage(msg, false);
 	}
 
-	private static final void trainMessage(final Message msg, final boolean isSpam) {
+	private static final void trainMessage(final Message msg, final boolean isSpam) throws OXException {
 		try {
 			/*
 			 * Initialize process to execute command

@@ -3,6 +3,7 @@
  - Fixed bug #5903: Added information to error, that its origin is
    temporary, if exception indicates a temporary error
  - Full ACL support for mail folders
+ - Added spam functionaliyt on move/copy to/from spam folder
 
 * 2007-03-16 - thorben.betten@open-xchange.com
 

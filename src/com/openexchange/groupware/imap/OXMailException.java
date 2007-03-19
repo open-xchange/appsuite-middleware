@@ -521,7 +521,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Login to imap server %s failed for user %s in context %s. Please try again later
 		 */
-		LOGIN_FAILED("Login to imap server %s failed for user %s in context %s. Please try again later", Category.PERMISSION, 94);
+		LOGIN_FAILED("Login to imap server %s failed for user %s in context %s. Please try again later", Category.PERMISSION, 94),
+		/**
+		 * SpamAssassin executable not found
+		 */
+		SPAMASSASSIN_NOT_FOUND("SpamAssassin executable not found", Category.SUBSYSTEM_OR_SERVICE_DOWN, 95);
 
 		/**
 		 * Message of the exception.

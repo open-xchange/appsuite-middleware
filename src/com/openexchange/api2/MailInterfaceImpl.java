@@ -158,6 +158,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.mail.ContentType;
+import com.openexchange.tools.mail.spam.SpamAssassin;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -3108,6 +3109,12 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		return tmp.toArray(new Message[tmp.size()]);
 	}
+	
+	private static final int SPAM_HAM = -1;
+	
+	private static final int SPAM_NOOP = 0;
+	
+	private static final int SPAM_SPAM = 1;
 
 	/*
 	 * (non-Javadoc)
@@ -3159,6 +3166,21 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					final long[] res = IMAPUtils.copyUID(imapCon.getImapFolder(), msgUIDs, destFolder, false);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					/*
+					 * Spam related action
+					 */
+					final String spamFullName = prepareMailFolderParam(getSpamFolder());
+					final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
+							: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
+					if (spamAction != SPAM_NOOP) {
+						for (int i = 0; i < msgUIDs.length; i++) {
+							if (spamAction == SPAM_SPAM) {
+								SpamAssassin.trainMessageAsSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+							} else if (spamAction == SPAM_HAM) {
+								SpamAssassin.trainMessageAsHam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+							}
+						}
+					}
 					if (move) {
 						start = System.currentTimeMillis();
 						IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
@@ -3209,10 +3231,28 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
+			/*
+			 * Spam related action
+			 */
+			final String spamFullName = prepareMailFolderParam(getSpamFolder());
+			final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
+					: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
+			if (spamAction != SPAM_NOOP) {
+				for (int i = 0; i < msgs.length; i++) {
+					if (spamAction == SPAM_SPAM) {
+						SpamAssassin.trainMessageAsSpam(msgs[i]);
+					} else if (spamAction == SPAM_HAM) {
+						SpamAssassin.trainMessageAsHam(msgs[i]);
+					}
+				}
+			}
+			/*
+			 * Delete source messages on move
+			 */
 			if (move) {
 				for (int i = 0; i < msgs.length; i++) {
 					if (msgs[i] != null) {
-						msgs[i].setFlag(Flags.Flag.DELETED, true);
+						msgs[i].setFlags(FLAGS_DELETED, true);
 					}
 				}
 				/*
