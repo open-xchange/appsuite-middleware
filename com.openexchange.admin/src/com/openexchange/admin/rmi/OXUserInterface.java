@@ -121,8 +121,8 @@ public interface OXUserInterface extends Remote {
      * 
      * @param context
      *            Context in which the new user will be deleted.
-     * @param user_id
-     *            int array containing user id(s).
+     * @param users
+     *            user array containing user object.
      * @param auth
      *            Credentials for authenticating against server.
      *            
@@ -132,7 +132,26 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void delete(Context ctx, int[] user_id, Credentials auth) 
+    public void delete(final Context ctx, final User[] users, final Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+
+    /**
+     * Delete user from given context.
+     * 
+     * @param context
+     *            Context in which the new user will be deleted.
+     * @param user
+     *            user object.
+     * @param auth
+     *            Credentials for authenticating against server.
+     *            
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     */
+    public void delete(final Context ctx, final User user, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
     /**
