@@ -46,34 +46,35 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.exceptions;
 
 import java.io.Serializable;
 
 /**
- * Is thrown when user want to do an action in a context which doesn't exists in the system.
+ * Is thrown if a user doesn't exist in an operation
  * 
- * @author cutmasta 
- * 
+ * @author d7
+ *
  */
-public class NoSuchContextException extends Exception implements Serializable {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 1991615694615324164L;
+public class NoSuchUserException extends Exception implements Serializable {
 
     /**
      * 
      */
-    public NoSuchContextException() {
-        super("Context does not exist");
+    private static final long serialVersionUID = -994183866598925225L;
+
+    /**
+     * 
+     */
+    public NoSuchUserException() {
+        super("User does not exist");
     }
 
     /**
      * @param message
      */
-    public NoSuchContextException(String message) {
+    public NoSuchUserException(String message) {
         super(message);
 
     }
@@ -81,7 +82,7 @@ public class NoSuchContextException extends Exception implements Serializable {
     /**
      * @param cause
      */
-    public NoSuchContextException(Throwable cause) {
+    public NoSuchUserException(Throwable cause) {
         super(cause);
 
     }
@@ -90,7 +91,7 @@ public class NoSuchContextException extends Exception implements Serializable {
      * @param message
      * @param cause
      */
-    public NoSuchContextException(String message, Throwable cause) {
+    public NoSuchUserException(String message, Throwable cause) {
         super(message, cause);
     }
 

@@ -54,6 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 
@@ -209,9 +210,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws NoSuchUserException 
      */
     public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
 
     /**
      * Retrieve user objects for a range of users by name
@@ -230,8 +232,9 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws NoSuchUserException 
      */
     public User[] getData(Context ctx, User[] users, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException;
 
 }

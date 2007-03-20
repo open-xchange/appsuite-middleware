@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class List extends UserAbstraction {
@@ -129,6 +130,8 @@ public class List extends UserAbstraction {
         } catch (NoSuchContextException e) {            
             printServerResponse(e.getMessage());
         } catch (InvalidDataException e) {            
+            printServerResponse(e.getMessage());
+        } catch (NoSuchUserException e) {
             printServerResponse(e.getMessage());
         }
 
