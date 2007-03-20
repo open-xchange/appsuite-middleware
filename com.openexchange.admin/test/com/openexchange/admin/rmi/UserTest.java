@@ -54,7 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 
 import java.rmi.Naming;
 import java.util.Calendar;
@@ -108,7 +108,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    @Test
+    @Test(expected=NoSuchUserException.class)
     public void testDelete() throws Exception {
         
         // get context to create an user
@@ -123,16 +123,11 @@ public class UserTest extends AbstractTest {
         urs.setId(oxu.create(ctx,urs,access,cred));             
         
         // delete user
-        oxu.delete(ctx,new int[]{urs.getId()},cred);
+        oxu.delete(ctx, urs ,cred);
         
         // try to load user, this MUST fail       
-        try {
-            oxu.getData(ctx,new int[]{urs.getId()},cred);
-            fail("user not exists expected");
-        } catch (final InvalidDataException ecp) {            
-            // this exception MUST happen, if not, test MUST fail :)
-            assertTrue(true);
-        }
+        oxu.getData(ctx,new int[]{urs.getId()},cred);
+        fail("user not exists expected");
     }
 
     @Test
