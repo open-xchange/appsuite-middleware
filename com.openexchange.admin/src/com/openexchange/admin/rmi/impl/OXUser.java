@@ -284,62 +284,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException,InvalidDataException {
-
-        // MAIL ATTRIBUTE CHANGE SUPPORTED?? - currently disabled cause of a
-        // discussion
-        // if( usrdata.getPrimaryEmail()==null) {
-        // //throw USER_EXCEPTIONS.create(23,"Changing mail attribute not
-        // allowed");
-        // }
-
-        // Do some mail attribute checks cause of bug
-        // http://www.open-xchange.org/bugzilla/show_bug.cgi?id=5444
-
-        // 1. If user sends only Aliases but not primarymail and email2 field.
-        // show error.
-        // cause he must set which adress is primarymail and email2 from the new
-        // aliases
-
-        if (usrdata.getAliases() != null) {
-            if (usrdata.getPrimaryEmail() == null || usrdata.getPrimaryEmail().length() < 1) {
-                throw new InvalidDataException("If ALIAS sent you need to send also primarymail!");
-            }
-            if (usrdata.getEmail1() == null || usrdata.getEmail1().length() < 1) {
-                throw new InvalidDataException("If ALIAS sent you need to send also mail1!");
-            }
-        }
-
-        HashSet<String> aliases = new HashSet<String>();
-        if (usrdata.getAliases() != null) {
-            aliases = usrdata.getAliases();
-        } else {
-            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-            final User[] usr = oxu.getData(ctx, new User[]{usrdata});
-            aliases = usr[0].getAliases();
-        }
-
-        if (usrdata.getPrimaryEmail() != null) {
-            if (!aliases.contains(usrdata.getPrimaryEmail())) {
-                throw new InvalidDataException("primarymail sent but does not exists in aliases of the user!");
-            }
-        }
-
-
-        if (usrdata.getEmail1() == null) {
-            throw new InvalidDataException("email1 not sent but required!");
-           
-        }
-
-        if (usrdata.getPrimaryEmail() != null && usrdata.getEmail1() != null) {
-            // primary mail value must be same with email1
-            if (!usrdata.getPrimaryEmail().equals(usrdata.getEmail1())) {
-                throw new InvalidDataException("email1 not equal with primarymail!");
-                
-            }
-        }
-    }
-
     public void delete(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
@@ -374,12 +318,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             usersfromid[i] = new User(user_ids[i]);
         }
         final User[] users = oxu.getData(ctx, usersfromid);
-        oxu.delete(ctx, user_ids);
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
+        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        for (int i = bundles.size() - 1; i >= 0; i--) {
+            revbundles.add(bundles.get(i));
+        }
+        for (final Bundle bundle : revbundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE==bundle.getState()) {
                 final ServiceReference[] servicereferences = bundle.getRegisteredServices();
@@ -389,26 +336,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling create for plugin: " + bundlename);
+                                log.info("Calling delete for plugin: " + bundlename);
                                 oxuser.delete(ctx, users, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                //TODO: Do rollback here
-//                                log.error("Error while calling create for plugin: " + bundlename, e);
-//                                log.info("Now doing rollback for all everything until now...");
-//                                for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-//                                    try {
-//                                        oxuserinterface.delete(ctx, new Integer[]{usr.getId()}, auth);
-//                                    } catch (PluginException e1) {
-//                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
-//                                    }
-//                                }
-//                                try {
-//                                    oxu.delete(ctx, new int[]{usr.getId()});
-//                                } catch (StorageException e1) {
-//                                    log.error("Error doing rollback for creating user in database", e1);
-//                                }
-//                                throw new StorageException(e);
+                                log.error("Error while calling delete for plugin: " + bundlename, e);
+                                throw new StorageException(e);
                             }
                         }
                     }
@@ -417,6 +350,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
+        oxu.delete(ctx, user_ids);
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
@@ -560,6 +494,62 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final String illegal = userName.replaceAll("[$@%\\.+a-zA-Z0-9_-]", "");
         if( illegal.length() > 0 ) {
             throw new OXUserException( OXUserException.ILLEGAL_CHARS + ": \""+illegal+"\"");
+        }
+    }
+
+    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException,InvalidDataException {
+    
+        // MAIL ATTRIBUTE CHANGE SUPPORTED?? - currently disabled cause of a
+        // discussion
+        // if( usrdata.getPrimaryEmail()==null) {
+        // //throw USER_EXCEPTIONS.create(23,"Changing mail attribute not
+        // allowed");
+        // }
+    
+        // Do some mail attribute checks cause of bug
+        // http://www.open-xchange.org/bugzilla/show_bug.cgi?id=5444
+    
+        // 1. If user sends only Aliases but not primarymail and email2 field.
+        // show error.
+        // cause he must set which adress is primarymail and email2 from the new
+        // aliases
+    
+        if (usrdata.getAliases() != null) {
+            if (usrdata.getPrimaryEmail() == null || usrdata.getPrimaryEmail().length() < 1) {
+                throw new InvalidDataException("If ALIAS sent you need to send also primarymail!");
+            }
+            if (usrdata.getEmail1() == null || usrdata.getEmail1().length() < 1) {
+                throw new InvalidDataException("If ALIAS sent you need to send also mail1!");
+            }
+        }
+    
+        HashSet<String> aliases = new HashSet<String>();
+        if (usrdata.getAliases() != null) {
+            aliases = usrdata.getAliases();
+        } else {
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final User[] usr = oxu.getData(ctx, new User[]{usrdata});
+            aliases = usr[0].getAliases();
+        }
+    
+        if (usrdata.getPrimaryEmail() != null) {
+            if (!aliases.contains(usrdata.getPrimaryEmail())) {
+                throw new InvalidDataException("primarymail sent but does not exists in aliases of the user!");
+            }
+        }
+    
+    
+        if (usrdata.getEmail1() == null) {
+            throw new InvalidDataException("email1 not sent but required!");
+           
+        }
+    
+        if (usrdata.getPrimaryEmail() != null && usrdata.getEmail1() != null) {
+            // primary mail value must be same with email1
+            if (!usrdata.getPrimaryEmail().equals(usrdata.getEmail1())) {
+                throw new InvalidDataException("email1 not equal with primarymail!");
+                
+            }
         }
     }
     
