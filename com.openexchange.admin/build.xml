@@ -247,7 +247,7 @@
 		</exec>
     </target>
 
-    <target name="install" depends="replacer,jar,install-plugins">
+    <target name="install" depends="replacer,jar">
         <mkdir dir="${destdir}/var/log/open-xchange"/>
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <mkdir dir="${destdir}/${prefix}/libexec"/>
