@@ -155,7 +155,7 @@ CREATE TABLE mail_domains (
     INDEX (domainName)
 );
 
-CREATE TABLE mail_restrictions (
+CREATE TABLE user_mail_restrictions (
 	cid INT4 UNSIGNED,
 	id INT4 UNSIGNED,
 	className VARCHAR(64),
