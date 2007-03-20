@@ -61,7 +61,25 @@
 
 	<!--                    TARGETS                      -->
 
-	<target name="compile-plugins">
+	<target name="compile-console">
+		<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+    	</subant>
+	</target>
+
+	<target name="install-console">
+		<subant failonerror="true" inheritall="false" target="install">
+                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+    	</subant>
+	</target>
+
+	<target name="clean-console">
+		<subant failonerror="true" inheritall="false" target="clean">
+                <fileset dir="../" includes="open-xchange-admin-console-**/build.xml"/>
+    	</subant>
+	</target>
+
+    <target name="compile-plugins">
 		<subant failonerror="true" inheritall="false" target="compile">
                 <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
     	</subant>
@@ -89,7 +107,7 @@
 		<subant failonerror="true" inheritall="false" target="dist">
 	               <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
 	   	</subant>
-	</target>
+   </target>
 
 	<target name="manifest">
 		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
@@ -117,6 +135,7 @@
             </classpath>
         </javac>
 		<antcall target="compile-plugins"></antcall>
+		<antcall target="compile-console"></antcall>
     </target>
 
 
@@ -184,6 +203,7 @@
         <delete dir="doc"/>
         <delete dir="jar"/>
 		<antcall target="clean-plugins"></antcall>
+		<antcall target="clean-console"></antcall>
     </target>
 	
 	<target name="dist-clean" depends="clean">
@@ -239,12 +259,8 @@
         </copy>
 		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in,linkhelper,config.ini.helper" followsymlinks="true"/>
+            <fileset dir="sbin" excludes="*.in,config.ini.helper" followsymlinks="true"/>
         </copy>
-    	<chmod perm="755" file="sbin/linkhelper"/>
-    	<exec executable="sbin/linkhelper">
-			<arg value="${destdir}/${prefix}/sbin"/>
-		</exec>
     	<chmod perm="755">
             <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
         </chmod>
@@ -262,6 +278,7 @@
     	<!-- <antcall target="install-suse"/> -->
     	<!-- <antcall target="install-redhat"/> -->
 		<antcall target="install-plugins"></antcall>
+		<antcall target="install-console"></antcall>
     </target>
 	
     <target name="install-client" depends="client">
