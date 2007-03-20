@@ -120,11 +120,12 @@ ALTER TABLE mail_domains
 	MODIFY restriction VARCHAR(64) NOT NULL,
     ENGINE=InnoDB;
 
-ALTER TABLE mail_restrictions
+ALTER TABLE user_mail_restrictions
 	MODIFY cid INT4 UNSIGNED NOT NULL,
 	MODIFY id INT4 UNSIGNED NOT NULL,
 	MODIFY className VARCHAR(64) NOT NULL,
 	MODIFY address VARCHAR(255) UNIQUE NOT NULL,
+    ADD FOREIGN KEY (cid, id) REFERENCES user(cid, id),
 	ENGINE=InnoDB;
 
 ALTER TABLE address_mappings
