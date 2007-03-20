@@ -2,6 +2,16 @@
 
  - Fixed bug when checking user flag support on non-existent or
    non-holding-messages mail folders
+ - All JavaMail-specific properties configurable through new property file
+   'javamail.properties'
+ - Changed error handling of SocketException 'Broken Pipe' to log only as a
+   warning, cause this kind of error is related to an aborted file download.
+#################### ATTENTION ! #####################
+  - CONFIG change: New property in 'system.properties' to link to a new
+    property file
+  - CONFIG change: New property file 'javamail.properties' that collects
+    all known JavaMail properties
+######################################################
 
 * 2007-03-19 - thorben.betten@open-xchange.com
 

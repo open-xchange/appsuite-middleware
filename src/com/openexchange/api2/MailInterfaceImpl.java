@@ -290,6 +290,14 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
 		}
+		try {
+			IMAPPropertiesFactory.loadGlobalImapProperties();
+			if (IMAPProperties.getJavaMailProperties() != null) {
+				IMAP_PROPS.putAll(IMAPProperties.getJavaMailProperties());
+			}
+		} catch (IMAPException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	private final static void initializeCapabilities(final IMAPStore imapStore) throws MessagingException {

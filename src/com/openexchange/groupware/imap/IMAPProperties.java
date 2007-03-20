@@ -50,6 +50,7 @@
 package com.openexchange.groupware.imap;
 
 import java.util.Arrays;
+import java.util.Properties;
 
 import com.openexchange.groupware.contexts.Context;
 
@@ -124,6 +125,8 @@ public class IMAPProperties {
 	private static boolean ignoreSubscription;
 	
 	private static boolean smtpEnvelopeFrom;
+	
+	private static Properties javaMailProperties;
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -493,6 +496,19 @@ public class IMAPProperties {
 
 	public static void setSMTPEnvelopeFrom(final boolean setSMTPEnvelopeFrom) {
 		IMAPProperties.smtpEnvelopeFrom = setSMTPEnvelopeFrom;
+	}
+
+	public static Properties getJavaMailProperties() throws IMAPException {
+		checkGlobalImapProperties();
+		return javaMailProperties;
+	}
+	
+	static Properties getJavaMailPropertiesInternal() {
+		return javaMailProperties;
+	}
+
+	public static void setJavaMailProperties(Properties javaMailProperties) {
+		IMAPProperties.javaMailProperties = javaMailProperties;
 	}
 
 	private static final void checkGlobalImapProperties() throws IMAPException {

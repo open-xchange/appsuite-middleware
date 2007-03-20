@@ -80,10 +80,14 @@ import com.openexchange.sessiond.SessionObject;
 public class IMAPPropertiesFactory {
 
 	private static Properties props;
+	
+	private static Properties javaMailProps;
 
 	private static final Lock PROP_LOCK = new ReentrantLock();
 
-	private static final String PROPERTYNAME = "IMAPPROPERTIES";
+	private static final String PROPERTYNAME_IMAP = "IMAPPROPERTIES";
+	
+	private static final String PROPERTYNAME_JAVAMAIL = "JAVAMAILPROPERTIES";
 
 	private static String PROP_FILE;
 
@@ -167,8 +171,8 @@ public class IMAPPropertiesFactory {
 	}
 
 	private static void checkImapPropFile() throws IMAPException {
-		if ((PROP_FILE = SystemConfig.getProperty(PROPERTYNAME)) == null) {
-			throw new IMAPException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME).append(
+		if ((PROP_FILE = SystemConfig.getProperty(PROPERTYNAME_IMAP)) == null) {
+			throw new IMAPException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME_IMAP).append(
 					"\" not defined in system.properties").toString());
 		}
 		/*
@@ -192,6 +196,16 @@ public class IMAPPropertiesFactory {
 		try {
 			fis = new FileInputStream(new File(PROP_FILE));
 			props.load(fis);
+			fis.close();
+			fis = null;
+			if (SystemConfig.getProperty(PROPERTYNAME_JAVAMAIL) != null) {
+				fis = new FileInputStream(new File(SystemConfig.getProperty(PROPERTYNAME_JAVAMAIL)));
+				javaMailProps = new Properties();
+				javaMailProps.load(fis);
+				if (javaMailProps.size() == 0) {
+					javaMailProps = null;
+				}
+			}
 		} catch (FileNotFoundException e) {
 			props = null;
 			throw new IMAPException(new StringBuilder(300).append("IMAP properties not found at location: ").append(
@@ -435,6 +449,10 @@ public class IMAPPropertiesFactory {
 						STR_FALSE)));
 				logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(IMAPProperties.isSMTPEnvelopeFromInternal())
 						.append('\n');
+				
+				IMAPProperties.setJavaMailProperties(javaMailProps);
+				logBuilder.append("\tJavaMail Properties loaded: ").append(
+						IMAPProperties.getJavaMailPropertiesInternal() != null).append('\n');
 
 				try {
 					IMAPProperties.setPartModifierImpl(PartModifier.getImpl(props.getProperty(PROP_IMAP_PART_MODIFIER,

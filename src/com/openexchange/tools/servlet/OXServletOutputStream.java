@@ -54,6 +54,7 @@ package com.openexchange.tools.servlet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 
 import javax.servlet.ServletOutputStream;
 
@@ -198,6 +199,8 @@ public class OXServletOutputStream extends ServletOutputStream {
 		 */
 		byteBuffer.write(withheldBytes, 0, withheldBytes.length);
 	}
+	
+	private static final String ERR_BROKEN_PIPE = "Broken pipe";
 
 	/**
 	 * Sends response headers to web server if not done before and writes all
@@ -241,6 +244,15 @@ public class OXServletOutputStream extends ServletOutputStream {
 			 * processPackage() method need not to be called.
 			 */
 			byteBuffer.reset();
+		} catch (SocketException e) {
+			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) != -1) {
+				LOG.warn(new StringBuilder(
+						"Underlying (TCP) protocol communication aborted:")
+						.append(e.getMessage()).toString(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+			throw new IOException(e.getMessage());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
