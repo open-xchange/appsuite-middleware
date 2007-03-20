@@ -344,7 +344,11 @@ public class FolderWriter extends DataWriter {
 							imapPerm.parseRights(folder.getOwnRights());
 							permissionBits = createPermissionBits(imapPerm);
 							if (IMAPProperties.isUserFlagsEnabled()
-									&& (IMAPUtils.supportsUserDefinedFlags(folder.getImapFolder()))) {
+									&& folder.exists()
+									&& folder.isHoldsMessages()
+									&& (IMAPUtils
+											.supportsUserDefinedFlags(folder
+													.getImapFolder()))) {
 								permissionBits |= BIT_USER_FLAG;
 							}
 						}

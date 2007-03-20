@@ -87,6 +87,8 @@ public class MailFolderObject {
 	
 	private Rights ownRights;
 	
+	private boolean holdsMessages;
+	
 	private boolean rootFolder;
 	
 	private String summary;
@@ -147,7 +149,7 @@ public class MailFolderObject {
 				}
 			}
 		}
-		final boolean holdsMessages = ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0);
+		this.holdsMessages = ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0);
 		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if (holdsMessages) {
@@ -373,6 +375,10 @@ public class MailFolderObject {
 
 	public boolean isRootFolder() {
 		return rootFolder;
+	}
+
+	public boolean isHoldsMessages() {
+		return holdsMessages;
 	}
 
 	public String getSummary() {
