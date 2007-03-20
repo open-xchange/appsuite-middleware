@@ -160,7 +160,6 @@ CREATE TABLE user_mail_restrictions (
 	id INT4 UNSIGNED,
 	className VARCHAR(64),
 	address VARCHAR(255),
-    PRIMARY KEY (cid, id),
 	INDEX(className, address)
 );
 
