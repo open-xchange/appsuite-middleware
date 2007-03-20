@@ -30,3 +30,10 @@ pushd $DDIR
 for linkname in $COMMANDS; do
     ln -sf cmdmuxer-plugin-hosting $linkname
 done
+for method in create delete change list; do
+    for module in user group resource; do
+	linkname="${method}${module}"
+	rm -f $linkname
+	ln -sf cmdmuxer $linkname
+    done
+done
