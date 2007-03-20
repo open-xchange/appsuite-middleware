@@ -1339,6 +1339,9 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.isImapSort()) {
 				try {
 					if (search) {
+						if (retval == null || retval.length == 0) {
+							return SearchIteratorAdapter.createEmptyIterator();
+						}
 						/*
 						 * Define sequence of valid message numbers: e.g.:
 						 * 2,34,35,43,51
@@ -1421,6 +1424,9 @@ public class MailInterfaceImpl implements MailInterface {
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
 				int toIndex = fromToIndices[1];
+				if (retval == null || retval.length == 0) {
+					return SearchIteratorAdapter.createEmptyIterator();
+				}
 				if ((fromIndex) > retval.length) {
 					/*
 					 * Return empty iterator if start is out of range
@@ -1611,6 +1617,9 @@ public class MailInterfaceImpl implements MailInterface {
 			long start = System.currentTimeMillis();
 			try {
 				if (search) {
+					if (msgArr == null || msgArr.length == 0) {
+						return SearchIteratorAdapter.createEmptyIterator();
+					}
 					/*
 					 * Define sequence of valid message numbers: e.g.:
 					 * 2,34,35,43,51
@@ -2338,6 +2347,7 @@ public class MailInterfaceImpl implements MailInterface {
 		imapCon.setImapFolder(isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore
 				.getFolder(folderName));
 		if (!isDefaultFolder && !imapCon.getImapFolder().exists()) {
+			imapCon.setImapFolder(null);
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, imapCon.getImapFolder().getFullName());
 		}
 		if (mode != Folder.READ_ONLY && mode != Folder.READ_WRITE) {

@@ -192,8 +192,7 @@ public class IMAPUtils {
 				final Header hdr = (Header) e.nextElement();
 				if (hdr.getName().equals(HDR_FROM)) {
 					tmp.put(HDR_FROM, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setFrom(InternetAddress.parse(hdrValue, false));
 							} catch (AddressException e) {
@@ -203,8 +202,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_TO)) {
 					tmp.put(HDR_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setRecipients(RecipientType.TO, InternetAddress.parse(hdrValue, false));
 							} catch (AddressException e) {
@@ -214,8 +212,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_CC)) {
 					tmp.put(HDR_CC, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setRecipients(RecipientType.CC, InternetAddress.parse(hdrValue, false));
 							} catch (AddressException e) {
@@ -225,8 +222,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_BCC)) {
 					tmp.put(HDR_BCC, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setRecipients(RecipientType.BCC, InternetAddress.parse(hdrValue, false));
 							} catch (AddressException e) {
@@ -236,8 +232,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_REPLY_TO)) {
 					tmp.put(HDR_REPLY_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setReplyTo(InternetAddress.parse(hdrValue, true));
 							} catch (AddressException e) {
@@ -247,8 +242,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_SUBJECT)) {
 					tmp.put(HDR_SUBJECT, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setSubject(MimeUtility.decodeText(hdrValue));
 							} catch (UnsupportedEncodingException e) {
@@ -262,8 +256,7 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_DATE)) {
 					tmp.put(HDR_DATE, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							try {
 								msg.setSentDate(mailDateFormat.parse(hdrValue));
 							} catch (ParseException e) {
@@ -273,29 +266,25 @@ public class IMAPUtils {
 					});
 				} else if (hdr.getName().equals(HDR_X_PRIORITY)) {
 					tmp.put(HDR_X_PRIORITY, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							msg.setHeader(HDR_X_PRIORITY, hdrValue);
 						}
 					});
 				} else if (hdr.getName().equals(HDR_MESSAGE_ID)) {
 					tmp.put(HDR_MESSAGE_ID, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							msg.setHeader(HDR_MESSAGE_ID, hdrValue);
 						}
 					});
 				} else if (hdr.getName().equals(HDR_IN_REPLY_TO)) {
 					tmp.put(HDR_IN_REPLY_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							msg.setHeader(HDR_IN_REPLY_TO, hdrValue);
 						}
 					});
 				} else if (hdr.getName().equals(HDR_REFERENCES)) {
 					tmp.put(HDR_REFERENCES, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException,
-								OXException {
+						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
 							msg.setHeader(HDR_REFERENCES, hdrValue);
 						}
 					});
@@ -799,7 +788,7 @@ public class IMAPUtils {
 			final IMAPFolder f = (IMAPFolder) store.getDefaultFolder();
 			// Object val =
 			f.doCommandIgnoreFailure(new IMAPFolder.ProtocolCommand() {
-				public Object doCommand(IMAPProtocol p) throws ProtocolException {
+				public Object doCommand(IMAPProtocol p) {
 					final Argument args = new Argument();
 					args.writeString(lfolder);
 					// Response[] r =
@@ -1891,7 +1880,7 @@ public class IMAPUtils {
 					 * Skip, ff it does not match our sequence number
 					 */
 					if (f.getNumber() != seqnum) {
-						continue;
+						continue NextResponse;
 					}
 					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder
 							.getSeparator(), seqnum);
@@ -1987,9 +1976,9 @@ public class IMAPUtils {
 					 * Response is null or not a FetchResponse
 					 */
 					if (currentReponse == null) {
-						continue;
+						continue NextResponse;
 					} else if (!(currentReponse instanceof FetchResponse)) {
-						continue;
+						continue NextResponse;
 					}
 					final FetchResponse f = (FetchResponse) currentReponse;
 					final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder
@@ -2026,13 +2015,13 @@ public class IMAPUtils {
 			 */
 			if (item instanceof Flags) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) {
 						msg.setFlags((Flags) item);
 					}
 				};
 			} else if (item instanceof ENVELOPE) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException {
 						final ENVELOPE env = (ENVELOPE) item;
 						msg.setFrom(env.from);
 						msg.setRecipients(RecipientType.TO, env.to);
@@ -2053,19 +2042,19 @@ public class IMAPUtils {
 				};
 			} else if (item instanceof INTERNALDATE) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) {
 						msg.setReceivedDate(((INTERNALDATE) item).getDate());
 					}
 				};
 			} else if (item instanceof RFC822SIZE) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) {
 						msg.setSize(((RFC822SIZE) item).size);
 					}
 				};
 			} else if (item instanceof BODYSTRUCTURE) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) throws OXException {
 						final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
 						final StringBuilder sb = new StringBuilder();
 						sb.append(bs.type).append('/').append(bs.subtype);
@@ -2077,7 +2066,7 @@ public class IMAPUtils {
 				};
 			} else if (item instanceof UID) {
 				itemHandlers[j] = new FetchItemHandler() {
-					public void handleItem(Item item, MessageCacheObject msg) throws MessagingException, OXException {
+					public void handleItem(Item item, MessageCacheObject msg) {
 						msg.setUid(((UID) item).uid);
 					}
 				};
@@ -2562,7 +2551,7 @@ public class IMAPUtils {
 						};
 					}
 					return new FieldComparer(locale) {
-						public int compareFields(Message msg1, Message msg2) throws MessagingException {
+						public int compareFields(Message msg1, Message msg2) {
 							return 0;
 						}
 					};
@@ -2570,7 +2559,7 @@ public class IMAPUtils {
 					LOG.error(e.getMessage(), e);
 				}
 				return new FieldComparer(locale) {
-					public int compareFields(Message msg1, Message msg2) throws MessagingException {
+					public int compareFields(Message msg1, Message msg2) {
 						return 0;
 					}
 				};
