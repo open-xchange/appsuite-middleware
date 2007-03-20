@@ -66,11 +66,11 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -285,16 +285,20 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    public void delete(final Context ctx, final int[] user_ids, final Credentials auth) 
+    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        delete(ctx, new User[]{user}, auth);
+    }
+
+    public void delete(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
-        if(ctx==null || user_ids ==null){
+        if(ctx==null || users ==null){
             throw new InvalidDataException();            
         }
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString() + " - " + Arrays.toString(user_ids)+" - "+auth.toString());
+        log.debug(ctx.toString() + " - " + Arrays.toString(users)+" - "+auth.toString());
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
@@ -303,22 +307,20 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
         }
 
+        final int[] user_ids = getUserIdArrayFromUsers(users);
+        // FIXME: Change function form int to user object
         if (!tools.existsUser(ctx, user_ids)) {
-            throw new InvalidDataException("No such user " + Arrays.toString(user_ids) + " in context " + ctx.getIdAsInt());
+            throw new InvalidDataException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
             
         }
-        for (final int element : user_ids) {
-            if (tools.isContextAdmin(ctx, element)) {
+        for (final User user : users) {
+            if (tools.isContextAdmin(ctx, user.getId())) {
                 throw new InvalidDataException("Admin delete not supported");              
             }
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        final User[] usersfromid = new User[user_ids.length];
-        for (int i = 0; i < user_ids.length; i++) {
-            usersfromid[i] = new User(user_ids[i]);
-        }
-        final User[] users = oxu.getData(ctx, usersfromid);
+        final User[] retusers = oxu.getData(ctx, users);
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
@@ -338,7 +340,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
                                 log.info("Calling delete for plugin: " + bundlename);
-                                oxuser.delete(ctx, users, auth);
+                                oxuser.delete(ctx, retusers, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
                                 log.error("Error while calling delete for plugin: " + bundlename, e);
@@ -351,7 +353,16 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
+        // FIXME: Change function from int to user object
         oxu.delete(ctx, user_ids);
+    }
+
+    private int[] getUserIdArrayFromUsers(User[] users) {
+        final int[] retval = new int[users.length];
+        for (int i = 0; i < users.length; i++) {
+            retval[i] = users[i].getId();
+        }
+        return retval;
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
@@ -434,39 +445,22 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
         
-        
-        if(ctx==null||user_ids==null){
+        if (ctx==null||user_ids==null) {
             throw new InvalidDataException();            
         }        
         
-        doAuthentication(auth,ctx);
-        
-        log.debug(ctx.toString()+" - "+Arrays.toString(user_ids)+" - "+auth.toString());
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            
-        }
-        for (final int element : user_ids) {
-            if (!tools.existsUser(ctx, element)) {
-                throw new NoSuchUserException("No such user " + element + " in context " + ctx.getIdAsInt());
-                
-            }
-        }
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         final User[] users = new User[user_ids.length];
         for (int i = 0; i < user_ids.length; i++) {
             users[i] = new User(user_ids[i]);
         }
-        return oxu.getData(ctx, users);
+
+        return getData(ctx, users, auth);
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {        
       
-        
-        if(ctx==null || users ==null){
+        if (ctx==null || users ==null) {
             throw new InvalidDataException();            
         }
         
@@ -480,9 +474,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
         }
         for (final User element : users) {
-            if (!tools.existsUser(ctx, element.getUsername())) {
+            final String username = element.getUsername();
+            if (null != username && !tools.existsUser(ctx, element.getUsername())) {
                 throw new NoSuchUserException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
-                
+            } else if (!tools.existsUser(ctx, element.getId())) {
+                throw new NoSuchUserException("No such user " + element.getId() + " in context " + ctx.getIdAsInt());
             }
         }
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
