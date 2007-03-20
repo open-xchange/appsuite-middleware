@@ -525,11 +525,15 @@ public class OXMailException extends OXException {
 		/**
 		 * SpamAssassin executable not found
 		 */
-		SPAMASSASSIN_NOT_FOUND("SpamAssassin executable not found", Category.SUBSYSTEM_OR_SERVICE_DOWN, 95),
+		SPAMASSASSIN_NOT_FOUND("SpamAssassin not installed or its executable has not been found", Category.SUBSYSTEM_OR_SERVICE_DOWN, 95),
 		/**
 		 * No IMAP account exists for user %s in context %s
 		 */
-		ACCOUNT_DOES_NOT_EXIST("No IMAP account exists for user %s in context %s", Category.SETUP_ERROR, 96);
+		ACCOUNT_DOES_NOT_EXIST("No IMAP account exists for user %s in context %s", Category.SETUP_ERROR, 96),
+		/**
+		 * Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s
+		 */
+		MOVE_PARTIALLY_COMPLETED("Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s", Category.INTERNAL_ERROR, 97);
 
 		/**
 		 * Message of the exception.

@@ -6,6 +6,8 @@
    'javamail.properties'
  - Changed error handling of SocketException 'Broken Pipe' to log only as a
    warning, cause this kind of error is related to an aborted file download.
+ - Expunge only applied to affected messages on move; whole folder expunge
+   is performed no more
 #################### ATTENTION ! #####################
   - CONFIG change: New property in 'system.properties' to link to a new
     property file

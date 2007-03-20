@@ -119,6 +119,7 @@ import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.UIDSet;
 
 /**
  * IMAPUtils
@@ -2330,6 +2331,47 @@ public class IMAPUtils {
 		default:
 			return;
 		}
+	}
+	
+	/**
+	 * Turns given array of <code>long</code> into an array of
+	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be
+	 * used for a varieties of <code>IMAPProtocol</code> methods.
+	 * 
+	 * @param uids -
+	 *            the UIDs
+	 * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
+	 */
+	public static final UIDSet[] toUIDSet(final long[] uids) {
+		List<UIDSet> sets = new ArrayList<UIDSet>(uids.length);
+		for (int i = 0; i < uids.length; i++) {
+			long current = uids[i];
+			final UIDSet set = new UIDSet();
+			set.start = current;
+			/*
+			 * Look for contiguous UIDs
+			 */
+			Inner: for (++i; i < uids.length; i++) {
+				final long next = uids[i];
+				if (next == current + 1)
+					current = next;
+				else {
+					/*
+					 * Break in sequence. Need to reexamine this message at the
+					 * top of the outer loop, so decrement 'i' to cancel the
+					 * outer loop's autoincrement
+					 */
+					i--;
+					break Inner;
+				}
+			}
+			set.end = current;
+			sets.add(set);
+		}
+		if (sets.isEmpty()) {
+			return null;
+		}
+		return sets.toArray(new UIDSet[sets.size()]);
 	}
 
 	public static String getAllAddresses(final Address[] a) {

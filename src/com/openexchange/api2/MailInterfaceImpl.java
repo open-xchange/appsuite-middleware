@@ -290,14 +290,6 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		try {
-			IMAPPropertiesFactory.loadGlobalImapProperties();
-			if (IMAPProperties.getJavaMailProperties() != null) {
-				IMAP_PROPS.putAll(IMAPProperties.getJavaMailProperties());
-			}
-		} catch (IMAPException e) {
-			LOG.error(e.getMessage(), e);
-		}
 	}
 
 	private final static void initializeCapabilities(final IMAPStore imapStore) throws MessagingException {
@@ -346,6 +338,13 @@ public class MailInterfaceImpl implements MailInterface {
 			} finally {
 				LOCK_INIT.unlock();
 			}
+		}
+		try {
+			if (IMAPProperties.getJavaMailProperties() != null) {
+				IMAP_PROPS.putAll(IMAPProperties.getJavaMailProperties());
+			}
+		} catch (IMAPException e) {
+			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
 			IMAP_PROPS.put("mail.imap.connectiontimeout", String.valueOf(IMAPProperties.getImapConnectionTimeout()));
@@ -3217,12 +3216,16 @@ public class MailInterfaceImpl implements MailInterface {
 					final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
 							: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
 					if (spamAction != SPAM_NOOP) {
-						for (int i = 0; i < msgUIDs.length; i++) {
-							if (spamAction == SPAM_SPAM) {
-								SpamAssassin.trainMessageAsSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
-							} else if (spamAction == SPAM_HAM) {
-								SpamAssassin.trainMessageAsHam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+						try {
+							for (int i = 0; i < msgUIDs.length; i++) {
+								if (spamAction == SPAM_SPAM) {
+									SpamAssassin.trainMessageAsSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+								} else if (spamAction == SPAM_HAM) {
+									SpamAssassin.trainMessageAsHam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+								}
 							}
+						} catch (OXException e) {
+							LOG.error(e.getMessage(), e);
 						}
 					}
 					if (move) {
@@ -3230,9 +3233,19 @@ public class MailInterfaceImpl implements MailInterface {
 						IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						/*
-						 * Expunge is going to be invoked in close() method
+						 * Expunge "moved" messages immediately
 						 */
-						imapCon.setExpunge(true);
+						try {
+							imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(msgUIDs));
+						} catch (ProtocolException e) {
+							throw new OXMailException(
+									MailCode.MOVE_PARTIALLY_COMPLETED, e,
+									com.openexchange.tools.oxfolder.OXFolderManagerImpl
+											.getUserName(sessionObj), Arrays
+											.toString(msgUIDs), imapCon
+											.getImapFolder().getFullName(), e
+											.getMessage());
+						}
 					}
 					return res;
 				} catch (MessagingException e) {

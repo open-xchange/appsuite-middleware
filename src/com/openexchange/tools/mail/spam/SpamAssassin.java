@@ -71,6 +71,8 @@ public class SpamAssassin {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpamAssassin.class);
+	
+	private static final String STR_SPAMASSASSIN = "SpamAssassin result: ";
 
 	// /**
 	// * <code>spamassassin -L</code>. "-L" use local tests only
@@ -152,6 +154,9 @@ public class SpamAssassin {
 			 * Read its result
 			 */
 			final String result = cmdExec.getOutputString();
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(result).toString());
+			}
 			if (result != null && exitCode == 1) {
 				/*
 				 * Spam found
@@ -176,6 +181,10 @@ public class SpamAssassin {
 	public static final void trainMessageAsHam(final Message msg) throws OXException {
 		trainMessage(msg, false);
 	}
+	
+	private static final String STR_SPAM = "Spam ";
+	
+	private static final String STR_HAM = "Ham ";
 
 	private static final void trainMessage(final Message msg, final boolean isSpam) throws OXException {
 		try {
@@ -195,7 +204,10 @@ public class SpamAssassin {
 			/*
 			 * Read its result
 			 */
-			cmdExec.getOutputString();
+			final String res = cmdExec.getOutputString();
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res).toString());
+			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 		} catch (MessagingException e) {
