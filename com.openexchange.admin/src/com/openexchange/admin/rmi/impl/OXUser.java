@@ -66,6 +66,7 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -431,7 +432,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
         
         
         if(ctx==null||user_ids==null){
@@ -449,7 +450,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         for (final int element : user_ids) {
             if (!tools.existsUser(ctx, element)) {
-                throw new InvalidDataException("No such user " + element + " in context " + ctx.getIdAsInt());
+                throw new NoSuchUserException("No such user " + element + " in context " + ctx.getIdAsInt());
                 
             }
         }
@@ -462,7 +463,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {        
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {        
       
         
         if(ctx==null || users ==null){
@@ -480,7 +481,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         for (final User element : users) {
             if (!tools.existsUser(ctx, element.getUsername())) {
-                throw new InvalidDataException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
+                throw new NoSuchUserException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
                 
             }
         }
