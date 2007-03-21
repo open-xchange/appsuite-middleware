@@ -3220,7 +3220,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#copyMessage(java.lang.String,
 	 *      java.lang.String, long, boolean)
 	 */
-	public long[] copyMessage(final String sourceFolderArg, final String destFolderArg, final long[] msgUIDs,
+	public long[] copyMessages(final String sourceFolderArg, final String destFolderArg, final long[] msgUIDs,
 			final boolean move) throws OXException {
 		try {
 			if (sourceFolderArg == null || sourceFolderArg.length() == 0) {

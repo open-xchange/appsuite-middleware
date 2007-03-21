@@ -331,14 +331,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 		try {
 			final String folderId = checkStringParam(paramContainer, PARAMETER_MAILFOLDER, paramSrcType);
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				}
 				retval = Integer.valueOf(mailInterface.getAllMessageCount(folderId)[0]);
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 				}
 				mailInterface = null;
@@ -408,11 +408,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get all mails
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			MailWriter mailWriter = null;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				/*
@@ -499,7 +500,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 				}
 				mailInterface = null;
@@ -567,11 +568,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get reply message
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			MailWriter mailWriter = null;
 			try {
-				if (createMailInterface) {
+				if (mailInterfaceArg == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				mailWriter.writeJSONMessageObject(mailInterface.getReplyMessageForDisplay(mailIdentifier.folder,
@@ -579,7 +581,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.flush();
 				valueWritten = true;
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -641,11 +643,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get forward message
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			MailWriter mailWriter = null;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				mailWriter.writeJSONMessageObject(mailInterface.getForwardMessageForDisplay(mailIdentifier.folder,
@@ -653,7 +656,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.flush();
 				valueWritten = true;
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -724,11 +727,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get message
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			MailWriter mailWriter = null;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				final Message msg = mailInterface.getMessage(mailIdentifier.folder, mailIdentifier.msgUID);
@@ -750,7 +754,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				writer.flush();
 				valueWritten = true;
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -825,11 +829,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get new mails
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			MailWriter mailWriter = null;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				/*
@@ -864,7 +869,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -932,11 +937,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Get new mails
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
 				final MailIdentifier mailIdentifier = new MailIdentifier(msgUID);
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				final CommonObject[] insertedObjs = mailInterface.saveVersitAttachment(mailIdentifier.folder,
 						mailIdentifier.msgUID, partIdentifier);
@@ -948,7 +954,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					jsonWriter.value(jo);
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -1222,11 +1228,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Search mails
 				 */
 				MailInterface mailInterface = mailInterfaceArg;
-				final boolean createMailInterface = (mailInterface == null);
+				boolean closeMailInterface = false;
 				MailWriter mailWriter = null;
 				try {
-					if (createMailInterface) {
+					if (mailInterface == null) {
 						mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+						closeMailInterface = true;
 					}
 					mailWriter = new MailWriter(jsonWriter, sessionObj);
 					/*
@@ -1280,7 +1287,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						}
 					}
 				} finally {
-					if (createMailInterface && mailInterface != null) {
+					if (closeMailInterface && mailInterface != null) {
 						mailInterface.close(true);
 					}
 					mailInterface = null;
@@ -1390,10 +1397,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				if (tryWithNewCon) {
 					MailInterface mailInterface = mailInterfaceArg;
-					final boolean createMailInterface = (mailInterface == null);
+					boolean closeMailInterface = false;
 					try {
-						if (createMailInterface) {
+						if (mailInterface == null) {
 							mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+							closeMailInterface = true;
 						}
 						for (int k = 0; k < size; k++) {
 							final Map.Entry<String, SmartLongArray> entry = iter.next();
@@ -1416,7 +1424,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 							}
 						}
 					} finally {
-						if (createMailInterface && mailInterface != null) {
+						if (closeMailInterface && mailInterface != null) {
 							mailInterface.close(true);
 							mailInterface = null;
 						}
@@ -1503,10 +1511,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final boolean hardDelete = "1".equals(getStringParam(paramContainer, PARAMETER_HARDDELETE, paramSrcType));
 			final JSONArray jsonIDs = new JSONArray(body);
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				boolean isJSONObject = true;
 				final MailIdentifier mailIdentifier = new MailIdentifier();
@@ -1547,7 +1556,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -1626,16 +1635,17 @@ public class Mail extends PermissionServlet implements UploadListener {
 						: false);
 			}
 			MailInterface mailInterface = mailIntefaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				if (destFolder != null) {
 					/*
 					 * Perform move operation
 					 */
-					mailInterface.copyMessage(sourceFolder, destFolder, new long[] { mailIdentifier.msgUID }, true);
+					mailInterface.copyMessages(sourceFolder, destFolder, new long[] { mailIdentifier.msgUID }, true);
 				}
 				if (colorLabel != null) {
 					/*
@@ -1651,7 +1661,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface.updateMessageFlags(sourceFolder, mailIdentifier.msgUID, flagBits.intValue(), flagVal);
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -1710,12 +1720,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final String sourceFolder = checkStringParam(paramContainer, PARAMETER_FOLDERID, paramSrcType);
 			final String destFolder = new JSONObject(body).getString(FolderFields.FOLDER_ID);
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
-				final long[] msgUIDs = mailInterface.copyMessage(sourceFolder, destFolder,
+				final long[] msgUIDs = mailInterface.copyMessages(sourceFolder, destFolder,
 						new long[] { mailIdentifier.msgUID }, false);
 				if (msgUIDs.length == 1) {
 					jsonWriter.value(new StringBuilder(destFolder).append(SEPERATOR).append(msgUIDs[0]).toString());
@@ -1732,7 +1743,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					jsonWriter.value(JSONObject.NULL);
 				}
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -1793,7 +1804,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final String destFolderIdentifier = checkStringParam(paramContainer, PARAMETER_DESTINATION_FOLDER,
 					paramSrcType);
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			JSONMessageAttachmentObject mao = null;
 			final InfostoreFacade db = Infostore.FACADE;
 			try {
@@ -1801,8 +1812,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					throw new OXPermissionException(new OXMailException(MailCode.NO_MAIL_MODULE_ACCESS, sessionObj
 							.getUserlogin()));
 				}
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mao = mailInterface.getMessageAttachment(mailIdentifier.folder, mailIdentifier.msgUID,
 						attachmentIdentifier);
@@ -1869,7 +1881,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				db.rollback();
 				throw e;
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}
@@ -1931,14 +1943,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 					&& !bodyObj.isNull(JSONMessageObject.JSON_FROM) ? bodyObj.getString(JSONMessageObject.JSON_FROM)
 					: null;
 			MailInterface mailInterface = mailInterfaceArg;
-			final boolean createMailInterface = (mailInterface == null);
+			boolean closeMailInterface = false;
 			try {
-				if (createMailInterface) {
+				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				mailInterface.sendReceiptAck(mailIdentifier.folder, mailIdentifier.msgUID, fromAddr);
 			} finally {
-				if (createMailInterface && mailInterface != null) {
+				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 					mailInterface = null;
 				}

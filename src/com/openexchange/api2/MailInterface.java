@@ -280,7 +280,7 @@ public interface MailInterface {
 	 * Copies or moves (if <code>move</code> is set) the defined message from
 	 * source folder to destination folder.
 	 */
-	public long[] copyMessage(String sourceFolder, String destFolder, long[] msgUIDs, boolean move) throws OXException;
+	public long[] copyMessages(String sourceFolder, String destFolder, long[] msgUIDs, boolean move) throws OXException;
 	
 	/**
 	 * Updates the color label stored in message's user flags
