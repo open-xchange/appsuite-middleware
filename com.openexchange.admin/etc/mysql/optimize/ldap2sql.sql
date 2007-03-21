@@ -35,11 +35,13 @@ CREATE TABLE user (
     timeZone VARCHAR(128),
     userPassword VARCHAR(128),
     contactId INT4 UNSIGNED,
-	passwordMech VARCHAR(32),
+    passwordMech VARCHAR(32),
     uidNumber INT4 UNSIGNED,
     gidNumber INT4 UNSIGNED,
     homeDirectory VARCHAR(128),
     loginShell VARCHAR(128),
+    amavisPolicyId INT4 UNSIGNED,
+    amavisPriority INT4 UNSIGNED,
     PRIMARY KEY (cid, id),
     INDEX (mail)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -145,29 +147,3 @@ CREATE TABLE resource_group_member (
 
 CREATE INDEX resource_group_member_cid_id_idx ON resource_group_member(cid, id);
 
-CREATE TABLE mail_domains (
-    cid INT4 UNSIGNED,
-    id INT4 UNSIGNED,
-	domainName VARCHAR(128),
-	smtpSenderRule VARCHAR(128),
-	restriction VARCHAR(64),
-    PRIMARY KEY (cid, id),
-    INDEX (domainName)
-);
-
-CREATE TABLE user_mail_restrictions (
-	cid INT4 UNSIGNED,
-	id INT4 UNSIGNED,
-	className VARCHAR(64),
-	address VARCHAR(255),
-	INDEX(className, address)
-);
-
-CREATE TABLE address_mappings (
-	cid INT4 UNSIGNED,
-	id INT4 UNSIGNED,
-	address VARCHAR(255),
-	destination VARCHAR(255),
-    PRIMARY KEY (cid, id),
-	INDEX(address)
-);
