@@ -3371,9 +3371,9 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 				/*
-				 * Expunge is going to be invoked in close() method
+				 * Expunge "moved" messages immediately
 				 */
-				imapCon.setExpunge(true);
+				imapCon.getImapFolder().expunge(msgs);
 			}
 			/*
 			 * Return new message id
