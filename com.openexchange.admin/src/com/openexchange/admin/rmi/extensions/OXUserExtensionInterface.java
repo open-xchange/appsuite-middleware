@@ -68,4 +68,10 @@ public interface OXUserExtensionInterface extends Serializable {
      * @return
      */
     public String toString();
+    
+    /**
+     * @param ext
+     * @return
+     */
+    public boolean equals(final OXUserExtensionInterface ext);
 }
