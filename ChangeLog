@@ -6,6 +6,7 @@
    if it is invoked on a non-selectable folder)
  - Caching of HOLDS_MESSAGES information in DefaultImapConnection class to
    avoid unnecessary JavaMail checks
+ - Ensure that a charset is set, when sending a message via MailObject
 
 * 2007-03-20 - thorben.betten@open-xchange.com
 

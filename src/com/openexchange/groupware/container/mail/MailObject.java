@@ -139,6 +139,8 @@ public class MailObject {
 		}
 	}
 	
+	private final static String STR_CHARSET = "charset";
+	
 	public final void send() throws OXException {
 		try {
 			validateMailObject();
@@ -174,22 +176,28 @@ public class MailObject {
 				internetAddrs = InternetAddress.parse(tmp, false);
 				msg.setRecipients(RecipientType.BCC, internetAddrs);
 			}
+			final ContentType ct = new ContentType(contentType);
+			if (ct.getParameter(STR_CHARSET) == null) {
+				/*
+				 * Ensure a charset is set
+				 */
+				ct.addParameter(STR_CHARSET, IMAPProperties.getDefaultMimeCharset());
+			}
 			/*
 			 * Set subject
 			 */
-			msg.setSubject(subject, "UTF-8");
+			msg.setSubject(subject, ct.getParameter(STR_CHARSET));
 			/*
 			 * Set content and its type
 			 */
-			final ContentType ct = new ContentType(contentType);
 			if ("text".equalsIgnoreCase(ct.getPrimaryType())) {
 				if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
 					msg.setContent(text, ct.toString());
 				} else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
-					if (ct.getParameter("charset") == null) {
+					if (ct.getParameter(STR_CHARSET) == null) {
 						msg.setText(text);
 					} else {
-						msg.setText(text, ct.getParameter("charset"));
+						msg.setText(text, ct.getParameter(STR_CHARSET));
 					}
 				} else {
 					throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
