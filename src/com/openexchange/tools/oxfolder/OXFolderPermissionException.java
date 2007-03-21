@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api.OXPermissionException;
@@ -65,54 +63,24 @@ public class OXFolderPermissionException extends OXPermissionException {
 
 	private static final long serialVersionUID = -5108199975949161729L;
 
-	public OXFolderPermissionException() {
-		super();
-		setComponent(Component.FOLDER);
-	}
-
-	public OXFolderPermissionException(final String message) {
-		super(message);
-		setComponent(Component.FOLDER);
-	}
-
-	public OXFolderPermissionException(final String message, final Exception cause) {
-		super(message, cause);
-		setComponent(Component.FOLDER);
-	}
-
-	public OXFolderPermissionException(final Exception cause) {
-		super(cause);
-		setComponent(Component.FOLDER);
-	}
-	
 	public OXFolderPermissionException(final FolderCode code) {
 		this(code, new Object[0]);
 	}
-	
+
 	public OXFolderPermissionException(final FolderCode code, final Object... messageArgs) {
-		super(code.getMessage());
-		setComponent(Component.FOLDER);
-		setCategory(Category.PERMISSION);
-		setDetailNumber(code.getNumber());
-		setMessageArgs(messageArgs);
+		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
 	}
-	
+
 	public OXFolderPermissionException(final FolderCode code, String messagePrefix, final Object... messageArgs) {
-		super(new StringBuilder().append(messagePrefix).append(code.getMessage()).toString());
-		setComponent(Component.FOLDER);
-		setCategory(Category.PERMISSION);
-		setDetailNumber(code.getNumber());
-		setMessageArgs(messageArgs);
+		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix)
+				.append(code.getMessage()).toString(), null, messageArgs);
 	}
-	
+
 	public OXFolderPermissionException(final FolderCode code, final Exception cause, final boolean insertCauseMsg,
 			final Object... messageArgs) {
-		super(insertCauseMsg ? new StringBuilder().append(code.getMessage()).append(':').append(cause.getMessage())
-				.toString() : code.getMessage(), null);
-		setComponent(Component.FOLDER);
-		setCategory(Category.PERMISSION);
-		setDetailNumber(code.getNumber());
-		setMessageArgs(messageArgs);
+		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), insertCauseMsg ? new StringBuilder().append(
+				code.getMessage()).append(':').append(cause.getMessage()).toString() : code.getMessage(), cause,
+				messageArgs);
 	}
 
 }

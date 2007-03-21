@@ -377,24 +377,20 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		 * Iterate result queue
 		 */
 		int prevModule = -1;
-		LinkedList<Integer> cacheQueue = null;
+		final LinkedList<Integer> cacheQueue = new LinkedList<Integer>();
 		for (int i = 0; i < size; i++) {
 			final FolderObject f = iter.next();
 			if (prevModule != f.getModule()) {
-				if (cacheQueue != null) {
-					FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
-							sessionObj, false);
-				}
+				FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
+						sessionObj, false);
 				prevModule = f.getModule();
 				stdModules.remove(Integer.valueOf(prevModule));
-				cacheQueue = new LinkedList<Integer>();
+				cacheQueue.clear();
 			}
 			cacheQueue.add(Integer.valueOf(f.getObjectID()));
 		}
-		if (cacheQueue != null) {
-			FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
-					sessionObj, false);
-		}
+		FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
+				sessionObj, false);
 		final int setSize = stdModules.size();
 		final Iterator<Integer> iter2 = stdModules.iterator();
 		for (int i = 0; i < setSize; i++) {

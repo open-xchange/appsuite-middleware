@@ -448,7 +448,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return retval.toString();
 	}
 
-	public void sendRedirect(final String location) throws IOException {
+	public void sendRedirect(final String location) {
 		status = HttpServletResponse.SC_MOVED_TEMPORARILY;
 		statusMsg = statusMsgs.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
 		addHeader("Location", location);
@@ -489,21 +489,20 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		final Class type = obj.getClass();
 		if (!type.isArray()) {
 			throw new IllegalArgumentException(obj.getClass().toString());
-		} else {
-			return (new Enumeration() {
-				int size = Array.getLength(obj);
-
-				int cursor;
-
-				public boolean hasMoreElements() {
-					return (cursor < size);
-				}
-
-				public Object nextElement() {
-					return Array.get(obj, cursor++);
-				}
-			});
 		}
+		return (new Enumeration() {
+			int size = Array.getLength(obj);
+
+			int cursor;
+
+			public boolean hasMoreElements() {
+				return (cursor < size);
+			}
+
+			public Object nextElement() {
+				return Array.get(obj, cursor++);
+			}
+		});
 	}
 
 }

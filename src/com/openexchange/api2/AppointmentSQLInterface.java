@@ -49,14 +49,15 @@
 
 package com.openexchange.api2;
 
+import java.sql.SQLException;
+import java.util.Date;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
-import java.sql.SQLException;
-import java.util.Date;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * AppointmentSQLInterface

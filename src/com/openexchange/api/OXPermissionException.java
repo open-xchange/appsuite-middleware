@@ -51,47 +51,29 @@ package com.openexchange.api;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 
 /**
-   OXPermissionException
-   @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
-*/
-public class OXPermissionException extends OXException
-{
+ * OXPermissionException
+ * 
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ */
+public class OXPermissionException extends OXException {
+
+	private static final long serialVersionUID = 8893780895314747686L;
+
+	public OXPermissionException(final Component component, final Category category, final int number,
+			final String message, final Throwable cause, final Object... messageArgs) {
+		super(component, category, number, message, cause, messageArgs);
+	}
 
 	/**
-     * @deprecated
+	 * Initializes a new exception using the information provides by the cause.
+	 * 
+	 * @param cause
+	 *            the cause of the exception.
 	 */
-    public OXPermissionException() {
-		super();
+	public OXPermissionException(final AbstractOXException cause) {
+		super(cause);
 	}
-	
-    /**
-     * @deprecated
-     */
-	public OXPermissionException(String message) {
-		super(message);
-	}
-	
-    /**
-     * @deprecated
-     */
-	public OXPermissionException(String message, Exception exc) {
-		super(message, exc);
-	}
-	
-    /**
-     * @deprecated
-     */
-	public OXPermissionException(Exception exc) {
-		super(exc);
-	}
-
-    /**
-     * Initializes a new exception using the information provides by the cause.
-     * @param cause the cause of the exception.
-     */
-    public OXPermissionException(final AbstractOXException cause) {
-        super(cause);
-    }
 }

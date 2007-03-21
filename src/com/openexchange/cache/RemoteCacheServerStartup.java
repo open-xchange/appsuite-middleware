@@ -125,14 +125,12 @@ public class RemoteCacheServerStartup {
 			}
 			// final Properties props =
 			// PropertyLoader.loadProperties(remoteCacheConfigFile);
-			if (props != null) {
-				final String portS = props.getProperty("registry.port", String.valueOf(DEFAULT_REGISTRY_PORT));
+			final String portS = props.getProperty("registry.port", String.valueOf(DEFAULT_REGISTRY_PORT));
 
-				try {
-					registryPort = Integer.parseInt(portS);
-				} catch (NumberFormatException e) {
-					LOG.error("Problem converting port to an int.", e);
-				}
+			try {
+				registryPort = Integer.parseInt(portS);
+			} catch (NumberFormatException e) {
+				LOG.error("Problem converting port to an int.", e);
 			}
 		} catch (Exception e) {
 			LOG.error("Problem loading props.", e);
@@ -145,7 +143,7 @@ public class RemoteCacheServerStartup {
 			registryHost = InetAddress.getLocalHost().getHostAddress();
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("registryHost = [" + registryHost + "]");
+				LOG.debug("registryHost = [" + registryHost + ']');
 			}
 
 			if ("localhost".equals(registryHost) || "127.0.0.1".equals(registryHost)) {
@@ -217,7 +215,7 @@ public class RemoteCacheServerStartup {
 			servicePort = Integer.parseInt(servicePortStr);
 
 			rcsa.setServicePort(servicePort);
-			LOG.debug("Remote cache service uses port number " + servicePort + ".");
+			LOG.debug("Remote cache service uses port number " + servicePort + '.');
 		} catch (NumberFormatException ignore) {
 			LOG.debug("Remote cache service port property " + IRemoteCacheConstants.REMOTE_CACHE_SERVICE_PORT
 					+ " not specified.  An anonymous port will be used.");
@@ -244,7 +242,7 @@ public class RemoteCacheServerStartup {
 				IRemoteCacheConstants.REMOTE_CACHE_SERVICE_VAL).trim();
 
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Binding server to " + host + ":" + port + " with the name " + serviceName);
+			LOG.info("Binding server to " + host + ':' + port + " with the name " + serviceName);
 		}
 		try {
 			Naming.rebind(new StringBuilder().append("//").append(host).append(':').append(port).append('/').append(

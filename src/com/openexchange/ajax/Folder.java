@@ -160,8 +160,7 @@ public class Folder extends SessionServlet {
 	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		Tools.disableCaching(resp);
 		try {
@@ -178,8 +177,7 @@ public class Folder extends SessionServlet {
 	 * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
+	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		Tools.disableCaching(resp);
 		try {
@@ -1227,7 +1225,9 @@ public class Folder extends SessionServlet {
 					valueWritten = true;
 				} finally {
 					try {
-						mailInterface.close(true);
+						if (mailInterface != null) {
+							mailInterface.close(true);
+						}
 					} catch (OXException e) {
 						LOG.error(e.getMessage(), e);
 					}

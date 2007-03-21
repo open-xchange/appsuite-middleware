@@ -219,8 +219,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	
 	public static final String PARAMETER_SEND_TYPE = "sendtype";
 
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
          * The magic spell to disable caching
@@ -234,8 +233,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
+	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
          * The magic spell to disable caching
@@ -2138,7 +2136,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				responseObj = new JSONObject().put("error", e.getMessage());
 			} catch (JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
-				responseObj = null;
 			}
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
@@ -2375,7 +2372,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 */
 		public Object clone() {
 			try {
-				return (MailIdentifier) super.clone();
+				return super.clone();
 			} catch (CloneNotSupportedException e) {
 				/*
 				 * Cannot occur since Cloneable is implemented
@@ -2511,7 +2508,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * 
 		 * @see com.openexchange.groupware.upload.UploadListener#action(com.openexchange.groupware.upload.UploadEvent)
 		 */
-		public boolean action(final UploadEvent uploadEvent) throws OXException, UploadServletException {
+		public boolean action(final UploadEvent uploadEvent) throws UploadServletException {
 			if (!doAction) {
 				return true;
 			} else if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
@@ -2530,7 +2527,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 						responseObj = new JSONObject().put("error", oxme.getMessage());
 					} catch (JSONException e) {
 						LOG.error(e.getMessage(), e);
-						responseObj = null;
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))
@@ -2544,7 +2540,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 						responseObj = new JSONObject().put("error", oxme.getMessage());
 					} catch (JSONException e) {
 						LOG.error(e.getMessage(), e);
-						responseObj = null;
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))

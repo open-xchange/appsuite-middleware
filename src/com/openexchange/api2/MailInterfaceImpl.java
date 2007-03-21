@@ -3401,7 +3401,8 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (!imapCon.isHoldsMessages()) {
-					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder()
+							.getFullName());
 				} else if (IMAPProperties.isSupportsACLs() && !imapCon.getMyRights().contains(Rights.Right.WRITE)) {
 					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), imapCon.getImapFolder()
 							.getFullName());
@@ -4059,7 +4060,8 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, deleteMe.getFullName());
 		}
 		try {
-			if (IMAPProperties.isSupportsACLs() && !deleteMe.myRights().contains(Rights.Right.CREATE)) {
+			if (IMAPProperties.isSupportsACLs() && ((deleteMe.getType() & Folder.HOLDS_MESSAGES) > 0)
+					&& !deleteMe.myRights().contains(Rights.Right.CREATE)) {
 				throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), deleteMe.getFullName());
 			}
 		} catch (MessagingException e) {
@@ -4071,7 +4073,6 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		final long start = System.currentTimeMillis();
 		try {
-			deleteMe.setSubscribed(false);
 			if (!deleteMe.delete(true)) {
 				throw new OXMailException(MailCode.DELETE_FAILED, deleteMe.getFullName());
 			}

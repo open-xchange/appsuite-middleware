@@ -447,11 +447,11 @@ public class OXContainerConverter {
 
 	private final TimeZone timezone;
 
-	private String organizerMailAddress = null;
+	private String organizerMailAddress;
 
 	private boolean sendUTC = true;
 
-	private boolean sendFloating = false;
+	private boolean sendFloating;
 
 	public OXContainerConverter(TimeZone timezone, String organizerMailAddress) {
 		super();

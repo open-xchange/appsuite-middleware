@@ -131,7 +131,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	private CompositeCacheManager cacheManager;
 
 	// relates listener id with a type
-	private final Map idTypeMap = new HashMap();
+	private final Map<Long, Integer> idTypeMap = new HashMap<Long, Integer>();
 
 	// private transient int listenerId = 0;
 	private int[] listenerId = new int[1];
@@ -140,7 +140,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	protected IRemoteCacheServerAttributes rcsa;
 
 	/** The interval at which we will log updates. */
-	private final int logInterval = 100;
+	private static final int logInterval = 100;
 
 	/**
 	 * Constructor for the RemoteCacheServer object. Thiks initializes the
@@ -273,7 +273,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @throws IOException
 	 * 
 	 */
-	public void put(final ICacheElement item) throws IOException {
+	public void put(final ICacheElement item) {
 		update(item);
 	}
 
@@ -282,7 +282,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * 
 	 * @see org.apache.jcs.engine.behavior.ICacheService#update(org.apache.jcs.engine.behavior.ICacheElement)
 	 */
-	public void update(final ICacheElement item) throws IOException {
+	public void update(final ICacheElement item) {
 		update(item, 0);
 	}
 
@@ -316,7 +316,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @param requesterId
 	 * @throws IOException
 	 */
-	public void update(final ICacheElement item, final long requesterId) throws IOException {
+	public void update(final ICacheElement item, final long requesterId) {
 
 		long start = 0;
 		if (timing) {
@@ -339,7 +339,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 			final CacheListeners cacheDesc = getCacheListeners(item.getCacheName());
 			/* Object val = */item.getVal();
 
-			final Integer remoteTypeL = (Integer) idTypeMap.get(Long.valueOf(requesterId));
+			final Integer remoteTypeL = idTypeMap.get(Long.valueOf(requesterId));
 			if (log.isDebugEnabled()) {
 				log.debug("In update, requesterId = [" + requesterId + "] remoteType = " + remoteTypeL);
 			}
@@ -370,13 +370,13 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 					if (fromCluster) {
 						if (log.isDebugEnabled()) {
 							log.debug("Put FROM cluster, NOT updating other auxiliaries for region. "
-									+ " requesterId [" + requesterId + "]");
+									+ " requesterId [" + requesterId + ']');
 						}
 						c.localUpdate(item);
 					} else {
 						if (log.isDebugEnabled()) {
 							log.debug("Put NOT from cluster, updating other auxiliaries for region. "
-									+ " requesterId [" + requesterId + "]");
+									+ " requesterId [" + requesterId + ']');
 						}
 						c.update(item);
 					}
@@ -409,7 +409,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 				}
 			}
 		} catch (IOException e) {
-			log.error("Trouble in Update. requesterId [" + requesterId + "]", e);
+			log.error("Trouble in Update. requesterId [" + requesterId + ']', e);
 		}
 
 		// TODO use JAMON for timing
@@ -476,7 +476,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @return ICacheElement
 	 * @throws IOException
 	 */
-	public ICacheElement get(final String cacheName, final Serializable key) throws IOException {
+	public ICacheElement get(final String cacheName, final Serializable key) {
 		return this.get(cacheName, key, 0);
 	}
 
@@ -494,8 +494,8 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @return ICacheElement
 	 * @throws IOException
 	 */
-	public ICacheElement get(final String cacheName, final Serializable key, final long requesterId) throws IOException {
-		final Integer remoteTypeL = (Integer) idTypeMap.get(Long.valueOf(requesterId));
+	public ICacheElement get(final String cacheName, final Serializable key, final long requesterId) {
+		final Integer remoteTypeL = idTypeMap.get(Long.valueOf(requesterId));
 
 		if (log.isDebugEnabled()) {
 			log.debug("get " + key + " from cache " + cacheName + " requesterId = [" + requesterId + "] remoteType = "
@@ -543,7 +543,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 		if (!fromCluster && this.rcsa.getAllowClusterGet()) {
 			if (log.isDebugEnabled()) {
 				log.debug("NonLocalGet. fromCluster [" + fromCluster + "] AllowClusterGet ["
-						+ this.rcsa.getAllowClusterGet() + "]");
+						+ this.rcsa.getAllowClusterGet() + ']');
 			}
 			element = c.get(key);
 		} else {
@@ -553,7 +553,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 
 			if (log.isDebugEnabled()) {
 				log.debug("LocalGet.  fromCluster [" + fromCluster + "] AllowClusterGet ["
-						+ this.rcsa.getAllowClusterGet() + "]");
+						+ this.rcsa.getAllowClusterGet() + ']');
 			}
 			element = c.localGet(key);
 		}
@@ -613,7 +613,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 		}
 		final CacheListeners cacheDesc = cacheListenersMap.get(cacheName);
 
-		final Integer remoteTypeL = (Integer) idTypeMap.get(Long.valueOf(requesterId));
+		final Integer remoteTypeL = idTypeMap.get(Long.valueOf(requesterId));
 		boolean fromCluster = false;
 		if (remoteTypeL != null && remoteTypeL.intValue() == IRemoteCacheAttributes.CLUSTER) {
 			fromCluster = true;
@@ -681,7 +681,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	public void removeAll(final String cacheName, final long requesterId) throws IOException {
 		final CacheListeners cacheDesc = cacheListenersMap.get(cacheName);
 
-		Integer remoteTypeL = (Integer) idTypeMap.get(Long.valueOf(requesterId));
+		Integer remoteTypeL = idTypeMap.get(Long.valueOf(requesterId));
 		boolean fromCluster = false;
 		if (remoteTypeL != null && remoteTypeL.intValue() == IRemoteCacheAttributes.CLUSTER) {
 			fromCluster = true;
@@ -740,7 +740,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 */
 	public void dispose(final String cacheName, final long requesterId) throws IOException {
 		if (log.isInfoEnabled()) {
-			log.info("Dispose request received from listener [" + requesterId + "]");
+			log.info("Dispose request received from listener [" + requesterId + ']');
 		}
 
 		final CacheListeners cacheDesc = cacheListenersMap.get(cacheName);
@@ -829,10 +829,10 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 
 		final int remoteType = ircl.getRemoteType();
 		if (remoteType == IRemoteCacheAttributes.CLUSTER) {
-			log.debug("adding cluster listener, listenerAddress [" + listenerAddress + "]");
+			log.debug("adding cluster listener, listenerAddress [" + listenerAddress + ']');
 			cacheDesc = getClusterListeners(cacheName);
 		} else {
-			log.debug("adding normal listener, listenerAddress [" + listenerAddress + "]");
+			log.debug("adding normal listener, listenerAddress [" + listenerAddress + ']');
 			cacheDesc = getCacheListeners(cacheName);
 		}
 		final Map eventQMap = cacheDesc.eventQMap;
@@ -849,7 +849,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 					final long listenerIdB = nextListenerId();
 					if (log.isDebugEnabled()) {
 						log.debug("listener id=" + (listenerIdB & 0xff) + " addded for cache [" + cacheName
-								+ "], listenerAddress [" + listenerAddress + "]");
+								+ "], listenerAddress [" + listenerAddress + ']');
 					}
 					listener.setListenerId(listenerIdB);
 					id = listenerIdB;
@@ -857,12 +857,12 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 					// in case it needs synchronization
 					if (log.isInfoEnabled()) {
 						log.info("adding vm listener under new id = [" + listenerIdB + "], listenerAddress ["
-								+ listenerAddress + "]");
+								+ listenerAddress + ']');
 					}
 				} else {
 					if (log.isInfoEnabled()) {
 						log.info("adding listener under existing id = [" + id + "], listenerAddress ["
-								+ listenerAddress + "]");
+								+ listenerAddress + ']');
 					}
 					// should confirm the the host is the same as we have on
 					// record, just in case a client has made a mistake.
@@ -871,7 +871,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 				// relate the type to an id
 				this.idTypeMap.put(Long.valueOf(id), Integer.valueOf(remoteType));
 			} catch (IOException ioe) {
-				log.error("Problem setting listener id, listenerAddress [" + listenerAddress + "]", ioe);
+				log.error("Problem setting listener id, listenerAddress [" + listenerAddress + ']', ioe);
 			}
 
 			final CacheEventQueueFactory fact = new CacheEventQueueFactory();
@@ -900,7 +900,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 			addCacheListener(cacheName, listener);
 
 			if (log.isDebugEnabled()) {
-				log.debug("Adding listener for cache [" + cacheName + "]");
+				log.debug("Adding listener for cache [" + cacheName + ']');
 			}
 		}
 	}
@@ -927,7 +927,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 */
 	public void removeCacheListener(final String cacheName, final long listenerId) {
 		if (log.isInfoEnabled()) {
-			log.info("Removing listener for cache region = [" + cacheName + "] and listenerId [" + listenerId + "]");
+			log.info("Removing listener for cache region = [" + cacheName + "] and listenerId [" + listenerId + ']');
 		}
 
 		final CacheListeners cacheDesc = getCacheListeners(cacheName);
@@ -937,20 +937,20 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 
 		if (q != null) {
 			if (log.isDebugEnabled()) {
-				log.debug("Found queue for cache region = [" + cacheName + "] and listenerId  [" + listenerId + "]");
+				log.debug("Found queue for cache region = [" + cacheName + "] and listenerId  [" + listenerId + ']');
 			}
 			q.destroy();
 			cleanupEventQMap(eventQMap);
 		} else {
 			if (log.isDebugEnabled()) {
 				log.debug("Did not find queue for cache region = [" + cacheName + "] and listenerId [" + listenerId
-						+ "]");
+						+ ']');
 			}
 		}
 
 		if (log.isInfoEnabled()) {
 			log.info("After removing listener [" + listenerId + "] cache region " + cacheName + "'s listener size ["
-					+ cacheDesc.eventQMap.size() + "]");
+					+ cacheDesc.eventQMap.size() + ']');
 		}
 	}
 
@@ -967,7 +967,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 			removeCacheListener(cacheName, listener);
 
 			if (log.isInfoEnabled()) {
-				log.info("Removing listener for cache [" + cacheName + "]");
+				log.info("Removing listener for cache [" + cacheName + ']');
 			}
 		}
 	}
@@ -978,7 +978,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * 
 	 * @throws IOException
 	 */
-	public void shutdown() throws IOException {
+	public void shutdown() {
 		//TODO: RemoteCacheServerFactory.shutdownImpl("", Registry.REGISTRY_PORT);
 	}
 
@@ -991,7 +991,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @param port
 	 * @throws IOException
 	 */
-	public void shutdown(final String host, final int port) throws IOException {
+	public void shutdown(final String host, final int port) {
 		if (log.isInfoEnabled()) {
 			log.info("Received shutdown request.  Shutting down server.");
 		}
@@ -1045,7 +1045,7 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 	 * @return The stats value
 	 * @throws IOException
 	 */
-	public String getStats() throws IOException {
+	public String getStats() {
 		return cacheManager.getStats();
 	}
 }

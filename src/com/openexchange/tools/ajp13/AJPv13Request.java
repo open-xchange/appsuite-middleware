@@ -193,7 +193,7 @@ public abstract class AJPv13Request {
 	}
 
 	protected final int unsignedByte2Int(final byte b) {
-		return (int) b & 0xff;
+		return (b & 0xff);
 	}
 
 }
