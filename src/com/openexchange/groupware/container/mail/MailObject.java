@@ -75,36 +75,36 @@ import com.openexchange.tools.mail.ContentType;
  * MailObject
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class MailObject {
-	
+
 	public static final int DONT_SET = -2;
 
 	private String fromAddr;
-	
+
 	private String[] toAddrs;
-	
+
 	private String[] ccAddrs;
-	
+
 	private String[] bccAddrs;
-	
+
 	private String subject;
-	
+
 	private String text;
-	
+
 	private String contentType;
-	
+
 	private boolean requestReadReceipt;
-	
+
 	private final SessionObject sessionObj;
-	
+
 	private final int objectId;
-	
+
 	private final int folderId;
-	
+
 	private final int module;
-	
+
 	private Session mailSession;
 
 	public MailObject(final SessionObject sessionObj, int objectId, int folderId, final int module) {
@@ -114,7 +114,7 @@ public class MailObject {
 		this.folderId = folderId;
 		this.module = module;
 	}
-	
+
 	private final void createMailSession() throws OXException {
 		if (mailSession != null) {
 			return;
@@ -124,7 +124,7 @@ public class MailObject {
 		mailProperties.put("mail.smtp.port", String.valueOf(sessionObj.getIMAPProperties().getSmtpPort()));
 		mailSession = Session.getDefaultInstance(mailProperties, null);
 	}
-	
+
 	private final void validateMailObject() throws OXException {
 		if (fromAddr == null || fromAddr.length() == 0) {
 			throw new OXMailException(MailCode.MISSING_FIELD, "From", "");
@@ -138,9 +138,17 @@ public class MailObject {
 			throw new OXMailException(MailCode.MISSING_FIELD, "Text", "");
 		}
 	}
-	
+
 	private final static String STR_CHARSET = "charset";
-	
+
+	private final static String HEADER_XPRIORITY = "X-Priority";
+
+	private final static String HEADER_DISPNOTTO = "Disposition-Notification-Toy";
+
+	private final static String HEADER_XOXREMINDER = "X-OX-Reminder";
+
+	private final static String VALUE_PRIORITYNROM = "3 (normal)";
+
 	public final void send() throws OXException {
 		try {
 			validateMailObject();
@@ -209,17 +217,17 @@ public class MailObject {
 			 * Disposition notification
 			 */
 			if (requestReadReceipt) {
-				msg.setHeader("Disposition-Notification-To", fromAddr);
+				msg.setHeader(HEADER_DISPNOTTO, fromAddr);
 			}
 			/*
 			 * Set priority
 			 */
-			msg.setHeader("X-Priority", "3 (normal)");
+			msg.setHeader(HEADER_XPRIORITY, VALUE_PRIORITYNROM);
 			/*
 			 * Set ox reference
 			 */
 			if (folderId != DONT_SET) {
-				msg.setHeader("X-OX-Reminder", new StringBuilder().append(this.objectId).append(',').append(
+				msg.setHeader(HEADER_XOXREMINDER, new StringBuilder().append(this.objectId).append(',').append(
 						this.folderId).append(',').append(module).toString());
 			}
 			/*
@@ -257,7 +265,7 @@ public class MailObject {
 			throw MailInterfaceImpl.handleMessagingException(e);
 		}
 	}
-	
+
 	public void addBccAddr(final String addr) {
 		bccAddrs = addAddr(addr, bccAddrs);
 	}
@@ -269,7 +277,7 @@ public class MailObject {
 	public void setBccAddrs(final String[] bccAddrs) {
 		this.bccAddrs = bccAddrs;
 	}
-	
+
 	public void addCcAddr(final String addr) {
 		ccAddrs = addAddr(addr, ccAddrs);
 	}
@@ -305,7 +313,7 @@ public class MailObject {
 	public void setText(final String text) {
 		this.text = text;
 	}
-	
+
 	public void addToAddr(final String addr) {
 		toAddrs = addAddr(addr, toAddrs);
 	}
@@ -317,7 +325,7 @@ public class MailObject {
 	public void setToAddrs(final String[] toAddrs) {
 		this.toAddrs = toAddrs;
 	}
-	
+
 	public boolean isRequestReadReceipt() {
 		return requestReadReceipt;
 	}
