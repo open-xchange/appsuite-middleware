@@ -235,6 +235,27 @@ public interface OXUserInterface extends Remote {
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
 
     /**
+     * Retrieve user objects for a range of users by id
+     * 
+     * @param ctx
+     *            numerical context identifier
+     * @param user_id
+     *            int of the user id
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return User containing result object.
+     * 
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws NoSuchUserException 
+     */
+    public User getData(Context ctx, int user_id, Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
+
+    /**
      * Retrieve user objects for a range of users by name
      * @see User.getUsername().
      * 
@@ -254,6 +275,28 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchUserException 
      */
     public User[] getData(Context ctx, User[] users, Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException;
+
+    /**
+     * Retrieve user objects for a range of users by name
+     * @see User.getUsername().
+     * 
+     * @param context
+     *            Context object.
+     * @param user
+     *            user object with user to get data for.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return User containing result object.
+     *
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws NoSuchUserException 
+     */
+    public User getData(Context ctx, User user, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException;
 
 }
