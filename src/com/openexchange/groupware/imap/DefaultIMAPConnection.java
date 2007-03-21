@@ -111,6 +111,8 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	private transient IMAPFolder imapFolder;
 	
 	private transient Rights myRights;
+	
+	private int holdsMessages = -1;
 
 	public DefaultIMAPConnection() {
 		super();
@@ -232,11 +234,22 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		return myRights;
 	}
 
-	public void setMyRights(final Rights myRights) {
-		this.myRights = myRights;
+	public void resetMyRights() {
+		this.myRights = null;
 	}
 
-	public boolean isConnected() throws MessagingException {
+	public boolean isHoldsMessages() throws MessagingException {
+		if (holdsMessages == -1) {
+			holdsMessages = (imapFolder.getType() & IMAPFolder.HOLDS_MESSAGES) == 0 ? 0 : 1;
+		}
+		return (holdsMessages > 0);
+	}
+
+	public void resetHoldsMessages() {
+		this.holdsMessages = -1;
+	}
+
+	public boolean isConnected() {
 		return (imapStore != null && imapStore.isConnected());
 	}
 

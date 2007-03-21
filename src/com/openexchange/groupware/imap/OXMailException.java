@@ -208,9 +208,9 @@ public class OXMailException extends OXException {
 		 */
 		NO_READ_ACCESS("User %s has no read access to mail folder %s", Category.PERMISSION, 22),
 		/**
-		 * Folder %s does not hold messages
+		 * Folder %s does not hold messages and is therefore not selectable
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages", Category.PERMISSION, 23),
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable", Category.PERMISSION, 23),
 		/**
 		 * Missing field %s in message %s
 		 */

@@ -1,3 +1,12 @@
+* 2007-03-21 - thorben.betten@open-xchange.com
+
+ - Fixed move of folders which only hold folders (\NoSelect flag set)
+ - Improved rights check to avoid a possible exception if examined folder
+   only holds folders (IMAP command 'MYRIGHTS' throws a MessagingException
+   if it is invoked on a non-selectable folder)
+ - Caching of HOLDS_MESSAGES information in DefaultImapConnection class to
+   avoid unnecessary JavaMail checks
+
 * 2007-03-20 - thorben.betten@open-xchange.com
 
  - Fixed bug when checking user flag support on non-existent or

@@ -101,6 +101,8 @@ public class MailFolderObject {
 	
 	private boolean exists;
 	
+	private boolean nonExistent;
+	
 	private char separator = '0';
 	
 	private IMAPFolder imapFolder;
@@ -127,7 +129,7 @@ public class MailFolderObject {
 		final String[] attrs = folder.getAttributes();
 		Attribs: for (String attribute : attrs) {
 			if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-				this.exists = false;
+				this.nonExistent = true;
 				break Attribs;
 			}
 		}
@@ -328,6 +330,10 @@ public class MailFolderObject {
 	public boolean exists() {
 		return exists;
 	}
+	
+	public boolean isNonExistent() {
+		return this.nonExistent;
+	}
 
 	public char getSeparator() throws MessagingException {
 		if (separator != '0') {
@@ -355,10 +361,6 @@ public class MailFolderObject {
 
 	public int getDeleted() {
 		return deleted;
-	}
-
-	public boolean isExists() {
-		return exists;
 	}
 
 	public boolean hasSubfolders() {
