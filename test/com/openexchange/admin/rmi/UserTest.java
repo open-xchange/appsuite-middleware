@@ -55,8 +55,10 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 import java.rmi.Naming;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -562,6 +564,13 @@ public class UserTest extends AbstractTest {
         assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
         assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
         assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
+        final ArrayList<OXUserExtensionInterface> aexts = a.getExtensions();
+        final ArrayList<OXUserExtensionInterface> bexts = b.getExtensions();
+        if (aexts.size() == bexts.size()) {
+            for (int i = 0; i < aexts.size(); i++) {
+                assertTrue(aexts.get(i).equals(bexts.get(i)));
+            }
+        }
     }
 
     private void compareUserAccess(final UserModuleAccess a, final UserModuleAccess b) {
