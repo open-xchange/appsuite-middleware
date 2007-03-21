@@ -256,8 +256,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.change(ctx, usrdata);
 
-        final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
-
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -271,7 +269,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                             try {
                                 log.info("Calling change for plugin: " + bundlename);
                                 oxuser.change(ctx, usrdata, auth);
-                                interfacelist.add(oxuser);
                             } catch (final PluginException e) {
                                 log.error("Error while calling change for plugin: " + bundlename, e);
                                 throw new StorageException(e);
@@ -442,12 +439,16 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
+    public User getData(Context ctx, int user_id, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
+        return getData(ctx, new int[]{user_id}, auth)[0];
+    }
+
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
         
         if (ctx==null||user_ids==null) {
-            throw new InvalidDataException();            
-        }        
+            throw new InvalidDataException();
+        }
         
         final User[] users = new User[user_ids.length];
         for (int i = 0; i < user_ids.length; i++) {
@@ -455,6 +456,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         return getData(ctx, users, auth);
+    }
+
+    public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
+        return getData(ctx, new User[]{user}, auth)[0];
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
@@ -482,7 +487,34 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        return oxu.getData(ctx, users);
+        
+        User[] retusers = oxu.getData(ctx, users);
+        
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
+                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
+                            try {
+                                log.info("Calling change for plugin: " + bundlename);
+                                retusers = oxuser.getData(ctx, retusers, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        return retusers;
     }
 
     private void validateUserName( final String userName ) throws OXUserException {
