@@ -316,7 +316,7 @@ public class MessageFiller {
 					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, "text/vcard")));
 					vcardPart.setHeader(MIME_VERSION, VERSION);
 					vcardPart.setFileName(MimeUtility.encodeText(new StringBuilder(session.getUserObject()
-							.getDisplayName().replaceAll(" +", "")).append(".vcs").toString(), IMAPProperties
+							.getDisplayName().replaceAll(" +", "")).append(".vcf").toString(), IMAPProperties
 							.getDefaultMimeCharset(), "Q"));
 					/*
 					 * Append body part
@@ -420,6 +420,9 @@ public class MessageFiller {
 			}
 		}
 		if (hasNestedMessages) {
+			if (primaryMultipart == null) {
+				primaryMultipart = new MimeMultipart();
+			}
 			/*
 			 * message/rfc822
 			 */
@@ -788,9 +791,7 @@ public class MessageFiller {
 				DBPool.closeReaderSilent(session.getContext(), readCon);
 				readCon = null;
 			}
-			if (converter != null) {
-				converter.close();
-			}
+			converter.close();
 		}
 	}
 

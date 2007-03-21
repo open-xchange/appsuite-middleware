@@ -7,6 +7,8 @@
  - Caching of HOLDS_MESSAGES information in DefaultImapConnection class to
    avoid unnecessary JavaMail checks
  - Ensure that a charset is set, when sending a message via MailObject
+ - Fixed Bug #6499: Using proper file extension for vCard attached by
+   webmailer
 
 * 2007-03-20 - thorben.betten@open-xchange.com
 
