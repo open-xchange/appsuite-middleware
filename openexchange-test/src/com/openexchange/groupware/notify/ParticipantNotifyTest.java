@@ -101,6 +101,23 @@ public class ParticipantNotifyTest extends TestCase{
 		assertNames( participantNames,"don.external@external.invalid" );	
 	}
 	
+	// Bug 6524
+	public void testAlphabetical() throws Exception {
+		Participant[] participants = getParticipants(U(2,3,4),G(),S(), R());
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		String[] participantNames = parseParticipants( msg );
+		assertEquals("User 1", participantNames[0]);
+		assertEquals("User 2", participantNames[1]);
+		assertEquals("User 3", participantNames[2]);
+		
+		
+	}
+	
 	public void testNoSend() throws Exception{
 		Participant[] participants = getParticipants(U(6,2),G(),S(), R());
 		Task t = getTask(participants);
