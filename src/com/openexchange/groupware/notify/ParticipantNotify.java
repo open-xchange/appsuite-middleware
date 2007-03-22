@@ -56,7 +56,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -192,18 +195,18 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			return;
 		if(obj.getParticipants() == null)
 			return;
-		StringBuffer participantsList = new StringBuffer();
-		StringBuffer resourcesList = new StringBuffer();
+		SortedSet<String> participantSet = new TreeSet<String>();
+		SortedSet<String> resourceSet = new TreeSet<String>();
 		
 		Map<Locale,List<EmailableParticipant>> receivers = new HashMap<Locale, List<EmailableParticipant>>();
 		
 		Map<String,EmailableParticipant> all = new HashMap<String,EmailableParticipant>();
 		UserParticipant[] users = obj.getUsers();
 		if(null == users) {
-			sortParticipants(obj.getParticipants(), participantsList, resourcesList, receivers, sessionObj, all);
+			sortParticipants(obj.getParticipants(), participantSet, resourceSet, receivers, sessionObj, all);
 		} else {
-			sortUserParticipants(obj.getUsers(), participantsList, receivers, sessionObj,all);
-			sortExternalParticipantsAndResources(obj.getParticipants(),participantsList,resourcesList,receivers, sessionObj,all);
+			sortUserParticipants(obj.getUsers(), participantSet, receivers, sessionObj,all);
+			sortExternalParticipantsAndResources(obj.getParticipants(),participantSet,resourceSet,receivers, sessionObj,all);
 		}
 		
 		String createdByDisplayName = "UNKNOWN";
@@ -262,8 +265,8 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 						"start" 	,	(null == obj.getStartDate()) ? "" : df.format(obj.getStartDate()),
 						"end"		,	(null == obj.getEndDate()) ? "" : df.format(obj.getEndDate()),
 						"title"		,	(null == obj.getTitle()) ? "" : obj.getTitle(),
-						"participants",		participantsList.toString(),
-						"resources"	,	(resourcesList.length() > 0) ? resourcesList.toString() : strings.getString(Notifications.NO_RESOURCES),
+						"participants",		list(participantSet),
+						"resources"	,	(resourceSet.size() > 0) ? list(resourceSet) : strings.getString(Notifications.NO_RESOURCES),
 						"created_by",		createdByDisplayName,
 						"changed_by",		modifiedByDisplayName,
 						"description",		(null == obj.getNote()) ? "" : obj.getNote()
@@ -290,6 +293,12 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		
 	}
 
+	private String list(SortedSet<String> sSet) {
+		StringBuilder b = new StringBuilder();
+		for(String s : sSet) { b.append(s).append('\n'); }
+		return b.toString();
+	}
+
 	private Map<String, String> m(String...args) {
 		if(args.length % 2 != 0)
 			throw new IllegalArgumentException("Length must be even");
@@ -310,7 +319,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		return new Locale(lang);
 	}
 	
-	private void sortExternalParticipantsAndResources(Participant[] participants, StringBuffer participantsList, StringBuffer resourcesList, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj,Map<String,EmailableParticipant> all) {
+	private void sortExternalParticipantsAndResources(Participant[] participants, Set<String> participantSet, Set<String> resourceSet, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj,Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -322,7 +331,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			case Participant.EXTERNAL_USER :
 				EmailableParticipant p = getExternalParticipant(participant);
 				if(p != null)
-					addSingleParticipant(p, participantsList, sessionObj, receivers,all,false);
+					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 				
 				break;
 			case Participant.RESOURCE :
@@ -332,10 +341,9 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 					p = getUserParticipant(participant, ctx);
 				}
 				if(p != null) {
-					addSingleParticipant(p, participantsList, sessionObj, receivers, all,true);
+					addSingleParticipant(p, participantSet, sessionObj, receivers, all,true);
 				}
-				resourcesList.append(p.displayName);
-				resourcesList.append("\n");
+				resourceSet.add(p.displayName);
 				break;
 			case Participant.GROUP : 
 			break;
@@ -345,7 +353,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 	}
 	
-	private void sortParticipants(Participant[] participants, StringBuffer participantsList, StringBuffer resourcesList, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj, Map<String,EmailableParticipant> all) {
+	private void sortParticipants(Participant[] participants, Set<String> participantSet, Set<String> resourceSet, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj, Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -355,21 +363,20 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			case Participant.USER:
 				EmailableParticipant p = getUserParticipant(participant, ctx);
 				if(p != null)
-					addSingleParticipant(p, participantsList, sessionObj, receivers,all,false);
+					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 				break;
 			case Participant.EXTERNAL_USER :
 				p = getExternalParticipant(participant);
 				if(p != null)
-					addSingleParticipant(p, participantsList, sessionObj, receivers,all,false);
+					addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 				
 				break;
 			case Participant.RESOURCE : 
 				p = getResourceParticipant(participant,ctx);
 				if(p != null) {
-					addSingleParticipant(p, participantsList, sessionObj, receivers, all,true);
+					addSingleParticipant(p, participantSet, sessionObj, receivers, all,true);
 				}
-				resourcesList.append(p.displayName);
-				resourcesList.append("\n");
+				resourceSet.add(p.displayName);
 				break;
 			case Participant.GROUP : 
 				try {
@@ -395,7 +402,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 								10,
 								-1
 							);
-							addSingleParticipant(p,participantsList,sessionObj,receivers,all,false);
+							addSingleParticipant(p,participantSet,sessionObj,receivers,all,false);
 						}
 						}
 					} catch (LdapException e) {
@@ -501,7 +508,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		return null;
 	}
 
-	private void sortUserParticipants(UserParticipant[] participants, StringBuffer participantsList, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj, Map<String,EmailableParticipant> all) {
+	private void sortUserParticipants(UserParticipant[] participants, Set<String> participantSet, Map<Locale, List<EmailableParticipant>> receivers, SessionObject sessionObj, Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -509,11 +516,11 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		for(Participant participant : participants) {					
 			EmailableParticipant p = getUserParticipant(participant, ctx);
 			if(p != null)
-				addSingleParticipant(p, participantsList, sessionObj, receivers,all,false);
+				addSingleParticipant(p, participantSet, sessionObj, receivers,all,false);
 		}
 	}
 
-	private void addSingleParticipant(EmailableParticipant participant, StringBuffer participantsList, SessionObject sessionObj, Map<Locale,List<EmailableParticipant>> receivers, Map<String, EmailableParticipant> all, boolean /* HACK */ resource) {
+	private void addSingleParticipant(EmailableParticipant participant, Set<String> participantSet, SessionObject sessionObj, Map<Locale,List<EmailableParticipant>> receivers, Map<String, EmailableParticipant> all, boolean /* HACK */ resource) {
 		
 		boolean onlyAddToLocaleList = false;
 		
@@ -549,10 +556,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		
 		if(resource)
 			return;
-		participantsList.append(participant.displayName);
-		participantsList.append("\n");
-		
-		
+		participantSet.add(participant.displayName);
 		
 	}
 	

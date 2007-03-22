@@ -6,6 +6,7 @@
  - Bugfix # 6315. Transfer lock ownership to mailadmin when a user is deleted
  - Throw delete events when removing infoitems during user delete to remove subordinate locks.
  - Event Handling to remove remaining locks if an item is deleted.
+ - Bugfix #6524 Sort participants in Notification eMails.
 
 * 2007-03-22 - thorben.betten@open-xchange.com
 
