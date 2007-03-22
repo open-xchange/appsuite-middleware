@@ -61,6 +61,8 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 
 import java.rmi.Naming;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 
 /**
@@ -75,6 +77,10 @@ public class GroupTest extends AbstractTest {
 
     private static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
+    public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(GroupTest.class);
+	}
+    
     @Test
     public void testAddGroup() throws Exception {
         final int context_id = getContextID();
