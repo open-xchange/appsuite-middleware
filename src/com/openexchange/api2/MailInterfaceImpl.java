@@ -3274,16 +3274,12 @@ public class MailInterfaceImpl implements MailInterface {
 					final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
 							: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
 					if (spamAction != SPAM_NOOP) {
-						try {
-							for (int i = 0; i < msgUIDs.length; i++) {
-								if (spamAction == SPAM_SPAM) {
-									SpamAssassin.trainMessageAsSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
-								} else if (spamAction == SPAM_HAM) {
-									SpamAssassin.trainMessageAsHam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
-								}
+						for (int i = 0; i < msgUIDs.length; i++) {
+							if (spamAction == SPAM_SPAM) {
+								SpamAssassin.trainMessageAsSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
+							} else if (spamAction == SPAM_HAM) {
+								SpamAssassin.trainMessageAsHam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]));
 							}
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
 						}
 					}
 					if (move) {

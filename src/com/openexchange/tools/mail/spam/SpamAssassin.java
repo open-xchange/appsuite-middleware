@@ -71,7 +71,7 @@ public class SpamAssassin {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpamAssassin.class);
-	
+
 	private static final String STR_SPAMASSASSIN = "SpamAssassin result: ";
 
 	// /**
@@ -98,7 +98,6 @@ public class SpamAssassin {
 	private static final String getCommand(final String command, final String paramList) {
 		final File location = getLocation(command);
 		if (location == null) {
-			// TODO: Throw exception
 			return null;
 		}
 		return new StringBuilder(location.getPath()).append(paramList.charAt(0) == ' ' ? "" : " ").append(paramList)
@@ -174,45 +173,38 @@ public class SpamAssassin {
 		return false;
 	}
 
-	public static final void trainMessageAsSpam(final Message msg) throws OXException {
+	/**
+	 * Adds given message to SpamAssassin's learn rules as <b>spam</b> in a
+	 * separate thread
+	 * 
+	 * @param msg -
+	 *            the message
+	 */
+	public static final void trainMessageAsSpam(final Message msg) {
 		trainMessage(msg, true);
 	}
 
-	public static final void trainMessageAsHam(final Message msg) throws OXException {
+	/**
+	 * Adds given message to SpamAssassin's learn rules as <b>ham</b> in a
+	 * separate thread
+	 * 
+	 * @param msg -
+	 *            the message
+	 */
+	public static final void trainMessageAsHam(final Message msg) {
 		trainMessage(msg, false);
 	}
-	
+
 	private static final String STR_SPAM = "Spam ";
-	
+
 	private static final String STR_HAM = "Ham ";
 
-	private static final void trainMessage(final Message msg, final boolean isSpam) throws OXException {
+	private static final void trainMessage(final Message msg, final boolean isSpam) {
 		try {
-			/*
-			 * Initialize process to execute command
-			 */
-			final CommandExecutor cmdExec = new CommandExecutor(isSpam ? getCommand(CMD_SA_LEARN, PARAM_SA_LEARN_SPAM)
-					: getCommand(CMD_SA_LEARN, PARAM_SA_LEARN_HAM));
-			/*
-			 * Send data
-			 */
-			cmdExec.send(getRawMessageInputStream(msg));
-			/*
-			 * Wait until process terminates. Get its exit code.
-			 */
-			cmdExec.waitFor();
-			/*
-			 * Read its result
-			 */
-			final String res = cmdExec.getOutputString();
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res).toString());
-			}
+			new TrainMessageThread(getRawMessageInputStream(msg), isSpam).start();
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 		} catch (MessagingException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (InterruptedException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -221,6 +213,62 @@ public class SpamAssassin {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		msg.writeTo(baos);
 		return new ByteArrayInputStream(baos.toByteArray());
+	}
+
+	private static class TrainMessageThread extends Thread {
+
+		private static final String NAME = "TrainMessageThread";
+
+		private static final String ERR_PREFIX = "Invocation of " + CMD_SA_LEARN + " failed: ";
+
+		private final InputStream msgSrc;
+
+		private final boolean isSpam;
+
+		private final String cmd;
+
+		public TrainMessageThread(final InputStream msgSrc, final boolean isSpam) {
+			super(NAME);
+			this.isSpam = isSpam;
+			this.cmd = isSpam ? getCommand(CMD_SA_LEARN, PARAM_SA_LEARN_SPAM) : getCommand(CMD_SA_LEARN,
+					PARAM_SA_LEARN_HAM);
+			this.msgSrc = msgSrc;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void run() {
+			try {
+				/*
+				 * Initialize process to execute command
+				 */
+				final CommandExecutor cmdExec = new CommandExecutor(cmd);
+				/*
+				 * Send data
+				 */
+				cmdExec.send(msgSrc);
+				/*
+				 * Wait until process terminates. Get its exit code.
+				 */
+				cmdExec.waitFor();
+				/*
+				 * Read its result
+				 */
+				final String res = cmdExec.getOutputString();
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res)
+							.toString());
+				}
+			} catch (IOException e) {
+				LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+			} catch (OXException e) {
+				LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+			} catch (InterruptedException e) {
+				LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+			}
+		}
+
 	}
 
 }

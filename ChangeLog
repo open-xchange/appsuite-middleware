@@ -1,3 +1,8 @@
+* 2007-03-22 - thorben.betten@open-xchange.com
+
+ - External process 'sa-learn' is invoked in a separate thread to avoid
+   possible server delay
+
 * 2007-03-21 - thorben.betten@open-xchange.com
 
  - Fixed move of folders which only hold folders (\NoSelect flag set)
