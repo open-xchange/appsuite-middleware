@@ -470,7 +470,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		retval = retval.replaceFirst("#TIME#", sentDate == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT,
 				session.getLocale()).format(sentDate));
 		retval = retval.replaceFirst("#SENDER#", sender);
-		final String nextLine = isHtml ? "<br>" : "\n";
+		final String nextLine = isHtml ? "<br><br>" : "\n\n";
 		return new StringBuilder(retval.length() + 3).append(nextLine).append(retval).append(nextLine).toString();
 	}
 

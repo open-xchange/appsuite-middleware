@@ -2,6 +2,7 @@
 
  - External process 'sa-learn' is invoked in a separate thread to avoid
    possible server delay
+ - Double break when quoting original message text on reply
 
 * 2007-03-21 - thorben.betten@open-xchange.com
 
