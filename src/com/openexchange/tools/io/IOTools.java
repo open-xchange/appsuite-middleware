@@ -60,7 +60,10 @@ public class IOTools {
 	
 	public static final void reallyBloodySkip(final InputStream is, long bytes) throws IOException {
 		while(bytes > 0) {
-			bytes -= is.skip(bytes);
+			long skipped = is.skip(bytes);
+			if(skipped<0)
+				return;
+			bytes -= skipped;
 		}
 	}
 }
