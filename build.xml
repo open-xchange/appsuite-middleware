@@ -298,6 +298,7 @@
         <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
         	<exclude name="**/*ResourceGroup*"/>
         	<classpath>
+        		<path refid="project.classpath"/>
             	<pathelement location="classes" />
             </classpath>
         </javac>
@@ -309,6 +310,7 @@
         <junit errorProperty="test.failed" failureProperty="test.failed">
             <classpath>
                 <pathelement location="classes" />
+            	<path refid="project.classpath" />
             </classpath>
 
             <sysproperty key="config" value="/opt/open-xchange/etc/admindaemon/AdminDaemon.properties"/>

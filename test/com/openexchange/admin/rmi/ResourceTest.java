@@ -61,6 +61,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 
 /**
@@ -72,6 +74,10 @@ public class ResourceTest extends AbstractTest{
     private OXResourceInterface getResourceClient() throws NotBoundException, MalformedURLException, RemoteException{
         return (OXResourceInterface)Naming.lookup(getRMIHostUrl()+OXResourceInterface.RMI_NAME);
     }
+    
+    public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(ResourceTest.class);
+	}
     
     @Test
     public void testCreate() throws Exception {

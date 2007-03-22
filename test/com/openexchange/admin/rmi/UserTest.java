@@ -65,6 +65,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 
 /**
@@ -84,6 +86,10 @@ public class UserTest extends AbstractTest {
     protected static OXUserInterface getUserClient() throws Exception{
         return (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
     }
+    
+    public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(UserTest.class);
+	}
     
     @Test
     public void testCreate() throws Exception {        
