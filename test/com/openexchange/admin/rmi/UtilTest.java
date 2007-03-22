@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -66,6 +67,8 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Vector;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 
 /**
@@ -77,6 +80,10 @@ public class UtilTest extends AbstractTest {
     private OXUtilInterface getUtilClient() throws NotBoundException, MalformedURLException, RemoteException{
         return (OXUtilInterface)Naming.lookup(getRMIHostUrl()+OXUtilInterface.RMI_NAME);
     }
+    
+    public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(UtilTest.class);
+	}
     
     public static Filestore getTestFilestoreObject(String name,String url) throws Exception{
         Filestore client_st = new Filestore();

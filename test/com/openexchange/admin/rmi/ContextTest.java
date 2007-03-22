@@ -56,8 +56,11 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 
+import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -79,6 +82,10 @@ public class ContextTest extends AbstractTest {
     public static Credentials DummyMasterCredentials(){
         return new Credentials("oxadminmaster","secret");
     }
+    
+    public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(ContextTest.class);
+	}
     
     @Test
     public void testChangeStorageData() throws Exception {
