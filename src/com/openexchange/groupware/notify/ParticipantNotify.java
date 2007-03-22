@@ -327,6 +327,10 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				break;
 			case Participant.RESOURCE :
 				p = getResourceParticipant(participant,ctx);
+				if(p == null) {
+					// Might be user added as resource (!)
+					p = getUserParticipant(participant, ctx);
+				}
 				if(p != null) {
 					addSingleParticipant(p, participantsList, sessionObj, receivers, all,true);
 				}
