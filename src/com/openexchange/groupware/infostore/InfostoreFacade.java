@@ -109,7 +109,7 @@ public interface InfostoreFacade extends Service{
 	public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException;
 
-	public void removeUser(int id, Context context) throws OXException;
+	public void removeUser(int id, Context context, SessionObject session) throws OXException;
 
 	public void unlock(int id, SessionObject sessionObj) throws OXException;
 

@@ -50,13 +50,16 @@
 package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tx.ThreadLocalDBProvider;
+import com.openexchange.server.DBPoolingException;
 
 public class InfostoreDelete implements DeleteListener {
 
@@ -70,10 +73,15 @@ public class InfostoreDelete implements DeleteListener {
 			return;
 		provider.setReadConnection(readCon);
 		provider.setWriteConnection(writeCon);
-		
 		try {
-			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext());
+			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), sqlDelEvent.getSession());
 		} catch (OXException e) {
+			throw new DeleteFailedException(e);
+		} catch (LdapException e) {
+			throw new DeleteFailedException(e);
+		} catch (DBPoolingException e) {
+			throw new DeleteFailedException(e);
+		} catch (SQLException e) {
 			throw new DeleteFailedException(e);
 		} finally {
 			provider.reset();

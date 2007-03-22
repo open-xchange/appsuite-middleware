@@ -87,6 +87,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	
 	private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
 	private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
+	private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
 	private String FIND_BY_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
 	private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
 	private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
@@ -112,6 +113,8 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		
 		UPDATE_BY_ID = UPDATE_BY_ID.replaceAll("%%tablename%%", tablename);
 		UPDATE_BY_ID = initAdditionalUPDATE_BY_ID(UPDATE_BY_ID);
+		
+		REASSIGN = REASSIGN.replaceAll("%%tablename%%", tablename);
 	}
 	
 	
@@ -296,11 +299,34 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			releaseReadConnection(ctx, con);
 		}
 	}
-	
 	@OXThrows(
 			category=Category.PROGRAMMING_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=5,
+			msg="Invalid SQL: '%s'"
+	)
+	public void reassign(Context ctx, int from, int to) throws OXException {
+		Connection writeCon = null;
+		PreparedStatement stmt = null;
+		try {
+			writeCon = getWriteConnection(ctx);
+			stmt = writeCon.prepareStatement(REASSIGN);
+			stmt.setInt(1, to);
+			stmt.setInt(2, from);
+			stmt.setInt(3, ctx.getContextId());
+			stmt.executeUpdate();
+		} catch (SQLException x) {
+			throw EXCEPTIONS.create(5,x,getStatement(stmt));
+		} finally {
+			close(stmt, null);
+			releaseWriteConnection(ctx, writeCon);
+		} 
+	}
+	
+	@OXThrows(
+			category=Category.PROGRAMMING_ERROR, 
+			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
+			exceptionId=6,
 			msg="Invalid SQL: '%s'"
 	)
 	protected void removeAllFromEntity(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
@@ -313,7 +339,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			stmt.setInt(2, entity);
 			stmt.executeUpdate();
 		} catch (SQLException x) {
-			throw EXCEPTIONS.create(5,x,getStatement(stmt));
+			throw EXCEPTIONS.create(6,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
 			releaseWriteConnection(ctx, writeCon);

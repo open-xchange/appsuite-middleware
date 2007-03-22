@@ -75,6 +75,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.event.EventClient;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.IDGenerator;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.Classes;
@@ -96,6 +98,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
@@ -105,6 +108,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.tx.Undoable;
+import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -1511,12 +1515,13 @@ public class DatabaseImpl extends DBService {
 
 	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
 	
-	public void removeUser(int id, Context ctx) throws OXException {
-		removePrivate(id,ctx);
-		assignToAdmin(id,ctx);
+	public void removeUser(int id, Context ctx, SessionObject session, EntityLockManager locks) throws OXException {
+		removePrivate(id,ctx,session);
+		assignToAdmin(id,ctx,session);
+		locks.transferLocks(ctx, id, ctx.getMailadmin());
 	}
 
-	private void removePrivate(int id, Context ctx) throws OXException {
+	private void removePrivate(int id, Context ctx, SessionObject session) throws OXException {
 		try {
 			List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
 			if(foldersWithPrivateItems.size() == 0)
@@ -1566,7 +1571,6 @@ public class DatabaseImpl extends DBService {
 			deleteVersionAction.setDocuments(versions);
 			deleteVersionAction.setQueryCatalog(catalog);
 			
-			
 			deleteVersionAction.perform();
 			try {
 				deleteDocumentAction.perform();
@@ -1578,7 +1582,7 @@ public class DatabaseImpl extends DBService {
 					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
 				}
 			}
-			
+						
 			FileStorage fs = getFileStorage(ctx);
 
 //			Remove the files. No rolling back from this point onward
@@ -1588,13 +1592,23 @@ public class DatabaseImpl extends DBService {
 					fs.deleteFile(version.getFilestoreLocation());
 			}
 			
+			EventClient ec = new EventClient(session);
+
+			for (DocumentMetadata m : documents) {
+				try {
+					ec.delete(m);
+				} catch (Exception e) {
+					LOG.error("", e);
+				}
+			}
+			
 		} catch (AbstractOXException x) {
 			throw new InfostoreException(x);
 		}
 		
 	}
 
-	private void assignToAdmin(int id, Context ctx) throws OXException {
+	private void assignToAdmin(int id, Context ctx, SessionObject session) throws OXException {
 		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = null;

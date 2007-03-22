@@ -1354,8 +1354,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return db.isFolderEmpty(folderId, ctx);
 	}
 
-	public void removeUser(int id, Context ctx) throws OXException {
-		db.removeUser(id, ctx);
+	public void removeUser(int id, Context ctx, SessionObject session) throws OXException {
+		db.removeUser(id, ctx, session, lockManager);
 	}
 
 	private int getId(Context context, Connection writeCon) throws SQLException {

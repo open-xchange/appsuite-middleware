@@ -177,7 +177,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		return id;
 	}
 
-	public void removeUser(int id, Context context) throws OXException {
+	public void removeUser(int id, Context context, SessionObject session) throws OXException {
 		
 	}
 

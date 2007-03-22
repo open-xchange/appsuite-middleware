@@ -3,6 +3,8 @@
  - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person
    if it can't be found. 
  - Bugfix # 6334. Error in size calculation for partial GET.   
+ - Bugfix # 6315. Transfer lock ownership to mailadmin when a user is deleted
+ - Throw delete events when removing infoitems during user delete to remove subordinate locks.
 
 * 2007-03-22 - thorben.betten@open-xchange.com
 

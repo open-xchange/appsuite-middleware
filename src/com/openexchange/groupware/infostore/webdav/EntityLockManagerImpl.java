@@ -98,4 +98,8 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig);
 	}
 
+	public void transferLocks(Context ctx, int from_user, int to_user) throws OXException {
+		reassign(ctx, from_user, to_user);
+	}
+
 }
