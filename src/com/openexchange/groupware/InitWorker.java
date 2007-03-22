@@ -62,6 +62,7 @@ import com.openexchange.event.EventConfig;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.event.EventQueue;
 import com.openexchange.groupware.attach.AttachmentCleaner;
+import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
@@ -188,6 +189,11 @@ public class InitWorker extends ComfireInitWorker {
 		PropertyCleaner propertyCleaner = new PropertyCleaner(InfostorePerformer.getInstance().getFactory().getFolderProperties(), InfostorePerformer.getInstance().getFactory().getInfoProperties());
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
+		
+		LOG.info("Adding LockCleaner");
+		LockCleaner lockCleaner = new LockCleaner(InfostorePerformer.getInstance().getFactory().getFolderLockManager(), InfostorePerformer.getInstance().getFactory().getInfoLockManager());
+		EventQueue.addFolderEvent(lockCleaner);
+		EventQueue.addInfostoreEvent(lockCleaner);
 		
 //		ComfireLogger.log("Starting AJP-Server...", ComfireLogger.INFO);
 //		AJPv13Server.startAJPServer();
