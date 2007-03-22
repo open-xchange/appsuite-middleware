@@ -1,6 +1,7 @@
 * 2007-03-22 - francisco.laguna@open-xchange.com
 
- - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person if it can't be found. 
+ - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person
+   if it can't be found. 
    
 
 * 2007-03-22 - thorben.betten@open-xchange.com
