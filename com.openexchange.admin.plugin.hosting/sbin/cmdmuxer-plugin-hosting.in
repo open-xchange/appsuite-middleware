@@ -144,5 +144,7 @@ case "${BNAME}" in
 esac
 
 JAVAMAIN="com.openexchange.admin.console.${ACTION}"
-
-$JAVA_BIN -classpath $LIBPATH/ox_admin_plugin_hosting.jar:$LIBPATH/ox_admindaemon.jar:$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*
+ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
+    echo -n "${jar}:"
+    done)
+$JAVA_BIN -classpath ${ADMINCP}$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*

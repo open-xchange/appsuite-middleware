@@ -85,5 +85,7 @@ esac
 MODULE=${CMDARR[1]}
 
 JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"
-
-$JAVA_BIN -classpath $LIBPATH/ox_admindaemon.jar:$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*
+ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
+    echo -n "${jar}:"
+    done)
+$JAVA_BIN -classpath ${ADMINCP}$LIBPATH/commons-cli-1.0.jar $JAVAMAIN $*
