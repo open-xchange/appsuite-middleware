@@ -2,7 +2,7 @@
 
  - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person
    if it can't be found. 
-   
+ - Bugfix # 6334. Error in size calculation for partial GET.   
 
 * 2007-03-22 - thorben.betten@open-xchange.com
 
