@@ -17,6 +17,8 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.api2.OXException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -643,17 +645,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		
 		public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 1;
-			throw new OXPermissionException();
+			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 2;
-			throw new OXPermissionException();
+			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 3;
-			throw new OXPermissionException();
+			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void assertMayAttach(){
