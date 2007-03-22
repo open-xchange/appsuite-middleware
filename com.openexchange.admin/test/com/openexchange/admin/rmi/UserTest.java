@@ -568,7 +568,9 @@ public class UserTest extends AbstractTest {
         final ArrayList<OXUserExtensionInterface> bexts = b.getExtensions();
         if (aexts.size() == bexts.size()) {
             for (int i = 0; i < aexts.size(); i++) {
-                assertTrue(aexts.get(i).equals(bexts.get(i)));
+                final OXUserExtensionInterface aext = aexts.get(i);
+                final OXUserExtensionInterface bext = bexts.get(i);
+                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
             }
         }
     }
