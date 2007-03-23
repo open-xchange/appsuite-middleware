@@ -741,7 +741,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
 
                 stmt.setInt(7, contact_id);
                 for (int i = 8; i < 15; i++) {
-                    stmt.setInt(i, java.sql.Types.INTEGER);
+                    stmt.setNull(i, java.sql.Types.INTEGER);
                 }
                 for (int i = 0; i < methodlist2.size(); i++) {
                     final int overhead = 15; // How much the index goes ahead
