@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -149,8 +150,8 @@ public final class GroupsWithGroupZero extends GroupStorage {
             throw new LdapException(e);
         }
         final Matcher match = pat.matcher(zero.getDisplayName());
-        final List<Group> groups = Arrays
-            .asList(delegate.searchGroups(pattern));
+        final List<Group> groups = new ArrayList<Group>();
+        groups.addAll(Arrays.asList(delegate.searchGroups(pattern)));
         if (match.find()) {
             groups.add(zero);
         }
