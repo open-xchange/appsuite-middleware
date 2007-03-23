@@ -74,6 +74,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -1221,6 +1222,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 rs3.close();
                 stmt.close();
 
+                // add all extensions supplied to getData
+                for(OXUserExtensionInterface i : user.getExtensions() ){
+                    newuser.addExtension(i);
+                }
                 userlist.add(newuser);
             }
 
