@@ -2803,8 +2803,18 @@ public class MailInterfaceImpl implements MailInterface {
 						 * with newer one.
 						 */
 						originalMsg.setFlags(FLAGS_DELETED, true);
-						originalMsgFolder.close(true);
-						mailInterfaceMonitor.changeNumActive(false);
+						try {
+							originalMsgFolder.getProtocol().uidexpunge(
+									IMAPUtils.toUIDSet(new long[] { mailId.getMsgUID() }));
+						} catch (ProtocolException e) {
+							originalMsgFolder.close(true);
+							mailInterfaceMonitor.changeNumActive(false);
+						} finally {
+							if (originalMsgFolder.isOpen()) {
+								originalMsgFolder.close(false);
+								mailInterfaceMonitor.changeNumActive(false);
+							}
+						}
 						/*
 						 * Reset message reference cause not needed anymore
 						 */
@@ -2901,6 +2911,16 @@ public class MailInterfaceImpl implements MailInterface {
 					final long start = System.currentTimeMillis();
 					try {
 						draftFolder.appendMessages(new Message[] { newSMTPMsg });
+						/*
+						 * If the new message arrives during the period between
+						 * when you last issue a command to the IMAP server and
+						 * when you call getMessageByUID to fetch the new
+						 * message, the JavaMail code won't have seen the
+						 * notification of the new message yet. A call to (e.g.)
+						 * getMessageCount will allow the server to send the
+						 * notification of the new message.
+						 */
+						draftFolder.getMessageCount();
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);

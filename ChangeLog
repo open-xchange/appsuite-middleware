@@ -5,6 +5,8 @@
 * 2007-03-23 - thorben.betten@open-xchange.com
 
  - Fixed counting of established IMAP connections
+ - Try to fix the bug related to fetch a newly created message with
+   getMessageByUID() 
 
 * 2007-03-22 - francisco.laguna@open-xchange.com
 

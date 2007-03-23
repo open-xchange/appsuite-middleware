@@ -98,7 +98,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
 	private final SessionObject session;
-	
+
 	private final StringHelper strHelper;
 
 	private final UserSettingMail usm;
@@ -110,9 +110,9 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	private Date sentDate;
 
 	private String replyText;
-	
+
 	private final StringBuilder textBuilder;
-	
+
 	private final StringBuilder nestedTextBuilder;
 
 	private boolean isHtml;
@@ -136,7 +136,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleFrom(javax.mail.internet.InternetAddress[])
 	 */
-	public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
+	public boolean handleFrom(final InternetAddress[] fromAddrs) {
 		if (fromAddrs != null) {
 			sender = MessageUtils.addr2String(fromAddrs);
 		}
@@ -149,8 +149,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleRecipient(javax.mail.Message.RecipientType,
 	 *      javax.mail.internet.InternetAddress[])
 	 */
-	public boolean handleRecipient(final RecipientType recipientType, final InternetAddress[] recipientAddrs)
-			throws OXException {
+	public boolean handleRecipient(final RecipientType recipientType, final InternetAddress[] recipientAddrs) {
 		return true;
 	}
 
@@ -159,7 +158,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleSubject(java.lang.String)
 	 */
-	public boolean handleSubject(final String subject) throws OXException {
+	public boolean handleSubject(final String subject) {
 		return true;
 	}
 
@@ -168,7 +167,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleSentDate(java.util.Date)
 	 */
-	public boolean handleSentDate(final Date sentDate) throws OXException {
+	public boolean handleSentDate(final Date sentDate) {
 		this.sentDate = (Date) sentDate.clone();
 		return true;
 	}
@@ -178,7 +177,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleReceivedDate(java.util.Date)
 	 */
-	public boolean handleReceivedDate(final Date receivedDate) throws OXException {
+	public boolean handleReceivedDate(final Date receivedDate) {
 		return true;
 	}
 
@@ -187,7 +186,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleHeaders(java.util.Map)
 	 */
-	public boolean handleHeaders(final Map<String, String> headerMap) throws OXException {
+	public boolean handleHeaders(final Map<String, String> headerMap) {
 		return true;
 	}
 
@@ -196,7 +195,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleSystemFlags(javax.mail.Flags.Flag[])
 	 */
-	public boolean handleSystemFlags(final Flag[] systemFlags) throws OXException {
+	public boolean handleSystemFlags(final Flag[] systemFlags) {
 		return true;
 	}
 
@@ -205,7 +204,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleUserFlags(java.lang.String[])
 	 */
-	public boolean handleUserFlags(final String[] userFlags) throws OXException {
+	public boolean handleUserFlags(final String[] userFlags) {
 		return true;
 	}
 
@@ -216,7 +215,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 *      java.lang.String, int, java.lang.String, java.lang.String)
 	 */
 	public boolean handleInlinePlainText(final String plainTextContent, final String baseContentType, final int size,
-			final String fileName, final String id) throws OXException {
+			final String fileName, final String id) {
 		textFound = true;
 		if (isAlternative && usm.isDisplayHtmlInlineContent()) {
 			/*
@@ -242,7 +241,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 *      java.lang.String, int, java.lang.String, java.lang.String)
 	 */
 	public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final String baseContentType,
-			final int size, final String fileName, final String id) throws OXException {
+			final int size, final String fileName, final String id) {
 		return handleInlinePlainText(decodedTextContent, baseContentType, size, fileName, id);
 	}
 
@@ -252,7 +251,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleInlineUUEncodedAttachment(com.openexchange.tools.mail.UUEncodedPart,
 	 *      java.lang.String)
 	 */
-	public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
+	public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) {
 		return true;
 	}
 
@@ -310,7 +309,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleSpecialPart(javax.mail.Part,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final Part part, final String baseContentType, final String id) throws OXException {
+	public boolean handleSpecialPart(final Part part, final String baseContentType, final String id) {
 		return true;
 	}
 
@@ -320,8 +319,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleImagePart(javax.mail.Part,
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public boolean handleImagePart(final Part part, final String imageCID, final String baseContentType, final String id)
-			throws OXException {
+	public boolean handleImagePart(final Part part, final String imageCID, final String baseContentType, final String id) {
 		return true;
 	}
 
@@ -331,14 +329,14 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleMultipart(javax.mail.Multipart,
 	 *      int, java.lang.String)
 	 */
-	public boolean handleMultipart(final Multipart mp, final int bodyPartCount, final String id) throws OXException {
+	public boolean handleMultipart(final Multipart mp, final int bodyPartCount, final String id) {
 		/*
 		 * Determine if message is of MIME type multipart/alternative
 		 */
 		isAlternative = (mp.getContentType().regionMatches(true, 0, "multipart/alternative", 0, 21) && bodyPartCount >= 2);
 		return true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -361,8 +359,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 				 */
 				final Message attachedMsg = new MimeMessage(mailSession, part.getInputStream());
 				final ReplyTextMessageHandler msgHandler = new ReplyTextMessageHandler(session, msgUID);
-				new MessageDumper(session)
-						.dumpMessage(attachedMsg, msgHandler, id);
+				new MessageDumper(session).dumpMessage(attachedMsg, msgHandler, id);
 				this.nestedTextBuilder.append(msgHandler.getReplyText(true));
 				this.isHtml |= msgHandler.isHtml;
 			}
@@ -391,12 +388,13 @@ public class ReplyTextMessageHandler implements MessageHandler {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleMessageEnd()
 	 */
-	public void handleMessageEnd(final Message msg) throws OXException {
+	public void handleMessageEnd(final Message msg) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("handleMessageEnd()");
 		}
@@ -409,8 +407,8 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	public String getReplyText() throws OXException {
 		return getReplyText(true);
 	}
-	
-	private final String getReplyText(final boolean appendReplyPrefix) throws OXException {
+
+	private final String getReplyText(final boolean appendReplyPrefix) {
 		if (replyText != null) {
 			return replyText;
 		}
@@ -437,8 +435,8 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		return (replyText = new StringBuilder().append(replyPrefix).append(replyTextBody).append(nestedTextBuilder)
 				.toString());
 	}
-	
-	private static final String quoteText(final String textContent) throws OXException {
+
+	private static final String quoteText(final String textContent) {
 		return textContent.replaceAll("(?m)^", "> ");
 	}
 
