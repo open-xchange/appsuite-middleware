@@ -514,7 +514,6 @@ public class MailInterfaceImpl implements MailInterface {
 			final long start = System.currentTimeMillis();
 			try {
 				imapStore = imapCon.connect();
-				mailInterfaceMonitor.changeNumActive(true);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (AuthenticationFailedException e) {

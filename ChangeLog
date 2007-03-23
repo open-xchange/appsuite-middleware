@@ -1,3 +1,7 @@
+* 2007-03-23 - thorben.betten@open-xchange.com
+
+ - Fixed counting of established IMAP connections
+
 * 2007-03-22 - francisco.laguna@open-xchange.com
 
  - Bugfix # 5485. ParticipantNotify tries to resolve a resource to a person
