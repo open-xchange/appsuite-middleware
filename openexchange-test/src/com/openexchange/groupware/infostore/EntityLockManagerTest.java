@@ -111,5 +111,22 @@ public class EntityLockManagerTest extends TestCase {
 		
 	}
 	
+	public void testTransferLocks() throws Exception {
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		lockManager.transferLocks(ctx, user.getId(), user.getId()+1);
+		
+		List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		assertEquals("locks are assigned to dest", 3,locks.size());
+		for(Lock lock : locks) {
+			assertEquals(user.getId()+1, lock.getOwner());
+		}
+		
+	}
+	
 	
 }
