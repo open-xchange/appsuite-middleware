@@ -187,6 +187,7 @@
             <fileset dir="../" defaultexcludes="yes">
 				<include name="${plugdocpath}/*Interface*"/>
 				<include name="${plugdocpath}/dataobjects/*"/>
+				<include name="${plugdocpath}/extensions/*"/>
             	<exclude name="${plugdocpath}/*ResourceGroup*"/>
             </fileset>
             <classpath>
