@@ -50,6 +50,7 @@ package com.openexchange.admin.console;
 
 import java.rmi.NotBoundException;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -130,6 +131,16 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
     
+    protected Option getShortLongOptWithDefault(final String shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
+        final StringBuilder desc = new StringBuilder();
+        desc.append(description);
+        desc.append(". Default: ");
+        desc.append(defaultvalue);
+        final Option retval = new Option(shortopt, longopt, hasarg, desc.toString());
+        retval.setRequired(required);
+        return retval;
+    }
+
     protected Option getContextOption() {
         final Option retval = getShortLongOpt(OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);
         retval.setArgName("Context ID");
@@ -159,7 +170,41 @@ public abstract class BasicCommandlineOptions {
         opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
         return  opt;
     }
+
+    protected Option addArgName(final Option option, final String argname) {
+        final Option retval = option;
+        retval.setArgName(argname);
+        return retval;
+    }
     
+    protected Option addDefaultArgName(final Option option) {
+        return addArgName(option, option.getLongOpt());
+    }
+
+    protected int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
+        if (null != test) {
+            return Integer.parseInt(test);
+        } else {
+            return defaultvalue;
+        }
+    }
+    
+    protected String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
+        if (null != test) {
+            return test;
+        } else {
+            return defaultvalue;
+        }
+    }
+
+    protected String verifySetAndGetOption(final CommandLine cmd, final String optionname) {
+        if (cmd.hasOption(optionname)) {
+            return cmd.getOptionValue(optionname);
+        } else {
+            return null;
+        }
+    }
+
     
     /**
      * 
