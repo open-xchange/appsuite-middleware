@@ -501,10 +501,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling change for plugin: " + bundlename);
+                                log.info("Calling getData for plugin: " + bundlename);
                                 retusers = oxuser.getData(ctx, retusers, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                log.error("Error while calling getData for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }

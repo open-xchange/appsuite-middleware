@@ -147,12 +147,13 @@ public abstract class OXUserStorageInterface {
      * Retrieve user objects for a range of users identified by User.getUsername().
      *
      * @param context Context object.
-     * @param users User[] with users to get data for.
+     * @param users User[] with users to get data for. Attention: These objects will be cloned by a shallow copy, so
+     * non native attributes will point to the same reference after this method
      * @return User[] containing result objects.     
      * @throws RemoteException
      *
      */
-    public abstract User[] getData(final Context ctx,final User[] users) throws StorageException;
+    public abstract User[] getData(final Context ctx, User[] users) throws StorageException;
     
     /**
      * Manipulate user data within the given context.

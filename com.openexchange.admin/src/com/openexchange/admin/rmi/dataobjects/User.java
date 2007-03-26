@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * @author cutmasta
  * @author d7
  */
-public class User implements Serializable {
+public class User implements Serializable, Cloneable {
     /**
      * For serialization
      */
@@ -2206,6 +2206,11 @@ public class User implements Serializable {
         return ret.toString();
     }
 
+    @Override
+    public User clone() throws CloneNotSupportedException {
+        return (User) super.clone();
+    }
+    
     private void init() {
         this.extensions = new ArrayList<OXUserExtensionInterface>();
         this.id = null;
@@ -2344,5 +2349,6 @@ public class User implements Serializable {
         }
         this.passwordMech = passwordMech;
     }
+    
     
 }
