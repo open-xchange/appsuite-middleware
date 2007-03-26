@@ -1,3 +1,8 @@
+* 2007-03-26 - thorben.betten@open-xchange.com
+
+ - Fixed possible ArrayIndexOutOfBoundsException when requesting next UID
+   on empty folder
+
 * 2007-03-23 - francisco.laguna@open-xchange.com
 
  - Merged marcus' bugfix for group search UnsupportedOperationException.

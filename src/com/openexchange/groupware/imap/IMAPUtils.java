@@ -744,6 +744,12 @@ public class IMAPUtils {
 				String retval = null;
 				try {
 					if (response.isOK()) {
+						if (r.length == 1) {
+							/*
+							 * Empty folder
+							 */
+							return Long.valueOf(1L);
+						}
 						final IMAPResponse ir = (IMAPResponse) r[r.length - 2];
 						/*
 						 * "* 243 FETCH (UID 338)"
