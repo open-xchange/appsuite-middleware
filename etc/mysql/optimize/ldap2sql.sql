@@ -40,8 +40,6 @@ CREATE TABLE user (
     gidNumber INT4 UNSIGNED,
     homeDirectory VARCHAR(128),
     loginShell VARCHAR(128),
-    amavisPolicyId INT4 UNSIGNED,
-    amavisPriority INT4 UNSIGNED,
     PRIMARY KEY (cid, id),
     INDEX (mail)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
