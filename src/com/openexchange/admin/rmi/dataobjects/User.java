@@ -53,6 +53,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -2169,6 +2170,24 @@ public class User implements Serializable, Cloneable {
             this.email1set = true;
         }
         this.email1 = email1;
+    }
+
+
+    public Hashtable<String, Object> toHashtable() {
+        final Hashtable<String, Object> ht = new Hashtable<String, Object>();
+        
+        for (final Field f : this.getClass().getDeclaredFields()) {
+            try {
+                final Object ob = f.get(this);
+                final String tname = f.getName();
+                if (ob != null && !tname.equals("serialVersionUID") && !tname.equals("extensions") && !tname.endsWith("set")) {
+                    ht.put(tname, ob);
+                }
+            } catch (final IllegalArgumentException e) {
+            } catch (final IllegalAccessException e) {
+            }
+        }
+        return ht;
     }
 
     @Override
