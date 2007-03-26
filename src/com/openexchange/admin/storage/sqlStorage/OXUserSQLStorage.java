@@ -265,7 +265,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
     /**
      * 
      */
-    abstract public User[] getData(final Context ctx, final User[] users) throws StorageException;
+    abstract public User[] getData(final Context ctx, User[] users) throws StorageException;
 
     /**
      * 

@@ -74,7 +74,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -1091,7 +1090,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
     }
 
     @Override
-    public User[] getData(final Context ctx, final User[] users) throws StorageException {
+    public User[] getData(final Context ctx, User[] users) throws StorageException {
         final int context_id = ctx.getIdAsInt();
         final Class c = User.class;
         final Method[] theMethods = c.getMethods();
@@ -1134,7 +1133,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             read_ox_con = cache.getREADConnectionForContext(context_id);
             for (final User user : users) {
                 int user_id = user.getId();
-                final User newuser = new User(user_id);
+                final User newuser = user.clone();
                 String username = user.getUsername();
                 if (-1 != user_id) {
                     if (null == username) {
@@ -1222,10 +1221,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 rs3.close();
                 stmt.close();
 
-                // add all extensions supplied to getData
-                for(OXUserExtensionInterface i : user.getExtensions() ){
-                    newuser.addExtension(i);
-                }
                 userlist.add(newuser);
             }
 
@@ -1243,6 +1238,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             log.error("Error",e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
+            log.error("Error",e);
+            throw new StorageException(e);
+        } catch (final CloneNotSupportedException e) {
             log.error("Error",e);
             throw new StorageException(e);
         } finally {
