@@ -188,110 +188,117 @@ public class IMAPUtils {
 		}
 
 		public final static void createHeaderHandlers(final FetchItemHandler itemHandler, final InternetHeaders h) {
-			final Map<String, HeaderHandler> tmp = new HashMap<String, HeaderHandler>();
+			itemHandler.hdrHandlers = new HashMap<String, HeaderHandler>();
 			for (final Enumeration e = h.getAllHeaders(); e.hasMoreElements();) {
 				final Header hdr = (Header) e.nextElement();
-				if (hdr.getName().equals(HDR_FROM)) {
-					tmp.put(HDR_FROM, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setFrom(InternetAddress.parse(hdrValue, false));
-							} catch (AddressException e) {
-								msg.setHeader(HDR_FROM, hdrValue);
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_TO)) {
-					tmp.put(HDR_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setRecipients(RecipientType.TO, InternetAddress.parse(hdrValue, false));
-							} catch (AddressException e) {
-								msg.setHeader(HDR_TO, hdrValue);
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_CC)) {
-					tmp.put(HDR_CC, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setRecipients(RecipientType.CC, InternetAddress.parse(hdrValue, false));
-							} catch (AddressException e) {
-								msg.setHeader(HDR_CC, hdrValue);
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_BCC)) {
-					tmp.put(HDR_BCC, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setRecipients(RecipientType.BCC, InternetAddress.parse(hdrValue, false));
-							} catch (AddressException e) {
-								msg.setHeader(HDR_BCC, hdrValue);
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_REPLY_TO)) {
-					tmp.put(HDR_REPLY_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setReplyTo(InternetAddress.parse(hdrValue, true));
-							} catch (AddressException e) {
-								msg.setHeader(HDR_REPLY_TO, hdrValue);
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_SUBJECT)) {
-					tmp.put(HDR_SUBJECT, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setSubject(MimeUtility.decodeText(hdrValue));
-							} catch (UnsupportedEncodingException e) {
-								LOG.error(e.getMessage(), e);
-								msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
-							} catch (MessagingException e) {
-								LOG.error(e.getMessage(), e);
-								msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_DATE)) {
-					tmp.put(HDR_DATE, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							try {
-								msg.setSentDate(mailDateFormat.parse(hdrValue));
-							} catch (ParseException e) {
-								throw new MessagingException(e.getMessage());
-							}
-						}
-					});
-				} else if (hdr.getName().equals(HDR_X_PRIORITY)) {
-					tmp.put(HDR_X_PRIORITY, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							msg.setHeader(HDR_X_PRIORITY, hdrValue);
-						}
-					});
-				} else if (hdr.getName().equals(HDR_MESSAGE_ID)) {
-					tmp.put(HDR_MESSAGE_ID, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							msg.setHeader(HDR_MESSAGE_ID, hdrValue);
-						}
-					});
-				} else if (hdr.getName().equals(HDR_IN_REPLY_TO)) {
-					tmp.put(HDR_IN_REPLY_TO, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							msg.setHeader(HDR_IN_REPLY_TO, hdrValue);
-						}
-					});
-				} else if (hdr.getName().equals(HDR_REFERENCES)) {
-					tmp.put(HDR_REFERENCES, new HeaderHandler() {
-						public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
-							msg.setHeader(HDR_REFERENCES, hdrValue);
-						}
-					});
-				}
+				addHeaderHandlers(itemHandler, hdr);
 			}
-			itemHandler.hdrHandlers = tmp;
+		}
+		
+		public final static boolean addHeaderHandlers(final FetchItemHandler itemHandler, final Header hdr) {
+			boolean retval = true;
+			if (hdr.getName().equals(HDR_FROM)) {
+				itemHandler.hdrHandlers.put(HDR_FROM, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setFrom(InternetAddress.parse(hdrValue, false));
+						} catch (AddressException e) {
+							msg.setHeader(HDR_FROM, hdrValue);
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_TO)) {
+				itemHandler.hdrHandlers.put(HDR_TO, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setRecipients(RecipientType.TO, InternetAddress.parse(hdrValue, false));
+						} catch (AddressException e) {
+							msg.setHeader(HDR_TO, hdrValue);
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_CC)) {
+				itemHandler.hdrHandlers.put(HDR_CC, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setRecipients(RecipientType.CC, InternetAddress.parse(hdrValue, false));
+						} catch (AddressException e) {
+							msg.setHeader(HDR_CC, hdrValue);
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_BCC)) {
+				itemHandler.hdrHandlers.put(HDR_BCC, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setRecipients(RecipientType.BCC, InternetAddress.parse(hdrValue, false));
+						} catch (AddressException e) {
+							msg.setHeader(HDR_BCC, hdrValue);
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_REPLY_TO)) {
+				itemHandler.hdrHandlers.put(HDR_REPLY_TO, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setReplyTo(InternetAddress.parse(hdrValue, true));
+						} catch (AddressException e) {
+							msg.setHeader(HDR_REPLY_TO, hdrValue);
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_SUBJECT)) {
+				itemHandler.hdrHandlers.put(HDR_SUBJECT, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setSubject(MimeUtility.decodeText(hdrValue));
+						} catch (UnsupportedEncodingException e) {
+							LOG.error(e.getMessage(), e);
+							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+						} catch (MessagingException e) {
+							LOG.error(e.getMessage(), e);
+							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_DATE)) {
+				itemHandler.hdrHandlers.put(HDR_DATE, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						try {
+							msg.setSentDate(mailDateFormat.parse(hdrValue));
+						} catch (ParseException e) {
+							throw new MessagingException(e.getMessage());
+						}
+					}
+				});
+			} else if (hdr.getName().equals(HDR_X_PRIORITY)) {
+				itemHandler.hdrHandlers.put(HDR_X_PRIORITY, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						msg.setHeader(HDR_X_PRIORITY, hdrValue);
+					}
+				});
+			} else if (hdr.getName().equals(HDR_MESSAGE_ID)) {
+				itemHandler.hdrHandlers.put(HDR_MESSAGE_ID, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						msg.setHeader(HDR_MESSAGE_ID, hdrValue);
+					}
+				});
+			} else if (hdr.getName().equals(HDR_IN_REPLY_TO)) {
+				itemHandler.hdrHandlers.put(HDR_IN_REPLY_TO, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						msg.setHeader(HDR_IN_REPLY_TO, hdrValue);
+					}
+				});
+			} else if (hdr.getName().equals(HDR_REFERENCES)) {
+				itemHandler.hdrHandlers.put(HDR_REFERENCES, new HeaderHandler() {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+						msg.setHeader(HDR_REFERENCES, hdrValue);
+					}
+				});
+			} else {
+				retval = false;
+			}
+			return retval;
 		}
 
 		/**
@@ -2100,8 +2107,13 @@ public class IMAPUtils {
 						}
 						for (final Enumeration e = h.getAllHeaders(); e.hasMoreElements();) {
 							final Header hdr = (Header) e.nextElement();
-							final HeaderHandler hdrHandler = this.getHdrHandler(hdr.getName());
-							if (hdrHandler != null) {
+							HeaderHandler hdrHandler = this.getHdrHandler(hdr.getName());
+							if (hdrHandler == null) {
+								if (FetchItemHandler.addHeaderHandlers(this, hdr)) {
+									hdrHandler = this.getHdrHandler(hdr.getName());
+									hdrHandler.handleHeader(hdr.getValue(), msg);
+								}
+							} else {
 								hdrHandler.handleHeader(hdr.getValue(), msg);
 							}
 						}
