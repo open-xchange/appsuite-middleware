@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -2181,14 +2182,14 @@ public class User implements Serializable, Cloneable {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public static User hashtableToUser(Hashtable<String, Object> ht) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException  {
+    public static User hashmapToUser(HashMap<String, Object> hm) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException  {
         User u = new User();
         for(Method m : u.getClass().getMethods()) {
             String mname = m.getName();
             if(mname.startsWith("set")) {
                 String keyName = mname.substring(3).toLowerCase();
-                if( ht.containsKey(keyName)) {
-                    m.invoke(u, ht.get(keyName));
+                if( hm.containsKey(keyName)) {
+                    m.invoke(u, hm.get(keyName));
                 }
             }
         }
