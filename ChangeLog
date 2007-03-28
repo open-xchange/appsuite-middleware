@@ -12,6 +12,8 @@
    header
  - Fixed bug #6566: String constant moved from class MailStrings to avoid
    its translation.
+ - Fixed bug #6466: Discarding cookies which cause a IllegalArgumentException
+   when creating corresponding instance of javax.servlet.http.Cookie
 
 * 2007-03-26 - thorben.betten@open-xchange.com
 

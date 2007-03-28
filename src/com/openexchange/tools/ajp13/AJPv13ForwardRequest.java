@@ -142,6 +142,8 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		processForwardRequest(ajpRequestHandler);
 	}
+	
+	private static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";
 
 	/**
 	 * Processes an incoming AJP Forward Package which contains all header data
@@ -241,10 +243,9 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		/*
 		 * Determine if content type inidicates form data
 		 */
-		if (servletRequest.containsHeader(CONTENT_TYPE)) {
-			if ("application/x-www-form-urlencoded".regionMatches(0, servletRequest.getHeader(CONTENT_TYPE), 0, 33)) {
-				ajpRequestHandler.setFormData(true);
-			}
+		if (servletRequest.containsHeader(CONTENT_TYPE)
+				&& CONTENT_TYPE_FORM.regionMatches(0, servletRequest.getHeader(CONTENT_TYPE), 0, 33)) {
+			ajpRequestHandler.setFormData(true);
 		}
 		/*
 		 * End of payload data NOT reached
@@ -349,7 +350,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 				 * drafted by Netscape
 				 */
 				int version = 0;
-				for (int j = 0; j < cookies.length; j++) {
+				NextCookie: for (int j = 0; j < cookies.length; j++) {
 					final Cookie c;
 					final String[] cookieNameValuePair = cookies[j].trim().split("=");
 					if (cookieNameValuePair.length == 1) {
@@ -372,7 +373,14 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 							}
 						}
 					} else {
-						c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
+						try {
+							c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
+						} catch (IllegalArgumentException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("Discarding cookie: " + e.getMessage(), e);
+							}
+							continue NextCookie;
+						}
 						c.setVersion(version);
 						cookieList.add(c);
 					}
