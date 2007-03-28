@@ -62,11 +62,11 @@ import java.util.ArrayList;
  */
 public class CachedCalendarIterator implements SearchIterator {
     
-    private ArrayList<CalendarDataObject> list;
-    private SearchIterator non_cached_iterator;
-    private boolean cache = false;
-    private int counter = 0;
-    private boolean closed = false;
+    private final ArrayList<CalendarDataObject> list;
+    private final SearchIterator non_cached_iterator;
+    private final boolean cache;
+    private int counter;
+    private boolean closed;
     
     public CachedCalendarIterator(SearchIterator non_cached_iterator) throws SearchIteratorException, OXException {
         list = new ArrayList<CalendarDataObject>(16);
@@ -80,10 +80,9 @@ public class CachedCalendarIterator implements SearchIterator {
     public boolean hasNext() {
         if (!cache) {
             return non_cached_iterator.hasNext();
-        } else {
-            if (list.size() > 0 && counter < list.size()) {
-                return true;
-            }
+        }
+        if (list.size() > 0 && counter < list.size()) {
+            return true;
         }
         return false;
     }
@@ -91,15 +90,14 @@ public class CachedCalendarIterator implements SearchIterator {
     public Object next() throws SearchIteratorException, OXException {
         if (!cache) {
             return non_cached_iterator.next();
-        } else {
-            if (hasNext()) {
-                return list.get(counter++);
-            }
+        }
+        if (hasNext()) {
+            return list.get(counter++);
         }
         return null;
     }
     
-    public void close() throws SearchIteratorException {
+    public final void close() throws SearchIteratorException {
         if (closed) {
             return;
         }

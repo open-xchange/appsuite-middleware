@@ -147,18 +147,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	public static final InfostoreQueryCatalog QUERIES = new InfostoreQueryCatalog();
 
-	private DatabaseImpl db = new DatabaseImpl();
+	private final DatabaseImpl db = new DatabaseImpl();
 
-	private InfostoreSecurityImpl security = new InfostoreSecurityImpl();
+	private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 
-	private EntityLockManager lockManager = new EntityLockManagerImpl(
+	private final EntityLockManager lockManager = new EntityLockManagerImpl(
 			"infostore_lock");
 
-	private ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
+	private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
 
-	private ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
+	private final ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
 	public InfostoreFacadeImpl() {
+		super();
 	}
 
 	public InfostoreFacadeImpl(DBProvider provider) {

@@ -94,11 +94,11 @@ import com.openexchange.groupware.tx.TransactionException;
 )
 public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource {
 
-	private InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DocumentMetadataResource.class);
+	private final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DocumentMetadataResource.class);
 	
-	private Log LOG = LogFactory.getLog(DocumentMetadataResource.class);
+	private static final Log LOG = LogFactory.getLog(DocumentMetadataResource.class);
 	
-	private InfostoreWebdavFactory factory = null;
+	private final InfostoreWebdavFactory factory;
 
 	private boolean exists;
 
@@ -109,19 +109,19 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	// State
 	private final Set<Metadata> setMetadata = new HashSet<Metadata>();
 	
-	private PropertyHelper propertyHelper;
+	private final PropertyHelper propertyHelper;
 
 	private String url;
 	
-	private SessionHolder sessionHolder;
+	private final SessionHolder sessionHolder;
 	
-	private InfostoreFacade database;
+	private final InfostoreFacade database;
 	
 	private boolean loadedMetadata;
 
 	private boolean existsInDB;
 
-	private LockHelper lockHelper;
+	private final LockHelper lockHelper;
 
 	private boolean metadataChanged;
 

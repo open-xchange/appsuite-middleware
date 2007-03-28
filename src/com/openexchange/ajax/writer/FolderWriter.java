@@ -205,7 +205,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.ID);
 						}
@@ -265,7 +265,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.FOLDER_ID);
 						}
@@ -313,7 +313,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBFOLDERS);
 						}
@@ -360,7 +360,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException, OXException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.PERMISSIONS);
 						}
@@ -398,7 +398,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUMMARY);
 						}
@@ -414,7 +414,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.STANDARD_FOLDER);
 						}
@@ -426,7 +426,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.TOTAL);
 						}
@@ -438,7 +438,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.NEW);
 						}
@@ -450,7 +450,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.UNREAD);
 						}
@@ -462,7 +462,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.DELETED);
 						}
@@ -474,7 +474,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.CAPABILITIES);
 						}
@@ -490,7 +490,7 @@ public class FolderWriter extends DataWriter {
 				retval[i] = new IMAPFolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
-							final int module) throws JSONException, OXException, MessagingException {
+							final int module) throws JSONException, OXException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
 						}
@@ -961,7 +961,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.SUMMARY:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUMMARY);
 						}
@@ -972,7 +972,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.STANDARD_FOLDER:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.STANDARD_FOLDER);
 						}
@@ -983,7 +983,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.TOTAL:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.TOTAL);
 						}
@@ -994,7 +994,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.NEW:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.NEW);
 						}
@@ -1005,7 +1005,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.UNREAD:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.UNREAD);
 						}
@@ -1016,7 +1016,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.DELETED:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.DELETED);
 						}
@@ -1027,7 +1027,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.CAPABILITIES:
 				retval[i] = new FolderFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-							final String name, final int hasSubfolders) throws JSONException, OXException {
+							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.CAPABILITIES);
 						}
@@ -1038,7 +1038,7 @@ public class FolderWriter extends DataWriter {
 			case FolderObject.SUBSCRIBED:
 				retval[i] = new FolderFieldWriter() {
 				public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-						final String name, final int hasSubfolders) throws JSONException, OXException {
+						final String name, final int hasSubfolders) throws JSONException {
 					if (withKey) {
 						jsonwriter.key(FolderFields.SUBSCRIBED);
 					}

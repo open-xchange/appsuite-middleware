@@ -79,32 +79,32 @@ public class FreeBusyResults implements SearchIterator {
     
     public final static int MAX_SHOW_USER_PARTICIPANTS = 5;
     
-    private ResultSet rs;
-    private Connection con;
-    private Context c;
+    private final ResultSet rs;
+    private final Connection con;
+    private final Context c;
     private int uid;
-    private int seq = 0;
-    private int sa = 0;
-    private int ft = 0;
-    private int oid = 0;
-    private int pflag = 0;
-    private int owner = 0;
-    private int fid = 0;
+    private int seq;
+    private int sa;
+    private int ft;
+    private int oid;
+    private int pflag;
+    private int owner;
+    private int fid;
     private String title;
     private RecurringResults rrs;
-    private boolean has_next = false;
-    private boolean show_details = false;
-    private PreparedStatement prep;
+    private boolean has_next;
+    private boolean show_details;
+    private final PreparedStatement prep;
     private CalendarFolderObject cfo;
     private Participant conflict_objects[];
-    private long range_start = 0;
-    private long range_end = 0;
+    private long range_start;
+    private long range_end;
     
-    private ArrayList al = new ArrayList(16);
-    private int counter = 0;
+    private ArrayList<Object> al = new ArrayList<Object>(16);
+    private int counter;
     
-    private ArrayList<PrivateFolderInformationObject> private_folder_array = null;
-    private PreparedStatement private_folder_information = null;
+    private ArrayList<PrivateFolderInformationObject> private_folder_array;
+    private PreparedStatement private_folder_information;
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
@@ -136,7 +136,7 @@ public class FreeBusyResults implements SearchIterator {
         preFill();
     }
     
-    private void preFill() throws OXException {
+    private final void preFill() throws OXException {
         try {
             while (myhasNext()) {
                 Object o = null;
@@ -150,22 +150,18 @@ public class FreeBusyResults implements SearchIterator {
                 }
             }
         } finally {
-            try {
-                myclose();
-            } catch (SearchIteratorException sie) {
-                throw new OXException(sie);
-            }
+            myclose();
         }
     }
     
-    public final Object next() throws SearchIteratorException, OXException {
+    public final Object next() {
         return al.get(counter++);
     }
     
     public final Object mynext() throws SearchIteratorException, OXException {
         CalendarDataObject cdao = null;
         if (seq > 0) {
-            RecurringResult rr = rrs.getRecurringResult(seq);
+        	final RecurringResult rr = rrs.getRecurringResult(seq);
             return recurringDAO(rr);
         }
         try {
@@ -173,9 +169,9 @@ public class FreeBusyResults implements SearchIterator {
                 cdao = new CalendarDataObject();
                 oid = rs.getInt(1);
                 cdao.setObjectID(oid);
-                java.util.Date s = rs.getTimestamp(2);
+                final java.util.Date s = rs.getTimestamp(2);
                 cdao.setStartDate(s);
-                java.util.Date e = rs.getTimestamp(3);
+                final java.util.Date e = rs.getTimestamp(3);
                 cdao.setEndDate(e);
                 ft = rs.getInt(4);
                 sa = rs.getInt(5);
@@ -184,7 +180,7 @@ public class FreeBusyResults implements SearchIterator {
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
                 owner = rs.getInt(9);
-                int recid = rs.getInt(10);
+                final int recid = rs.getInt(10);
                 if (!rs.wasNull() && recid == oid) {
                     cdao.setRecurrenceCalculator(rs.getInt(11));
                     cdao.setRecurrence(rs.getString(12));
@@ -196,29 +192,26 @@ public class FreeBusyResults implements SearchIterator {
                         rrs = CalendarRecurringCollection.calculateRecurring(cdao, range_start, range_end, 0);
                         seq = rrs.size()-1;
                         if (seq >= 0) {
-                            RecurringResult rr = rrs.getRecurringResult(seq);
+                            final RecurringResult rr = rrs.getRecurringResult(seq);
                             rsNext();
                             return recurringDAO(rr);
-                        } else {
-                            rsNext();
-                            return null;
                         }
+                        rsNext();
+                        return null;
                     }
                 }
             }
         } catch (SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch(Exception e) {
-            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao.toString());
+            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString());
             throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.CALCULATION_ERROR, com.openexchange.groupware.Component.APPOINTMENT, oid, e);
         }
-        if (ft != 0) {
+        if (ft != 0 && cdao != null) {
             cdao.setFullTime(true);
         }
-        if (show_details) {
-            if (checkPermissions()) {
-                cdao.setTitle(title);
-            }
+        if (show_details && checkPermissions() && cdao != null) {
+            cdao.setTitle(title);
         }
         rsNext();
         return cdao;
@@ -232,9 +225,9 @@ public class FreeBusyResults implements SearchIterator {
         return false;
     }
     
-    private final CalendarDataObject recurringDAO(RecurringResult rr) throws OXException {
+    private final CalendarDataObject recurringDAO(final RecurringResult rr) throws OXException {
         if (rr != null) {
-            CalendarDataObject cdao = new CalendarDataObject();
+            final CalendarDataObject cdao = new CalendarDataObject();
             cdao.setShownAs(sa);
             cdao.setStartDate(new Date(rr.getStart()));
             cdao.setEndDate(new Date(rr.getEnd()));
@@ -243,29 +236,26 @@ public class FreeBusyResults implements SearchIterator {
             }
             cdao.setRecurrencePosition(rr.getPosition());
             cdao.setObjectID(oid);
-            if (show_details) {
-                if (checkPermissions()) {
-                    cdao.setTitle(title);
-                    Participants ret = resolveConflictingUserParticipants();
-                    cdao.setParticipants(ret.getList());
-                }
+            if (show_details && checkPermissions()) {
+            	cdao.setTitle(title);
+                final Participants ret = resolveConflictingUserParticipants();
+                cdao.setParticipants(ret.getList());
             }
             seq--;
             return cdao;
-        } else {
+        }
             rsNext();
             return null;
-        }
     }
     
     public boolean hasNext() {
-        if (al.size() > 0 && counter < al.size()) {
+        if (!al.isEmpty() && counter < al.size()) {
             return true;
         }
         return false;
     }
     
-    public boolean myhasNext() {
+    public final boolean myhasNext() {
         if (seq > 0) {
             return true;
         }
@@ -283,13 +273,13 @@ public class FreeBusyResults implements SearchIterator {
         }
     }
     
-    public void close() throws SearchIteratorException {
+    public void close() {
         al = null;
         title = null;
         rrs = null;
     }
     
-    public void myclose() throws SearchIteratorException {
+    public final void myclose() {
         CalendarCommonCollection.closeResultSet(rs);
         CalendarCommonCollection.closePreparedStatement(prep);
         CalendarCommonCollection.closePreparedStatement(private_folder_information);
@@ -302,14 +292,14 @@ public class FreeBusyResults implements SearchIterator {
         }
     }
     
-    private boolean checkPermissions() throws OXException {
+    private final boolean checkPermissions() {
         if ((pflag == 0 && isVisible()) || (pflag == 1 && owner == uid)) {
             return true;
         }
         return false;
     }
     
-    private boolean isVisible() throws OXException {
+    private final boolean isVisible() {
         if (cfo == null) {
             return false;
         }
@@ -324,7 +314,7 @@ public class FreeBusyResults implements SearchIterator {
             int o = 0;
             boolean perm = false;
             for (int a = 0; a < private_folder_array.size(); a++) {
-                PrivateFolderInformationObject pfio = private_folder_array.get(a);
+                final PrivateFolderInformationObject pfio = private_folder_array.get(a);
                 if (pfio.compareObjectId(oid)) {
                     p = pfio.getPrivateFolder();
                     o = pfio.getParticipant();
@@ -348,7 +338,7 @@ public class FreeBusyResults implements SearchIterator {
         return false;
     }
     
-    private void preFillPermissionArray(int groups[], UserConfiguration uc) throws OXException {
+    private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
         Connection readcon = null;
         try {
             cfo = CalendarCommonCollection.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, readcon);
@@ -367,17 +357,17 @@ public class FreeBusyResults implements SearchIterator {
         }
     }
     
-    private Participants resolveConflictingUserParticipants() throws OXException {
-        Participants p = new Participants();
+    private final Participants resolveConflictingUserParticipants() throws OXException {
+    	final Participants p = new Participants();
         int counter = 0;
         if (conflict_objects instanceof UserParticipant[]) {
             try {
-                CalendarDataObject temp = new CalendarDataObject();
+            	final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
-                UserParticipant op[] = CalendarSql.getCalendarSqlImplementation().getUserParticipants(temp, con, uid).getUsers();
+                final UserParticipant op[] = CalendarSql.getCalendarSqlImplementation().getUserParticipants(temp, con, uid).getUsers();
                 if (op != null && op.length > 1) {
-                    UserParticipant up[] = (UserParticipant[])conflict_objects;
+                	final  UserParticipant up[] = (UserParticipant[])conflict_objects;
                     for (int a = 0; a < up.length; a++) {
                         for (int b = 0; b < op.length; b++) {
                             if (up[a].getIdentifier() == op[b].getIdentifier()) {
@@ -393,12 +383,12 @@ public class FreeBusyResults implements SearchIterator {
             } catch(SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR);
             }
-        } else if (conflict_objects instanceof Participant[]) {
+        } else {
             try {
-                CalendarDataObject temp = new CalendarDataObject();
+            	final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
-                Participant op[] = CalendarSql.getCalendarSqlImplementation().getParticipants(temp, con).getList();
+                final Participant op[] = CalendarSql.getCalendarSqlImplementation().getParticipants(temp, con).getList();
                 if (op != null && op.length > 1) {
                     for (int a = 0; a < conflict_objects.length; a++) {
                         for (int b = 0; b < op.length; b++) {
@@ -419,7 +409,7 @@ public class FreeBusyResults implements SearchIterator {
         return p;
     }
     
-    private void preFillPrivateFolderInformation() {
+    private final void preFillPrivateFolderInformation() {
         private_folder_array = new ArrayList<PrivateFolderInformationObject>(16);
         int object_id = 0;
         int pfid = 0;
@@ -431,7 +421,7 @@ public class FreeBusyResults implements SearchIterator {
                 pfid = rs.getInt(2);
                 uid = rs.getInt(3);
                 if (!rs.wasNull()) {
-                    PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
+                	final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
                     private_folder_array.add(pfio);
                 }
             }

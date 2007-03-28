@@ -91,9 +91,9 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PathResolverImpl.class);
 	
-	private ThreadLocal<Map<String,Resolved>> resolveCache = new ThreadLocal<Map<String,Resolved>>();
-	private ThreadLocal<Map<Integer,String>> docPathCache = new ThreadLocal<Map<Integer,String>>();
-	private ThreadLocal<Map<Integer,String>> folderPathCache = new ThreadLocal<Map<Integer,String>>();
+	private final ThreadLocal<Map<String,Resolved>> resolveCache = new ThreadLocal<Map<String,Resolved>>();
+	private final ThreadLocal<Map<Integer,String>> docPathCache = new ThreadLocal<Map<Integer,String>>();
+	private final ThreadLocal<Map<Integer,String>> folderPathCache = new ThreadLocal<Map<Integer,String>>();
 
 	private InfostoreFacade database;
 	

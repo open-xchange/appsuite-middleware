@@ -69,9 +69,9 @@ public class BooleanValueDefinition extends ValueDefinition {
 	
 	public Object createValue(final StringScanner s, final Property property) throws IOException {
 		if (s.imatch("TRUE")) {
-			return new Boolean(true);
+			return Boolean.TRUE;
 		} else if (s.imatch("FALSE")) {
-			return new Boolean(false);
+			return Boolean.FALSE;
 		} else {
 			throw new VersitException(s, "TRUE or FALSE expected");
 		}

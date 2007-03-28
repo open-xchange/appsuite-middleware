@@ -381,9 +381,9 @@ public class KXmlParser implements XmlPullParser {
                         && "standalone".equals(attributes[4 * pos + 2])) {
                         String st = attributes[3 + 4 * pos];
                         if ("yes".equals(st))
-                            standalone = new Boolean(true);
+                            standalone = Boolean.TRUE;
                         else if ("no".equals(st))
-                            standalone = new Boolean(false);
+                            standalone = Boolean.FALSE;
                         else
                             error("illegal standalone value: " + st);
                         pos++;
