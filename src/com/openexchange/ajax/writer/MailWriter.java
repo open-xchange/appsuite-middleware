@@ -334,7 +334,7 @@ public class MailWriter extends DataWriter {
 			case JSONMessageObject.FIELD_THREAD_LEVEL:
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
-							final boolean withKey) throws JSONException, MessagingException {
+							final boolean withKey) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_THREAD_LEVEL);
 						}
@@ -401,7 +401,7 @@ public class MailWriter extends DataWriter {
 			default:
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
-							final boolean withKey) throws JSONException, MessagingException {
+							final boolean withKey) throws JSONException {
 						if (withKey) {
 							jsonwriter.key("Unknown column");
 						}

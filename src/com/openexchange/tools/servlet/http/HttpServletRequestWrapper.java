@@ -54,12 +54,15 @@ package com.openexchange.tools.servlet.http;
 import java.security.Principal;
 import java.text.ParseException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.openexchange.tools.ajp13.AJPv13Exception;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
+import com.openexchange.tools.ajp13.AJPv13Server;
 import com.openexchange.tools.servlet.ServletRequestWrapper;
 
 /**
@@ -104,6 +107,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	private boolean requestedSessionIdFromURL;
 
 	private final AJPv13RequestHandler ajpRequestHandler;
+
+	private HttpServlet servletInstance;
 
 	public HttpServletRequestWrapper(AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception {
 		super();
@@ -252,6 +257,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 			 */
 			session = (HttpSessionWrapper) HttpSessionManagement.createHttpSession(id);
 			session.setNew(true);
+			session.setServletContext(getServletContext());
 		}
 		return session;
 	}
@@ -297,7 +303,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.authType = authType;
 	}
 
-	private long getDateValueFromHeaderField(final String headerValue) {
+	public void setServletInstance(final HttpServlet servletInstance) {
+		this.servletInstance = servletInstance;
+	}
+
+	private final long getDateValueFromHeaderField(final String headerValue) {
 		try {
 			return Tools.parseHeaderDate(headerValue).getTime();
 		} catch (ParseException e) {
@@ -305,5 +315,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
+	
+	private final ServletContext getServletContext() {
+		return AJPv13Server.servletConfigs.getContext(servletInstance.getClass().getCanonicalName(), servletPath);
+	}
+
 
 }

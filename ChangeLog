@@ -4,6 +4,9 @@
    c.o.t.servlet.ServletRequestWrapper
  - Fixed bug when handling message headers that do not occur in previous
    messages but appear in later ones
+ - Implemented better initialization of servlet's ServletConfig and
+   ServletContext references: now each servlet can hold its own config and
+   context settings. Many thanks go out to Francisco!
 
 * 2007-03-26 - thorben.betten@open-xchange.com
 

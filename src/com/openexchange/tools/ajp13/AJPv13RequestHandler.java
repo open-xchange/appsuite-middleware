@@ -527,6 +527,7 @@ public class AJPv13RequestHandler {
 			servletId = servletKey;
 			MonitoringInfo.incrementNumberOfConnections(connectionType);
 		}
+		supplyRequestWrapperWithServlet();
 	}
 
 	public HttpServlet getServletInstance() {
@@ -539,6 +540,7 @@ public class AJPv13RequestHandler {
 
 	public void setServletRequestObj(final HttpServletRequestWrapper servletRequestObj) {
 		this.servletRequestObj = servletRequestObj;
+		supplyRequestWrapperWithServlet();
 	}
 
 	public HttpServletResponseWrapper getServletResponseObj() {
@@ -684,6 +686,12 @@ public class AJPv13RequestHandler {
 
 	public void setServletId(final String servletId) {
 		this.servletId = servletId;
+	}
+	
+	private final void supplyRequestWrapperWithServlet() {
+		if(servletRequestObj != null && servletInstance != null) {
+			servletRequestObj.setServletInstance(servletInstance);
+		}
 	}
 
 	private static String toHexString(final int i) {

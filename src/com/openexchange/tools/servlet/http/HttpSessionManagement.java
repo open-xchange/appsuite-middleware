@@ -134,7 +134,6 @@ public class HttpSessionManagement {
 
 	public static HttpSession createHttpSession(final String uniqueId) {
 		final HttpSessionWrapper httpSession = new HttpSessionWrapper(uniqueId);
-		httpSession.setServletContext(AJPv13Server.servletContext);
 		putHttpSession(httpSession);
 		return httpSession;
 	}

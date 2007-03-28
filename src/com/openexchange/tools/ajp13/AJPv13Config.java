@@ -103,6 +103,8 @@ public class AJPv13Config {
 	private static String jvmRoute;
 	
 	private static boolean checkMagicBytesStrict;
+
+	private static String servletConfigs;
 	
 	static {
 		final Properties ajpProperties = new Properties();
@@ -217,6 +219,18 @@ public class AJPv13Config {
 				 * AJP_CHECK_MAGIC_BYTES_STRICT
 				 */
 				checkMagicBytesStrict = Boolean.valueOf(ajpProperties.getProperty("AJP_CHECK_MAGIC_BYTES_STRICT", "true"));
+				
+				servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
+				if(servletConfigs == null)
+					servletConfigs = "/opt/open-xchange/etc/groupware/servletConfig";
+				
+				File servletConfigsFile = new File(servletConfigs);
+				if(servletConfigsFile.exists() && servletConfigsFile.isDirectory()){
+					// OKAY
+				} else {
+					LOG.warn(servletConfigsFile+" does not exist or is not a directory");
+				}
+				
 				/*
 				 * Log info
 				 */
@@ -250,6 +264,7 @@ public class AJPv13Config {
 			logBuilder.append("\tSERVLET_POOL_SIZE=").append(servletPoolSize).append('\n');
 			logBuilder.append("\tAJP_JVM_ROUTE=").append(jvmRoute).append('\n');
 			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict);
+			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs);
 			LOG.info(logBuilder.toString());
 		}
 	}
@@ -324,6 +339,10 @@ public class AJPv13Config {
 	
 	public static final boolean getCheckMagicBytesStrict() {
 		return checkMagicBytesStrict;
+	}
+	
+	public static final String getServletConfigs(){
+		return servletConfigs;
 	}
 	
 }

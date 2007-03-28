@@ -51,6 +51,7 @@
 
 package com.openexchange.tools.ajp13;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -63,6 +64,7 @@ import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor;
 import com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor;
+import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.ServletConfigWrapper;
 import com.openexchange.tools.servlet.ServletContextWrapper;
 import com.openexchange.tools.servlet.http.HttpServletManager;
@@ -86,10 +88,7 @@ public class AJPv13Server implements Runnable {
 
 	private boolean running;
 
-	// static fields
-	public static ServletConfigWrapper servletConfig;
-
-	public static ServletContextWrapper servletContext;
+	public static ServletConfigLoader servletConfigs = new ServletConfigLoader();
 
 	private static AJPv13Server instance;
 
@@ -124,9 +123,12 @@ public class AJPv13Server implements Runnable {
 		/*
 		 * Create Servlet Config and servlet-specific Servlet Context
 		 */
-		servletConfig = new ServletConfigWrapper();
-		servletContext = new ServletContextWrapper(servletConfig);
+		final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
+		final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
 		servletConfig.setServletContextWrapper(servletContext);
+		servletConfigs.setDefaultConfig(servletConfig);
+		servletConfigs.setDefaultContext(servletContext);
+		servletConfigs.setDirectory(new File(AJPv13Config.getServletConfigs()));
 		synchronized (AJPv13Server.class) {
 			if (instance == null) {
 				instance = new AJPv13Server();
@@ -174,10 +176,8 @@ public class AJPv13Server implements Runnable {
 	}
 
 	private void stopServer() {
-		if (!running) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("AJPv13Server is not running and thus does not need to be stopped");
-			}
+		if (!running && LOG.isInfoEnabled()) {
+			LOG.info("AJPv13Server is not running and thus does not need to be stopped");
 		}
 		/*
 		 * Stop listeners
@@ -190,12 +190,14 @@ public class AJPv13Server implements Runnable {
 		/*
 		 * Interrupt & destroy threads
 		 */
+		final StringBuilder sb = new StringBuilder(100);
 		for (int i = 0; i < threadArr.length; i++) {
 			try {
 				threadArr[i].interrupt();
 			} catch (Exception e) {
-				LOG.error(new StringBuilder(100).append(threadArr[i].getName()).append(" could NOT be interrupted")
+				LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted")
 						.toString(), e);
+				sb.setLength(0);
 			} finally {
 				threadArr[i] = null;
 			}

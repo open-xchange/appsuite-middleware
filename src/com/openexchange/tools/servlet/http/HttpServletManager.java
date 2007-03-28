@@ -59,6 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
@@ -147,7 +148,7 @@ public class HttpServletManager {
 		}
 		try {
 			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-			servletInstance.init(AJPv13Server.servletConfig);
+			servletInstance.init(AJPv13Server.servletConfigs.getConfig(servletInstance.getClass().getCanonicalName(), servletKey));
 			return servletInstance;
 		} catch (Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -235,7 +236,9 @@ public class HttpServletManager {
 						final boolean isSTM = servletInstance instanceof SingleThreadModel;
 						servletQueue = isSTM ? new FIFOQueue<HttpServlet>(HttpServlet.class, AJPv13Config
 								.getServletPoolSize()) : new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-						servletInstance.init(AJPv13Server.servletConfig);
+						final ServletConfig conf = AJPv13Server.servletConfigs.getConfig(servletInstance.getClass()
+								.getCanonicalName(), servletKey);
+						servletInstance.init(conf);
 						servletQueue.enqueue(servletInstance);
 						if (isSTM) {
 							/*
@@ -245,7 +248,7 @@ public class HttpServletManager {
 							final int servlet_pool_size = AJPv13Config.getServletPoolSize();
 							for (int i = 0; i < (servlet_pool_size - 1); i++) {
 								servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-								servletInstance.init(AJPv13Server.servletConfig);
+								servletInstance.init(conf);
 								servletQueue.enqueue(servletInstance);
 							}
 						}

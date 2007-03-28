@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container.mail;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -209,7 +208,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	private static final String HDR_FROM = "From";
 
 	@Override
-	public Address[] getFrom() throws MessagingException {
+	public Address[] getFrom() {
 		if (from != null) {
 			return from;
 		}
@@ -226,7 +225,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	}
 
 	@Override
-	public void setFrom(final Address address) throws MessagingException {
+	public void setFrom(final Address address) {
 		this.from = new InternetAddress[] { ((InternetAddress) address) };
 	}
 
@@ -328,7 +327,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	private static final String HDR_SUBJECT = "Subject";
 
 	@Override
-	public String getSubject() throws MessagingException {
+	public String getSubject() {
 		try {
 			return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MimeUtility.decodeText(headers
 					.get(HDR_SUBJECT)) : null;
@@ -340,7 +339,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	}
 
 	@Override
-	public void setSubject(final String subject) throws MessagingException {
+	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
 
@@ -358,12 +357,12 @@ public class MessageCacheObject extends Message implements Serializable {
 	}
 
 	@Override
-	public void setSentDate(final Date date) throws MessagingException {
+	public void setSentDate(final Date date) {
 		this.date = date;
 	}
 
 	@Override
-	public Date getReceivedDate() throws MessagingException {
+	public Date getReceivedDate() {
 		return receivedDate;
 	}
 
@@ -372,7 +371,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	}
 
 	@Override
-	public Flags getFlags() throws MessagingException {
+	public Flags getFlags()  {
 		return (Flags) flags.clone();
 	}
 
@@ -405,7 +404,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		return seqNum;
 	}
 
-	public int getSize() throws MessagingException {
+	public int getSize() {
 		return size;
 	}
 
@@ -419,7 +418,7 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	private static final String HDR_CONTENT_TYPE = "Content-Type";
 
-	public String getContentType() throws MessagingException {
+	public String getContentType() {
 		return contentType != null ? contentType.toString() : headers.containsKey(HDR_CONTENT_TYPE) ? headers
 				.get(HDR_CONTENT_TYPE) : null;
 	}
@@ -466,7 +465,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		throw new MessagingException("Method not supported");
 	}
 
-	public InputStream getInputStream() throws IOException, MessagingException {
+	public InputStream getInputStream() throws MessagingException {
 		throw new MessagingException("Method not supported");
 	}
 
@@ -474,7 +473,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		throw new MessagingException("Method not supported");
 	}
 
-	public Object getContent() throws IOException, MessagingException {
+	public Object getContent() throws MessagingException {
 		throw new MessagingException("Method not supported");
 	}
 
@@ -494,13 +493,13 @@ public class MessageCacheObject extends Message implements Serializable {
 		throw new MessagingException("Method not supported");
 	}
 
-	public void writeTo(final OutputStream os) throws IOException, MessagingException {
+	public void writeTo(final OutputStream os) throws MessagingException {
 		throw new MessagingException("Method not supported");
 	}
 
 	private static final String SPLIT_COMMA = " *, *";
 
-	public String[] getHeader(final String header_name) throws MessagingException {
+	public String[] getHeader(final String header_name) {
 		if (header_name.equalsIgnoreCase(HDR_X_PRIORITY)) {
 			return new String[] { String.valueOf(priority) };
 		}
@@ -519,7 +518,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		headers.put(header_name, header_value);
 	}
 
-	public void addHeader(final String header_name, final String header_value) throws MessagingException {
+	public void addHeader(final String header_name, final String header_value) {
 		if (headers.containsKey(header_name)) {
 			headers.put(header_name, new StringBuilder().append(headers.get(header_name)).append(',').append(
 					header_value).toString());
@@ -528,7 +527,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		headers.put(header_name, header_value);
 	}
 
-	public void removeHeader(final String header_name) throws MessagingException {
+	public void removeHeader(final String header_name) {
 		headers.remove(header_name);
 	}
 
@@ -567,7 +566,7 @@ public class MessageCacheObject extends Message implements Serializable {
 				.get(HDR_REPLY_TO)) }) : null;
 	}
 
-	public void setReplyTo(final Address[] addresses) throws MessagingException {
+	public void setReplyTo(final Address[] addresses) {
 		this.replyTo = (InternetAddress[]) addresses;
 	}
 

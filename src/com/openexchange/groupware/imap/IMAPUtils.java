@@ -194,7 +194,7 @@ public class IMAPUtils {
 				addHeaderHandlers(itemHandler, hdr);
 			}
 		}
-		
+
 		public final static boolean addHeaderHandlers(final FetchItemHandler itemHandler, final Header hdr) {
 			boolean retval = true;
 			if (hdr.getName().equals(HDR_FROM)) {
@@ -249,13 +249,10 @@ public class IMAPUtils {
 				});
 			} else if (hdr.getName().equals(HDR_SUBJECT)) {
 				itemHandler.hdrHandlers.put(HDR_SUBJECT, new HeaderHandler() {
-					public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException {
+					public void handleHeader(String hdrValue, MessageCacheObject msg) {
 						try {
 							msg.setSubject(MimeUtility.decodeText(hdrValue));
 						} catch (UnsupportedEncodingException e) {
-							LOG.error(e.getMessage(), e);
-							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
-						} catch (MessagingException e) {
 							LOG.error(e.getMessage(), e);
 							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
 						}
@@ -472,7 +469,7 @@ public class IMAPUtils {
 					 * Grab last response that should indicate an OK
 					 */
 					final Response response = r[r.length - 1];
-					Boolean retval = Boolean.valueOf(false);
+					Boolean retval = Boolean.FALSE;
 					if (response.isOK()) { // command succesful
 						retval = Boolean.valueOf(response.toString().indexOf("READ-ONLY") != -1);
 					}
@@ -1083,7 +1080,8 @@ public class IMAPUtils {
 					try {
 						if (msg.getContent() instanceof String) {
 							final String msgText = (String) msg.getContent();
-							foundInCurrentField = msgText.toLowerCase(Locale.ENGLISH).indexOf(searchPatterns[i].toLowerCase()) > -1;
+							foundInCurrentField = msgText.toLowerCase(Locale.ENGLISH).indexOf(
+									searchPatterns[i].toLowerCase()) > -1;
 						} else {
 							throw new IMAPException("Unknown Search Field: " + searchFields[i]);
 						}
@@ -1547,11 +1545,11 @@ public class IMAPUtils {
 	}
 
 	private static class UIDCopyResponse {
-		
+
 		private String src;
 
 		private String dest;
-		
+
 		public UIDCopyResponse() {
 			super();
 		}
@@ -1649,10 +1647,11 @@ public class IMAPUtils {
 	}
 
 	private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
-	
+
 	private final static String[] ALL = new String[] { "1:*" };
-	
-	public static final void setAllSystemFlags(final IMAPFolder imapFolder, final Flags flags, final boolean enable) throws MessagingException {
+
+	public static final void setAllSystemFlags(final IMAPFolder imapFolder, final Flags flags, final boolean enable)
+			throws MessagingException {
 		setSystemFlags(imapFolder, ALL, flags, enable);
 	}
 
@@ -1668,9 +1667,9 @@ public class IMAPUtils {
 		}
 		setSystemFlags(imapFolder, uidsArr, flags, enable);
 	}
-	
-	private static final void setSystemFlags(final IMAPFolder imapFolder, final String[] uidsArr,
-			final Flags flags, final boolean enable) throws MessagingException {
+
+	private static final void setSystemFlags(final IMAPFolder imapFolder, final String[] uidsArr, final Flags flags,
+			final boolean enable) throws MessagingException {
 		final Flag[] systemFlags;
 		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
 			return;
@@ -2017,7 +2016,7 @@ public class IMAPUtils {
 		}
 		return retval.toArray(new MessageCacheObject[retval.size()]);
 	}
-	
+
 	private static final String STR_EMPTY = "";
 
 	private static final FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f) {
@@ -2045,9 +2044,6 @@ public class IMAPUtils {
 						try {
 							msg.setSubject(env.subject == null ? STR_EMPTY : MimeUtility.decodeText(env.subject));
 						} catch (UnsupportedEncodingException e) {
-							LOG.error(e.getMessage(), e);
-							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
-						} catch (MessagingException e) {
 							LOG.error(e.getMessage(), e);
 							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
 						}
@@ -2350,7 +2346,7 @@ public class IMAPUtils {
 			return;
 		}
 	}
-	
+
 	/**
 	 * Turns given array of <code>long</code> into an array of
 	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be
@@ -2361,7 +2357,7 @@ public class IMAPUtils {
 	 * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
 	 */
 	public static final UIDSet[] toUIDSet(final long[] uids) {
-		List<UIDSet> sets = new ArrayList<UIDSet>(uids.length);
+		final List<UIDSet> sets = new ArrayList<UIDSet>(uids.length);
 		for (int i = 0; i < uids.length; i++) {
 			long current = uids[i];
 			final UIDSet set = new UIDSet();
@@ -2510,7 +2506,7 @@ public class IMAPUtils {
 				return "";
 			}
 		}
-		
+
 		private static final Integer compareReferences(final Object o1, final Object o2) {
 			if (o1 == null && o2 != null) {
 				return Integer.valueOf(-1);
