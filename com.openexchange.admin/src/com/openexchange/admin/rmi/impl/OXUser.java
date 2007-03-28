@@ -499,17 +499,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     for (final ServiceReference servicereference : servicereferences) {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            try {
-                                log.info("Calling getData for plugin: " + bundlename);
-                                retusers = oxuser.getData(ctx, retusers, auth);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling getData for plugin: " + bundlename, e);
-                                throw new StorageException(e);
-                            }
+                            final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
+                            log.info("Calling getData for plugin: " + bundlename);
+                            retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
-                    
                 }
             }
         }
