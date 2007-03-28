@@ -216,6 +216,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Retrieve user objects for a range of users by id
      * 
+     * @deprecated  Use {@link #getData(Context,User[],Credential)} instead
      * @param ctx
      *            numerical context identifier
      * @param user_id
@@ -229,14 +230,16 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws NoSuchUserException 
+     * @throws NoSuchUserException
      */
+    @Deprecated
     public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
 
     /**
      * Retrieve user objects for a range of users by id
      * 
+     * @deprecated  Use {@link #getData(Context,User,Credential)} instead
      * @param ctx
      *            numerical context identifier
      * @param user_id
@@ -252,6 +255,7 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException 
      */
+    @Deprecated
     public User getData(Context ctx, int user_id, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
 
