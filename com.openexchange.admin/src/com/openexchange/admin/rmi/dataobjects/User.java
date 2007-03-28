@@ -50,6 +50,8 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -2172,7 +2174,31 @@ public class User implements Serializable, Cloneable {
         this.email1 = email1;
     }
 
+    /**
+     * @param ht
+     * @return key/value pairs in Hashtable as a User Object
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public static User hashtableToUser(Hashtable<String, Object> ht) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException  {
+        User u = new User();
+        for(Method m : u.getClass().getMethods()) {
+            String mname = m.getName();
+            if(mname.startsWith("set")) {
+                String keyName = mname.substring(3).toLowerCase();
+                if( ht.containsKey(keyName)) {
+                    m.invoke(u, ht.get(keyName));
+                }
+            }
+        }
 
+        return u;
+    }
+    
+    /**
+     * @return this user Objects members as key/value pairs in a hashtable
+     */
     public Hashtable<String, Object> toHashtable() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>();
         
