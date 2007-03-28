@@ -77,6 +77,12 @@ public class User implements Serializable, Cloneable {
     private ArrayList<OXUserExtensionInterface> extensions = null;
     private final boolean extensionsset = false;
 
+    /**
+     * This field is used to show if all extension have run fine and inserted their
+     * data correctly
+     */
+    private boolean extensionsok = true;
+    
     private Integer id;
     private boolean idset = false;
 
@@ -2376,6 +2382,27 @@ public class User implements Serializable, Cloneable {
     public ArrayList<OXUserExtensionInterface> getExtensions() {
         return this.extensions;
     }
+    
+    public boolean removeExtension(final OXUserExtensionInterface o) {
+        return extensions.remove(o);
+    }
+
+    /**
+     * This method is used to get an extensions through the name of this
+     * extension. This first occurence will be returned, or null if no fitting
+     * extension was found.
+     * 
+     * @param extname a String for the extension
+     * @return the {@link OXUserExtensionInterface} with extname
+     */
+    public OXUserExtensionInterface getExtensionbyName(final String extname) {
+        for (final OXUserExtensionInterface ext : this.extensions) {
+            if (ext.getExtensionName().equals(extname)) {
+                return ext;
+            }
+        }
+        return null;
+    }
 
     /**
      * @return the passwordMech
@@ -2394,6 +2421,14 @@ public class User implements Serializable, Cloneable {
             this.passwordMechset = true;
         }
         this.passwordMech = passwordMech;
+    }
+
+    public final boolean isExtensionsok() {
+        return extensionsok;
+    }
+
+    public final void setExtensionsok(boolean extensionsok) {
+        this.extensionsok = extensionsok;
     }
     
     
