@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -986,7 +985,7 @@ public class InfostoreRequest extends CommonRequest{
 		try {
 			infostore.startTransaction();
 			
-			DocumentMetadata m = new DocumentMetadataImpl();
+			/*DocumentMetadata m = */new DocumentMetadataImpl();
 			
 			infostore.unlock(id, sessionObj);
 			
