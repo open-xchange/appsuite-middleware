@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -119,7 +118,7 @@ public class Multiple extends SessionServlet {
 	private static final transient Log LOG = LogFactory.getLog(Multiple.class);
 	
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-	throws ServletException, IOException {
+	throws IOException {
 		final Response response = new Response();
 		JSONArray jsonArray = null;
 		final String data = getBody(httpServletRequest);

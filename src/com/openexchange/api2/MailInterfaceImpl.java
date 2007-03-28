@@ -2649,7 +2649,8 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 	
-	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\nOriginal-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
+	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\n" +
+			"Original-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
 
 	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID)
 			throws OXException, MessagingException {

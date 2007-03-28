@@ -221,13 +221,12 @@ public class AJPv13Config {
 				checkMagicBytesStrict = Boolean.valueOf(ajpProperties.getProperty("AJP_CHECK_MAGIC_BYTES_STRICT", "true"));
 				
 				servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
-				if(servletConfigs == null)
+				if(servletConfigs == null) {
 					servletConfigs = "/opt/open-xchange/etc/groupware/servletConfig";
+				}
 				
-				File servletConfigsFile = new File(servletConfigs);
-				if(servletConfigsFile.exists() && servletConfigsFile.isDirectory()){
-					// OKAY
-				} else {
+				final File servletConfigsFile = new File(servletConfigs);
+				if((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {
 					LOG.warn(servletConfigsFile+" does not exist or is not a directory");
 				}
 				
@@ -263,7 +262,7 @@ public class AJPv13Config {
 			logBuilder.append("\tAJP_WATCHER_FREQUENCY=").append(watcherFrequency).append('\n');
 			logBuilder.append("\tSERVLET_POOL_SIZE=").append(servletPoolSize).append('\n');
 			logBuilder.append("\tAJP_JVM_ROUTE=").append(jvmRoute).append('\n');
-			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict);
+			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict).append('\n');
 			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs);
 			LOG.info(logBuilder.toString());
 		}
