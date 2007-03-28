@@ -1,3 +1,8 @@
+* 2007-03-28 - thorben.betten@open-xchange.com
+
+ - Implemented method javax.servlet.ServletRequest.getScheme() in type
+   c.o.t.servlet.ServletRequestWrapper
+
 * 2007-03-26 - thorben.betten@open-xchange.com
 
  - Fixed possible ArrayIndexOutOfBoundsException when requesting next UID

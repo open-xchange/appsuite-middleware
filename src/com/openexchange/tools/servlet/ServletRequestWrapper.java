@@ -335,7 +335,7 @@ public class ServletRequestWrapper implements ServletRequest {
 		return characterEncoding;
 	}
 
-	public BufferedReader getReader() throws IOException {
+	public BufferedReader getReader() {
 		return null;
 	}
 
@@ -356,6 +356,17 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public String getScheme() {
+		if (scheme == null) {
+			if (protocol == null) {
+				return null;
+			}
+			/*
+			 * Determine scheme from protocol (in the form
+			 * protocol/majorVersion.minorVersion) and isSecure information
+			 */
+			scheme = new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH))
+					.append(is_secure ? "s" : "").toString();
+		}
 		return scheme;
 	}
 
