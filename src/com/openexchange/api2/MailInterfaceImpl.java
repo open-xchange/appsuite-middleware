@@ -638,13 +638,11 @@ public class MailInterfaceImpl implements MailInterface {
 						prepareMailFolderParam(defaultFolderNames[INDEX_DRAFTS])).toString());
 				tmp.setLength(0);
 				long start = System.currentTimeMillis();
-				if (!f.exists()) {
-					if (!f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_DRAFTS]).toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_DRAFTS]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
 				}
 				if (checkSubscribed && !f.isSubscribed()) {
 					try {
@@ -667,13 +665,11 @@ public class MailInterfaceImpl implements MailInterface {
 						prepareMailFolderParam(defaultFolderNames[INDEX_SENT])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
-				if (!f.exists()) {
-					if (!f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SENT]).toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SENT]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
 				}
 				if (checkSubscribed && !f.isSubscribed()) {
 					try {
@@ -694,13 +690,11 @@ public class MailInterfaceImpl implements MailInterface {
 						prepareMailFolderParam(defaultFolderNames[INDEX_SPAM])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
-				if (!f.exists()) {
-					if (!f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SPAM]).toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SPAM]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
 				}
 				if (checkSubscribed && !f.isSubscribed()) {
 					try {
@@ -721,13 +715,11 @@ public class MailInterfaceImpl implements MailInterface {
 						prepareMailFolderParam(defaultFolderNames[INDEX_TRASH])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
-				if (!f.exists()) {
-					if (!f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_TRASH]).toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_TRASH]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
 				}
 				if (checkSubscribed && !f.isSubscribed()) {
 					try {
@@ -4054,12 +4046,10 @@ public class MailInterfaceImpl implements MailInterface {
 		/*
 		 * Delete old folder
 		 */
-		if (!toMove.delete(true)) {
-			if (LOG.isWarnEnabled()) {
-				final OXMailException e = new OXMailException(
-						MailCode.DELETE_FAILED, toMove.getFullName());
-				LOG.warn(e.getMessage(), e);
-			}
+		if (!toMove.delete(true) && LOG.isWarnEnabled()) {
+			final OXMailException e = new OXMailException(
+					MailCode.DELETE_FAILED, toMove.getFullName());
+			LOG.warn(e.getMessage(), e);
 		}
 		return newFolder;
 	}

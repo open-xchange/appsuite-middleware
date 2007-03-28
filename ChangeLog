@@ -7,6 +7,9 @@
  - Implemented better initialization of servlet's ServletConfig and
    ServletContext references: now each servlet can hold its own config and
    context settings. Many thanks go out to Francisco!
+ - Fixed bug #6567: Broken message's BODYSTRUCTURE is logged as WARNING
+   instead of an ERROR cause it's related to a corrupt rfc822 message
+   header
 
 * 2007-03-26 - thorben.betten@open-xchange.com
 

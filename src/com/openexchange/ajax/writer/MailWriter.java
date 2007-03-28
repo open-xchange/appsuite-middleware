@@ -50,6 +50,7 @@
 package com.openexchange.ajax.writer;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.mail.Address;
@@ -118,6 +119,8 @@ public class MailWriter extends DataWriter {
 	public final void writeMessageAsJSONObject(final Message msg) throws OXException {
 		writeMessageAsJSONObject(msg, true);
 	}
+	
+	private static final String ERR_BROKEN_BODYSTRUCTURE = "unable to load bodystructure";
 
 	public final void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay) throws OXException {
 		try {
@@ -127,7 +130,11 @@ public class MailWriter extends DataWriter {
 			final JSONMessageObject msgObj = msgHandler.getMessageObject();
 			msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_BROKEN_BODYSTRUCTURE) != -1 && LOG.isWarnEnabled()) {
+				LOG.warn(e.getMessage(), e);
+			} else {
+				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			}
 		} catch (JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
@@ -386,9 +393,9 @@ public class MailWriter extends DataWriter {
 						}
 						if (IMAPProperties.isUserFlagsEnabled()) {
 							final String[] userFlags = msg.getFlags().getUserFlags();
-							for (int i = 0; i < userFlags.length; i++) {
-								if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
-									jsonwriter.value(JSONMessageObject.getColorLabelIntValue(userFlags[i]));
+							for (int a = 0; a < userFlags.length; a++) {
+								if (userFlags[a].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
+									jsonwriter.value(JSONMessageObject.getColorLabelIntValue(userFlags[a]));
 									return;
 								}
 							}
