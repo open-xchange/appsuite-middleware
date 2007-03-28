@@ -59,8 +59,6 @@ package com.openexchange.groupware.i18n;
  */
 public class MailStrings {
 
-	public static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\nOriginal-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
-	
 	public static final String ACK_SUBJECT = "Read Acknowledgement";
 	
 	public static final String ACK_RECEIPT_TEXT = "Receipt Acknowledgement";

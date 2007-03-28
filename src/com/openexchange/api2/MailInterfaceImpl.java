@@ -2648,6 +2648,8 @@ public class MailInterfaceImpl implements MailInterface {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
+	
+	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\nOriginal-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
 
 	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID)
 			throws OXException, MessagingException {
@@ -2702,7 +2704,7 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		ct.setContentType("text/plain; name=MDNPart1.txt; charset=UTF-8");
 		final MimeBodyPart ack = new MimeBodyPart();
-		ack.setText(strHelper.getString(MailStrings.ACK_TEXT).replaceFirst("#FROM#", fromAddr).replaceFirst("#MSG ID#",
+		ack.setText(strHelper.getString(MailInterfaceImpl.ACK_TEXT).replaceFirst("#FROM#", fromAddr).replaceFirst("#MSG ID#",
 				msgID), IMAPProperties.getDefaultMimeCharset());
 		ack.setHeader("MIME-Version", "1.0");
 		ack.setHeader("Content-Type", ct.toString());

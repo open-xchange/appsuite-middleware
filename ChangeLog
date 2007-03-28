@@ -10,6 +10,8 @@
  - Fixed bug #6567: Broken message's BODYSTRUCTURE is logged as WARNING
    instead of an ERROR cause it's related to a corrupt rfc822 message
    header
+ - Fixed bug #6566: String constant moved from class MailStrings to avoid
+   its translation.
 
 * 2007-03-26 - thorben.betten@open-xchange.com
 
