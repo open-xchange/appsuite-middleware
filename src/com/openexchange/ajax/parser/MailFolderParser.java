@@ -56,13 +56,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.IMAPPermission;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderException;

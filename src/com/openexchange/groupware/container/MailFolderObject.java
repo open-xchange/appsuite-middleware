@@ -51,7 +51,6 @@ package com.openexchange.groupware.container;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.IMAPPermission;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPException;
@@ -59,6 +58,7 @@ import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.server.IMAPPermission;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;

@@ -62,7 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
-import com.openexchange.IMAPPermission;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterfaceImpl;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;

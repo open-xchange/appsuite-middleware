@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange;
+package com.openexchange.server;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -57,8 +57,6 @@ import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.OXUser2IMAPLogin;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
