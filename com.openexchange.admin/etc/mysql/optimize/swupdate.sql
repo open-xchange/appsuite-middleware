@@ -2,7 +2,6 @@
 
 CREATE TABLE swupdate (
     cid INT4 UNSIGNED,
-    id INT4 UNSIGNED,
     monday TIME NULL,
     tuesday TIME NULL,
     wednesday TIME NULL,
@@ -11,5 +10,5 @@ CREATE TABLE swupdate (
     saturday TIME NULL,
     sunday TIME NULL,
     `interval` INT2 UNSIGNED NULL,
-    PRIMARY KEY (cid, id)
+    PRIMARY KEY (cid)
 );
