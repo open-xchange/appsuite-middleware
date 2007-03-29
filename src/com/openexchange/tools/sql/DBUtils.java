@@ -86,6 +86,20 @@ public final class DBUtils {
 		super();
 	}
 
+    /**
+     * Closes the ResultSet.
+     * @param result <code>null</code> or a ResultSet to close.
+     */
+    public static void closeSQLStuff(final ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
 	/**
 	 * Closes the ResultSet and the Statement.
 	 * 
@@ -95,13 +109,7 @@ public final class DBUtils {
 	 *            <code>null</code> or a Statement to close.
 	 */
 	public static void closeSQLStuff(final ResultSet result, final Statement stmt) {
-		if (result != null) {
-			try {
-				result.close();
-			} catch (SQLException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
+        closeSQLStuff(result);
 		if (null != stmt) {
 			try {
 				stmt.close();

@@ -50,6 +50,9 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -155,6 +158,17 @@ public abstract class SessionServlet extends AJAXServlet {
         throws SessionException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
+            if (LOG.isDebugEnabled()) {
+                final StringBuilder debug = new StringBuilder();
+                debug.append("Parameter session not found: ");
+                final Enumeration enm = req.getParameterNames();
+                while (enm.hasMoreElements()) {
+                    debug.append(enm.nextElement());
+                    debug.append(',');
+                }
+                debug.setCharAt(debug.length(), '.');
+                LOG.debug(debug.toString());
+            }
             throw EXCEPTION.create(1);
         }
         return retval;
@@ -177,17 +191,29 @@ public abstract class SessionServlet extends AJAXServlet {
     )
     private static String getSessionId(final HttpServletRequest req,
         final String cookieId) throws SessionException {
-        final Cookie[] cookie = req.getCookies();
+        final Cookie[] cookies = req.getCookies();
         String retval = null;
-        if (cookie != null) {
+        if (cookies != null) {
             final String cookieName = Login.cookiePrefix + cookieId;
-            for (int a = 0; a < cookie.length && retval == null; a++) {
-                if (cookieName.equals(cookie[a].getName())) {
-                    retval = cookie[a].getValue();
+            for (int a = 0; a < cookies.length && retval == null; a++) {
+                if (cookieName.equals(cookies[a].getName())) {
+                    retval = cookies[a].getValue();
                 }
             }
         }
         if (null == retval) {
+            if (LOG.isDebugEnabled()) {
+                final StringBuilder debug = new StringBuilder();
+                debug.append("No cookie for ID: ");
+                debug.append(cookieId);
+                debug.append(". Cookie names: ");
+                for (Cookie cookie : cookies) {
+                    debug.append(cookie.getName());
+                    debug.append(',');
+                }
+                debug.setCharAt(debug.length(), '.');
+                LOG.debug(debug.toString());
+            }
             throw EXCEPTION.create(2);
         }
         return retval;
@@ -203,14 +229,14 @@ public abstract class SessionServlet extends AJAXServlet {
         category = Category.TRY_AGAIN,
         desc = "A session with the given identifier can not be found.",
         exceptionId = 3,
-        msg = "Your session expired. Please start a new browser session."
+        msg = "Your session %s expired. Please start a new browser session."
     )
     private static SessionObject getSession(final String sessionId)
         throws SessionException {
         final SessionObject retval = SessiondConnector.getInstance()
             .getSession(sessionId);
         if (null == retval) {
-            throw EXCEPTION.create(3);
+            throw EXCEPTION.create(3, sessionId);
         }
         return retval;
     }

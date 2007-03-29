@@ -53,6 +53,7 @@ package com.openexchange.groupware.contexts;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.sessiond.LoginException.Source;
 
 /**
  * This exception will be thrown if error occur in the storage classes for the
@@ -65,6 +66,14 @@ public class ContextException extends AbstractOXException {
      * Serialization.
      */
     private static final long serialVersionUID = -6369708132747242970L;
+
+    /**
+     * Initializes a new exception using the information provided by the cause.
+     * @param cause the cause of the exception.
+     */
+    public ContextException(final AbstractOXException cause) {
+        super(cause);
+    }
 
     /**
      * Initializes a new exception using the information provides by the code.
@@ -115,9 +124,18 @@ public class ContextException extends AbstractOXException {
         NO_CONNECTION("Can't get connection to database.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
         /**
-         * SQL programming exception.
+         * SQL problem: %1$s.
          */
-        SQL_ERROR(null, Category.PROGRAMMING_ERROR, 6);
+        SQL_ERROR("SQL problem: %1$s.", Category.PROGRAMMING_ERROR, 6),
+        /**
+         * Your database is currently updated.
+         */
+        UPDATE("Your database is currently updated.", Category
+            .SUBSYSTEM_OR_SERVICE_DOWN, 7),
+        /**
+         * Problem initializing the cache.
+         */
+        CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8);
 
         /**
          * Message of the exception.

@@ -72,5 +72,6 @@ public final class ContextInit {
      */
     public static void init() throws AbstractOXException {
         LoginInfo.init();
+        ContextStorage.init();
     }
 }

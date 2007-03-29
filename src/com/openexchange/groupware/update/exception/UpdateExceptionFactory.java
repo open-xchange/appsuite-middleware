@@ -49,29 +49,63 @@
 
 package com.openexchange.groupware.update.exception;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 
-public class UpdateExceptionFactory extends AbstractOXExceptionFactory {
+/**
+ * Factory for creating exception in the schema updater.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class UpdateExceptionFactory extends
+    AbstractOXExceptionFactory<UpdateException> {
 
+    /**
+     * Default constructor.
+     * @param clazz read exception informations from this class.
+     */
     public UpdateExceptionFactory(final Class clazz) {
         super(clazz);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected AbstractOXException buildException(Component component,
-        Category category, int number, String message, Throwable cause,
-        Object... msgArgs) {
-        // TODO Auto-generated method stub
-        return null;
+    protected UpdateException buildException(final Component component,
+        final Category category, final int number, final String message,
+        final Throwable cause, final Object... msgArgs) {
+        return new UpdateException(component, category, number, message, cause,
+            msgArgs);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected int getClassId() {
-        // TODO Auto-generated method stub
-        return 0;
+        return Classes.UPDATE_EXCEPTION_FACTORY;
     }
 
+    /**
+     * Creates an UpdateException.
+     * @param number annotation identifier of the exception.
+     * @param msgArgs arguments for the message.
+     * @return the created UpdateException.
+     */
+    public UpdateException create(final int number, final Object... msgArgs) {
+        return create(number, null, msgArgs);
+    }
+
+    /**
+     * Creates an UpdateException.
+     * @param number annotation identifier of the exception.
+     * @param cause nested cause.
+     * @param msgArgs arguments for the message.
+     * @return the created UpdateException.
+     */
+    public UpdateException create(final int number, final Throwable cause,
+        final Object... msgArgs) {
+        return createException(number, cause, msgArgs);
+    }
 }

@@ -60,6 +60,7 @@ import java.sql.Statement;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
@@ -100,29 +101,41 @@ public class SchemaStoreImpl extends SchemaStore {
      * {@inheritDoc}
      */
     @Override
-    @OXThrowsMultiple(
-        category = {Category.PROGRAMMING_ERROR, Category.SETUP_ERROR },
-        desc = {"", "" },
-        exceptionId = {1, 2 },
-        msg = {"A SQL error occured while reading schema version information: "
-            + "%1$s.", "No row found in table update." }
-    )
     public Schema getSchema(final int contextId) throws SchemaException {
+        final Schema retval;
+        if (existsTable(contextId)) {
+            retval = loadSchema(contextId);
+        } else {
+            retval = SchemaImpl.FIRST;
+        }
+        return retval;
+    }
+
+    /**
+     * Loads the schema version information from the database.
+     * @param contextId context identifier.
+     * @return the schema version information.
+     * @throws SchemaException if loading fails.
+     */
+    @OXThrowsMultiple(
+        category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR,
+            Category.SETUP_ERROR },
+        desc = {"", "", "" },
+        exceptionId = { 1, 2, 4 },
+        msg = { "A SQL error occured while reading schema version information: "
+            + "%1$s.", "No row found in table update.", "Multiple rows found." }
+    )
+    private Schema loadSchema(final int contextId) throws SchemaException {
         Connection con;
         try {
-            con = Database.get(contextId, false);
+            con = Database.get(contextId, true);
         } catch (DBPoolingException e) {
             throw new SchemaException(e);
         }
+        SchemaImpl schema = null;
         Statement stmt = null;
         ResultSet result = null;
-        SchemaImpl schema = null;
         try {
-            final DatabaseMetaData meta = con.getMetaData();
-            result = meta.getTables(null, null, "version", null);
-            if (!result.next()) {
-                return SchemaImpl.FIRST;
-            }
             stmt = con.createStatement();
             result = stmt.executeQuery(SELECT);
             if (result.next()) {
@@ -136,13 +149,56 @@ public class SchemaStoreImpl extends SchemaStore {
             } else {
                 throw EXCEPTION.create(2);
             }
+            if (result.next()) {
+                throw EXCEPTION.create(4);
+            }
         } catch (SQLException e) {
             throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            Database.back(contextId, false, con);
+            Database.back(contextId, true, con);
         }
         return schema;
     }
 
+    /**
+     * Checks if the schema version table exists.
+     * @param contextId context identifier.
+     * @return <code>true</code> if the table exists.
+     * @throws SchemaException if the check fails.
+     */
+    @OXThrowsMultiple(
+        category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR },
+        desc = { "Checking if a table exist failed.", "Strange context "
+            + "identifier or a mapping is missing." },
+        exceptionId = { 3, 5 },
+        msg = { "A SQL exception occured while checking for schema version "
+            + "table: %1$s.", "Resolving schema for context %1$d failed." }
+    )
+    private boolean existsTable(final int contextId) throws SchemaException {
+        Connection con;
+        try {
+            con = Database.get(contextId, true);
+        } catch (DBPoolingException e) {
+            throw new SchemaException(e);
+        }
+        boolean retval = false;
+        ResultSet result = null;
+        try {
+            final DatabaseMetaData meta = con.getMetaData();
+            result = meta.getTables(Database.getSchema(contextId), null,
+                "version", new String[] { "TABLE" });
+            if (result.next()) {
+                retval = true;
+            }
+        } catch (SQLException e) {
+            throw EXCEPTION.create(3, e, e.getMessage());
+        } catch (DBPoolingException e) {
+            throw EXCEPTION.create(5, e, contextId);
+        } finally {
+            closeSQLStuff(result);
+            Database.back(contextId, true, con);
+        }
+        return retval;
+    }
 }

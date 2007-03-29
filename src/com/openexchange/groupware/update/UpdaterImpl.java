@@ -49,21 +49,16 @@
 
 package com.openexchange.groupware.update;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
- * @author marcus
- *
+ * Implementation for the updater interface.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdaterImpl extends Updater {
 
-    private Map<Integer,Schema> schemaCache = new HashMap<Integer, Schema>();
-    
     /**
      * Default constructor.
      */
@@ -73,7 +68,6 @@ public class UpdaterImpl extends Updater {
 
     /**
      * {@inheritDoc}
-     * @throws UpdateException 
      */
     @Override
     public boolean isLocked(final Context context) throws UpdateException {
@@ -92,7 +86,6 @@ public class UpdaterImpl extends Updater {
 
     /**
      * {@inheritDoc}
-     * @throws UpdateException 
      */
     @Override
     public boolean toUpdate(final Context context) throws UpdateException {
@@ -100,18 +93,20 @@ public class UpdaterImpl extends Updater {
         return Version.NUMBER > schema.getDBVersion();
     }
 
+    /**
+     * Loads the schema information from the database.
+     * @param context the schema in that this context is will be loaded.
+     * @return the schema information.
+     * @throws UpdateException if loading the schema information fails.
+     */
     private Schema getSchema(final Context context) throws UpdateException {
-        final int contextId = context.getContextId();
-        Schema schema = schemaCache.get(contextId);
-        if (null == schema) {
-            try {
-                final SchemaStore store = SchemaStore.getInstance(
-                    SchemaStoreImpl.class.getName());
-                schema = store.getSchema(context);
-                schemaCache.put(contextId, schema);
-            } catch (SchemaException e) {
-                throw new UpdateException(e);
-            }
+        final Schema schema;
+        try {
+            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl
+                .class.getName());
+            schema = store.getSchema(context);
+        } catch (SchemaException e) {
+            throw new UpdateException(e);
         }
         return schema;
     }

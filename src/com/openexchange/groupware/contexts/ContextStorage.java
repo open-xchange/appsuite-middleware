@@ -47,11 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import java.util.List;
+
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
@@ -62,7 +63,7 @@ public abstract class ContextStorage {
     /**
      * Singleton implementation.
      */
-    private static final ContextStorage SINGLETON;
+    private static ContextStorage impl;
 
     /**
      * Will be returned if a context cannot be found through its login info.
@@ -74,7 +75,7 @@ public abstract class ContextStorage {
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
-        return SINGLETON;
+        return impl;
     }
 
     /**
@@ -95,7 +96,32 @@ public abstract class ContextStorage {
      * context with the given identifier can't be found.
      * @throws ContextException if an error occurs.
      */
-    public abstract Context getContext(int contextId)
+    public Context getContext(final int contextId) throws ContextException {
+        final Context retval = loadContext(contextId);
+        // Check for update.
+        try {
+            final Updater updater = Updater.getInstance();
+            if (updater.toUpdate(retval)) {
+                updater.startUpdate(retval);
+                throw new ContextException(ContextException.Code.UPDATE);
+            }
+            if (updater.isLocked(retval)) {
+                throw new ContextException(ContextException.Code.UPDATE);
+            }
+        } catch (UpdateException e) {
+            throw new ContextException(e);
+        }
+        // Lock context.
+        return retval;
+    }
+
+    /**
+     * Loads the context object.
+     * @param contextId unique identifier of the context to load.
+     * @return the context object.
+     * @throws ContextException if loading the context fails.
+     */
+    protected abstract Context loadContext(int contextId)
         throws ContextException;
 
     /**
@@ -113,8 +139,12 @@ public abstract class ContextStorage {
         // Do nothing because we use a singleton implementation.
     }
 
-    static {
-        // TODO make context implementations configurable
-        SINGLETON = new CachingContextStorage(new RdbContextStorage());
+    /**
+     * Initialization.
+     * @throws ContextException if initialization of contexts fails.
+     */
+    public static void init() throws ContextException {
+        CachingContextStorage.initCache();
+        impl = new CachingContextStorage(new RdbContextStorage());
     }
 }

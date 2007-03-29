@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import java.io.IOException;
@@ -82,14 +80,14 @@ public class CachingContextStorage extends ContextStorage {
         CachingContextStorage.class);
 
     /**
-     * Cache.
-     */
-    private static final JCS CACHE;
-
-    /**
      * Lock for the cache.
      */
-    private static final Lock CACHE_LOCK;
+    private static final Lock CACHE_LOCK = new ReentrantLock();
+
+    /**
+     * Cache.
+     */
+    private static JCS cache;
 
     /**
      * Implementation of the context storage that does persistant storing.
@@ -119,12 +117,12 @@ public class CachingContextStorage extends ContextStorage {
      */
     @Override
     public int getContextId(final String loginInfo) throws ContextException {
-        Integer contextId = (Integer) CACHE.get(loginInfo);
+        Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
             LOG.trace("Cache MISS. Login info: " + loginInfo);
             contextId = persistantImpl.getContextId(loginInfo);
             try {
-                CACHE.put(loginInfo, contextId);
+                cache.put(loginInfo, contextId);
             } catch (CacheException e) {
                 throw new ContextException(Code.CACHE_PUT, e);
             }
@@ -138,19 +136,19 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    public Context getContext(final int contextId) throws ContextException {
+    protected Context loadContext(final int contextId) throws ContextException {
         return CacheProxy.getCacheProxy(
             new OXObjectFactory<Context>() {
                 public Object getKey() {
                     return contextId;
                 }
                 public Context load() throws AbstractOXException {
-                    return persistantImpl.getContext(contextId);
+                    return persistantImpl.loadContext(contextId);
                 }
                 public Lock getCacheLock() {
                     return CACHE_LOCK;
                 }
-            }, CACHE, Context.class);
+            }, cache, Context.class);
     }
 
     /**
@@ -161,15 +159,18 @@ public class CachingContextStorage extends ContextStorage {
         return persistantImpl.getAllContextIds();
     }
 
-    static {
+    /**
+     * Initializes the context cache.
+     * @throws ContextException if the initialization fails.
+     */
+    public static void initCache() throws ContextException {
         try {
             Configuration.load();
-            CACHE = JCS.getInstance("Context");
+            cache = JCS.getInstance("Context");
         } catch (CacheException e) {
-            throw new RuntimeException("Can't create context cache.", e);
+            throw new ContextException(ContextException.Code.CACHE_INIT, e);
         } catch (IOException e) {
-            throw new RuntimeException("Can't read cache configuration.", e);
+            throw new ContextException(ContextException.Code.CACHE_INIT, e);
         }
-        CACHE_LOCK = new ReentrantLock(true);
     }
 }

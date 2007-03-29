@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.exception;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -58,7 +57,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * Creates schema exceptions.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SchemaExceptionFactory extends AbstractOXExceptionFactory {
+public class SchemaExceptionFactory extends
+    AbstractOXExceptionFactory<SchemaException> {
 
     /**
      * Default constructor.
@@ -72,7 +72,7 @@ public class SchemaExceptionFactory extends AbstractOXExceptionFactory {
      * {@inheritDoc}
      */
     @Override
-    protected AbstractOXException buildException(final Component component,
+    protected SchemaException buildException(final Component component,
         final Category category, final int number, final String message,
         final Throwable cause, final Object... msgArgs) {
         return new SchemaException(component, category, number, message, cause,
@@ -91,23 +91,23 @@ public class SchemaExceptionFactory extends AbstractOXExceptionFactory {
      * Creates a schema exception.
      * @param identifier exception identifier.
      * @param cause nested cause.
-     * @param messageArgs arguments for the message.
-     * @return
+     * @param msgArgs arguments for the message.
+     * @return the created exception.
      */
     public SchemaException create(final int identifier, final Throwable cause,
-        final Object... messageArgs) {
-        return (SchemaException) super.createException(identifier, cause,
-            messageArgs);
+        final Object... msgArgs) {
+        return createException(identifier, cause,
+            msgArgs);
     }
 
     /**
      * Creates a schema exception.
      * @param identifier exception identifier.
-     * @param messageArgs arguments for the message.
-     * @return
+     * @param msgArgs arguments for the message.
+     * @return the created exception.
      */
     public SchemaException create(final int identifier,
-        final Object... messageArgs) {
-        return create(identifier, null, messageArgs);
+        final Object... msgArgs) {
+        return create(identifier, null, msgArgs);
     }
 }

@@ -50,20 +50,41 @@
 package com.openexchange.groupware.update.exception;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 
 /**
- * @author marcus
- *
+ * Exception class for the updater.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdateException extends AbstractOXException {
 
     /**
-     * 
+     * For serialization.
      */
     private static final long serialVersionUID = 7764336021245161926L;
 
-    public UpdateException(AbstractOXException e) {
-        super(e);
+    /**
+     * Nesting constructor.
+     * @param cause Nested cause.
+     */
+    public UpdateException(final AbstractOXException cause) {
+        super(cause);
+    }
+
+    /**
+     * Constructor with all parameters.
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     * @param msgArgs arguments for the exception message.
+     */
+    public UpdateException(final Component component, final Category category,
+        final int number, final String message, final Throwable cause,
+        final Object[] msgArgs) {
+        super(component, category, number, message, cause);
+        setMessageArgs(msgArgs);
     }
 
 }

@@ -49,23 +49,28 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.groupware.AbstractOXException;
+
 /**
- * The {@link #run()} method of this class is started in a seperate thread for
- * the update process.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * A single update task.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateProcess implements Runnable {
+public interface UpdateTask {
 
     /**
-     * {@inheritDoc}
+     * Returns the database schema version with that this update task was
+     * introduced. This version is compared with the schema version of the
+     * database. This update will only be applied if the database schema version
+     * is lower than this version. The most actual version is defined here
+     * {@link Version}.
+     * @return the schema version with that this update task was introduced.
      */
-    public void run() {
-//        lockSchema();
-//        removeContexts();
-//        collectAllUpdates();
-//        filterUpdates();
-//        sortUpdates();
-//        performUpdates();
-//        unlockSchema();
-    }
+    int addedWithVersion();
+
+    /**
+     * This method is called to apply the changes to the schema of the database.
+     * @throws AbstractOXException if applying the changes fails.
+     */
+    void perform() throws AbstractOXException;
+
 }

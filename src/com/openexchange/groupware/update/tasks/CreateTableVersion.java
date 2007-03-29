@@ -47,25 +47,36 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tasks;
+
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * The {@link #run()} method of this class is started in a seperate thread for
- * the update process.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Creates the table version and inserts a single line.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateProcess implements Runnable {
+public final class CreateTableVersion implements UpdateTask {
+
+    /**
+     * Default constructor.
+     */
+    public CreateTableVersion() {
+        super();
+    }
 
     /**
      * {@inheritDoc}
      */
-    public void run() {
-//        lockSchema();
-//        removeContexts();
-//        collectAllUpdates();
-//        filterUpdates();
-//        sortUpdates();
-//        performUpdates();
-//        unlockSchema();
+    public int addedWithVersion() {
+        return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void perform() throws AbstractOXException {
+        // TODO Auto-generated method stub
+
     }
 }

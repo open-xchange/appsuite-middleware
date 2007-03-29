@@ -88,6 +88,8 @@ import com.openexchange.webdav.InfostorePerformer;
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
+ * @deprecated we should now use the *Init.java classes for initializing all
+ * subsystems.
  */
 public class InitWorker extends ComfireInitWorker {
 

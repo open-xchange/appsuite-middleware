@@ -49,41 +49,88 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
- * @author marcus
- *
+ * Interface for the updater.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@OXExceptionSource(classId = Classes.UPDATER, component = Component.UPDATE)
 public abstract class Updater {
 
-    private static Class< ? extends Updater> implementingClass =
-        UpdaterImpl.class;
-    
     /**
-     * 
+     * Current implementation of the updater.
+     */
+    private static Class< ? extends Updater> implementingClass;
+
+    /**
+     * Factory for creating exceptions from annotations.
+     */
+    private static final UpdateExceptionFactory EXCEPTION =
+        new UpdateExceptionFactory(Updater.class);
+
+    /**
+     * Default constructor.
      */
     protected Updater() {
         super();
     }
 
-    public static Updater getInstance() {
+    /**
+     * Factory method to get an updater.
+     * @return the updater.
+     * @throws UpdateException if instanciating the implementation fails.
+     */
+    @OXThrows(
+        category = Category.SETUP_ERROR,
+        desc = "",
+        exceptionId = 1,
+        msg = "Can't instanciate updater implementation %1$s."
+    )
+    public static Updater getInstance() throws UpdateException {
         try {
+            synchronized (Updater.class) {
+                if (null == implementingClass) {
+                    implementingClass = UpdaterImpl.class;
+                }
+            }
             return implementingClass.newInstance();
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw EXCEPTION.create(1, e, implementingClass.getName());
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw EXCEPTION.create(1, e, implementingClass.getName());
         }
-        return null;
     }
 
-    public abstract boolean toUpdate(final Context context) throws UpdateException;
+    /**
+     * @param context Context inside the schema.
+     * @return <code>true</code> if the schema must be updated.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract boolean toUpdate(final Context context)
+        throws UpdateException;
 
-    public abstract void startUpdate(final Context context) throws UpdateException;
+    /**
+     * Starts the update process on a schema.
+     * @param context Context inside the schema.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract void startUpdate(final Context context)
+        throws UpdateException;
 
-    public abstract boolean isLocked(final Context context) throws UpdateException;
+    /**
+     * @param context Context inside the schema.
+     * @return <code>true</code> if the schema the context resides in is
+     * currently updated.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract boolean isLocked(final Context context)
+        throws UpdateException;
 }

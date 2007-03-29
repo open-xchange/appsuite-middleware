@@ -89,15 +89,17 @@ public abstract class SchemaStore {
 
     /**
      * Factory method.
+     * @param className Class name of the implementation.
      * @return an implementation for this interface.
      */
     @OXThrowsMultiple(
-        category={Category.SETUP_ERROR, Category.SETUP_ERROR},
-        desc={"", ""},
-        exceptionId={1, 2},
-        msg={"Class %1$s can not be loaded.", "Can't instanciate class %1$s."}
+        category = {Category.SETUP_ERROR, Category.SETUP_ERROR},
+        desc = {"", ""},
+        exceptionId = {1, 2},
+        msg = {"Class %1$s can not be loaded.", "Can't instanciate class %1$s."}
     )
-    public static SchemaStore getInstance(final String className) throws SchemaException {
+    public static SchemaStore getInstance(final String className)
+        throws SchemaException {
         try {
             synchronized (SchemaStore.class) {
                 if (null == implementingClass) {
@@ -107,11 +109,11 @@ public abstract class SchemaStore {
             }
             return implementingClass.newInstance();
         } catch (InstantiationException e) {
-            throw EXCEPTION.create(2, e);
+            throw EXCEPTION.create(2, e, className);
         } catch (IllegalAccessException e) {
-            throw EXCEPTION.create(2, e);
+            throw EXCEPTION.create(2, e, className);
         } catch (ClassNotFoundException e) {
-            throw EXCEPTION.create(1, e);
+            throw EXCEPTION.create(1, e, className);
         }
     }
 

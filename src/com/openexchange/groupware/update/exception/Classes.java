@@ -50,16 +50,35 @@
 package com.openexchange.groupware.update.exception;
 
 /**
- * @author marcus
- *
+ * Class identifier for component update exceptions.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Classes {
 
+    /**
+     * {@link SchemaStoreImpl}.
+     */
     public static final int SCHEMA_STORE_IMPL = 1;
 
+    /**
+     * {@link SchemaExceptionFactory}.
+     */
     public static final int SCHEMA_EXCEPTION_FACTORY = 2;
 
+    /**
+     * {@link SchemaStore}.
+     */
     public static final int SCHEMA_STORE = 3;
+
+    /**
+     * {@link UpdateExceptionFactory}.
+     */
+    public static final int UPDATE_EXCEPTION_FACTORY = 4;
+
+    /**
+     * {@link Updater}.
+     */
+    public static final int UPDATER = 5;
 
     /**
      * Prevent instanciation.

@@ -49,8 +49,15 @@
 
 package com.openexchange.groupware.update;
 
+/**
+ * The current schema version that the groupware needs.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public final class Version {
 
+    /**
+     * Schema version after all updates have been applied.
+     */
     public static final int NUMBER = 0;
 
     /**
