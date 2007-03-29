@@ -72,12 +72,22 @@ public class BasicAuthenticator {
         fileAuth = AuthenticationFactory.getInstanceFile();
     }
     
+    /**
+     * @param authdata
+     * @throws InvalidCredentialsException
+     */
     public void doAuthentication(Credentials authdata) throws InvalidCredentialsException{
         if(!fileAuth.authenticate(authdata)){
             throw new InvalidCredentialsException("Authentication failed");
         }
     }
     
+    /**
+     * @param authdata
+     * @param ctx
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     */
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
         if(!sqlAuth.authenticate(authdata,ctx)){
             throw new InvalidCredentialsException("Authentication failed");
