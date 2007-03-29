@@ -79,13 +79,13 @@ public class DeleteEvent extends EventObject {
 
 	private static final long serialVersionUID = 2636570955675454470L;
 
-	private final Context ctx;
+	private transient final Context ctx;
 
 	private final int id;
 
 	private final int type;
 
-	private SessionObject session;
+	private transient SessionObject session;
 
 	public DeleteEvent(Object source, int id, int type, int cid) throws ContextException {
 		super(source);

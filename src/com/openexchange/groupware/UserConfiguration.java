@@ -631,11 +631,12 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createCon = (writeCon == null);
+		boolean closeConnection = false;
 		PreparedStatement stmt = null;
 		try {
-			if (createCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeConnection = true;
 			}
 			if (insert) {
 				stmt = writeCon.prepareStatement(INSERT_USER_CONFIGURATION);
@@ -650,7 +651,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			}
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, createCon ? writeCon : null, false, ctx);
+			closeResources(null, stmt, closeConnection ? writeCon : null, false, ctx);
 		}
 	}
 
@@ -658,12 +659,13 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			final Connection readConArg) throws SQLException, DBPoolingException {
 		final Context ctx = new ContextImpl(cid);
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
 			stmt.setInt(1, ctx.getContextId());
@@ -674,19 +676,21 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			}
 			return new UserConfiguration(0, userId, groups, ctx);
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
-	public static UserConfiguration loadUserConfiguration(final int userId, int[] groups, final Context ctx,
+	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx,
 			final Connection readConArg) throws SQLException, LdapException, DBPoolingException, OXException {
+		int[] groups = groupsArg;
 		Connection readCon = readConArg;
-		final boolean createCon = (readCon == null);
+		boolean closeCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeCon = true;
 			}
 			stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
 			stmt.setInt(1, ctx.getContextId());
@@ -701,7 +705,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 			}
 			throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, userId, ctx.getContextId());
 		} finally {
-			closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -723,18 +727,19 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	public static void deleteUserConfiguration(final int userId, final Connection writeConArg, final Context ctx)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createWriteCon = (writeCon == null);
+		boolean closeWriteCon = false;
 		PreparedStatement stmt = null;
 		try {
-			if (createWriteCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
 			}
 			stmt = writeCon.prepareStatement(DELETE_USER_CONFIGURATION);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, userId);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, createWriteCon ? writeCon : null, false, ctx);
+			closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
 		}
 	}
 
