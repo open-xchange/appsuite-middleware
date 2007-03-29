@@ -2,7 +2,6 @@
 
 ALTER TABLE swupdate
     MODIFY cid INT4 UNSIGNED NOT NULL,
-    MODIFY id INT4 UNSIGNED NOT NULL,
     MODIFY monday TIME default NULL,
     MODIFY tuesday TIME default NULL,
     MODIFY wednesday TIME default NULL,
