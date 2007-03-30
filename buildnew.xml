@@ -5,15 +5,39 @@
     </description>
 
     <!-- Customizable values -->
+    <property name="destdir" value=""/>
+	<property name="prefix" location="/opt/open-xchange" />
+	<property name="log.install.dir" value="/var/log/open-xchange"/>
     <property file="VERSION"/>
     <property file="PVERSION"/>
 
     <!-- Directories -->
     <property name="src.dir" location="src"/>
     <property name="build.dir" location="build"/>
+	<property name="lib.dir" location="lib"/>
+	<property name="conf.dir" location="conf/groupware"/>
+	<property name="i18n.dir" location="i18n"/>
+	<property name="bin.dir" location="sbin"/>
 
     <!-- Replacements -->
     <property name="ox_buildnumber" value="${pversion}"/>
+	<property name="lib.install.dir" value="${prefix}/lib"/>
+	<property name="lib.install.copy.dir" location="${destdir}${lib.install.dir}"/>
+	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+	<property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+	<property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
+	<property name="bin.install.dir" value="${prefix}/sbin/"/>
+	<property name="bin.install.copy.dir" location="${destdir}${bin.install.dir}"/>
+
+    <!-- Replacements in Version.java.in -->
+    <filterset id="version">
+        <filter token="@ox_major@" value="${ox_major}" />
+        <filter token="@ox_minor@" value="${ox_minor}" />
+        <filter token="@ox_patch@" value="${ox_patch}" />
+        <filter token="@ox_buildnumber@" value="${ox_buildnumber}" />
+        <filter token="@ox_codename@" value="${ox_codename}" />
+        <filter token="@ox_name@" value="${ox_name}" />
+	</filterset>
 
     <!-- JAR names for classpath -->
     <property name="jsdkjar" value="jsdk.jar" />
@@ -52,12 +76,32 @@
         <pathelement location="${lib.dir}/${jbossclientjar}" />
         <pathelement location="${lib.dir}/${oxadapterjar}" />
         <pathelement location="${lib.dir}/${tnefjar}" />
-          <pathelement location="${lib.dir}/${springbeanjar}" />
-          <pathelement location="${lib.dir}/${springcorejar}" />
+        <pathelement location="${lib.dir}/${springbeanjar}" />
+        <pathelement location="${lib.dir}/${springcorejar}" />
     </path>
 
+    <!-- JARs for running server -->
+    <fileset dir="lib" id="server-jars">
+		<include name="ox_server.jar"/>
+	    <include name="ox_languages.jar"/>
+	</fileset>
+
+	<!-- I18N Properties -->
+	<property name="xgettext" value="xgettext"/>
+	<fileset id="i18n.sources" dir="${src.dir}">
+		<include name="com/openexchange/groupware/i18n/*.java"/>
+	</fileset>
+	<property name="msgfmt" value="msgfmt"/>
+	<fileset id="i18n.pos" dir="${i18n.dir}">
+		<include name="**/*.po"/>
+	</fileset>
+	<property name="java_apt" value="apt"/>
+
+    <!-- Compile -->
+    
     <target name="prepare">
         <mkdir dir="${build.dir}"/>
+		<mkdir dir="lib"/>
     </target>
 
     <target name="compile" depends="prepare, patchVersionJava">
@@ -67,32 +111,119 @@
         </javac>
     </target>
 
-    <target name="build" depends="compile"/>
+	<target name="jar" depends="compile">
+		<jar jarfile="lib/ox_server.jar" basedir="${build.dir}" includes="**"/>
+	</target>
 
-    <target name="install" depends="build">
+    <target name="build" depends="compile, jar, create-lang-jar"/>
+
+    <target name="installJars" depends="build">
+        <echo message="${lib.install.copy.dir}"/>
+		<mkdir dir="${lib.install.copy.dir}"/>
+		<copy todir="${lib.install.copy.dir}" overwrite="true">
+			<fileset refid="server-jars" />
+		</copy>
     </target>
+
+    <target name="installExceptJars">
+		<mkdir dir="${log.install.copy.dir}"/>
+
+		<mkdir dir="${conf.install.copy.dir}"/>
+		<copy todir="${conf.install.copy.dir}" overwrite="true">
+			<fileset dir="${conf.dir}" excludes="*.in"/> 
+		</copy>
+		
+		<mkdir dir="${bin.install.copy.dir}"/>
+		<copy todir="${bin.install.copy.dir}" overwrite="true">
+			<fileset dir="${bin.dir}" excludes="*.in"/>
+		</copy>
+		<chmod perm="755" file="${bin.install.copy.dir}/open-xchange-groupware"/>
+		
+        <!-- system files -->
+    	<!-- templates -->
+    </target>
+
+    <target name="install" depends="build,installJars,installExceptJars"/>
 
     <target name="default" depends="install"/>
 
     <target name="clean">
-        <delete file="${src.dir}/com/openexchange/server/Version.java"/>
+        <delete file="lib/ox_languages.jar"/>
+        <delete file="lib/ox_server.jar"/>
         <delete dir="${build.dir}"/>
+        <delete file="${src.dir}/com/openexchange/server/Version.java"/>
     </target>
 
+    <!-- I18N Stuff -->
+
+    <target name="check-msgfmt-executable" unless="exists_msgfmt">
+		<exec executable="${msgfmt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_msgmft">
+			<arg value="--help" />
+		</exec>
+		<condition property="exists_msgfmt">
+			<equals arg1="0" arg2="${result_msgmft}" />
+		</condition>
+        <antcall target="show-missing-msgfmt"/>
+    </target>
+
+    <target name="check-xgettext-executable" unless="exists_xgettext">
+		<exec executable="${xgettext}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_xgettext">
+			<arg value="--help"/>
+		</exec>
+		<condition property="exists_xgettext">
+			<equals arg1="0" arg2="${result_xgettext}"/>
+		</condition>
+        <antcall target="show-missing-xgettext"/>
+    </target>
+
+    <target name="check_apt_executable" unless="exists_apt">
+		<exec executable="${java_apt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_apt">
+			<arg value="-help" />
+		</exec>
+		<condition property="exists_apt">
+			<equals arg1="0" arg2="${result_apt}" />
+		</condition>
+        <antcall target="show-missing-apt"></antcall>
+    </target>
+    
+    <target name="check-i18n-executables" depends="check-msgfmt-executable,check-xgettext-executable,check_apt_executable">
+		<antcall target="show-missing-executables"/>
+	</target>
+
+    <target name="show-missing-executables" depends="show-missing-xgettext,show-missing-msgfmt,show-missing-apt"/>
+	
+	<target name="show-missing-xgettext" unless="exists_xgettext">
+		<echo message="xgettext can't be found. POT files won't be generated." />
+    </target>
+
+	<target name="show-missing-msgfmt" unless="exists_msgfmt">
+		<echo message="msgfmt can't be found. Language Bundle won't be generated." />
+	</target>
+				
+	<target name="show-missing-apt" unless="exists_apt">
+		<echo message="apt can't be found. Error codes cannot be read from server code." />
+	</target>
+
+	<target name="create-lang-jar" depends="check-msgfmt-executable,prepare" if="exists_msgfmt">
+		<!-- FIXME Discover Files and languages dynamically -->
+		<exec executable="${msgfmt}" dir="${basedir}">
+			<arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
+		</exec>
+		<exec executable="${msgfmt}" dir="${basedir}">
+			<arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
+		</exec>
+		<jar jarfile="lib/ox_languages.jar" basedir="${build.dir}"
+			includes="com/openexchange/groupware/i18n/ServerMessages*" />
+	</target>
+    
     <!-- Templates -->
 
     <target name="patchVersionJava">
         <copy file="${src.dir}/com/openexchange/server/Version.java.in"
             tofile="${src.dir}/com/openexchange/server/Version.java"
-             overwrite="yes"/>
-        <replace file="${src.dir}/com/openexchange/server/Version.java">
-            <replacefilter token="@ox_major@" value="${ox_major}" />
-            <replacefilter token="@ox_minor@" value="${ox_minor}" />
-            <replacefilter token="@ox_patch@" value="${ox_patch}" />
-            <replacefilter token="@ox_buildnumber@" value="${ox_buildnumber}" />
-            <replacefilter token="@ox_codename@" value="${ox_codename}" />
-            <replacefilter token="@ox_name@" value="${ox_name}" />
-        </replace>
+            overwrite="yes">
+            <filterset refid="version"/>
+        </copy>
     </target>
 
 </project>

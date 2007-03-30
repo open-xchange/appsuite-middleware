@@ -58,11 +58,9 @@ public final class Version {
     public static final String MAJOR = "@ox_major@";
     public static final String MINOR = "@ox_minor@";
     public static final String PATCH = "@ox_patch@";
-    public static final String DESCRIPTION = "@ox_descr@";
     public static final String CODENAME = "@ox_codename@";
     public static final String NAME = "@ox_name@";
     public static final String BUILDNUMBER = "@ox_buildnumber@";
-    public static final String WEBMAIL_SIGNATURE = "@ox_webmail_signature@";
 
     public static final String VERSION_STRING = MAJOR + '.' + MINOR + '.'
         + PATCH + '-' + BUILDNUMBER;
