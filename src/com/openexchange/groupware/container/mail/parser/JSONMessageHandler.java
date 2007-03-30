@@ -292,11 +292,11 @@ public class JSONMessageHandler implements MessageHandler {
 	 */
 	public boolean handleInlinePlainText(final String plainTextContent, final String baseContentType, final int size,
 			final String fileName, final String id) throws OXException {
-		textFound = true;
-		if (isAlternative && usm.isDisplayHtmlInlineContent()) {
+		if (isAlternative && usm.isDisplayHtmlInlineContent() && !textFound) {
 			/*
-			 * User wants to see message's html content
+			 * User wants to see message's alternative content
 			 */
+			textFound = true;
 			return true;
 		}
 		final String formattedText = MessageUtils.formatContentForDisplay(plainTextContent, false, session, msgUID);

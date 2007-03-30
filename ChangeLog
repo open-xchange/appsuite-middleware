@@ -2,6 +2,9 @@
 
  - Fixed bug #6585: Server enhanced by 'Automatic Database Update'
  - Fixed ClassCastException when creating a proxy for a context
+ - Fixed missing display of messages whose content type is
+   'multipart/alternative' and whose alternative version is different to
+   MIME type 'text/html'
 
 * 2007-03-28 - thorben.betten@open-xchange.com
 
