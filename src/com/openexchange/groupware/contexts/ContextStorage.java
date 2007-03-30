@@ -56,7 +56,8 @@ import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ContextStorage {
 
@@ -121,7 +122,7 @@ public abstract class ContextStorage {
      * @return the context object.
      * @throws ContextException if loading the context fails.
      */
-    protected abstract ContextImpl loadContext(int contextId)
+    protected abstract ContextExtended loadContext(int contextId)
         throws ContextException;
     
     /**

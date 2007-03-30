@@ -57,7 +57,7 @@ import java.io.Serializable;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ContextImpl implements Context, Serializable {
+public class ContextImpl implements ContextExtended, Serializable {
 
     /**
      * Serialization.
@@ -191,8 +191,9 @@ public class ContextImpl implements Context, Serializable {
         this.fileStorageQuota = fileStorageQuota;
     }
 
-    /**
-     * @param enabled the enabled to set
+    /* (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.contexts.ContextExtended#setEnabled(boolean)
      */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;

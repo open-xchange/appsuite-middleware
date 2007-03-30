@@ -108,14 +108,16 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * {@inheritDoc}
      */
-    public void close() {
+    @Override
+	public void close() {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public int getContextId(final String loginInfo) throws ContextException {
+    @Override
+	public int getContextId(final String loginInfo) throws ContextException {
         Connection con = null;
         try {
             con = DBPool.pickup();
@@ -179,7 +181,8 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * {@inheritDoc}
      */
-    protected ContextImpl loadContext(final int contextId) throws ContextException {
+    @Override
+	protected ContextExtended loadContext(final int contextId) throws ContextException {
         LOG.error("Lade context from database.");
         Connection con = null;
         try {
@@ -221,7 +224,8 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * {@inheritDoc}
      */
-    public List<Integer> getAllContextIds() throws ContextException {
+    @Override
+	public List<Integer> getAllContextIds() throws ContextException {
         final List<Integer> retval = new ArrayList<Integer>();
         Connection con = null;
         try {

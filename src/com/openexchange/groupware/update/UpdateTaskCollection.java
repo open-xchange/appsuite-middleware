@@ -80,7 +80,7 @@ public class UpdateTaskCollection {
 
 	private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
-	private static final List<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
+	private static final ArrayList<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
 
 	static {
 		if (System.getProperty(PROPERTYNAME) == null) {
@@ -145,7 +145,7 @@ public class UpdateTaskCollection {
 	}
 
 	public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
-		final List<UpdateTask> retval = (List<UpdateTask>) ((ArrayList<UpdateTask>) updateTaskList).clone();
+		final List<UpdateTask> retval = (List<UpdateTask>) updateTaskList.clone();
 		/*
 		 * Filter
 		 */

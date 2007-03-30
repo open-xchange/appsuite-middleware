@@ -47,79 +47,23 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
-import com.openexchange.cache.dynamic.OXNoRefresh;
-
 /**
- * The context stores all attributes that are necessary for components dealing
- * with context specific data. This are especially which database stores the
- * data of the context, the unique numerical identifier used in the relational
- * database to assign persistent stored data to their contexts and is the base
- * distinguished name used in the directory service to seperate contexts.
- * Objects implementing this interface must implement
- * {@link java.lang.Object#equals(java.lang.Object)} and
- * {@link java.lang.Object#hashCode()} because this interface is used as key for
- * maps.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ *
+ * ContextExtended - an extended version of <code>Context</code> interface
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public interface Context {
-
-    /**
-     * Defined the attributes of an context.
-     */
-    enum Attribute { RDB_IDENTIFIER, BASE_DN };
-
-    /**
-     * Returns a value of an attribute from the context.
-     * @param attribute Name of the attribute that value should be returned.
-     * @return the value of an attribute or <code>null</code> if the attribute
-     * isn't set.
-     */
-    Object getValue(Attribute attribute);
-
-    /**
-     * Returns the unique identfier of the context.
-     * @return unique identifier of the context.
-     */
-    @OXNoRefresh
-    int getContextId();
-
-    /**
-     * Returns the unique identfier of context's mailadmin.
-     * @return unique identifier of the context's mailadmin
-     */
-    int getMailadmin();
-
-    /**
-     * @return a string array with login and password of the file storage.
-     */
-    String[] getFileStorageAuth();
-
-    /**
-     * @return the quota for the file storage or <code>0</code> if there is no
-     * quota.
-     */
-    long getFileStorageQuota();
-
-    /**
-     * @return the filestoreId
-     */
-    int getFilestoreId();
-
-    /**
-     * Returns if a context is enabled. All sessions that belong to a disabled
-     * context have to die as fast as possible to be able to maintain these
-     * contexts.
-     * @return <code>true</code> if the context ist enabled, <code>false</code>
-     * otherwise.
-     */
-    boolean isEnabled();
-
-    /**
-     * @return the context specific location inside the filestore.
-     */
-    String getFilestoreName();
+public interface ContextExtended extends Context {
+	
+	/**
+	 * Sets context's enabled status. This causes sessions that belong to a disabled
+	 * context to die as fast as possible to be able to maintain these
+	 * contexts.
+	 * @param enabled - the sontext's enabled status
+	 */
+	void setEnabled(boolean enabled);
+	
 }

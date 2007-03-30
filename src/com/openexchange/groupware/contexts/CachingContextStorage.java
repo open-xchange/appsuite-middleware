@@ -137,14 +137,15 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    protected ContextImpl loadContext(final int contextId) throws ContextException {
-        return CacheProxy.getCacheProxy(
-            new OXObjectFactory<ContextImpl>() {
+    protected ContextExtended loadContext(final int contextId) throws ContextException {
+    	final ContextExtended retval = 
+         CacheProxy.getCacheProxy(
+            new OXObjectFactory<ContextExtended>() {
                 public Object getKey() {
                     return Integer.valueOf(contextId);
                 }
-                public ContextImpl load() throws AbstractOXException {
-                	final ContextImpl retval = persistantImpl.loadContext(contextId);
+                public ContextExtended load() throws AbstractOXException {
+                	final ContextExtended retval = persistantImpl.loadContext(contextId);
                     final Updater updater = Updater.getInstance();
                     if (updater.isLocked(retval)) {
                         retval.setEnabled(false);
@@ -154,7 +155,8 @@ public class CachingContextStorage extends ContextStorage {
                 public Lock getCacheLock() {
                     return CACHE_LOCK;
                 }
-            }, cache, Context.class);
+            }, cache, ContextExtended.class);
+    	return retval;
     }
 
     /**
