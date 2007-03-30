@@ -1,0 +1,98 @@
+<project name="open-xchange" default="default" basedir=".">
+
+    <description>
+        Open-Xchange Collaboration Suite Server
+    </description>
+
+    <!-- Customizable values -->
+    <property file="VERSION"/>
+    <property file="PVERSION"/>
+
+    <!-- Directories -->
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+
+    <!-- Replacements -->
+    <property name="ox_buildnumber" value="${pversion}"/>
+
+    <!-- JAR names for classpath -->
+    <property name="jsdkjar" value="jsdk.jar" />
+    <property name="jdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
+    <property name="mailjar" value="mail.jar" />
+    <property name="activationjar" value="activation.jar" />
+    <property name="jdomjar" value="jdom.jar" />
+    <property name="jcsjar" value="jcs-1.2.7.9.2.jar" />
+    <property name="concurrentjar" value="concurrent.jar" />
+    <property name="loggingjar" value="commons-logging.jar" />
+    <property name="jsonjar" value="json.jar" />
+    <property name="fileuploadjar" value="commons-fileupload.jar" />
+    <property name="iojar" value="commons-io.jar" />
+    <property name="webdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
+    <property name="httpclientjar" value="commons-httpclient-2.0.2.jar" />
+    <property name="tnefjar" value="tnef.jar" />
+    <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
+    <property name="springcorejar" value="spring-core_1.2.7.jar" />
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="${lib.dir}/${jsdkjar}"/>
+        <pathelement location="${lib.dir}/${jdbcjar}"/>
+        <pathelement location="${lib.dir}/${mailjar}"/>
+        <pathelement location="${lib.dir}/${activationjar}"/>
+        <pathelement location="${lib.dir}/${jdomjar}"/>
+        <pathelement location="${lib.dir}/${jcsjar}"/>
+        <pathelement location="${lib.dir}/${concurrentjar}"/>
+        <pathelement location="${lib.dir}/${loggingjar}"/>
+        <pathelement location="${lib.dir}/${jsonjar}"/>
+        <pathelement location="${lib.dir}/${fileuploadjar}"/>
+        <pathelement location="${lib.dir}/${iojar}"/>
+        <pathelement location="${lib.dir}/${webdavjar}"/>
+        <pathelement location="${lib.dir}/${httpclientjar}"/>
+        <pathelement location="${lib.dir}/${jettyjar}" />
+        <pathelement location="${lib.dir}/${jbossclientjar}" />
+        <pathelement location="${lib.dir}/${oxadapterjar}" />
+        <pathelement location="${lib.dir}/${tnefjar}" />
+          <pathelement location="${lib.dir}/${springbeanjar}" />
+          <pathelement location="${lib.dir}/${springcorejar}" />
+    </path>
+
+    <target name="prepare">
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare, patchVersionJava">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="build" depends="compile"/>
+
+    <target name="install" depends="build">
+    </target>
+
+    <target name="default" depends="install"/>
+
+    <target name="clean">
+        <delete file="${src.dir}/com/openexchange/server/Version.java"/>
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Templates -->
+
+    <target name="patchVersionJava">
+        <copy file="${src.dir}/com/openexchange/server/Version.java.in"
+            tofile="${src.dir}/com/openexchange/server/Version.java"
+             overwrite="yes"/>
+        <replace file="${src.dir}/com/openexchange/server/Version.java">
+            <replacefilter token="@ox_major@" value="${ox_major}" />
+            <replacefilter token="@ox_minor@" value="${ox_minor}" />
+            <replacefilter token="@ox_patch@" value="${ox_patch}" />
+            <replacefilter token="@ox_buildnumber@" value="${ox_buildnumber}" />
+            <replacefilter token="@ox_codename@" value="${ox_codename}" />
+            <replacefilter token="@ox_name@" value="${ox_name}" />
+        </replace>
+    </target>
+
+</project>
