@@ -49,65 +49,91 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * Implementation for the updater interface.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@OXExceptionSource(classId = Classes.UPDATER_IMPL, component = Component.UPDATE)
 public class UpdaterImpl extends Updater {
 
-    /**
-     * Default constructor.
-     */
-    public UpdaterImpl() {
-        super();
-    }
+	/**
+	 * For creating exceptions.
+	 */
+	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(UpdaterImpl.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isLocked(final Context context) throws UpdateException {
-        return getSchema(context).isLocked();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public UpdaterImpl() {
+		super();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startUpdate(final Context context) {
-        final UpdateProcess process = new UpdateProcess();
-        final Thread thread = new Thread(process);
-        thread.start();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isLocked(final Context context) throws UpdateException {
+		return getSchema(context).isLocked();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean toUpdate(final Context context) throws UpdateException {
-        final Schema schema = getSchema(context);
-        return Version.NUMBER > schema.getDBVersion();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@OXThrows(
+			category = Category.PROGRAMMING_ERROR,
+			desc = "",
+			exceptionId = 1,
+			msg = "Update process initialization failed: %1$s."
+	)
+	@Override
+	public void startUpdate(final Context context) throws UpdateException {
+		UpdateProcess process;
+		try {
+			process = new UpdateProcess(context.getContextId());
+		} catch (SchemaException e) {
+			throw EXCEPTION.create(1, e, e.getMessage());
+		}
+		final Thread thread = new Thread(process);
+		thread.start();
+	}
 
-    /**
-     * Loads the schema information from the database.
-     * @param context the schema in that this context is will be loaded.
-     * @return the schema information.
-     * @throws UpdateException if loading the schema information fails.
-     */
-    private Schema getSchema(final Context context) throws UpdateException {
-        final Schema schema;
-        try {
-            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl
-                .class.getName());
-            schema = store.getSchema(context);
-        } catch (SchemaException e) {
-            throw new UpdateException(e);
-        }
-        return schema;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean toUpdate(final Context context) throws UpdateException {
+		final Schema schema = getSchema(context);
+		return Version.NUMBER > schema.getDBVersion();
+	}
+
+	/**
+	 * Loads the schema information from the database.
+	 * 
+	 * @param context
+	 *            the schema in that this context is will be loaded.
+	 * @return the schema information.
+	 * @throws UpdateException
+	 *             if loading the schema information fails.
+	 */
+	private Schema getSchema(final Context context) throws UpdateException {
+		final Schema schema;
+		try {
+			final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
+			schema = store.getSchema(context);
+		} catch (SchemaException e) {
+			throw new UpdateException(e);
+		}
+		return schema;
+	}
 }

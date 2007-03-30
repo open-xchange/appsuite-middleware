@@ -47,47 +47,66 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.database;
+
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.tools.Collections;
 
 /**
- * Interface to the data container for the update information of a database
- * schema.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ *
+ * ConfigDBStorage
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public interface Schema {
-
-    /**
-     * @return the database version number stored in the database.
-     */
-    int getDBVersion();
-
-    /**
-     * @return if this schema can be used with an OX that database version
-     * number is directly before the actual.
-     */
-    boolean isGroupwareCompatible();
-
-    /**
-     * @return if this schema can be used with an OX admin daemon that database
-     * version number is directly before the actual.
-     */
-    boolean isAdminCompatible();
-
-    /**
-     * @return <code>true</code> if the schema will currently be updated.
-     */
-    boolean isLocked();
-
-    /**
-     * @return name of the server that is currently updating the schema or
-     * <code>null</code>.
-     */
-    String getServer();
-    
-    /**
-     * @return schema name
-     */
-    String getSchema();
+public class ConfigDBStorage {
+	
+	/*
+	 * Prevent instanciation
+	 */
+	private ConfigDBStorage() {
+		super();
+	}
+	
+	private static final String SQL_SELECT_CONTEXTS = "SELECT cid FROM context_server2db_pool WHERE server_id = ? AND write_db_pool_id = ? AND db_schema = ?";
+	
+	public static final int[] getContextsFromSchema(final String schema, final int writePoolId) throws DBPoolingException {
+		try {
+			Connection configDBReadCon = null;
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				/*
+				 * Get write pool
+				 */
+				configDBReadCon = Database.get(false);
+				stmt = configDBReadCon.prepareStatement(SQL_SELECT_CONTEXTS);
+				stmt.setInt(1, Server.getServerId());
+				stmt.setInt(2, writePoolId);
+				stmt.setString(3, schema);
+				rs = stmt.executeQuery();
+				final Collections.SmartIntArray intArr = new Collections.SmartIntArray(16);
+				while (rs.next()) {
+					intArr.append(rs.getInt(1));
+				}
+				return intArr.toArray();
+			} finally {
+				closeSQLStuff(rs, stmt);
+				if (configDBReadCon != null) {
+					Database.back(false, configDBReadCon);
+				}
+			}
+		} catch (SQLException e) {
+			throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
+		}
+	}
 
 }

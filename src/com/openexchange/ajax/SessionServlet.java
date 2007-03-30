@@ -51,31 +51,29 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionException;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.tools.servlet.http.Tools;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 
 /**
  * Overriden service method that checks if a valid session can be found for the
@@ -116,6 +114,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * Checks the session ID supplied as a query parameter in the request URI.
      * {@inheritDoc}
      */
+    @OXThrows(category=Category.TRY_AGAIN, desc="", exceptionId=4, msg="Context is locked.")
     protected void service(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
@@ -126,6 +125,11 @@ public abstract class SessionServlet extends AJAXServlet {
             final String sessionId = getSessionId(req, cookieId);
             final SessionObject session = getSession(sessionId);
             rememberSession(req, session);
+            final Context ctx = session.getContext();
+            if (!ctx.isEnabled()) {
+            	SessiondConnector.getInstance().removeSession(sessionId);
+            	throw EXCEPTION.create(4);
+            }
             super.service(req, resp);
         } catch (SessionException e) {
             LOG.debug(e.getMessage(), e);

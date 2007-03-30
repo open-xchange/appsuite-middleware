@@ -79,7 +79,12 @@ public final class Classes {
      * {@link Updater}.
      */
     public static final int UPDATER = 5;
-
+    
+    /**
+     * {@link UpdaterImpl}.
+     */
+    public static final int UPDATER_IMPL = 6;
+    
     /**
      * Prevent instanciation.
      */

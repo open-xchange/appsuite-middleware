@@ -179,7 +179,7 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * {@inheritDoc}
      */
-    protected Context loadContext(final int contextId) throws ContextException {
+    protected ContextImpl loadContext(final int contextId) throws ContextException {
         LOG.error("Lade context from database.");
         Connection con = null;
         try {
@@ -245,4 +245,14 @@ public class RdbContextStorage extends ContextStorage {
         }
         return retval;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public void invalidateContext(int contextId) throws ContextException {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("invalidateContext not implemented in " + this.getClass().getCanonicalName());
+		}
+	}
 }

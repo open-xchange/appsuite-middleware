@@ -61,65 +61,80 @@ import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
 /**
  * Abstract class defining the interface for reading the schema version
  * information.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(
-    classId=Classes.SCHEMA_STORE,
-    component=Component.UPDATE
-)
+@OXExceptionSource(classId = Classes.SCHEMA_STORE, component = Component.UPDATE)
 public abstract class SchemaStore {
 
-    /**
-     * For creating exceptions.
-     */
-    private static final SchemaExceptionFactory EXCEPTION = new SchemaExceptionFactory(
-        SchemaStore.class);
+	/**
+	 * For creating exceptions.
+	 */
+	private static final SchemaExceptionFactory EXCEPTION = new SchemaExceptionFactory(SchemaStore.class);
 
-    /**
-     * Class implementing this abstract interface.
-     */
-    private static Class< ? extends SchemaStore> implementingClass;
+	/**
+	 * Class implementing this abstract interface.
+	 */
+	private static Class<? extends SchemaStore> implementingClass;
 
-    /**
-     * Default constructor.
-     */
-    protected SchemaStore() {
-        super();
-    }
+	/**
+	 * Default constructor.
+	 */
+	protected SchemaStore() {
+		super();
+	}
 
-    /**
-     * Factory method.
-     * @param className Class name of the implementation.
-     * @return an implementation for this interface.
-     */
-    @OXThrowsMultiple(
-        category = {Category.SETUP_ERROR, Category.SETUP_ERROR},
-        desc = {"", ""},
-        exceptionId = {1, 2},
-        msg = {"Class %1$s can not be loaded.", "Can't instanciate class %1$s."}
-    )
-    public static SchemaStore getInstance(final String className)
-        throws SchemaException {
-        try {
-            synchronized (SchemaStore.class) {
-                if (null == implementingClass) {
-                    implementingClass = Class.forName(className).asSubclass(
-                        SchemaStore.class);
-                }
-            }
-            return implementingClass.newInstance();
-        } catch (InstantiationException e) {
-            throw EXCEPTION.create(2, e, className);
-        } catch (IllegalAccessException e) {
-            throw EXCEPTION.create(2, e, className);
-        } catch (ClassNotFoundException e) {
-            throw EXCEPTION.create(1, e, className);
-        }
-    }
+	/**
+	 * Factory method.
+	 * 
+	 * @param className
+	 *            Class name of the implementation.
+	 * @return an implementation for this interface.
+	 */
+	@OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR }, desc = { "", "" }, exceptionId = { 1,
+			2 }, msg = { "Class %1$s can not be loaded.", "Can't instanciate class %1$s." })
+	public static SchemaStore getInstance(final String className) throws SchemaException {
+		try {
+			synchronized (SchemaStore.class) {
+				if (null == implementingClass) {
+					implementingClass = Class.forName(className).asSubclass(SchemaStore.class);
+				}
+			}
+			return implementingClass.newInstance();
+		} catch (InstantiationException e) {
+			throw EXCEPTION.create(2, e, className);
+		} catch (IllegalAccessException e) {
+			throw EXCEPTION.create(2, e, className);
+		} catch (ClassNotFoundException e) {
+			throw EXCEPTION.create(1, e, className);
+		}
+	}
 
-    public abstract Schema getSchema(final int contextId) throws SchemaException;
+	public abstract Schema getSchema(final int contextId) throws SchemaException;
 
-    public Schema getSchema(final Context context) throws SchemaException {
-        return getSchema(context.getContextId());
-    }
+	/**
+	 * Marks given schema as locked due to a start of an update process
+	 * 
+	 * @param schema -
+	 *            the schema
+	 * @param contextId TODO
+	 * 
+	 * @throws SchemaException
+	 */
+	public abstract void lockSchema(final Schema schema, int contextId) throws SchemaException;
+	
+	/**
+	 * Marks given schem as unlocked to release this schema from an update
+	 * process
+	 * 
+	 * @param schema -
+	 *            the schema
+	 * @param contextId TODO
+	 * @throws SchemaException
+	 */
+	public abstract void unlockSchema(final Schema schema, int contextId) throws SchemaException;
+
+	public Schema getSchema(final Context context) throws SchemaException {
+		return getSchema(context.getContextId());
+	}
 }

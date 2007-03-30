@@ -53,30 +53,36 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.tasks.CreateTableVersion;
 import com.openexchange.server.DBPoolingException;
 
 /**
  * Implements loading and storing the schema version information.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OXExceptionSource(
     classId = Classes.SCHEMA_STORE_IMPL,
     component = Component.UPDATE
 )
 public class SchemaStoreImpl extends SchemaStore {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SchemaStoreImpl.class);
 
     /**
      * SQL command for selecting the version from the schema.
@@ -110,13 +116,211 @@ public class SchemaStoreImpl extends SchemaStore {
         }
         return retval;
     }
+    
+    private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
+    
+    private static final String SQL_UPDATE_LOCKED = "UPDATE version SET locked = ?";
+    
+    /*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.SchemaStore#lockSchema(com.openexchange.groupware.update.Schema)
+	 */
+	@OXThrowsMultiple(
+			category = { Category.PROGRAMMING_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
+			desc = { "", "", "", "" },
+			exceptionId = { 6, 7, 8, 9 },
+			msg = { "A SQL error occured while reading schema version information: %1$s.",
+			"No result returned from SQL query, but was expected.",
+			"Update conflict detected. Another process is currently updating schema %1$s.",
+			"Table update failed. Schema %1$s could not be locked." }
+	)
+	@Override
+	public void lockSchema(final Schema schema, final int contextId) throws SchemaException {
+		if (schema == SchemaImpl.FIRST) {
+			/*
+			 * Invoke initial update task to create table 'version'
+			 */
+			try {
+				new CreateTableVersion().perform();
+			} catch (AbstractOXException e) {
+				throw new SchemaException(e);
+			}
+		}
+		/*
+		 * Start of update process, so lock schema
+		 */
+		try {
+			boolean error = false;
+			Connection writeCon = null;
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				/*
+				 * Try to obtain exclusive lock on table 'version'
+				 */
+				writeCon = Database.get(contextId, true);
+				writeCon.setAutoCommit(false); // BEGIN
+				stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
+				rs = stmt.executeQuery();
+				if (!rs.next()) {
+					error = true;
+					throw EXCEPTION.create(7);
+				} else if (rs.getBoolean(1)) {
+					/*
+					 * Schema is already locked by another update process
+					 */
+					error = true;
+					throw EXCEPTION.create(8, schema.getSchema());
+				}
+				rs.close();
+				rs = null;
+				stmt.close();
+				stmt = null;
+				/*
+				 * Lock schema
+				 */
+				stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
+				stmt.setBoolean(1, true);
+				if (stmt.executeUpdate() == 0) {
+					/*
+					 * Schema could not be locked
+					 */
+					error = true;
+					throw EXCEPTION.create(9, schema.getSchema());
+				}
+				/*
+				 * Everything went fine. Schema is marked as locked
+				 */
+				writeCon.commit(); // COMMIT
+			} finally {
+				closeSQLStuff(rs, stmt);
+				if (writeCon != null) {
+					if (error) {
+						try {
+							writeCon.rollback();
+						} catch (SQLException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+					if (!writeCon.getAutoCommit()) {
+						try {
+							writeCon.setAutoCommit(true);
+						} catch (SQLException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+					Database.back(contextId, true, writeCon);
+				}
+			}
+		} catch (DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+			throw new SchemaException(e);
+		} catch (SQLException e) {
+			throw EXCEPTION.create(6, e, e.getMessage());
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.SchemaStore#unlockSchema(com.openexchange.groupware.update.Schema)
+	 */
+	@OXThrowsMultiple(
+			category = { Category.PROGRAMMING_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
+			desc = { "", "", "", "" },
+			exceptionId = { 10, 11, 12, 13 },
+			msg = { "A SQL error occured while reading schema version information: %1$s.",
+			"No result returned from SQL query, but was expected.",
+			"Update conflict detected. Schema %1$s is not marked as LOCKED.",
+			"Table update failed. Schema %1$s could not be unlocked." }
+	)
+	@Override
+	public void unlockSchema(final Schema schema, final int contextId) throws SchemaException {
+		/*
+		 * End of update process, so unlock schema
+		 */
+		try {
+			boolean error = false;
+			Connection writeCon = null;
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				/*
+				 * Try to obtain exclusive lock on table 'version'
+				 */
+				writeCon = Database.get(contextId, true);
+				writeCon.setAutoCommit(false); // BEGIN
+				stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
+				rs = stmt.executeQuery();
+				if (!rs.next()) {
+					error = true;
+					throw EXCEPTION.create(11);
+				} else if (!rs.getBoolean(1)) {
+					/*
+					 * Schema is NOT locked by update process
+					 */
+					error = true;
+					throw EXCEPTION.create(12, schema.getSchema());
+				}
+				rs.close();
+				rs = null;
+				stmt.close();
+				stmt = null;
+				/*
+				 * Unlock schema
+				 */
+				stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
+				stmt.setBoolean(1, false);
+				if (stmt.executeUpdate() == 0) {
+					/*
+					 * Schema could not be unlocked
+					 */
+					error = true;
+					throw EXCEPTION.create(13, schema.getSchema());
+				}
+				/*
+				 * Everything went fine. Schema is marked as unlocked
+				 */
+				writeCon.commit(); // COMMIT
+			} finally {
+				closeSQLStuff(rs, stmt);
+				if (writeCon != null) {
+					if (error) {
+						try {
+							writeCon.rollback();
+						} catch (SQLException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+					if (!writeCon.getAutoCommit()) {
+						try {
+							writeCon.setAutoCommit(true);
+						} catch (SQLException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+					Database.back(contextId, true, writeCon);
+				}
+			}
+		} catch (DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+			throw new SchemaException(e);
+		} catch (SQLException e) {
+			throw EXCEPTION.create(10, e, e.getMessage());
+		}
+	}
 
     /**
-     * Loads the schema version information from the database.
-     * @param contextId context identifier.
-     * @return the schema version information.
-     * @throws SchemaException if loading fails.
-     */
+	 * Loads the schema version information from the database.
+	 * 
+	 * @param contextId
+	 *            context identifier.
+	 * @return the schema version information.
+	 * @throws SchemaException
+	 *             if loading fails.
+	 */
     @OXThrowsMultiple(
         category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR,
             Category.SETUP_ERROR },

@@ -78,4 +78,54 @@ public final class Collections {
         }
         return retval;
     }
+    
+    /**
+	 *
+	 * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> as dynamical lists
+	 *
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 *
+	 */
+	public static class SmartIntArray {
+		/**
+		 * Pointer to keep track of position in the array
+		 */
+		private int pointer;
+
+		private int[] array;
+
+		private final int growthSize;
+
+		public SmartIntArray() {
+			this(1024);
+		}
+
+		public SmartIntArray(final int initialSize) {
+			this(initialSize, (initialSize / 4));
+		}
+
+		public SmartIntArray(final int initialSize, final int growthSize) {
+			this.growthSize = growthSize;
+			array = new int[initialSize];
+		}
+
+		public SmartIntArray append(final int i) {
+			if (pointer >= array.length) {
+				/*
+				 * time to grow!
+				 */
+				final int[] tmpArray = new int[array.length + growthSize];
+				System.arraycopy(array, 0, tmpArray, 0, array.length);
+				array = tmpArray;
+			}
+			array[pointer++] = i;
+			return this;
+		}
+
+		public int[] toArray() {
+			final int[] trimmedArray = new int[pointer];
+			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
+			return trimmedArray;
+		}
+	}
 }

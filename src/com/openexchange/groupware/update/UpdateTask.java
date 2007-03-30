@@ -56,6 +56,20 @@ import com.openexchange.groupware.AbstractOXException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface UpdateTask {
+	
+	public static enum UpdateTaskPriority {
+		HIGHEST(0),
+		HIGH(1),
+		NORMAL(3),
+		LOW(4),
+		LOWEST(5);
+		
+		public final int priority;
+		
+		private UpdateTaskPriority(final int priority) {
+			this.priority = priority;
+		}
+	}
 
     /**
      * Returns the database schema version with that this update task was
@@ -66,6 +80,11 @@ public interface UpdateTask {
      * @return the schema version with that this update task was introduced.
      */
     int addedWithVersion();
+    
+    /**
+     * @return this update task's priority
+     */
+    int getPriority();
 
     /**
      * This method is called to apply the changes to the schema of the database.

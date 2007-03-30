@@ -49,10 +49,12 @@
 
 package com.openexchange.groupware.update;
 
+
 /**
  * This class is a data container for the update information of a database
  * schema.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SchemaImpl implements Schema {
 
@@ -85,6 +87,11 @@ public class SchemaImpl implements Schema {
      * Hostname of the server that updates the database.
      */
     private String server;
+    
+    /**
+     * Schema name
+     */
+    private String schema;
 
     /**
      * Default constructor.
@@ -92,7 +99,7 @@ public class SchemaImpl implements Schema {
     SchemaImpl() {
         super();
     }
-
+    
     /**
      * @param locked
      * @param dbVersion
@@ -177,4 +184,20 @@ public class SchemaImpl implements Schema {
     public void setServer(final String server) {
         this.server = server;
     }
+
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.Schema#getSchema()
+	 */
+	public String getSchema() {
+		return schema;
+	}
+
+	/**
+	 * @param schema - the schema name
+	 */
+	public void setSchema(final String schema) {
+		this.schema = schema;
+	}
+    
 }

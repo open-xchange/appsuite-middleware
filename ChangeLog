@@ -1,3 +1,7 @@
+* 2007-03-30 - thorben.betten@open-xchange.com
+
+ - Fixed bug #6585: Server enhanced by 'Automatic Database Update'
+
 * 2007-03-28 - thorben.betten@open-xchange.com
 
  - Implemented method javax.servlet.ServletRequest.getScheme() in type

@@ -135,7 +135,11 @@ public class ContextException extends AbstractOXException {
         /**
          * Problem initializing the cache.
          */
-        CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8);
+        CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8),
+        /**
+         * Can't remove object %s from cache
+         */
+        CACHE_REMOVE("Can't remove object %s from cache", Category.INTERNAL_ERROR, 9);
 
         /**
          * Message of the exception.

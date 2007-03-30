@@ -61,6 +61,8 @@ IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
 JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
+UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
+
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
 # ERROR=1, WARN=3, INFO=5 (DEFAULT), DEBUG=10

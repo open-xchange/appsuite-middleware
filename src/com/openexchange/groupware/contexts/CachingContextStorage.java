@@ -64,11 +64,12 @@ import com.openexchange.cache.dynamic.CacheProxy;
 import com.openexchange.cache.dynamic.OXObjectFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.ContextException.Code;
+import com.openexchange.groupware.update.Updater;
 
 /**
  * This class implements a caching for the context storage. It provides a proxy
  * implementation for the Context interface to the outside world to be able to
- * keep the referenced context data actual.
+ * keep the referenced context data up-to-date.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CachingContextStorage extends ContextStorage {
@@ -136,14 +137,19 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    protected Context loadContext(final int contextId) throws ContextException {
+    protected ContextImpl loadContext(final int contextId) throws ContextException {
         return CacheProxy.getCacheProxy(
-            new OXObjectFactory<Context>() {
+            new OXObjectFactory<ContextImpl>() {
                 public Object getKey() {
-                    return contextId;
+                    return Integer.valueOf(contextId);
                 }
-                public Context load() throws AbstractOXException {
-                    return persistantImpl.loadContext(contextId);
+                public ContextImpl load() throws AbstractOXException {
+                	final ContextImpl retval = persistantImpl.loadContext(contextId);
+                    final Updater updater = Updater.getInstance();
+                    if (updater.isLocked(retval)) {
+                        retval.setEnabled(false);
+                    }
+                    return retval;
                 }
                 public Lock getCacheLock() {
                     return CACHE_LOCK;
@@ -173,4 +179,25 @@ public class CachingContextStorage extends ContextStorage {
             throw new ContextException(ContextException.Code.CACHE_INIT, e);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public void invalidateContext(int contextId) throws ContextException {
+		if (cache == null) {
+			/*
+			 * Cache not initialized, yet
+			 */
+			return;
+		}
+		CACHE_LOCK.lock();
+		try {
+			cache.remove(Integer.valueOf(contextId));
+		} catch (CacheException e) {
+			throw new ContextException(ContextException.Code.CACHE_REMOVE, e, String.valueOf(contextId));
+		} finally {
+			CACHE_LOCK.unlock();
+		}
+	}
 }

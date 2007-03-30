@@ -79,4 +79,11 @@ public final class CreateTableVersion implements UpdateTask {
         // TODO Auto-generated method stub
 
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+	public int getPriority() {
+		return UpdateTaskPriority.HIGH.priority;
+	}
 }

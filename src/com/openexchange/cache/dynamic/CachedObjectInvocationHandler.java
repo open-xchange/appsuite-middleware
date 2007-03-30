@@ -98,7 +98,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
      * the database.
      * @throws AbstractOXException if loading or putting into cache fails.
      */
-    private void refresh() throws AbstractOXException {
+    private final void refresh() throws AbstractOXException {
         final Lock lock = factory.getCacheLock();
         lock.lock();
         try {

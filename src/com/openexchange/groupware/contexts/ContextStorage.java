@@ -121,8 +121,15 @@ public abstract class ContextStorage {
      * @return the context object.
      * @throws ContextException if loading the context fails.
      */
-    protected abstract Context loadContext(int contextId)
+    protected abstract ContextImpl loadContext(int contextId)
         throws ContextException;
+    
+    /**
+     * Invalidates the context object in cache(s)
+     * @param contextId unique identifier of the context to invalidate
+     * @throws ContextException if invalidating the context fails
+     */
+    public abstract void invalidateContext(int contextId) throws ContextException;
 
     /**
      * Gives a list of all context ids which are stored in the config database.

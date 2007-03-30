@@ -49,23 +49,111 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.Iterator;
+import java.util.List;
+
+import com.openexchange.database.ConfigDBStorage;
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.update.exception.SchemaException;
+import com.openexchange.server.DBPoolingException;
+
 /**
  * The {@link #run()} method of this class is started in a seperate thread for
  * the update process.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateProcess implements Runnable {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(UpdateProcess.class);
+	
+	private final int contextId;
+	
+	private final Schema schema;
+	
+	private final SchemaStore schemaStore;
+	
+	public UpdateProcess(final int contextId) throws SchemaException {
+		schemaStore = SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName());
+		this.contextId = contextId;
+		this.schema = schemaStore.getSchema(contextId);
+	}
 
     /**
      * {@inheritDoc}
      */
     public void run() {
-//        lockSchema();
-//        removeContexts();
-//        collectAllUpdates();
-//        filterUpdates();
-//        sortUpdates();
-//        performUpdates();
-//        unlockSchema();
+		boolean unlock = false;
+		try {
+			try {
+				lockSchema();
+				/*
+				 * Lock successfully obtained, thus remember to unlock
+				 */
+				unlock = true;
+				/*
+				 * Remove affected contexts and kick active sessions
+				 */
+				removeContexts();
+				/*
+				 * Get filtered & sorted list of update tasks
+				 */
+				final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
+						.getDBVersion());
+				/*
+				 * Perform updates
+				 */
+				final int size = updateTasks.size();
+				final Iterator<UpdateTask> iter = updateTasks.iterator();
+				for (int i = 0; i < size; i++) {
+					try {
+						iter.next().perform();
+					} catch (AbstractOXException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+			} finally {
+				if (unlock) {
+					unlockSchema();
+				}
+			}
+		} catch (SchemaException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (ContextException e) {
+			LOG.error(e.getMessage(), e);
+		}
+
+		// lockSchema();
+		// removeContexts();
+		// collectAllUpdates();
+		// filterUpdates();
+		// sortUpdates();
+		// performUpdates();
+		// unlockSchema();
+
+	}
+    
+    private final void lockSchema() throws SchemaException {
+    	schemaStore.lockSchema(schema, contextId);
     }
+    
+    private final void unlockSchema() throws SchemaException {
+    	schemaStore.unlockSchema(schema, contextId);
+    }
+    
+    private final void removeContexts() throws DBPoolingException, ContextException {
+		final int[] contextIds = ConfigDBStorage.getContextsFromSchema(schema.getSchema(), Database.resolvePool(
+				contextId, true));
+		final ContextStorage contextStorage = ContextStorage.getInstance();
+		for (int cid : contextIds) {
+			contextStorage.invalidateContext(cid);
+		}
+	}
+    
 }
