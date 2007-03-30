@@ -60,7 +60,7 @@ import java.util.Locale;
 import com.openexchange.tools.conf.GlobalConfig;
 
 /**
- * Mit dieser Klasse können Datumsformatierungen durchgeführt werden.
+ * Mit dieser Klasse koennen Datumsformatierungen durchgefuehrt werden.
  * 
  * @author Benjamin Otterbach
  */
@@ -73,13 +73,13 @@ public class FormatDate {
 
     /**
      * Initial Methode.<BR>
-     * Setzt die Standard Formatierung des Datums anhand des Sprach und Länder Codes fest.<BR><BR>
-     * Länder Code = de : Pattern String = dd.MM.yyyy HH:mm:ss<BR>
-     * Länder Code = en : Pattern String = <BR>
-     * Länder Code = en : Pattern String = <BR>
-     * Länder Code = unknown : Pattern String = <BR>
+     * Setzt die Standard Formatierung des Datums anhand des Sprach und Laender Codes fest.<BR><BR>
+     * Laender Code = de : Pattern String = dd.MM.yyyy HH:mm:ss<BR>
+     * Laender Code = en : Pattern String = <BR>
+     * Laender Code = en : Pattern String = <BR>
+     * Laender Code = unknown : Pattern String = <BR>
      * @param String Sprach Code
-     * @param String Länder Code
+     * @param String Laender Code
      */
     public FormatDate(String language, String country) {
 	this.language = language;
@@ -111,7 +111,7 @@ public class FormatDate {
     /**
      * Mit dieser Methode kann ein Datum konvertiert werden,
      * wobei das Original Format angegeben werden muss.
-     * Das ausgabeformat des Datums entspricht dem angegebenen Ländercode,
+     * Das ausgabeformat des Datums entspricht dem angegebenen Laendercode,
      * der beim Initialisieren angegeben wurde.
      * @param String Das Datum das konvertiert werden soll.
      * @param String Format des Original Datum.
@@ -166,7 +166,7 @@ public class FormatDate {
 
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
-     * Rückgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
+     * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
@@ -186,7 +186,7 @@ public class FormatDate {
     
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
-     * Rückgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
+     * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
