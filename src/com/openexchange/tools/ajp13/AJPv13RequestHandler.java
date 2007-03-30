@@ -464,6 +464,7 @@ public class AJPv13RequestHandler {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final String delim = " | ";
 		final StringBuilder sb = new StringBuilder(300);

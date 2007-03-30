@@ -464,7 +464,7 @@ public class OXFolderAdminHelper {
 					stmt.close();
 					stmt = null;
 				}
-				if (performCommit && writeCon != null) {
+				if (performCommit) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
 				}

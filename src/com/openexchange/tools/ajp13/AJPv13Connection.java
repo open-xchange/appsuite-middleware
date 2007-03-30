@@ -243,6 +243,7 @@ public class AJPv13Connection {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(100);
 		sb.append("State: ").append(state == IDLE_STATE ? "IDLE" : "ASSIGNED").append(" | ");

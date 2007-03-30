@@ -123,6 +123,7 @@ public class AJPv13ListenerThread extends Thread {
 	 * 
 	 * @see java.lang.Thread#interrupt()
 	 */
+	@Override
 	public void interrupt() {
 		dead = true;
 		super.interrupt();

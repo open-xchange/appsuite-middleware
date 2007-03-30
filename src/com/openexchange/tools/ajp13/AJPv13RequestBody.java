@@ -72,6 +72,11 @@ public class AJPv13RequestBody extends AJPv13Request {
 		super(payloadData);
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
+	 */
+	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		if (payloadData == null) {
 			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA);

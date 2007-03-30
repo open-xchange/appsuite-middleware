@@ -122,13 +122,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 			try {
 				final Context ctx = delEvent.getContext();
 				final boolean createReadCon = (readCon == null);
-				final boolean createWriteCon = (writeCon == null);
+				boolean closeWriteCon = false;
 				try {
 					if (createReadCon) {
 						readCon = DBPool.pickup(ctx);
 					}
-					if (createWriteCon) {
+					if (writeCon == null) {
 						writeCon = DBPool.pickupWriteable(ctx);
+						closeWriteCon = true;
 					}
 					performTransaction = writeCon.getAutoCommit();
 					if (performTransaction) {
@@ -203,7 +204,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 					if (createReadCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);
 					}
-					if (createWriteCon && writeCon != null) {
+					if (closeWriteCon && writeCon != null) {
 						DBPool.closeWriterSilent(ctx, writeCon);
 					}
 				}
@@ -249,13 +250,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 			try {
 				final Context ctx = delEvent.getContext();
 				final boolean createReadCon = (readCon == null);
-				final boolean createWriteCon = (writeCon == null);
+				boolean closeWriteCon = false;
 				try {
 					if (createReadCon) {
 						readCon = DBPool.pickup(ctx);
 					}
-					if (createWriteCon) {
+					if (writeCon == null) {
 						writeCon = DBPool.pickupWriteable(ctx);
+						closeWriteCon = true;
 					}
 					performTransaction = writeCon.getAutoCommit();
 					if (performTransaction) {
@@ -286,7 +288,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 					if (createReadCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);
 					}
-					if (createWriteCon && writeCon != null) {
+					if (closeWriteCon && writeCon != null) {
 						DBPool.closeWriterSilent(ctx, writeCon);
 					}
 				}

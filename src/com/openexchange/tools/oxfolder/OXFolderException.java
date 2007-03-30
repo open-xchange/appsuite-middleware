@@ -557,13 +557,13 @@ public class OXFolderException extends OXException {
 
 	public OXFolderException(final FolderCode folderCode, final String messagePrefix, final Category category,
 			final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, new StringBuilder().append(messagePrefix)
+		super(Component.FOLDER, category, folderCode.detailNumber, new StringBuilder().append(messagePrefix)
 				.append(folderCode.message).toString(), null);
 		setMessageArgs(messageArgs);
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Category category, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, null);
+		super(Component.FOLDER, category, folderCode.detailNumber, folderCode.message, null);
 		setMessageArgs(messageArgs);
 	}
 
