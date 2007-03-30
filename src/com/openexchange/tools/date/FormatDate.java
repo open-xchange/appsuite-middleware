@@ -143,7 +143,7 @@ public class FormatDate {
      * wobei das Original Format sowie das Ausgabe Format angegeben werden muss.
      * @param String Das Datum das konvertiert werden soll.
      * @param String Format des Original Datum.
-     * @param String Format des gewünschten Datums.
+     * @param String Format des gewuenschten Datums.
      * @return String - Formatiertes Datum
      */
     public String formatDate(String originalDate, String originalPattern, String wantedPattern) throws ParseException {
