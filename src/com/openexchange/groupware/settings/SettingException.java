@@ -117,9 +117,9 @@ public class SettingException extends AbstractOXException {
         NO_WRITE("Writing the setting %1$s is not permitted.",
             Category.PERMISSION, 3),
         /**
-         * Unknown setting path %1$d.
+         * Unknown setting path %1$s.
          */
-        UNKNOWN_PATH("Unknown setting path %1$d.", Category.PROGRAMMING_ERROR,
+        UNKNOWN_PATH("Unknown setting path %1$s.", Category.PROGRAMMING_ERROR,
             4),
         /**
          * Setting "%1$s" is not a leaf one.
