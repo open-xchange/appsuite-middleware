@@ -93,7 +93,7 @@ public interface OXGroupInterface extends Remote {
     /**
      * Fetch a group from server.
      * @param ctx Context object
-     * @param grp_id Id of the group to retrieve from server.
+     * @param grp the group to retrieve from server.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -102,7 +102,7 @@ public interface OXGroupInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @return The Group with its data.
      */
-    public Group get(Context ctx,int grp_id,Credentials auth) 
+    public Group get(Context ctx, final Group grp,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
   
@@ -124,7 +124,7 @@ public interface OXGroupInterface extends Remote {
     /**
      * Delete group within given context.
      * @param ctx Context object
-     * @param grp_id Contains all ids of the groups which should be deleted from the server.
+     * @param grps Contains all groups which should be deleted from the server.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -132,7 +132,7 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void delete(Context ctx,int[] grp_id,Credentials auth) 
+    public void delete(Context ctx,Group[] grps,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     
@@ -148,14 +148,14 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void addMember(Context ctx,int grp_id, int [] member_ids,Credentials auth) 
+    public void addMember(Context ctx, final Group grp, int [] member_ids, Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     
     /**
      * Remove member(s) from group.
      * @param ctx Context object
-     * @param grp_id The ID of the group from which the members should be removed.
+     * @param grp the group from which the members should be removed.
      * @param member_ids User IDs.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
@@ -164,14 +164,14 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void removeMember(Context ctx,int grp_id,int[] member_ids,Credentials auth) 
+    public void removeMember(Context ctx, final Group grp,int[] member_ids, Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
    
     /**
      * Get User IDs of the members of this group.
      * @param ctx Context object
-     * @param grp_id ID of the group from which to retrieve the members.
+     * @param grp group from which to retrieve the members.
      * @param auth Credentials for authenticating against server.
      * @return User IDs.
      * @throws RemoteException General RMI Exception
@@ -180,7 +180,7 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public int[] getMembers(Context ctx,int grp_id,Credentials auth) 
+    public int[] getMembers(Context ctx,final Group grp,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     

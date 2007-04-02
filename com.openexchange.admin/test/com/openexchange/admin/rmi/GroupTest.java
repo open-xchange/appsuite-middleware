@@ -296,22 +296,22 @@ public class GroupTest extends AbstractTest {
 
     public static int[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        return xres.getMembers(ctx, group.getId(), cred);
+        return xres.getMembers(ctx, group, cred);
     }
 
     public static void addMemberToGroup(final Context ctx, final Group grp, final int[] member_ids, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        xres.addMember(ctx, grp.getId(), member_ids, cred);
+        xres.addMember(ctx, grp, member_ids, cred);
     }
 
     public static void removeMemberFromGroup(final Context ctx, final Group grp, final int[] member_ids, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        xres.removeMember(ctx, grp.getId(), member_ids, cred);
+        xres.removeMember(ctx, grp, member_ids, cred);
     }
 
     public static Group loadGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        return xres.get(ctx, grp.getId(), cred);
+        return xres.get(ctx, grp, cred);
     }
 
     public static int addGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
@@ -321,7 +321,7 @@ public class GroupTest extends AbstractTest {
 
     public static void deleteGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        xres.delete(ctx, new int[] { grp.getId() }, cred);
+        xres.delete(ctx, new Group[] { grp }, cred);
     }
 
     public static Group[] searchGroup(final Context ctx, final String pattern, final String host, final Credentials cred) throws Exception {
