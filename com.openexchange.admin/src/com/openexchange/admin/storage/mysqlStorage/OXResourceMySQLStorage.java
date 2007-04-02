@@ -212,10 +212,16 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage {
             final String displayName = res.getDisplayname();
 
             int available;
-            if (res!=null &&res.isAvailable()) {
-                available = 1;
+            if (null != res && null != res.isAvailable()) {
+                if (res.isAvailable()) {
+                    available = 1;
+                } else {
+                    available = 0;
+                }
             } else {
-                available = 0;
+                // This is the default, so if this attribute of the object has never been
+                // touched, we set this to true;
+                available = 1;
             }
 
             final String description = res.getDescription();
