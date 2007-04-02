@@ -1,6 +1,8 @@
 * 2007-04-02 - thorben.betten@open-xchange.com
 
  - Enhanced mail display by an enriched2html conversion
+ - Fixed bug #6592: Only entity's permissions are going to be deleted
+   instead of all folder-associated permissions
 
 * 2007-03-30 - thorben.betten@open-xchange.com
 
