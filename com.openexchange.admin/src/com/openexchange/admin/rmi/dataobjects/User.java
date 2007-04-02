@@ -2103,9 +2103,12 @@ public class User implements Serializable, Cloneable {
     }
 
     public boolean attributesforcreateset() {
-        if (null != this.username && null != this.display_name
-                && null != this.password && null != this.given_name
-                && null != this.sur_name && null != this.primaryEmail) {
+        if (null != this.username && !this.username.equals("")
+                && null != this.display_name && !this.display_name.equals("")
+                && null != this.password && !this.password.equals("")
+                && null != this.given_name && !this.given_name.equals("")
+                && null != this.sur_name && !this.sur_name.equals("")
+                && null != this.primaryEmail && !this.primaryEmail.equals("")) {
             return true;
         } else {
             return false;

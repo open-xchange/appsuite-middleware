@@ -139,7 +139,9 @@ public class Resource implements Serializable {
     }
 
     public boolean attributesforcreateset() {
-        if (null != this.name && null != this.displayname && null != this.email) {
+        if (null != this.name && !this.name.equals("") 
+                && null != this.displayname && !this.displayname.equals("")
+                && null != this.email && !this.email.equals("")) {
             return true;
         } else {
             return false;

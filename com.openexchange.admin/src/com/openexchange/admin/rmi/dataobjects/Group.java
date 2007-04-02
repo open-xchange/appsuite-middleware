@@ -140,7 +140,8 @@ public class Group implements Serializable {
     }
 
     public boolean attributesforcreateset() {
-        if (this.displayname != null && this.name != null) {
+        if (this.displayname != null && !this.displayname.equals("")
+                && this.name != null && !this.name.equals("")) {
             return true;
         } else {
             return false;
