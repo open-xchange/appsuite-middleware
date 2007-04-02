@@ -3,6 +3,8 @@
  - Enhanced mail display by an enriched2html conversion
  - Fixed bug #6592: Only entity's permissions are going to be deleted
    instead of all folder-associated permissions
+ - Bugfix #6280: A single corrupt message does not affect whole fetch
+   command
 
 * 2007-03-30 - thorben.betten@open-xchange.com
 
