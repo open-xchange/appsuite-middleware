@@ -83,7 +83,8 @@ public class MailRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COUNT)) {
 			MAIL_SERVLET.actionGetMailCount(sessionObj, pw, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
+			//throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
+			MAIL_SERVLET.actionGetUpdates(sessionObj, pw, jsonObject, mailInterface);
 		} else if (action.regionMatches(true, 0, AJAXServlet.ACTION_REPLY, 0, 5)) {
 			MAIL_SERVLET.actionGetReply(sessionObj, pw, jsonObject, (action
 					.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)), mailInterface);

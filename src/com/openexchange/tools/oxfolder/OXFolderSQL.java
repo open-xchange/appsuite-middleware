@@ -1053,7 +1053,7 @@ public class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_PERMS = "UPDATE #PERM# SET permission_id = ? WHERE cid = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_PERMS = "UPDATE #PERM# SET permission_id = ? WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
 	private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE #FOLDER# SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -1064,10 +1064,16 @@ public class OXFolderSQL {
 		final int size = reassignPerms.size();
 		Connection wc = writeConArg;
 		final boolean create = (wc == null);
+		Connection rc = readConArg;
+		final boolean createRead = (rc == null);
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
 			if (create) {
 				wc = DBPool.pickupWriteable(ctx);
+			}
+			if (createRead) {
+				rc = DBPool.pickup(ctx);
 			}
 			// stmt =
 			// wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE,
@@ -1075,14 +1081,20 @@ public class OXFolderSQL {
 			Iterator<Integer> iter = reassignPerms.iterator();
 			Next: for (int i = 0; i < size; i++) {
 				final int fuid = iter.next().intValue();
-				stmt = wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
-				stmt.setInt(1, mailAdmin);
-				stmt.setInt(2, ctx.getContextId());
+				/*
+				 * Check if admin already holds permission on current folder
+				 */
+				stmt = rc.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+				stmt.setInt(1, ctx.getContextId());
+				stmt.setInt(2, mailAdmin);
 				stmt.setInt(3, fuid);
-				try {
-					stmt.executeUpdate();
-				} catch (SQLException inner) {
-					closeResources(null, stmt, null, true, ctx);
+				rs = stmt.executeQuery();
+				final boolean hasPerm = rs.next();
+				rs.close();
+				rs = null;
+				stmt.close();
+				stmt = null;
+				if (hasPerm) {
 					/*
 					 * User (Mail Admin) already holds permission on this folder
 					 */
@@ -1098,10 +1110,22 @@ public class OXFolderSQL {
 						LOG.error(e.getMessage(), e);
 						continue Next;
 					}
+				} else {
+					stmt = wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+					stmt.setInt(1, mailAdmin);
+					stmt.setInt(2, ctx.getContextId());
+					stmt.setInt(3, fuid);
+					stmt.setInt(4, entity);
+					try {
+						stmt.executeUpdate();
+					} catch (SQLException e) {
+						LOG.error(e.getMessage(), e);
+						continue Next;
+					} finally {
+						stmt.close();
+						stmt = null;
+					}
 				}
-				stmt.close();
-				stmt = null;
-				// stmt.addBatch();
 			}
 			// stmt.executeBatch();
 			// stmt.close();
@@ -1117,7 +1141,10 @@ public class OXFolderSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(rs, stmt, create ? wc : null, false, ctx);
+			if (createRead && rc != null) {
+				DBPool.closeReaderSilent(ctx, rc);
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@
    instead of all folder-associated permissions
  - Bugfix #6280: A single corrupt message does not affect whole fetch
    command
+ - Bugfix #6561: Avoid NPE on getMergedPermission()
 
 * 2007-03-30 - thorben.betten@open-xchange.com
 

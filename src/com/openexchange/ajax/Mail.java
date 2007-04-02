@@ -264,7 +264,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} else if (actionStr.equalsIgnoreCase(ACTION_COUNT)) {
 			actionGetMailCount(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_UPDATES)) {
-			throw new OXMailException(MailCode.UNSUPPORTED_ACTION, ACTION_UPDATES, "IMAP");
+			//throw new OXMailException(MailCode.UNSUPPORTED_ACTION, ACTION_UPDATES, "IMAP");
+			actionGetUpdates(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_REPLY) || actionStr.equalsIgnoreCase(ACTION_REPLYALL)) {
 			actionGetReply(req, resp, (actionStr.equalsIgnoreCase(ACTION_REPLYALL)));
 		} else if (actionStr.equalsIgnoreCase(ACTION_FORWARD)) {
@@ -301,6 +302,41 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
+	}
+	
+	public void actionGetUpdates(final SessionObject sessionObj,
+			final Writer writer, final JSONObject requestObj,
+			final MailInterface mi) throws JSONException {
+		actionGetUpdates(sessionObj, writer, requestObj,
+				PARAM_SRC_TYPE_JSON, mi);
+	}
+
+	private final void actionGetUpdates(final HttpServletRequest req,
+			final HttpServletResponse resp) throws IOException,
+			ServletException {
+		try {
+			actionGetUpdates(getSessionObject(req), resp.getWriter(), req,
+					PARAM_SRC_TYPE_REQUEST, null);
+		} catch (JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final void actionGetUpdates(final SessionObject sessionObj,
+			final Writer writer, final Object paramContainer,
+			final int paramSrcType, final MailInterface mailInterfaceArg)
+			throws JSONException {
+		/*
+		 * Send an empty array cause ACTION=UPDATES is not supported for IMAP
+		 * messages
+		 */
+		final Response response = new Response();
+		/*
+		 * Close response and flush print writer
+		 */
+		response.setData(new JSONArray());
+		response.setTimestamp(null);
+		Response.write(response, writer);
 	}
 
 	public void actionGetMailCount(final SessionObject sessionObj, final Writer writer, final JSONObject requestObj,
