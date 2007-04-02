@@ -62,6 +62,7 @@ import org.apache.commons.cli.PosixParser;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -94,9 +95,10 @@ public class Delete extends ResourceAbstraction {
                                           
               OXResourceInterface oxres = (OXResourceInterface)Naming.lookup(OXResourceInterface.RMI_NAME);
              
-             final  int resource_id = Integer.valueOf(cmd.getOptionValue(_OPT_RESOURCEID_SHORT));
+              final int resource_id = Integer.valueOf(cmd.getOptionValue(_OPT_RESOURCEID_SHORT));
               
-              oxres.delete(ctx, resource_id, auth);
+              final Resource res = new Resource(resource_id);
+              oxres.delete(ctx, res, auth);
              
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());            
