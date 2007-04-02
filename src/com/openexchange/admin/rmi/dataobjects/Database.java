@@ -280,7 +280,10 @@ public class Database implements Serializable{
      * can be created with this object
      */
     public boolean attributesforcreateset() {
-    	if (-1 != this.id || null != this.driver || null != this.url || null != this.scheme) {
+    	if (-1 != this.id
+            && null != this.driver && !this.driver.equals("")
+            && null != this.url && !this.url.equals("")
+            && null != this.scheme && !this.scheme.equals("")) {
     		return true;
     	} else {
     		return false;
