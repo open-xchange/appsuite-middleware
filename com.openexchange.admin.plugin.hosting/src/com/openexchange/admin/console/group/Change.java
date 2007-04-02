@@ -168,10 +168,10 @@ public class Change extends GroupAbstraction {
                 }
             }
             if(newMemberList != null) {
-                oxgrp.addMember(ctx, groupid, newMemberList, auth);
+                oxgrp.addMember(ctx, grp, newMemberList, auth);
             }
             if(removeMemberList != null) {
-                oxgrp.removeMember(ctx, groupid, removeMemberList, auth);
+                oxgrp.removeMember(ctx, grp, removeMemberList, auth);
             }
 
             oxgrp.change(ctx, grp, auth);

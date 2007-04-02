@@ -62,6 +62,7 @@ import org.apache.commons.cli.PosixParser;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -101,7 +102,7 @@ public class Delete extends GroupAbstraction {
 
             final int groupid = Integer.valueOf(cmd.getOptionValue(OPT_NAME_GROUPID));
 
-            oxgrp.delete(ctx, new int[]{groupid}, auth);
+            oxgrp.delete(ctx, new Group[]{new Group(groupid)}, auth);
         }catch(java.rmi.ConnectException neti){
             printError(neti.getMessage());      
         }catch(org.apache.commons.cli.MissingArgumentException as){

@@ -106,7 +106,7 @@ public class List extends GroupAbstraction {
             for(Group group : allgrps){
                 System.out.println(group);
                 System.out.println("  Members:");
-                for(int id : oxgrp.getMembers(ctx, group.getId(), auth)) {
+                for(int id : oxgrp.getMembers(ctx, group, auth)) {
                     System.out.println("   "+id);
                 }
             }
