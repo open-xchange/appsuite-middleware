@@ -54,6 +54,8 @@ import com.openexchange.cache.Configuration;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPoolingException;
 
@@ -83,7 +85,10 @@ public class OXRunner {
         }
         try {
             DatabaseInit.init();
+            ContextStorage.init();
         } catch (DBPoolingException e) {
+            throw new RuntimeException(e);
+        } catch (ContextException e) {
             throw new RuntimeException(e);
         }
     }
