@@ -75,6 +75,12 @@ public class Resource implements Serializable {
         init();
     }
 
+    public Resource(final Integer id) {
+        super();
+        init();
+        this.id = id;
+    }
+
     private void init() {
         this.id = null;
         this.name = null;
