@@ -62,6 +62,7 @@ import com.openexchange.sessiond.LoginException.Code;
  * <code>user</code> and <code>domain.tld</code> and the context part will be
  * used to resolve the context while the user part will be used to authenticate
  * the user.
+ * TODO move to com.openexchange.groupware.login
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class LoginInfo {
