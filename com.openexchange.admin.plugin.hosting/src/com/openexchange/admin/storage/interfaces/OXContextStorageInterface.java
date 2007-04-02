@@ -51,6 +51,9 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -77,6 +80,8 @@ public abstract class OXContextStorageInterface {
      */
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
+    private static final Log log = LogFactory.getLog(OXContextStorageInterface.class);
+    
     protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandlerExtended prop = null;
@@ -98,10 +103,12 @@ public abstract class OXContextStorageInterface {
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXContextStorageInterface.class);
-                    } catch (ClassNotFoundException e) {
+                    } catch (final ClassNotFoundException e) {
+                        log.error(e);
                         throw new StorageException(e);
                     }
                 } else {
+                    log.error("Property for context_storage not defined");
                     throw new StorageException("Property for context_storage not defined");
                 }
             }
@@ -110,17 +117,23 @@ public abstract class OXContextStorageInterface {
         try {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
+            log.error(e);
             throw new StorageException(e);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
+            log.error(e);
             throw new StorageException(e);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
+            log.error(e);
             throw new StorageException(e);
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
+            log.error(e);
             throw new StorageException(e);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
+            log.error(e);
             throw new StorageException(e);
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
+            log.error(e);
             throw new StorageException(e);
         }
     }
