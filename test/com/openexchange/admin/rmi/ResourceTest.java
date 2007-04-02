@@ -134,7 +134,11 @@ public class ResourceTest extends AbstractTest{
         
         
         // set change data
-        res.setAvailable(!res.isAvailable());
+        if (null != res.isAvailable()) {
+            res.setAvailable(!res.isAvailable());
+        } else {
+            res.setAvailable(true);
+        }
         res.setDescription(res.getDescription()+change_suffix);
         res.setDisplayname(res.getDisplayname()+change_suffix);
         res.setEmail(res.getEmail()+change_suffix);
@@ -215,7 +219,7 @@ public class ResourceTest extends AbstractTest{
     
     public static Resource getTestResourceObject(String name){
         Resource res = new Resource();
-        res.setAvailable(true);
+//        res.setAvailable(true);
         res.setDescription("description of resource "+name);
         res.setDisplayname("displayname of resource "+name);
         res.setEmail("resource-email-"+name+"@"+TEST_DOMAIN);
