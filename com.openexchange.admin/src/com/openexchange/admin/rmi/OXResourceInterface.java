@@ -106,7 +106,7 @@ public interface OXResourceInterface extends Remote {
      * Get Resource from given context.
      * @return Resource object containing data.
      * @param ctx Context object.
-     * @param resource_id long containing the resource id.
+     * @param res Resource containing the resource id.
      * @param auth Credentials for authenticating against server.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -121,7 +121,7 @@ public interface OXResourceInterface extends Remote {
     /**
      * Delete resource from given context.
      * @param ctx Context object.
-     * @param resource_id ID of Resource which should be deleted.
+     * @param res Resource which should be deleted.
      * @param auth Credentials for authenticating against server.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
