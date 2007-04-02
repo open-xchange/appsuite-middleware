@@ -115,7 +115,7 @@ public interface OXResourceInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
-    public Resource get(Context ctx, int resource_id, Credentials auth) 
+    public Resource get(Context ctx, Resource res, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
     /**
@@ -130,7 +130,7 @@ public interface OXResourceInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      */
-    public void delete(Context ctx, int resource_id, Credentials auth) 
+    public void delete(Context ctx, final Resource res, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
 
     /**

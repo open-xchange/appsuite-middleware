@@ -144,7 +144,7 @@ public class ResourceTest extends AbstractTest{
         oxres.change(ctx,res,DummyCredentials());
         
         // get resource from server and verify changed data
-        Resource srv_res = oxres.get(ctx,res.getId(),DummyCredentials());        
+        Resource srv_res = oxres.get(ctx,res,DummyCredentials());        
         
         assertEquals(res.getDescription(),srv_res.getDescription());
         assertEquals(res.getDisplayname(),srv_res.getDisplayname());
@@ -162,7 +162,7 @@ public class ResourceTest extends AbstractTest{
         res.setId(oxres.create(ctx,res,DummyCredentials()));
         
         // get resource from server
-        Resource srv_res = oxres.get(ctx,res.getId(),DummyCredentials());        
+        Resource srv_res = oxres.get(ctx,res,DummyCredentials());        
         
         assertEquals(res.getDescription(),srv_res.getDescription());
         assertEquals(res.getDisplayname(),srv_res.getDisplayname());
@@ -179,7 +179,7 @@ public class ResourceTest extends AbstractTest{
         res.setId(oxres.create(ctx,res,DummyCredentials()));
         
         // get resource from server
-        Resource srv_res = oxres.get(ctx,res.getId(),DummyCredentials());        
+        Resource srv_res = oxres.get(ctx,res,DummyCredentials());        
         
         assertEquals(res.getDescription(),srv_res.getDescription());
         assertEquals(res.getDisplayname(),srv_res.getDisplayname());
@@ -188,11 +188,11 @@ public class ResourceTest extends AbstractTest{
         
         
         // delete resource
-        oxres.delete(ctx,res.getId(),DummyCredentials());
+        oxres.delete(ctx,res,DummyCredentials());
         
         // try to get resource again, this MUST fail
         try{
-            srv_res = oxres.get(ctx,res.getId(),DummyCredentials());   
+            srv_res = oxres.get(ctx,res,DummyCredentials());   
             fail("Expected that the resource was deleted!");
         }catch(InvalidDataException idv){  }
         
