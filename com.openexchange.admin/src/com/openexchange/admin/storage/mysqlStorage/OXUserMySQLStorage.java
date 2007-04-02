@@ -617,7 +617,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 }
                 
                 Locale langus = OXUser.getLanguage(usrdata);
-                String lang = langus.getLanguage() + "_" + langus.getCountry();
+                String lang = langus.getLanguage().toLowerCase()+ "_" + langus.getCountry().toUpperCase();
                 stmt.setString(8,lang);
                 
                 // mailenabled
