@@ -89,7 +89,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
    
-    public int create(Context ctx, Group grp, Credentials auth) 
+    public int create(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null || grp==null){
@@ -100,7 +100,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         
         log.debug(""+ctx.toString()+" - "+grp.toString()+" - "+auth.toString());
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
         }
@@ -115,7 +115,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
             try {
                 validateGroupName(grp.getName());
-            } catch (OXGroupException ox) {
+            } catch (final OXGroupException ox) {
                 throw new InvalidDataException("Invalid group name!");
             }
         }
@@ -124,13 +124,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new InvalidDataException("Group already exists!");
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.create(ctx, grp);
         // MonitoringInfos.incrementNumberOfCreateGroupCalled();
 
     }
   
-    public Group[] list(Context ctx, String pattern, Credentials auth) 
+    public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
     
         if(ctx==null){
@@ -146,18 +146,18 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new InvalidDataException("Invalid search pattern!");
         }
         
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();          
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.list(ctx, pattern);
 
     }
 
   
-    public Group get(Context ctx, int grp_id, Credentials auth) 
+    public Group get(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null){
@@ -166,9 +166,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         
         doAuthentication(auth,ctx);
         
+        final int grp_id = grp.getId();
         log.debug(""+ctx.toString()+" - "+grp_id+" - "+auth.toString());
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
             
@@ -179,13 +180,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.get(ctx, grp_id);
 
     }
 
   
-    public void change(Context ctx, Group grp, Credentials auth) 
+    public void change(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
         if(ctx==null || grp==null){
@@ -196,7 +197,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         
         log.debug(""+ctx.toString()+" - "+grp.toString()+" - "+auth.toString());
         
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
         }
@@ -212,7 +213,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
             try {
                 validateGroupName(grp.getName());
-            } catch (OXGroupException ox) {
+            } catch (final OXGroupException ox) {
                 throw new InvalidDataException("Invalid group name");
             }
         }
@@ -221,13 +222,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new InvalidDataException("No such group");           
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.change(ctx, grp);
 
     }
 
    
-    public void addMember(Context ctx, int grp_id, int[] member_ids, Credentials auth) 
+    public void addMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null || member_ids==null){
@@ -235,11 +236,11 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
         
         doAuthentication(auth,ctx);
-        
+        final int grp_id = grp.getId();
         log.debug(""+ctx.toString()+" - "+grp_id+" - "+Arrays.toString(member_ids)+" - "+auth.toString());
                 
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
         }
@@ -256,13 +257,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new InvalidDataException("Member already exists in group");
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.addMember(ctx, grp_id, member_ids);
        
     }
 
     
-    public void removeMember(Context ctx, int grp_id, int[] member_ids, Credentials auth)
+    public void removeMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null || member_ids==null){
@@ -270,10 +271,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
         
         doAuthentication(auth,ctx);
-        
+        final int grp_id = grp.getId();
         log.debug(""+ctx.toString()+" - "+grp_id+" - "+Arrays.toString(member_ids)+" - "+auth.toString());
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -289,46 +290,49 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new InvalidDataException("No such group");
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.removeMember(ctx, grp_id, member_ids);
 
     }
 
    
-    public void delete(Context ctx, int[] grp_id, Credentials auth) 
+    public void delete(final Context ctx, final Group[] grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
-        if(ctx==null || grp_id==null){
+        if(ctx==null || grp==null){
             throw new InvalidDataException();
         }
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString() + " - " +Arrays.toString(grp_id)+" - "+auth.toString());
+        log.debug(ctx.toString() + " - " +Arrays.toString(grp)+" - "+auth.toString());
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
         }
 
-        for (final int elem : grp_id) {
+        final int[] grp_ids = new int[grp.length];
+        int i = 0;
+        for (final Group elem : grp) {
             // should we allow of deleting the users group?
-            if (1 == elem) {
-                throw new InvalidDataException("Group with id " + elem + " cannot be deleted");
+            final int grp_id = elem.getId();
+            if (1 == grp_id) {
+                throw new InvalidDataException("Group with id " + grp_id + " cannot be deleted");
             }
+            grp_ids[i++] = grp_id;
         }
 
-        if (!tool.existsGroup(ctx, grp_id)) {
+        if (!tool.existsGroup(ctx, grp_ids)) {
             throw new InvalidDataException("No such group");
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        oxGroup.delete(ctx, grp_id);
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        oxGroup.delete(ctx, grp_ids);
 
     }
-
    
-    public int[] getMembers(Context ctx, int grp_id, Credentials auth) 
+    public int[] getMembers(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
         if(ctx==null){
@@ -336,10 +340,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
         
         doAuthentication(auth,ctx);
-        
+        final int grp_id = grp.getId();
         log.debug(ctx.toString() + " - " + grp_id+" - "+auth.toString());
 
-        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
            
@@ -350,18 +354,17 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             
         }
 
-        OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.getMembers(ctx, grp_id);
 
     }
 
-    private void validateGroupName( String groupName ) throws OXGroupException {
+    private void validateGroupName( final String groupName ) throws OXGroupException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        String illegal = groupName.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
+        final String illegal = groupName.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
         if( illegal.length() > 0 ) {
             throw new OXGroupException( OXGroupException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
     }
-
 }
