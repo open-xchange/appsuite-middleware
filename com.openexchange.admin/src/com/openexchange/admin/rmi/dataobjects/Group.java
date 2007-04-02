@@ -68,6 +68,16 @@ public class Group implements Serializable {
 
     private String email;
 
+    public Group() {
+    }
+
+    
+    public Group(Integer id) {
+        super();
+        init();
+        this.id = id;
+    }
+
     /**
      * @param id
      * @param name
@@ -87,9 +97,6 @@ public class Group implements Serializable {
         this.displayname = null;
         this.members = null;
         this.email = null;
-    }
-    
-    public Group() {
     }
 
     public Integer getId() {
