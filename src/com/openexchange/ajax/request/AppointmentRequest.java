@@ -277,10 +277,10 @@ public class AppointmentRequest {
 		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-		final Date startUTC = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_START);
-		final Date endUTC = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_END);
-		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
-		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
+		final Date startUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
+		final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
+		final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
+		final Date end = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 		String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
 		int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -319,7 +319,11 @@ public class AppointmentRequest {
 				if (showAppointmentInAllFolders) {
 					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserObject().getId(), start, end, _appointmentFields, timestamp, 0, null);
 				} else {
-					it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, timestamp);
+					if (start != null && end != null) {					
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, timestamp);
+					} else {
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, timestamp);
+					}
 				}
 				
 				while (it.hasNext()) {
