@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.2 2007/03/01 11:45:40 choeger Exp $
+ * $Id: OXResource.java,v 1.3 2007/04/02 10:16:52 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -185,7 +185,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
     }
     
-     public void delete(final Context ctx, final int resource_id, final Credentials auth)
+    public void delete(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
         if(ctx==null){
@@ -193,7 +193,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         doAuthentication(auth,ctx);
-        
+        final int resource_id = res.getId();
         log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
         
         
@@ -213,7 +213,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
     }
     
-    public Resource get(final Context ctx, final int resource_id, final Credentials auth)
+    public Resource get(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
         if(ctx==null){
@@ -221,7 +221,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         doAuthentication(auth,ctx);
-        
+        final int resource_id = res.getId();
         log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
