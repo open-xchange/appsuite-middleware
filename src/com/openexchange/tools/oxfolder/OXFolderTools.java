@@ -702,7 +702,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, true, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
 	}
 
 	/**
@@ -777,7 +777,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -818,7 +818,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -875,7 +875,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -919,7 +919,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	public static SearchIterator getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups,
@@ -970,7 +970,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -1032,7 +1032,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -1300,7 +1300,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	public static SearchIterator getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups,
@@ -1345,7 +1345,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, createReadCon);
 	}
 
 	/**
@@ -1391,7 +1391,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -1433,7 +1433,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append("SELECT ").append(
@@ -1470,7 +1470,7 @@ public class OXFolderTools {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**

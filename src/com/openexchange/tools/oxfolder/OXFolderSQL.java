@@ -1014,7 +1014,7 @@ public class OXFolderSQL {
 			/*
 			 * Delete
 			 */
-			deletePermissions(deletePerms, permTable, writeConArg, ctx);
+			deletePermissions(deletePerms, entity, permTable, writeConArg, ctx);
 			if (!isMailAdmin) {
 				/*
 				 * Reassign
@@ -1027,9 +1027,9 @@ public class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_DELETE_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ?";
+	private static final String SQL_DELETE_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
-	private static final void deletePermissions(final Set<Integer> deletePerms, final String permTable,
+	private static final void deletePermissions(final Set<Integer> deletePerms, final int entity, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		final int size = deletePerms.size();
 		final Iterator<Integer> iter = deletePerms.iterator();
@@ -1044,6 +1044,7 @@ public class OXFolderSQL {
 			for (int i = 0; i < size; i++) {
 				stmt.setInt(1, ctx.getContextId());
 				stmt.setInt(2, iter.next().intValue());
+				stmt.setInt(3, entity);
 				stmt.addBatch();
 			}
 			stmt.executeBatch();

@@ -153,7 +153,7 @@ public class MessageDumper {
 		try {
 			dumpPart(msg, msgHandler, prefix, 1);
 		} catch (IOException e) {
-			throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, msg.getMessageNumber(), msg.getFolder()
+			throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, Integer.valueOf(msg.getMessageNumber()), msg.getFolder()
 					.getFullName(), OXFolderManagerImpl.getUserName(session));
 		}
 		msgHandler.handleMessageEnd(msg);

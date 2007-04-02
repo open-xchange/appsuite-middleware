@@ -1,3 +1,7 @@
+* 2007-04-02 - thorben.betten@open-xchange.com
+
+ - Enhanced mail display by an enriched2html conversion
+
 * 2007-03-30 - thorben.betten@open-xchange.com
 
  - Fixed bug #6585: Server enhanced by 'Automatic Database Update'

@@ -92,6 +92,8 @@ public class FolderObjectIterator implements SearchIterator {
 	private final Queue<FolderObject> prefetchQueue;
 
 	private boolean isClosed;
+	
+	private final boolean closeCon;
 
 	private final Set<Integer> folderIds;
 
@@ -143,6 +145,7 @@ public class FolderObjectIterator implements SearchIterator {
 		this.rs = null;
 		this.stmt = null;
 		this.ctx = null;
+		this.closeCon = false;
 		this.remainInCache = remainInCache;
 		if (col == null || col.isEmpty()) {
 			this.next = null;
@@ -175,7 +178,7 @@ public class FolderObjectIterator implements SearchIterator {
 	 * folder cache by specifying different cache element attributes.
 	 */
 	public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean remainInCache,
-			final Context ctx, final Connection readCon) throws SearchIteratorException {
+			final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
 		if (FolderCacheProperties.isEnableDBGrouping()) {
 			this.folderIds = null;
 		} else {
@@ -185,6 +188,7 @@ public class FolderObjectIterator implements SearchIterator {
 		this.stmt = stmt;
 		this.readCon = readCon;
 		this.ctx = ctx;
+		this.closeCon = closeCon;
 		this.remainInCache = remainInCache;
 		/*
 		 * Set next to first result set entry
@@ -355,7 +359,7 @@ public class FolderObjectIterator implements SearchIterator {
 		/*
 		 * Close connection
 		 */
-		if (readCon != null) {
+		if (closeCon && readCon != null) {
 			try {
 				DBPool.push(ctx, readCon);
 				readCon = null;

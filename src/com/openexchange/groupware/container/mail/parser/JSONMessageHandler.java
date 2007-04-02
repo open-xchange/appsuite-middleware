@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -78,6 +79,7 @@ import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
+import com.openexchange.tools.mail.Enriched2HtmlConverter;
 import com.openexchange.tools.mail.Html2TextConverter;
 import com.openexchange.tools.mail.UUEncodedPart;
 
@@ -283,6 +285,10 @@ public class JSONMessageHandler implements MessageHandler {
 		}
 		return true;
 	}
+	
+	private static final String MIME_TEXT_ENRICHED = "text/enriched";
+	
+	private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
 
 	/*
 	 * (non-Javadoc)
@@ -290,7 +296,7 @@ public class JSONMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleInlinePlainText(java.lang.String,
 	 *      java.lang.String, int, java.lang.String, java.lang.String)
 	 */
-	public boolean handleInlinePlainText(final String plainTextContent, final String baseContentType, final int size,
+	public boolean handleInlinePlainText(final String plainTextContentArg, final String baseContentType, final int size,
 			final String fileName, final String id) throws OXException {
 		if (isAlternative && usm.isDisplayHtmlInlineContent() && !textFound) {
 			/*
@@ -299,7 +305,14 @@ public class JSONMessageHandler implements MessageHandler {
 			textFound = true;
 			return true;
 		}
-		final String formattedText = MessageUtils.formatContentForDisplay(plainTextContent, false, session, msgUID);
+		final boolean isEnriched = MIME_TEXT_ENRICHED.equals(baseContentType.toLowerCase(Locale.ENGLISH));
+		final String plainTextContent;
+		if (isEnriched) {
+			plainTextContent = ENRCONV.convert(plainTextContentArg);
+		} else {
+			plainTextContent = plainTextContentArg;
+		}
+		final String formattedText = MessageUtils.formatContentForDisplay(plainTextContent, isEnriched, session, msgUID);
 		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
 		mao.setDisposition(Part.INLINE);
 		mao.setContentType(baseContentType);
@@ -620,6 +633,7 @@ public class JSONMessageHandler implements MessageHandler {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final String delim = " | ";
 		return new StringBuilder(100).append("isAlternative=").append(isAlternative).append(delim).append("textFound=")

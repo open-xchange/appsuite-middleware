@@ -210,7 +210,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, true, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
 	}
 	
 	/**
@@ -285,7 +285,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 	
 	/**
@@ -326,7 +326,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 	
 	/**
@@ -383,7 +383,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -427,7 +427,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 	
 	private static final String SQL_SELPBFLD = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND fuid NOT IN #IDS#";
@@ -462,7 +462,7 @@ public class OXFolderIteratorSQL {
 			/*
 			 * asQueue() already closes all resources
 			 */
-			final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, readCon).asQueue();
+			final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, readCon, true).asQueue();
 			final int size = q.size();
 			/*
 			 * 2.) All non-user-visible public folders
@@ -614,7 +614,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -882,7 +882,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -892,15 +892,29 @@ public class OXFolderIteratorSQL {
 	public static SearchIterator getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups,
 			final int[] accessibleModules, final int module, final Context ctx)
 			throws OXException, SearchIteratorException {
+		return getAllVisibleFoldersIteratorOfModule(userId, memberInGroups, accessibleModules, module, ctx, null);
+	}
+	
+	/**
+	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code>
+	 * instances of a certain module
+	 */
+	public static SearchIterator getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups,
+			final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg)
+			throws OXException, SearchIteratorException {
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
 						.getSqlInString(accessibleModules), "AND (ot.module = ?)", FolderCacheProperties
 						.isEnableDBGrouping() ? getGroupBy(STR_OT) : null, getSubfolderOrderBy(STR_OT));
-		Connection readCon = null;
+		Connection readCon = readConArg;
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			readCon = DBPool.pickup(ctx);
+			if (readCon == null) {
+				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
+			}
 			stmt = readCon.prepareStatement(sqlSelectStr);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, ctx.getContextId());
@@ -909,16 +923,16 @@ public class OXFolderIteratorSQL {
 			stmt.setInt(5, module);
 			rs = stmt.executeQuery();
 		} catch (SQLException e) {
-			closeResources(rs, stmt, readCon, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
 		} catch (DBPoolingException e) {
-			closeResources(rs, stmt, readCon, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
 		} catch (Throwable t) {
-			closeResources(rs, stmt, readCon, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
 	}
 
 	/**
@@ -964,7 +978,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	/**
@@ -1006,7 +1020,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 	private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append("SELECT ").append(
@@ -1043,7 +1057,7 @@ public class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
 		}
-		return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
+		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
 }

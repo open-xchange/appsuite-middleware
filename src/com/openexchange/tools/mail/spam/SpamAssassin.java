@@ -238,6 +238,7 @@ public class SpamAssassin {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void run() {
 			try {
 				/*
