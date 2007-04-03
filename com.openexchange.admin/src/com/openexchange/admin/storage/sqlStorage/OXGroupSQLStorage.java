@@ -84,19 +84,9 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
 	abstract public int create(final Context ctx,final Group grp) throws StorageException;
 	
 	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#delete(com.openexchange.admin.rmi.dataobjects.Context, int[])
-	 */
-	abstract public void delete(final Context ctx,final int[] grp_id) throws StorageException;
-	
-	/**
 	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context, int)
 	 */
 	abstract public int[] getMembers(final Context ctx,final int grp_id) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#get(com.openexchange.admin.rmi.dataobjects.Context, int)
-	 */
-	abstract public Group get(final Context ctx,final int grp_id) throws StorageException;
 	
 	/**
 	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#list(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
