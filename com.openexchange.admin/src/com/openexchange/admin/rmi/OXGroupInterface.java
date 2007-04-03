@@ -132,9 +132,22 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void delete(Context ctx,Group[] grps,Credentials auth) 
+    public void delete(Context ctx, Group[] grps,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
+    /**
+     * Delete group within given context.
+     * @param ctx Context object
+     * @param grps Contains all groups which should be deleted from the server.
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     */
+    public void delete(final Context ctx, final Group grp, final Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     /**
      * Adds a new member to the group within given context.
