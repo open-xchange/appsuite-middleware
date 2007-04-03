@@ -1,6 +1,8 @@
 * 2007-04-03 - thorben.betten@open-xchange.com
 
  - Bugfix #6280: Added less strict parsing of header 'Content-Type'
+ - Using same buffer size throughout all OutputStream instances
+   (ServletOutputStream & SocketOutputStream)
 
 * 2007-04-02 - thorben.betten@open-xchange.com
 

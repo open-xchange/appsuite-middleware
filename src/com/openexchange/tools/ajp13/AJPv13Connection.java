@@ -183,7 +183,7 @@ public class AJPv13Connection {
 
 	public OutputStream getOutputStream() throws IOException {
 		if (outputStream == null) {
-			return (outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream()));
+			return (outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE));
 		}
 		return outputStream;
 	}
