@@ -103,11 +103,9 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();    
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));        
-        final int[] id = {urs.getId()};
         
         // now load user from server and check if data is correct, else fail
-        final User[] srv_response = oxu.getData(ctx,id,cred);
-        final User srv_loaded = srv_response[0];
+        final User srv_loaded = oxu.getData(ctx,urs,cred);
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -134,7 +132,7 @@ public class UserTest extends AbstractTest {
         oxu.delete(ctx, urs ,cred);
         
         // try to load user, this MUST fail       
-        oxu.getData(ctx,new int[]{urs.getId()},cred);
+        oxu.getData(ctx,urs,cred);
         fail("user not exists expected");
     }
 
@@ -152,8 +150,7 @@ public class UserTest extends AbstractTest {
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,access,cred));     
         // now load user from server and check if data is correct, else fail
-        final User[] srv_response = oxu.getData(ctx,new int[]{urs.getId()},cred);
-        final User srv_loaded = srv_response[0];
+        final User srv_loaded = oxu.getData(ctx, urs, cred);
         if(urs.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(urs,srv_loaded);
@@ -294,29 +291,26 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));     
-        
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        usr.setId(oxu.create(ctx,usr,access,cred));     
         // now load user from server and check if data is correct, else fail
-        User[] srv_response = oxu.getData(ctx,new int[]{urs.getId()},cred);
-        final User srv_loaded = srv_response[0];
-        if(urs.getId().equals(srv_loaded.getId())){
+        User srv_loaded = oxu.getData(ctx,usr,cred);
+        if(usr.getId().equals(srv_loaded.getId())){
             //verify data
-            compareUser(urs,srv_loaded);
+            compareUser(usr,srv_loaded);
         }else{
             fail("Expected to get user data");
         } 
         
         
         // now change data
-        createChangeUserData(srv_loaded);
-        
+        srv_loaded = createChangeUserData(srv_loaded);
+        srv_loaded.setBirthday(null);
         // submit changes
         oxu.change(ctx,srv_loaded,cred);
         
         // load again
-        srv_response = oxu.getData(ctx,new int[]{srv_loaded.getId()},cred);
-        final User user_changed_loaded = srv_response[0];
+        final User user_changed_loaded = oxu.getData(ctx, srv_loaded, cred);
         if(srv_loaded.getId().equals(user_changed_loaded.getId())){
             //verify data
             compareUser(srv_loaded,user_changed_loaded);
@@ -609,19 +603,19 @@ public class UserTest extends AbstractTest {
     }
     
 
-    private void createChangeUserData(final User usr){
+    private User createChangeUserData(final User usr) throws CloneNotSupportedException{
         // change all fields of the user
-       
-        usr.setEnabled(!usr.getEnabled());        
-        usr.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
-        usr.setEmail1(usr.getEmail1()+change_suffix);
-        usr.setEmail2(usr.getEmail2()+change_suffix);
-        usr.setEmail3(usr.getEmail3()+change_suffix);
+        final User retval = usr.clone();
+        retval.setEnabled(!usr.getEnabled());        
+        retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
+        retval.setEmail1(usr.getEmail1()+change_suffix);
+        retval.setEmail2(usr.getEmail2()+change_suffix);
+        retval.setEmail3(usr.getEmail3()+change_suffix);
         
-        usr.setDisplay_name(usr.getDisplay_name()+change_suffix);
-        usr.setGiven_name(usr.getGiven_name()+change_suffix);
-        usr.setSur_name(usr.getSur_name()+change_suffix);
-        usr.setLanguage(Locale.US);
+        retval.setDisplay_name(usr.getDisplay_name()+change_suffix);
+        retval.setGiven_name(usr.getGiven_name()+change_suffix);
+        retval.setSur_name(usr.getSur_name()+change_suffix);
+        retval.setLanguage(Locale.US);
         // new for testing
         
         final HashSet<String> aliase = usr.getAliases();
@@ -629,102 +623,104 @@ public class UserTest extends AbstractTest {
         for (final String element : aliase) {
             lAliases.add(element + "_" + change_suffix);            
         }
-        lAliases.add(usr.getPrimaryEmail());
-        lAliases.add(usr.getEmail2());
+        lAliases.add(usr.getPrimaryEmail()+change_suffix);
+        lAliases.add(usr.getEmail2()+change_suffix);
         
-        usr.setAliases(lAliases);        
+        retval.setAliases(lAliases);        
         
         // set the dates to the acutal + 1 day
-        usr.setBirthday(new Date(usr.getBirthday().getTime()+(24*60*60*1000)));
-        usr.setAnniversary(new Date(usr.getAnniversary().getTime()+(24*60*60*1000)));        
-        usr.setAssistant_name(usr.getAssistant_name()+change_suffix);        
-        usr.setBranches(usr.getBranches()+change_suffix);
-        usr.setBusiness_category(usr.getBusiness_category()+change_suffix);
-        usr.setCity_business(usr.getCity_business()+change_suffix);
-        usr.setCountry_business(usr.getCountry_business()+change_suffix);
-        usr.setPostal_code_business(usr.getPostal_code_business()+change_suffix);
-        usr.setState_business(usr.getState_business()+change_suffix);
-        usr.setStreet_business(usr.getStreet_business()+change_suffix);
-        usr.setTelephone_callback(usr.getTelephone_callback()+change_suffix);
-        usr.setCity_home(usr.getCity_home()+change_suffix);
-        usr.setCommercial_register(usr.getCommercial_register()+change_suffix);
-        usr.setCompany(usr.getCompany()+change_suffix);
-        usr.setCountry_home(usr.getCountry_home()+change_suffix);
-        usr.setDepartment(usr.getDepartment()+change_suffix);
-        usr.setEmployeeType(usr.getEmployeeType()+change_suffix);
-        usr.setFax_business(usr.getFax_business()+change_suffix);
-        usr.setFax_home(usr.getFax_home()+change_suffix);
-        usr.setFax_other(usr.getFax_other()+change_suffix);
-        usr.setImapServer(usr.getImapServer()+change_suffix);
-        usr.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
-        usr.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
-        usr.setTelephone_ip(usr.getTelephone_ip()+change_suffix);
-        usr.setTelephone_isdn(usr.getTelephone_isdn()+change_suffix);
-        usr.setMail_folder_drafts_name(usr.getMail_folder_drafts_name()+change_suffix);
-        usr.setMail_folder_sent_name(usr.getMail_folder_sent_name()+change_suffix);
-        usr.setMail_folder_spam_name(usr.getMail_folder_spam_name()+change_suffix);
-        usr.setMail_folder_trash_name(usr.getMail_folder_trash_name()+change_suffix);
-        usr.setManager_name(usr.getManager_name()+change_suffix);
-        usr.setMarital_status(usr.getMarital_status()+change_suffix);
-        usr.setCellular_telephone1(usr.getCellular_telephone1()+change_suffix);
-        usr.setCellular_telephone2(usr.getCellular_telephone2()+change_suffix);
-        usr.setInfo(usr.getInfo()+change_suffix);
-        usr.setNickname(usr.getNickname()+change_suffix);
-        usr.setNote(usr.getNote()+change_suffix);
-        usr.setNumber_of_children(usr.getNumber_of_children()+change_suffix);
-        usr.setNumber_of_employee(usr.getNumber_of_employee()+change_suffix);
-        usr.setTelephone_pager(usr.getTelephone_pager()+change_suffix);        
-        usr.setPassword_expired(!usr.getPassword_expired());       
-        usr.setTelephone_assistant(usr.getTelephone_assistant()+change_suffix);
-        usr.setTelephone_business1(usr.getTelephone_business1()+change_suffix);
-        usr.setTelephone_business2(usr.getTelephone_business2()+change_suffix);
-        usr.setTelephone_car(usr.getTelephone_car()+change_suffix);
-        usr.setTelephone_company(usr.getTelephone_company()+change_suffix);
-        usr.setTelephone_home1(usr.getTelephone_home1()+change_suffix);
-        usr.setTelephone_home2(usr.getTelephone_home2()+change_suffix);
-        usr.setTelephone_other(usr.getTelephone_other()+change_suffix);
-        usr.setPosition(usr.getPosition()+change_suffix);
-        usr.setPostal_code_home(usr.getPostal_code_home()+change_suffix);        
-        usr.setProfession(usr.getProfession()+change_suffix);
-        usr.setTelephone_radio(usr.getTelephone_radio()+change_suffix);
-        usr.setRoom_number(usr.getRoom_number()+change_suffix);
-        usr.setSales_volume(usr.getSales_volume()+change_suffix);
-        usr.setCity_other(usr.getCity_other()+change_suffix);
-        usr.setCountry_other(usr.getCountry_other()+change_suffix);
-        usr.setMiddle_name(usr.getMiddle_name()+change_suffix);
-        usr.setPostal_code_other(usr.getPostal_code_other()+change_suffix);
-        usr.setState_other(usr.getState_other()+change_suffix);
-        usr.setStreet_other(usr.getStreet_other()+change_suffix);
-        usr.setSmtpServer(usr.getSmtpServer()+change_suffix);
-        usr.setSpouse_name(usr.getSpouse_name()+change_suffix);
-        usr.setState_home(usr.getState_home()+change_suffix);
-        usr.setStreet_home(usr.getStreet_home()+change_suffix);
-        usr.setSuffix(usr.getSuffix()+change_suffix);
-        usr.setTax_id(usr.getTax_id()+change_suffix);
-        usr.setTelephone_telex(usr.getTelephone_telex()+change_suffix);
-        usr.setTimezone(usr.getTimezone());
-        usr.setTitle(usr.getTitle()+change_suffix);
-        usr.setTelephone_ttytdd(usr.getTelephone_ttytdd()+change_suffix);
-        usr.setUrl(usr.getUrl()+change_suffix);
-        usr.setUserfield01(usr.getUserfield01()+change_suffix);
-        usr.setUserfield02(usr.getUserfield02()+change_suffix);
-        usr.setUserfield03(usr.getUserfield03()+change_suffix);
-        usr.setUserfield04(usr.getUserfield04()+change_suffix);
-        usr.setUserfield05(usr.getUserfield05()+change_suffix);
-        usr.setUserfield06(usr.getUserfield06()+change_suffix);
-        usr.setUserfield07(usr.getUserfield07()+change_suffix);
-        usr.setUserfield08(usr.getUserfield08()+change_suffix);
-        usr.setUserfield09(usr.getUserfield09()+change_suffix);
-        usr.setUserfield10(usr.getUserfield10()+change_suffix);
-        usr.setUserfield11(usr.getUserfield11()+change_suffix);
-        usr.setUserfield12(usr.getUserfield12()+change_suffix);
-        usr.setUserfield13(usr.getUserfield13()+change_suffix);
-        usr.setUserfield14(usr.getUserfield14()+change_suffix);
-        usr.setUserfield15(usr.getUserfield15()+change_suffix);
-        usr.setUserfield16(usr.getUserfield16()+change_suffix);
-        usr.setUserfield17(usr.getUserfield17()+change_suffix);
-        usr.setUserfield18(usr.getUserfield18()+change_suffix);
-        usr.setUserfield19(usr.getUserfield19()+change_suffix);
-        usr.setUserfield20(usr.getUserfield20()+change_suffix);
+        retval.setBirthday(new Date(usr.getBirthday().getTime()+(24*60*60*1000)));
+        retval.setAnniversary(new Date(usr.getAnniversary().getTime()+(24*60*60*1000)));        
+        retval.setAssistant_name(usr.getAssistant_name()+change_suffix);        
+        retval.setBranches(usr.getBranches()+change_suffix);
+        retval.setBusiness_category(usr.getBusiness_category()+change_suffix);
+        retval.setCity_business(usr.getCity_business()+change_suffix);
+        retval.setCountry_business(usr.getCountry_business()+change_suffix);
+        retval.setPostal_code_business(usr.getPostal_code_business()+change_suffix);
+        retval.setState_business(usr.getState_business()+change_suffix);
+        retval.setStreet_business(usr.getStreet_business()+change_suffix);
+        retval.setTelephone_callback(usr.getTelephone_callback()+change_suffix);
+        retval.setCity_home(usr.getCity_home()+change_suffix);
+        retval.setCommercial_register(usr.getCommercial_register()+change_suffix);
+        retval.setCompany(usr.getCompany()+change_suffix);
+        retval.setCountry_home(usr.getCountry_home()+change_suffix);
+        retval.setDepartment(usr.getDepartment()+change_suffix);
+        retval.setEmployeeType(usr.getEmployeeType()+change_suffix);
+        retval.setFax_business(usr.getFax_business()+change_suffix);
+        retval.setFax_home(usr.getFax_home()+change_suffix);
+        retval.setFax_other(usr.getFax_other()+change_suffix);
+        retval.setImapServer(usr.getImapServer()+change_suffix);
+        retval.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
+        retval.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
+        retval.setTelephone_ip(usr.getTelephone_ip()+change_suffix);
+        retval.setTelephone_isdn(usr.getTelephone_isdn()+change_suffix);
+        retval.setMail_folder_drafts_name(usr.getMail_folder_drafts_name()+change_suffix);
+        retval.setMail_folder_sent_name(usr.getMail_folder_sent_name()+change_suffix);
+        retval.setMail_folder_spam_name(usr.getMail_folder_spam_name()+change_suffix);
+        retval.setMail_folder_trash_name(usr.getMail_folder_trash_name()+change_suffix);
+        retval.setManager_name(usr.getManager_name()+change_suffix);
+        retval.setMarital_status(usr.getMarital_status()+change_suffix);
+        retval.setCellular_telephone1(usr.getCellular_telephone1()+change_suffix);
+        retval.setCellular_telephone2(usr.getCellular_telephone2()+change_suffix);
+        retval.setInfo(usr.getInfo()+change_suffix);
+        retval.setNickname(usr.getNickname()+change_suffix);
+        retval.setNote(usr.getNote()+change_suffix);
+        retval.setNumber_of_children(usr.getNumber_of_children()+change_suffix);
+        retval.setNumber_of_employee(usr.getNumber_of_employee()+change_suffix);
+        retval.setTelephone_pager(usr.getTelephone_pager()+change_suffix);        
+        retval.setPassword_expired(!usr.getPassword_expired());       
+        retval.setTelephone_assistant(usr.getTelephone_assistant()+change_suffix);
+        retval.setTelephone_business1(usr.getTelephone_business1()+change_suffix);
+        retval.setTelephone_business2(usr.getTelephone_business2()+change_suffix);
+        retval.setTelephone_car(usr.getTelephone_car()+change_suffix);
+        retval.setTelephone_company(usr.getTelephone_company()+change_suffix);
+        retval.setTelephone_home1(usr.getTelephone_home1()+change_suffix);
+        retval.setTelephone_home2(usr.getTelephone_home2()+change_suffix);
+        retval.setTelephone_other(usr.getTelephone_other()+change_suffix);
+        retval.setPosition(usr.getPosition()+change_suffix);
+        retval.setPostal_code_home(usr.getPostal_code_home()+change_suffix);        
+        retval.setProfession(usr.getProfession()+change_suffix);
+        retval.setTelephone_radio(usr.getTelephone_radio()+change_suffix);
+        retval.setRoom_number(usr.getRoom_number()+change_suffix);
+        retval.setSales_volume(usr.getSales_volume()+change_suffix);
+        retval.setCity_other(usr.getCity_other()+change_suffix);
+        retval.setCountry_other(usr.getCountry_other()+change_suffix);
+        retval.setMiddle_name(usr.getMiddle_name()+change_suffix);
+        retval.setPostal_code_other(usr.getPostal_code_other()+change_suffix);
+        retval.setState_other(usr.getState_other()+change_suffix);
+        retval.setStreet_other(usr.getStreet_other()+change_suffix);
+        retval.setSmtpServer(usr.getSmtpServer()+change_suffix);
+        retval.setSpouse_name(usr.getSpouse_name()+change_suffix);
+        retval.setState_home(usr.getState_home()+change_suffix);
+        retval.setStreet_home(usr.getStreet_home()+change_suffix);
+        retval.setSuffix(usr.getSuffix()+change_suffix);
+        retval.setTax_id(usr.getTax_id()+change_suffix);
+        retval.setTelephone_telex(usr.getTelephone_telex()+change_suffix);
+        retval.setTimezone(usr.getTimezone());
+        retval.setTitle(usr.getTitle()+change_suffix);
+        retval.setTelephone_ttytdd(usr.getTelephone_ttytdd()+change_suffix);
+        retval.setUrl(usr.getUrl()+change_suffix);
+        retval.setUserfield01(usr.getUserfield01()+change_suffix);
+        retval.setUserfield02(usr.getUserfield02()+change_suffix);
+        retval.setUserfield03(usr.getUserfield03()+change_suffix);
+        retval.setUserfield04(usr.getUserfield04()+change_suffix);
+        retval.setUserfield05(usr.getUserfield05()+change_suffix);
+        retval.setUserfield06(usr.getUserfield06()+change_suffix);
+        retval.setUserfield07(usr.getUserfield07()+change_suffix);
+        retval.setUserfield08(usr.getUserfield08()+change_suffix);
+        retval.setUserfield09(usr.getUserfield09()+change_suffix);
+        retval.setUserfield10(usr.getUserfield10()+change_suffix);
+        retval.setUserfield11(usr.getUserfield11()+change_suffix);
+        retval.setUserfield12(usr.getUserfield12()+change_suffix);
+        retval.setUserfield13(usr.getUserfield13()+change_suffix);
+        retval.setUserfield14(usr.getUserfield14()+change_suffix);
+        retval.setUserfield15(usr.getUserfield15()+change_suffix);
+        retval.setUserfield16(usr.getUserfield16()+change_suffix);
+        retval.setUserfield17(usr.getUserfield17()+change_suffix);
+        retval.setUserfield18(usr.getUserfield18()+change_suffix);
+        retval.setUserfield19(usr.getUserfield19()+change_suffix);
+        retval.setUserfield20(usr.getUserfield20()+change_suffix);
+        
+        return retval;
     }
 }
