@@ -185,6 +185,7 @@ public class ServletConfigLoader {
 		Map<String, String> props = clazzProps.get(clazz);
 		Map<String, String> dirProps = pathProps.get(path);
 
+		
 		if (props == null && !clazzGuardian.contains(clazz)) {
 			props = loadProperties(propFile);
 			if (null == props) {
@@ -213,7 +214,7 @@ public class ServletConfigLoader {
 			props.putAll(dirProps);
 		}
 
-		return buildConfig(props);
+		return buildConfig(new HashMap<String,String>(props)); // Clone
 
 	}
 
@@ -264,6 +265,14 @@ public class ServletConfigLoader {
 			return m;
 		}
 		return null;
+	}
+
+	private String getStack() {
+		StringBuilder builder = new StringBuilder();
+		for(StackTraceElement elem : Thread.currentThread().getStackTrace()) {
+			builder.append(elem).append("\n");
+		}
+		return builder.toString();
 	}
 
 	private void addProps(final Map<String, String> m, final Properties props) {
