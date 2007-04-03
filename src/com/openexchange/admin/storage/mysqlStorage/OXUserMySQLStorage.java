@@ -1817,10 +1817,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         return retlist;
     }
 
-    private Method getMethodforbooleanparameter(Method method) throws SecurityException, NoSuchMethodException {
+    private Method getMethodforbooleanparameter(final Method method) throws SecurityException, NoSuchMethodException {
         final String methodname = method.getName();
         final String boolmethodname = "is" + methodname.substring(3) + "set";
-        final Method retval = this.getClass().getMethod(boolmethodname);
+        final Method retval = User.class.getMethod(boolmethodname);
         return retval;
     }
 
