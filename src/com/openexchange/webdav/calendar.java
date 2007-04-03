@@ -85,6 +85,7 @@ public final class calendar extends XmlServlet {
 	
 	private static final Log LOG = LogFactory.getLog(calendar.class);
 	
+	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		final OutputStream os = resp.getOutputStream();
 		
@@ -191,16 +192,19 @@ public final class calendar extends XmlServlet {
 		}
 	}
 	
+	@Override
 	protected void startWriter(final SessionObject sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
 		appointmentwriter.startWriter(objectId, folderId, os);
 	}
 	
+	@Override
 	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
 		appointmentwriter.startWriter(bModified, bDelete, folderId, lastsync, os);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
 		return (sessionObj.getUserConfiguration().hasWebDAVXML() && sessionObj.getUserConfiguration().hasCalendar());
 	}
