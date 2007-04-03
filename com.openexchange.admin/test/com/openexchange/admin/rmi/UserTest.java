@@ -305,6 +305,43 @@ public class UserTest extends AbstractTest {
         
         // now change data
         srv_loaded = createChangeUserData(srv_loaded);
+        // submit changes
+        oxu.change(ctx,srv_loaded,cred);
+        
+        // load again
+        final User user_changed_loaded = oxu.getData(ctx, srv_loaded, cred);
+        if(srv_loaded.getId().equals(user_changed_loaded.getId())){
+            //verify data
+            compareUser(srv_loaded,user_changed_loaded);
+        }else{
+            fail("Expected to get correct changed user data");
+        } 
+    }
+    
+    @Test(expected=AssertionError.class)
+    public void testChangefailing() throws Exception {
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        usr.setId(oxu.create(ctx,usr,access,cred));     
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx,usr,cred);
+        if(usr.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(usr,srv_loaded);
+        }else{
+            fail("Expected to get user data");
+        } 
+        
+        
+        // now change data
+        srv_loaded = createChangeUserData(srv_loaded);
         srv_loaded.setBirthday(null);
         // submit changes
         oxu.change(ctx,srv_loaded,cred);
