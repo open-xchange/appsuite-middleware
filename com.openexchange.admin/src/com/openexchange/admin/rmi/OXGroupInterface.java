@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  * This interface defines the Open-Xchange API Version 2 for creating and manipulating OX groups within a OX context.
  *
  * @author cutmasta
+ * @author d7
  *
  */
 public interface OXGroupInterface extends Remote {
@@ -76,6 +77,7 @@ public interface OXGroupInterface extends Remote {
     
     /**
      * Create new group in given context.
+     * 
      * @param ctx Context object.
      * @param grp Group which should be created.
      * @param auth Credentials for authenticating against server.
@@ -86,12 +88,13 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public int create(Context ctx,Group grp,Credentials auth) 
+    public int create(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     
     /**
      * Fetch a group from server.
+     * 
      * @param ctx Context object
      * @param grp the group to retrieve from server.
      * @param auth Credentials for authenticating against server.
@@ -102,12 +105,13 @@ public interface OXGroupInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @return The Group with its data.
      */
-    public Group get(Context ctx, final Group grp,Credentials auth) 
+    public Group get(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
   
     /**
-     * Change group data in given context
+     * Convenience method for changing group data in given context
+     * 
      * @param ctx Context object
      * @param grp Group to change.
      * @param auth Credentials for authenticating against server.
@@ -117,12 +121,13 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void change(Context ctx,Group grp,Credentials auth) 
+    public void change(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;    
     
     
     /**
      * Delete group within given context.
+     * 
      * @param ctx Context object
      * @param grps Contains all groups which should be deleted from the server.
      * @param auth Credentials for authenticating against server.
@@ -132,13 +137,14 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void delete(Context ctx, Group[] grps,Credentials auth) 
+    public void delete(final Context ctx, final Group[] grps, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     /**
-     * Delete group within given context.
+     * Convenience method for deleting group within given context.
+     * 
      * @param ctx Context object
-     * @param grps Contains all groups which should be deleted from the server.
+     * @param grp Group which should be deleted from the server.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -151,6 +157,7 @@ public interface OXGroupInterface extends Remote {
     
     /**
      * Adds a new member to the group within given context.
+     * 
      * @param ctx Context object
      * @param grp_id The ID of the group in which the new members should be added.
      * @param member_ids User IDs.
@@ -161,12 +168,13 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void addMember(Context ctx, final Group grp, int [] member_ids, Credentials auth) 
+    public void addMember(final Context ctx, final Group grp, int [] member_ids, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     
     /**
      * Remove member(s) from group.
+     * 
      * @param ctx Context object
      * @param grp the group from which the members should be removed.
      * @param member_ids User IDs.
@@ -177,12 +185,13 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public void removeMember(Context ctx, final Group grp,int[] member_ids, Credentials auth) 
+    public void removeMember(final Context ctx, final Group grp, int[] member_ids, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
    
     /**
      * Get User IDs of the members of this group.
+     * 
      * @param ctx Context object
      * @param grp group from which to retrieve the members.
      * @param auth Credentials for authenticating against server.
@@ -193,12 +202,13 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public int[] getMembers(Context ctx,final Group grp,Credentials auth) 
+    public int[] getMembers(final Context ctx,final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     
     /**
      * List groups whithin context.
+     * 
      * @param ctx Context object.
      * @param pattern Search pattern to search for e.g. "*mygroup*"
      * @param auth Credentials for authenticating against server.
@@ -209,7 +219,7 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      */
-    public Group[] list(Context ctx, String pattern,Credentials auth) 
+    public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
 }
