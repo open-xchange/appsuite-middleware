@@ -181,7 +181,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        return oxGroup.get(ctx, grp_id);
+        return oxGroup.get(ctx, grp);
 
     }
 
@@ -328,7 +328,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        oxGroup.delete(ctx, grp_ids);
+        oxGroup.delete(ctx, grp);
 
     }
    

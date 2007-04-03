@@ -50,6 +50,7 @@ package com.openexchange.admin.storage.interfaces;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 import java.lang.reflect.Constructor;
@@ -140,6 +141,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 
     public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final Group[] gid) throws StorageException;
 
     public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
 
