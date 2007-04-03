@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
@@ -157,6 +158,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
         return selectwithint(ctx.getIdAsInt(), "SELECT id FROM groups WHERE cid = ? AND id = ?;", ctx.getIdAsInt(), gid);
     }
 
+    /**
+     * @deprecated Use method with User[] instead
+     */
+    @Deprecated
     public boolean existsGroup(final Context ctx, final int[] gids) throws StorageException {
         boolean retBool = false;
         AdminCache cache = ClientAdminThread.cache;
@@ -214,6 +219,65 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
 
         return retBool;
 
+    }
+
+    @Override
+    public boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException {
+        boolean retBool = false;
+        AdminCache cache = ClientAdminThread.cache;
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            for (final Group grp : grps) {
+                prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND id = ?;");
+                prep_check.setInt(1, ctx.getIdAsInt());
+                prep_check.setInt(2, grp.getId());
+
+                rs = prep_check.executeQuery();
+
+                if (rs.next()) {
+                    retBool = true;
+                    prep_check.close();
+                } else {
+                    prep_check.close();
+                    return false;
+                }
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                if (con != null) {
+                    cache.pushOXDBWrite(ctx.getIdAsInt(), con);
+                }
+            } catch (PoolException e) {
+                log.error("Error pushing configdb write connection to pool!", e);
+            }
+
+        }
+
+        return retBool;
     }
 
     /**

@@ -390,37 +390,37 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
         return retval;
     }
 
-    @Override
-    public void delete(final Context ctx, final int[] grp_id) throws StorageException {
+    public void delete(final Context ctx, final Group[] grps) throws StorageException {
         Connection con = null;
         PreparedStatement prep_del_members = null;
         PreparedStatement prep_del_group = null;
         final int context_id = ctx.getIdAsInt();
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            tool.existsGroup(ctx, grp_id);
+            
+            tool.existsGroup(ctx, grps);
 
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
-            for (final int elem : grp_id) {
-                
+            for (final Group grp : grps) {
+                final int grp_id = grp.getId();
 //              let the groupware api know that the group will be deleted
-                OXFolderAdminHelper.propagateGroupModification(elem, con, con, context_id); 
+                OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
                 
-                final DeleteEvent delev = new DeleteEvent(this, elem, DeleteEvent.TYPE_GROUP, context_id);
+                final DeleteEvent delev = new DeleteEvent(this, grp_id, DeleteEvent.TYPE_GROUP, context_id);
                 AdminCache.delreg.fireDeleteEvent(delev, con, con);
 
                 prep_del_members = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
                 prep_del_members.setInt(1, context_id);
-                prep_del_members.setInt(2, elem);
+                prep_del_members.setInt(2, grp_id);
                 prep_del_members.executeUpdate();
                 prep_del_members.close();
 
-                createRecoveryData(elem, context_id, con);
+                createRecoveryData(grp_id, context_id, con);
 
                 prep_del_group = con.prepareStatement("DELETE FROM groups WHERE cid=? AND id=?");
                 prep_del_group.setInt(1, context_id);
-                prep_del_group.setInt(2, elem);
+                prep_del_group.setInt(2, grp_id);
                 prep_del_group.executeUpdate();
                 prep_del_group.close();
             }
@@ -565,7 +565,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
     }
 
     @Override
-    public Group get(final Context ctx, final int grp_id) throws StorageException {
+    public Group get(final Context ctx, final Group grp) throws StorageException {
         Group retval = null;
         Connection con = null;
         PreparedStatement prep_list = null;
@@ -576,7 +576,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
 
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
             prep_list.setInt(1, context_ID);
-            prep_list.setInt(2, grp_id);
+            prep_list.setInt(2, grp.getId());
             final ResultSet rs = prep_list.executeQuery();
 
             while (rs.next()) {

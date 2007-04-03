@@ -152,7 +152,7 @@ public abstract class OXGroupStorageInterface {
     /**
      * Get group by context and id
      */
-    public abstract Group get(final Context ctx, final int grp_id) throws StorageException;
+    public abstract Group get(final Context ctx, final Group grp) throws StorageException;
 
     /**
      * Edit group data
@@ -171,8 +171,12 @@ public abstract class OXGroupStorageInterface {
 
     /**
      * Delete group from context
+     * 
+     * @param ctx
+     * @param grps
+     * @throws StorageException
      */
-    public abstract void delete(final Context ctx, final int[] grp_id) throws StorageException;
+    public abstract void delete(final Context ctx, final Group[] grps) throws StorageException;
 
     /**
      * Get all members of group grp_id in context ctx
