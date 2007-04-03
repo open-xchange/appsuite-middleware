@@ -2068,6 +2068,13 @@ public class IMAPUtils {
 	}
 
 	private static final String STR_EMPTY = "";
+	
+	/**
+	 * Default value for message header 'Content-Type'
+	 * 
+	 * @value text/plain; charset=us-ascii
+	 */
+	private static final String DEFAULT_CONTENT_TYPE = "text/plain; charset=us-ascii";
 
 	private static final FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f) {
 		FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
@@ -2129,10 +2136,18 @@ public class IMAPUtils {
 						try {
 							msg.setContentType(new ContentType(sb.toString()));
 						} catch (OXException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn(e.getMessage(), e);
+							}
 							/*
 							 * Try with less strict parsing
 							 */
-							msg.setContentType(new ContentType(sb.toString(), false));
+							try {
+								msg.setContentType(new ContentType(sb.toString(), false));
+							} catch (OXException ie) {
+								LOG.error(ie.getMessage(), ie);
+								msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
+							}
 						}
 					}
 				};
