@@ -1433,6 +1433,8 @@ public class OXFolderSQL {
 			closeResources(null, stmt, create ? wc : null, false, ctx);
 		}
 	}
+	
+	private static final String SQL_DELETE_FOLDER_PERMS = "DELETE FROM #PERM# WHERE cid = ? AND fuid = ?";
 
 	private static final void checkFolderPermissions(final int fuid, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
@@ -1443,7 +1445,7 @@ public class OXFolderSQL {
 			if (create) {
 				wc = DBPool.pickupWriteable(ctx);
 			}
-			stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+			stmt = wc.prepareStatement(SQL_DELETE_FOLDER_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, fuid);
 			stmt.executeUpdate();
