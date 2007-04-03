@@ -296,6 +296,14 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
    
+    public void delete(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if (null == grp) {
+            throw new InvalidDataException();
+        }
+        delete(ctx, new Group[]{grp}, auth);
+    }
+
+
     public void delete(final Context ctx, final Group[] grp, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
