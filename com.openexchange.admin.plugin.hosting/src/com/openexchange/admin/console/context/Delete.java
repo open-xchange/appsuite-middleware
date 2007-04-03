@@ -14,7 +14,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -22,68 +21,68 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Delete extends BasicCommandlineOptions {     
+public class Delete extends ContextAbtraction {     
     
- public Delete(String[] args2) {
+ public Delete(final String[] args2) {
         
-        CommandLineParser parser = new PosixParser();
+        final CommandLineParser parser = new PosixParser();
 
-        Options options = getOptions();
+        final Options options = getOptions();
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
-            Context ctx = new Context();
+            final CommandLine cmd = parser.parse(options, args2);            
+            final Context ctx = new Context();
                       
             ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));            
             
-            Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
+            final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
                         
             // get rmi ref
-            OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
                        
             oxres.delete(ctx,auth);
             
-        }catch(java.rmi.ConnectException neti){
+        }catch(final java.rmi.ConnectException neti){
             printError(neti.getMessage());            
-        }catch(java.lang.NumberFormatException num){
+        }catch(final java.lang.NumberFormatException num){
             printInvalidInputMsg("Ids must be numbers!");
-        }catch(org.apache.commons.cli.MissingArgumentException as){
+        }catch(final org.apache.commons.cli.MissingArgumentException as){
             printError("Missing arguments on the command line: " + as.getMessage());;
             printHelpText("delete", options);
-        }catch(org.apache.commons.cli.UnrecognizedOptionException ux){
+        }catch(final org.apache.commons.cli.UnrecognizedOptionException ux){
             printError("Unrecognized options on the command line: " + ux.getMessage());;
             printHelpText("delete", options);
-        } catch (org.apache.commons.cli.MissingOptionException mis) {
+        } catch (final org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());;
             printHelpText("delete", options);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {            
+        } catch (final MalformedURLException e) {            
             printServerResponse(e.getMessage());
-        } catch (RemoteException e) {            
+        } catch (final RemoteException e) {            
             printServerResponse(e.getMessage());
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-        } catch (StorageException e) {            
+        } catch (final StorageException e) {            
             printServerResponse(e.getMessage());
-        } catch (InvalidCredentialsException e) {
+        } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-        } catch (NoSuchContextException e) {
+        } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
         }
 
     }
 
-    public static void main(String args[]){
+    public static void main(final String args[]){
         new Delete(args);
     }
     
     private Options getOptions() {
-        Options retval = getDefaultCommandLineOptions();
+        final Options retval = getDefaultCommandLineOptions();
         
         // this time context id is mandatory
-        Option tmp = retval.getOption(OPT_NAME_CONTEXT_SHORT);
+        final Option tmp = retval.getOption(OPT_NAME_CONTEXT_SHORT);
         tmp.setRequired(true);
         retval.addOption(tmp);                
         

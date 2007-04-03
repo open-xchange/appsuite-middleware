@@ -14,7 +14,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -25,7 +24,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class MoveContextFilestore extends BasicCommandlineOptions {    
+public class MoveContextFilestore extends ContextAbtraction {    
    
     private final static String OPT_FILESTORE_SHORT = "f";
     private final static String OPT_FILESTORE_LONG= "filestore";
@@ -33,79 +32,79 @@ public class MoveContextFilestore extends BasicCommandlineOptions {
     private final static String OPT_REASON_SHORT = "r";
     private final static String OPT_REASON_LONG= "reason";
     
- public MoveContextFilestore(String[] args2) {
+ public MoveContextFilestore(final String[] args2) {
         
-        CommandLineParser parser = new PosixParser();
+        final CommandLineParser parser = new PosixParser();
 
-        Options options = getOptions();
+        final Options options = getOptions();
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
-            Context ctx = new Context();            
+            final CommandLine cmd = parser.parse(options, args2);            
+            final Context ctx = new Context();            
             
             ctx.setID(Integer.parseInt(cmd.getOptionValue(OPT_NAME_CONTEXT_SHORT)));            
             
-            Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
+            final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
                         
             // get rmi ref
-            OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
             
-            Filestore fs = new Filestore(Integer.parseInt(cmd.getOptionValue(OPT_FILESTORE_SHORT)));
+            final Filestore fs = new Filestore(Integer.parseInt(cmd.getOptionValue(OPT_FILESTORE_SHORT)));
                         
-            MaintenanceReason mr = new MaintenanceReason(Integer.parseInt(cmd.getOptionValue(OPT_REASON_SHORT))); 
+            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt(cmd.getOptionValue(OPT_REASON_SHORT))); 
             
             oxres.moveContextFilestore(ctx, fs, mr, auth);
             
-        }catch(java.rmi.ConnectException neti){
+        }catch(final java.rmi.ConnectException neti){
             printError(neti.getMessage());            
-        }catch(java.lang.NumberFormatException num){
+        }catch(final java.lang.NumberFormatException num){
             printInvalidInputMsg("Ids must be numbers!");
-        }catch(org.apache.commons.cli.MissingArgumentException as){
+        }catch(final org.apache.commons.cli.MissingArgumentException as){
             printError("Missing arguments on the command line: " + as.getMessage());;
             printHelpText("movecontext", options);
-        }catch(org.apache.commons.cli.UnrecognizedOptionException ux){
+        }catch(final org.apache.commons.cli.UnrecognizedOptionException ux){
             printError("Unrecognized options on the command line: " + ux.getMessage());;
             printHelpText("movecontext", options);
-        } catch (org.apache.commons.cli.MissingOptionException mis) {
+        } catch (final org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());;
             printHelpText("movecontext", options);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {            
+        } catch (final MalformedURLException e) {            
             printServerResponse(e.getMessage());
-        } catch (RemoteException e) {            
+        } catch (final RemoteException e) {            
             printServerResponse(e.getMessage());
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-        } catch (StorageException e) {            
+        } catch (final StorageException e) {            
             printServerResponse(e.getMessage());
-        } catch (InvalidCredentialsException e) {
+        } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());        
-        } catch (InvalidDataException e) {            
+        } catch (final InvalidDataException e) {            
             printServerResponse(e.getMessage());
-        } catch (NoSuchContextException e) {
+        } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
         }
 
     }
 
-    public static void main(String args[]){
+    public static void main(final String args[]){
         new MoveContextFilestore(args);
     }
     
     private Options getOptions() {
-        Options retval = getDefaultCommandLineOptions();
+        final Options retval = getDefaultCommandLineOptions();
         
         // this time context id is mandatory
-        Option tmp = retval.getOption(OPT_NAME_CONTEXT_SHORT);
+        final Option tmp = retval.getOption(OPT_NAME_CONTEXT_SHORT);
         tmp.setRequired(true);
         retval.addOption(tmp);      
         
-        Option reason = getShortLongOpt(OPT_REASON_SHORT, OPT_REASON_LONG, "Maintenance reason id", true, true);
+        final Option reason = getShortLongOpt(OPT_REASON_SHORT, OPT_REASON_LONG, "Maintenance reason id", true, true);
         retval.addOption(reason);
         
-        Option db = getShortLongOpt(OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, true);
+        final Option db = getShortLongOpt(OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, true);
         retval.addOption(db);
         
         return retval;

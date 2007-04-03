@@ -13,67 +13,66 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class EnableAll extends BasicCommandlineOptions{    
+public class EnableAll extends ContextAbtraction {    
       
     
- public EnableAll(String[] args2) {
+ public EnableAll(final String[] args2) {
         
-        CommandLineParser parser = new PosixParser();
+        final CommandLineParser parser = new PosixParser();
 
-        Options options = getOptions();
+        final Options options = getOptions();
 
         try {
             
-            CommandLine cmd = parser.parse(options, args2);            
+            final CommandLine cmd = parser.parse(options, args2);            
                         
-            Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
+            final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT),cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
                         
             // get rmi ref
-            OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);            
+            final OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);            
             
             oxres.enableAll(auth);
             
-        }catch(java.rmi.ConnectException neti){
+        }catch(final java.rmi.ConnectException neti){
             printError(neti.getMessage());            
-        }catch(java.lang.NumberFormatException num){
+        }catch(final java.lang.NumberFormatException num){
             printInvalidInputMsg("Ids must be numbers!");
-        }catch(org.apache.commons.cli.MissingArgumentException as){
+        }catch(final org.apache.commons.cli.MissingArgumentException as){
             printError("Missing arguments on the command line: " + as.getMessage());;
             printHelpText("enableall", options);
-        }catch(org.apache.commons.cli.UnrecognizedOptionException ux){
+        }catch(final org.apache.commons.cli.UnrecognizedOptionException ux){
             printError("Unrecognized options on the command line: " + ux.getMessage());;
             printHelpText("enableall", options);
-        } catch (org.apache.commons.cli.MissingOptionException mis) {
+        } catch (final org.apache.commons.cli.MissingOptionException mis) {
             printError("Missing options on the command line: " + mis.getMessage());;
             printHelpText("enableall", options);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {            
+        } catch (final MalformedURLException e) {            
             printServerResponse(e.getMessage());
-        } catch (RemoteException e) {            
+        } catch (final RemoteException e) {            
             printServerResponse(e.getMessage());
-        } catch (NotBoundException e) {
+        } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-        } catch (StorageException e) {            
+        } catch (final StorageException e) {            
             printServerResponse(e.getMessage());
-        } catch (InvalidCredentialsException e) {
+        } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());  
         }
 
     }
 
-    public static void main(String args[]){
+    public static void main(final String args[]){
         new EnableAll(args);
     }
     
     private Options getOptions() {
-        Options retval = new Options();
+        final Options retval = new Options();
         retval.addOption(getAdminUserOption());
         retval.addOption(getAdminPassOption());    
         
