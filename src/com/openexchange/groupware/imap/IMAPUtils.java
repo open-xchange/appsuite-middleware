@@ -2126,7 +2126,14 @@ public class IMAPUtils {
 						if (bs.cParams != null) {
 							sb.append(bs.cParams);
 						}
-						msg.setContentType(new ContentType(sb.toString()));
+						try {
+							msg.setContentType(new ContentType(sb.toString()));
+						} catch (OXException e) {
+							/*
+							 * Try with less strict parsing
+							 */
+							msg.setContentType(new ContentType(sb.toString(), false));
+						}
 					}
 				};
 			} else if (item instanceof UID) {

@@ -77,9 +77,17 @@ public class ContentType implements Serializable {
 	private static final Pattern PATTERN_PARAMETER = Pattern.compile("(;\\s*|\\s+)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))",
 			Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_BASETYPE = Pattern.compile("([^\\s]+)(/)([^\\s]+)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PATTERN_BASETYPE = Pattern.compile("([^\\s]+)(/)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
+	
+	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
 
 	private static final char DELIMITER = '/';
+	
+	private static final char SEMICOLON = ';';
+	
+	private static final int NONE = -1;
+	
+	private static final String SPLIT = "\\s*";
 
 	private String primaryType;
 
@@ -95,8 +103,46 @@ public class ContentType implements Serializable {
 	}
 
 	public ContentType(final String contentType) throws OXException {
+		this(contentType, true);
+	}
+	
+	public ContentType(final String contentType, final boolean strict) throws OXException {
 		this();
-		parseContentType(contentType);
+		if (strict) {
+			/*
+			 * Expect a correct base type (e.g. text/plain) and
+			 * semicolon-separated parameters (if any)
+			 */
+			parseContentType(contentType);
+		} else {
+			int pos = NONE;
+			final Matcher m = PATTERN_BASETYPE.matcher(contentType);
+			if (m.find()) {
+				baseType = null;
+				primaryType = m.group(1);
+				subType = m.group(3);
+				pos = m.end();
+			} else {
+				throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, contentType);
+			}
+			if (pos != NONE) {
+				final String paramStr = contentType.substring(pos);
+				final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON
+						: Character.isWhitespace(paramStr.charAt(0)) ? paramStr.charAt(0) : NONE;
+				if (delim != NONE) {
+					final String[] paramArr = paramStr.split(new StringBuilder(SPLIT).append((char) delim)
+							.append(SPLIT).toString());
+					NextParam: for (int i = 0; i < paramArr.length; i++) {
+						final Matcher paramMatcher;
+						if (paramArr[i].length() == 0) {
+							continue NextParam;
+						} else if ((paramMatcher = PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
+							parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH), paramMatcher.group(3));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private final void parseContentType(final String ct) throws OXException {
@@ -252,6 +298,7 @@ public class ContentType implements Serializable {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(primaryType).append(DELIMITER).append(subType);
