@@ -402,7 +402,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 					.get(Integer.valueOf(unsignedByte2Int(nextByte)))
 					: null;
 			if (attributeName == null) {
-				throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, nextByte);
+				throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, Byte.valueOf(nextByte));
 			}
 			attributeValue = parseString();
 			servletRequest.setAttribute(attributeName, attributeValue);

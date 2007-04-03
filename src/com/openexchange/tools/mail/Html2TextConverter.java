@@ -357,11 +357,9 @@ public class Html2TextConverter {
 				final int idx2 = t.indexOf("\"", idx);
 				href = t.substring(idx, idx2);
 			}
-		} else if (isTag(t, "/a")) {
-			if (href.length() > 0) {
-				result = new StringBuilder(100).append(" [ ").append(href).append(" ]").toString();
-				href = "";
-			}
+		} else if (isTag(t, "/a") && href.length() > 0) {
+			result = new StringBuilder(100).append(" [ ").append(href).append(" ]").toString();
+			href = "";
 		}
 		return result;
 	}

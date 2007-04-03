@@ -91,6 +91,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.Closeable#close()
 	 */
+	@Override
 	public void close() throws IOException {
 		isClosed = true;
 	}
@@ -159,6 +160,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read() throws IOException {
 		MUTEX.lock();
 		try {
@@ -198,6 +200,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#read(byte[])
 	 */
+	@Override
 	public int read(final byte[] b) throws IOException {
 		return read(b, 0, b.length);
 	}
@@ -207,6 +210,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#read(byte[], int, int)
 	 */
+	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
 		MUTEX.lock();
 		try {
@@ -275,6 +279,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#skip(long)
 	 */
+	@Override
 	public long skip(final long n) throws IOException {
 		MUTEX.lock();
 		try {
@@ -316,6 +321,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#available()
 	 */
+	@Override
 	public int available() throws IOException {
 		if (!dataSet) {
 			if (data == null || pos >= data.length) {
@@ -333,6 +339,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * 
 	 * @see java.io.InputStream#markSupported()
 	 */
+	@Override
 	public boolean markSupported() {
 		return false;
 	}

@@ -95,6 +95,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 	 * 
 	 * @see java.io.Closeable#close()
 	 */
+	@Override
 	public void close() throws IOException {
 		flushByteBuffer();
 		// ajpCon = null;
@@ -107,6 +108,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 	 * 
 	 * @see java.io.OutputStream#write(int)
 	 */
+	@Override
 	public void write(final int i) throws IOException {
 		if (isClosed) {
 			throw new IOException(ERR_OUTPUT_CLOSED);
@@ -137,6 +139,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 	 * 
 	 * @see java.io.OutputStream#write(byte[])
 	 */
+	@Override
 	public void write(final byte[] b) throws IOException {
 		write(b, 0, b.length);
 	}
@@ -146,6 +149,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 	 * 
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
+	 @Override
 	public void write(final byte[] b, final int off, final int len) throws IOException {
 		if (isClosed) {
 			throw new IOException(ERR_OUTPUT_CLOSED);
@@ -291,17 +295,5 @@ public class OXServletOutputStream extends ServletOutputStream {
 			throw new IOException(ERR_OUTPUT_CLOSED);
 		}
 		byteBuffer.reset();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.Flushable#flush()
-	 */
-	public void flush() throws IOException {
-		/*
-		 * Does nothing at all
-		 */
-		super.flush();
 	}
 }

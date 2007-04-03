@@ -232,7 +232,7 @@ public class AJPv13Response {
 		case CPONG_REPLY_PREFIX_CODE:
 			break;
 		default:
-			throw new AJPv13Exception(AJPCode.UNKNOWN_PREFIX_CODE, prefixCode);
+			throw new AJPv13Exception(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(prefixCode));
 		}
 		return byteArray.toByteArray();
 	}
@@ -318,7 +318,7 @@ public class AJPv13Response {
 
 	private void writeInt(final int intValue) throws AJPv13Exception {
 		if (intValue > MAX_INT_VALUE) {
-			throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, intValue);
+			throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, Integer.valueOf(intValue));
 		}
 		final int high = (intValue >> 8);
 		final int low = (intValue & (255));

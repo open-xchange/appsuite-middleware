@@ -77,7 +77,7 @@ public class AJPv13RequestHandler {
 
 	private static enum State {
 		IDLE, ASSIGNED
-	};
+	}
 
 	/**
 	 * Byte sequence indicating a packet from Web Server to Servlet Container.
@@ -183,14 +183,14 @@ public class AJPv13RequestHandler {
 				 */
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
 			} catch (SocketException e) {
-				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, ajpCon.getPackageNumber());
+				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer.valueOf(ajpCon.getPackageNumber()));
 			}
 			if (checkMagicBytes(magic)) {
 				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
 			} else if (magic[0] == -1 || magic[1] == -1) {
-				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, false, null, ajpCon.getPackageNumber());
+				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, false, null, Integer.valueOf(ajpCon.getPackageNumber()));
 			} else {
-				throw new AJPv13InvalidByteSequenceException(ajpCon.getPackageNumber(), toHexString(magic[0]),
+				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()), toHexString(magic[0]),
 						toHexString(magic[1]), dumpBytes((byte) magic[0], (byte) magic[1], getPayloadData(-1, ajpCon
 								.getInputStream(), false)));
 			}
@@ -374,11 +374,9 @@ public class AJPv13RequestHandler {
 				bytesRead = in.read(bytes, offset, bytes.length - offset);
 				offset += bytesRead;
 			}
-			if (offset < bytes.length) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Sould be ").append(
-							payloadLength).append(" but was ").append(offset).toString(), new Throwable());
-				}
+			if (offset < bytes.length && LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(
+						payloadLength).append(" but was ").append(offset).toString(), new Throwable());
 			}
 		} else {
 			/*
@@ -472,7 +470,7 @@ public class AJPv13RequestHandler {
 		sb.append("Servlet: ").append(servletInstance == null ? "null" : servletInstance.getClass().getName()).append(
 				delim);
 		sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
-		sb.append("Content Length: ").append(b_contentLength ? contentLength : "Not available").append(delim);
+		sb.append("Content Length: ").append(b_contentLength ? String.valueOf(contentLength) : "Not available").append(delim);
 		sb.append("Sevlet triggered: ").append(serviceMethodCalled).append(delim);
 		sb.append("Headers sent: ").append(headersSent).append(delim);
 		sb.append("End Response sent: ").append(endResponseSent).append(delim);

@@ -87,7 +87,7 @@ public class UUEncodedBodyPart {
 	private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
 		this.bodyPart = bodyPart;
 		if (initialize && findUUEncodedAttachmentPosition()) {
-			ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3)
+			final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3)
 					.getBytes());
 			bodyPartInputStream = MimeUtility.decode(bStream, "uuencode");
 		} else {
