@@ -315,11 +315,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 // First we have to check which return value we have. We have to
                 // distinguish four types
                 final Method method = methodandname.getMethod();
+                final Method methodbool = getMethodforbooleanparameter(method);
+                boolean test = (Boolean) methodbool.invoke(usrdata, (Object[])null);
                 final String methodname = methodandname.getName();
                 final String returntype = method.getReturnType().getName();
                 if (returntype.equalsIgnoreCase("java.lang.String")) {
                     final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
-                    if (null != result) {
+                    if (null != result && !test) {
                         contact_query.append(Mapper.method2field.get(methodname));
                         contact_query.append(" = ?, ");
                         methodlist2.add(method);
@@ -327,22 +329,28 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
                     final int result = (Integer) method.invoke(usrdata, (Object[]) null);
-                    if (-1 != result) {
+                    if (-1 != result && !test) {
                         contact_query.append(Mapper.method2field.get(methodname));
                         contact_query.append(" = ?, ");
                         methodlist2.add(method);
                         returntypes.add(returntype);
                     }
                 } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
-                    contact_query.append(Mapper.method2field.get(methodname));
-                    contact_query.append(" = ?, ");
-                    methodlist2.add(method);
-                    returntypes.add(returntype);
+                    final Boolean result = (Boolean) method.invoke(usrdata, (Object[]) null);
+                    if (null != result && !test) {
+                        contact_query.append(Mapper.method2field.get(methodname));
+                        contact_query.append(" = ?, ");
+                        methodlist2.add(method);
+                        returntypes.add(returntype);
+                    }                    
                 } else if (returntype.equalsIgnoreCase("java.util.Date")) {
-                    contact_query.append(Mapper.method2field.get(methodname));
-                    contact_query.append(" = ?, ");
-                    methodlist2.add(method);
-                    returntypes.add(returntype);
+                    final Date result = (Date) method.invoke(usrdata, (Object[]) null);
+                    if (null != result && !test) {
+                        contact_query.append(Mapper.method2field.get(methodname));
+                        contact_query.append(" = ?, ");
+                        methodlist2.add(method);
+                        returntypes.add(returntype);
+                    }                    
                 }
             }
             contact_query.delete(contact_query.length() - 2, contact_query.length() - 1);
