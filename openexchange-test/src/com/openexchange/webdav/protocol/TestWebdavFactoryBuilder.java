@@ -31,7 +31,7 @@ public class TestWebdavFactoryBuilder {
 	
 	private static final int mode = INFO;
 	
-	public static WebdavFactory buildFactory() {
+	public static WebdavFactory buildFactory() throws Exception {
 		switch(mode) {
 		case DUMMY : return buildDummyFactory();
 		case INFO : return buildInfoFactory();
@@ -43,7 +43,7 @@ public class TestWebdavFactoryBuilder {
 		return DummyResourceManager.getInstance();
 	}
 
-	private static WebdavFactory buildInfoFactory() {
+	private static WebdavFactory buildInfoFactory() throws Exception{
 		
 		InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
 		factory.setDatabase(new InfostoreFacadeImpl());
@@ -54,15 +54,10 @@ public class TestWebdavFactoryBuilder {
 		factory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
 		factory.setProvider(new DBPoolProvider());
 		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
-		
-		try {
-            final ContextStorage ctxstor = ContextStorage.getInstance();
-            final int contextId = ctxstor.getContextId("defaultcontext");
-            final Context ctx = ctxstor.getContext(contextId);
-			factory.setSessionHolder(new DummySessionHolder("thorben", ctx));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		final ContextStorage ctxstor = ContextStorage.getInstance();
+        final int contextId = ctxstor.getContextId("defaultcontext");
+        final Context ctx = ctxstor.getContext(contextId);
+		factory.setSessionHolder(new DummySessionHolder("thorben", ctx));
 		return factory;
 	}
 	
@@ -85,6 +80,7 @@ public class TestWebdavFactoryBuilder {
 			Init.loadTestProperties();
 			Init.loadSystemProperties();
 			Init.initDB();
+			ContextStorage.init();
 		}
 	}
 	
