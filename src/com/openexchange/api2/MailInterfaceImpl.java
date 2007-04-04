@@ -410,7 +410,7 @@ public class MailInterfaceImpl implements MailInterface {
 		if (/* IMAPProperties.noAdminMailbox() && */sessionObj.getUserObject().getId() == sessionObj.getContext()
 				.getMailadmin()) {
 			throw new AccountExistenceException(com.openexchange.tools.oxfolder.OXFolderManagerImpl
-					.getUserName(sessionObj), sessionObj.getContext().getContextId());
+					.getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 		}
 		DefaultIMAPConnection imapCon = fetchCachedCon ? getCachedConnection(sessionObj) : null;
 		if (imapCon != null) {
@@ -779,6 +779,7 @@ public class MailInterfaceImpl implements MailInterface {
 					tmpFolder.close(true); //expunge
 				} catch (MessagingException e) {
 					LOG.error(e.getMessage(), e);
+				} finally {
 					mailInterfaceMonitor.changeNumActive(false);
 					tmpFolder = null;
 				}
@@ -852,12 +853,12 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					final long start = System.currentTimeMillis();
 					imapCon.getImapFolder().close(false);
-					mailInterfaceMonitor.changeNumActive(false);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} catch (MessagingException e) {
 					LOG.error(e.getMessage(), e);
 				} finally {
-					imapCon.setImapFolder(null);
+					mailInterfaceMonitor.changeNumActive(false);
+					imapCon.removeImapFolder();
 				}
 			}
 			/*
@@ -1521,7 +1522,8 @@ public class MailInterfaceImpl implements MailInterface {
 		if (IMAPProperties.isImapSearch()) {
 			try {
 				if (searchCols.length != searchPatterns.length) {
-					throw new OXMailException(MailCode.INVALID_SEARCH_PARAMS, searchCols.length, searchPatterns.length);
+					throw new OXMailException(MailCode.INVALID_SEARCH_PARAMS, Integer.valueOf(searchCols.length),
+							Integer.valueOf(searchPatterns.length));
 				}
 				final SearchTerm searchTerm = IMAPUtils.getSearchTerm(searchCols, searchPatterns, linkWithOR);
 				msgs = imapFolder.search(searchTerm);
@@ -1830,7 +1832,7 @@ public class MailInterfaceImpl implements MailInterface {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			if (msg == null) {
-				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, msgUID, imapCon.getImapFolder().toString());
+				throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, String.valueOf(msgUID), imapCon.getImapFolder().toString());
 			}
 			if (imapCon.getImapFolder().getMode() == Folder.READ_WRITE && !msg.isExpunged()) {
 				/*
@@ -1846,7 +1848,7 @@ public class MailInterfaceImpl implements MailInterface {
 					} catch (MessagingException e) {
 						if (LOG.isWarnEnabled()) {
 							LOG.warn(OXMailException.getFormattedMessage(MailCode.FLAG_FAILED, IMAPUtils.FLAG_DRAFT,
-									msg.getMessageNumber(), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
+									String.valueOf(msg.getMessageNumber()), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
 						}
 					}
 				} else if (!isDraftFld && isDraft) {
@@ -1855,7 +1857,7 @@ public class MailInterfaceImpl implements MailInterface {
 					} catch (MessagingException e) {
 						if (LOG.isWarnEnabled()) {
 							LOG.warn(OXMailException.getFormattedMessage(MailCode.FLAG_FAILED, IMAPUtils.FLAG_DRAFT,
-									msg.getMessageNumber(), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
+									String.valueOf(msg.getMessageNumber()), imapCon.getImapFolder().getFullName(), e.getMessage()), e);
 						}
 					}
 				}
@@ -2352,6 +2354,7 @@ public class MailInterfaceImpl implements MailInterface {
 					.equals(folderName));
 		}
 		if (imapCon.getImapFolder() != null) {
+			IMAPUtils.forceNoopCommand(imapCon.getImapFolder());
 			if (isIdenticalFolder && imapCon.getImapFolder().isOpen()) {
 				if (imapCon.getImapFolder().getMode() == mode) {
 					/*
@@ -2367,6 +2370,7 @@ public class MailInterfaceImpl implements MailInterface {
 					return;
 				}
 			}
+			IMAPUtils.forceNoopCommand(imapCon.getImapFolder());
 			if (imapCon.getImapFolder().isOpen()) {
 				imapCon.getImapFolder().close(false);
 				mailInterfaceMonitor.changeNumActive(false);
@@ -2394,7 +2398,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, imapCon.getImapFolder().getFullName());
 		}
 		if (mode != Folder.READ_ONLY && mode != Folder.READ_WRITE) {
-			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, mode);
+			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
 		} else if (mode == Folder.READ_WRITE && ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
 				&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 				&& IMAPUtils.isReadOnly(imapCon.getImapFolder())) {
@@ -2457,7 +2461,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, tmpFolder.getFullName());
 		}
 		if (mode != Folder.READ_ONLY && mode != Folder.READ_WRITE) {
-			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, mode);
+			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
 		} else if (mode == Folder.READ_WRITE && ((tmpFolder.getType() & Folder.HOLDS_MESSAGES) == 0) // NoSelect
 				&& STR_FALSE.equalsIgnoreCase(imapProps.getProperty(PROPERTY_ALLOWREADONLYSELECT, STR_FALSE))
 				&& IMAPUtils.isReadOnly(tmpFolder)) {
@@ -2628,7 +2632,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			final String[] dispNotification = msg.getHeader(DISP_TO);
 			if (dispNotification == null || dispNotification.length == 0) {
-				throw new OXMailException(MailCode.MISSING_HEADER, DISP_TO, msgUID);
+				throw new OXMailException(MailCode.MISSING_HEADER, DISP_TO, Long.valueOf(msgUID));
 			}
 			InternetAddress[] to = null;
 			for (int i = 0; i < dispNotification.length; i++) {
@@ -2906,16 +2910,6 @@ public class MailInterfaceImpl implements MailInterface {
 					final long start = System.currentTimeMillis();
 					try {
 						draftFolder.appendMessages(new Message[] { newSMTPMsg });
-						/*
-						 * If the new message arrives during the period between
-						 * when you last issue a command to the IMAP server and
-						 * when you call getMessageByUID to fetch the new
-						 * message, the JavaMail code won't have seen the
-						 * notification of the new message yet. A call to (e.g.)
-						 * getMessageCount will allow the server to send the
-						 * notification of the new message.
-						 */
-						draftFolder.getMessageCount();
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);

@@ -1,3 +1,8 @@
+* 2007-04-04 - thorben.betten@open-xchange.com
+
+ - Fixed bug when accessing last message in a IMAP folder, in which the
+   last message has been deleted in previous request.
+
 * 2007-04-03 - thorben.betten@open-xchange.com
 
  - Bugfix #6280: Added less strict parsing of header 'Content-Type'

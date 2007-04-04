@@ -440,6 +440,42 @@ public class IMAPUtils {
 		}
 		return null;
 	}
+	
+	private static final String COMMAND_NOOP = "NOOP";
+	
+	/**
+	 * Force to send a NOOP command to IMAP server that is explicitely <b>not</b>
+	 * handled by JavaMail API. It really does not matter if this command
+	 * succeeds or breaks up in a <code>MessagingException</code>. Therefore
+	 * neither a return value is defined nor any exception is thrown
+	 */
+	public static final void forceNoopCommand(final IMAPFolder f) {
+		try {
+			f.doCommand(new IMAPFolder.ProtocolCommand() {
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+				 */
+				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+					final Response[] r = protocol.command(COMMAND_NOOP, null);
+					/*
+					 * Grab last response that should indicate an OK
+					 */
+					final Response response = r[r.length - 1];
+					if (response.isOK()) {
+						return Boolean.TRUE;
+					}
+					return Boolean.FALSE;
+				}
+
+			});
+		} catch (MessagingException e) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace(e.getMessage(), e);
+			}
+		}
+	}
 
 	private static final String COMMAND_SEARCH = "SEARCH";
 

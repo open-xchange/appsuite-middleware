@@ -226,6 +226,10 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void setImapFolder(final IMAPFolder imapFolder) {
 		this.imapFolder = imapFolder;
 	}
+	
+	public void removeImapFolder() {
+		this.imapFolder = null;
+	}
 
 	public Rights getMyRights() throws MessagingException {
 		if (myRights == null) {
