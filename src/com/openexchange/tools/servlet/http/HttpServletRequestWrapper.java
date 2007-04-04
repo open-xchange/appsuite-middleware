@@ -257,8 +257,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 			 */
 			session = (HttpSessionWrapper) HttpSessionManagement.createHttpSession(id);
 			session.setNew(true);
-			session.setServletContext(getServletContext());
 		}
+		session.setServletContext(getServletContext());
 		return session;
 	}
 
