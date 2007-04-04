@@ -106,6 +106,11 @@ public class AppointmentParser extends CalendarParser {
 		} else if (isTag(parser, AppointmentFields.DELETE_EXCEPTIONS)) {
 			try {
 				final String _s = getValue(parser);
+				
+				if (_s == null) {
+					return;
+				}
+
 				final String[] _dates = _s.split(",");
 				final java.util.Date[] deleteExceptions = new java.util.Date[_dates.length];
 				
