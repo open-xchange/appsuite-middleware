@@ -20,8 +20,7 @@ public class ServletConfigLoaderTest extends TestCase {
 		ServletContext context = loader.getContext("com.openexchange.servlets.ImaginaryServlet");
 		
 		assertEquals("13", context.getInitParameter("cool.temperature"));
-		assertEquals("Celsius", context.getInitParameter("cool.scale"));
-		
+		assertEquals("Celsius", context.getInitParameter("cool.scale"));	
 	}
 	
 	public void testLoadSpecializedConfig() {
@@ -34,6 +33,16 @@ public class ServletConfigLoaderTest extends TestCase {
 		ServletContext context = loader.getContext("com.openexchange.servlets.OtherImaginaryServlet","imaginary/other");
 		
 		assertEquals("overridden", context.getInitParameter("overrideMe"));
+		assertEquals("not overridden", context.getInitParameter("dontOverrideMe"));
+		
+		config = loader.getConfig("com.openexchange.servlets.OtherImaginaryServlet","imaginary/other2");
+		
+		assertEquals("overridden2", config.getInitParameter("overrideMe"));
+		assertEquals("not overridden", config.getInitParameter("dontOverrideMe"));
+		
+		context = loader.getContext("com.openexchange.servlets.OtherImaginaryServlet","imaginary/other2");
+		
+		assertEquals("overridden2", context.getInitParameter("overrideMe"));
 		assertEquals("not overridden", context.getInitParameter("dontOverrideMe"));
 		
 	}
