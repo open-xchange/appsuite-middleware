@@ -52,6 +52,7 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 
@@ -153,6 +154,12 @@ public abstract class OXGroupStorageInterface {
      * Get group by context and id
      */
     public abstract Group get(final Context ctx, final Group grp) throws StorageException;
+    
+    /**
+     * Get groups for a specified user! 
+     * 
+     */
+    public abstract Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException;
 
     /**
      * Edit group data

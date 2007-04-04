@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -74,6 +75,8 @@ public interface OXGroupInterface extends Remote {
      */
     public static final String RMI_NAME  = "OXGroup_V2";
     
+    public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
     /**
      * Create new group in given context.

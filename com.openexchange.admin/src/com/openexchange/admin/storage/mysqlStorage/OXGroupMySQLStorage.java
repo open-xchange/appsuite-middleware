@@ -53,6 +53,7 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -563,11 +564,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
 
         return retval;
     }
-
-    @Override
-    public Group get(final Context ctx, final Group grp) throws StorageException {
-        Group retval = null;
-        Connection con = null;
+    
+    private static Group get(final Context ctx,final Group grp,Connection con) throws StorageException{
+    	Group retval = null;        
         PreparedStatement prep_list = null;
         final int context_ID = ctx.getIdAsInt();
         try {
@@ -585,7 +584,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
                 final String ident = rs.getString("identifier");
                 final String disp = rs.getString("displayName");
                 retval = new Group(id, ident, disp);
-                // data.put(I_OXGroup.CID,cid);
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
@@ -611,17 +609,38 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             } catch (final SQLException e) {
                 log.error("SQL Error", e);
             }
+        }
 
+        return retval;
+    }
+
+    @Override
+    public Group get(final Context ctx, final Group grp) throws StorageException {
+        
+        Connection con = null;
+        
+        try {
+        	
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+
+            return get(ctx, grp, con);        
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException ec) {
+                log.error("Error rollback configdb connection", ec);
+            }
+            throw new StorageException(e);
+        } finally {
             try {
                 if (con != null) {
-                    cache.pushOXDBRead(context_ID, con);
+                    cache.pushOXDBRead(ctx.getIdAsInt().intValue(), con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
             }
         }
-
-        return retval;
     }
 
     @Override
@@ -791,5 +810,50 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             }
         }
     }
+
+	@Override
+	public Group[] getGroupsForUser(Context ctx, User usr) throws StorageException {
+		
+		Connection con = null;
+        PreparedStatement prep_list = null;  
+        try {
+
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            // fetch all group ids the user is member of
+            prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
+            prep_list.setInt(1, ctx.getIdAsInt().intValue());
+            prep_list.setInt(2, usr.getId().intValue());
+            
+            final ResultSet rs = prep_list.executeQuery();
+            ArrayList<Group> grplist = new ArrayList<Group>();
+            while (rs.next()) {
+            	grplist.add(get(ctx, new Group(rs.getInt("id")), con));
+            }
+            return grplist.toArray(new Group[grplist.size()]);
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);            
+            throw new StorageException(sql);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);            
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (prep_list != null) {
+                    prep_list.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error", e);
+            }
+
+            try {
+                if (con != null) {
+                    cache.pushOXDBRead(ctx.getIdAsInt().intValue(), con);
+                }
+            } catch (final PoolException e) {
+                log.error("Pool Error", e);
+            }
+        }
+		
+	}
 
 }
