@@ -2,6 +2,8 @@
 
  - Fixed bug when accessing last message in a IMAP folder, in which the
    last message has been deleted in previous request.
+ - Bugfix #5086: Indicating errors in a well-formatted JavaScript text on
+   POST requests
 
 * 2007-04-03 - thorben.betten@open-xchange.com
 

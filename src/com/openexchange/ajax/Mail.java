@@ -196,6 +196,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_1 = "1";
 	
 	private static final String STR_EMPTY = "";
+	
+	private static final String STR_NULL = "null";
 
 	/**
 	 * The parameter 'folder' contains the folder's id whose contents are
@@ -219,6 +221,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	
 	public static final String PARAMETER_SEND_TYPE = "sendtype";
 
+	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
@@ -233,6 +236,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
+	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
@@ -371,6 +375,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			try {
 				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
 				}
 				retval = Integer.valueOf(mailInterface.getAllMessageCount(folderId)[0]);
 			} finally {
@@ -773,7 +778,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				final Message msg = mailInterface.getMessage(mailIdentifier.folder, mailIdentifier.msgUID);
 				if (msg == null) {
-					throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, mailIdentifier.msgUID, mailIdentifier.folder);
+					throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, Long.valueOf(mailIdentifier.msgUID), mailIdentifier.folder);
 				}
 				if (showMessageSource) {
 					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1128,7 +1133,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						}
 					}
 				} else if (mao.getContentID() == JSONMessageAttachmentObject.CONTENT_BYTE_ARRAY) {
-					ContentType contentType = new ContentType(mao.getContentType());
+					final ContentType contentType = new ContentType(mao.getContentType());
 					if (contentType.containsParameter(STR_CHARSET)) {
 						contentType.addParameter(STR_CHARSET, STR_UTF8);
 					}
@@ -1874,11 +1879,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 						sessionObj.getUserConfiguration());
 				if (!p.isFolderVisible()) {
 					throw new OXFolderException(FolderCode.NOT_VISIBLE, STR_EMPTY, getFolderName(folderObj),
-							getUserName(sessionObj), sessionObj.getContext().getContextId());
+							getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 				}
 				if (!p.canWriteOwnObjects()) {
 					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, STR_EMPTY, getUserName(sessionObj),
-							getFolderName(folderObj), sessionObj.getContext().getContextId());
+							getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 				}
 				/*
 				 * Create document's meta data
@@ -2019,7 +2024,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return getStringParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXMailException(MailCode.UNKNOWN_PARAM_CONTAINER_TYPE, paramSrcType);
+			throw new OXMailException(MailCode.UNKNOWN_PARAM_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 
@@ -2052,7 +2057,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static String checkStringParam(final HttpServletRequest req, final String paramName)
 			throws OXMandatoryFieldException {
 		final String paramVal = req.getParameter(paramName);
-		if (paramVal == null || paramVal.length() == 0 || "null".equals(paramVal)) {
+		if (paramVal == null || paramVal.length() == 0 || STR_NULL.equals(paramVal)) {
 			throw new OXMandatoryFieldException(Component.EMAIL, MailCode.MISSING_PARAM.getCategory(),
 					MailCode.MISSING_PARAM.getNumber(), null, paramName);
 		}
@@ -2080,7 +2085,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return checkIntArrayParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXMailException(MailCode.UNKNOWN_PARAM_CONTAINER_TYPE, paramSrcType);
+			throw new OXMailException(MailCode.UNKNOWN_PARAM_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 
@@ -2130,6 +2135,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
+	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
 		SessionObject sessionObj = null;
@@ -2182,13 +2188,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 			LOG.error(e.getMessage(), e);
 			JSONObject responseObj = null;
 			try {
-				responseObj = new JSONObject().put("error", e.getMessage());
+				final Response response = new Response();
+				response.setException(e);
+				responseObj = response.getJSON();
 			} catch (JSONException e1) {
 				LOG.error(e1.getMessage(), e1);
 			}
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-					responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-					JS_FRAGMENT_ACTION, e.getAction() == null ? "null" : e.getAction()), e.getMessage(), e);
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
 		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			sendErrorAsJS(resp, e.getMessage());
@@ -2256,9 +2264,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Create JSON response object
 					 */
-					final JSONObject responseObj = new JSONObject().put(STR_DATA, msgIdentifier);
-					final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, responseObj.toString())
-							.replaceFirst(JS_FRAGMENT_ACTION, actionStr);
+					final Response response = new Response();
+					response.setData(msgIdentifier);
+					final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+							Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+							actionStr);
 					writer.write(jsResponse);
 					writer.flush();
 					return true;
@@ -2271,9 +2281,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Message could not be sent
 				 */
 				LOG.error(e.getMessage(), e);
-				final JSONObject responseObj = new JSONObject().put("error", e.getMessage());
+				final Response response = new Response();
+				response.setException(e);
 				final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-						Matcher.quoteReplacement(responseObj.toString())).replaceFirst(JS_FRAGMENT_ACTION, actionStr);
+						Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+						actionStr);
 				writer.write(jsResponse);
 				writer.flush();
 				return true;
@@ -2368,6 +2380,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return this;
 	}
 
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
 		return sessionObj.getUserConfiguration().hasWebMail();
 	}
@@ -2419,6 +2432,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
+		@Override
 		public Object clone() {
 			try {
 				return super.clone();
@@ -2435,6 +2449,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * 
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return str;
 		}
@@ -2526,6 +2541,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * 
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return Arrays.toString(toArray());
 		}
@@ -2570,28 +2586,32 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final UploadFile uploadFile = iter.next();
 				if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
 					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
-							uploadQuotaPerFile, uploadFile.getFileName(), uploadFile.getSize());
+							Long.valueOf(uploadQuotaPerFile), uploadFile.getFileName(), Long.valueOf(uploadFile.getSize()));
 					JSONObject responseObj = null;
 					try {
-						responseObj = new JSONObject().put("error", oxme.getMessage());
+						final Response response = new Response();
+						response.setException(oxme);
+						responseObj = response.getJSON();
 					} catch (JSONException e) {
 						LOG.error(e.getMessage(), e);
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))
+							responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString()))
 							.replaceFirst(JS_FRAGMENT_ACTION, actionStr), oxme.getMessage(), oxme);
 				}
 				size += uploadFile.getSize();
 				if (uploadQuota > 0 && size > uploadQuota) {
-					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED, uploadQuota);
+					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
 					JSONObject responseObj = null;
 					try {
-						responseObj = new JSONObject().put("error", oxme.getMessage());
+						final Response response = new Response();
+						response.setException(oxme);
+						responseObj = response.getJSON();
 					} catch (JSONException e) {
 						LOG.error(e.getMessage(), e);
 					}
 					throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-							responseObj == null ? "null" : Matcher.quoteReplacement(responseObj.toString()))
+							responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString()))
 							.replaceFirst(JS_FRAGMENT_ACTION, actionStr), oxme.getMessage(), oxme);
 				}
 			}
