@@ -77,13 +77,23 @@ public class MailTool {
     
     final static String MAILHOST = "localhost";
     
-    public final static void sendMail(final String recipient, final String subject, final String message) throws OXMailToolException {
+    /**
+     * @param recipient
+     * @param sender Can be left out by setting null here
+     * @param subject
+     * @param message
+     * @throws OXMailToolException
+     */
+    public final static void sendMail(final String recipient, final String sender, final String subject, final String message) throws OXMailToolException {
         final Properties props = new Properties();
         props.put("mail.smtp.host", MAILHOST);
         final Session session = Session.getDefaultInstance(props);
         final SMTPMessage msg = new SMTPMessage(session);
         try {
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+            if (null != sender) {
+                msg.setFrom(new InternetAddress(sender));
+            }
             msg.setSubject(subject);
             msg.setText(message);
             if (msg.getSentDate() == null) {

@@ -63,6 +63,11 @@ public class MailTest {
 
     @Test
     public void testMail() throws OXMailToolException {
-        MailTool.sendMail("primaryemail-blabla1173960641939@example.org", "Error", "Test");
+        MailTool.sendMail("primaryemail-blabla1173960641939@example.org", "postmaster@example.com", "Error", "Test");
+    }
+
+    @Test
+    public void testMailwithoutsender() throws OXMailToolException {
+        MailTool.sendMail("primaryemail-blabla1173960641939@example.org", null, "Error", "Test");
     }
 }
