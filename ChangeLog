@@ -1,3 +1,10 @@
+* 2007-04-04 - sebastian.kauss@open-xchange.com
+
+ - Fixed bug #6485: Fixed problem in appointment xml parser that
+   delete exception are not parse correctly.
+
+ - Fixed bug #6359: Add debug messages to find expired sessions
+
 * 2007-04-04 - thorben.betten@open-xchange.com
 
  - Fixed bug when accessing last message in a IMAP folder, in which the
