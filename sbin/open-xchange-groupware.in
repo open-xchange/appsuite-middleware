@@ -24,27 +24,11 @@ JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Dopenexchange.propfile=$SYSTEMPROPERTIES \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
-CLASSPATH="-classpath \
-@jdbcjar@:\
-@mailjar@:\
-@activationjar@:\
-@jdomjar@:\
-@jsdkjar@:\
-@jcsjar@:\
-@concurrentjar@:\
-@loggingjar@:\
-@jsonjar@:\
-@fileuploadjar@:\
-@iojar@:\
-@webdavjar@:\
-@httpclientjar@:\
-@jbossclientjar@:\
-@oxadapterjar@:\
-@tnefjar@:\
-@springbeanjar@:\
-@springcorejar@:\
-@oxgroupwarelibdir@/ox_server.jar:\
-@oxgroupwarelibdir@/ox_languages.jar:"
+ALLCLASSES=$(for jar in @libdirpath@/*.jar; do
+    echo -n "${jar}:"
+    done)
+
+CLASSPATH="-classpath $ALLCLASSES"
 
 pushd $OXPREFIX
 
