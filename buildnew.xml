@@ -1,4 +1,4 @@
-<project name="open-xchange" default="default" basedir=".">
+<project name="Open-Xchange" default="default" basedir=".">
 
     <description>
         Open-Xchange Collaboration Suite Server
@@ -7,6 +7,7 @@
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" location="/opt/open-xchange"/>
+    <property name="3rdlib" location="${prefix}/lib"/>
     <property name="log.install.dir" value="/var/log/open-xchange"/>
     <property name="distribution" value="debian"/>
     <property file="VERSION"/>
@@ -61,29 +62,29 @@
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="${lib.dir}/${jsdkjar}"/>
-        <pathelement location="${lib.dir}/${jdbcjar}"/>
-        <pathelement location="${lib.dir}/${mailjar}"/>
-        <pathelement location="${lib.dir}/${activationjar}"/>
-        <pathelement location="${lib.dir}/${jdomjar}"/>
-        <pathelement location="${lib.dir}/${jcsjar}"/>
-        <pathelement location="${lib.dir}/${concurrentjar}"/>
-        <pathelement location="${lib.dir}/${loggingjar}"/>
-        <pathelement location="${lib.dir}/${jsonjar}"/>
-        <pathelement location="${lib.dir}/${fileuploadjar}"/>
-        <pathelement location="${lib.dir}/${iojar}"/>
-        <pathelement location="${lib.dir}/${webdavjar}"/>
-        <pathelement location="${lib.dir}/${httpclientjar}"/>
-        <pathelement location="${lib.dir}/${jettyjar}" />
-        <pathelement location="${lib.dir}/${jbossclientjar}" />
-        <pathelement location="${lib.dir}/${oxadapterjar}" />
-        <pathelement location="${lib.dir}/${tnefjar}" />
-        <pathelement location="${lib.dir}/${springbeanjar}" />
-        <pathelement location="${lib.dir}/${springcorejar}" />
+        <pathelement location="${3rdlib}/${jsdkjar}"/>
+        <pathelement location="${3rdlib}/${jdbcjar}"/>
+        <pathelement location="${3rdlib}/${mailjar}"/>
+        <pathelement location="${3rdlib}/${activationjar}"/>
+        <pathelement location="${3rdlib}/${jdomjar}"/>
+        <pathelement location="${3rdlib}/${jcsjar}"/>
+        <pathelement location="${3rdlib}/${concurrentjar}"/>
+        <pathelement location="${3rdlib}/${loggingjar}"/>
+        <pathelement location="${3rdlib}/${jsonjar}"/>
+        <pathelement location="${3rdlib}/${fileuploadjar}"/>
+        <pathelement location="${3rdlib}/${iojar}"/>
+        <pathelement location="${3rdlib}/${webdavjar}"/>
+        <pathelement location="${3rdlib}/${httpclientjar}"/>
+        <pathelement location="${3rdlib}/${jettyjar}" />
+        <pathelement location="${3rdlib}/${jbossclientjar}" />
+        <pathelement location="${3rdlib}/${oxadapterjar}" />
+        <pathelement location="${3rdlib}/${tnefjar}" />
+        <pathelement location="${3rdlib}/${springbeanjar}" />
+        <pathelement location="${3rdlib}/${springcorejar}" />
     </path>
 
     <!-- JARs for running server -->
-    <fileset dir="lib" id="server-jars">
+    <fileset dir="${lib.dir}" id="server-jars">
         <include name="ox_server.jar"/>
         <include name="ox_languages.jar"/>
     </fileset>
@@ -104,10 +105,10 @@
     <target name="prepare">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${tmp.dir}"/>
-        <mkdir dir="lib"/>
+        <mkdir dir="${lib.dir}"/>
     </target>
 
-    <target name="compile" depends="prepare, patchVersionJava">
+    <target name="compile" depends="prepare,patchVersionJava">
         <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
@@ -115,15 +116,14 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="lib/ox_server.jar" basedir="${build.dir}" includes="**"/>
+        <jar jarfile="${lib.dir}/ox_server.jar" basedir="${build.dir}" includes="**"/>
     </target>
 
-    <target name="build" depends="compile, jar, create-lang-jar"/>
+    <target name="build" depends="compile,jar,create-lang-jar"/>
 
     <!-- Install targets -->
 
     <target name="installJars" depends="build">
-        <echo message="${lib.install.copy.dir}"/>
         <mkdir dir="${lib.install.copy.dir}"/>
         <copy todir="${lib.install.copy.dir}" overwrite="true">
             <fileset refid="server-jars" />
@@ -131,7 +131,6 @@
     </target>
 
     <target name="installConfig" depends="prepare">
-        <echo message="Conf: ${conf.dir}"/>
         <property name="patch.conf.dir" value="${tmp.dir}/${conf.dir}"/>
         <mkdir dir="${patch.conf.dir}"/>
         <copy todir="${patch.conf.dir}" overwrite="true">
@@ -178,8 +177,7 @@
     <target name="default" depends="install"/>
 
     <target name="clean">
-        <delete file="lib/ox_languages.jar"/>
-        <delete file="lib/ox_server.jar"/>
+        <delete dir="${lib.dir}"/>
         <delete dir="${tmp.dir}"/>
         <delete dir="${build.dir}"/>
         <delete file="${src.dir}/com/openexchange/server/Version.java"/>
@@ -243,7 +241,7 @@
         <exec executable="${msgfmt}" dir="${basedir}">
             <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
-        <jar jarfile="lib/ox_languages.jar" basedir="${build.dir}"
+        <jar jarfile="${lib.dir}/ox_languages.jar" basedir="${build.dir}"
             includes="com/openexchange/groupware/i18n/ServerMessages*" />
     </target>
     
@@ -257,8 +255,13 @@
         </copy>
     </target>
 
-    <target name="patchConfigFiles"
-        depends="patchFileLoggingProperties,patchScriptConf,patchSessiondProperties,patchSystemProperties"/>
+    <target name="patchConfigFiles">
+        <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <antcall target="patchFileLoggingProperties"/>
+        <antcall target="patchScriptConf"/>
+        <antcall target="patchSessiondProperties"/>
+        <antcall target="patchSystemProperties"/>
+    </target>
 
     <target name="patchFileLoggingProperties">
         <move tofile="${patch.conf.dir}/file-logging.properties"
@@ -290,7 +293,12 @@
         </replace>
     </target>
 
-    <target name="patchBinFiles" depends="patchConsistencyStart,patchGroupwareStart"/>
+    <target name="patchBinFiles">
+        <fail message="Define conf.subst.patch" unless="conf.subst.patch"/>
+        <fail message="Define lib.subst.patch" unless="lib.subst.patch"/>
+        <antcall target="patchConsistencyStart"/>
+        <antcall target="patchGroupwareStart"/>
+    </target>
 
 	<target name="patchConsistencyStart">
         <move tofile="${patch.bin.dir}/checkConsistency" file="${patch.bin.dir}/checkConsistency.in" overwrite="true"/>
