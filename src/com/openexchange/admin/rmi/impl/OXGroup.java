@@ -62,6 +62,7 @@ import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -375,4 +376,30 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new OXGroupException( OXGroupException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
     }
+
+
+	public Group[] getGroupsForUser(Context ctx, User usr, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+		 	
+			if(ctx==null){
+	            throw new InvalidDataException();
+		 	}
+	        
+	        doAuthentication(auth,ctx);
+	       
+	        log.debug(ctx.toString() + " - " + usr.getId().intValue()+" - "+auth.toString());
+	        
+	        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+	        if (!tool.existsContext(ctx)) {
+	            throw new NoSuchContextException();
+	           
+	        }
+	        
+	        if(!tool.existsUser(ctx, usr.getId().intValue())){
+	        	throw new InvalidDataException("No such user");
+	        }
+	        
+	        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+	        return oxGroup.getGroupsForUser(ctx, usr);
+	        
+	}
 }
