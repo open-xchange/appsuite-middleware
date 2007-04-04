@@ -75,6 +75,18 @@ public interface OXGroupInterface extends Remote {
      */
     public static final String RMI_NAME  = "OXGroup_V2";
     
+    /**
+     * 
+     * @param ctx Context object.
+     * @param usr User object
+     * @param auth redentials for authenticating against server.
+     * @return
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException if the data sent within the method contained invalid data.
+     */
     public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
     
