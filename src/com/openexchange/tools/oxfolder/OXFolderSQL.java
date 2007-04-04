@@ -97,12 +97,13 @@ public class OXFolderSQL {
 	public static final int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
 			final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_DEFAULTFLD);
 			stmt.setInt(1, ctx.getContextId());
@@ -114,7 +115,7 @@ public class OXFolderSQL {
 			}
 			return -1;
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -129,12 +130,13 @@ public class OXFolderSQL {
 	public static final int lookUpFolder(final int parent, final String folderName, final int module,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
 			stmt.setInt(1, ctx.getContextId()); // cid
@@ -144,7 +146,7 @@ public class OXFolderSQL {
 			rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : -1;
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -158,12 +160,13 @@ public class OXFolderSQL {
 	public static final boolean exists(final int folderId, final Connection readConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_EXISTS);
 			stmt.setInt(1, ctx.getContextId());
@@ -171,7 +174,7 @@ public class OXFolderSQL {
 			rs = stmt.executeQuery();
 			return rs.next();
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -188,12 +191,13 @@ public class OXFolderSQL {
 			throws DBPoolingException, SQLException {
 		final List<Integer> retval = new ArrayList<Integer>();
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_GETSUBFLDIDS);
 			stmt.setInt(1, ctx.getContextId());
@@ -203,7 +207,7 @@ public class OXFolderSQL {
 				retval.add(Integer.valueOf(rs.getInt(1)));
 			}
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 		return retval;
 	}
@@ -218,11 +222,12 @@ public class OXFolderSQL {
 			final long lastModified, final Connection writeConArg, final Context ctx) throws DBPoolingException,
 			SQLException {
 		Connection writeCon = writeConArg;
-		final boolean createCon = (writeCon == null);
+		boolean closeCon = false;
 		PreparedStatement stmt = null;
 		try {
-			if (createCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeCon = true;
 			}
 			stmt = writeCon.prepareStatement(SQL_UDTSUBFLDFLG);
 			stmt.setInt(1, hasSubfolders ? 1 : 0);
@@ -231,7 +236,7 @@ public class OXFolderSQL {
 			stmt.setInt(4, folderId);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, createCon ? writeCon : null, false, ctx);
+			closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
 		}
 	}
 
@@ -246,12 +251,13 @@ public class OXFolderSQL {
 	public static final int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_NUMSUB.replaceFirst("#IDS#", StringCollection.getSqlInString(userId,
 					groups)));
@@ -263,7 +269,7 @@ public class OXFolderSQL {
 				return rs.getInt(1);
 			}
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 		return 0;
 	}
@@ -313,10 +319,11 @@ public class OXFolderSQL {
 				}
 			}
 		}
-		final boolean createWriteCon = (writeCon == null);
+		boolean closeWriteCon = false;
 		try {
-			if (createWriteCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
 			}
 			final boolean isAuto = writeCon.getAutoCommit();
 			if (isAuto) {
@@ -396,7 +403,7 @@ public class OXFolderSQL {
 					}
 				}
 			} catch (SQLException e) {
-				if (isAuto && writeCon != null) {
+				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
 				}
@@ -407,7 +414,7 @@ public class OXFolderSQL {
 				writeCon.setAutoCommit(true);
 			}
 		} finally {
-			if (createWriteCon && writeCon != null) {
+			if (closeWriteCon && writeCon != null) {
 				DBPool.closeWriterSilent(ctx, writeCon);
 			}
 		}
@@ -442,10 +449,11 @@ public class OXFolderSQL {
 				}
 			}
 		}
-		final boolean createWriteCon = (writeCon == null);
+		boolean closeWriteCon = false;
 		try {
-			if (createWriteCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
 			}
 			final boolean isAuto = writeCon.getAutoCommit();
 			if (isAuto) {
@@ -507,7 +515,7 @@ public class OXFolderSQL {
 				stmt.close();
 				stmt = null;
 			} catch (SQLException e) {
-				if (isAuto && writeCon != null) {
+				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
 				}
@@ -523,7 +531,7 @@ public class OXFolderSQL {
 				writeCon.setAutoCommit(true);
 			}
 		} finally {
-			if (createWriteCon && writeCon != null) {
+			if (closeWriteCon && writeCon != null) {
 				DBPool.closeWriterSilent(ctx, writeCon);
 			}
 		}
@@ -539,17 +547,19 @@ public class OXFolderSQL {
 			final long lastModified, final Context ctx, final Connection readConArg, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createWriteCon = (writeCon == null);
+		boolean closeWriteCon = false;
 		Connection readCon = readConArg;
-		final boolean createCon = (readCon == null);
+		boolean closeCon = false;
 		PreparedStatement pst = null;
 		ResultSet subFolderRS = null;
 		try {
-			if (createCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeCon = true;
 			}
-			if (createWriteCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
 			}
 			final boolean isAuto = writeCon.getAutoCommit();
 			if (isAuto) {
@@ -594,7 +604,7 @@ public class OXFolderSQL {
 				pst.close();
 				pst = null;
 			} catch (SQLException se) {
-				if (isAuto && writeCon != null) {
+				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
 				}
@@ -605,8 +615,8 @@ public class OXFolderSQL {
 				writeCon.setAutoCommit(true);
 			}
 		} finally {
-			closeResources(subFolderRS, pst, createCon ? readCon : null, true, ctx);
-			if (createWriteCon && writeCon != null) {
+			closeResources(subFolderRS, pst, closeCon ? readCon : null, true, ctx);
+			if (closeWriteCon && writeCon != null) {
 				DBPool.closeWriterSilent(ctx, writeCon);
 			}
 		}
@@ -617,10 +627,11 @@ public class OXFolderSQL {
 	public static final void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified,
 			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createWriteCon = (writeCon == null);
+		boolean closeWriteCon = false;
 		try {
-			if (createWriteCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
 			}
 			final boolean isAuto = writeCon.getAutoCommit();
 			if (isAuto) {
@@ -638,7 +649,7 @@ public class OXFolderSQL {
 				pst.close();
 				pst = null;
 			} catch (SQLException sqle) {
-				if (isAuto && writeCon != null) {
+				if (isAuto) {
 					writeCon.rollback();
 					writeCon.setAutoCommit(true);
 				}
@@ -654,7 +665,7 @@ public class OXFolderSQL {
 				writeCon.setAutoCommit(true);
 			}
 		} finally {
-			if (createWriteCon && writeCon != null) {
+			if (closeWriteCon && writeCon != null) {
 				DBPool.closeWriterSilent(ctx, writeCon);
 			}
 		}
@@ -695,9 +706,10 @@ public class OXFolderSQL {
 			final boolean deleteWorking, final boolean createBackup, final Context ctx, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createWriteCon = (writeCon == null);
-		if (createWriteCon) {
+		boolean closeWriteCon = false;
+		if (writeCon == null) {
 			writeCon = DBPool.pickupWriteable(ctx);
+			closeWriteCon = true;
 		}
 		final boolean isAuto = writeCon.getAutoCommit();
 		if (isAuto) {
@@ -787,7 +799,7 @@ public class OXFolderSQL {
 			if (isAuto) {
 				writeCon.setAutoCommit(true);
 			}
-			if (createWriteCon && writeCon != null) {
+			if (closeWriteCon) {
 				DBPool.closeWriterSilent(ctx, writeCon);
 			}
 		}
@@ -808,12 +820,13 @@ public class OXFolderSQL {
 		NEXTSERIAL_LOCK.lock();
 		try {
 			Connection callWriteCon = callWriteConArg;
-			final boolean createCon = (callWriteCon == null);
+			boolean closeCon = false;
 			boolean isAuto = false;
 			try {
 				try {
-					if (createCon) {
+					if (callWriteCon == null) {
 						callWriteCon = DBPool.pickupWriteable(ctx);
+						closeCon = true;
 					}
 					isAuto = callWriteCon.getAutoCommit();
 					if (isAuto) {
@@ -838,7 +851,7 @@ public class OXFolderSQL {
 					}
 					return id;
 				} finally {
-					if (createCon && callWriteCon != null) {
+					if (closeCon && callWriteCon != null) {
 						DBPool.pushWrite(ctx, callWriteCon);
 					}
 				}
@@ -847,7 +860,7 @@ public class OXFolderSQL {
 					callWriteCon.rollback(); // ROLLBACK
 					callWriteCon.setAutoCommit(true);
 				}
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, ctx.getContextId());
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
 			}
 		} finally {
 			NEXTSERIAL_LOCK.unlock();
@@ -857,13 +870,14 @@ public class OXFolderSQL {
 	public static void hardDeleteOXFolder(final int folderId, final Context ctx, final Connection writeConArg)
 			throws SQLException, DBPoolingException {
 		Connection writeCon = writeConArg;
-		final boolean createWriteCon = (writeCon == null);
-		if (createWriteCon) {
+		boolean closeWrite = false;
+		if (writeCon == null) {
 			try {
 				writeCon = DBPool.pickupWriteable(ctx);
 			} catch (DBPoolingException e) {
 				throw e;
 			}
+			closeWrite = true;
 		}
 		final boolean isAuto = writeCon.getAutoCommit();
 		if (isAuto) {
@@ -896,7 +910,7 @@ public class OXFolderSQL {
 			if (isAuto) {
 				writeCon.setAutoCommit(true);
 			}
-			closeResources(null, stmt, createWriteCon ? writeCon : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? writeCon : null, false, ctx);
 		}
 	}
 
@@ -909,12 +923,13 @@ public class OXFolderSQL {
 	public static final int getContextMailAdmin(final Connection readConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean createReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				createReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_GET_CONTEXT_MAILADMIN);
 			stmt.setInt(1, ctx.getContextId());
@@ -963,13 +978,14 @@ public class OXFolderSQL {
 			final long lastModified, final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		final boolean isMailAdmin = (mailAdmin == null);
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			final String permissionsIDs;
 			if (isMailAdmin) {
@@ -1023,7 +1039,7 @@ public class OXFolderSQL {
 						readCon, writeConArg, ctx);
 			}
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -1034,11 +1050,12 @@ public class OXFolderSQL {
 		final int size = deletePerms.size();
 		final Iterator<Integer> iter = deletePerms.iterator();
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
 			stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
 			for (int i = 0; i < size; i++) {
@@ -1049,7 +1066,7 @@ public class OXFolderSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
 		}
 	}
 
@@ -1063,17 +1080,19 @@ public class OXFolderSQL {
 			SQLException {
 		final int size = reassignPerms.size();
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		Connection rc = readConArg;
-		final boolean createRead = (rc == null);
+		boolean closeRead =false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
-			if (createRead) {
+			if (rc == null) {
 				rc = DBPool.pickup(ctx);
+				closeRead = true;
 			}
 			// stmt =
 			// wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE,
@@ -1141,8 +1160,8 @@ public class OXFolderSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeResources(rs, stmt, create ? wc : null, false, ctx);
-			if (createRead && rc != null) {
+			closeResources(rs, stmt, closeWrite ? wc : null, false, ctx);
+			if (closeRead && rc != null) {
 				DBPool.closeReaderSilent(ctx, rc);
 			}
 		}
@@ -1153,11 +1172,12 @@ public class OXFolderSQL {
 	private static final void deleteSingleEntityPermission(final int entity, final int fuid, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean close = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				close = true;
 			}
 			stmt = wc.prepareStatement(SQL_REASSIGN_DEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
 			stmt.setInt(1, ctx.getContextId());
@@ -1165,7 +1185,7 @@ public class OXFolderSQL {
 			stmt.setInt(3, fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, close ? wc : null, false, ctx);
 		}
 	}
 
@@ -1175,11 +1195,12 @@ public class OXFolderSQL {
 			final int fuid, final String permTable, final Connection writeConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean close = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				close = true;
 			}
 			stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
 			stmt.setInt(1, mergedPerm.getFolderPermission());
@@ -1192,7 +1213,7 @@ public class OXFolderSQL {
 			stmt.setInt(8, fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, close ? wc : null, false, ctx);
 		}
 	}
 
@@ -1202,12 +1223,13 @@ public class OXFolderSQL {
 			final String permTable, final Connection readConArg, final Context ctx) throws SQLException,
 			DBPoolingException {
 		Connection readCon = readConArg;
-		final boolean createRead = (readCon == null);
+		boolean closeRead = false;
 		PreparedStatement innerStmt = null;
 		ResultSet innerRs = null;
 		try {
-			if (createRead) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeRead = true;
 			}
 			innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
 			innerStmt.setInt(1, ctx.getContextId());
@@ -1248,7 +1270,7 @@ public class OXFolderSQL {
 			mergedPerm.setFolderAdmin(mailAdminPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
 			return mergedPerm;
 		} finally {
-			closeResources(innerRs, innerStmt, createRead ? readCon : null, true, ctx);
+			closeResources(innerRs, innerStmt, closeRead ? readCon : null, true, ctx);
 		}
 	}
 
@@ -1275,13 +1297,14 @@ public class OXFolderSQL {
 			final String folderTable, final String permTable, final Connection readConArg,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
-		final boolean createReadCon = (readCon == null);
+		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		final boolean isMailAdmin = (mailAdmin == null);
 		try {
-			if (createReadCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_SEL_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
 			stmt.setInt(1, ctx.getContextId());
@@ -1364,7 +1387,7 @@ public class OXFolderSQL {
 				reassignFolders(reassignFolders, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
 			}
 		} finally {
-			closeResources(rs, stmt, createReadCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -1375,7 +1398,7 @@ public class OXFolderSQL {
 			SQLException {
 		final int size = deleteFolders.size();
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		PreparedStatement stmt = null;
 		try {
 			/*
@@ -1397,8 +1420,9 @@ public class OXFolderSQL {
 			/*
 			 * Delete folders
 			 */
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
 			stmt = wc.prepareStatement(SQL_DELETE_FOLDER.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
 			iter = deleteFolders.iterator();
@@ -1410,7 +1434,7 @@ public class OXFolderSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
 		}
 	}
 
@@ -1419,18 +1443,19 @@ public class OXFolderSQL {
 	private static final void deleteSpecialfoldersRefs(final int fuid, final Connection writeConArg, final Context ctx)
 			throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
 			stmt = wc.prepareStatement(SQL_DELETE_SPECIAL_REFS);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
 		}
 	}
 	
@@ -1439,18 +1464,19 @@ public class OXFolderSQL {
 	private static final void checkFolderPermissions(final int fuid, final String permTable,
 			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
 			stmt = wc.prepareStatement(SQL_DELETE_FOLDER_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
 		}
 	}
 
@@ -1462,11 +1488,12 @@ public class OXFolderSQL {
 		final int size = reassignFolders.size();
 		final Iterator<Integer> iter = reassignFolders.iterator();
 		Connection wc = writeConArg;
-		final boolean create = (wc == null);
+		boolean closeWrite = false;
 		PreparedStatement stmt = null;
 		try {
-			if (create) {
+			if (wc == null) {
 				wc = DBPool.pickupWriteable(ctx);
+				closeWrite = true;
 			}
 			stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
 			for (int i = 0; i < size; i++) {
@@ -1479,7 +1506,7 @@ public class OXFolderSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeResources(null, stmt, create ? wc : null, false, ctx);
+			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
 		}
 	}
 
