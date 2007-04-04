@@ -18,14 +18,16 @@
 	<property name="masterauthfile" value="mpasswd"/>
 	
 	<path id="project.classpath">
-	    <pathelement location="${lib.dir}/ox_server.jar"/>
+        <pathelement location="${lib.dir}/ox_server.jar"/>
         <pathelement location="${lib.dir}/commons-fileupload.jar"/>
         <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
         <pathelement location="${lib.dir}/commons-io.jar"/>
         <pathelement location="${lib.dir}/commons-logging.jar"/>
         <pathelement location="${lib.dir}/commons-cli-1.0.jar"/>
         <pathelement location="${lib.dir}/concurrent.jar"/>
-		<pathelement location="${lib.dir}/activation.jar"/>
+        <pathelement location="${lib.dir}/activation.jar"/>
+        <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
+        <pathelement location="${lib.dir}/mail.jar"/>
         <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
         <pathelement location="${lib.dir}/junit-4.1.jar"/>
         <pathelement location="${lib.dir}/mysql-connector-java-3.1.13-bin.jar"/>
