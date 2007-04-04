@@ -78,6 +78,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
+import java.util.HashMap;
 
 /**
  * SessionHandler
@@ -446,6 +447,14 @@ public class SessionHandler extends TimerTask {
 	
 	protected static void cleanUp() {
 		LOG.debug("session cleanup");
+
+		if (LOG.isDebugEnabled()) {
+			final Map<String, SessionObject> hashMap = sessionList.getLast();
+			final Iterator<String> iterator = hashMap.keySet().iterator();
+			while (iterator.hasNext()) {
+				LOG.debug("session timeout for id: " + iterator.next());
+			}
+		}
 		
 		addContainer();
 		MonitoringInfo.decrementNumberOfActiveSessions(sessionList.getLast().size());
