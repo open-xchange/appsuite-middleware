@@ -4,6 +4,8 @@
    last message has been deleted in previous request.
  - Bugfix #5086: Indicating errors in a well-formatted JavaScript text on
    POST requests
+ - Bugfix #6614: Format sequence number argument in IMAP command, cause an
+   IMAP command must not exceed max. length of 16384 bytes.
 
 * 2007-04-03 - thorben.betten@open-xchange.com
 

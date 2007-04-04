@@ -521,6 +521,12 @@ public class IMAPUtils {
 			throw new OXMailException(MailCode.FAILED_READ_ONLY_CHECK);
 		}
 	}
+	
+	private static final String COMMAND_SEARCH_UNSEEN = "SEARCH UNSEEN";
+	
+	private static final String COMMAND_SORT = "SORT";
+	
+	private static final String COMMAND_SORT_REVERSE_DATE_PEFIX = "SORT (REVERSE DATE) UTF-8 ";
 
 	/**
 	 * Determines all messages in given folder which have the \UNSEEN flag set
@@ -535,14 +541,12 @@ public class IMAPUtils {
 			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(IMAPProtocol p) throws ProtocolException {
-				Response[] r = p.command("SEARCH UNSEEN", null);
+				Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
 				/*
 				 * Result is something like: * SEARCH 12 20 24
 				 */
 				Response response = r[r.length - 1];
-				int index = 0;
-				StringBuilder newMsgsBuffer = new StringBuilder();
-				Message[] newMsgs = null;
+				final List<Integer> newMsgList = new ArrayList<Integer>();
 				try {
 					if (response.isOK()) {
 						for (int i = 0, len = r.length - 1; i < len; i++) {
@@ -557,16 +561,13 @@ public class IMAPUtils {
 							 * criteria.
 							 */
 							if (ir.keyEquals(COMMAND_SEARCH)) {
-								boolean first = true;
 								String num;
 								while ((num = ir.readAtomString()) != null) {
-									if (first) {
-										newMsgsBuffer.append(num);
-										first = false;
-									} else {
-										newMsgsBuffer.append(',').append(num);
+									try {
+										newMsgList.add(Integer.valueOf(num));
+									} catch (NumberFormatException e) {
+										continue;
 									}
-									index++;
 								}
 							}
 							r[i] = null;
@@ -581,15 +582,25 @@ public class IMAPUtils {
 				/*
 				 * No new messages found
 				 */
-				if (index == 0) {
+				if (newMsgList.isEmpty()) {
 					return null;
 				}
 				/*
 				 * Sort new messages
 				 */
-				newMsgs = new Message[index];
-				index = 0;
-				r = p.command("SORT (REVERSE DATE) UTF-8 " + newMsgsBuffer.toString(), null);
+				String seqNumArg = getSeqNumArg(newMsgList);
+				final int seqNumArgLength = seqNumArg.length();
+				if (seqNumArgLength > MAX_IMAP_COMMAND_LENGTH) {
+					/*
+					 * Command exceeds max. length of 16384 bytes
+					 */
+					final int off = seqNumArgLength - MAX_IMAP_COMMAND_LENGTH;
+					seqNumArg = seqNumArg.substring(seqNumArg.indexOf(',', off) + 1);
+				}
+				final Message[] newMsgs = new Message[newMsgList.size()];
+				int index = 0;
+				r = p.command(new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX).append(seqNumArg)
+						.toString(), null);
 				response = r[r.length - 1];
 				try {
 					if (response.isOK()) {
@@ -598,14 +609,12 @@ public class IMAPUtils {
 								continue;
 							}
 							IMAPResponse ir = (IMAPResponse) r[i];
-							if (ir.keyEquals("SORT")) {
+							if (ir.keyEquals(COMMAND_SORT)) {
 								String num;
 								while ((num = ir.readAtomString()) != null) {
 									try {
 										newMsgs[index++] = new MessageCacheObject(imapFolder.getFullName(), imapFolder
 												.getSeparator(), Integer.parseInt(num));
-										// newMsgs[index++] =
-										// imapFolder.getMessage(Integer.parseInt(num));
 									} catch (NumberFormatException e) {
 										LOG.error(e.getMessage(), e);
 										throw new ProtocolException("Invalid Message Number: " + num);
@@ -626,6 +635,34 @@ public class IMAPUtils {
 			}
 		});
 		return val;
+	}
+	
+	private static final String getSeqNumArg(final List<Integer> l) {
+		final StringBuilder sb = new StringBuilder();
+		Collections.sort(l);
+		final int size = l.size();
+		final Iterator<Integer> iter = l.iterator();
+		int prev = iter.next().intValue();
+		boolean continguous = false;
+		sb.append(prev);
+		for (int i = 1; i < size; i++) {
+			final int current = iter.next().intValue();
+			if (prev + 1 == current) {
+				prev++;
+				continguous = true;
+			} else if (continguous) {
+				sb.append(':').append(prev);
+				sb.append(',');
+				sb.append(current);
+				prev = current;
+				continguous = false;
+			} else {
+				sb.append(',');
+				sb.append(current);
+				prev = current;
+			}
+		}
+		return sb.toString();
 	}
 
 	/**
