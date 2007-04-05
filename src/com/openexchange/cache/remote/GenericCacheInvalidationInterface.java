@@ -52,8 +52,6 @@ package com.openexchange.cache.remote;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import com.openexchange.cache.CacheKey;
-
 /**
  * GenericCacheInvalidationInterface
  * 
