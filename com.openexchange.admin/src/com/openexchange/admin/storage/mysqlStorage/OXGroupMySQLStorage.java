@@ -529,20 +529,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
                 retval[i] = ids.get(i);
             }
         } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            log.error("Pool Error", e);            
             throw new StorageException(e);
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            log.error("SQL Error", sql);            
             throw new StorageException(sql);
         } finally {
             try {
@@ -571,8 +561,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
         final int context_ID = ctx.getIdAsInt();
         try {
 
-            con = cache.getREADConnectionForContext(context_ID);
-
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
             prep_list.setInt(1, context_ID);
             prep_list.setInt(2, grp.getId());
@@ -586,21 +574,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
                 retval = new Group(id, ident, disp);
             }
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
-            throw new StorageException(sql);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
-            throw new StorageException(e);
+            log.error("SQL Error", sql);            
+            throw new StorageException(sql);       
         } finally {
             try {
                 if (prep_list != null) {
@@ -625,12 +600,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
 
             return get(ctx, grp, con);        
         } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            log.error("Pool Error", e);            
             throw new StorageException(e);
         } finally {
             try {
@@ -675,20 +645,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             }
             return (Group[])list.toArray(new Group[list.size()]);
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            log.error("SQL Error", sql);            
             throw new StorageException(sql);
         } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            log.error("Pool Error", e);            
             throw new StorageException(e);
         } finally {
             try {
