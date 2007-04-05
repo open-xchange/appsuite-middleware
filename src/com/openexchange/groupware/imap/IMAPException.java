@@ -47,12 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 

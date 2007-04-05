@@ -507,7 +507,7 @@ public class IMAPProperties {
 		return javaMailProperties;
 	}
 
-	public static void setJavaMailProperties(Properties javaMailProperties) {
+	public static void setJavaMailProperties(final Properties javaMailProperties) {
 		IMAPProperties.javaMailProperties = javaMailProperties;
 	}
 
@@ -522,6 +522,7 @@ public class IMAPProperties {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final String delim = " | ";
 		final StringBuilder sb = new StringBuilder(300);

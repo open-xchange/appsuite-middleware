@@ -71,6 +71,7 @@ public class TNEFBodyPart extends TNEFMimeBodyPart {
 		this.size = size;
 	}
 	
+	@Override
 	public int getSize() {
 		return size;
 	}

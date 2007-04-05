@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.io.BufferedInputStream;
@@ -95,7 +93,7 @@ public class MessageDataSource implements DataSource {
 	 */
 	public MessageDataSource(InputStream inputStream, String contentType, String name) throws IOException {
 		this.contentType = contentType;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		copyStream(inputStream, baos);
 		data = baos.toByteArray();
 		this.name = name;

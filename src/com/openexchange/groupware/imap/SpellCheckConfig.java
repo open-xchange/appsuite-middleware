@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.util.HashMap;
@@ -179,6 +177,7 @@ public class SpellCheckConfig {
 		this.enabled = enabled;
 	}
 
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("SpellCheckConfig: enabled=").append(enabled).append(" | breakpoint=").append(breakpoint);

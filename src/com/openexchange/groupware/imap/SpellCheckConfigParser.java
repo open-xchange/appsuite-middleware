@@ -137,11 +137,12 @@ public class SpellCheckConfigParser {
 			expectedDictionaries = new HashMap<String,String>();
 		}
 		
-		final private void print(final String context, final String text) {
+		private void print(final String context, final String text) {
 			System.out.println(new StringBuilder().append(context).append(": \"").append(text).append("\".").toString());
 		}
 
-		final public void startElement(final String namespace, final String localname, final String type,
+		@Override
+		public void startElement(final String namespace, final String localname, final String type,
 				final Attributes attributes) throws SAXException {
 			if (type.equalsIgnoreCase(TAG_SPELLCHECK)) {
 				state = SPELLCHECK;
@@ -211,7 +212,8 @@ public class SpellCheckConfigParser {
 			}
 		}
 
-		final public void endElement(final String namespace, final String localname, final String type)
+		@Override
+		public void endElement(final String namespace, final String localname, final String type)
 				throws org.xml.sax.SAXException {
 			if (type.equalsIgnoreCase(TAG_SPELLCHECK)) {
 				if (state != SPELLCHECK) {
@@ -226,7 +228,8 @@ public class SpellCheckConfigParser {
 			}
 		}
 
-		final public void characters(final char[] ch, final int start, final int len) {
+		@Override
+		public void characters(final char[] ch, final int start, final int len) {
 			final String text = new String(ch, start, len);
 			final String text1 = text.trim();
 			if (text1.length() > 0) {

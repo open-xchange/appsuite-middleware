@@ -467,7 +467,6 @@ public class UserSettingMail implements DeleteListener {
 			Connection writeCon = writeConArg;
 			final boolean createCon = (writeCon == null);
 			PreparedStatement stmt = null;
-			ResultSet rs = null;
 			try {
 				if (createCon) {
 					writeCon = DBPool.pickupWriteable(ctx);
@@ -497,7 +496,7 @@ public class UserSettingMail implements DeleteListener {
 				}
 				return (stmt.executeBatch().length > 0);
 			} finally {
-				closeResources(rs, stmt, createCon ? writeCon : null, false, ctx);
+				closeResources(null, stmt, createCon ? writeCon : null, false, ctx);
 			}
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
@@ -861,6 +860,7 @@ public class UserSettingMail implements DeleteListener {
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
+		@Override
 		public Object clone() {
 			try {
 				final Signature clone = (Signature) super.clone();
