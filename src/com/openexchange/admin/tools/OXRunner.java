@@ -50,7 +50,10 @@ package com.openexchange.admin.tools;
 
 import java.io.IOException;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.cache.Configuration;
+import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
@@ -86,9 +89,17 @@ public class OXRunner {
         try {
             DatabaseInit.init();
             ContextStorage.init();
+            /*
+             * Force cache initialization
+             */
+            FolderCacheManager.getInstance();
         } catch (DBPoolingException e) {
             throw new RuntimeException(e);
         } catch (ContextException e) {
+            throw new RuntimeException(e);
+        } catch (FolderCacheNotEnabledException e) {
+            throw new RuntimeException(e);
+        } catch (OXException e) {
             throw new RuntimeException(e);
         }
     }
