@@ -1,3 +1,10 @@
+* 2007-04-05 - thorben.betten@open-xchange.com
+
+ - Using UIDPLUS extension to append messages to a mail folder to
+   immediately know assigned UIDs
+ - Removed unnecessary event handler from folder cache
+ - Initial classes for remote cache
+
 * 2007-04-04 - sebastian.kauss@open-xchange.com
 
  - Fixed bug #6485: Fixed problem in appointment xml parser that
