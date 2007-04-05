@@ -353,6 +353,7 @@
 		  	<replacefilter token="@consolelogfile@" value= "${log.dir}/open-xchange-console.log"/>
 		  	<replacefilter token="@springcorejar@" value= "${lib.subst.patch}/${springcorejar}"/>
 		  	<replacefilter token="@springbeanjar@" value= "${lib.subst.patch}/${springbeanjar}"/>
+	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
 	  	</replace>
 	</target>
 	
