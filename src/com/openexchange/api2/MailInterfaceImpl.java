@@ -169,6 +169,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -2899,17 +2900,28 @@ public class MailInterfaceImpl implements MailInterface {
 						mailInterfaceMonitor.changeNumActive(true);
 					}
 					newSMTPMsg.setFlag(Flags.Flag.DRAFT, true);
-					long uidNext = draftFolder.getUIDNext();
-					if (uidNext == -1) {
-						/*
-						 * UIDNEXT not supported
-						 */
-						uidNext = IMAPUtils.getUIDNext(draftFolder);
-					}
 					newSMTPMsg.saveChanges();
+					/*
+					 * Append message to daftt folder
+					 */
+					long uidNext = -1;
 					final long start = System.currentTimeMillis();
 					try {
-						draftFolder.appendMessages(new Message[] { newSMTPMsg });
+						if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasUIDPlus()) {
+							final AppendUID appendUID = draftFolder.appendUIDMessages(new Message[] { newSMTPMsg })[0];
+							if (appendUID != null) {
+								uidNext = appendUID.uid;
+							}
+						} else {
+							uidNext = draftFolder.getUIDNext();
+							if (uidNext == -1) {
+								/*
+								 * UIDNEXT not supported
+								 */
+								uidNext = IMAPUtils.getUIDNext(draftFolder);
+							}
+							draftFolder.appendMessages(new Message[] { newSMTPMsg });
+						}
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);
@@ -3010,17 +3022,26 @@ public class MailInterfaceImpl implements MailInterface {
 					sentFolder.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 				}
-				long uidNext = sentFolder.getUIDNext();
-				if (uidNext == -1) {
-					/*
-					 * UIDNEXT not supported
-					 */
-					uidNext = IMAPUtils.getUIDNext(sentFolder);
-				}
 				newSMTPMsg.setFlag(Flags.Flag.SEEN, true);
+				newSMTPMsg.saveChanges();
+				long uidNext = -1;
 				final long start = System.currentTimeMillis();
 				try {
-					sentFolder.appendMessages(new Message[] { newSMTPMsg });
+					if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasUIDPlus()) {
+						final AppendUID appendUID = sentFolder.appendUIDMessages(new Message[] { newSMTPMsg })[0];
+						if (appendUID != null) {
+							uidNext = appendUID.uid;
+						}
+					} else {
+						uidNext = sentFolder.getUIDNext();
+						if (uidNext == -1) {
+							/*
+							 * UIDNEXT not supported
+							 */
+							uidNext = IMAPUtils.getUIDNext(sentFolder);
+						}
+						sentFolder.appendMessages(new Message[] { newSMTPMsg });
+					}
 				} catch (MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
