@@ -8,7 +8,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
     <property name="destdir" value=""/>
     <property name="daemon.jar" value="ox_admindaemon.jar"/>
-    <property name="client.jar" value="ox_rmiclient.jar"/>
+    <property name="client.jar" value="ox_admin_rmiclient.jar"/>
     <property name="lib.dir" value="lib"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
     <property name="distribution" value="debian"/>
@@ -253,7 +253,6 @@
 
     <target name="install" depends="replacer,jar">
         <mkdir dir="${destdir}/var/log/open-xchange"/>
-        <mkdir dir="${destdir}/${prefix}/lib"/>
         <mkdir dir="${destdir}/${prefix}/libexec"/>
         <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
@@ -268,7 +267,6 @@
     	<chmod perm="755">
             <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
         </chmod>
-        <copy todir="${destdir}/${prefix}/lib" file="jar/${daemon.jar}" overwrite="true"/>
     	<mkdir dir="${destdir}/etc/init.d"/>
 		<!-- copy all dist specific files from below system/ to $prefix/ -->
     	<copy todir="${destdir}/" overwrite="true">
@@ -281,11 +279,18 @@
 		<!-- EXAMPLE -->
     	<!-- <antcall target="install-suse"/> -->
     	<!-- <antcall target="install-redhat"/> -->
-		<antcall target="install-plugins"></antcall>
+		<antcall target="install-jar"></antcall>
+
+    	<antcall target="install-plugins"></antcall>
 		<antcall target="install-console"></antcall>
     </target>
 	
-    <target name="install-client" depends="client">
+    <target name="install-jar" depends="jar">
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <copy todir="${destdir}/${prefix}/lib" file="jar/${daemon.jar}" overwrite="true"/>
+    </target>
+
+	<target name="install-client" depends="client">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
     </target>
