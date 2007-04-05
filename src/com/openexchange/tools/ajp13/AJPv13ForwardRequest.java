@@ -190,6 +190,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 				requestURI = requestURI.substring(0, pos);
 			}
 			servletRequest.setRequestURI(requestURI);
+			servletRequest.setPathInfo(requestURI);
 		} catch (AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "req_uri");
 		}
