@@ -104,6 +104,7 @@ public class Starter {
 			LOG.info(
 					"VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
 		} catch (Exception gee) {
+			LOG.error(gee.getMessage(), gee);
 		}
 
 		LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
