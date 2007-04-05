@@ -82,6 +82,9 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  */
 public class FolderCacheManager {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderCacheManager.class);
 
 	private static final boolean enabled = FolderCacheProperties.isEnableFolderCache();
 
@@ -105,12 +108,6 @@ public class FolderCacheManager {
 			ConfigurationInit.init();
 			Configuration.load();
 			folderCache = JCS.getInstance(FOLDER_CACHE_REGION_NAME);
-			/*
-			 * Add element event hander(s)
-			 */
-			IElementAttributes defaultAttribs = folderCache.getDefaultElementAttributes();
-			defaultAttribs.addElementEventHandler(new FolderCacheEventHandler());
-			folderCache.setDefaultElementAttributes(defaultAttribs);
 		} catch (CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
@@ -245,8 +242,8 @@ public class FolderCacheManager {
 			final IElementAttributes elemAttribs) throws OXException {
 		try {
 			if (!folderObj.containsObjectID()) {
-				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, "", FolderFields.ID, -1, ctx
-						.getContextId());
+				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, "", FolderFields.ID, Integer
+						.valueOf(-1), Integer.valueOf(ctx.getContextId()));
 			}
 			final CacheKey ck = new CacheKey(ctx, folderObj.getObjectID());
 			if (!overwrite) {
@@ -357,8 +354,12 @@ public class FolderCacheManager {
 
 	public static class FolderCacheEventHandler extends ElementEventHandlerWrapper {
 
+		@Override
 		protected void onExceededIdletimeBackground(final ElementEvent event) {
 			super.onExceededIdletimeBackground(event);
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("onExceededIdletimeBackground()");
+			}
 		}
 
 	}
