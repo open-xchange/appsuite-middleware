@@ -994,7 +994,6 @@ public class OXFolderSQL {
 			} else {
 				permissionsIDs = new StringBuilder().append('(').append(entity).append(')').toString();
 			}
-
 			stmt = readCon.prepareStatement(SQL_SEL_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable).replaceFirst(
 					TMPL_FOLDER_TABLE, folderTable).replaceFirst(TMPL_IDS, permissionsIDs));
 			stmt.setInt(1, ctx.getContextId());
