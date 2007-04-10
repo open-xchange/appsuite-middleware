@@ -797,7 +797,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			}
 
 			EventClient ec = new EventClient(sessionObj);
-			ec.modify(document);
+			DocumentMetadataImpl docForEvent = new DocumentMetadataImpl(oldDocument);
+			SetSwitch set = new SetSwitch(docForEvent);
+			GetSwitch get = new GetSwitch(document);
+			for(Metadata metadata : modifiedColumns) {
+				set.setValue(metadata.doSwitch(get));
+				metadata.doSwitch(set);
+			}
+			ec.modify(docForEvent);
 		} catch (OXException x) {
 			throw x;
 		} catch (Exception e) {
