@@ -3921,7 +3921,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 				if (folderObj.getName().indexOf(parent.getSeparator()) != -1) {
-					throw new OXMailException(MailCode.INVALID_FOLDER_NAME, parent.getSeparator());
+					throw new OXMailException(MailCode.INVALID_FOLDER_NAME, Character.valueOf(parent.getSeparator()));
 				}
 				final IMAPFolder createMe = (IMAPFolder) getFolder(parent, folderObj.getName());
 				if (createMe.exists()) {
@@ -4209,11 +4209,11 @@ public class MailInterfaceImpl implements MailInterface {
 				if (temporary) {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
 							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), imapProps.getContext().getContextId());
+									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
 				} else {
 					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
 							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), imapProps.getContext().getContextId());
+									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
 				}
 			}
 		} else if (e instanceof FolderClosedException) {
@@ -4250,8 +4250,8 @@ public class MailInterfaceImpl implements MailInterface {
 			 * No subclass of MessagingException
 			 */
 			if (e.getNextException() instanceof BindException) {
-				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
-						.getImapPort());
+				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : Integer.valueOf(imapProps
+						.getImapPort()));
 			} else if (e.getNextException() instanceof ConnectException) {
 				OXMailException tmp = null;
 				try {
@@ -4281,8 +4281,8 @@ public class MailInterfaceImpl implements MailInterface {
 				oxme = new OXMailException(MailCode.NO_ROUTE_TO_HOST, e, imapProps == null ? STR_EMPTY : imapProps
 						.getImapServer());
 			} else if (e.getNextException() instanceof PortUnreachableException) {
-				oxme = new OXMailException(MailCode.PORT_UNREACHABLE, e, imapProps == null ? STR_EMPTY : imapProps
-						.getImapPort());
+				oxme = new OXMailException(MailCode.PORT_UNREACHABLE, e, imapProps == null ? STR_EMPTY : Integer.valueOf(imapProps
+						.getImapPort()));
 			} else if (e.getNextException() instanceof SocketException) {
 				/*
 				 * Treat dependent on message

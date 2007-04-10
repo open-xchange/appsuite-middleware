@@ -114,12 +114,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * Checks the session ID supplied as a query parameter in the request URI.
      * {@inheritDoc}
      */
-    @OXThrows(category=Category.TRY_AGAIN, desc="", exceptionId=4, msg="Context is locked.")
+    @Override
+	@OXThrows(category=Category.TRY_AGAIN, desc="", exceptionId=4, msg="Context is locked.")
     protected void service(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
-
-        final Response response;
         try {
             final String cookieId = getCookieId(req);
             final String sessionId = getSessionId(req, cookieId);
@@ -133,7 +132,7 @@ public abstract class SessionServlet extends AJAXServlet {
             super.service(req, resp);
         } catch (SessionException e) {
             LOG.debug(e.getMessage(), e);
-            response = new Response();
+            final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             try {
