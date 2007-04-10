@@ -145,7 +145,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     public void change(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
                 
-        if(ctx==null||res==null){
+        if(ctx==null||res==null || res.getId()==null){
             throw new InvalidDataException();
         }
         
@@ -188,7 +188,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     public void delete(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
-        if(ctx==null){
+        if(ctx==null||res==null||res.getId()==null){
             throw new InvalidDataException();
         }
         
@@ -216,7 +216,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     public Resource get(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
         
-        if(ctx==null){
+        if(ctx==null||res==null||res.getId()==null){
             throw new InvalidDataException();
         }
         
