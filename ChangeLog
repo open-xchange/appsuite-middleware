@@ -1,3 +1,7 @@
+* 2007-04-10 - marcus.klein@open-xchange.com
+
+  - Use all jars in lib directory for starting OX.
+
 * 2007-04-05 - thorben.betten@open-xchange.com
 
  - Using UIDPLUS extension to append messages to a mail folder to

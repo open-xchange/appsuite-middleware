@@ -454,6 +454,7 @@
             <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
             <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
             <replacefilter token="@oxgroupwarelibdir@"    value="${lib.subst.patch}"/>
+	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
         </replace>
     </target>
 
