@@ -88,8 +88,10 @@ public interface UpdateTask {
 
     /**
      * This method is called to apply the changes to the schema of the database.
+     * @param schema TODO
+     * @param contextId TODO
      * @throws AbstractOXException if applying the changes fails.
      */
-    void perform() throws AbstractOXException;
+    void perform(Schema schema, int contextId) throws AbstractOXException;
 
 }

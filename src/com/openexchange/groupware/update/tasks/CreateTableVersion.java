@@ -49,14 +49,53 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import com.openexchange.database.Database;
+import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.SchemaImpl;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
 
 /**
  * Creates the table version and inserts a single line.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+@OXExceptionSource(
+	    classId = Classes.UPDATE_TASK,
+	    component = Component.UPDATE
+	)
 public final class CreateTableVersion implements UpdateTask {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CreateTableVersion.class);
+	
+	/**
+     * For creating exceptions.
+     */
+    private static final SchemaExceptionFactory EXCEPTION =
+        new SchemaExceptionFactory(CreateTableVersion.class);
+	
+//	private static final String CREATE = "CREATE TABLE foobar (" +
+//			"version INT4 UNSIGNED NOT NULL," +
+//			"boolfield01 BOOLEAN NOT NULL," +
+//			"boolfield02 BOOLEAN NOT NULL," +
+//			"boolfield03 BOOLEAN NOT NULL," +
+//			"server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
+//			" ENGINE = InnoDB";
+//	
+//	private static final String INSERT = "INSERT INTO foobar VALUES (?, ?, ?, ?, ?)";
 
     /**
      * Default constructor.
@@ -75,9 +114,38 @@ public final class CreateTableVersion implements UpdateTask {
     /**
      * {@inheritDoc}
      */
-    public void perform() throws AbstractOXException {
-        // TODO Auto-generated method stub
-
+    @OXThrowsMultiple(
+			category = { Category.PROGRAMMING_ERROR },
+			desc = { "" },
+			exceptionId = { 1 },
+			msg = { "A SQL error occured while performing task CreateTableVersion: %1$s." }
+	)
+    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    	LOG.error("UpdateTask 'CreateTableVersion' performed!");
+//    	Connection writeCon = null;
+//    	PreparedStatement stmt = null;
+//        try {
+//            writeCon = Database.get(contextId, true);
+//            try {
+//				stmt = writeCon.prepareStatement(CREATE);
+//				stmt.executeUpdate();
+//				stmt.close();
+//				stmt = writeCon.prepareStatement(INSERT);
+//				stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
+//				stmt.setBoolean(2, true);
+//				stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
+//				stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
+//				stmt.setString(5, Server.getServerName());
+//				stmt.executeUpdate();
+//			} catch (SQLException e) {
+//				throw EXCEPTION.create(1, e, e.getMessage());
+//			}
+//        } finally {
+//        	closeSQLStuff(null, stmt);
+//        	if (writeCon != null) {
+//        		Database.back(contextId, true, writeCon);
+//        	}
+//        }
     }
     
     /**

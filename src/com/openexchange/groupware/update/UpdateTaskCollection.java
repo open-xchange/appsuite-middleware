@@ -62,6 +62,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.openexchange.configuration.SystemConfig;
+
 /**
  * 
  * UpdateTaskCollection
@@ -83,12 +85,13 @@ public class UpdateTaskCollection {
 	private static final ArrayList<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
 
 	static {
-		if (System.getProperty(PROPERTYNAME) == null) {
+		final String propStr;
+		if ((propStr = SystemConfig.getProperty(PROPERTYNAME)) == null) {
 			LOG.error("Missing property 'UPDATETASKSCFG' in system.properties");
 		} else {
-			final File updateTasksFile = new File(System.getProperty(PROPERTYNAME));
+			final File updateTasksFile = new File(propStr);
 			if (!updateTasksFile.exists() || !updateTasksFile.isFile()) {
-				LOG.error("Missing file 'updatetasks.cfg' in " + System.getProperty(PROPERTYNAME));
+				LOG.error("Missing file " + propStr);
 			} else {
 				BufferedReader reader = null;
 				try {
@@ -144,6 +147,14 @@ public class UpdateTaskCollection {
 		}
 	}
 
+	/**
+	 * Creates a list of <code>UpdateTask</code> instances that apply to
+	 * current database version
+	 * 
+	 * @param dbVersion -
+	 *            current database version
+	 * @return list of <code>UpdateTask</code> instances
+	 */
 	public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
 		final List<UpdateTask> retval = (List<UpdateTask>) updateTaskList.clone();
 		/*
@@ -165,6 +176,23 @@ public class UpdateTaskCollection {
 	}
 
 	/**
+	 * Iterates all implementations of <code>UpdateTask</code> and determines
+	 * the highest version number indicated through method
+	 * <code>UpdateTask.addedWithVersion()</code>.
+	 * 
+	 * @return the highest version number
+	 */
+	public static final int getHighestVersion() {
+		final int size = updateTaskList.size();
+		final Iterator<UpdateTask> iter = updateTaskList.iterator();
+		int version = 0;
+		for (int i = 0; i < size; i++) {
+			version = Math.max(version, iter.next().addedWithVersion());
+		}	
+		return version;
+	}
+
+	/**
 	 * 
 	 * UpdateTaskComparator - sorts instances of <code>UpdateTask</code> by
 	 * their version in first order and by their priority in second order
@@ -179,7 +207,7 @@ public class UpdateTaskCollection {
 		 * 
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
-		public int compare(UpdateTask o1, UpdateTask o2) {
+		public int compare(final UpdateTask o1, final UpdateTask o2) {
 			if (o1.addedWithVersion() > o2.addedWithVersion()) {
 				return 1;
 			} else if (o1.addedWithVersion() < o2.addedWithVersion()) {

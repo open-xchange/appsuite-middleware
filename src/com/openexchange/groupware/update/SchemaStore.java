@@ -57,6 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * Abstract class defining the interface for reading the schema version

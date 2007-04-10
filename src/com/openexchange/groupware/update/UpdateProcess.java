@@ -87,6 +87,12 @@ public class UpdateProcess implements Runnable {
      * {@inheritDoc}
      */
     public void run() {
+    	if (schema.isLocked()) {
+    		/*
+    		 * Already beeing updated
+    		 */
+    		return;
+    	}
 		boolean unlock = false;
 		try {
 			try {
@@ -111,7 +117,7 @@ public class UpdateProcess implements Runnable {
 				final Iterator<UpdateTask> iter = updateTasks.iterator();
 				for (int i = 0; i < size; i++) {
 					try {
-						iter.next().perform();
+						iter.next().perform(schema, contextId);
 					} catch (AbstractOXException e) {
 						LOG.error(e.getMessage(), e);
 					}

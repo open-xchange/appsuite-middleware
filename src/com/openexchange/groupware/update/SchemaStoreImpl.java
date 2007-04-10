@@ -57,9 +57,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.database.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.database.Server;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -67,7 +69,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.groupware.update.tasks.CreateTableVersion;
 import com.openexchange.server.DBPoolingException;
 
 /**
@@ -83,6 +84,10 @@ public class SchemaStoreImpl extends SchemaStore {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SchemaStoreImpl.class);
+	
+	private boolean tableCreated;
+	
+	private final Lock createTableLock;
 
     /**
      * SQL command for selecting the version from the schema.
@@ -101,6 +106,7 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     public SchemaStoreImpl() {
         super();
+        createTableLock = new ReentrantLock();
     }
 
     /**
@@ -108,14 +114,68 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     @Override
     public Schema getSchema(final int contextId) throws SchemaException {
-        final Schema retval;
-        if (existsTable(contextId)) {
-            retval = loadSchema(contextId);
-        } else {
-            retval = SchemaImpl.FIRST;
+        if (!tableCreated) {
+	    	createTableLock.lock();
+	    	try {
+		    	if (!tableCreated && !existsTable(contextId)) {
+		    		createVersionTable(contextId);
+		    		tableCreated = true;
+		        }
+	        } finally {
+	        	createTableLock.unlock();
+	        }
         }
-        return retval;
+        return loadSchema(contextId);
     }
+    
+    @OXThrowsMultiple(
+			category = { Category.PROGRAMMING_ERROR, Category.PROGRAMMING_ERROR },
+			desc = { "", "" },
+			exceptionId = { 14, 15 },
+			msg = { "A SQL error occured while creating table 'version': %1$s.",
+			"A database error occured while creating table 'version': %1$s." }
+	)
+    private static final void createVersionTable(final int contextId) throws SchemaException {
+    	/*
+		 * Create table 'version'
+		 */
+		try {
+			Connection writeCon = null;
+	    	PreparedStatement stmt = null;
+	        try {
+	            writeCon = Database.get(contextId, true);
+					stmt = writeCon.prepareStatement(CREATE);
+				stmt.executeUpdate();
+				stmt.close();
+				stmt = writeCon.prepareStatement(INSERT);
+				stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
+				stmt.setBoolean(2, SchemaImpl.FIRST.isLocked());
+				stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
+				stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
+				stmt.setString(5, Server.getServerName());
+				stmt.executeUpdate();
+	        } finally {
+	        	closeSQLStuff(null, stmt);
+	        	if (writeCon != null) {
+	        		Database.back(contextId, true, writeCon);
+	        	}
+	        }
+		} catch (SQLException e) {
+			throw EXCEPTION.create(14, e, e.getMessage());
+		} catch (DBPoolingException e) {
+			throw EXCEPTION.create(15, e, e.getMessage());
+		}
+    }
+    
+    private static final String CREATE = "CREATE TABLE version (" +
+		"version INT4 UNSIGNED NOT NULL," +
+		"locked BOOLEAN NOT NULL," +
+		"gw_compatible BOOLEAN NOT NULL," +
+		"admin_compatible BOOLEAN NOT NULL," +
+		"server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
+		" ENGINE = InnoDB";
+    
+    private static final String INSERT = "INSERT INTO version VALUES (?, ?, ?, ?, ?)";
     
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
     
@@ -137,16 +197,6 @@ public class SchemaStoreImpl extends SchemaStore {
 	)
 	@Override
 	public void lockSchema(final Schema schema, final int contextId) throws SchemaException {
-		if (schema == SchemaImpl.FIRST) {
-			/*
-			 * Invoke initial update task to create table 'version'
-			 */
-			try {
-				new CreateTableVersion().perform();
-			} catch (AbstractOXException e) {
-				throw new SchemaException(e);
-			}
-		}
 		/*
 		 * Start of update process, so lock schema
 		 */
@@ -221,6 +271,8 @@ public class SchemaStoreImpl extends SchemaStore {
 		}
 
 	}
+	
+	private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?, locked = ?, gw_compatible = ?, admin_compatible = ?";
 
 	/*
 	 * (non-Javadoc)
@@ -269,10 +321,13 @@ public class SchemaStoreImpl extends SchemaStore {
 				stmt.close();
 				stmt = null;
 				/*
-				 * Unlock schema
+				 * Update & unlock schema
 				 */
-				stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
-				stmt.setBoolean(1, false);
+				stmt = writeCon.prepareStatement(SQL_UPDATE_VERSION);
+				stmt.setInt(1, SchemaImpl.ACTUAL.getDBVersion());
+				stmt.setBoolean(2, false);
+				stmt.setBoolean(3, SchemaImpl.ACTUAL.isGroupwareCompatible());
+				stmt.setBoolean(4, SchemaImpl.ACTUAL.isAdminCompatible());
 				if (stmt.executeUpdate() == 0) {
 					/*
 					 * Schema could not be unlocked
@@ -323,11 +378,12 @@ public class SchemaStoreImpl extends SchemaStore {
 	 */
     @OXThrowsMultiple(
         category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR,
-            Category.SETUP_ERROR },
-        desc = {"", "", "" },
-        exceptionId = { 1, 2, 4 },
+            Category.SETUP_ERROR, Category.PROGRAMMING_ERROR },
+        desc = {"", "", "", "" },
+        exceptionId = { 1, 2, 4, 16 },
         msg = { "A SQL error occured while reading schema version information: "
-            + "%1$s.", "No row found in table update.", "Multiple rows found." }
+            + "%1$s.", "No row found in table update.", "Multiple rows found.",
+            "A database error occured while reading schema version information: %1$s." }
     )
     private Schema loadSchema(final int contextId) throws SchemaException {
         Connection con;
@@ -350,6 +406,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 schema.setGroupwareCompatible(result.getBoolean(pos++));
                 schema.setAdminCompatible(result.getBoolean(pos++));
                 schema.setServer(result.getString(pos++));
+                schema.setSchema(Database.getSchema(contextId));
             } else {
                 throw EXCEPTION.create(2);
             }
@@ -358,12 +415,14 @@ public class SchemaStoreImpl extends SchemaStore {
             }
         } catch (SQLException e) {
             throw EXCEPTION.create(1, e, e.getMessage());
+        } catch (DBPoolingException e) {
+        	throw EXCEPTION.create(16, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             Database.back(contextId, true, con);
         }
         return schema;
-    }
+    } 
 
     /**
      * Checks if the schema version table exists.
@@ -379,8 +438,8 @@ public class SchemaStoreImpl extends SchemaStore {
         msg = { "A SQL exception occured while checking for schema version "
             + "table: %1$s.", "Resolving schema for context %1$d failed." }
     )
-    private boolean existsTable(final int contextId) throws SchemaException {
-        Connection con;
+    private static final boolean existsTable(final int contextId) throws SchemaException {
+    	Connection con;
         try {
             con = Database.get(contextId, true);
         } catch (DBPoolingException e) {
@@ -398,7 +457,7 @@ public class SchemaStoreImpl extends SchemaStore {
         } catch (SQLException e) {
             throw EXCEPTION.create(3, e, e.getMessage());
         } catch (DBPoolingException e) {
-            throw EXCEPTION.create(5, e, contextId);
+            throw EXCEPTION.create(5, e, Integer.valueOf(contextId));
         } finally {
             closeSQLStuff(result);
             Database.back(contextId, true, con);

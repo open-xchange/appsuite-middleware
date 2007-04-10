@@ -86,6 +86,11 @@ public final class Classes {
     public static final int UPDATER_IMPL = 6;
     
     /**
+     * {@link UpdateTask}.
+     */
+    public static final int UPDATE_TASK = 7;
+    
+    /**
      * Prevent instanciation.
      */
     private Classes() {

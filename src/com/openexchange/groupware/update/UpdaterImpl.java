@@ -114,7 +114,7 @@ public class UpdaterImpl extends Updater {
 	@Override
 	public boolean toUpdate(final Context context) throws UpdateException {
 		final Schema schema = getSchema(context);
-		return Version.NUMBER > schema.getDBVersion();
+		return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
 	}
 
 	/**

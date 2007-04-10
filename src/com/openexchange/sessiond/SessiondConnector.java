@@ -174,17 +174,15 @@ public class SessiondConnector {
 				
 				if (response.startsWith("OK")) {
 					return null;
-				} else {
-					return null;
 				}
+				return null;
 			} catch (Exception exc) {
 				LOG.error("addSession", exc);
 			}
 			
 			return null;
-		} else {
-			return SessionHandler.addSession(username, password, client_ip, host);
 		}
+		return SessionHandler.addSession(username, password, client_ip, host);
 	}
 	
 	/**
@@ -209,17 +207,15 @@ public class SessiondConnector {
 				
 				if (response.startsWith("OK")) {
 					return true;
-				} else {
-					return false;
 				}
+				return false;
 			} catch (Exception exc) {
 				LOG.error("refreshSession", exc);
 			}
 			
 			return false;
-		} else {
-			return SessionHandler.refreshSession(sessionid);
 		}
+		return SessionHandler.refreshSession(sessionid);
 	}
 	
 	/**
@@ -252,9 +248,8 @@ public class SessiondConnector {
 			}
 			
 			return false;
-		} else {
-			return SessionHandler.clearSession(sessionid);
 		}
+		return SessionHandler.clearSession(sessionid);
 	}
 	
 	/**
@@ -296,7 +291,7 @@ public class SessiondConnector {
 				
 				final String response = new String(b_in);
 				
-				if (response != null && !response.startsWith("ERROR:")) {
+				if (!response.startsWith("ERROR:")) {
 					final SessionObject sessionobject = new SessionObject(sessionid);
 					
 					final String authdata = new String(Base64.decode(response), "UTF-8");
@@ -316,17 +311,15 @@ public class SessiondConnector {
 					sessionobject.setHost(host);
 					
 					return sessionobject;
-				} else {
-					return null;
 				}
+				return null;
 			} catch (Exception exc) {
 				LOG.error("removeSession", exc);
 			}
 			
 			return null;
-		} else {
-			return SessionHandler.getSession(sessionid, refresh);
 		}
+		return SessionHandler.getSession(sessionid, refresh);
 	}
 	
 	/**
