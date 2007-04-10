@@ -120,17 +120,19 @@ public class CachingContextStorage extends ContextStorage {
     public int getContextId(final String loginInfo) throws ContextException {
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
-            LOG.trace("Cache MISS. Login info: " + loginInfo);
-            contextId = persistantImpl.getContextId(loginInfo);
+            if (LOG.isTraceEnabled()) {
+            	LOG.trace("Cache MISS. Login info: " + loginInfo);
+            }
+            contextId = Integer.valueOf(persistantImpl.getContextId(loginInfo));
             try {
                 cache.put(loginInfo, contextId);
             } catch (CacheException e) {
                 throw new ContextException(Code.CACHE_PUT, e);
             }
-        } else {
+        } else if (LOG.isTraceEnabled()) {
             LOG.trace("Cache HIT. Login info: " + loginInfo);
         }
-        return contextId;
+        return contextId.intValue();
     }
 
     /**
@@ -146,10 +148,10 @@ public class CachingContextStorage extends ContextStorage {
                 }
                 public ContextExtended load() throws AbstractOXException {
                 	final ContextExtended retval = persistantImpl.loadContext(contextId);
-//                    final Updater updater = Updater.getInstance();
-//                    if (updater.isLocked(retval)) {
-//                        retval.setEnabled(false);
-//                    }
+                    final Updater updater = Updater.getInstance();
+                    if (updater.isLocked(retval)) {
+                        retval.setEnabled(false);
+                    }
                     return retval;
                 }
                 public Lock getCacheLock() {
@@ -186,7 +188,7 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
 	@Override
-	public void invalidateContext(int contextId) throws ContextException {
+	public void invalidateContext(final int contextId) throws ContextException {
 		if (cache == null) {
 			/*
 			 * Cache not initialized, yet

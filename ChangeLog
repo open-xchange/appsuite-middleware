@@ -4,7 +4,7 @@
    copy of a serializable object
  - Using a faster implementation of ByteArrayOutputStream in
    OXServletOutputStream
- - Several fixes in update process
+ - Several fixes in update proces
 
 * 2007-04-10 - marcus.klein@open-xchange.com
 
