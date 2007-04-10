@@ -100,18 +100,18 @@ public abstract class ContextStorage {
     public Context getContext(final int contextId) throws ContextException {
         final Context retval = loadContext(contextId);
         // Check for update.
-        try {
-            final Updater updater = Updater.getInstance();
-            if (updater.toUpdate(retval)) {
-                updater.startUpdate(retval);
-                throw new ContextException(ContextException.Code.UPDATE);
-            }
-            if (updater.isLocked(retval)) {
-                throw new ContextException(ContextException.Code.UPDATE);
-            }
-        } catch (UpdateException e) {
-            throw new ContextException(e);
-        }
+//        try {
+//            final Updater updater = Updater.getInstance();
+//            if (updater.toUpdate(retval)) {
+//                updater.startUpdate(retval);
+//                throw new ContextException(ContextException.Code.UPDATE);
+//            }
+//            if (updater.isLocked(retval)) {
+//                throw new ContextException(ContextException.Code.UPDATE);
+//            }
+//        } catch (UpdateException e) {
+//            throw new ContextException(e);
+//        }
         // Lock context.
         return retval;
     }

@@ -146,10 +146,10 @@ public class CachingContextStorage extends ContextStorage {
                 }
                 public ContextExtended load() throws AbstractOXException {
                 	final ContextExtended retval = persistantImpl.loadContext(contextId);
-                    final Updater updater = Updater.getInstance();
-                    if (updater.isLocked(retval)) {
-                        retval.setEnabled(false);
-                    }
+//                    final Updater updater = Updater.getInstance();
+//                    if (updater.isLocked(retval)) {
+//                        retval.setEnabled(false);
+//                    }
                     return retval;
                 }
                 public Lock getCacheLock() {
