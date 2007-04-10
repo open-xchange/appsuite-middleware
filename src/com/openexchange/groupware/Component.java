@@ -230,7 +230,11 @@ public enum Component {
     /**
      * Session.
      */
-    SESSION("SES");
+    SESSION("SES"),
+    /**
+     * SyncML
+     */
+    SYNCML("SYN");
 
     /**
      * The abbrevation for components.
