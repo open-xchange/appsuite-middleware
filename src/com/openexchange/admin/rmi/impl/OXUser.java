@@ -232,8 +232,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public void change(final Context ctx, final User usrdata, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
 
-        if(ctx==null || usrdata==null){
-            throw new InvalidDataException();            
+        if(ctx==null || usrdata==null|| usrdata.getId()==null){
+            throw new InvalidDataException();
         }
         
         
@@ -561,8 +561,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
     
-    
-        if (usrdata.getEmail1() == null) {
+        // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+        // which is not very good when just changing the displayname for example
+        if ((usrdata.getPrimaryEmail() != null && usrdata.getEmail1() == null)) {
             throw new InvalidDataException("email1 not sent but required!");
            
         }
