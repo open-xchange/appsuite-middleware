@@ -51,7 +51,6 @@
 
 package com.openexchange.tools.servlet;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
@@ -77,13 +76,13 @@ public class OXServletOutputStream extends ServletOutputStream {
 
 	private final AJPv13Connection ajpCon;
 
-	private final ByteArrayOutputStream byteBuffer;
+	private final UnsynchronizedByteArrayOutputStream byteBuffer;
 
 	private boolean isClosed;
 
 	public OXServletOutputStream(AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
-		byteBuffer = new ByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+		byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 	}
 
 	public void resetBuffer() {

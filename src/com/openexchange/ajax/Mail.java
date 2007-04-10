@@ -268,7 +268,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} else if (actionStr.equalsIgnoreCase(ACTION_COUNT)) {
 			actionGetMailCount(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_UPDATES)) {
-			//throw new OXMailException(MailCode.UNSUPPORTED_ACTION, ACTION_UPDATES, "IMAP");
 			actionGetUpdates(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_REPLY) || actionStr.equalsIgnoreCase(ACTION_REPLYALL)) {
 			actionGetReply(req, resp, (actionStr.equalsIgnoreCase(ACTION_REPLYALL)));
@@ -1508,13 +1507,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 					list = new SmartLongArray(length);
 					idMap.put(folder, list);
 				}
-				list.append(Long.valueOf(m.group(1)));
+				list.append(Long.parseLong(m.group(1)));
 				found = m.find();
 			} while (found && folder.equals(m.group(2)));
 			if (found) {
 				folder = m.group(2);
 				list = new SmartLongArray(length);
-				list.append(Long.valueOf(m.group(1)));
+				list.append(Long.parseLong(m.group(1)));
 				idMap.put(folder, list);
 			}
 		}
@@ -2298,7 +2297,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";
 
-	private final void addUploadFilesAsAttachments(final JSONMessageObject msgObj, final UploadEvent uploadEvent,
+	private static final void addUploadFilesAsAttachments(final JSONMessageObject msgObj, final UploadEvent uploadEvent,
 			final int level) {
 		int nextAttachmentNum = msgObj.getMsgAttachments() == null || msgObj.getMsgAttachments().isEmpty() ? 0 : msgObj
 				.getMsgAttachments().size();
@@ -2336,7 +2335,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return new StringBuilder(10).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
 	}
 
-	private final void addInfostoreDocumentsAsAttachments(final JSONMessageObject msgObj, final int[] documentIDs,
+	private static final void addInfostoreDocumentsAsAttachments(final JSONMessageObject msgObj, final int[] documentIDs,
 			final int level, final SessionObject session) {
 		if (documentIDs == null || documentIDs.length == 0) {
 			return;
@@ -2480,7 +2479,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	}
 
-	private static class SmartLongArray {
+	private static class SmartLongArray implements Cloneable {
 		/**
 		 * Pointer to keep track of position in the array
 		 */
@@ -2507,6 +2506,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		public void reset() {
 			pointer = 0;
+			//Arrays.fill(array, 0);
 			trimmedArray = null;
 		}
 
@@ -2544,6 +2544,28 @@ public class Mail extends PermissionServlet implements UploadListener {
 		@Override
 		public String toString() {
 			return Arrays.toString(toArray());
+		}
+		
+		/* (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#clone()
+		 */
+		@Override
+		public Object clone() {
+			SmartLongArray clone;
+			try {
+				clone = (SmartLongArray) super.clone();
+				clone.array = new long[this.array.length];
+				System.arraycopy(array, 0, clone.array, 0, array.length);
+				if (trimmedArray != null) {
+					clone.trimmedArray = new long[this.trimmedArray.length];
+					System.arraycopy(trimmedArray, 0, clone.trimmedArray, 0, trimmedArray.length);
+				}
+				return clone;
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+				throw new IllegalStateException("SmartLongArray.clone() failed", e);
+			}
 		}
 	}
 

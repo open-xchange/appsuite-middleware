@@ -2,6 +2,8 @@
 
  - Extended c.o.t.Collections class by a copy method that generates a deep
    copy of a serializable object
+ - Using a faster implementation of ByteArrayOutputStream in
+   OXServletOutputStream
 
 * 2007-04-10 - marcus.klein@open-xchange.com
 
