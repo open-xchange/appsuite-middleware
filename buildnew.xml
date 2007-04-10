@@ -493,10 +493,23 @@
     <target name="setup" depends="setServerName,patchConfigDBProperties"/>
 
     <target name="setServerName">
+        <fail message="Server name not defined." unless="server.name"/>
+        <replaceregexp byline="true">
+            <regexp pattern="SERVER_NAME=.*"/>
+            <substitution expression="SERVER_NAME=${server.name}"/>
+            <fileset dir="${conf.install.copy.dir}">
+                <include name="system.properties"/>
+            </fileset>
+        </replaceregexp>
         <fail message="Not implemented."/>
     </target>
 
     <target name="patchConfigDBProperties">
+        <fail message="Database host not defined." unless="dbhost"/>
+        <fail message="ConfigDB schema not defined." unless="configdb"/>
+        <fail message="Database driver not defined." unless="dbdriver"/>
+        <fail message="Database user name not defined." unless="dbuser"/>
+        <fail message="Database password not defined." unless="dbpass"/>
         <fileset dir="${conf.install.copy.dir}" id="configDBProperties">
             <include name="configdb.properties"/>
         </fileset>
