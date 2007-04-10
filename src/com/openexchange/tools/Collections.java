@@ -49,42 +49,55 @@
 
 package com.openexchange.tools;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * Methods for easy handling of collections.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Collections.class);
 
-    /**
-     * Prevent instanciation.
-     */
-    private Collections() {
-        super();
-    }
+	/**
+	 * Prevent instanciation.
+	 */
+	private Collections() {
+		super();
+	}
 
-    /**
-     * Converts a list of Integer into an int array.
-     * @param list list to convert.
-     * @return the converted int array.
-     */
-    public static int[] toArray(final List<Integer> list) {
-        final int[] retval = new int[list.size()];
-        final Iterator<Integer> iter = list.iterator();
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = iter.next();
-        }
-        return retval;
-    }
-    
-    /**
-	 *
-	 * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> as dynamical lists
-	 *
+	/**
+	 * Converts a list of Integer into an int array.
+	 * 
+	 * @param list
+	 *            list to convert.
+	 * @return the converted int array.
+	 */
+	public static int[] toArray(final List<Integer> list) {
+		final int[] retval = new int[list.size()];
+		final Iterator<Integer> iter = list.iterator();
+		for (int i = 0; i < retval.length; i++) {
+			retval[i] = iter.next();
+		}
+		return retval;
+	}
+
+	/**
+	 * 
+	 * SmartIntArray - A tiny helper class to increase arrays of
+	 * <code>int</code> as dynamical lists
+	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 *
+	 * 
 	 */
 	public static class SmartIntArray {
 		/**
@@ -128,4 +141,181 @@ public final class Collections {
 			return trimmedArray;
 		}
 	}
+
+	/**
+	 * ByteArrayOutputStream implementation that doesn’t synchronize methods and
+	 * doesn’t copy the data on toByteArray().
+	 */
+	public static class FastByteArrayOutputStream extends OutputStream {
+		/**
+		 * Buffer and size
+		 */
+		protected byte[] buf = null;
+
+		protected int size = 0;
+
+		/**
+		 * Constructs a stream with buffer capacity size 5K
+		 */
+		public FastByteArrayOutputStream() {
+			this(5 * 1024);
+		}
+
+		/**
+		 * Constructs a stream with the given initial size
+		 */
+		public FastByteArrayOutputStream(int initSize) {
+			this.size = 0;
+			this.buf = new byte[initSize];
+		}
+
+		/**
+		 * Ensures that we have a large enough buffer for the given size.
+		 */
+		private final void verifyBufferSize(final int sz) {
+			if (sz > buf.length) {
+				byte[] old = buf;
+				buf = new byte[Math.max(sz, 2 * buf.length)];
+				System.arraycopy(old, 0, buf, 0, old.length);
+				old = null;
+			}
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		/**
+		 * Returns the byte array containing the written data. Note that this
+		 * array will almost always be larger than the amount of data actually
+		 * written.
+		 */
+		public byte[] getByteArray() {
+			return buf;
+		}
+
+		@Override
+		public final void write(final byte b[]) {
+			verifyBufferSize(size + b.length);
+			System.arraycopy(b, 0, buf, size, b.length);
+			size += b.length;
+		}
+
+		@Override
+		public final void write(final byte b[], final int off, final int len) {
+			verifyBufferSize(size + len);
+			System.arraycopy(b, off, buf, size, len);
+			size += len;
+		}
+
+		@Override
+		public final void write(final int b) {
+			verifyBufferSize(size + 1);
+			buf[size++] = (byte) b;
+		}
+
+		public void reset() {
+			size = 0;
+		}
+
+		/**
+		 * Returns a ByteArrayInputStream for reading back the written data
+		 */
+		public InputStream getInputStream() {
+			return new FastByteArrayInputStream(buf, size);
+		}
+
+	}
+
+	/**
+	 * ByteArrayInputStream implementation that does not synchronize methods.
+	 */
+	public static class FastByteArrayInputStream extends InputStream {
+		/**
+		 * Our byte buffer
+		 */
+		protected byte[] buf = null;
+
+		/**
+		 * Number of bytes that we can read from the buffer
+		 */
+		protected int count = 0;
+
+		/**
+		 * Number of bytes that have been read from the buffer
+		 */
+		protected int pos = 0;
+
+		public FastByteArrayInputStream(byte[] buf, int count) {
+			this.buf = buf;
+			this.count = count;
+		}
+
+		@Override
+		public final int available() {
+			return count - pos;
+		}
+
+		@Override
+		public final int read() {
+			return (pos < count) ? (buf[pos++] & 0xff) : -1;
+		}
+
+		@Override
+		public final int read(final byte[] b, final int off, final int lenArg) {
+			if (pos >= count) {
+				return -1;
+			}
+			int len = lenArg;
+			if ((pos + len) > count) {
+				len = (count - pos);
+			}
+			System.arraycopy(buf, pos, b, off, len);
+			pos += len;
+			return len;
+		}
+
+		@Override
+		public final long skip(final long nArg) {
+			long n = nArg;
+			if ((pos + n) > count) {
+				n = count - pos;
+			}
+			if (n < 0) {
+				return 0;
+			}
+			pos += n;
+			return n;
+		}
+
+	}
+
+	/**
+	 * Returns a copy of the object, or null if the object cannot be serialized.
+	 */
+	public static Object copy(final Serializable orig) {
+		Object obj = null;
+		try {
+			/*
+			 * Write the object out to a byte array
+			 */
+			final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
+			final ObjectOutputStream out = new ObjectOutputStream(fbos);
+			out.writeObject(orig);
+			out.flush();
+			out.close();
+			/*
+			 * Retrieve an input stream from the byte array and read a copy of
+			 * the object back in
+			 */
+			final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
+			obj = in.readObject();
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (ClassNotFoundException cnfe) {
+			LOG.error(cnfe.getMessage(), cnfe);
+		}
+		return obj;
+	}
+
 }

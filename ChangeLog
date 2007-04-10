@@ -1,3 +1,8 @@
+* 2007-04-10 - thorben.betten@open-xchange.com
+
+ - Extended c.o.t.Collections class by a copy method that generates a deep
+   copy of a serializable object
+
 * 2007-04-10 - marcus.klein@open-xchange.com
 
   - Use all jars in lib directory for starting OX.
