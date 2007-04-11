@@ -75,6 +75,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -341,6 +342,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         Resource retres = oxRes.get(ctx, resource_id);
 
+        // TODO: this code is superflous as soon as get takes resource as arg:
+        for(OXResourceExtensionInterface or : res.getExtensions() ) {
+            retres.addExtension(or);
+        }
+            
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
