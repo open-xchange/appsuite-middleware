@@ -1,3 +1,8 @@
+* 2007-04-11 - marcus.klein@open-xchange.com
+
+  - Bugfix #6462: Task and appointment notifications can be turned off through
+    configuration interface.
+
 * 2007-04-11 - thorben.betten@open-xchange.com
 
  - Fixed problem during update process if multiple login requests occur

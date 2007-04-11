@@ -47,14 +47,15 @@
  *
  */
 
-
-
 package com.openexchange.groupware.settings;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
@@ -75,8 +76,11 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConfigTree {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigTree.class);
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ConfigTree.class);
 
     /**
      * Path name containing the identifier of the user.
@@ -328,6 +332,15 @@ public final class ConfigTree {
         timezone.setId(-1);
         TREE.addElement(timezone);
 
+        final Setting calNotification = new Setting("calendarnotification",
+            true);
+        calNotification.setId(-1);
+        TREE.addElement(calNotification);
+
+        final Setting taskNotification = new Setting("tasknotification", true);
+        taskNotification.setId(-1);
+        TREE.addElement(taskNotification);
+
         final Setting reloadTimes = new Setting("reloadtimes", true);
         reloadTimes.setId(-1);
         TREE.addElement(reloadTimes);
@@ -478,6 +491,36 @@ public final class ConfigTree {
             }
             protected void setValue(final UserImpl user, final String value) {
                 user.setTimeZone(value);
+            }
+        });
+        tmp.put(calNotification.getName(), new AbstractMailFuncs() {
+            @Override
+            protected String getName() {
+                return calNotification.getName();
+            }
+            @Override
+            protected Object isSet(final UserSettingMail settings) {
+                return settings.isNotifyAppointments();
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNotifyAppointments(Boolean.parseBoolean(value));
+            }
+        });
+        tmp.put(taskNotification.getName(), new AbstractMailFuncs() {
+            @Override
+            protected String getName() {
+                return taskNotification.getName();
+            }
+            @Override
+            protected Object isSet(final UserSettingMail settings) {
+                return settings.isNotifyTasks();
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNotifyTasks(Boolean.parseBoolean(value));
             }
         });
         tmp.put(reloadTimes.getName(), new ReadOnlyValue() {
