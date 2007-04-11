@@ -1,10 +1,15 @@
+* 2007-04-11 - thorben.betten@open-xchange.com
+
+ - Fixed problem during update process if multiple login requests occur
+ - Indicating proper error message if a context is currently beeing updated
+
 * 2007-04-10 - thorben.betten@open-xchange.com
 
  - Extended c.o.t.Collections class by a copy method that generates a deep
    copy of a serializable object
  - Using a faster implementation of ByteArrayOutputStream in
    OXServletOutputStream
- - Several fixes in update proces
+ - Several fixes in update process
 
 * 2007-04-10 - marcus.klein@open-xchange.com
 

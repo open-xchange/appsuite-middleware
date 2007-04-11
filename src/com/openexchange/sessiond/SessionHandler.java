@@ -155,7 +155,7 @@ public class SessionHandler extends TimerTask {
 	
 	protected static SessionObject addSession(final String loginName, final String password, final String client_ip,
 			final String host) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException,
-			PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException {
+			PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException, ContextException {
 		final String sessionId = sessionIdGenerator.createSessionId(loginName, client_ip);
 		
 		if (LOG.isDebugEnabled()) {
@@ -183,15 +183,15 @@ public class SessionHandler extends TimerTask {
 		
 		final ContextStorage cs = ContextStorage.getInstance();
 		Context context = null;
-		try {
+		//try {
 			final int contextId = cs.getContextId(contextname);
 			if (ContextStorage.NOT_FOUND == contextId) {
 				throw new ContextNotFoundException("Can't find context.");
 			}
 			context = cs.getContext(contextId);
-		} catch (ContextException e) {
-			throw new SessiondException("", e);
-		}
+		//} catch (ContextException e) {
+		//	throw new SessiondException("", e);
+		//}
 		
 		if (context == null) {
 			throw new ContextNotFoundException("can't find context with the given name (" + contextname + ")");

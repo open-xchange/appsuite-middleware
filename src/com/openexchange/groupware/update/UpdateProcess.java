@@ -103,9 +103,9 @@ public class UpdateProcess implements Runnable {
 				 * Load schema
 				 */
 				this.schema = schemaStore.getSchema(contextId);
-				if (schema.getDBVersion() == UpdateTaskCollection.getHighestVersion()) {
+				if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
 					/*
-					 * Groupware version is equal to database version
+					 * Already been updated before by previous thread
 					 */
 					return;
 				}

@@ -64,6 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.sessiond.InvalidCredentialsException;
 import com.openexchange.sessiond.LoginException;
@@ -77,7 +78,6 @@ import com.openexchange.sessiond.UserNotFoundException;
 import com.openexchange.sessiond.LoginException.Code;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
 
 public class Login extends AJAXServlet {
@@ -97,7 +97,7 @@ public class Login extends AJAXServlet {
 	
 	private static final String ERROR_CONTEXT_NOT_FOUND = "Context not found";
 	
-	private static final String ERROR_NO_VALID_SESSION = "No valid session";
+	//private static final String ERROR_NO_VALID_SESSION = "No valid session";
 	
 	private static final String ERROR_INVALID_ACTION = "Invalid session";
 	
@@ -109,7 +109,7 @@ public class Login extends AJAXServlet {
 	
 	private static final String _password = "password";
 	
-	private static final String _setCookie = "Set-Cookie";
+	//private static final String _setCookie = "Set-Cookie";
 	
 	private static final String _redirectUrl = "/index.html#id=";
 	
@@ -117,6 +117,11 @@ public class Login extends AJAXServlet {
 	
 	private static final Log LOG = LogFactory.getLog(Login.class);
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
 	protected void doGet(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException,
         IOException {
@@ -172,7 +177,10 @@ public class Login extends AJAXServlet {
                 LOG.error("Error creating session.", e);
                 response.setException(new LoginException(LoginException.Code
                     .DATABASE_DOWN, e));
-            }
+            } catch (ContextException e) {
+            	 LOG.error("Error looking up context.", e);
+            	 response.setException(e);
+			}
             SessionServlet.rememberSession(req, sessionObj);
             /*
              * Write response

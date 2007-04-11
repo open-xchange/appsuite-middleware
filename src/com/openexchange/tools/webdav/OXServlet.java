@@ -63,6 +63,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.sessiond.InvalidCredentialsException;
 import com.openexchange.sessiond.LoginException;
@@ -138,7 +139,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws ServletException if adding a session fails.
      */
     protected boolean doAuth(final HttpServletRequest req,
-        final HttpServletResponse resp) throws IOException, ServletException {
+        final HttpServletResponse resp) throws IOException {
         final String sessionId = getSessionId(req);
         SessionObject session = null;
         if (null != sessionId) {
@@ -319,7 +320,9 @@ public abstract class OXServlet extends WebDavServlet {
             throw new LoginException(LoginException.Code.DATABASE_DOWN, e);
         } catch (MaxSessionLimitException e) {
             throw new LoginException(LoginException.Code.DATABASE_DOWN, e);
-        }
+        } catch (ContextException e) {
+        	throw new LoginException(e);
+		}
         return session;
     }
 

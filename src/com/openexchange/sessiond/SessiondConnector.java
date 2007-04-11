@@ -51,6 +51,7 @@
 
 package com.openexchange.sessiond;
 
+import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.ssl.SSLSocket;
 import com.openexchange.tools.encoding.Base64;
@@ -135,8 +136,9 @@ public class SessiondConnector {
 	 * @throws ContextNotFoundException
 	 * @throws MaxSessionLimitException
 	 * @throws SessiondException
+	 * @throws ContextException 
 	 */
-	public SessionObject addSession(final String username, final String password, final String client_ip) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException {
+	public SessionObject addSession(final String username, final String password, final String client_ip) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException, ContextException {
 		return SessionHandler.addSession(username, password, client_ip, null);
 	}
 	
@@ -156,8 +158,9 @@ public class SessiondConnector {
 	 * @throws ContextNotFoundException
 	 * @throws MaxSessionLimitException
 	 * @throws SessiondException
+	 * @throws ContextException 
 	 */
-	public SessionObject addSession(final String username, final String password, final String sessionid, final String client_ip, final String host, final String data) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException {
+	public SessionObject addSession(final String username, final String password, final String sessionid, final String client_ip, final String host, final String data) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException, ContextException {
 		if (config.isTcpClientSocketEnabled()) {
 			// TCP Connection enabled
 			

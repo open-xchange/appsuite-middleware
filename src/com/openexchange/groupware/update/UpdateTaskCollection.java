@@ -200,7 +200,7 @@ public class UpdateTaskCollection {
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 * 
 	 */
-	private static class UpdateTaskComparator implements Comparator<UpdateTask> {
+	private static final class UpdateTaskComparator implements Comparator<UpdateTask> {
 
 		/*
 		 * (non-Javadoc)
