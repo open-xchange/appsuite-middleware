@@ -63,8 +63,6 @@ import java.util.List;
 
 public class TreeNode {
 	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TreeNode.class);
-
 	public int msgNum;
 
 	private ArrayList<TreeNode> childs;
@@ -85,6 +83,7 @@ public class TreeNode {
 		childs.addAll(childThreads);
 	}
 
+	@Override
 	public String toString() {
 		return new StringBuilder().append(msgNum).append(' ').append(childs).toString();
 	}
