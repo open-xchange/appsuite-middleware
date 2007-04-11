@@ -98,6 +98,10 @@ public class AJPv13Listener implements Runnable {
 	
 	private final Condition resumeRunning = listenerLock.newCondition();
 	
+	private static int numberOfRunningAJPListeners;
+	
+	private static final Lock COUNT_LOCK = new ReentrantLock();
+	
 	private static final DecimalFormat DF = new DecimalFormat("00000");
 	
 	/**
@@ -201,6 +205,7 @@ public class AJPv13Listener implements Runnable {
 	 */
 	public void run() {
 		boolean keepOnRunning = true;
+		changeNumberOfRunningAJPListeners(true);
 		while (keepOnRunning && client != null) {
 			final long start = System.currentTimeMillis();
 			/*
@@ -293,7 +298,7 @@ public class AJPv13Listener implements Runnable {
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
 					processing = false;
 				}
-				AJPv13Server.decrementNumberOfOpenSockets();
+				AJPv13Server.decrementNumberOfOpenAJPSockets();
 				AJPv13Server.ajpv13ListenerMonitor.decrementNumActive();
 			}
 			lastAccesTime = Long.MAX_VALUE;
@@ -333,6 +338,7 @@ public class AJPv13Listener implements Runnable {
 				keepOnRunning = false;
 			}
 		}
+		changeNumberOfRunningAJPListeners(false);
 		AJPv13Watcher.removeListener(num);
 	}
 	
@@ -453,6 +459,19 @@ public class AJPv13Listener implements Runnable {
 
 	public boolean isPooled() {
 		return pooled;
+	}
+	
+	public static final void changeNumberOfRunningAJPListeners(final boolean increment) {
+		COUNT_LOCK.lock();
+		try {
+			numberOfRunningAJPListeners += increment ? 1 : -1;
+		} finally {
+			COUNT_LOCK.unlock();
+		}
+	}
+
+	public static final int getNumberOfRunningAJPListeners() {
+		return numberOfRunningAJPListeners;
 	}
 	
 }

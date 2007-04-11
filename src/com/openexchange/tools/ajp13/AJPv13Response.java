@@ -215,7 +215,7 @@ public class AJPv13Response {
 			} else if (AJPv13Config.isAJPModJK()) {
                 writeBoolean(true);
             } else {
-				final boolean reuseConnection = AJPv13Server.getNumberOfOpenSockets() <= AJPv13Config.getAJPMaxNumOfSockets();
+				final boolean reuseConnection = AJPv13Server.getNumberOfOpenAJPSockets() <= AJPv13Config.getAJPMaxNumOfSockets();
 				writeBoolean(reuseConnection);
 			}
 			break;

@@ -78,7 +78,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 		return MonitoringInfo.getNumberOfAJAXConnections();
 	}
 	
-	public int getNumberOfOpenSockets() {
+	public int getNumberOfOpenAJPSockets() {
 		return MonitoringInfo.getNumberOfOpenSockets();
 	}
 
@@ -102,8 +102,8 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 		return MonitoringInfo.getNumberOfActiveSessions();
 	}
 
-	public int getNumberOfRunningThreads() {
-		return MonitoringInfo.getNumberOfRunningThreads();
+	public int getNumberOfRunningAJPListeners() {
+		return MonitoringInfo.getNumberOfRunningAJPListeners();
 	}
 	
 	public int getNumberOfWorkingServlets() {

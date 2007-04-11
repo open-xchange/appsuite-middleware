@@ -91,10 +91,6 @@ public class AJPv13ListenerPool {
 		super();
 	}
 	
-	public static int getNumberOfRunningThreads() {
-		return AJPv13Watcher.getNumOfListeners();
-	}
-
 	/**
 	 * Initializes the pool by putting as many listeners as specified through
 	 * init-parameter <code>LISTENER_POOL_SIZE</code>

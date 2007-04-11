@@ -52,7 +52,7 @@
 package com.openexchange.monitoring;
 
 import com.openexchange.database.Database;
-import com.openexchange.tools.ajp13.AJPv13ListenerPool;
+import com.openexchange.tools.ajp13.AJPv13Listener;
 import com.openexchange.tools.ajp13.AJPv13Server;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
@@ -65,7 +65,7 @@ public class MonitoringInfo {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitoringInfo.class);
 	
 //	 Constants for connection types
-	public static final int SOCKET = 0;
+	public static final int AJP_SOCKET = 0;
 	
 	public static final int AJAX = 1;
 	
@@ -82,7 +82,7 @@ public class MonitoringInfo {
 	private static final int SESSION = 7;
 	
 	// Static fields
-	private static int numberOfOpenSockets;
+	private static int numberOfOpenAJPSockets;
 	
 	private static int numberOfAJAXConnections;
 	
@@ -120,8 +120,8 @@ public class MonitoringInfo {
 		return getNumberOfConnections(AJAX);
 	}
 	
-	public static int getNumberOfRunningThreads() {
-		return AJPv13ListenerPool.getNumberOfRunningThreads();
+	public static int getNumberOfRunningAJPListeners() {
+		return AJPv13Listener.getNumberOfRunningAJPListeners();
 	}
 	
 	public static int getNumberOfWorkingServlets() {
@@ -133,7 +133,7 @@ public class MonitoringInfo {
 	}
 	
 	public static int getNumberOfOpenSockets() {
-		return AJPv13Server.getNumberOfOpenSockets();
+		return AJPv13Server.getNumberOfOpenAJPSockets();
 	}
 
 	public static void incrementNumberOfConnections(final int connectionType) {
@@ -153,8 +153,8 @@ public class MonitoringInfo {
 	public static int getNumberOfConnections(final int connectionType) {
 		int retval = -1;
 		switch (connectionType) {
-		case SOCKET:
-			retval = numberOfOpenSockets;
+		case AJP_SOCKET:
+			retval = numberOfOpenAJPSockets;
 			break;
 		case AJAX:
 			retval = numberOfAJAXConnections;
@@ -185,8 +185,8 @@ public class MonitoringInfo {
 		synchronized (MonitoringInfo.class) {
 			final int i = increment ? 1 : -1;
 			switch (connectionType) {
-			case SOCKET:
-				numberOfOpenSockets += i;
+			case AJP_SOCKET:
+				numberOfOpenAJPSockets += i;
 				break;
 			case AJAX:
 				numberOfAJAXConnections += i;

@@ -2,6 +2,7 @@
 
  - Fixed problem during update process if multiple login requests occur
  - Indicating proper error message if a context is currently beeing updated
+ - Fixed several problems in GeneralMonitor MBean
 
 * 2007-04-10 - thorben.betten@open-xchange.com
 

@@ -257,7 +257,7 @@ public class AJPv13Server implements Runnable {
 				}
 				final long start = System.currentTimeMillis();
 				client.setTcpNoDelay(true);
-				incrementNumberOfOpenSockets();
+				incrementNumberOfOpenAJPSockets();
 				AJPv13Listener l = AJPv13ListenerPool.getListener();
 				while (!l.startListener(client)) {
 					/*
@@ -279,16 +279,16 @@ public class AJPv13Server implements Runnable {
 		new AJPv13Server().startServer();
 	}
 
-	public static int getNumberOfOpenSockets() {
-		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.SOCKET);
+	public static int getNumberOfOpenAJPSockets() {
+		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.AJP_SOCKET);
 	}
 
-	private static void incrementNumberOfOpenSockets() {
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.SOCKET);
+	private static void incrementNumberOfOpenAJPSockets() {
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.AJP_SOCKET);
 	}
 
-	public static void decrementNumberOfOpenSockets() {
-		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.SOCKET);
+	public static void decrementNumberOfOpenAJPSockets() {
+		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.AJP_SOCKET);
 	}
 
 }
