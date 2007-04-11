@@ -51,6 +51,8 @@ package com.openexchange.groupware.update;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.database.ConfigDBStorage;
 import com.openexchange.database.Database;
@@ -73,67 +75,82 @@ public class UpdateProcess implements Runnable {
 	
 	private final int contextId;
 	
-	private final Schema schema;
+	private Schema schema;
+	
+	private final Lock updateLock;
 	
 	private final SchemaStore schemaStore;
 	
 	public UpdateProcess(final int contextId) throws SchemaException {
 		schemaStore = SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName());
 		this.contextId = contextId;
-		this.schema = schemaStore.getSchema(contextId);
+		this.updateLock = new ReentrantLock();
+		//this.schema = schemaStore.getSchema(contextId);
 	}
 
     /**
      * {@inheritDoc}
      */
     public void run() {
-    	if (schema.isLocked()) {
-    		/*
-    		 * Already beeing updated
-    		 */
-    		return;
-    	}
-		boolean unlock = false;
-		try {
+    	/*
+    	 * Obtain lock
+    	 */
+    	updateLock.lock();
+    	try {
+			boolean unlock = false;
 			try {
-				lockSchema();
 				/*
-				 * Lock successfully obtained, thus remember to unlock
+				 * Load schema
 				 */
-				unlock = true;
-				/*
-				 * Remove affected contexts and kick active sessions
-				 */
-				removeContexts();
-				/*
-				 * Get filtered & sorted list of update tasks
-				 */
-				final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
-						.getDBVersion());
-				/*
-				 * Perform updates
-				 */
-				final int size = updateTasks.size();
-				final Iterator<UpdateTask> iter = updateTasks.iterator();
-				for (int i = 0; i < size; i++) {
-					try {
-						iter.next().perform(schema, contextId);
-					} catch (AbstractOXException e) {
-						LOG.error(e.getMessage(), e);
+				this.schema = schemaStore.getSchema(contextId);
+				if (schema.getDBVersion() == UpdateTaskCollection.getHighestVersion()) {
+					/*
+					 * Groupware version is equal to database version
+					 */
+					return;
+				}
+				try {
+					lockSchema();
+					/*
+					 * Lock successfully obtained, thus remember to unlock
+					 */
+					unlock = true;
+					/*
+					 * Remove affected contexts and kick active sessions
+					 */
+					removeContexts();
+					/*
+					 * Get filtered & sorted list of update tasks
+					 */
+					final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
+							.getDBVersion());
+					/*
+					 * Perform updates
+					 */
+					final int size = updateTasks.size();
+					final Iterator<UpdateTask> iter = updateTasks.iterator();
+					for (int i = 0; i < size; i++) {
+						try {
+							iter.next().perform(schema, contextId);
+						} catch (AbstractOXException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
+				} finally {
+					if (unlock) {
+						unlockSchema();
 					}
 				}
-			} finally {
-				if (unlock) {
-					unlockSchema();
-				}
+			} catch (SchemaException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (DBPoolingException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (ContextException e) {
+				LOG.error(e.getMessage(), e);
 			}
-		} catch (SchemaException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (ContextException e) {
-			LOG.error(e.getMessage(), e);
-		}
+    	} finally {
+    		updateLock.unlock();
+    	}
 
 		// lockSchema();
 		// removeContexts();
