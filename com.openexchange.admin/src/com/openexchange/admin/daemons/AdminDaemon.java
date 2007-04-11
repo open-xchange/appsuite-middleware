@@ -146,7 +146,7 @@ public class AdminDaemon {
             oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup();
             OXGroupInterface oxgrp_stub_v2 = (OXGroupInterface) UnicastRemoteObject.exportObject(oxgrp_v2, 0);
 
-            oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
+            oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
             OXResourceInterface oxres_stub_v2 = (OXResourceInterface) UnicastRemoteObject.exportObject(oxres_v2, 0);
             
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin();
