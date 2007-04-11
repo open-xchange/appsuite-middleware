@@ -143,8 +143,8 @@ public final class Collections {
 	}
 
 	/**
-	 * ByteArrayOutputStream implementation that doesn’t synchronize methods and
-	 * doesn’t copy the data on toByteArray().
+	 * ByteArrayOutputStream implementation that does not synchronize methods and
+	 * does not copy the data on toByteArray().
 	 */
 	public static class FastByteArrayOutputStream extends OutputStream {
 		/**
