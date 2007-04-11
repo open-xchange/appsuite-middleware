@@ -211,7 +211,7 @@ public class UserSettingMail implements DeleteListener {
 		accessLock.lock();
 		try {
 			Connection writeCon = writeConArg;
-			final boolean createCon = (writeCon == null);
+			boolean closeCon = false;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			boolean insert = false;
@@ -230,8 +230,9 @@ public class UserSettingMail implements DeleteListener {
 				tmpCon = null;
 			}
 			try {
-				if (createCon) {
+				if (writeCon == null) {
 					writeCon = DBPool.pickupWriteable(ctx);
+					closeCon = true;
 				}
 				if (insert) {
 					stmt = writeCon.prepareStatement(SQL_INSERT);
@@ -283,7 +284,7 @@ public class UserSettingMail implements DeleteListener {
 				stmt.executeUpdate();
 				saveSignatures(user, ctx, writeCon);
 			} finally {
-				closeResources(rs, stmt, createCon ? writeCon : null, false, ctx);
+				closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
 			}
 			modifiedDuringSession = false;
 		} catch (SQLException e) {
@@ -305,11 +306,12 @@ public class UserSettingMail implements DeleteListener {
 		accessLock.lock();
 		try {
 			Connection writeCon = writeConArg;
-			final boolean createWriteCon = (writeCon == null);
+			boolean closeWriteCon = false;
 			PreparedStatement stmt = null;
 			try {
-				if (createWriteCon) {
+				if (writeCon == null) {
 					writeCon = DBPool.pickupWriteable(ctx);
+					closeWriteCon = true;
 				}
 				/*
 				 * Delete signatures
@@ -329,7 +331,7 @@ public class UserSettingMail implements DeleteListener {
 				stmt.close();
 				stmt = null;
 			} finally {
-				closeResources(null, stmt, createWriteCon ? writeCon : null, false, ctx);
+				closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
 				stmt = null;
 			}
 		} catch (SQLException e) {
@@ -352,12 +354,13 @@ public class UserSettingMail implements DeleteListener {
 		accessLock.lock();
 		try {
 			Connection readCon = readConArg;
-			final boolean createCon = (readCon == null);
+			boolean closeCon = false;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				if (createCon) {
+				if (readCon == null) {
 					readCon = DBPool.pickup(ctx);
+					closeCon = true;
 				}
 				stmt = readCon.prepareStatement(SQL_LOAD);
 				stmt.setInt(1, ctx.getContextId());
@@ -408,7 +411,7 @@ public class UserSettingMail implements DeleteListener {
 				loadSignatures(user, ctx, readCon);
 				modifiedDuringSession = false;
 			} finally {
-				closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
@@ -424,12 +427,13 @@ public class UserSettingMail implements DeleteListener {
 	private final void loadSignatures(final int user, final Context ctx, final Connection readConArg) throws OXException {
 		try {
 			Connection readCon = readConArg;
-			final boolean createCon = (readCon == null);
+			boolean closeCon = false;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				if (createCon) {
+				if (readCon == null) {
 					readCon = DBPool.pickup(ctx);
+					closeCon = true;
 				}
 				stmt = readCon.prepareStatement(SQL_LOAD_SIGNATURES);
 				stmt.setInt(1, ctx.getContextId());
@@ -451,7 +455,7 @@ public class UserSettingMail implements DeleteListener {
 					signatures = null;
 				}
 			} finally {
-				closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
@@ -465,11 +469,12 @@ public class UserSettingMail implements DeleteListener {
 	private final boolean saveSignatures(final int user, final Context ctx, final Connection writeConArg) throws OXException {
 		try {
 			Connection writeCon = writeConArg;
-			final boolean createCon = (writeCon == null);
+			boolean closeCon = false;
 			PreparedStatement stmt = null;
 			try {
-				if (createCon) {
+				if (writeCon == null) {
 					writeCon = DBPool.pickupWriteable(ctx);
+					closeCon = true;
 				}
 				/*
 				 * Delete old
@@ -496,7 +501,7 @@ public class UserSettingMail implements DeleteListener {
 				}
 				return (stmt.executeBatch().length > 0);
 			} finally {
-				closeResources(null, stmt, createCon ? writeCon : null, false, ctx);
+				closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
 			}
 		} catch (SQLException e) {
 			LOG.error(e.getMessage(), e);
@@ -872,7 +877,7 @@ public class UserSettingMail implements DeleteListener {
 				 * Cannot occur since we are cloneable
 				 */
 				LOG.error(e.getMessage(), e);
-				return null;
+				throw new InternalError(e.getMessage());
 			}
 		}
 

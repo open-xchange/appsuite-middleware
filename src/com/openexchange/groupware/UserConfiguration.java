@@ -377,7 +377,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		Arrays.sort(accessibleModules);
 		return cloneAccessibleModules();
 	}
-	
+
 	private final int[] cloneAccessibleModules() {
 		final int[] clone = new int[accessibleModules.length];
 		System.arraycopy(accessibleModules, 0, clone, 0, clone.length);
@@ -529,6 +529,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(
 				Integer.toBinaryString(permissionBits)).toString();
@@ -581,7 +582,8 @@ public class UserConfiguration implements Serializable, DeleteListener {
 					}
 				} else {
 					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, "",
-							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), ctx.getContextId());
+							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), Integer.valueOf(ctx
+									.getContextId()));
 				}
 			} finally {
 				closeResources(rs, stmt, readCon, true, ctx);
@@ -703,7 +705,8 @@ public class UserConfiguration implements Serializable, DeleteListener {
 				}
 				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
 			}
-			throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, userId, ctx.getContextId());
+			throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, Integer.valueOf(userId), Integer
+					.valueOf(ctx.getContextId()));
 		} finally {
 			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 		}

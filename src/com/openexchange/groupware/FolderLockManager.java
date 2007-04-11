@@ -54,7 +54,6 @@ import java.util.Map;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
 

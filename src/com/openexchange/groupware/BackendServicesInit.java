@@ -65,7 +65,7 @@ public class BackendServicesInit {
 		super();
 	}
 
-	public static final void init() throws AbstractOXException {
+	public static final void init() {
 		AJPv13Server.startAJPServer();
 		MonitorAgent.startMonitorAgent();
 		/*

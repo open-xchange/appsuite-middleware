@@ -177,16 +177,16 @@ public class AbstractOXException extends Exception {
          * @return the category according to the code.
          */
         public static Category byCode(final int code) {
-            return CODES.get(code);
+            return CODES.get(Integer.valueOf(code));
         }
         
 		private static final Map<Integer, Category> CODES;
 
 		static {
-            Map<Integer, Category> tmp = new HashMap<Integer, Category>(
+            final Map<Integer, Category> tmp = new HashMap<Integer, Category>(
                 Category.values().length, 1F);
 			for(Category category : values()) {
-				tmp.put(category.getCode(), category);
+				tmp.put(Integer.valueOf(category.getCode()), category);
 			}
             CODES = Collections.unmodifiableMap(tmp);
 		}
@@ -380,7 +380,7 @@ public class AbstractOXException extends Exception {
      * @param truncatedId identifier of the truncated attribute.
      */
     public void addTruncatedId(final int truncatedId) {
-        truncatedIds.add(truncatedId);
+        truncatedIds.add(Integer.valueOf(truncatedId));
     }
 
     /**
@@ -389,7 +389,7 @@ public class AbstractOXException extends Exception {
     public int[] getTruncatedIds() {
         final int[] retval = new int[truncatedIds.size()];
         for (int i = 0; i < truncatedIds.size(); i++) {
-            retval[i] = truncatedIds.get(i);
+            retval[i] = truncatedIds.get(i).intValue();
         }
         return retval;
     }

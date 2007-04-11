@@ -53,16 +53,17 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class IOTools {
-	
+
 	private IOTools() {
 		super();
 	}
-	
+
 	public static final void reallyBloodySkip(final InputStream is, long bytes) throws IOException {
-		while(bytes > 0) {
-			long skipped = is.skip(bytes);
-			if(skipped<0)
+		while (bytes > 0) {
+			final long skipped = is.skip(bytes);
+			if (skipped < 0) {
 				return;
+			}
 			bytes -= skipped;
 		}
 	}

@@ -59,7 +59,7 @@ package com.openexchange.sessiond;
 public class Sessiond {
 	
 	public Sessiond(SessiondConfig config) {
-		SessionHandler sessionHandler = new SessionHandler(config);
+		final SessionHandler sessionHandler = new SessionHandler(config);
 		sessionHandler.init();		
 
 		if (config.isServerSocketEnabled()) {
