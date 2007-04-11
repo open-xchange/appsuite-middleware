@@ -76,8 +76,6 @@ public class UpdateProcess implements Runnable {
 
 	private final int contextId;
 
-	// private Schema schema;
-
 	private final Lock updateLock;
 
 	private final SchemaStore schemaStore;
