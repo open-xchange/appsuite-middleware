@@ -61,6 +61,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.SystemConfig;
 
@@ -79,6 +81,10 @@ public class UpdateTaskCollection {
 	private UpdateTaskCollection() {
 		super();
 	}
+	
+	private static final Lock VERSION_LOCK = new ReentrantLock();
+	
+	private static int version = -1;
 
 	private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
@@ -183,12 +189,24 @@ public class UpdateTaskCollection {
 	 * @return the highest version number
 	 */
 	public static final int getHighestVersion() {
-		final int size = updateTaskList.size();
-		final Iterator<UpdateTask> iter = updateTaskList.iterator();
-		int version = 0;
-		for (int i = 0; i < size; i++) {
-			version = Math.max(version, iter.next().addedWithVersion());
-		}	
+		if (version == -1) {
+			VERSION_LOCK.lock();
+			try {
+				/*
+				 * Check again
+				 */
+				if (version == -1) {
+					final int size = updateTaskList.size();
+					final Iterator<UpdateTask> iter = updateTaskList.iterator();
+					version = 0;
+					for (int i = 0; i < size; i++) {
+						version = Math.max(version, iter.next().addedWithVersion());
+					}
+				}
+			} finally {
+				VERSION_LOCK.unlock();
+			}
+		}
 		return version;
 	}
 
