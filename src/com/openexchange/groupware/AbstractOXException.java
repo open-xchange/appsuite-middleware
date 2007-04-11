@@ -380,7 +380,7 @@ public class AbstractOXException extends Exception {
      * @param truncatedId identifier of the truncated attribute.
      */
     public void addTruncatedId(final int truncatedId) {
-        truncatedIds.add(Integer.valueOf(truncatedId));
+        truncatedIds.add(truncatedId);
     }
 
     /**
@@ -389,7 +389,7 @@ public class AbstractOXException extends Exception {
     public int[] getTruncatedIds() {
         final int[] retval = new int[truncatedIds.size()];
         for (int i = 0; i < truncatedIds.size(); i++) {
-            retval[i] = truncatedIds.get(i).intValue();
+            retval[i] = truncatedIds.get(i);
         }
         return retval;
     }
