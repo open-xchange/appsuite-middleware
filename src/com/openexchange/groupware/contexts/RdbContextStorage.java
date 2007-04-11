@@ -183,7 +183,6 @@ public class RdbContextStorage extends ContextStorage {
      */
     @Override
 	protected ContextExtended loadContext(final int contextId) throws ContextException {
-        LOG.error("Lade context from database.");
         Connection con = null;
         try {
             con = DBPool.pickup();
