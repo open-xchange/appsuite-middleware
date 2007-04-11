@@ -88,10 +88,11 @@ public abstract class TagFillerAdapter implements TagFiller {
      */
     public static final TagFiller MAP_TAG_FILLER = new TagFillerAdapter() {
 
-        public String replace(final String tag, final Object data) {
+        @Override
+		public String replace(final String tag, final Object data) {
             String retval = EMPTY;
             if (data instanceof Map) {
-                Map replacements = (Map) data;
+                final Map replacements = (Map) data;
                 if (replacements.containsKey(tag)) {
                     retval = replacements.get(tag).toString();
                 }
