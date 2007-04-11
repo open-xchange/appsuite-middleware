@@ -17,14 +17,23 @@ ALTER TABLE user_mail_restrictions
     ADD FOREIGN KEY (cid, id) REFERENCES user(cid, id),
 	ENGINE=InnoDB;
 
+ALTER TABLE group_address_mappings
+	MODIFY cid INT4 UNSIGNED NOT NULL,
+	MODIFY id INT4 UNSIGNED NOT NULL,
+	MODIFY address VARCHAR(255) UNIQUE NOT NULL,
+    ADD FOREIGN KEY (cid, id) REFERENCES groups(cid, id),
+	ENGINE=InnoDB;
+
+ALTER TABLE resource_address_mappings
+	MODIFY cid INT4 UNSIGNED NOT NULL,
+	MODIFY id INT4 UNSIGNED NOT NULL,
+	MODIFY destination VARCHAR(255) NOT NULL,
+    ADD FOREIGN KEY (cid, id) REFERENCES resource(cid, id),
+	ENGINE=InnoDB;
+
 ALTER TABLE address_mappings
 	MODIFY cid INT4 UNSIGNED NOT NULL,
 	MODIFY id INT4 UNSIGNED NOT NULL,
 	MODIFY address VARCHAR(255) UNIQUE NOT NULL,
 	MODIFY destination VARCHAR(255) NOT NULL,
-	ENGINE=InnoDB;
-
-# amavis
-
-ALTER TABLE policy
 	ENGINE=InnoDB;
