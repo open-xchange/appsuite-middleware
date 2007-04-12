@@ -51,6 +51,11 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+
+import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public class Group implements Serializable {
     /**
@@ -67,6 +72,14 @@ public class Group implements Serializable {
     private Integer[] members;
 
     private String email;
+
+    private ArrayList<OXGroupExtensionInterface> extensions = null;
+
+    /**
+     * This field is used to show if all extension have run fine and inserted their
+     * data correctly
+     */
+    private boolean extensionsok = true;
 
     public Group() {
     }
@@ -92,6 +105,7 @@ public class Group implements Serializable {
     }
 
     private void init(){
+        this.extensions = new ArrayList<OXGroupExtensionInterface>();
         this.id = null;
         this.name = null;
         this.displayname = null;
@@ -178,5 +192,42 @@ public class Group implements Serializable {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    public void addExtension(final OXGroupExtensionInterface extension) {
+        this.extensions.add(extension);
+    }
+
+    public ArrayList<OXGroupExtensionInterface> getExtensions() {
+        return this.extensions;
+    }
+    
+    public boolean removeExtension(final OXGroupExtensionInterface o) {
+        return extensions.remove(o);
+    }
+
+    /**
+     * This method is used to get an extensions through the name of this
+     * extension. This first occurence will be returned, or null if no fitting
+     * extension was found.
+     * 
+     * @param extname a String for the extension
+     * @return the {@link OXUserExtensionInterface} with extname
+     */
+    public OXGroupExtensionInterface getExtensionbyName(final String extname) {
+        for (final OXGroupExtensionInterface ext : this.extensions) {
+            if (ext.getExtensionName().equals(extname)) {
+                return ext;
+            }
+        }
+        return null;
+    }
+
+    public final boolean isExtensionsok() {
+        return extensionsok;
+    }
+
+    public final void setExtensionsok(boolean extensionsok) {
+        this.extensionsok = extensionsok;
     }
 }
