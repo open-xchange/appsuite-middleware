@@ -4304,7 +4304,7 @@ public class MailInterfaceImpl implements MailInterface {
 				} else {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
 							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), imapProps.getContext().getContextId());
+									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
 				}
 			} else {
 				/*

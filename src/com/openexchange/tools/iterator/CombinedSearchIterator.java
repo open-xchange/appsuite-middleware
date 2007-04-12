@@ -68,7 +68,6 @@ public class CombinedSearchIterator implements SearchIterator {
 			return false;
 		}
 		for (; i < iterators.length && !iterators[i].hasNext(); i++) {
-			;
 		}
 		if (i >= iterators.length) {
 			return false;

@@ -88,7 +88,7 @@ public class AJPv13Server implements Runnable {
 
 	private boolean running;
 
-	public static ServletConfigLoader servletConfigs = new ServletConfigLoader();
+	public static final ServletConfigLoader SERVLET_CONFIGS = new ServletConfigLoader();
 
 	private static AJPv13Server instance;
 
@@ -126,9 +126,9 @@ public class AJPv13Server implements Runnable {
 		final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
 		final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
 		servletConfig.setServletContextWrapper(servletContext);
-		servletConfigs.setDefaultConfig(servletConfig);
-		servletConfigs.setDefaultContext(servletContext);
-		servletConfigs.setDirectory(new File(AJPv13Config.getServletConfigs()));
+		SERVLET_CONFIGS.setDefaultConfig(servletConfig);
+		SERVLET_CONFIGS.setDefaultContext(servletContext);
+		SERVLET_CONFIGS.setDirectory(new File(AJPv13Config.getServletConfigs()));
 		synchronized (AJPv13Server.class) {
 			if (instance == null) {
 				instance = new AJPv13Server();

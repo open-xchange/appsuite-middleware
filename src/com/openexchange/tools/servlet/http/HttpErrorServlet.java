@@ -77,6 +77,7 @@ public class HttpErrorServlet extends HttpServlet {
 		this.message = message;
 	}
 
+	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
 		try {
             resp.setContentType("text/html; charset=UTF-8");
@@ -89,6 +90,7 @@ public class HttpErrorServlet extends HttpServlet {
 
 	}
 
+	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
 		doGet(req, resp);
 	}

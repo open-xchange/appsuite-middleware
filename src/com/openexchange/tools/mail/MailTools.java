@@ -66,8 +66,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-;
-
 /**
  * MailTools
  * 
@@ -108,7 +106,7 @@ public class MailTools {
 
 	public static String getFormatedSize(final int tmp, final String locale) {
 		try {
-			return (formatNumber((Double.valueOf(tmp).doubleValue() / 1024d), locale, MailTools.NUMBER_DIGITS));
+			return (formatNumber((tmp / 1024d), locale, MailTools.NUMBER_DIGITS));
 		} catch (NumberFormatException nfe) {
 			return "0.00";
 		}

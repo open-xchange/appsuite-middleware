@@ -2308,10 +2308,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Try 5 times
 		 */
+		final int[] indices = new int[2];
+		indices[0] = level;
 		while (addedAttachments < numOfUploadFiles) {
 			final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
 			if (uf != null) {
-				mao.setPositionInMail(MessageUtils.getIdentifier(new int[] { level, ++nextAttachmentNum }));
+				indices[1] = ++nextAttachmentNum;
+				mao.setPositionInMail(MessageUtils.getIdentifier(indices));
 				mao.setSize(uf.getSize());
 				mao.setContent(null);
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
@@ -2344,9 +2347,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 				.getMsgAttachments().size();
 		final InfostoreFacade db = Infostore.FACADE;
 		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject();
+		final int[] indices = new int[2];
+		indices[0] = level;
 		NextDoc: for (int i = 0; i < documentIDs.length; i++) {
 			try {
-				mao.setPositionInMail(MessageUtils.getIdentifier(new int[] { level, ++nextAttachmentNum }));
+				indices[1] = ++nextAttachmentNum;
+				mao.setPositionInMail(MessageUtils.getIdentifier(indices));
 				final int docID = documentIDs[i];
 				final DocumentMetadata docMeta = db.getDocumentMetadata(docID, InfostoreFacade.CURRENT_VERSION, session
 						.getContext(), session.getUserObject(), session.getUserConfiguration());

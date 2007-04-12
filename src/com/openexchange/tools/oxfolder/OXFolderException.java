@@ -543,7 +543,7 @@ public class OXFolderException extends OXException {
 		this(folderCode, (Exception) null, messageArgs);
 	}
 
-	public OXFolderException(final FolderCode folderCode, final Exception cause, final Object... messageArgs) {
+	public OXFolderException(final FolderCode folderCode, final Throwable cause, final Object... messageArgs) {
 		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause);
 		setMessageArgs(messageArgs);
 	}
@@ -567,7 +567,7 @@ public class OXFolderException extends OXException {
 		setMessageArgs(messageArgs);
 	}
 
-	public OXFolderException(final FolderCode folderCode, final Exception cause, final boolean insertCauseMsg,
+	public OXFolderException(final FolderCode folderCode, final Throwable cause, final boolean insertCauseMsg,
 			final Object... messageArgs) {
 		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, insertCauseMsg ? new StringBuilder()
 				.append(folderCode.message).append(':').append(cause.getMessage()).toString() : folderCode.message,
@@ -575,7 +575,7 @@ public class OXFolderException extends OXException {
 		setMessageArgs(messageArgs);
 	}
 
-	public OXFolderException(final FolderCode folderCode, final String msgPrefix, final Exception cause,
+	public OXFolderException(final FolderCode folderCode, final String msgPrefix, final Throwable cause,
 			final boolean insertCauseMsg, final Object... messageArgs) {
 		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, insertCauseMsg ? new StringBuilder(
 				msgPrefix).append(folderCode.message).append(':').append(cause.getMessage()).toString()

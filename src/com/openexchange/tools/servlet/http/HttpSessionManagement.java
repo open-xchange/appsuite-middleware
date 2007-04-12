@@ -62,7 +62,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.HttpSession;
 
 import com.openexchange.server.ServerTimer;
-import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**
  * HttpSessionManagement

@@ -67,16 +67,16 @@ import java.util.Date;
 
 public class StringCollection {
     
-    public static final byte[] DSO = "\\".getBytes();
-    public static final byte[] DSOR = "\\\\".getBytes();
-    public static final byte[] DAP = "'".getBytes();
-    public static final byte[] DAPR = "\\'".getBytes();
+    static final byte[] DSO = "\\".getBytes();
+    static final byte[] DSOR = "\\\\".getBytes();
+    static final byte[] DAP = "'".getBytes();
+    static final byte[] DAPR = "\\'".getBytes();
     
     private StringCollection() { }
     
     
-    public static final String disarmSQLString(String s) {
-        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR)).toString();
+    public static final String disarmSQLString(final String s) {
+        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
     }
     
     /**
@@ -88,17 +88,17 @@ public class StringCollection {
      * @param byte replacement[]
      * @return byte[]
      */
-    public static final byte[] replaceGivenBytes(byte b[], byte replace[], byte replacement[]) {
+    public static final byte[] replaceGivenBytes(final byte b[], final byte replace[], final byte replacement[]) {
         byte r[] = new byte[(b.length+(replacement.length*2))];
         int c = 0;
-        int l = replace.length;
+        final int l = replace.length;
         for (int a  = 0; a < b.length; a++) {
             boolean found = false;
             int fc = 1;
             if (b[a] == replace[0]) {
                 found = true;
                 for (int n = 1; n < l; n++) {
-                    int m = a+n;
+                	final int m = a+n;
                     if (m < b.length) {
                         if (b[(a+n)] == replace[n]) {
                             found = true;
@@ -135,13 +135,13 @@ public class StringCollection {
      * @param int arr[]
      * @return SQLInString or null
      */
-    public static final String getSqlInString(int arr[]) {
-        StringBuffer sb = new StringBuffer();
+    public static final String getSqlInString(final int arr[]) {
+    	final StringBuffer sb = new StringBuffer();
         if (arr.length > 0) {
-            sb.append("(");
+            sb.append('(');
             for (int a = 0; a < arr.length; a++) {
                 if (a > 0) {
-                    sb.append(",");
+                    sb.append(',');
                     sb.append(arr[a]);
                 } else {
                     sb.append(arr[a]);
@@ -150,7 +150,7 @@ public class StringCollection {
         } else {
             return null;
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }    
     
@@ -162,13 +162,13 @@ public class StringCollection {
      * @param Object arr[]
      * @return SQLInString or null
      */
-    public static final String getSqlInString(Object arr[]) {
-        StringBuffer sb = new StringBuffer();
+    public static final String getSqlInString(final Object arr[]) {
+    	final StringBuffer sb = new StringBuffer();
         if (arr.length > 0) {
-            sb.append("(");
+            sb.append('(');
             for (int a = 0; a < arr.length; a++) {
                 if (a > 0) {
-                    sb.append(",");
+                    sb.append(',');
                     sb.append(arr[a]);
                 } else {
                     sb.append(arr[a]);
@@ -177,7 +177,7 @@ public class StringCollection {
         } else {
             return null;
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
     
@@ -189,13 +189,13 @@ public class StringCollection {
      * @param int arr[][]
      * @return SQLInString or null
      */
-    public static final String getSqlInString(int arr[][]) {
-        StringBuffer sb = new StringBuffer();
+    public static final String getSqlInString(final int arr[][]) {
+    	final StringBuffer sb = new StringBuffer();
         if (arr.length > 0) {
-            sb.append("(");
+            sb.append('(');
             for (int a = 0; a < arr.length; a++) {
                 if (a > 0) {
-                    sb.append(",");
+                    sb.append(',');
                     sb.append(arr[a][0]);
                 } else {
                     sb.append(arr[a][0]);
@@ -204,7 +204,7 @@ public class StringCollection {
         } else {
             return null;
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
     
@@ -218,17 +218,17 @@ public class StringCollection {
      * @param int arr[]
      * @return SQLInString or null
      */
-    public static final String getSqlInString(int i, int arr[]) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("(");
+    public static final String getSqlInString(final int i, final int arr[]) {
+    	final StringBuffer sb = new StringBuffer();
+        sb.append('(');
         sb.append(i);
         if (arr.length > 0) {
             for (int a = 0; a < arr.length; a++) {
-                sb.append(",");
+                sb.append(',');
                 sb.append(arr[a]);
             }
         }
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
     
@@ -240,7 +240,7 @@ public class StringCollection {
      * @param Map
      * @return SQLInString or null
      */
-    public static final String getSqlInStringFromMap(Map m) {
+    public static final String getSqlInStringFromMap(final Map m) {
         final StringBuffer sb = new StringBuffer();
         sb.append('(');
         if (m != null) {
@@ -248,7 +248,7 @@ public class StringCollection {
         	final Iterator it = m.keySet().iterator();
             boolean first = true;
             for (int k = 0; k < size; k++) {
-                String temp = it.next().toString();
+            	final String temp = it.next().toString();
                 if (!first) {
                     sb.append(',');
                     sb.append(temp);
@@ -273,8 +273,8 @@ public class StringCollection {
      * @param int c
      * @return byte[]
      */
-    public static final byte[] blurTrim(byte b[], int c) {
-        byte r[] = new byte[c];
+    public static final byte[] blurTrim(final byte b[], final int c) {
+    	final byte r[] = new byte[c];
         System.arraycopy(b, 0, r, 0, c);
         return r;
     }
@@ -288,31 +288,31 @@ public class StringCollection {
      * @param int l (last position in b + replacement.length)
      * @return byte[]
      */
-    public static final byte[] expandArray(byte b[], int c, int l) {
-        byte r[] = new byte[((b.length+l)*2)];
+    public static final byte[] expandArray(final byte b[], final int c, final int l) {
+    	final byte r[] = new byte[((b.length+l)*2)];
         System.arraycopy(b, 0, r, 0, c);
         return r;
     }
     
-    public static final String date2SQLString(Date d) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    public static final String date2SQLString(final Date d) {
+    	final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return (sdf.format(d));
     }
     
-    public static final String date2String(Date d) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    public static final String date2String(final Date d) {
+    	final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         return (sdf.format(d));
     }
     
-    public static final String getSelect(int[] cols, String table) throws IndexOutOfBoundsException {
-        StringBuffer sb = new StringBuffer(256);
+    public static final String getSelect(final int[] cols, final String table) throws IndexOutOfBoundsException {
+    	final StringBuffer sb = new StringBuffer(256);
         sb.append("SELECT ");
         int x = 0;
         for (int a = 0; a < cols.length; a++) {
-            String temp = CalendarCommonCollection.getFieldName(cols[a]);
+        	final String temp = CalendarCommonCollection.getFieldName(cols[a]);
             if (temp != null) {
                 if (x != 0) {
-                    sb.append(",");
+                    sb.append(',');
                     sb.append(temp);
                 } else {
                     sb.append(temp);
@@ -325,12 +325,12 @@ public class StringCollection {
         return sb.toString();
     }
     
-    public static String convertArray2String(int i[]) {
+    public static String convertArray2String(final int i[]) {
 		if (i == null) {
 			return null;
 		}
 		
-        StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer();
         for (int a = 0; a < i.length; a++) {
             sb.append(i[a]);
             sb.append(',');
@@ -339,12 +339,12 @@ public class StringCollection {
         return sb.delete(sb.length()-1, sb.length()).toString();
     }
     
-    public static String convertArray2String(String s[]) {
+    public static String convertArray2String(final String s[]) {
 		if (s == null) {
 			return null;
 		}
 		
-        StringBuffer sb = new StringBuffer();
+		final StringBuffer sb = new StringBuffer();
         for (int a = 0; a < s.length; a++) {
             sb.append(s[a]);
             sb.append(',');
@@ -353,7 +353,7 @@ public class StringCollection {
         return sb.delete(sb.length()-1, sb.length()).toString();
     }
     
-    public static int[] convertStringArray2IntArray(String s[]) {
+    public static int[] convertStringArray2IntArray(final String s[]) {
         int[] i = new int[s.length];
         for (int a = 0; a < i.length; a++) {
             i[a] = Integer.parseInt(s[a]);
@@ -361,7 +361,7 @@ public class StringCollection {
         return i;
     }
     
-    public static boolean isEmpty(String s) {
+    public static boolean isEmpty(final String s) {
         final int length = s.length();
     	for (int a = 0; a < length; a++) {
             if (!Character.isWhitespace(s.charAt(a))) {
@@ -371,8 +371,8 @@ public class StringCollection {
         return true;
     }
     
-    public static final String convertArraytoString(Object[] o) {
-        StringBuilder sb = new StringBuilder();
+    public static final String convertArraytoString(final Object[] o) {
+    	final StringBuilder sb = new StringBuilder();
         for (int a = 0; a < o.length; a++) {
             sb.append(o[a]);
         }
@@ -380,10 +380,10 @@ public class StringCollection {
     }
     
     public static final String getStackAsString() {   
-        Throwable t = new Throwable();
+    	final Throwable t = new Throwable();
         t.fillInStackTrace();        
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
         return sw.toString();
     }

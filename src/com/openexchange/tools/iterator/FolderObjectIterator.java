@@ -152,14 +152,14 @@ public class FolderObjectIterator implements SearchIterator {
 			prefetchQueue = null;
 		} else {
 			if (col instanceof List) {
-				List<FolderObject> list = (List<FolderObject>) col;
+				final List<FolderObject> list = (List<FolderObject>) col;
 				this.next = list.remove(0);
 				prefetchQueue = new LinkedList<FolderObject>();
 				if (!list.isEmpty()) {
 					prefetchQueue.addAll(list);
 				}
 			} else if (col instanceof Queue) {
-				Queue<FolderObject> queue = (Queue<FolderObject>) col;
+				final Queue<FolderObject> queue = (Queue<FolderObject>) col;
 				this.next = queue.poll();
 				prefetchQueue = new LinkedList<FolderObject>();
 				if (!queue.isEmpty()) {

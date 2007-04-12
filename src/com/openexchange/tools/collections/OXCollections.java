@@ -56,7 +56,7 @@ import java.util.List;
 public class OXCollections {
 	
 	// Don't generics wonderfully increase readability?
-	public static <L,C> L inject(L list, Iterable<C> iterable, Injector<L,C> injector){
+	public static <L,C> L inject(L list, final Iterable<C> iterable, final Injector<L,C> injector){
 		for(C component : iterable) {
 			list = injector.inject(list,component);
 		}
@@ -64,7 +64,7 @@ public class OXCollections {
 		return list;
 	}
 	
-	public static <C> List<C> inject(Iterable<C> iterable, Injector<List<C>,C> injector) {
+	public static <C> List<C> inject(final Iterable<C> iterable, final Injector<List<C>,C> injector) {
 		return inject(new ArrayList<C>(), iterable, injector);
 	}
 

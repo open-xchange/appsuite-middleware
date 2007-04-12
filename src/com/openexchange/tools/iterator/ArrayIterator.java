@@ -57,7 +57,8 @@ public class ArrayIterator implements SearchIterator {
 	private final Object[] array;
 	
 	public ArrayIterator(final Object[] array){
-		this.array = array;
+		this.array = new Object[array.length];
+		System.arraycopy(array, 0, this.array, 0, array.length);
 	}
 	
 	public boolean hasNext() {
@@ -69,7 +70,6 @@ public class ArrayIterator implements SearchIterator {
 	}
 	
 	public void close() {
-		;
 	}
 	
 	public int size() {

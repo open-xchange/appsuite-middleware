@@ -160,6 +160,7 @@ public class Folder extends SessionServlet {
 	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
+	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		Tools.disableCaching(resp);
@@ -177,6 +178,7 @@ public class Folder extends SessionServlet {
 	 * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest,
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
+	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 		Tools.disableCaching(resp);
@@ -511,8 +513,8 @@ public class Folder extends SessionServlet {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
 						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY,
 								getUserName(sessionObj),
-								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), sessionObj.getContext()
-										.getContextId());
+								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), Integer.valueOf(sessionObj.getContext()
+										.getContextId()));
 					}
 					/*
 					 * Append virtual folder 'Userstore'
@@ -1559,7 +1561,7 @@ public class Folder extends SessionServlet {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return getStringParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, paramSrcType);
+			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 
@@ -1585,7 +1587,7 @@ public class Folder extends SessionServlet {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return checkStringParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, paramSrcType);
+			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 
@@ -1616,7 +1618,7 @@ public class Folder extends SessionServlet {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return checkIntArrayParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, paramSrcType);
+			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 
@@ -1666,7 +1668,7 @@ public class Folder extends SessionServlet {
 		} else if (paramSrcType == PARAM_SRC_TYPE_JSON) {
 			return checkDateParam((JSONObject) paramContainer, paramName);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, paramSrcType);
+			throw new OXFolderException(FolderCode.UNKNOWN_PARAMETER_CONTAINER_TYPE, Integer.valueOf(paramSrcType));
 		}
 	}
 

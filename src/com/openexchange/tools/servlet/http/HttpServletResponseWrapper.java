@@ -156,7 +156,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		 * Date Format
 		 */
 		headerDateFormat = new SimpleDateFormat(HTTP_HEADER_DATE_FORMAT);
-		DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
+		final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
 		String[] shortWeekdays = new String[8];
 		shortWeekdays[Calendar.SUNDAY] = "Sun";
 		shortWeekdays[Calendar.MONDAY] = "Mon";
@@ -206,6 +206,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return headers.containsKey(name);
 	}
 
+	@Override
 	public void reset() {
 		super.reset();
 		this.cookies.clear();

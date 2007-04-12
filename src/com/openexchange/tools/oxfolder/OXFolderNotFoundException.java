@@ -58,11 +58,11 @@ public class OXFolderNotFoundException extends OXFolderException {
 	private static final long serialVersionUID = 1949728866316863300L;
 
 	public OXFolderNotFoundException (final int fuid, final int cid) {
-		super(FolderCode.NOT_EXISTS, fuid, cid);
+		super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
 	}
 	
 	public OXFolderNotFoundException (final String prefix, final int fuid, final int cid) {
-		super(FolderCode.NOT_EXISTS, prefix, fuid, cid);
+		super(FolderCode.NOT_EXISTS, prefix, Integer.valueOf(fuid), Integer.valueOf(cid));
 	}
 
 }

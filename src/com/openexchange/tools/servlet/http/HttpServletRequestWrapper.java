@@ -317,7 +317,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	}
 	
 	private final ServletContext getServletContext() {
-		return AJPv13Server.servletConfigs.getContext(servletInstance.getClass().getCanonicalName(), servletPath);
+		return AJPv13Server.SERVLET_CONFIGS.getContext(servletInstance.getClass().getCanonicalName(), servletPath);
 	}
 
 

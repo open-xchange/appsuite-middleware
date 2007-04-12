@@ -286,9 +286,9 @@ public class OXFolderAccess {
 			final FolderObject fo = getFolderObject(folderId);
 			return fo.getEffectiveUserPermission(userId, userConfig, readCon);
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		}
 	}
 
@@ -307,13 +307,13 @@ public class OXFolderAccess {
 			final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
 			if (folderId == -1) {
 				throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY, folderModule2String(module),
-						getUserName(userId, ctx), ctx.getContextId());
+						getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
 			}
 			return getFolderObject(folderId);
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		}
 	}
 
@@ -370,7 +370,7 @@ public class OXFolderAccess {
 					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, session.getUserObject(), userConfig);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
-							.getModule()), ctx.getContextId());
+							.getModule()), Integer.valueOf(ctx.getContextId()));
 				}
 			} else {
 				/*
@@ -392,16 +392,16 @@ public class OXFolderAccess {
 					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
-							.getModule()), ctx.getContextId());
+							.getModule()), Integer.valueOf(ctx.getContextId()));
 				}
 			}
 			return false;
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (Throwable t) {
-			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, ctx.getContextId());
+			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, Integer.valueOf(ctx.getContextId()));
 		}
 	}
 

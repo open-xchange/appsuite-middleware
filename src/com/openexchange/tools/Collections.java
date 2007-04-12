@@ -86,7 +86,7 @@ public final class Collections {
 		final int[] retval = new int[list.size()];
 		final Iterator<Integer> iter = list.iterator();
 		for (int i = 0; i < retval.length; i++) {
-			retval[i] = iter.next();
+			retval[i] = iter.next().intValue();
 		}
 		return retval;
 	}
@@ -174,10 +174,9 @@ public final class Collections {
 		 */
 		private final void verifyBufferSize(final int sz) {
 			if (sz > buf.length) {
-				byte[] old = buf;
+				final byte[] old = buf;
 				buf = new byte[Math.max(sz, 2 * buf.length)];
 				System.arraycopy(old, 0, buf, 0, old.length);
-				old = null;
 			}
 		}
 
@@ -191,7 +190,9 @@ public final class Collections {
 		 * written.
 		 */
 		public byte[] getByteArray() {
-			return buf;
+			final byte[] retval = new byte[buf.length];
+			System.arraycopy(buf, 0, retval, 0, buf.length);
+			return retval;
 		}
 
 		@Override
@@ -247,7 +248,8 @@ public final class Collections {
 		protected int pos = 0;
 
 		public FastByteArrayInputStream(byte[] buf, int count) {
-			this.buf = buf;
+			this.buf = new byte[buf.length];
+			System.arraycopy(buf, 0, this.buf, 0, buf.length);
 			this.count = count;
 		}
 

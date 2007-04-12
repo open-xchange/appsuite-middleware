@@ -267,15 +267,15 @@ public class ServletConfigLoader {
 		return null;
 	}
 
-	private String getStack() {
-		StringBuilder builder = new StringBuilder();
+	/*private final String getStack() {
+		final StringBuilder builder = new StringBuilder();
 		for(StackTraceElement elem : Thread.currentThread().getStackTrace()) {
 			builder.append(elem).append("\n");
 		}
 		return builder.toString();
-	}
+	}*/
 
-	private void addProps(final Map<String, String> m, final Properties props) {
+	private final void addProps(final Map<String, String> m, final Properties props) {
 		for (Map.Entry<Object, Object> entry : props.entrySet()) {
 			m.put((String) entry.getKey(), (String) entry.getValue());
 		}

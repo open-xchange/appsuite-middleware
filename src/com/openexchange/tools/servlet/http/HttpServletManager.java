@@ -148,7 +148,7 @@ public class HttpServletManager {
 		}
 		try {
 			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-			servletInstance.init(AJPv13Server.servletConfigs.getConfig(servletInstance.getClass().getCanonicalName(), servletKey));
+			servletInstance.init(AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass().getCanonicalName(), servletKey));
 			return servletInstance;
 		} catch (Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -236,7 +236,7 @@ public class HttpServletManager {
 						final boolean isSTM = servletInstance instanceof SingleThreadModel;
 						servletQueue = isSTM ? new FIFOQueue<HttpServlet>(HttpServlet.class, AJPv13Config
 								.getServletPoolSize()) : new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-						final ServletConfig conf = AJPv13Server.servletConfigs.getConfig(servletInstance.getClass()
+						final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass()
 								.getCanonicalName(), servletKey);
 						servletInstance.init(conf);
 						servletQueue.enqueue(servletInstance);

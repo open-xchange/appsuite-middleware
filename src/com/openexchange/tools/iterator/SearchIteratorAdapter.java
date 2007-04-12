@@ -113,7 +113,6 @@ public class SearchIteratorAdapter implements SearchIterator {
 			}
 
 			public void close() throws SearchIteratorException {
-				;
 			}
 			
 			public int size() {
@@ -163,7 +162,6 @@ public class SearchIteratorAdapter implements SearchIterator {
 			}
 
 			public void close() throws SearchIteratorException {
-				;
 			}
 			
 			public int size() {
