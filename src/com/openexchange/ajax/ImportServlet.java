@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -62,8 +63,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONWriter;
 
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -78,7 +81,8 @@ import com.openexchange.groupware.upload.UploadFile;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration and refactoring)
  */
 public class ImportServlet extends ImportExport {
-
+	
+	public static final String JSON_CALLBACK = "import";
 	private static final long serialVersionUID = -4691910391290394603L;
 
 	public ImportServlet() {
@@ -128,15 +132,20 @@ public class ImportServlet extends ImportExport {
 				}
 				jsonWriter.endArray();
 				
-				final OutputStream outputStream = resp.getOutputStream();
-				
-				resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-				
+				//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
+				resp.setContentType("text/html");
 				final String content = stringWriter.toString();
-				resp.setContentLength(content.length());
+				Response resObj = new Response();
+				resObj.setData(new JSONArray(content) );
+				PrintWriter w = null;
+				try {
+					w = resp.getWriter();
+					w.write(substitute(JS_FRAGMENT,"json",resObj.getJSON().toString(),"action",JSON_CALLBACK));
+					close(w);
+				} catch (IOException e) {
+					LOG.warn(e);
+				}
 				
-				outputStream.write(content.getBytes("UTF-8"));
-				outputStream.flush();
 			} finally {
 				if (ue != null) {
 					ue.cleanUp();

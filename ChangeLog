@@ -1,7 +1,9 @@
 * 2007-04-12 - tobias.prinz@open-xchange.com
 
- - Torben fixed small calculation error in UploadEvent at my desktop, so
+ - Thorben fixed small calculation error in UploadEvent at my desktop, so
    I checked it in.
+ - Changed response of ImportServlet from JSON to JavaScript callback as
+   needed by GUI team. Fixed tests accordingly.
 
 * 2007-04-12 - thorben.betten@open-xchange.com
 
