@@ -213,14 +213,22 @@ public class MonitoringInfo {
 		}
 	}
 	
+	private static final String TYPE_AJAX = "ajax";
+	
+	private static final String TYPE_WEBDAV_USER = "servlet/webdav.documents";
+	
+	private static final String TYPE_OUTLOOK = "servlet/webdav.";
+	
+	private static final String TYPE_SYNCML = "syncml";
+	
 	public static final int getConnectionType(final String pathInfo) {
-		if (pathInfo.startsWith("ajax")) {
+		if (pathInfo.startsWith(TYPE_AJAX)) {
 			return MonitoringInfo.AJAX;
-		} else if (pathInfo.startsWith("servlet/webdav.documents")) {
+		} else if (pathInfo.startsWith(TYPE_WEBDAV_USER)) {
 			return MonitoringInfo.WEBDAV_USER;
-		} else if (pathInfo.startsWith("servlet/webdav.")) {
+		} else if (pathInfo.startsWith(TYPE_OUTLOOK)) {
 			return MonitoringInfo.OUTLOOK;
-		} else if (pathInfo.startsWith("syncml")) {
+		} else if (pathInfo.startsWith(TYPE_SYNCML)) {
 			return MonitoringInfo.SYNCML;
 		} else {
 			return -1;
