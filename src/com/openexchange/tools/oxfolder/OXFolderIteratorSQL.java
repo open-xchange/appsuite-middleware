@@ -97,6 +97,8 @@ public class OXFolderIteratorSQL {
 	
 	private static final String STR_EMPTY = "";
 	
+	private static final String STR_SELECT = "SELECT ";
+	
 	private OXFolderIteratorSQL() {
 		super();
 	}
@@ -108,7 +110,7 @@ public class OXFolderIteratorSQL {
 	 */
 	private final static String getSQLUserVisibleFolders(final String fields, final String permissionIds,
 			final String accessibleModules, final String additionalCondition, final String groupBy, final String orderBy) {
-		final StringBuilder retValBuilder = new StringBuilder("SELECT ").append(fields).append(
+		final StringBuilder retValBuilder = new StringBuilder(STR_SELECT).append(fields).append(
 				" FROM oxfolder_tree AS ot ").append(
 				"JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append(
 				"WHERE (((ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(
@@ -498,7 +500,7 @@ public class OXFolderIteratorSQL {
 //			 * as it should. I didn't found a working one using joins.
 //			 */
 //			final StringBuilder sql = new StringBuilder(1000);
-//			sql.append("SELECT ").append(FolderObjectIterator.getFieldsForSQL(STR_OT));
+//			sql.append(STR_SELECT).append(FolderObjectIterator.getFieldsForSQL(STR_OT));
 //			sql.append(" FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?");
 //			sql.append(" WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION);
 //			sql.append(") OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)");
@@ -569,7 +571,7 @@ public class OXFolderIteratorSQL {
 			readCon = DBPool.pickup(ctx);
 			final StringBuilder sb = new StringBuilder();
 			sb
-					.append("SELECT ")
+					.append(STR_SELECT)
 					.append(FolderObjectIterator.getFieldsForSQL(STR_OT))
 					.append(" FROM oxfolder_tree AS ot ")
 					.append("LEFT JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid ")
@@ -943,7 +945,7 @@ public class OXFolderIteratorSQL {
 	public static SearchIterator getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups,
 			final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
 		final String fields = FolderObjectIterator.getFieldsForSQL(STR_OT);
-		final StringBuilder sqlBuilder = new StringBuilder("SELECT ")
+		final StringBuilder sqlBuilder = new StringBuilder(STR_SELECT)
 				.append(fields)
 				.append(
 						" FROM del_oxfolder_tree AS ot JOIN del_oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ")
@@ -1023,7 +1025,7 @@ public class OXFolderIteratorSQL {
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
-	private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append("SELECT ").append(
+	private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append(STR_SELECT).append(
 			FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(" WHERE (cid = ?) ")
 			.toString();
 

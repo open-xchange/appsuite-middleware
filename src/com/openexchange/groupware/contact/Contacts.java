@@ -412,7 +412,7 @@ public class Contacts implements DeleteListener {
 			StringBuilder sb = null;
 			for (int i=0;i<650;i++){
 				if (mapping[i] != null && mapping[i].containsElement(co) && i != ContactObject.DISTRIBUTIONLIST && i != ContactObject.LINKS && i != ContactObject.OBJECT_ID && i != ContactObject.IMAGE_LAST_MODIFIED && i != ContactObject.IMAGE1_CONTENT_TYPE){					
-					sb = new StringBuilder(mapping[i].getDBFieldName()+',');
+					sb = new StringBuilder(mapping[i].getDBFieldName()).append(',');
 					insert_fields.append(sb);
 					insert_values.append("?,");			
 				}			
@@ -775,7 +775,7 @@ public class Contacts implements DeleteListener {
 				StringBuilder sb;
 				for (int i=0;i<modtrim.length;i++){
 					if (mapping[modtrim[i]] != null && mapping[modtrim[i]].containsElement(co) && modtrim[i] != ContactObject.DISTRIBUTIONLIST && modtrim[i] != ContactObject.LINKS && modtrim[i] != ContactObject.OBJECT_ID && i != ContactObject.IMAGE1_CONTENT_TYPE){					
-						sb = new StringBuilder(mapping[modtrim[i]].getDBFieldName()+" = ?,");
+						sb = new StringBuilder(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
 						update.append(sb);				
 					}	
 				}
@@ -1170,7 +1170,7 @@ public class Contacts implements DeleteListener {
 					ps.setString(7, dleo.getEmailaddress());
 					ps.setInt(8,cid);
 					
-					LOG.debug(new StringBuilder("WRITE DLIST "+ps.toString()));
+					LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
 					
 					ps.execute();									
 				} finally {
@@ -1355,7 +1355,7 @@ public class Contacts implements DeleteListener {
 						ps.setString(8, dleo.getEmailaddress());
 						ps.setInt(12, cid);
 						
-						LOG.debug(new StringBuilder("UPDATE DLIST "+ps.toString()));
+						LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
 						
 						ps.execute();
 					
@@ -1395,7 +1395,7 @@ public class Contacts implements DeleteListener {
 		try {
 			ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
 			ps.setInt(1, id);
-			LOG.debug(new StringBuilder("DELETE FROM DLIST "+ps.toString()));
+			LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
 			ps.execute();
 		} catch (SQLException se) {
 			throw EXCEPTIONS.create(48,se,cid,id);
@@ -1424,7 +1424,7 @@ public class Contacts implements DeleteListener {
 							ps.setInt(3, dleo.getEmailfield());			
 						}
 						ps.setInt(4, cid);
-						LOG.debug(new StringBuilder("DELETE FROM DLIST "+ps.toString()));
+						LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
 						ps.execute();
 					} finally {
 						try{

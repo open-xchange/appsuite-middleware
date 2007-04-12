@@ -165,6 +165,7 @@ public class MonitorAgent extends AbstractAgent {
 		agent.stop();
 	}
 	
+	@Override
 	public void run() {
 		initializeMBeanServer();
 	}
@@ -226,6 +227,7 @@ public class MonitorAgent extends AbstractAgent {
 		return new String[] { className.substring(0, pos), className.substring(pos + 1) };
 	}
 
+	@Override
 	public void stop() {
 		try {
 			while (!objectNames.isEmpty()) {
@@ -252,6 +254,7 @@ public class MonitorAgent extends AbstractAgent {
 	
 	private static final String ERR_REGISTRATION = "MBean registration denied: MonitorAgent is not running";
 	
+	@Override
 	public void registerMBean(final String name, final Object mbean) throws Exception {
 		if (!running) {
 			throw new Exception(ERR_REGISTRATION);
@@ -261,6 +264,7 @@ public class MonitorAgent extends AbstractAgent {
 		objectNames.push(objectName);
 	}
 	
+	@Override
 	public void registerMBean(final ObjectName objectName, final Object mbean) throws Exception {
 		if (!running) {
 			throw new Exception(ERR_REGISTRATION);
@@ -269,7 +273,8 @@ public class MonitorAgent extends AbstractAgent {
 		objectNames.push(objectName);
 	}
 	
-	 public void unregisterMBean(final String name) throws Exception {
+	 @Override
+	public void unregisterMBean(final String name) throws Exception {
 		 if (!running) {
 				throw new Exception(ERR_REGISTRATION);
 			}
@@ -278,7 +283,8 @@ public class MonitorAgent extends AbstractAgent {
 		 objectNames.remove(objectName);
 	 }
 	 
-	 public void unregisterMBean(final ObjectName objectName) throws Exception {
+	 @Override
+	public void unregisterMBean(final ObjectName objectName) throws Exception {
 		 if (!running) {
 				throw new Exception(ERR_REGISTRATION);
 			}

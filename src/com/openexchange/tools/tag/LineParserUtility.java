@@ -77,8 +77,8 @@ public final class LineParserUtility {
      */
     public static String parseLine(final String line, final TagFiller fill,
         final Object data) {
-        StringBuffer retval = new StringBuffer();
-        int start = line.indexOf("[");
+    	final StringBuffer retval = new StringBuffer();
+        int start = line.indexOf('[');
         int ende = -1;
         if (start != -1) {
             retval.append(line.substring(0, start));
@@ -86,9 +86,9 @@ public final class LineParserUtility {
             retval.append(line);
         }
         while (start != -1) {
-            ende = line.indexOf("]", start);
+            ende = line.indexOf(']', start);
             if (ende != -1) {
-                String tag = line.substring(start + 1, ende);
+            	final String tag = line.substring(start + 1, ende);
                 String replaced = null;
                 if (data != null) {
                     replaced = fill.replace(tag, data);
@@ -98,12 +98,12 @@ public final class LineParserUtility {
                 if (null != replaced) {
                     retval.append(replaced);
                 } else {
-                    retval.append("[");
+                    retval.append('[');
                     retval.append(tag);
-                    retval.append("]");
+                    retval.append(']');
                 }
 
-                start = line.indexOf("[", ende);
+                start = line.indexOf('[', ende);
                 if (start != -1) {
                     retval.append(line.substring(ende + 1, start));
                 }

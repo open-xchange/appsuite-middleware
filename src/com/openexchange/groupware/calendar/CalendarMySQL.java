@@ -1210,7 +1210,7 @@ class CalendarMySQL implements CalendarSqlImp {
         query.append(cdao.getContextID());
         query.append(PARTICIPANTS_IDENTIFIER_IS);
         query.append(cdao.getObjectID());
-        ResultSet rs = stmt.executeQuery(query.toString());;
+        ResultSet rs = stmt.executeQuery(query.toString());
         String temp = null;
         try {
             while (rs.next()) {

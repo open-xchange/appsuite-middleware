@@ -330,7 +330,7 @@ public class ContactRequest {
 			
 			ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
 			ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
-			it = contactsql.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir, internalColumns);;
+			it = contactsql.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
 				ContactObject contactObj = (ContactObject)it.next();

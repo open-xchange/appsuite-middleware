@@ -549,7 +549,7 @@ public class CalendarOperation implements SearchIterator {
         long start_time = cdao.getStartDate().getTime();
         long end_time = (cdao.getEndDate().getTime() + (cdao.getRecurrenceCalculator() * CalendarRecurringCollection.MILLI_DAY));
         start_time = start_time % CalendarRecurringCollection.MILLI_DAY;
-        end_time = end_time % CalendarRecurringCollection.MILLI_DAY;;
+        end_time = end_time % CalendarRecurringCollection.MILLI_DAY;
         cdao.setStartDate(CalendarRecurringCollection.calculateRecurringDate(start_date, start_time));
         cdao.setEndDate(CalendarRecurringCollection.calculateRecurringDate(end_date, end_time));
     }
@@ -561,15 +561,14 @@ public class CalendarOperation implements SearchIterator {
                 boolean ret = has_next;
                 if (from == 0 && to == 0) {
                     return ret;
-                } else {
-                    if (ret) {
-                        from++;
-                        if (from <= to) {
-                            return ret;
-                        }
-                    } else {
+                }
+                if (ret) {
+                    from++;
+                    if (from <= to) {
                         return ret;
                     }
+                } else {
+                    return ret;
                 }
             }
         }
@@ -841,7 +840,7 @@ public class CalendarOperation implements SearchIterator {
                             fn = ""+cols[a];
                         }
                         if (a > 0)  {
-                            colss.append(",");
+                            colss.append(',');
                             colss.append(fn);
                         } else {
                             colss.append(fn);

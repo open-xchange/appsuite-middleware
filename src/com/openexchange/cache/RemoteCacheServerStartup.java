@@ -190,6 +190,7 @@ public class RemoteCacheServerStartup {
 			// TODO make configurable.
 			// use this socket factory to add a timeout.
 			RMISocketFactory.setSocketFactory(new RMISocketFactory() {
+				@Override
 				public Socket createSocket(String host, int port) throws IOException {
 					final Socket socket = new Socket(host, port);
 					socket.setSoTimeout(DEFAULT_RMI_SOCKET_FACTORY_TIMEOUT_MS);
@@ -197,6 +198,7 @@ public class RemoteCacheServerStartup {
 					return socket;
 				}
 
+				@Override
 				public ServerSocket createServerSocket(int port) throws IOException {
 					return new ServerSocket(port);
 				}
@@ -225,14 +227,14 @@ public class RemoteCacheServerStartup {
 		if (lccStr == null) {
 			lccStr = "true";
 		}
-		final boolean lcc = Boolean.valueOf(lccStr).booleanValue();
+		final boolean lcc = Boolean.parseBoolean(lccStr);
 		rcsa.setLocalClusterConsistency(lcc);
 
 		String acgStr = props.getProperty(IRemoteCacheConstants.REMOTE_ALLOW_CLUSTER_GET);
 		if (acgStr == null) {
 			acgStr = "true";
 		}
-		final boolean acg = Boolean.valueOf(acgStr).booleanValue();
+		final boolean acg = Boolean.parseBoolean(acgStr);
 		rcsa.setAllowClusterGet(acg);
 
 		// CREATE SERVER

@@ -1140,7 +1140,7 @@ public final class CalendarRecurringCollection {
     }
     
     private static final void dsf(StringBuffer sb, String s) {
-        sb.append("t");
+        sb.append('t');
         sb.append(DELIMETER_PIPE);
         sb.append(s);
         sb.append(DELIMETER_PIPE);

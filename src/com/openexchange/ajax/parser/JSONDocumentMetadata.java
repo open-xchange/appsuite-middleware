@@ -129,7 +129,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.LAST_MODIFIED_LITERAL.getName(), now.getTime());
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.CREATION_DATE_LITERAL.getName(), creationDate.getTime());
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -158,7 +158,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.MODIFIED_BY_LITERAL.getName(), lastEditor);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -172,7 +172,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FOLDER_ID_LITERAL.getName(), folderId);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -186,7 +186,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.TITLE_LITERAL.getName(), title);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -200,7 +200,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.VERSION_LITERAL.getName(), version);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -218,7 +218,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FILE_SIZE_LITERAL.getName(), length);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -232,7 +232,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FILE_MIMETYPE_LITERAL.getName(), type);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -246,7 +246,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FILENAME_LITERAL.getName(), fileName);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -260,7 +260,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.ID_LITERAL.getName(), id);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -274,7 +274,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.CREATED_BY_LITERAL.getName(), creator);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -288,7 +288,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.DESCRIPTION_LITERAL.getName(), description);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -302,7 +302,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.URL_LITERAL.getName(), url);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -342,7 +342,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.CATEGORIES_LITERAL.getName(), catArray);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -356,7 +356,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.LOCKED_UNTIL_LITERAL.getName(), lockedUntil);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -370,7 +370,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FILE_MD5SUM_LITERAL.getName(), sum);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 	
@@ -382,7 +382,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.COLOR_LABEL_LITERAL.getName(), color);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -394,7 +394,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.CURRENT_VERSION_LITERAL.getName(), bool);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 
@@ -408,7 +408,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.VERSION_COMMENT_LITERAL.getName(), string);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 	
@@ -430,7 +430,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		try {
 			jsonObject.put(Metadata.FILESTORE_LOCATION_LITERAL.getName(), string);
 		} catch (JSONException e) {
-			LOG.error("",e);;
+			LOG.error("",e);
 		}
 	}
 

@@ -99,7 +99,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
          * enlarge the number of pooled objects if they are needed.
          */
         GROW
-    };
+    }
 
     /* --- Settings --- */
 
@@ -345,9 +345,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                                 + data.numIdle() + ", Waiting: "
                                 + lock.getWaitQueueLength(idleAvailable)
                                 + ", Time: " + getWaitTime(startTime));
-                        } else {
-                            continue;
                         }
+                        continue;
                     default:
                         throw new IllegalStateException(
                             "Unknown exhausted action: " + exhaustedAction);
@@ -401,9 +400,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 if (created) {
                     throw new PoolingException(
                         "Problem while creating new object.");
-                } else {
-                    continue;
                 }
+                continue;
             }
             final Thread thread = Thread.currentThread();
             retval.setThread(thread);
@@ -673,9 +671,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     idleSize = data.numIdle();
                     removed.add(metaData);
                     continue;
-                } else {
-                    index++;
                 }
+                index++;
             }
             final Iterator<PooledData<T>> iter = data.listActive();
             while (iter.hasNext()) {

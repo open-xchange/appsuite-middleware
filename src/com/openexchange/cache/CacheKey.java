@@ -114,7 +114,8 @@ public class CacheKey implements Serializable {
     /**
      *  {@inheritDoc}
      */
-    public boolean equals(final Object obj) {
+    @Override
+	public boolean equals(final Object obj) {
         if (!(obj instanceof CacheKey)) {
             return false;
         }
@@ -125,14 +126,16 @@ public class CacheKey implements Serializable {
     /**
      * {@inheritDoc}
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return hash;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return "CacheKey context=" + contextId + " | key=" + keyObj.toString();
     }
 }

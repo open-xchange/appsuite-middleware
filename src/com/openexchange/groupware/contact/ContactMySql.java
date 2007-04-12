@@ -495,7 +495,7 @@ public class ContactMySql implements ContactSql {
 		}
 		sb.append(where);
 		sb.append(getOrder());
-		LOG.debug(new StringBuilder("ContactSQL Query: "+sb.toString()));
+		LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
 		//System.out.println(new StringBuilder("ContactSQL Query: "+sb.toString()));
 		return sb.toString();
 	}
@@ -630,10 +630,10 @@ public class ContactMySql implements ContactSql {
             oclp = fo.getEffectiveUserPermission(user, so.getUserConfiguration());            
            
             if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()){
-            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())+',');
+            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
             	read_own.append(tmp);  
             } else if (oclp.canReadAllObjects()){
-            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())+',');
+            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
             	read_all.append(tmp);  
             }
         }
@@ -682,7 +682,7 @@ public class ContactMySql implements ContactSql {
 	}
 	
 	public String iFdeleteDistributionListEntriesByIds(int cid){
-		return new StringBuilder("DELETE FROM prg_dlist where intfield01 = ? AND intfield02 IS NULL AND intfield03 IS NULL AND cid = "+cid).toString();
+		return new StringBuilder("DELETE FROM prg_dlist where intfield01 = ? AND intfield02 IS NULL AND intfield03 IS NULL AND cid = ").append(cid).toString();
 	}
 
 	public String iFfillDistributionListArray(int id, int cid){
@@ -741,7 +741,7 @@ public class ContactMySql implements ContactSql {
 	}
 	
 	public StringBuilder iFgetContactById(StringBuilder sb){
-		sb = new StringBuilder("SELECT "+sb);
+		sb = new StringBuilder("SELECT ").append(sb);
 		sb.deleteCharAt(sb.length()-1);
 		sb.append(" from prg_contacts AS co ");
 		return sb;

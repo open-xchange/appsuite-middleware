@@ -1154,7 +1154,7 @@ public class JSONMessageParser {
 
 	private static final Pattern PLAIN_TEXT_QUOTE_PATTERN = Pattern.compile("(\\G\\s?>)");
 
-	private final String getFormattedText(String text, final boolean isHtmlContent) throws MessagingException {
+	private final String getFormattedText(final String text, final boolean isHtmlContent) throws MessagingException {
 		final StringBuilder formattedText = new StringBuilder();
 		if (isHtmlContent) {
 			String htmlContent = text;
@@ -1171,7 +1171,7 @@ public class JSONMessageParser {
 		}
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new StringReader(text.toString()));
+			reader = new BufferedReader(new StringReader(text));
 			String line = "";
 			int quotelevel_before = 0;
 			while ((line = reader.readLine()) != null) {

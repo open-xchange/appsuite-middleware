@@ -1320,14 +1320,13 @@ public class DatabaseImpl extends DBService {
 			StringBuilder SELECT = new StringBuilder(
 					getSQLSelectForInfostoreColumns(dbColumns, false));
 			StringBuilder JOIN_NEW = new StringBuilder(
-					" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.creating_date>?"
-							+ onlyOwn);
+					" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.creating_date>?").append(onlyOwn);
 			StringBuilder JOIN_MODIFIED = new StringBuilder(
 					" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id  AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.last_modified>? AND infostore.creating_date<infostore.last_modified"
-							+ onlyOwn);
+							).append(onlyOwn);
 			StringBuilder DELETE_SELECT = new StringBuilder(
 					"SELECT id FROM del_infostore WHERE cid=? AND folder_id=? AND last_modified>?"
-							+ onlyOwn);
+							).append(onlyOwn);
 
 			stmtNew = con.prepareStatement(SELECT.toString()
 					+ JOIN_NEW.toString() + ORDER.toString());
@@ -1528,7 +1527,7 @@ public class DatabaseImpl extends DBService {
 				return;
 			StringBuffer where = new StringBuffer("infostore.folder_id in (");
 			for(FolderObject folder : foldersWithPrivateItems){
-				where.append(folder.getObjectID()).append(",");
+				where.append(folder.getObjectID()).append(',');
 			}
 			where.setCharAt(where.length()-1, ')');
 			where.append(" and infostore.cid = ").append(ctx.getContextId());
@@ -1540,7 +1539,7 @@ public class DatabaseImpl extends DBService {
 			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
 			while(iter.hasNext()) {
 				DocumentMetadata metadata = (DocumentMetadata)iter.next();
-				where.append(metadata.getId()).append(",");
+				where.append(metadata.getId()).append(',');
 				documents.add(metadata);
 			}
 			if(documents.size() == 0)
@@ -2172,7 +2171,6 @@ public class DatabaseImpl extends DBService {
 				if (rs.next()) {
 					next = d.fillDocumentMetadata(new DocumentMetadataImpl(),
 							columns, rs);
-					;
 					NextObject: while (next == null) {
 						if (rs.next()) {
 							next = d.fillDocumentMetadata(

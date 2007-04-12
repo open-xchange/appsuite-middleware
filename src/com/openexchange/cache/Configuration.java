@@ -92,7 +92,7 @@ public final class Configuration {
      * Loads the configuration for the caching system.
      * @throws IOException if the configuration can't be loaded.
      */
-    public static final void load() throws IOException {
+    public static void load() throws IOException {
         LOCK.lock();
         try {
             if (!loaded) {
@@ -103,7 +103,7 @@ public final class Configuration {
         }
     }
 
-    private static final void configure() throws IOException {
+    private static void configure() throws IOException {
         FileInputStream fis = null;
         try {
             final String cacheConfigFile = SystemConfig.getProperty(CACHE_CONF_FILE);

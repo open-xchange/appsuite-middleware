@@ -204,7 +204,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			}
 			SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(")))");
  		} else {
- 			SQL_QUERY.append(")");
+ 			SQL_QUERY.append(')');
  		}
 		
 		query = query.replace('*', '%');
@@ -285,7 +285,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		StringBuffer joined = new StringBuffer();
 		for(Integer i : all) {
 			joined.append(i.toString());
-			joined.append(",");
+			joined.append(',');
 		}
 		joined.setLength(joined.length()-1);
 		return joined.toString();
@@ -387,7 +387,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				Object retval = null;
 				retval = next;
 				if (rs.next()) {
-					next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);;
+					next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
 					NextObject: while (next == null) {
 						if (rs.next()) {
 							next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);

@@ -167,7 +167,7 @@ public class FolderQueryCacheManager {
 				LOCK_MODIFY.unlock();
 			}
 		}
-		Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
+		final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
 				.getFromGroup(createUserKey(userId), createContextKey(cid));
 		final LinkedList<Integer> q;
 		if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
