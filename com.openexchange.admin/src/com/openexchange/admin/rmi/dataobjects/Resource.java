@@ -54,7 +54,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
-import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public class Resource implements Serializable {
     /**
@@ -203,7 +202,7 @@ public class Resource implements Serializable {
      * extension was found.
      * 
      * @param extname a String for the extension
-     * @return the {@link OXUserExtensionInterface} with extname
+     * @return the {@link OXResourceExtensionInterface} with extname
      */
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
         for (final OXResourceExtensionInterface ext : this.extensions) {
