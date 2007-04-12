@@ -149,4 +149,21 @@ public class Credentials implements Serializable{
         ret.append("]");
         return ret.toString();
     }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof Credentials) {
+            final Credentials otherCredentials = (Credentials)obj;
+            if (otherCredentials.login.equals(this.login) &&
+                otherCredentials.password.equals(this.password)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+    
 }
