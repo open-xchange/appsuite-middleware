@@ -157,18 +157,17 @@ public class UploadEvent {
 	}
 	
 	public final int getNumberOfUploadFiles() {
-		int count = 0;
-		final Iterator<UploadFile> iter = getUploadFilesIterator();
-		while (iter.hasNext()) {
-			count++;
-		}
-		return count;
+		return createList().size();
 	}
 	
 	public final Iterator<UploadFile> getUploadFilesIterator() {
+		return createList().iterator();
+	}
+	
+	private final List<UploadFile> createList() {
 		final int size = uploadFiles.size();
 		if (size == 0) {
-			return new ArrayList<UploadFile>(0).iterator();
+			return new ArrayList<UploadFile>(0);
 		}
 		final List<UploadFile> retvalList = new ArrayList<UploadFile>(size);
 		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
@@ -179,7 +178,7 @@ public class UploadEvent {
 				uf = uf.getHomonymous();
 			}
 		}
-		return retvalList.iterator();
+		return retvalList;
 	}
 
 	public final void addFormField(final String fieldName, final String fieldValue) {

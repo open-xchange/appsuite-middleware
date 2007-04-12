@@ -1,3 +1,8 @@
+* 2007-04-12 - tobias.prinz@open-xchange.com
+
+ - Torben fixed small calculation error in UploadEvent at my desktop, so
+   I checked it in.
+
 * 2007-04-12 - thorben.betten@open-xchange.com
 
  - Bugfix #6668: Fixed NPE when creating
