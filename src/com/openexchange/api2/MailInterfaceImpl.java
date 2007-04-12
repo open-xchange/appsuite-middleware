@@ -4266,6 +4266,7 @@ public class MailInterfaceImpl implements MailInterface {
 								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 						tmp.setCategory(Category.TRY_AGAIN);
 					} else {
+						mailInterfaceMonitor.changeNumBrokenConnections(true);
 						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
 								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 					}
