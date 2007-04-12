@@ -514,7 +514,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     private void validateUserName( final String userName ) throws OXUserException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        final String illegal = userName.replaceAll("[$@%\\.+a-zA-Z0-9_-]", "");
+        String usr_uid_regexp = prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        final String illegal = userName.replaceAll(usr_uid_regexp,"");
         if( illegal.length() > 0 ) {
             throw new OXUserException( OXUserException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
