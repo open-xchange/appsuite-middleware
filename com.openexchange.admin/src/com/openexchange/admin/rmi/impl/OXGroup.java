@@ -371,7 +371,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     private void validateGroupName( final String groupName ) throws OXGroupException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        final String illegal = groupName.replaceAll("[ $@%\\.+a-zA-Z0-9_-]", "");
+        String group_check_regexp = prop.getResourceProp("CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        final String illegal = groupName.replaceAll(group_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new OXGroupException( OXGroupException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
