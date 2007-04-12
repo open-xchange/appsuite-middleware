@@ -260,18 +260,17 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		IMAP_PROPS = ((Properties) (System.getProperties().clone()));
 		/*
-		 * mail.mime.base64.ignoreerrors: If set to "true", the BASE64 decoder
-		 * will ignore errors in the encoded data, returning EOF. This may be
-		 * useful when dealing with improperly encoded messages that contain
-		 * extraneous data at the end of the encoded stream. Note however that
-		 * errors anywhere in the stream will cause the decoder to stop decoding
-		 * so this should be used with extreme caution.
+		 * Set some global JavaMail properties
 		 */
 		IMAP_PROPS.put("mail.mime.base64.ignoreerrors", STR_TRUE);
 		IMAP_PROPS.put(PROPERTY_ALLOWREADONLYSELECT, STR_TRUE);
 		IMAP_PROPS.put("mail.mime.encodeeol.strict", STR_TRUE);
 		IMAP_PROPS.put("mail.mime.decodetext.strict", STR_FALSE);
-		IMAP_PROPS.put("mail.mime.charset", UTF8);
+		try {
+			IMAP_PROPS.put("mail.mime.charset", IMAPProperties.getDefaultMimeCharset());
+		} catch (IMAPException e1) {
+			LOG.error(e1.getMessage(), e1);
+		}
 		/*
 		 * Following properties define if IMAPS and/or SMTPS should be enabled
 		 */
@@ -352,7 +351,8 @@ public class MailInterfaceImpl implements MailInterface {
 			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
-			IMAP_PROPS.put("mail.imap.connectiontimeout", String.valueOf(IMAPProperties.getImapConnectionTimeout()));
+			IMAP_PROPS.put("mail.imap.connectiontimeout", Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
+			IMAP_PROPS.put("mail.imap.timeout", Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
 		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
@@ -2761,7 +2761,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.MailInterface#sendMessage(com.openexchange.groupware.container.mail.JSONMessageObject,
-	 *      com.openexchange.groupware.upload.UploadEvent)
+	 *      com.openexchange.groupware.upload.UploadEvent, int)
 	 */
 	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent, final int sendType)
 			throws OXException {

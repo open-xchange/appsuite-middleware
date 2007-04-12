@@ -78,7 +78,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
-import java.util.HashMap;
 
 /**
  * SessionHandler
@@ -316,6 +315,7 @@ public class SessionHandler extends TimerTask {
 					sessionList.get(0).put(sessionid, sessionobject);
 					if (a > 0) {
 						sessions.remove(sessionid);
+						MonitoringInfo.decrementNumberOfActiveSessions();
 					}
 					
 					return true;
@@ -323,6 +323,7 @@ public class SessionHandler extends TimerTask {
 				
 				LOG.debug("session TIMEOUT sessionid=" + sessionid);
 				sessions.remove(sessionid);
+				MonitoringInfo.decrementNumberOfActiveSessions();
 				
 				return false;
 			}

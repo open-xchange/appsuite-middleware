@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -68,9 +69,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.server.DBPoolingException;
@@ -156,7 +155,7 @@ public class OXFolderAdminHelper {
 				stmt.setInt(1, cid);
 				rs = stmt.executeQuery();
 				if (!rs.next()) {
-					throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, cid);
+					throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(cid));
 				}
 				contextMalAdmin = rs.getInt(1);
 			} finally {
@@ -171,7 +170,7 @@ public class OXFolderAdminHelper {
 			}
 			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, cid);
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
 		}
 	}
 
@@ -484,44 +483,39 @@ public class OXFolderAdminHelper {
 	 */
 	public static final void propagateGroupModification(final int group, final Connection readCon,
 			final Connection writeCon, final int cid) throws SQLException {
-		final Context ctx;
-		try {
-			ctx = ContextStorage.getInstance().getContext(cid);
-		} catch (ContextException e) {
-			LOG.error(e.getMessage(), e);
-			return;
-		}
 		final long lastModified = System.currentTimeMillis();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			/*
-			 * Touch all folder timestamps in whose permissions group entity
-			 * number occurs
+			 * Touch all folder timestamps in whose permissions the group's entity
+			 * identifier occurs
 			 */
 			stmt = readCon.prepareStatement(SQL_SELECT_FOLDER_IN_PERMISSIONS.replaceFirst("#FT#", STR_OXFOLDERTREE)
 					.replaceFirst("#PT#", STR_OXFOLDERPERMS));
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, ctx.getContextId());
+			stmt.setInt(1, cid);
+			stmt.setInt(2, cid);
 			stmt.setInt(3, group);
 			rs = stmt.executeQuery();
 			final List<Integer> list = new ArrayList<Integer>();
 			while (rs.next()) {
 				list.add(Integer.valueOf(rs.getInt(1)));
 			}
-			closeResources(rs, stmt, null, true, ctx);
+			closeSQLStuff(rs, stmt);
+			rs = null;
+			stmt = null;
 			if (!list.isEmpty()) {
 				stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
 				do {
 					stmt.setLong(1, lastModified);
-					stmt.setInt(2, ctx.getContextId());
+					stmt.setInt(2, cid);
 					stmt.setInt(3, list.remove(0).intValue());
 					stmt.addBatch();
 				} while (!list.isEmpty());
 				stmt.executeBatch();
 			}
 		} finally {
-			closeResources(rs, stmt, null, true, ctx);
+			closeResources(rs, stmt, null, true, cid);
 		}
 	}
 	
@@ -654,9 +648,9 @@ public class OXFolderAdminHelper {
 						" in context ").append(cid).toString());
 			}
 		} catch (DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, cid);
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(cid));
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, cid);
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
 		}
 	}
 

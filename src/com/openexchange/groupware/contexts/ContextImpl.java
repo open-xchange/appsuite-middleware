@@ -114,7 +114,7 @@ public class ContextImpl implements ContextExtended, Serializable {
         Object retval = null;
         switch (attribute) {
         case RDB_IDENTIFIER:
-            retval = contextId;
+            retval = Integer.valueOf(contextId);
             break;
         default:
             break;

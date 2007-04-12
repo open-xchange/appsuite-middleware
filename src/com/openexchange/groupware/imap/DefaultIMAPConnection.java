@@ -142,6 +142,8 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	private static final String STR_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
 	private static final String STR_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+	
+	private static final String PROP_MAIL_DEBUG = "mail.debug";
 
 	/**
 	 * Establishes a new IMAP connection (if not done yet) and returns its
@@ -167,10 +169,16 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		if (imapSession == null) {
 			imapSession = Session.getDefaultInstance(imapProperties, null);
 		}
-
-		// imapSession.setDebug(true);
-		// imapSession.setDebugOut(System.err);
-
+		/*
+		 * Check if debug should be enabled
+		 */
+		if (Boolean.parseBoolean(imapSession.getProperty(PROP_MAIL_DEBUG))) {
+			imapSession.setDebug(true);
+			imapSession.setDebugOut(System.err);
+		}
+		/*
+		 * Get store
+		 */
 		imapStore = (IMAPStore) imapSession.getStore(PROTOCOL_IMAP);
 		String tmpPass = imapPassword;
 		try {

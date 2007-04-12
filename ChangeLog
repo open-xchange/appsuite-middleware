@@ -1,3 +1,9 @@
+* 2007-04-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #6668: Fixed NPE when creating
+   'com.openexchange.groupware.contexts.Context' object from given context
+   ID
+
 * 2007-04-11 - marcus.klein@open-xchange.com
 
   - Bugfix #6462: Task and appointment notifications can be turned off through

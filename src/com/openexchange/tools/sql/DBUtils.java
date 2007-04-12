@@ -63,8 +63,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.DBPool;
 
 /**
  * Utilities for database resource handling.
@@ -86,19 +86,21 @@ public final class DBUtils {
 		super();
 	}
 
-    /**
-     * Closes the ResultSet.
-     * @param result <code>null</code> or a ResultSet to close.
-     */
-    public static void closeSQLStuff(final ResultSet result) {
-        if (result != null) {
-            try {
-                result.close();
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-    }
+	/**
+	 * Closes the ResultSet.
+	 * 
+	 * @param result
+	 *            <code>null</code> or a ResultSet to close.
+	 */
+	public static void closeSQLStuff(final ResultSet result) {
+		if (result != null) {
+			try {
+				result.close();
+			} catch (SQLException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+	}
 
 	/**
 	 * Closes the ResultSet and the Statement.
@@ -109,7 +111,7 @@ public final class DBUtils {
 	 *            <code>null</code> or a Statement to close.
 	 */
 	public static void closeSQLStuff(final ResultSet result, final Statement stmt) {
-        closeSQLStuff(result);
+		closeSQLStuff(result);
 		if (null != stmt) {
 			try {
 				stmt.close();
@@ -133,8 +135,27 @@ public final class DBUtils {
 	 * anymore.
 	 * </p>
 	 */
-	public static final void closeResources(final ResultSet rs, final Statement stmt, final Connection con,
+	public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con,
 			final boolean isReadCon, final Context ctx) {
+		closeResources(rs, stmt, con, isReadCon, ctx.getContextId());
+	}
+	
+	/**
+	 * <p>
+	 * Closes given <code>java.sql.ResultSet</code> and
+	 * <code>java.sql.Statement</code> reference and puts back given
+	 * <code>java.sql.Connection</code> reference into pool. The flag
+	 * <code>isReadCon</code> determines if connection instance is of type
+	 * readable or writeable.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> References are not set to <code>null</code>, so the
+	 * caller has to ensure that these references are not going to be used
+	 * anymore.
+	 * </p>
+	 */
+	public static void closeResources(final ResultSet rs, final Statement stmt, final Connection con,
+			final boolean isReadCon, final int cid) {
 		/*
 		 * Close ResultSet
 		 */
@@ -164,19 +185,19 @@ public final class DBUtils {
 		 */
 		if (con != null) {
 			if (isReadCon) {
-				DBPool.closeReaderSilent(ctx, con);
+				Database.back(cid, false, con);
 			} else {
-				DBPool.closeWriterSilent(ctx, con);
+				Database.back(cid, true, con);
 			}
 		}
 	}
 
-	public static final String getStatement(final Statement stmt) {
+	public static String getStatement(final Statement stmt) {
 		return (stmt == null) ? "" : stmt.toString();
 	}
 
 	public static String getStatement(final PreparedStatement stmt, final String query) {
-		if(stmt == null) {
+		if (stmt == null) {
 			return query;
 		}
 		try {
@@ -186,37 +207,41 @@ public final class DBUtils {
 		}
 	}
 
-    /**
-     * Rolls a transaction of a connection back.
-     * @param con connection to roll back.
-     */
-    public static void rollback(final Connection con) {
-        try {
-            con.rollback();
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
+	/**
+	 * Rolls a transaction of a connection back.
+	 * 
+	 * @param con
+	 *            connection to roll back.
+	 */
+	public static void rollback(final Connection con) {
+		try {
+			con.rollback();
+		} catch (SQLException e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
 
-    /**
-     * This method tries to parse the truncated fields out of the DataTruncation
-     * exception. This method has been implemented because mysql doesn't return
-     * the column identifier of the truncated field through the getIndex()
-     * method of the DataTruncation exception. This method uses the fact that
-     * the exception sent by the mysql server encapsulates the truncated fields
-     * into single quotes.
-     * @param e DataTruncation exception to parse.
-     * @return a string array containing all truncated field from the exception.
-     */
-    public static String[] parseTruncatedFields(final DataTruncation trunc) {
-        final Pattern pattern = Pattern.compile("([^']*')(\\S+)('[^']*)");
-        final Matcher matcher = pattern.matcher(trunc.getMessage());
-        final List<String> retval = new ArrayList<String>();
-        if (matcher.find()) {
-            for (int i = 2; i < matcher.groupCount(); i++) {
-                retval.add(matcher.group(i));
-            }
-        }
-        return retval.toArray(new String[retval.size()]);
-    }
+	/**
+	 * This method tries to parse the truncated fields out of the DataTruncation
+	 * exception. This method has been implemented because mysql doesn't return
+	 * the column identifier of the truncated field through the getIndex()
+	 * method of the DataTruncation exception. This method uses the fact that
+	 * the exception sent by the mysql server encapsulates the truncated fields
+	 * into single quotes.
+	 * 
+	 * @param e
+	 *            DataTruncation exception to parse.
+	 * @return a string array containing all truncated field from the exception.
+	 */
+	public static String[] parseTruncatedFields(final DataTruncation trunc) {
+		final Pattern pattern = Pattern.compile("([^']*')(\\S+)('[^']*)");
+		final Matcher matcher = pattern.matcher(trunc.getMessage());
+		final List<String> retval = new ArrayList<String>();
+		if (matcher.find()) {
+			for (int i = 2; i < matcher.groupCount(); i++) {
+				retval.add(matcher.group(i));
+			}
+		}
+		return retval.toArray(new String[retval.size()]);
+	}
 }
