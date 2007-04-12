@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -121,8 +122,9 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 				);
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
-		WebResponse webRes = webconv.sendRequest(req);
-		//Response res = Response.parse(webRes.getText());
+		WebResponse webRes = webconv.getResource(req);
+		
+		JSONObject response = extractFromCallback( webRes.getText() );
 		
 		//test: export
 		webconv =  getWebConversation();
