@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.7 2007/04/12 08:55:03 cutmasta Exp $
+ * $Id: OXResource.java,v 1.8 2007/04/12 08:56:44 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -397,7 +397,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     private void validateResourceName( String resName ) throws OXResourceException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        String resource_check_regexp = prop.getResourceProp("CHECK_RES_NAME_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
         String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new OXResourceException( OXResourceException.ILLEGAL_CHARS + ": \""+illegal+"\"");
