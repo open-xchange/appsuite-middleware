@@ -54,8 +54,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
-import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
-import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public class Group implements Serializable {
     /**
@@ -212,7 +210,7 @@ public class Group implements Serializable {
      * extension was found.
      * 
      * @param extname a String for the extension
-     * @return the {@link OXUserExtensionInterface} with extname
+     * @return the {@link OXGroupExtensionInterface} with extname
      */
     public OXGroupExtensionInterface getExtensionbyName(final String extname) {
         for (final OXGroupExtensionInterface ext : this.extensions) {
