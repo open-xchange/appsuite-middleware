@@ -410,6 +410,24 @@ public class PropertyHandler {
         
         return source;
     }
+
+    public String getResourceProp(String key, String fallback) {
+        String retval = fallback;
+        if ( resPropValues == null ) {
+            if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
+                resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
+            } else {
+                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
+            }
+        }
+        
+        if ( resPropValues != null && resPropValues.containsKey( key ) ) {
+            retval = resPropValues.get( key ).toString(); 
+        } else {
+            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallback );
+        }
+        return retval;
+    }
     
 
 }
