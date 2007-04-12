@@ -555,23 +555,21 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
         return retval;
     }
     
-    private static Group get(final Context ctx,final Group grp,Connection con) throws StorageException{
-    	Group retval = null;        
+    private static Group get(final Context ctx, Group grp,Connection con) throws StorageException{
         PreparedStatement prep_list = null;
         final int context_ID = ctx.getIdAsInt();
         try {
 
-            prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
+            prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
             prep_list.setInt(1, context_ID);
             prep_list.setInt(2, grp.getId());
             final ResultSet rs = prep_list.executeQuery();
 
             while (rs.next()) {
-                // int cid = rs.getInt("cid");
-                final int id = rs.getInt("id");
                 final String ident = rs.getString("identifier");
                 final String disp = rs.getString("displayName");
-                retval = new Group(id, ident, disp);
+                grp.setName(ident);
+                grp.setDisplayname(disp);
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
@@ -586,11 +584,11 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             }
         }
 
-        return retval;
+        return grp;
     }
 
     @Override
-    public Group get(final Context ctx, final Group grp) throws StorageException {
+    public Group get(final Context ctx, Group grp) throws StorageException {
         
         Connection con = null;
         

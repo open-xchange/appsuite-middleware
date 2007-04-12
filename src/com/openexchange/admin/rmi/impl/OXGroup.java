@@ -49,13 +49,21 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGroupException;
+import com.openexchange.admin.plugins.OXGroupPluginInterface;
+import com.openexchange.admin.plugins.OXResourcePluginInterface;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -81,6 +89,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     private final Log log = LogFactory.getLog(this.getClass());
 
     private PropertyHandler prop = null;
+
+    private BundleContext context = null;
 
     public OXGroup() throws RemoteException {
         super();
@@ -126,9 +136,50 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        return oxGroup.create(ctx, grp);
-        // MonitoringInfos.incrementNumberOfCreateGroupCalled();
+        final int retval = oxGroup.create(ctx, grp);
+        grp.setId(retval);
+        final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
+                            try {
+                                log.info("Calling create for plugin: " + bundlename);
+                                oxgroup.create(ctx, grp, auth);
+                                interfacelist.add(oxgroup);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling create for plugin: " + bundlename, e);
+                                log.info("Now doing rollback for everything until now...");
+                                for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
+                                    try {
+                                        oxgroupinterface.delete(ctx, new Group[]{grp}, auth);
+                                    } catch (final PluginException e1) {
+                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                    }
+                                }
+                                try {
+                                    oxGroup.delete(ctx, new Group[]{grp});
+                                } catch (final StorageException e1) {
+                                    log.error("Error doing rollback for creating resource in database", e1);
+                                }
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        return retval;
+        // MonitoringInfos.incrementNumberOfCreateGroupCalled();
     }
   
     public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
@@ -182,8 +233,27 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        return oxGroup.get(ctx, grp);
+        Group retgrp = oxGroup.get(ctx, grp);
 
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context.getService(servicereference);
+                            log.info("Calling getData for plugin: " + bundlename);
+                            retgrp = oxgroupplugin.get(ctx, retgrp, auth);
+                        }
+                    }
+                }
+            }
+        }
+
+        return retgrp;
     }
 
   
@@ -225,6 +295,30 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.change(ctx, grp);
+
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
+                            try {
+                                log.info("Calling change for plugin: " + bundlename);
+                                oxgroup.change(ctx, grp, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
 
     }
 
@@ -337,8 +431,39 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        oxGroup.delete(ctx, grp);
 
+        final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
+
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
+        for (int n = bundles.size() - 1; n >= 0; n--) {
+            revbundles.add(bundles.get(n));
+        }
+        for (final Bundle bundle : revbundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
+                            try {
+                                log.info("Calling delete for plugin: " + bundlename);
+                                oxgroup.delete(ctx, grp, auth);
+                                interfacelist.add(oxgroup);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling delete for plugin: " + bundlename, e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        oxGroup.delete(ctx, grp);
     }
    
     public int[] getMembers(final Context ctx, final Group grp, final Credentials auth) 
@@ -371,7 +496,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     private void validateGroupName( final String groupName ) throws OXGroupException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        String group_check_regexp = prop.getResourceProp("CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        String group_check_regexp = prop.getGroupProp("CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
         final String illegal = groupName.replaceAll(group_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new OXGroupException( OXGroupException.ILLEGAL_CHARS + ": \""+illegal+"\"");
