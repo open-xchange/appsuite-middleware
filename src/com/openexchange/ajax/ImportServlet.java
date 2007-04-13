@@ -140,7 +140,7 @@ public class ImportServlet extends ImportExport {
 				PrintWriter w = null;
 				try {
 					w = resp.getWriter();
-					w.write(substitute(JS_FRAGMENT,"json",resObj.getJSON().toString(),"action",JSON_CALLBACK));
+					w.write(substitute(JS_FRAGMENT,"json",resObj.getJSON().toString(),"import",JSON_CALLBACK));
 					close(w);
 				} catch (IOException e) {
 					LOG.warn(e);
