@@ -48,9 +48,13 @@
  */
 package com.openexchange.admin.console.resource;
 
+import java.util.ArrayList;
+
 import org.apache.commons.cli.Option;
 
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
 public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     
@@ -67,6 +71,18 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     protected static final String _OPT_RESOURCEID_SHORT = "i";
     protected static final String _OPT_RESOURCEID_LONG = "resourceid";
     
+    
+    protected void printExtensionsError(Resource res){
+        //+ loop through extensions and check for errors       
+        if(res!=null && res.getExtensions()!=null){
+            ArrayList<OXResourceExtensionInterface> _exts = res.getExtensions();
+            for (OXResourceExtensionInterface _extension :_exts) {
+                if(_extension.getExtensionError()!=null){
+                    printServerResponse(_extension.getExtensionError());
+                }
+            }
+        }
+    }
     
     protected Option getDisplayNameOption(){
         return getShortLongOpt( _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, true);        

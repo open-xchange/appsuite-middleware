@@ -48,9 +48,13 @@
  */
 package com.openexchange.admin.console.group;
 
+import java.util.ArrayList;
+
 import org.apache.commons.cli.Option;
 
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 public abstract class GroupAbstraction extends BasicCommandlineOptions {
 
@@ -69,6 +73,19 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
     protected static final String OPT_NAME_REMOVEMEMBERS_LONG = "removemembers";
     protected static final String OPT_NAME_REMOVEMEMBERS = "r";
 
+    
+    protected void printExtensionsError(Group grp){
+        //+ loop through extensions and check for errors       
+        if(grp!=null && grp.getExtensions()!=null){
+            ArrayList<OXGroupExtensionInterface> _exts = grp.getExtensions();
+            for (OXGroupExtensionInterface _extension :_exts) {
+                if(_extension.getExtensionError()!=null){
+                    printServerResponse(_extension.getExtensionError());
+                }
+            }
+        }
+    }
+    
     protected Option getAddMembersOption() {
         final Option retval = getShortLongOpt(OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, true);
         retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
