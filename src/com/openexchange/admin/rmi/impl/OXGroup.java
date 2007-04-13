@@ -91,8 +91,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
     private BundleContext context = null;
 
-    public OXGroup() throws RemoteException {
+    public OXGroup(final BundleContext context) throws RemoteException {
         super();
+        this.context = context;
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         log.info("Class loaded: " + this.getClass().getName());
