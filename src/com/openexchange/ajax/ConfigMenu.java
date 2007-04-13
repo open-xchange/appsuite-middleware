@@ -259,7 +259,7 @@ public class ConfigMenu extends SessionServlet {
                     setting.setSingleValue(null);
                 } catch (JSONException e) {
                     // I check if there is a JSON array in the value.
-                	LOG.error(e.getMessage(), e);
+                    // No logging here because this is not an error.
                 }
             }
             storage.save(userId, setting);
