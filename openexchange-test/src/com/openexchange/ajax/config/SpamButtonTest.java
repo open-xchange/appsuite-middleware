@@ -49,35 +49,32 @@
 
 package com.openexchange.ajax.config;
 
-import com.openexchange.ajax.ConfigMenuTest;
+import com.openexchange.ajax.AbstractAJAXTest;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-/**
- * Suite for all config tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class ConfigTestSuite {
+public class SpamButtonTest extends AbstractAJAXTest {
 
     /**
-     * Prevent instanciation.
+     * Path to the configuration parameter.
      */
-    private ConfigTestSuite() {
-        super();
+    private static final String PATH = "mail/spambutton";
+
+    /**
+     * Default constructor.
+     * @param name Name of the test.
+     */
+    public SpamButtonTest(final String name) {
+        super(name);
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * Tests if the spam button option is sent to the GUI.
+     * @throws Throwable if an exception occurs.
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(CurrentTimeTest.class);
-        tests.addTestSuite(SpamButtonTest.class);
-        tests.addTestSuite(BugTests.class);
-        return tests;
+    public void testSpamButton() throws Throwable {
+        final String value = ConfigTools.readSetting(getWebConversation(),
+            getHostName(), getSessionId(), PATH);
+        assertTrue("Got no value for the spam button configuration parameter.",
+            Boolean.TRUE.toString().equals(value)
+            || Boolean.FALSE.toString().equals(value));
     }
 }
