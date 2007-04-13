@@ -225,6 +225,9 @@ public class TaskWriter extends CalendarWriter {
 			case Task.PARTICIPANTS:
 				writeParticipants(taskObject);
 				break;
+			case Task.USERS:
+				writeUsers(taskObject);
+				break;
             case Task.PRIVATE_FLAG:
                 writeValue(taskObject.getPrivateFlag());
                 break;
