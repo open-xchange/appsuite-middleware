@@ -86,7 +86,7 @@ public class GroupRequest {
 		return timestamp;
 	}
 
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -98,8 +98,8 @@ public class GroupRequest {
 		}
 	}
 	
-	public void actionList(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
-		JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
+	public void actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
 		
 		timestamp = new Date(0);
 		
@@ -107,13 +107,13 @@ public class GroupRequest {
 		
 		jsonWriter.array();
 		try {
-			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+			final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			
 			for (int a = 0; a < jsonArray.length(); a++) {
-				JSONObject jData = jsonArray.getJSONObject(a);
-				com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID));
+				final JSONObject jData = jsonArray.getJSONObject(a);
+				final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID));
 			
-				GroupWriter groupWriter = new GroupWriter(jsonWriter);
+				final GroupWriter groupWriter = new GroupWriter(jsonWriter);
 				groupWriter.writeGroup(g);
 			
 				lastModified = g.getLastModified();
@@ -127,23 +127,23 @@ public class GroupRequest {
 		}
 	}
 
-	public void actionGet(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		
 		timestamp = new Date(0);
 		
-		GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
-		com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id);
+		final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id);
 		
-		GroupWriter groupWriter = new GroupWriter(jsonWriter);
+		final GroupWriter groupWriter = new GroupWriter(jsonWriter);
 		groupWriter.writeGroup(g);
 		
 		timestamp = g.getLastModified();
 		
 	}
 	
-	public void actionSearch(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, SearchIteratorException {
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, SearchIteratorException {
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 		
 		String searchpattern = null;
 		
@@ -154,19 +154,19 @@ public class GroupRequest {
 		timestamp = new Date(0);
 		
 		jsonWriter.array();
-		SearchIterator it = null;
+		final SearchIterator it = null;
 		
 		try {
-			GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+			final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			com.openexchange.groupware.ldap.Group[] groups = null;
 			
-			if (searchpattern.equals("*")) {
+			if ("*".equals(searchpattern)) {
                 groups = groupStorage.getGroups();
 			} else {
                 groups = groupStorage.searchGroups(searchpattern);
 			}
 			
-			GroupWriter groupWriter = new GroupWriter(jsonWriter);
+			final GroupWriter groupWriter = new GroupWriter(jsonWriter);
 			
 			for (int a = 0; a < groups.length; a++) {
 				jsonWriter.object();

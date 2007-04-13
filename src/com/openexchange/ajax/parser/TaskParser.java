@@ -75,7 +75,7 @@ public class TaskParser extends CalendarParser {
 		this.parseAll = parseAll;
 	}
 
-	public void parse(Task taskobject, JSONObject jsonobject) throws OXException {
+	public void parse(final Task taskobject, final JSONObject jsonobject) throws OXException {
 		try {
 			parseElementTask(taskobject, jsonobject);
 		} catch (Exception exc) {
@@ -83,7 +83,7 @@ public class TaskParser extends CalendarParser {
 		}
 	}
 	
-	protected void parseElementTask(Task taskobject, JSONObject jsonobject) throws Exception {
+	protected void parseElementTask(final Task taskobject, final JSONObject jsonobject) throws Exception {
 		if (jsonobject.has(CalendarFields.START_DATE)) {
 			taskobject.setStartDate(parseDate(jsonobject, CalendarFields.START_DATE));
 		}

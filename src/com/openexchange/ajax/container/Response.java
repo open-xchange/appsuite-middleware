@@ -196,9 +196,8 @@ public class Response {
         final Object tmp = getJSON().get(DATA);
         if (tmp instanceof JSONObject) {
             return (JSONObject) tmp;
-        } else {
-            throw new JSONException("Use method getData()");
         }
+        throw new JSONException("Use method getData()");
     }
 
     /**
@@ -382,7 +381,8 @@ public class Response {
     /**
      * {@inheritDoc}
      */
-    public String toString() {
+    @Override
+	public String toString() {
         final StringWriter writer = new StringWriter();
         try {
             write(this, writer);

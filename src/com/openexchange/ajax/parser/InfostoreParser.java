@@ -87,7 +87,7 @@ public class InfostoreParser {
 
 	public DocumentMetadata getDocumentMetadata(final String json) throws JSONException, OXException {
 		
-		DocumentMetadata m = new JSONDocumentMetadata(json);
+		final DocumentMetadata m = new JSONDocumentMetadata(json);
 		CheckSizeSwitch.checkSizes(m);
 		
 		return m;
@@ -99,7 +99,7 @@ public class InfostoreParser {
 		for(String idString : parameterValues) {
 			int id = -1;
 			try {
-				id = Integer.valueOf(idString);
+				id = Integer.parseInt(idString);
 			} catch (NumberFormatException x) {
 				throw new UnknownMetadataException(idString);
 			}
@@ -131,7 +131,7 @@ public class InfostoreParser {
 			}
 		}
 		if(shrink) {
-			Metadata[] shrunk = new Metadata[metadata.length-1];
+			final Metadata[] shrunk = new Metadata[metadata.length-1];
 			System.arraycopy(metadata, 0, shrunk, 0, shrunk.length);
 			return shrunk;
 		}

@@ -64,8 +64,9 @@ public class InfostoreException2Message extends Exception2Message {
 	@Override
 	protected ErrorMessage exception(OXException x) {
 		Throwable cause = x.getCause();
-		if(cause == null)
+		if(cause == null) {
 			cause = x;
+		}
 		return new ErrorMessage(cause.getMessage());
 	}
 	

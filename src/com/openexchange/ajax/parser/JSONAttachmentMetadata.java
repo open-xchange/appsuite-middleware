@@ -75,12 +75,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 	
 	public int getCreatedBy() {
-		if(json.has(AttachmentField.CREATED_BY_LITERAL.getName()))
+		if(json.has(AttachmentField.CREATED_BY_LITERAL.getName())) {
 			return json.optInt(AttachmentField.CREATED_BY_LITERAL.getName());
+		}
 		return -1;
 	}
 
-	public void setCreatedBy(int createdBy) {
+	public void setCreatedBy(final int createdBy) {
 		try {
 			json.put(AttachmentField.CREATED_BY_LITERAL.getName(),createdBy);
 		} catch (JSONException e) {
@@ -89,29 +90,32 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public Date getCreationDate() {
-		if(!json.has(AttachmentField.CREATION_DATE_LITERAL.getName()))
+		if(!json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
 			return null;
+		}
 		return new Date(json.optLong(AttachmentField.CREATION_DATE_LITERAL.getName()));
 	}
 
-	public void setCreationDate(Date creationDate) {
-		if(creationDate == null && json.has(AttachmentField.CREATION_DATE_LITERAL.getName()))
+	public void setCreationDate(final Date creationDate) {
+		if(creationDate == null && json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
 			json.remove(AttachmentField.CREATION_DATE_LITERAL.getName());
-		else if(creationDate != null)
+		} else if(creationDate != null) {
 			try {
 				json.put(AttachmentField.CREATION_DATE_LITERAL.getName(),creationDate.getTime());
 			} catch (JSONException e) {
 				LOG.debug("",e);
 			}
+		}
 	}
 
 	public String getFileMIMEType() {
-		if(!json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName()))
+		if(!json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())) {
 			return null;
+		}
 		return json.optString(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
 	}
 
-	public void setFileMIMEType(String fileMIMEType) {
+	public void setFileMIMEType(final String fileMIMEType) {
 		if(fileMIMEType == null && json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())){
 			json.remove(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
 			return;
@@ -124,12 +128,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public String getFilename() {
-		if(!json.has(AttachmentField.FILENAME_LITERAL.getName()))
+		if(!json.has(AttachmentField.FILENAME_LITERAL.getName())) {
 			return null;
+		}
 		return json.optString(AttachmentField.FILENAME_LITERAL.getName());
 	}
 
-	public void setFilename(String filename) {
+	public void setFilename(final String filename) {
 		if(filename == null && json.has(AttachmentField.FILENAME_LITERAL.getName())){
 			json.remove(AttachmentField.FILENAME_LITERAL.getName());
 			return;
@@ -142,13 +147,14 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public long getFilesize() {
-		if(!json.has(AttachmentField.FILE_SIZE_LITERAL.getName()))
+		if(!json.has(AttachmentField.FILE_SIZE_LITERAL.getName())) {
 			return 0;
+		}
 		return json.optLong(AttachmentField.FILE_SIZE_LITERAL.getName());
 		
 	}
 
-	public void setFilesize(long filesize) {
+	public void setFilesize(final long filesize) {
 		try {
 			json.put(AttachmentField.FILE_SIZE_LITERAL.getName(),filesize);
 		} catch (JSONException e) {
@@ -157,13 +163,14 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public int getAttachedId() {
-		if(!json.has(AttachmentField.ATTACHED_ID_LITERAL.getName()))
+		if(!json.has(AttachmentField.ATTACHED_ID_LITERAL.getName())) {
 			return -1;
+		}
 		return json.optInt(AttachmentField.ATTACHED_ID_LITERAL.getName());
 		
 	}
 
-	public void setAttachedId(int objectId) {
+	public void setAttachedId(final int objectId) {
 		try {
 			json.put(AttachmentField.ATTACHED_ID_LITERAL.getName(),objectId);
 		} catch (JSONException e) {
@@ -175,7 +182,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		return json.optBoolean(AttachmentField.RTF_FLAG_LITERAL.getName());
 	}
 
-	public void setRtfFlag(boolean rtfFlag) {
+	public void setRtfFlag(final boolean rtfFlag) {
 		try {
 			json.put(AttachmentField.RTF_FLAG_LITERAL.getName(),rtfFlag);
 		} catch (JSONException e) {
@@ -184,13 +191,14 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public int getModuleId() {
-		if(!json.has(AttachmentField.MODULE_ID_LITERAL.getName()))
+		if(!json.has(AttachmentField.MODULE_ID_LITERAL.getName())) {
 			return -1;
+		}
 		return json.optInt(AttachmentField.MODULE_ID_LITERAL.getName());
 		
 	}
 
-	public void setModuleId(int moduleId) {
+	public void setModuleId(final int moduleId) {
 		try {
 			json.put(AttachmentField.MODULE_ID_LITERAL.getName(),moduleId);
 		} catch (JSONException e) {
@@ -199,12 +207,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public int getId() {
-		if(!json.has(AttachmentField.ID_LITERAL.getName()))
+		if(!json.has(AttachmentField.ID_LITERAL.getName())) {
 			return -1;
+		}
 		return json.optInt(AttachmentField.ID_LITERAL.getName());
 	}
 
-	public void setId(int id) {
+	public void setId(final int id) {
 		try {
 			json.put(AttachmentField.ID_LITERAL.getName(),id);
 		} catch (JSONException e) {
@@ -212,7 +221,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		}
 	}
 
-	public void setFolderId(int folderId) {
+	public void setFolderId(final int folderId) {
 		try {
 			json.put(AttachmentField.FOLDER_ID_LITERAL.getName(),folderId);
 		} catch (JSONException e) {
@@ -221,11 +230,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 	}
 
 	public int getFolderId() {
-		if(!json.has(AttachmentField.FOLDER_ID_LITERAL.getName()))
+		if(!json.has(AttachmentField.FOLDER_ID_LITERAL.getName())) {
 			return -1;
+		}
 		return json.optInt(AttachmentField.FOLDER_ID_LITERAL.getName());
 	}
 	
+	@Override
 	public String toString(){
 		return json.toString();
 	}
@@ -234,7 +245,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		return json.toString();
 	}
 
-	public void setComment(String string) {
+	public void setComment(final String string) {
 		if(null == string) {
 			try {
 				json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
@@ -258,7 +269,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 		return json.optString(AttachmentField.FILE_ID_LITERAL.getName());
 	}
 
-	public void setFileId(String string) {
+	public void setFileId(final String string) {
 		if(null == string) {
 			try {
 				json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);

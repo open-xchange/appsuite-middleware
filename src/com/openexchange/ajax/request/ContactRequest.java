@@ -108,7 +108,7 @@ public class ContactRequest {
 		LOG.debug("use user timezone: " + timeZone);
 	}
 	
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
 			actionNew(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
@@ -134,19 +134,19 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionNew(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
 		
-		ContactObject contactObj = new ContactObject();
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final ContactObject contactObj = new ContactObject();
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		ContactParser contactparser = new ContactParser(sessionObj);
+		final ContactParser contactparser = new ContactParser(sessionObj);
 		contactparser.parse(contactObj, jData);
 		
 		if (!contactObj.containsParentFolderID()) {
 			throw new OXMandatoryFieldException("missing folder");
 		}
 		
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
 		contactsql.insertContactObject(contactObj);
 		
 		jsonWriter.object();
@@ -156,29 +156,29 @@ public class ContactRequest {
 		
 	}
 	
-	public void actionUpdate(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException {
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException {
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		
-		ContactObject contactobject = new ContactObject();
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final ContactObject contactobject = new ContactObject();
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		ContactParser contactparser = new ContactParser(sessionObj);
+		final ContactParser contactparser = new ContactParser(sessionObj);
 		contactparser.parse(contactobject, jData);
 		
 		contactobject.setObjectID(id);
 		
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
 		contactsql.updateContactObject(contactobject, inFolder, timestamp);
 		
 		jsonWriter.array();
 		jsonWriter.endArray();
 	}
 	
-	public void actionUpdates(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
 		timestamp = new Date(0);
 		
@@ -190,8 +190,8 @@ public class ContactRequest {
 		
 		try {
 			timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-			int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-			String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+			final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+			final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 			
 			boolean bIgnoreDelete = false;
 			
@@ -203,11 +203,11 @@ public class ContactRequest {
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
-			ContactWriter contactWriter = new ContactWriter(jsonWriter, timeZone);
-			ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+			final ContactWriter contactWriter = new ContactWriter(jsonWriter, timeZone);
+			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
 			it = contactsql.getModifiedContactsInFolder(folderId, internalColumns, timestamp);
 			while (it.hasNext()) {
-				ContactObject contactObj = (ContactObject)it.next();
+				final ContactObject contactObj = (ContactObject)it.next();
 				
 				contactWriter.writeArray(contactObj, columns);
 				
@@ -221,7 +221,7 @@ public class ContactRequest {
 			if (!bIgnoreDelete) {
 				it = contactsql.getDeletedContactsInFolder(folderId, internalColumns, timestamp);
 				while (it.hasNext()) {
-					ContactObject contactObj = (ContactObject)it.next();
+					final ContactObject contactObj = (ContactObject)it.next();
 					
 					jsonWriter.value(contactObj.getObjectID());
 					
@@ -240,14 +240,14 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionDelete(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		int objectId = DataParser.checkInt(jData, DataFields.ID);
-		int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
+		final int objectId = DataParser.checkInt(jData, DataFields.ID);
+		final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
 		
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
 		try {
 			contactsql.deleteContactObject(objectId, inFolder, timestamp);
 		} catch (Exception e) {
@@ -257,7 +257,7 @@ public class ContactRequest {
 		jsonWriter.endArray();
 	}
 	
-	public void actionList(JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException {
+	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -267,12 +267,12 @@ public class ContactRequest {
 		jsonWriter.array();
 		
 		try {
-			String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-			int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-			JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+			final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 			int[][] objectIdAndFolderId = new int[jData.length()][2];
 			for (int a = 0; a < objectIdAndFolderId.length; a++) {
-				JSONObject jObject = jData.getJSONObject(a);
+				final JSONObject jObject = jData.getJSONObject(a);
 				objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
 				objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 			}
@@ -281,14 +281,14 @@ public class ContactRequest {
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
-			ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-			ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
+			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+			final ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
 			
 			try {
 				it = contactsql.getObjectsById(objectIdAndFolderId, internalColumns);
 				
 				while (it.hasNext()) {
-					ContactObject contactObj = (ContactObject)it.next();
+					final ContactObject contactObj = (ContactObject)it.next();
 					contactwriter.writeArray(contactObj, columns);
 					
 					lastModified = contactObj.getLastModified();
@@ -308,12 +308,12 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionAll(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-		String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+	public void actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
 		timestamp = new Date(0);
 		
@@ -328,12 +328,12 @@ public class ContactRequest {
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
-			ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-			ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
+			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+			final ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
 			it = contactsql.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
-				ContactObject contactObj = (ContactObject)it.next();
+				final ContactObject contactObj = (ContactObject)it.next();
 				contactwriter.writeArray(contactObj, columns);
 				
 				lastModified = contactObj.getLastModified();
@@ -350,34 +350,34 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionGet(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		
-		ContactSQLInterface sqlinterface = new RdbContactSQLInterface(sessionObj);
+		final ContactSQLInterface sqlinterface = new RdbContactSQLInterface(sessionObj);
 		
 		timestamp = new Date(0);
 		
-		ContactObject contactObj = sqlinterface.getObjectById(id, inFolder);
+		final ContactObject contactObj = sqlinterface.getObjectById(id, inFolder);
 		
-		ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
+		final ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
 		contactwriter.writeContact(contactObj);
 		
 		timestamp = contactObj.getLastModified();
 	}
 	
-	public void actionCount(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
-		int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+	public void actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-		int count = contactsql.getNumberOfContacts(folderId);
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+		final int count = contactsql.getNumberOfContacts(folderId);
 		
 		jsonWriter.value(count);
 	}
 	
-	public void actionSearch(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
 		boolean startletter = false;
 		
@@ -390,8 +390,8 @@ public class ContactRequest {
 		SearchIterator it = null;
 		
 		try {
-			JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
-			ContactSearchObject searchObj = new ContactSearchObject();
+			final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
+			final ContactSearchObject searchObj = new ContactSearchObject();
 			if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
 				searchObj.setFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
 			} else {
@@ -405,8 +405,8 @@ public class ContactRequest {
 				startletter = DataParser.parseBoolean(jData, "startletter");
 			}
 			
-			int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-			String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+			final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+			final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 			
 			searchObj.setSurname(DataParser.parseString(jsonObj, ContactFields.LAST_NAME));
 			searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
@@ -431,14 +431,14 @@ public class ContactRequest {
 			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
-			ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-			ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
+			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+			final ContactWriter contactwriter = new ContactWriter(jsonWriter, timeZone);
 			
 			if (searchObj.getFolder() > 0 && (searchObj.getPattern() != null || startletter)) {
 				it = contactsql.searchContacts(searchObj.getPattern(), startletter, searchObj.getFolder(), orderBy, orderDir, internalColumns);
 				
 				while (it.hasNext()) {
-					ContactObject contactObj = (ContactObject)it.next();
+					final ContactObject contactObj = (ContactObject)it.next();
 					contactwriter.writeArray(contactObj, columns);
 					
 					lastModified = contactObj.getLastModified();
@@ -451,7 +451,7 @@ public class ContactRequest {
 				it = contactsql.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
 				
 				while (it.hasNext()) {
-					ContactObject contactObj = (ContactObject)it.next();
+					final ContactObject contactObj = (ContactObject)it.next();
 					contactwriter.writeArray(contactObj, columns);
 					
 					lastModified = contactObj.getLastModified();
@@ -469,16 +469,16 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionCopy(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
 		timestamp = new Date(0);
 		
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 		
-		ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
-		ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
+		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
+		final  ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
 		contactObj.removeObjectID();
 		contactObj.setParentFolderID(folderId);
 		

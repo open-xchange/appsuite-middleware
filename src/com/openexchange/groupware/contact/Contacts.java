@@ -54,19 +54,27 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.api2.OXException;
+import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.Component;
@@ -93,16 +101,6 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-
-import java.sql.Timestamp;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -163,7 +161,7 @@ public class Contacts implements DeleteListener {
 			msg={"Unable to scale the contact image. This is a not supported file type or it is too large! Your mime type is %1$s and your image size is %2$d The max. allowed image size is %3$d",		
 					"This gif Image is to large. It can not be scaled and will not be accepted"}
 	)
-	public static byte[] scaleContactImage(byte[] img, String mime) throws OXConflictException, OXException, IOException {
+	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
 		
 		/** TODO
 		 * check acme giff scale
@@ -172,9 +170,9 @@ public class Contacts implements DeleteListener {
 		int scaledHeight = 76;
 		int max_size = 33750;	
 		*/
-		int scaledWidth = Integer.valueOf(ContactConfig.getProperty("scale_image_width")).intValue();
-		int scaledHeight = Integer.valueOf(ContactConfig.getProperty("scale_image_height")).intValue();
-		int max_size = Integer.valueOf(ContactConfig.getProperty("max_image_size")).intValue();		
+		final int scaledWidth = Integer.valueOf(ContactConfig.getProperty("scale_image_width")).intValue();
+		final int scaledHeight = Integer.valueOf(ContactConfig.getProperty("scale_image_height")).intValue();
+		final int max_size = Integer.valueOf(ContactConfig.getProperty("max_image_size")).intValue();		
 		
 		String fileType = "";
 		String[] allowed_mime = ImageIO.getReaderFormatNames();
@@ -333,7 +331,7 @@ public class Contacts implements DeleteListener {
 							"Mandatory field last name is not set."
 						}
 	)
-	public static void performContactStorageInsert(ContactObject co, int user,int[] group, SessionObject so) throws OXConflictException, OXException {
+	public static void performContactStorageInsert(final ContactObject co, final int user,final int[] group, final SessionObject so) throws OXConflictException, OXException {
 		
 		StringBuilder insert_fields = new StringBuilder();
 		StringBuilder insert_values = new StringBuilder();
@@ -357,7 +355,7 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXConflictException(3,  fid, so.getContext().getContextId(),user);
 				//throw new OXException("saveContactObject() called with a non-Contact-Folder! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
+			final EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(4, fid, so.getContext().getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
@@ -1272,11 +1270,11 @@ public class Contacts implements DeleteListener {
 		if (old_dleos != null){
 			for (int u=0;u<old_dleos.length;u++){ // this for;next goes to all old entries from the server
 				old_one = old_dleos[u];
-				if (old_one != null) { // maybe we have some empty entries here from previous checks
-					if (old_one.containsEntryID() && old_one.getEntryID() > 0){
+				if (old_one != null && old_one.containsEntryID() && old_one.getEntryID() > 0) { // maybe we have some empty entries here from previous checks
+					//if (old_one.containsEntryID() && old_one.getEntryID() > 0){
 						deletes[delete_count] = old_one;
 						delete_count++;
-					}
+					//}
 				}
 			}
 		}

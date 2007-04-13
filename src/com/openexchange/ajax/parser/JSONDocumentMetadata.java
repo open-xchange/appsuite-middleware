@@ -51,8 +51,6 @@
 
 package com.openexchange.ajax.parser;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Set;
 
@@ -62,17 +60,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.URLHelper;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_AJAX_PARSERL_JSONDOCUMENTMETADATA,
@@ -94,12 +88,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		this.jsonObject = new JSONObject();
 	}
 	
-	public JSONDocumentMetadata(String json) throws JSONException, OXException {
+	public JSONDocumentMetadata(final String json) throws JSONException {
 		this.jsonObject = new JSONObject(json);
 		
 		//Test parsing of complex objects
-		if(jsonObject.has(Metadata.CATEGORIES_LITERAL.getName()))
+		if(jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
 			jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
+		}
 		if(jsonObject.has(Metadata.URL_LITERAL.getName())) {
 			String url = jsonObject.getString(Metadata.URL_LITERAL.getName());
 			if(!"".equals(url.trim())) {
@@ -109,9 +104,10 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		}
 	}
 	
-	public String getProperty(String key) {
-		if(Metadata.get(key) == null) 
+	public String getProperty(final String key) {
+		if(Metadata.get(key) == null) {
 			return jsonObject.optString(key);
+		}
 		return null;
 	}
 
@@ -120,12 +116,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public Date getLastModified() {
-		if(!jsonObject.has(Metadata.LAST_MODIFIED_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.LAST_MODIFIED_LITERAL.getName())) {
 			return null;
+		}
 		return new Date(jsonObject.optLong(Metadata.LAST_MODIFIED_LITERAL.getName()));
 	}
 
-	public void setLastModified(Date now) {
+	public void setLastModified(final Date now) {
 		try {
 			jsonObject.put(Metadata.LAST_MODIFIED_LITERAL.getName(), now.getTime());
 		} catch (JSONException e) {
@@ -134,12 +131,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public Date getCreationDate() {
-		if(!jsonObject.has(Metadata.CREATION_DATE_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.CREATION_DATE_LITERAL.getName())) {
 			return null;
+		}
 		return new Date(jsonObject.optLong(Metadata.CREATION_DATE_LITERAL.getName()));
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(final Date creationDate) {
 		try {
 			jsonObject.put(Metadata.CREATION_DATE_LITERAL.getName(), creationDate.getTime());
 		} catch (JSONException e) {
@@ -148,13 +146,14 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public int getModifiedBy() {
-		if(!jsonObject.has(Metadata.MODIFIED_BY_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.MODIFIED_BY_LITERAL.getName())) {
 			return -1;
+		}
 		return jsonObject.optInt(Metadata.MODIFIED_BY_LITERAL.getName());
 	
 	}
 
-	public void setModifiedBy(int lastEditor) {
+	public void setModifiedBy(final int lastEditor) {
 		try {
 			jsonObject.put(Metadata.MODIFIED_BY_LITERAL.getName(), lastEditor);
 		} catch (JSONException e) {
@@ -163,12 +162,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public long getFolderId() {
-		if(!jsonObject.has(Metadata.FOLDER_ID_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FOLDER_ID_LITERAL.getName())) {
 			return -1;
+		}
 		return jsonObject.optLong(Metadata.FOLDER_ID_LITERAL.getName());
 	}
 
-	public void setFolderId(long folderId) {
+	public void setFolderId(final long folderId) {
 		try {
 			jsonObject.put(Metadata.FOLDER_ID_LITERAL.getName(), folderId);
 		} catch (JSONException e) {
@@ -177,12 +177,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getTitle() {
-		if(!jsonObject.has(Metadata.TITLE_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.TITLE_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.TITLE_LITERAL.getName());	
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		try {
 			jsonObject.put(Metadata.TITLE_LITERAL.getName(), title);
 		} catch (JSONException e) {
@@ -191,12 +192,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public int getVersion() {
-		if(!jsonObject.has(Metadata.VERSION_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.VERSION_LITERAL.getName())) {
 			return 0;
+		}
 		return jsonObject.optInt(Metadata.VERSION_LITERAL.getName());
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(final int version) {
 		try {
 			jsonObject.put(Metadata.VERSION_LITERAL.getName(), version);
 		} catch (JSONException e) {
@@ -209,12 +211,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public long getFileSize() {
-		if(!jsonObject.has(Metadata.FILE_SIZE_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FILE_SIZE_LITERAL.getName())) {
 			return -1;
+		}
 		return jsonObject.optLong(Metadata.FILE_SIZE_LITERAL.getName());
 	}
 
-	public void setFileSize(long length) {
+	public void setFileSize(final long length) {
 		try {
 			jsonObject.put(Metadata.FILE_SIZE_LITERAL.getName(), length);
 		} catch (JSONException e) {
@@ -223,12 +226,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getFileMIMEType() {
-		if(!jsonObject.has(Metadata.FILE_MIMETYPE_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FILE_MIMETYPE_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.FILE_MIMETYPE_LITERAL.getName());
 	}
 
-	public void setFileMIMEType(String type) {
+	public void setFileMIMEType(final String type) {
 		try {
 			jsonObject.put(Metadata.FILE_MIMETYPE_LITERAL.getName(), type);
 		} catch (JSONException e) {
@@ -237,12 +241,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getFileName() {
-		if(!jsonObject.has(Metadata.FILENAME_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FILENAME_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.FILENAME_LITERAL.getName());
 	}
 
-	public void setFileName(String fileName) {
+	public void setFileName(final String fileName) {
 		try {
 			jsonObject.put(Metadata.FILENAME_LITERAL.getName(), fileName);
 		} catch (JSONException e) {
@@ -251,12 +256,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public int getId() {
-		if(!jsonObject.has(Metadata.ID_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.ID_LITERAL.getName())) {
 			return InfostoreFacade.NEW;
+		}
 		return jsonObject.optInt(Metadata.ID_LITERAL.getName());
 	}
 
-	public void setId(int id) {
+	public void setId(final int id) {
 		try {
 			jsonObject.put(Metadata.ID_LITERAL.getName(), id);
 		} catch (JSONException e) {
@@ -265,12 +271,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public int getCreatedBy() {
-		if(!jsonObject.has(Metadata.CREATED_BY_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.CREATED_BY_LITERAL.getName())) {
 			return -1;
+		}
 		return jsonObject.optInt(Metadata.CREATED_BY_LITERAL.getName());
 	}
 
-	public void setCreatedBy(int creator) {
+	public void setCreatedBy(final int creator) {
 		try {
 			jsonObject.put(Metadata.CREATED_BY_LITERAL.getName(), creator);
 		} catch (JSONException e) {
@@ -279,12 +286,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getDescription() {
-		if(!jsonObject.has(Metadata.DESCRIPTION_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.DESCRIPTION_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.DESCRIPTION_LITERAL.getName());
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		try {
 			jsonObject.put(Metadata.DESCRIPTION_LITERAL.getName(), description);
 		} catch (JSONException e) {
@@ -293,12 +301,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getURL() {
-		if(!jsonObject.has(Metadata.URL_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.URL_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.URL_LITERAL.getName());
 	}
 
-	public void setURL(String url) {
+	public void setURL(final String url) {
 		try {
 			jsonObject.put(Metadata.URL_LITERAL.getName(), url);
 		} catch (JSONException e) {
@@ -307,17 +316,19 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public long getSequenceNumber() {
-		if(getLastModified()==null)
+		if(getLastModified()==null) {
 			return 0;
+		}
 		return getLastModified().getTime();
 	}
 
 	public String getCategories() {
-		if(!jsonObject.has(Metadata.CATEGORIES_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
 			return "";
+		}
 		try {
-			JSONArray arr = jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
-			StringBuffer list = new StringBuffer();
+			final JSONArray arr = jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
+			final StringBuffer list = new StringBuffer();
 			for(int i = 0; i < arr.length(); i++) {
 				list.append(arr.get(i));
 				list.append(", ");
@@ -330,10 +341,10 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		return "";
 	}
 
-	public void setCategories(String categories) {
-		JSONArray catArray = new JSONArray();
+	public void setCategories(final String categories) {
+		final JSONArray catArray = new JSONArray();
 		
-		String[] categoriesSplit = categories.split("\\s+,\\s+");
+		final String[] categoriesSplit = categories.split("\\s+,\\s+");
 		
 		for(String category : categoriesSplit) {
 			catArray.put(category);
@@ -347,12 +358,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public Date getLockedUntil() {
-		if(!jsonObject.has(Metadata.LOCKED_UNTIL_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.LOCKED_UNTIL_LITERAL.getName())) {
 			return null;
+		}
 		return new Date(jsonObject.optLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
 	}
 
-	public void setLockedUntil(Date lockedUntil) {
+	public void setLockedUntil(final Date lockedUntil) {
 		try {
 			jsonObject.put(Metadata.LOCKED_UNTIL_LITERAL.getName(), lockedUntil);
 		} catch (JSONException e) {
@@ -361,12 +373,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getFileMD5Sum() {
-		if(!jsonObject.has(Metadata.FILE_MD5SUM_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FILE_MD5SUM_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.FILE_MD5SUM_LITERAL.getName());
 	}
 
-	public void setFileMD5Sum(String sum) {
+	public void setFileMD5Sum(final String sum) {
 		try {
 			jsonObject.put(Metadata.FILE_MD5SUM_LITERAL.getName(), sum);
 		} catch (JSONException e) {
@@ -378,7 +391,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		return jsonObject.optInt(Metadata.COLOR_LABEL_LITERAL.getName());
 	}
 
-	public void setColorLabel(int color) {
+	public void setColorLabel(final int color) {
 		try {
 			jsonObject.put(Metadata.COLOR_LABEL_LITERAL.getName(), color);
 		} catch (JSONException e) {
@@ -390,7 +403,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		return jsonObject.optBoolean(Metadata.CURRENT_VERSION_LITERAL.getName());
 	}
 
-	public void setIsCurrentVersion(boolean bool) {
+	public void setIsCurrentVersion(final boolean bool) {
 		try {
 			jsonObject.put(Metadata.CURRENT_VERSION_LITERAL.getName(), bool);
 		} catch (JSONException e) {
@@ -399,12 +412,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getVersionComment() {
-		if(!jsonObject.has(Metadata.VERSION_COMMENT_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.VERSION_COMMENT_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.VERSION_COMMENT_LITERAL.getName());
 	}
 
-	public void setVersionComment(String string) {
+	public void setVersionComment(final String string) {
 		try {
 			jsonObject.put(Metadata.VERSION_COMMENT_LITERAL.getName(), string);
 		} catch (JSONException e) {
@@ -412,6 +426,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		}
 	}
 	
+	@Override
 	public String toString(){
 		return jsonObject.toString();
 	}
@@ -421,12 +436,13 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	}
 
 	public String getFilestoreLocation() {
-		if(!jsonObject.has(Metadata.FILESTORE_LOCATION_LITERAL.getName()))
+		if(!jsonObject.has(Metadata.FILESTORE_LOCATION_LITERAL.getName())) {
 			return null;
+		}
 		return jsonObject.optString(Metadata.FILESTORE_LOCATION_LITERAL.getName());
 	}
 
-	public void setFilestoreLocation(String string) {
+	public void setFilestoreLocation(final String string) {
 		try {
 			jsonObject.put(Metadata.FILESTORE_LOCATION_LITERAL.getName(), string);
 		} catch (JSONException e) {

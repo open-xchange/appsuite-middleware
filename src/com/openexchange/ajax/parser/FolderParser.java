@@ -185,8 +185,8 @@ public class FolderParser {
 				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
 				if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
 						permissionBits[3])) {
-					throw new OXFolderException(FolderCode.INVALID_PERMISSION, permissionBits[0], permissionBits[1],
-							permissionBits[2], permissionBits[3]);
+					throw new OXFolderException(FolderCode.INVALID_PERMISSION, Integer.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]),
+							Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
 				}
 				oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
 				if (!elem.has(FolderFields.GROUP)) {

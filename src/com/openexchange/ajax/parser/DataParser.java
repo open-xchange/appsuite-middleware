@@ -51,17 +51,17 @@
 
 package com.openexchange.ajax.parser;
 
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.sessiond.SessionObject;
 import java.util.Date;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.sessiond.SessionObject;
 
 /**
  * DataParser
@@ -193,9 +193,8 @@ public class DataParser {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			return null;
-		} else {
-			return new Date(Long.parseLong(tmp));
 		}
+		return new Date(Long.parseLong(tmp));
 	}
 	
 	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
@@ -224,7 +223,7 @@ public class DataParser {
 		if (tmp != null && tmp.length() == 0) {
 			throw new OXMandatoryFieldException(_missingField + name);
 		}
-		return Boolean.valueOf(tmp);
+		return Boolean.parseBoolean(tmp);
 	}
 	
 	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
@@ -253,7 +252,7 @@ public class DataParser {
 		}
 	}
 	
-	public static Date checkTime(final JSONObject jsonObj, final String name, TimeZone timeZone) throws JSONException, OXMandatoryFieldException {
+	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			throw new OXMandatoryFieldException(_missingField + name);
