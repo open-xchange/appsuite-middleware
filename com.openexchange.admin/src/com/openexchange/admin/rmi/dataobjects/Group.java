@@ -80,6 +80,8 @@ public class Group implements Serializable {
     private boolean extensionsok = true;
 
     public Group() {
+        super();
+        init();
     }
 
     
