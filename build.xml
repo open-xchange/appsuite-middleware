@@ -9,6 +9,7 @@
     <property name="prefix" location="/opt/open-xchange"/>
     <property name="3rdlib" location="${prefix}/lib"/>
     <property name="log.install.dir" value="/var/log/open-xchange"/>
+	<property name="etc.install.dir" value="/etc/" />
     <property name="distribution" value="debian"/>
     <property file="VERSION"/>
     <property file="PVERSION"/>
@@ -179,7 +180,7 @@
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
         </copy>
-        <chmod perm="755" file="${destdir}/etc/init.d/open-xchange-groupware"/>
+        <chmod perm="755" file="${destdir}/${etc.install.dir}/init.d/open-xchange-groupware"/>
     </target>
 
     <target name="installExceptJars" depends="installScripts">
