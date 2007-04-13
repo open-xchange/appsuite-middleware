@@ -60,8 +60,6 @@
 
     <property name="test.xml.dir" location="test-results" />
 
-		
-
 	<!--                    TARGETS                      -->
 
 	<target name="compile-console">
@@ -82,7 +80,56 @@
     	</subant>
 	</target>
 
-    <target name="compile-plugins">
+	<!-- START FIXME: did not find another way to solve this
+	     license plugin depends on sw-update, so sw-update must be compiled first
+	     sw-update depends on mail and context_light -->
+	<property name="ctx.build" value="../open-xchange-admin-plugin-context_light/build.xml"/>
+	<available file="${ctx.build}" property="ctx.available"/>
+
+	<target name="compile-context-plugin" if="ctx.available">
+    	<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-plugin-context_light/build.xml"/>
+    	</subant>
+	</target>
+
+	<property name="mail.build" value="../open-xchange-admin-plugin-mail/build.xml"/>
+	<available file="${mail.build}" property="mail.available"/>
+
+	<target name="compile-mail-plugin" if="mail.available">
+    	<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-plugin-mail/build.xml"/>
+    	</subant>
+	</target>
+
+	<property name="swupdate.build" value="../open-xchange-admin-plugin-sw-update/build.xml"/>
+	<available file="${swupdate.build}" property="swupdate.available"/>
+
+	<condition property="swupdate.complete">
+	    <and>
+	    	<available file="${ctx.build}"/>
+	    	<available file="${mail.build}"/>
+	    	<available file="${swupdate.build}"/>
+		</and>
+	</condition>
+		
+
+	<target name="compile-sw-update-plugin" depends="compile-mail-plugin,compile-context-plugin" if="swupdate.complete">
+    	<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-plugin-sw-update/build.xml"/>
+    	</subant>
+	</target>
+
+	<property name="license.build" value="../open-xchange-admin-plugin-license/build.xml"/>
+	<available file="${license.build}" property="license.available"/>
+
+	<target name="compile-license-plugin" depends="compile-sw-update-plugin" if="swupdate.complete">
+    	<subant failonerror="true" inheritall="false" target="compile">
+                <fileset dir="../" includes="open-xchange-admin-plugin-license/build.xml"/>
+    	</subant>
+	</target>
+	<!-- END FIXME -->
+	
+	<target name="compile-plugins" depends="compile-license-plugin">
 		<subant failonerror="true" inheritall="false" target="compile">
                 <fileset dir="../" includes="open-xchange-admin-plugin**/build.xml"/>
     	</subant>
