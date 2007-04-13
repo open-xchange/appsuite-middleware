@@ -49,13 +49,28 @@
 package com.openexchange.admin.console.user;
 
 
+import java.util.ArrayList;
+
 import org.apache.commons.cli.Option;
 
 
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
+    protected void printExtensionsError(User usr){
+        //+ loop through extensions and check for errors       
+        if(usr!=null && usr.getExtensions()!=null){
+            ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
+            for (OXUserExtensionInterface usr_extension : usr_exts) {
+                if(usr_extension.getExtensionError()!=null){
+                    printServerResponse(usr_extension.getExtensionError());
+                }
+            }
+        }
+    }
     
     protected Option getIdOption(){
         return getShortLongOpt(OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true); 
