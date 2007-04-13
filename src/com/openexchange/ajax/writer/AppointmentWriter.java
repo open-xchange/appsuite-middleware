@@ -77,7 +77,7 @@ public class AppointmentWriter extends CalendarWriter {
 		this.timeZone = timeZone;
 	}
 	
-	public void writeArray(AppointmentObject appointmentObj, int cols[], Date betweenStart, Date betweenEnd) throws JSONException {
+	public void writeArray(final AppointmentObject appointmentObj, final int cols[], final Date betweenStart, final Date betweenEnd) throws JSONException {
 		if (appointmentObj.getFullTime()) {
 			if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
 				writeArray(appointmentObj, cols);
@@ -87,7 +87,7 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 	}
 	
-	public void writeArray(AppointmentObject appointmentObject, int cols[]) throws JSONException {
+	public void writeArray(final AppointmentObject appointmentObject, final int cols[]) throws JSONException {
 		jsonwriter.array();
 		
 		for (int a = 0; a < cols.length; a++) {
@@ -96,7 +96,7 @@ public class AppointmentWriter extends CalendarWriter {
 		jsonwriter.endArray();
 	}
 	
-	public void writeAppointment(AppointmentObject appointmentObject) throws JSONException {
+	public void writeAppointment(final AppointmentObject appointmentObject) throws JSONException {
 		jsonwriter.object();
 		
 		writeCommonFields(appointmentObject);
@@ -105,7 +105,7 @@ public class AppointmentWriter extends CalendarWriter {
 			writeParameter(AppointmentFields.TITLE, appointmentObject.getTitle());
 		}
 		
-		boolean isFullTime = appointmentObject.getFullTime();
+		final boolean isFullTime = appointmentObject.getFullTime();
 		
 		if (isFullTime) {
 			writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate());
@@ -170,16 +170,16 @@ public class AppointmentWriter extends CalendarWriter {
 			writeParameter(AppointmentFields.IGNORE_CONFLICTS, true);
 		}
 		
-		if (appointmentObject instanceof CalendarDataObject) {
-                    if (((CalendarDataObject)appointmentObject).isHardConflict()) {
+		if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject)appointmentObject).isHardConflict()) {
+                    //if (((CalendarDataObject)appointmentObject).isHardConflict()) {
                         writeParameter(AppointmentFields.HARD_CONFLICT, true);
-                    }
+                    //}
 		}
 		
 		jsonwriter.endObject();
 	}
 	
-	public void write(int field, AppointmentObject appointmentObject) throws JSONException {
+	public void write(final int field, final AppointmentObject appointmentObject) throws JSONException {
 		final boolean isFullTime = appointmentObject.getFullTime();
 		
 		switch (field) {

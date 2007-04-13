@@ -66,7 +66,7 @@ public abstract class AbstractConfigWrapper {
 	
 	private static final Log LOG = LogFactory.getLog(AbstractConfigWrapper.class);
 	
-	public static String parseProperty(Properties prop, String name, String value) {
+	public static String parseProperty(final Properties prop, final String name, final String value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			return tmp;
@@ -74,7 +74,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static int parseProperty(Properties prop, String name, int value) {
+	public static int parseProperty(final Properties prop, final String name, final int value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			try {
@@ -86,7 +86,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static boolean parseProperty(Properties prop, String name, boolean value) {
+	public static boolean parseProperty(final Properties prop, final String name, final boolean value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			return Boolean.parseBoolean(tmp);
@@ -94,10 +94,10 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static int[] parseProperty(Properties prop, String name, int[] value) {
+	public static int[] parseProperty(final Properties prop, final String name, final int[] value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
-			String s[] = tmp.split(",");
+			final String s[] = tmp.split(",");
 			int ports[] = new int[s.length];
 			
 			for (int a = 0; a < ports.length; a++) {
@@ -114,7 +114,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static String[] parseProperty(Properties prop, String name, String[] value) {
+	public static String[] parseProperty(final Properties prop, final String name, final String[] value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			return tmp.split(",");

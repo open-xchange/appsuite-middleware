@@ -73,22 +73,26 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 	}
 
 	public WebdavResource getResource() throws WebdavException {
-		if(res != null)
+		if(res != null) {
 			return res;
+		}
 		return res = factory.resolveResource(getUrl());
 	}
 	
 	public WebdavResource getDestination() throws WebdavException {
-		if(null == getDestinationUrl())
+		if(null == getDestinationUrl()) {
 			return null;
-		if(dest != null)
+		}
+		if(dest != null) {
 			return dest;
+		}
 		return dest = factory.resolveResource(getDestinationUrl());
 	}
 	
 	public WebdavCollection getCollection() throws WebdavException {
-		if(res != null && res.isCollection())
+		if(res != null && res.isCollection()) {
 			return (WebdavCollection) res;
+		}
 		return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
 	}
 	
@@ -97,17 +101,19 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
 	}
 	
 	public IfHeader getIfHeader() throws IfHeaderParseException {
-		String ifHeader = getHeader("If");
-		if(ifHeader == null)
+		final String ifHeader = getHeader("If");
+		if(ifHeader == null) {
 			return null;
+		}
 		return new IfHeaderParser().parse(getHeader("If"));
 	}
 	
-	public int getDepth(int def){
-		String depth = getHeader("depth");
-		if(null == depth)
+	public int getDepth(final int def){
+		final String depth = getHeader("depth");
+		if(null == depth) {
 			return def;
-		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.valueOf(depth);
+		}
+		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
 	}
 	
 	public WebdavFactory getFactory(){

@@ -83,8 +83,8 @@ public abstract class AbstractOXExceptionFactory<T> {
             this.message = throwsInfo.msg()[index];
         }
 
-        private String idList(int[] is) {
-            StringBuilder b = new StringBuilder();
+        private String idList(final int[] is) {
+        	final StringBuilder b = new StringBuilder();
             for(int i : is) { b.append(i).append(","); }
             b.setLength(b.length()-1);
             return b.toString();
@@ -92,7 +92,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     }
 
     protected AbstractOXExceptionFactory(Class<?> clazz) {
-        OXExceptionSource exceptionSource  = clazz.getAnnotation(OXExceptionSource.class);
+    	final OXExceptionSource exceptionSource  = clazz.getAnnotation(OXExceptionSource.class);
         if(exceptionSource == null) {
             throw new IllegalArgumentException(clazz+" doesn't seem to be an OXExceptionSource");
         }
@@ -103,14 +103,14 @@ public abstract class AbstractOXExceptionFactory<T> {
 
     }
 
-    private void addClass(Class<?> clazz) {
+    private void addClass(final Class<?> clazz) {
         OXThrows throwsInfo = clazz.getAnnotation(OXThrows.class);
         addThrows(throwsInfo, clazz);
         OXThrowsMultiple multiple = clazz.getAnnotation(OXThrowsMultiple.class);
         addMultiple(multiple,clazz);
 
 
-        Method[] methods = clazz.getDeclaredMethods();
+        final Method[] methods = clazz.getDeclaredMethods();
         for(Method method : methods) {
             throwsInfo = method.getAnnotation(OXThrows.class);
             addThrows(throwsInfo, clazz);
@@ -130,23 +130,23 @@ public abstract class AbstractOXExceptionFactory<T> {
         } FIXME */
     }
 
-    private void addMultiple(OXThrowsMultiple multiple, Class clazz) {
+    private void addMultiple(final OXThrowsMultiple multiple, final Class clazz) {
         if(multiple != null) {
             for(int i = 0; i < multiple.exceptionId().length; i++) {
-                if(throwsMap.containsKey(multiple.exceptionId()[i])) {
+                if(throwsMap.containsKey(Integer.valueOf(multiple.exceptionId()[i]))) {
                     throw new IllegalArgumentException("Exception ID "+multiple.exceptionId()[i]+" is used twice in "+clazz.getName());
                 }
-                throwsMap.put(multiple.exceptionId()[i], new ExceptionInfo(multiple,i));
+                throwsMap.put(Integer.valueOf(multiple.exceptionId()[i]), new ExceptionInfo(multiple,i));
             }
         }
     }
 
-    private void addThrows(OXThrows throwsInfo, Class clazz) {
+    private void addThrows(final OXThrows throwsInfo, final Class clazz) {
         if(throwsInfo != null) {
-            if(throwsMap.containsKey(throwsInfo.exceptionId())) {
+            if(throwsMap.containsKey(Integer.valueOf(throwsInfo.exceptionId()))) {
                 throw new IllegalArgumentException("Exception ID "+throwsInfo.exceptionId()+" is used twice in "+clazz.getName());
             }
-            throwsMap.put(throwsInfo.exceptionId(),new ExceptionInfo(throwsInfo));
+            throwsMap.put(Integer.valueOf(throwsInfo.exceptionId()),new ExceptionInfo(throwsInfo));
         }
     }
 
@@ -155,7 +155,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     }
 
     public T createException(final int id, final Throwable cause, final Object... msgParams) {
-        final ExceptionInfo throwsInfo = throwsMap.get(id);
+        final ExceptionInfo throwsInfo = throwsMap.get(Integer.valueOf(id));
         if (throwsInfo == null) {
             return buildException(component, Category.PROGRAMMING_ERROR, getClassId() * 100,
                     "Missing OXException annotation " + id, cause);

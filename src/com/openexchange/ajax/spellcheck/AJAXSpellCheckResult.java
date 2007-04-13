@@ -125,7 +125,7 @@ public class AJAXSpellCheckResult {
 		suggestions.add(suggestion);
 	}
 	
-	public void addAllSuggestion(List<String> suggestions) {
+	public void addAllSuggestion(final List<String> suggestions) {
 		this.suggestions.addAll(suggestions);
 	}
 	

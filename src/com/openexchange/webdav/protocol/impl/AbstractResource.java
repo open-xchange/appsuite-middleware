@@ -77,25 +77,25 @@ public abstract class AbstractResource implements WebdavResource {
 		checkParentExists(getUrl());
 	}
 	
-	protected void checkParentExists(String url) throws WebdavException {
-		String[] comps = url.split("/");
-		StringBuilder path = new StringBuilder();
+	protected void checkParentExists(final String url) throws WebdavException {
+		final String[] comps = url.split("/");
+		final StringBuilder path = new StringBuilder();
 		
 		for(int i = 1; i < comps.length-1; i++) {
 			path.append("/");
 			path.append(comps[i]);
-			WebdavResource res = getFactory().resolveResource(path.toString());
+			final WebdavResource res = getFactory().resolveResource(path.toString());
 			if(!res.exists() || !res.isCollection()) {
 				throw new WebdavException("Conflict with: "+res.getUrl()+" exists: "+res.exists()+" collection: "+res.isCollection(), getUrl(), HttpServletResponse.SC_CONFLICT);
 			}
 		}
 	}
 	
-	public void putBody(InputStream body) throws WebdavException{
+	public void putBody(final InputStream body) throws WebdavException{
 		putBody(body,false);
 	}
 	
-	public void putBodyAndGuessLength(InputStream body) throws WebdavException{
+	public void putBodyAndGuessLength(final InputStream body) throws WebdavException{
 		putBody(body, true);
 	}
 	
@@ -103,11 +103,11 @@ public abstract class AbstractResource implements WebdavResource {
 		return null;
 	}
 	
-	public WebdavResource move(String string) throws WebdavException {
+	public WebdavResource move(final String string) throws WebdavException {
 		return move(string,false, true);
 	}
 
-	public WebdavResource copy(String string) throws WebdavException {
+	public WebdavResource copy(final String string) throws WebdavException {
 		return copy(string,false, true);
 	}
 	
@@ -115,17 +115,18 @@ public abstract class AbstractResource implements WebdavResource {
 		return this.getFactory().resolveResource(getUrl());
 	}
 	
-	public WebdavResource move(String dest, boolean noroot, boolean overwrite) throws WebdavException {
-		WebdavResource copy = copy(dest);
+	public WebdavResource move(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+		final WebdavResource copy = copy(dest);
 		delete();
 		((AbstractResource)copy).setCreationDate(getCreationDate());
 		return copy;
 	}
 	
-	public WebdavResource copy(String dest, boolean noroot, boolean overwrite) throws WebdavException {
-		AbstractResource clone = instance(dest);
-		if(hasBody())
+	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+		final AbstractResource clone = instance(dest);
+		if(hasBody()) {
 			clone.putBody(getBody());
+		}
 		for(WebdavProperty prop : getAllProps()) {
 			clone.putProperty(prop);
 		}
@@ -134,32 +135,34 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 
 
-	public AbstractResource instance(String dest) throws WebdavException {
+	public AbstractResource instance(final String dest) throws WebdavException {
 		return (AbstractResource) getFactory().resolveResource(dest);
 	}
 	
-	public void removeProperty(String namespace, String name) throws WebdavException {
+	public void removeProperty(final String namespace, final String name) throws WebdavException {
 		internalRemoveProperty(namespace,name);
 	}
 	
-	public void putProperty(WebdavProperty prop) throws WebdavException {
-		if(handleSpecialPut(prop))
+	public void putProperty(final WebdavProperty prop) throws WebdavException {
+		if(handleSpecialPut(prop)) {
 			return;
+		}
 		internalPutProperty(prop);
 	}
 
 
-	public WebdavProperty getProperty(String namespace, String name) throws WebdavException {
-		WebdavProperty prop = handleSpecialGet(namespace, name);
-		if(prop != null)
+	public WebdavProperty getProperty(final String namespace, final String name) throws WebdavException {
+		final WebdavProperty prop = handleSpecialGet(namespace, name);
+		if(prop != null) {
 			return prop;
+		}
 		return internalGetProperty(namespace, name);
 	}
 	
 	public List<WebdavProperty> getAllProps() throws WebdavException{
-		List<WebdavProperty> props = internalGetAllProps();
+		final List<WebdavProperty> props = internalGetAllProps();
 		for(Property p : getFactory().getProtocol().getKnownProperties()){
-			WebdavProperty prop = getProperty(p.getNamespace(),p.getName());
+			final WebdavProperty prop = getProperty(p.getNamespace(),p.getName());
 			if(prop != null) {
 				props.add(prop);
 			}
@@ -184,7 +187,7 @@ public abstract class AbstractResource implements WebdavResource {
 		throw new IllegalStateException("This resource is no collection");
 	}
 	
-	protected void addParentLocks(List<WebdavLock> lockList) throws WebdavException {
+	protected void addParentLocks(final List<WebdavLock> lockList) throws WebdavException {
 		for(WebdavResource res : parents()) {
 			for(WebdavLock lock : res.getOwnLocks()) {
 				if(lock.locks(res, this)){
@@ -194,57 +197,61 @@ public abstract class AbstractResource implements WebdavResource {
 		}
 	}
 	
-	protected WebdavLock findParentLock(String token) throws WebdavException {
+	protected WebdavLock findParentLock(final String token) throws WebdavException {
 		for(WebdavResource res : parents()) {
-			WebdavLock lock = res.getOwnLock(token);
-			if(null != lock && lock.locks(res, this))
+			final WebdavLock lock = res.getOwnLock(token);
+			if(null != lock && lock.locks(res, this)) {
 				return lock;
+			}
 		}
 		return null;
 	}
 	
 	protected WebdavCollection parent() throws WebdavException{
-		String url = getUrl();
-		String parentUrl = url.substring(0, url.lastIndexOf('/'));
+		final String url = getUrl();
+		final String parentUrl = url.substring(0, url.lastIndexOf('/'));
 		return getFactory().resolveCollection(parentUrl);
 	}
 	
 	protected List<WebdavCollection> parents() throws WebdavException{
-		List<WebdavCollection> parents = new ArrayList<WebdavCollection>();
-		String[] comps = getUrl().split("/");
-		StringBuilder path = new StringBuilder();
+		final List<WebdavCollection> parents = new ArrayList<WebdavCollection>();
+		final String[] comps = getUrl().split("/");
+		final StringBuilder path = new StringBuilder();
 		
 		for(int i = 1; i < comps.length-1; i++) {
 			path.append("/");
 			path.append(comps[i]);
-			WebdavCollection res = getFactory().resolveCollection(path.toString());
+			final WebdavCollection res = getFactory().resolveCollection(path.toString());
 			parents.add(res);
 		}
 		return parents;
 	}
 	
-	protected boolean handleSpecialPut(WebdavProperty prop) throws WebdavException{
-		Property p = getFactory().getProtocol().get(prop.getNamespace(),prop.getName());
-		if(p == null)
+	protected boolean handleSpecialPut(final WebdavProperty prop) throws WebdavException{
+		final Property p = getFactory().getProtocol().get(prop.getNamespace(),prop.getName());
+		if(p == null) {
 			return false;
-		SpecialSetSwitch setter = getSetSwitch(prop.getValue());
+		}
+		final SpecialSetSwitch setter = getSetSwitch(prop.getValue());
 		
-		return (Boolean) p.doSwitch(setter);
+		return ((Boolean) p.doSwitch(setter)).booleanValue();
 	}
 	
-	protected SpecialSetSwitch getSetSwitch(String value) {
+	protected SpecialSetSwitch getSetSwitch(final String value) {
 		return new SpecialSetSwitch(value);
 	}
 
-	protected WebdavProperty handleSpecialGet(String namespace, String name) throws WebdavException {
-		Property p = getFactory().getProtocol().get(namespace,name);
-		if(p == null)
+	protected WebdavProperty handleSpecialGet(final String namespace, final String name) throws WebdavException {
+		final Property p = getFactory().getProtocol().get(namespace,name);
+		if(p == null) {
 			return null;
-		if(!isset(p))
+		}
+		if(!isset(p)) {
 			return null;
-		String value = (String) p.doSwitch(getGetSwitch(this));
+		}
+		final String value = (String) p.doSwitch(getGetSwitch(this));
 		
-		WebdavProperty retVal = p.getWebdavProperty();
+		final WebdavProperty retVal = p.getWebdavProperty();
 		retVal.setValue(value);
 		// FIXME make overridable call
 		switch(p.getId()) {
@@ -256,23 +263,26 @@ public abstract class AbstractResource implements WebdavResource {
 		return retVal;
 	}
 
-	protected PropertySwitch getGetSwitch(AbstractResource resource) {
+	protected PropertySwitch getGetSwitch(final AbstractResource resource) {
 		return new SpecialGetSwitch();
 	}
 	
 
+	@Override
 	public int hashCode(){
 		return getUrl().hashCode();
 	}
 	
-	public boolean equals(Object o){
+	@Override
+	public boolean equals(final Object o){
 		if (o instanceof WebdavResource) {
-			WebdavResource res = (WebdavResource) o;
+			final WebdavResource res = (WebdavResource) o;
 			return res.getUrl().equals(getUrl());
 		}
 		return false;
 	}
 	
+	@Override
 	public String toString(){
 		return getUrl();
 	}
@@ -310,9 +320,10 @@ public abstract class AbstractResource implements WebdavResource {
 		}
 
 		public Object contentLength() throws WebdavException {
-			Long l = getLength();
-			if(l == null)
+			final Long l = getLength();
+			if(l == null) {
 				return null;
+			}
 			return l.toString();
 		}
 
@@ -333,8 +344,8 @@ public abstract class AbstractResource implements WebdavResource {
 		}
 
 		public Object lockDiscovery() throws WebdavException {
-			StringBuffer activeLocks = new StringBuffer();
-			WebdavLockWriter writer = new WebdavLockWriter();
+			final StringBuffer activeLocks = new StringBuffer();
+			final WebdavLockWriter writer = new WebdavLockWriter();
 			for(WebdavLock lock : getLocks()){
 				activeLocks.append(writer.lock2xml(lock));
 			}
@@ -360,52 +371,52 @@ public abstract class AbstractResource implements WebdavResource {
 		}
 		
 		public Object creationDate() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object displayName() throws WebdavException {
 			setDisplayName(value);
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object contentLanguage() throws WebdavException {
 			setLanguage(value);
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object contentLength() throws WebdavException {
 			setLength(new Long(value));
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object contentType() throws WebdavException {
 			setContentType(value);
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object etag() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object lastModified() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object resourceType() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object lockDiscovery() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object supportedLock() throws WebdavException {
-			return true;
+			return Boolean.TRUE;
 		}
 
 		public Object source() throws WebdavException {
 			setSource(value);
-			return true;
+			return Boolean.TRUE;
 		}
 		
 	}

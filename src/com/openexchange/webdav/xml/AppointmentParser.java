@@ -75,7 +75,7 @@ public class AppointmentParser extends CalendarParser {
 		this.sessionObj = sessionObj;	
 	}
 	
-	public void parse(XmlPullParser parser, AppointmentObject appointmentobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final AppointmentObject appointmentobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -92,7 +92,7 @@ public class AppointmentParser extends CalendarParser {
 		}
 	}
 	
-	protected void parseElementAppointment(AppointmentObject ao, XmlPullParser parser) throws Exception {
+	protected void parseElementAppointment(final AppointmentObject ao, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
 			LOG.trace("unknown namespace in tag: " + parser.getName());
 			parser.nextText();
@@ -145,7 +145,7 @@ public class AppointmentParser extends CalendarParser {
 		}
 	}
 	
-	private Date parseString2Date(String s) {
+	private Date parseString2Date(final String s) {
 		return new Date(Long.parseLong(s));
 	}
 }

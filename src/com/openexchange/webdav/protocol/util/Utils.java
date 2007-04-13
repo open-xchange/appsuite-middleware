@@ -59,6 +59,8 @@ import javax.servlet.http.HttpServletResponse;
 
 public class Utils {
 	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Utils.class);
+	
 	// Taken from slide
 	/**
      * The set of SimpleDateFormat formats to use in getDateHeader().
@@ -87,6 +89,9 @@ public class Utils {
                 }
             } catch (ParseException e) {
             	// Ignore and try the others
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug(e.getMessage(), e);
+            	}
             }
         }
         return date;

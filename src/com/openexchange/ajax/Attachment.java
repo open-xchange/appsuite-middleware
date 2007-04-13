@@ -126,6 +126,7 @@ public class Attachment extends PermissionServlet {
 	}
 	
 	
+	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		final SessionObject session = getSessionObject(req);
@@ -151,10 +152,10 @@ public class Attachment extends PermissionServlet {
 			int folderId, attachedId, moduleId, id;
 			final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
 			try {
-				folderId = Integer.valueOf(req.getParameter(PARAMETER_FOLDERID));
-				attachedId = Integer.valueOf(req.getParameter(PARAMETER_ATTACHEDID));
-				moduleId = Integer.valueOf(req.getParameter(PARAMETER_MODULE));
-				id = Integer.valueOf(req.getParameter(PARAMETER_ID));
+				folderId = Integer.parseInt(req.getParameter(PARAMETER_FOLDERID));
+				attachedId = Integer.parseInt(req.getParameter(PARAMETER_ATTACHEDID));
+				moduleId = Integer.parseInt(req.getParameter(PARAMETER_MODULE));
+				id = Integer.parseInt(req.getParameter(PARAMETER_ID));
 					
 			} catch (NumberFormatException x) {
 				handle(res, new AbstractOXException("Invalid Number"), action, contentType == null ? JS_FRAGMENT_POPUP : null );
@@ -170,6 +171,7 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		final SessionObject session = getSessionObject(req);
@@ -187,6 +189,7 @@ public class Attachment extends PermissionServlet {
 		
 	}
 
+	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		
@@ -210,14 +213,14 @@ public class Attachment extends PermissionServlet {
 				UploadEvent upload = null;
 				try {
 					upload = processUpload(req);
-					List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
-					List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
+					final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+					final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 					
 					long sum = 0;
-					for(Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
-						UploadFile uploadFile = iter.next();
-						String fileField = uploadFile.getFieldName();
-						int index = Integer.valueOf(fileField.substring(5));
+					for(final Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
+						final UploadFile uploadFile = iter.next();
+						final String fileField = uploadFile.getFieldName();
+						final int index = Integer.parseInt(fileField.substring(5));
 						final String obj = upload.getFormField("json_"+index);
 						if (obj == null || obj.length() == 0) {
 							continue;
@@ -246,7 +249,7 @@ public class Attachment extends PermissionServlet {
 				}
 			}
 		}catch (UploadException x) {
-			Response resp = new Response();
+			final Response resp = new Response();
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
 				res.setContentType("text/html; charset=UTF-8");
@@ -263,7 +266,7 @@ public class Attachment extends PermissionServlet {
 	}
 
 
-	private void assureSize(int index, List<AttachmentMetadata> attachments, List<UploadFile> uploadFiles) {
+	private void assureSize(final int index, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles) {
 		int enlarge = index - (attachments.size()-1);
 		for(int i = 0; i < enlarge; i++) { attachments.add(null); }
 		
@@ -273,7 +276,7 @@ public class Attachment extends PermissionServlet {
 	}
 
 
-	private void document(final HttpServletResponse res, boolean ie,boolean ie7, final int folderId, final int attachedId, final int moduleId, final int id, String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+	private void document(final HttpServletResponse res, final boolean ie,final boolean ie7, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
 		InputStream documentData = null;
 		OutputStream os = null;
 		
@@ -374,8 +377,9 @@ public class Attachment extends PermissionServlet {
 				attachment.setId(AttachmentBase.NEW);
 	
 				long modified = ATTACHMENT_BASE.attachToObject(attachment,new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile())),ctx,user,userConfig);
-				if(modified  >  timestamp)
+				if(modified  >  timestamp) {
 					timestamp = modified;
+				}
 				arr.put(attachment.getId());
 				
 			}

@@ -69,7 +69,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	private Context context = null;
 
 	
-	protected int doUpdates(UpdateBlock...updates) throws UpdateException, TransactionException {
+	protected int doUpdates(final UpdateBlock...updates) throws UpdateException, TransactionException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
 		int counter = 0;
@@ -93,7 +93,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return counter;
 	}
 	
-	public void setContext(Context context) {
+	public void setContext(final Context context) {
 		this.context = context;
 	}
 	
@@ -101,7 +101,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		return this.context;
 	}
 
-	public void setProvider(DBProvider provider) {
+	public void setProvider(final DBProvider provider) {
 		this.provider = provider;
 	}
 	
@@ -130,13 +130,14 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 			DBUtils.closeSQLStuff(rs, stmt);
 		}
 
-		public int performUpdate(Connection writeCon) throws SQLException {
+		public int performUpdate(final Connection writeCon) throws SQLException {
 			stmt = writeCon.prepareStatement(sql);
 			fillStatement();
 			statementString = stmt.toString();
-			if(LOG.isTraceEnabled()) 
+			if(LOG.isTraceEnabled()) {
 				LOG.trace(statementString);
-			int updated =  stmt.executeUpdate();
+			}
+			final int updated =  stmt.executeUpdate();
 			//System.out.println(String.format("%d ::: %s",updated,statementString));
 			return updated;
 		}

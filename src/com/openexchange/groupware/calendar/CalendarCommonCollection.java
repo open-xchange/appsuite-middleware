@@ -1060,7 +1060,7 @@ public class CalendarCommonCollection {
         } catch (DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } catch(SQLException sqle) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sqle, 37);
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sqle, Integer.valueOf(37));
         } finally {
             closePreparedStatement(prep);
             closeResultSet(rs);
@@ -1071,8 +1071,9 @@ public class CalendarCommonCollection {
                     LOG.error("error pushing readable connection" ,dbpe);
                 }
             }
-            return ret;
+            //return ret;
         }
+        return ret;
     }
     
     static final void fillEventInformation(CalendarDataObject cdao, CalendarDataObject edao, UserParticipant up_event[], UserParticipant[] new_userparticipants, UserParticipant[] deleted_userparticipants, Participant p_event[], Participant new_participants[], Participant deleted_participants[]) {

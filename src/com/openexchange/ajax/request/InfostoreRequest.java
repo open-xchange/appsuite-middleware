@@ -444,8 +444,6 @@ public class InfostoreRequest extends CommonRequest{
 		} catch (Throwable t){
 			handle(t);
 			return;
-		} finally {
-			
 		}
 				
 		try {

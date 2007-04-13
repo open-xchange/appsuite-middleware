@@ -40,6 +40,9 @@ public class XmlPullParserFactory {
         XmlPullParserFactory f = new XmlPullParserFactory();
         referenceContextClass = f.getClass();
     }
+    
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(XmlPullParserFactory.class);
 
     /** Name of the system or midlet property that should be used for
      a system property containing a comma separated list of factory
@@ -318,7 +321,9 @@ public class XmlPullParserFactory {
                 // necessary because of J2ME .class issue
                 instance = candidate.newInstance ();
             }
-            catch (Exception e) {}
+            catch (Exception e) {
+            	LOG.error(e.getMessage(), e);
+            }
 
             if (candidate != null) {
                 boolean recognized = false;

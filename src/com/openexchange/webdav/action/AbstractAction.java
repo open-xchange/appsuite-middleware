@@ -59,7 +59,7 @@ public abstract class AbstractAction implements WebdavAction {
 	private WebdavAction next;
 	private BulkLoader bulkLoader;
 
-	public void yield(WebdavRequest req, WebdavResponse res) throws WebdavException {
+	public void yield(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		next.perform(req, res);
 	}
 	
@@ -67,11 +67,11 @@ public abstract class AbstractAction implements WebdavAction {
 		return next;
 	}
 
-	public void setNext(WebdavAction next) {
+	public void setNext(final WebdavAction next) {
 		this.next = next;
 	}
 	
-	public void setBuldLoader(BulkLoader loader) {
+	public void setBuldLoader(final BulkLoader loader) {
 		this.bulkLoader = loader;
 	}
 	
@@ -79,19 +79,23 @@ public abstract class AbstractAction implements WebdavAction {
 		return this.bulkLoader;
 	}
 	
-	protected final void preLoad(LoadingHints loading) {
-		if(bulkLoader != null)
+	protected final void preLoad(final LoadingHints loading) {
+		if(bulkLoader != null) {
 			bulkLoader.load(loading);
+		}
 	}
 	
-	protected final void preLoad(List<LoadingHints> hints) {
-		if(bulkLoader != null)
+	protected final void preLoad(final List<LoadingHints> hints) {
+		if(bulkLoader != null) {
 			bulkLoader.load(hints);
+		}
 	}
 	
+	@Override
 	public String toString(){
-		if(null != next)
+		if(null != next) {
 			return getClass().getSimpleName()+" "+next.toString();
+		}
 		return getClass().getSimpleName();
 	}
 }

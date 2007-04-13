@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.spellcheck;
 
 import java.io.BufferedReader;
@@ -60,7 +58,11 @@ import java.util.List;
 
 import org.json.JSONArray;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.SpellCheckConfig;
 import com.openexchange.sessiond.SessionObject;
@@ -71,49 +73,61 @@ import com.openexchange.tools.text.spelling.OXSpellCheckResult;
  * AJAXSpellCheck
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
+@OXExceptionSource(classId = AJAXSpellCheckExceptionClasses.AJAX_SPELL_CHECK, component = Component.SPELLCHECK)
 public class AJAXSpellCheck {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJAXSpellCheck.class);
-	
+
 	private SessionObject session;
+	
+	private static final AJAXSpellCheckExceptionFactory EXCEPTIONS = new AJAXSpellCheckExceptionFactory(AJAXSpellCheck.class);
+	
+	private static final Object[] EMPTY_MSG_ARGS = new Object[0];
 
 	public AJAXSpellCheck(SessionObject session) {
 		super();
 		this.session = session;
 	}
-	
-	private String getCommand() throws OXException {
-		try {
-			final String lang = session.getLanguage().toUpperCase();
-			final SpellCheckConfig scc = IMAPProperties.getSpellCheckConfig();
-			if (scc == null)
-				throw new Exception("No SpellCheckConfig loaded!");
-			final SpellCheckConfig.DictionaryConfig dicConfig = scc.getDictionary(lang);
-			if (dicConfig == null)
-				throw new Exception("No dictionary could be found for language: " + lang);
-			if (dicConfig.getCommand() == null)
-				throw new Exception("Dictionary (id=" + dicConfig.getId() + ") does not hold a command."
-						+ " Please specify a command in corresponding \"spellcheck.cfg\" file");
-			return dicConfig.getCommand();
-		} catch (Exception e) {
-			throw new OXException(e);
+
+	@OXThrowsMultiple(
+			category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR },
+			desc={ "", "", "" },
+			exceptionId={ 1, 2, 3 },
+			msg={ "No SpellCheckConfig loaded.", "No dictionary could be found for language: %1$s.",
+					"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
+	private String getCommand() throws AbstractOXException {
+		final String lang = session.getLanguage().toUpperCase();
+		final SpellCheckConfig scc = IMAPProperties.getSpellCheckConfig();
+		if (scc == null) {
+			throw EXCEPTIONS.createException(1, EMPTY_MSG_ARGS);
 		}
+		final SpellCheckConfig.DictionaryConfig dicConfig = scc.getDictionary(lang);
+		if (dicConfig == null) {
+			throw EXCEPTIONS.createException(2, lang);
+		}
+		if (dicConfig.getCommand() == null) {
+			throw EXCEPTIONS.createException(3, dicConfig.getId());
+		}
+		return dicConfig.getCommand();
 	}
-	
-	public AJAXSpellCheckResult[] checkText(final String text) throws OXException {
+
+	@OXThrowsMultiple(category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.PROGRAMMING_ERROR },
+			desc={ "", "", "" },
+			exceptionId={ 4, 5, 6 },
+			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occured: %1$s." })
+	public AJAXSpellCheckResult[] checkText(final String text) throws AbstractOXException {
 		try {
 			if (IMAPProperties.getSpellCheckConfig() == null) {
-				throw new OXException("Missing SpellCheckConfig object");
+				throw EXCEPTIONS.createException(4, EMPTY_MSG_ARGS);
 			}
 			if (!IMAPProperties.getSpellCheckConfig().isEnabled()) {
 				return new AJAXSpellCheckResult[] {};
 			}
 			final String command = getCommand();
 			final AJAXUserDictionary userDic = session.getUserConfiguration().getUserDictionary();
-			if (userDic == null)
-				throw new OXException("User dictionary could not be found!");
+			if (userDic == null) {
+				throw EXCEPTIONS.createException(5, EMPTY_MSG_ARGS);
+			}
 			StringReader sr = null;
 			BufferedReader br = null;
 			OXAspellCheck oac = null;
@@ -138,8 +152,9 @@ public class AJAXSpellCheck {
 						ascr.setOffset(oscr.getOffset());
 						ascr.setOriginalWord(oscr.getOriginalWord());
 						ascr.addAllSuggestion(oscr.getSuggestions());
-						ascr.setType(userDic.containsWord(oscr.getOriginalWord()) ? AJAXSpellCheckResult.TYPE_SUGGESTION
-								: AJAXSpellCheckResult.TYPE_ERROR);
+						ascr
+								.setType(userDic.containsWord(oscr.getOriginalWord()) ? AJAXSpellCheckResult.TYPE_SUGGESTION
+										: AJAXSpellCheckResult.TYPE_ERROR);
 						resultList.add(ascr);
 					}
 				}
@@ -158,17 +173,15 @@ public class AJAXSpellCheck {
 					oac.destroy();
 				}
 			}
-		} catch (OXException e) {
-			throw e;
-		} catch (Exception exc) {
-			throw new OXException("Error while running spell check", exc);
+		} catch (IOException e) {
+			throw EXCEPTIONS.createException(6, e, e.getMessage());
 		}
 	}
-	
-	public JSONArray getSpellCheckResultsAsJSONArray(final String text) throws IOException, OXException {
+
+	public JSONArray getSpellCheckResultsAsJSONArray(final String text) throws AbstractOXException {
 		return createJSONArrayFromSpellCheckResults(checkText(text));
 	}
-	
+
 	private JSONArray createJSONArrayFromSpellCheckResults(final AJAXSpellCheckResult[] results) {
 		final JSONArray retvalArr = new JSONArray();
 		for (int i = 0; i < results.length; i++) {

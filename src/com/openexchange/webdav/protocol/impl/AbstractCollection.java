@@ -66,12 +66,13 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public abstract class AbstractCollection extends AbstractResource implements
 		WebdavCollection {
 	
+	@Override
 	public boolean isCollection(){
 		return true;
 	}
 	
 	@Override
-	public void putBody(InputStream data, boolean guessSize) throws WebdavException {
+	public void putBody(final InputStream data, final boolean guessSize) throws WebdavException {
 		throw new WebdavException("Collections may not have bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
@@ -93,7 +94,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 		return null;
 	}
 	
-	public void setLanguage(String lang) throws WebdavException{
+	public void setLanguage(final String lang) throws WebdavException{
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
@@ -106,13 +107,13 @@ public abstract class AbstractCollection extends AbstractResource implements
 	}
 	
 	
-	public void setSource(String source) throws WebdavException {
+	public void setSource(final String source) throws WebdavException {
 		//IGNORE
 	}
 	
 	public void delete() throws WebdavException {
-		List<WebdavResource> copy = new ArrayList<WebdavResource>(getChildren());
-		List<WebdavException> exceptions = new ArrayList<WebdavException>();
+		final List<WebdavResource> copy = new ArrayList<WebdavResource>(getChildren());
+		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
 		for(WebdavResource res : copy) {
 			try {
 				res.delete();
@@ -132,23 +133,25 @@ public abstract class AbstractCollection extends AbstractResource implements
 
 	protected abstract void internalDelete() throws WebdavException;
 	
-	public AbstractCollection instance(String url) throws WebdavException {
+	@Override
+	public AbstractCollection instance(final String url) throws WebdavException {
 		return (AbstractCollection) getFactory().resolveCollection(url);
 	}
 	
 	@Override
-	public WebdavResource copy(String dest, boolean noroot, boolean overwrite) throws WebdavException {
-		List<WebdavException> exceptions = new ArrayList<WebdavException>();
+	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
 		try {
 			WebdavResource copy = null;
-			if(!noroot)
+			if(!noroot) {
 				copy = super.copy(dest,noroot, overwrite);
-			else
+			} else {
 				copy = getFactory().resolveCollection(dest);
+			}
 			
 			for(WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
-				String oldUri = res.getUrl();
-				String name = oldUri.substring(oldUri.lastIndexOf("/")+1);
+				final String oldUri = res.getUrl();
+				final String name = oldUri.substring(oldUri.lastIndexOf('/')+1);
 				try {
 					res.copy(dest+"/"+name);
 				} catch (WebdavException x) {
@@ -165,7 +168,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 		throw new IllegalStateException("Impossible");
 	}
 	
-	public void setLength(Long l) throws WebdavException {
+	public void setLength(final Long l) throws WebdavException {
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
@@ -173,15 +176,15 @@ public abstract class AbstractCollection extends AbstractResource implements
 		return null;
 	}
 	
-	public void setContentType(String s) throws WebdavException {
+	public void setContentType(final String s) throws WebdavException {
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(String subPath) throws WebdavException {
+	public WebdavResource resolveResource(final String subPath) throws WebdavException {
 		return getFactory().resolveResource(getUrl()+"/"+subPath);
 	}
 
-	public WebdavCollection resolveCollection(String subPath) throws WebdavException {
+	public WebdavCollection resolveCollection(final String subPath) throws WebdavException {
 		return getFactory().resolveCollection(getUrl()+"/"+subPath);
 	}
 
@@ -193,6 +196,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 		}
 	}
 	
+	@Override
 	public boolean hasBody(){
 		return false;
 	}
@@ -217,19 +221,22 @@ public abstract class AbstractCollection extends AbstractResource implements
 		
 		public boolean hasNext() {
 			if(subIterator != null) {
-				if(subIterator.hasNext())
+				if(subIterator.hasNext()) {
 					return true;
+				}
 				subIterator = null;
 			}
 			return childIterator.hasNext();
 		}
 
 		public WebdavResource next() {
-			if(subIterator != null && subIterator.hasNext())
+			if(subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
-			WebdavResource res = childIterator.next();
-			if(res.isCollection())
+			}
+			final WebdavResource res = childIterator.next();
+			if(res.isCollection()) {
 				subIterator = res.toCollection().iterator();
+			}
 			return res;
 		}
 

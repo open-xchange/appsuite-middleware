@@ -219,7 +219,9 @@ public class Contacts implements DeleteListener {
 		int origType = bi.getType();
 
 		StringBuilder logi = new StringBuilder("OUR IMAGE -> mime="+mime+" / type="+origType+" / width="+origWidth+" / height="+origHeigh+" / byte[] size="+img.length);
-		LOG.debug(logi.toString());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(logi.toString());
+		}
 		/*
 		if ((origHeigh > scaledHeight || origWidth > scaledWidth) && mime.toLowerCase().contains("gif")){
 			throw EXCEPTIONS.createOXConflictException(2);
@@ -244,8 +246,9 @@ public class Contacts implements DeleteListener {
 					sWd = scaledWidth;
 					sHd = scaledWidth;
 				}
-	
-				LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio).toString());
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio).toString());
+				}
 				
 			} else if (origWidth > origHeigh){
 				float w1 = origWidth;
@@ -262,8 +265,9 @@ public class Contacts implements DeleteListener {
 				sWd =  Math.round(widthFloat);
 				sHd = Math.round(heighFloat);
 
-				
-				LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio));
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio));
+				}
 				
 			} else if (origWidth < origHeigh){
 				float w1 = origWidth;
@@ -280,8 +284,9 @@ public class Contacts implements DeleteListener {
 				
 				sWd = Math.round(widthFloat);
 				sHd = Math.round(heighFloat);
-				
-				LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio));
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio));
+				}
 			}
 		
 			BufferedImage scaledBufferedImage = new BufferedImage(sWd, sHd, origType);
@@ -465,7 +470,9 @@ public class Contacts implements DeleteListener {
 			Date ddd = new Date(lmd);
 			co.setLastModified(ddd);
 			
-			LOG.debug(new StringBuilder("INFO: YOU WANT TO INSERT THIS: cid="+so.getContext().getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("INFO: YOU WANT TO INSERT THIS: cid="+so.getContext().getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
+			}
 			
 			ps.execute();	
 
@@ -694,7 +701,9 @@ public class Contacts implements DeleteListener {
 			java.util.Date server_date = original.getLastModified();
 			
 			try{
-				LOG.debug(new StringBuilder("Compare Dates for Contact Update\nClient-Date="+client_date.getTime()+"\nServer-Date="+server_date.getTime()));
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder("Compare Dates for Contact Update\nClient-Date="+client_date.getTime()+"\nServer-Date="+server_date.getTime()));
+				}
 				
 				if (client_date != null && client_date.getTime() > -1 && client_date.getTime() < server_date.getTime()) {
 					throw EXCEPTIONS.createOXConcurrentModificationException(19);
@@ -807,7 +816,9 @@ public class Contacts implements DeleteListener {
 			
 			writecon.setAutoCommit(false);
 			
-			LOG.debug(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
+			}
 			//System.out.println(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
 			ps.execute();	
 
@@ -1170,7 +1181,9 @@ public class Contacts implements DeleteListener {
 					ps.setString(7, dleo.getEmailaddress());
 					ps.setInt(8,cid);
 					
-					LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
+					}
 					
 					ps.execute();									
 				} finally {
@@ -1355,7 +1368,9 @@ public class Contacts implements DeleteListener {
 						ps.setString(8, dleo.getEmailaddress());
 						ps.setInt(12, cid);
 						
-						LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
+						}
 						
 						ps.execute();
 					
@@ -1395,7 +1410,9 @@ public class Contacts implements DeleteListener {
 		try {
 			ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
 			ps.setInt(1, id);
-			LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+			}
 			ps.execute();
 		} catch (SQLException se) {
 			throw EXCEPTIONS.create(48,se,cid,id);
@@ -1424,7 +1441,9 @@ public class Contacts implements DeleteListener {
 							ps.setInt(3, dleo.getEmailfield());			
 						}
 						ps.setInt(4, cid);
-						LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
+						}
 						ps.execute();
 					} finally {
 						try{
@@ -1542,7 +1561,9 @@ public class Contacts implements DeleteListener {
 					ps.setString(3, leo.getContactDisplayname());
 					ps.setString(4, leo.getLinkDisplayname());
 					ps.setInt(5, cid);
-					LOG.debug(new StringBuilder("INSERT LINKAGE "+ps.toString()));
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder("INSERT LINKAGE ").append(ps.toString()));
+					}
 					ps.execute();
 				} finally {
 					try{
@@ -1646,7 +1667,9 @@ public class Contacts implements DeleteListener {
 						ps.setInt(1, id);
 						ps.setInt(2, leo.getLinkID());
 						ps.setInt(3, cid);
-						LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY"+ps.toString()));
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(ps.toString()));
+						}
 						ps.execute();
 					} finally {
 						try{
@@ -1759,7 +1782,9 @@ public class Contacts implements DeleteListener {
 			ps.setBytes(2, img);
 			ps.setString(3, mime);
 			ps.setInt(4, cid);
-			LOG.debug(new StringBuilder("INSERT IMAGE "+ps.toString()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
+			}
 			ps.execute();
 		} catch (SQLException se) {
 			throw EXCEPTIONS.create(37,se,cid,contact_id);
@@ -1801,7 +1826,9 @@ public class Contacts implements DeleteListener {
 			ps.setInt(4, cid);
 			ps.setInt(5, contact_id);
 			ps.setInt(6, cid);
-			LOG.debug(new StringBuilder("UPDATE IMAGE "+ps.toString()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
+			}
 			ps.execute();
 		} catch (SQLException se) {
 			throw EXCEPTIONS.create(39,se,cid,contact_id);
@@ -1817,7 +1844,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static boolean performContactReadCheckByID(int objectId, int user, int[] group, Context ctx, UserConfiguration uc) throws OXException, DBPoolingException {
+	public static boolean performContactReadCheckByID(int objectId, int user, int[] group, Context ctx, UserConfiguration uc) throws DBPoolingException {
 		
 		Connection readCon = null;
 		ResultSet rs = null;
@@ -2263,8 +2290,9 @@ public class Contacts implements DeleteListener {
 				ec.delete(co);
 			}
 			
-			
-			LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
+			}
 			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
 
 		} catch (InvalidStateException is){

@@ -64,15 +64,16 @@ public abstract class AbstractAttachmentAction extends AbstractDBAction
 	
 	private AttachmentQueryCatalog queryCatalog = null;
 	
-	protected int fillFields(AttachmentMetadata attachment, PreparedStatement stmt) throws SQLException {
-		GetSwitch get = new GetSwitch(attachment);
+	protected int fillFields(final AttachmentMetadata attachment, final PreparedStatement stmt) throws SQLException {
+		final GetSwitch get = new GetSwitch(attachment);
 		int i = 1;
 		for(AttachmentField field : queryCatalog.getFields()) {
 			Object value = field.doSwitch(get);
-			if(isDateField(field))
-				value = ((Date)value).getTime();
+			if(isDateField(field)) {
+				value = Long.valueOf(((Date)value).getTime());
+			}
 			if(field.equals(AttachmentField.RTF_FLAG_LITERAL)) {
-				value =  (attachment.getRtfFlag() ) ? 1 : 0;
+				value = Integer.valueOf((attachment.getRtfFlag() ) ? 1 : 0);
 			}
 			stmt.setObject(i++,value);
 		}
@@ -80,12 +81,12 @@ public abstract class AbstractAttachmentAction extends AbstractDBAction
 		return i;
 	}
 	
-	private final boolean isDateField(AttachmentField field) {
+	private final boolean isDateField(final AttachmentField field) {
 		return field.equals(AttachmentField.CREATION_DATE_LITERAL);
 	}
 	
 
-	public void setQueryCatalog(AttachmentQueryCatalog queryCatalog) {
+	public void setQueryCatalog(final AttachmentQueryCatalog queryCatalog) {
 		this.queryCatalog = queryCatalog;
 	}
 	

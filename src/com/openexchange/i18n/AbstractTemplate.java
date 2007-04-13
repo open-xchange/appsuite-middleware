@@ -56,8 +56,9 @@ public abstract class AbstractTemplate implements Template {
 
 
 	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0)
+		if(substitutions.length % 2 != 0) {
 			throw new IllegalArgumentException("Must provide matching key value pairs");
+		}
 		
 		final Map<String,String> m = new HashMap<String,String>();
 		

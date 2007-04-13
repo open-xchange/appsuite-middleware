@@ -54,16 +54,17 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavHeadAction extends AbstractAction {
 
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		head(res,req.getResource(),-1);
 	}
 	
-	protected final void head(WebdavResponse res, WebdavResource resource, long overrideLength) throws WebdavException {
-		if(resource == null)
+	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws WebdavException {
+		if(resource == null) {
 			return;
+		}
 		res.setHeader("Content-Type", resource.getContentType());
-		res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : new Long(overrideLength).toString());
+		res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : String.valueOf(overrideLength));
 		res.setHeader("ETag", resource.getETag());
 		res.setHeader("Accept-Ranges", "bytes");
 

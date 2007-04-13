@@ -224,6 +224,9 @@ public class LocalFileStorage extends FileStorage {
                 created = lock.createNewFile();
             } catch (IOException e) {
                 // Try again to create the file.
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug(e.getMessage(), e);
+            	}
             }
             if (!created) {
                 try {

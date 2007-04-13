@@ -199,7 +199,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             if (Tools.isFolderShared(folder, userId)
                 && retval.getPrivateFlag()) {
                 throw new TaskException(Code.NO_PRIVATE_PERMISSION,
-                    folder.getFolderName(), folderId);
+                    folder.getFolderName(), Integer.valueOf(folderId));
             }
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -531,6 +531,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 // If the task does not have a reminder this exception is
                 // thrown. Which is quite okay because not every task must have
                 // a reminder.
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug(e.getMessage(), e);
+            	}
             }
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -606,24 +609,24 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 while (iter.hasNext()) {
                     final FolderObject folder = (FolderObject) iter.next();
                     if (folder.isShared(userId)) {
-                        shared.add(folder.getObjectID());
+                        shared.add(Integer.valueOf(folder.getObjectID()));
                     } else if (TaskLogic.canReadInFolder(ctx, userId, groups,
                         config, folder)) {
-                        own.add(folder.getObjectID());
+                        own.add(Integer.valueOf(folder.getObjectID()));
                     } else {
-                        all.add(folder.getObjectID());
+                        all.add(Integer.valueOf(folder.getObjectID()));
                     }
                 }
             } else {
                 final FolderObject folder = Tools.getFolder(ctx,
                     search.getFolder());
                 if (folder.isShared(userId)) {
-                    shared.add(folder.getObjectID());
+                    shared.add(Integer.valueOf(folder.getObjectID()));
                 } else if (TaskLogic.canReadInFolder(ctx, userId, groups,
                     config, folder)) {
-                    own.add(folder.getObjectID());
+                    own.add(Integer.valueOf(folder.getObjectID()));
                 } else {
-                    all.add(folder.getObjectID());
+                    all.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
             all = Collections.unmodifiableList(all);

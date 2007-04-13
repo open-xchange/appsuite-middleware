@@ -145,6 +145,7 @@ public class InitWorker extends ComfireInitWorker {
 			try {
 				lll = Integer.valueOf(check).intValue();
 			} catch (NumberFormatException nfe) {
+				LOG.error(nfe.getMessage(), nfe);
 			}
 			System.out.println("LLL = " + lll);
 		}
@@ -188,12 +189,12 @@ public class InitWorker extends ComfireInitWorker {
 		EventQueue.addTaskEvent(attCleaner);
 		
 		LOG.info("Adding PropertiesCleaner");
-		PropertyCleaner propertyCleaner = new PropertyCleaner(InfostorePerformer.getInstance().getFactory().getFolderProperties(), InfostorePerformer.getInstance().getFactory().getInfoProperties());
+		final PropertyCleaner propertyCleaner = new PropertyCleaner(InfostorePerformer.getInstance().getFactory().getFolderProperties(), InfostorePerformer.getInstance().getFactory().getInfoProperties());
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
 		
 		LOG.info("Adding LockCleaner");
-		LockCleaner lockCleaner = new LockCleaner(InfostorePerformer.getInstance().getFactory().getFolderLockManager(), InfostorePerformer.getInstance().getFactory().getInfoLockManager());
+		final LockCleaner lockCleaner = new LockCleaner(InfostorePerformer.getInstance().getFactory().getFolderLockManager(), InfostorePerformer.getInstance().getFactory().getInfoLockManager());
 		EventQueue.addFolderEvent(lockCleaner);
 		EventQueue.addInfostoreEvent(lockCleaner);
 		

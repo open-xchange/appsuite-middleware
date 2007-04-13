@@ -78,6 +78,7 @@ public class Appointment extends DataServlet {
 	
 	private static final Log LOG = LogFactory.getLog(Appointment.class);
 	
+	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -132,6 +133,7 @@ public class Appointment extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -154,7 +156,7 @@ public class Appointment extends DataServlet {
 				}
 
 				if (data.charAt(0) == '[') {
-					JSONArray jsonDataArray = new JSONArray(data);
+					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
 					
 					appointmentRequest = new AppointmentRequest(sessionObj, sw);
@@ -170,7 +172,7 @@ public class Appointment extends DataServlet {
 						}
 					}
 				} else if (data.charAt(0) == '{') {
-					JSONObject jsonDataObject = new JSONObject(data);
+					final JSONObject jsonDataObject = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObject);
 					
 					appointmentRequest = new AppointmentRequest(sessionObj, sw);
@@ -221,6 +223,7 @@ public class Appointment extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
 		return sessionObj.getUserConfiguration().hasCalendar();
 	}

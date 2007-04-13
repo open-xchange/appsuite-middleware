@@ -12,21 +12,21 @@ public class AlwaysWriteConnectionProvider implements DBProvider {
 		this.delegate = delegate;
 	}
 	
-	public Connection getReadConnection(Context ctx)
+	public Connection getReadConnection(final Context ctx)
 			throws TransactionException {
 		return delegate.getWriteConnection(ctx);
 	}
 
-	public Connection getWriteConnection(Context ctx)
+	public Connection getWriteConnection(final Context ctx)
 			throws TransactionException {
 		return delegate.getWriteConnection(ctx);
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
+	public void releaseReadConnection(final Context ctx, final Connection con) {
 		delegate.releaseWriteConnection(ctx, con);
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 		delegate.releaseWriteConnection(ctx, con);
 	}
 

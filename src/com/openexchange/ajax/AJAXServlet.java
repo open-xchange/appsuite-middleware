@@ -376,7 +376,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			final char c = s.charAt(i);
 			if (c < ' ' || c > 126 || c == '"' || c == '<' || c == '>' || c == '&') {
 				w.write("&#x");
-				final String hex = Integer.toHexString((int) c & 0xffff);
+				final String hex = Integer.toHexString(/*(int) */c & 0xffff);
 				w.write(hex.toUpperCase(Locale.ENGLISH));
 				w.write(';');
 			} else {
@@ -915,6 +915,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	protected static void close(final Writer w) {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(new StringBuilder("Called close() with writer").append(w.toString()));
+		}
 		// return;
 		/*
 		 * if (w == null) { return; } try { w.flush(); //
@@ -934,11 +937,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 	}
 	
-	protected final boolean isIE(HttpServletRequest req){
+	protected final boolean isIE(final HttpServletRequest req){
 		return req.getHeader("User-Agent").contains("MSIE");
 	}
 	
-	protected final boolean isIE7(HttpServletRequest req){
+	protected final boolean isIE7(final HttpServletRequest req){
 		return req.getHeader("User-Agent").contains("MSIE 7");
 	}
 

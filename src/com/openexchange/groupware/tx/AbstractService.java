@@ -62,16 +62,16 @@ public abstract class AbstractService implements Service {
 	protected abstract void rollback(Object transaction)throws TransactionException;
 	
 	public void startTransaction() throws TransactionException {
-		long id = Thread.currentThread().getId();
+		final long id = Thread.currentThread().getId();
 		
-		if(txIds.containsKey(id)){
-			throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
+		if(txIds.containsKey(Long.valueOf(id))){
+			throw new TransactionException("There is already a transaction active at this moment", startedTx.get(Long.valueOf(id)));
 		}
 		
-		Object txId = createTransaction();
+		final Object txId = createTransaction();
 		
-		txIds.put(id,txId);
-		startedTx.put(id,Thread.currentThread().getStackTrace());
+		txIds.put(Long.valueOf(id),txId);
+		startedTx.put(Long.valueOf(id),Thread.currentThread().getStackTrace());
 	}
 	
 	public void commit() throws TransactionException{
@@ -83,12 +83,12 @@ public abstract class AbstractService implements Service {
 	}
 	
 	protected Object getActiveTransaction(){
-		return txIds.get(Thread.currentThread().getId());
+		return txIds.get(Long.valueOf(Thread.currentThread().getId()));
 	}
 	
 	public void finish() throws TransactionException{
-		txIds.remove(Thread.currentThread().getId());
-		startedTx.remove(Thread.currentThread().getId());
+		txIds.remove(Long.valueOf(Thread.currentThread().getId()));
+		startedTx.remove(Long.valueOf(Thread.currentThread().getId()));
 	}
 	
 }

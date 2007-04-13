@@ -131,7 +131,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 	}
 	
         public final void setRecurringStart(long recurring_start) {
-            long mod = recurring_start%CalendarRecurringCollection.MILLI_DAY;
+        	final long mod = recurring_start%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {
                 recurring_start = recurring_start-mod;
             }
@@ -164,7 +164,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 		this.ignoreConflicts = ignoreConflicts;
 	}
 	
-	public void setTimezone(String timezone) {
+	public void setTimezone(final String timezone) {
 		this.timezone = timezone;
 	}
 	
@@ -225,6 +225,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 		return b_timezone;
 	}
 	
+	@Override
 	public void reset() {
 		super.reset();
 		
@@ -241,31 +242,39 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 		b_timezone = false;
 	}
 	
+	@Override
 	public int hashCode() {
 		return objectId;
 	}
 	
+	@Override
 	public boolean equals(final Object o) {
 		if (o instanceof AppointmentObject) {
 			if (((AppointmentObject)o).hashCode() == hashCode()) {
 				return true;
-			} else {
-				return false;
 			}
-		} else {
 			return false;
 		}
+		return false;
 	}
 	
+	@Override
 	public Object clone() {
-		final AppointmentObject appointmentobject = new AppointmentObject();
-		appointmentobject.setLabel(getLabel());
-		appointmentobject.setFullTime(getFullTime());
-		appointmentobject.setLocation(getLocation());
-		appointmentobject.setShownAs(getShownAs());
-		appointmentobject.setLabel(getLabel());
-		appointmentobject.setOccurrence(getOccurrence());
-		appointmentobject.setTimezone(getTimezone());
-		return appointmentobject;
+		try {
+			final AppointmentObject appointmentobject = (AppointmentObject) super.clone();/*new AppointmentObject();*/
+			appointmentobject.setLabel(getLabel());
+			appointmentobject.setFullTime(getFullTime());
+			appointmentobject.setLocation(getLocation());
+			appointmentobject.setShownAs(getShownAs());
+			appointmentobject.setLabel(getLabel());
+			appointmentobject.setOccurrence(getOccurrence());
+			appointmentobject.setTimezone(getTimezone());
+			return appointmentobject;
+		} catch (CloneNotSupportedException e) {
+			/*
+			 * Cannot occur since we are cloneable
+			 */
+			throw new InternalError(e.getMessage());
+		}
 	}
 }

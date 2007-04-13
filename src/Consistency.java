@@ -49,11 +49,9 @@
 
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -71,15 +69,15 @@ import com.openexchange.database.AssignmentStorage;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
@@ -109,8 +107,8 @@ public class Consistency {
 	
 	private Log LOG = LogFactory.getLog(DBDelProblemSolver.class);
 	
-	private void outputSet(SortedSet<String> set) {
-		Iterator<String> itstr = set.iterator();
+	private void outputSet(final SortedSet<String> set) {
+		final Iterator<String> itstr = set.iterator();
 		while (itstr.hasNext()) {
 			LOG.info(itstr.next());
 		}
@@ -121,7 +119,7 @@ public class Consistency {
 	 *
 	 */
 	private boolean diffset(final SortedSet<String> first,
-			SortedSet<String> second, String name, String name2) {
+			final SortedSet<String> second, final String name, final String name2) {
 		boolean retval = false;
 		first.removeAll(second);
 		if (!first.isEmpty()) {
@@ -133,25 +131,25 @@ public class Consistency {
 		return retval;
 	}
 	
-	private void checkOneContext(Context ctx)
-		throws IOException, FilestoreException, FileStorageException {
-		DatabaseImpl DATABASE = new DatabaseImpl(new DBPoolProvider());
-		FileStorage stor = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
+	private void checkOneContext(final Context ctx)
+		throws FilestoreException, FileStorageException {
+		final DatabaseImpl DATABASE = new DatabaseImpl(new DBPoolProvider());
+		final FileStorage stor = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
 				new DBPoolProvider()); 
-		AttachmentBase attach = Attachments.getInstance();
+		final AttachmentBase attach = Attachments.getInstance();
 		// We believe in the worst case, so lets check the storage first, so
 		// that the state file is recreated
 		stor.recreateStateFile();
 		
-		SortedSet<String> filestoreset = stor.getFileList();
-		SortedSet<String> attachmentset =
+		final SortedSet<String> filestoreset = stor.getFileList();
+		final SortedSet<String> attachmentset =
 			attach.getAttachmentFileStoreLocationsperContext(ctx);
 		SortedSet<String> dbfileset;
 		SortedSet<String> dbdelfileset;
 		try {
 			dbfileset = DATABASE.getDocumentFileStoreLocationsperContext(ctx);
 			dbdelfileset = DATABASE.getDelDocumentFileStoreLocationsperContext(ctx);
-			SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset); 
+			final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset); 
 			joineddbfileset.addAll(dbdelfileset);
 			joineddbfileset.addAll(attachmentset);
 			
@@ -213,8 +211,8 @@ public class Consistency {
 		}
 	}
 
-	private void runSolver(boolean dummy,
-			SortedSet<String> set, Context ctx, ProblemSolver solver) {
+	private void runSolver(final boolean dummy,
+			final SortedSet<String> set, final Context ctx, final ProblemSolver solver) {
 		if (!dryrun) {
 			LOG.info("Now trying to solve this...");
 			if (dummy) {
@@ -223,7 +221,7 @@ public class Consistency {
 				solver.deleteEntries(set, ctx);					
 			}
 			try {
-				FileStorage stor = solver.getStorage();
+				final FileStorage stor = solver.getStorage();
 				if (stor instanceof QuotaFileStorage) {
 					LOG.info("Recalculating usage...");
 					((QuotaFileStorage)stor).recalculateUsage();
@@ -235,31 +233,31 @@ public class Consistency {
 	}
 	
 	private void completeContextChecking() 
-			throws ContextException, IOException, FilestoreException, FileStorageException {
-		ContextStorage ctxstor = ContextStorage.getInstance();
-		List<Integer> list = ctxstor.getAllContextIds();
-		Iterator<Integer> it = list.iterator();
+			throws ContextException, FilestoreException, FileStorageException {
+		final ContextStorage ctxstor = ContextStorage.getInstance();
+		final List<Integer> list = ctxstor.getAllContextIds();
+		final Iterator<Integer> it = list.iterator();
 		
 		while (it.hasNext()) {
-			int cid = it.next();
+			final int cid = it.next().intValue();
 			LOG.info("-------------------------------------");
 			LOG.info("Checking Context Nr. " + cid + " ....");
-			Context ctx = ctxstor.getContext(cid);
+			final Context ctx = ctxstor.getContext(cid);
 			checkOneContext(ctx);
 		}
 	}
 
-	private List<Integer> getContextIdstoFilestore(int filestore_id) throws ContextException {
-		ContextStorage ctxstor = ContextStorage.getInstance();
-		List<Integer> ids  = ctxstor.getAllContextIds();
-		List<Integer> retval = new ArrayList<Integer>();
-		Iterator<Integer> it = ids.iterator();
+	private List<Integer> getContextIdstoFilestore(final int filestore_id) throws ContextException {
+		final ContextStorage ctxstor = ContextStorage.getInstance();
+		final List<Integer> ids  = ctxstor.getAllContextIds();
+		final List<Integer> retval = new ArrayList<Integer>();
+		final Iterator<Integer> it = ids.iterator();
 		
 		while (it.hasNext()) {
-			int cid = it.next();
-			Context ctx = ctxstor.getContext(cid);
+			final int cid = it.next().intValue();
+			final Context ctx = ctxstor.getContext(cid);
 			if (ctx.getFilestoreId() == filestore_id) {
-				retval.add(ctx.getContextId());
+				retval.add(Integer.valueOf(ctx.getContextId()));
 			}
 
 		}
@@ -270,7 +268,7 @@ public class Consistency {
 		/*
 		 * First select the contexts which are stored in that database...
 		 */
-		ContextStorage ctxstor = ContextStorage.getInstance();
+		final ContextStorage ctxstor = ContextStorage.getInstance();
 		List<Integer> list;
 		try {
 			list = AssignmentStorage.listContexts(database);
@@ -278,19 +276,17 @@ public class Consistency {
 				LOG.info("There are no contexts which stored their " +
 					"data in " + database);
 			} else {
-				Iterator<Integer> it = list.iterator();
+				final Iterator<Integer> it = list.iterator();
 				
 				while (it.hasNext()) {
 					Context ctx;
 					try {
-						int cid = it.next();
+						final int cid = it.next().intValue();
 						LOG.info("-------------------------------------");
 						LOG.info("Checking Context Nr. " + cid + " ....");
 						ctx = ctxstor.getContext(cid);
 						checkOneContext(ctx);
 					} catch (ContextException e) {
-						LOG.debug("", e);
-					} catch (IOException e) {
 						LOG.debug("", e);
 					} catch (FilestoreException e) {
                         LOG.debug(e.getMessage(), e);
@@ -312,7 +308,7 @@ public class Consistency {
 		 * First select the contexts which have stored their data in that
 		 * filestore...
 		 */
-		ContextStorage ctxstor = ContextStorage.getInstance();
+		final ContextStorage ctxstor = ContextStorage.getInstance();
 		List<Integer> list;
 		try {
 			list = getContextIdstoFilestore(filestore);
@@ -321,20 +317,18 @@ public class Consistency {
 				LOG.info("There are no contexts which stored their " +
 					"data in " + filestore);
 			} else {
-				Iterator<Integer> it = list.iterator();
+				final Iterator<Integer> it = list.iterator();
 				
 				while (it.hasNext()) {
 					Context ctx;
 					try {
-						int cid = it.next();
+						final int cid = it.next().intValue();
 						LOG.info("-------------------------------------");
 						LOG.info("Checking Context Nr. " + cid + " ....");
 						ctx = ctxstor.getContext(cid);
 						checkOneContext(ctx);
 
 					} catch (ContextException e) {
-						LOG.debug("", e);
-					} catch (IOException e) {
 						LOG.debug("", e);
 					} catch (FilestoreException e) {
                         LOG.debug(e.getMessage(), e);
@@ -387,9 +381,8 @@ public class Consistency {
 	}
 	
 	public void start(final String[] args) {
-		Properties p = System.getProperties();
-		String path;
-		path = p.getProperty("user.dir");
+		/*Properties p = System.getProperties();*/
+		/*String path = p.getProperty("user.dir");*/
 		ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
             ConfigurationInit.init();
@@ -460,8 +453,6 @@ public class Consistency {
 				}
 			} catch (ContextException e) {
 				LOG.debug("",e);
-			} catch (IOException e) {
-				LOG.debug("", e);
 			} catch (FilestoreException e) {
                 LOG.debug(e.getMessage(), e);
             } catch (FileStorageException e) {
@@ -477,7 +468,7 @@ public class Consistency {
 	 * @throws ContextException 
 	 */
 	public static void main(final String[] args) {
-		Consistency consist = new Consistency();
+		final Consistency consist = new Consistency();
 		consist.start(args);
 	}
 }

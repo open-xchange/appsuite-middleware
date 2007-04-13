@@ -51,14 +51,22 @@
 
 package com.openexchange.webdav.xml;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
@@ -69,13 +77,6 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 import com.openexchange.webdav.xml.fields.CalendarFields;
-import java.io.OutputStream;
-import java.util.Date;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
 /**
  * AppointmentWriter
@@ -129,8 +130,8 @@ public class AppointmentWriter extends CalendarWriter {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void startWriter(int objectId, int folderId, OutputStream os) throws Exception {
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
@@ -144,9 +145,9 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 	}
 	
-	public void startWriter(boolean modified, boolean deleted, int folder_id, Date lastsync, OutputStream os) throws Exception {
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
-		XMLOutputter xo = new XMLOutputter();
+	public void startWriter(final boolean modified, final boolean deleted, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+		final XMLOutputter xo = new XMLOutputter();
 		
 		SearchIterator it = null;
 		
@@ -174,17 +175,17 @@ public class AppointmentWriter extends CalendarWriter {
 		
 	}
 	
-	public void writeIterator(SearchIterator it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject((AppointmentObject)it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(AppointmentObject appointmentobject, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final AppointmentObject appointmentobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		writeObject(appointmentobject, new Element("prop", "D", "DAV:"), delete, xo, os);
 	}
 	
-	public void writeObject(AppointmentObject appointmentobject, Element e_prop, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final AppointmentObject appointmentobject, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		int status = 200;
 		String description = "OK";
 		int object_id = 0;
@@ -202,11 +203,11 @@ public class AppointmentWriter extends CalendarWriter {
 		writeResponseElement(e_prop, object_id, status, description, xo, os);
 	}
 	
-	protected void addContent2PropElement(Element e_prop, AppointmentObject ao, boolean delete) throws Exception {
+	protected void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete) throws Exception {
 		addContent2PropElement(e_prop, ao, delete, false);
 	}
 	
-	protected void addContent2PropElement(Element e_prop, AppointmentObject ao, boolean delete, boolean externalUse) throws Exception {
+	protected void addContent2PropElement(final Element e_prop, final AppointmentObject ao, final boolean delete, final boolean externalUse) throws Exception {
 		if (delete) {
 			addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
 			addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
@@ -214,14 +215,14 @@ public class AppointmentWriter extends CalendarWriter {
 		} else {
 			addElement("object_status", "CREATE", e_prop);
 			
-			boolean fullTime = ao.getFullTime();
+			final boolean fullTime = ao.getFullTime();
 			
 			if (ao.getRecurrenceType() == CalendarObject.NONE) {
 				addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
 				addElement(CalendarFields.END_DATE, ao.getEndDate(), e_prop);
 			} else {
 				if (!externalUse) {
-					RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
+					final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(ao);
 					if (recuResults.size() == 1) {
 						ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 						ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
@@ -239,9 +240,9 @@ public class AppointmentWriter extends CalendarWriter {
 			}
 			
 			if (ao.containsDeleteExceptions()) {
-				Date[] deleteExceptions = ao.getDeleteException();
+				final Date[] deleteExceptions = ao.getDeleteException();
 				if (deleteExceptions != null) {
-					StringBuffer stringBuffer = new StringBuffer();
+					final StringBuffer stringBuffer = new StringBuffer();
 					for (int a = 0; a < deleteExceptions.length; a++) {
 						if (a > 0) {
 							stringBuffer.append(',');
@@ -254,9 +255,9 @@ public class AppointmentWriter extends CalendarWriter {
 			}
 			
 			if (ao.containsChangeExceptions()) {
-				Date[] changeException = ao.getChangeException();
+				final Date[] changeException = ao.getChangeException();
 				if (changeException != null) {
-					StringBuffer stringBuffer = new StringBuffer();
+					final StringBuffer stringBuffer = new StringBuffer();
 					for (int a = 0; a < changeException.length; a++) {
 						if (a > 0) {
 							stringBuffer.append(',');
@@ -293,6 +294,7 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 	}
 	
+	@Override
 	protected int getModule() {
 		return Types.APPOINTMENT;
 	}

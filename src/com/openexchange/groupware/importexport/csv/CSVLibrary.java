@@ -86,11 +86,15 @@ import com.openexchange.sessiond.SessionObject;
 		"Could not create folderId from String %s",
 		"Could not read InputStream as String"})
 public class CSVLibrary {
-	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CSVLibrary.class);
+	
+	protected static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVLibrary.class);
 	public static final char CELL_DELIMITER = ',';
 	public static final char ROW_DELIMITER = '\n';
 
-	public static FolderObject getFolderObject(SessionObject sessObj, String folder) throws ImportExportException {
+	public static FolderObject getFolderObject(final SessionObject sessObj, final String folder) throws ImportExportException {
 		final int folderId = getFolderId(folder);
 		FolderObject fo = null;
 		try {
@@ -105,7 +109,7 @@ public class CSVLibrary {
 		return fo;
 	}
 
-	public static int getFolderId(String folderString) throws ImportExportException {
+	public static int getFolderId(final String folderString) throws ImportExportException {
 		try{
 			return Integer.parseInt(folderString);
 		} catch (NumberFormatException e) {
@@ -113,8 +117,8 @@ public class CSVLibrary {
 		}
 	}
 
-	public static List<String> convertToList(int[] cols) {
-		List<String> l = new LinkedList<String>();
+	public static List<String> convertToList(final int[] cols) {
+		final List<String> l = new LinkedList<String>();
 		for(int col : cols){
 			l.add( Contacts.mapping[col].getReadableTitle() );
 		}
@@ -124,10 +128,10 @@ public class CSVLibrary {
 	/**
 	 * ...because Java5, basic data types and Arrays don't mix
 	 */
-	public static Set<Integer> transformIntArrayToSet(int[] arr) {
-		LinkedHashSet<Integer> s = new LinkedHashSet<Integer>();
+	public static Set<Integer> transformIntArrayToSet(final int[] arr) {
+		final LinkedHashSet<Integer> s = new LinkedHashSet<Integer>();
 		for(int val : arr){
-			s.add(val);
+			s.add(Integer.valueOf(val));
 		}
 		return s;
 	}
@@ -135,18 +139,18 @@ public class CSVLibrary {
 	/**
 	 * ...because Java5, basic data types and Arrays don't mix
 	 */
-	public static int[] transformSetToIntArray(Set<Integer> s) {
+	public static int[] transformSetToIntArray(final Set<Integer> s) {
 		int[] ret = new int[s.size()];
 		int i = 0;
 		for(Integer val : s){
-			ret[i++] = val;
+			ret[i++] = val.intValue();
 		}
 		return ret;
 	}
 	
-	public static String transformInputStreamToString(InputStream is) throws ImportExportException{
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		StringBuilder bob = new StringBuilder();
+	public static String transformInputStreamToString(final InputStream is) throws ImportExportException{
+		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		final StringBuilder bob = new StringBuilder();
 		String buffer;
 		try {
 			while( (buffer = br.readLine()) != null){
@@ -156,7 +160,14 @@ public class CSVLibrary {
 		} catch (IOException e) {
 			throw EXCEPTIONS.create(2);
 		} finally {
-			try { br.close(); } catch (IOException e) { /*already closed*/}
+			try {
+				br.close();
+			} catch (IOException e) {
+				/* 
+				 * already closed
+				 */
+				LOG.error(e.getMessage(), e);
+			}
 		}
 		return bob.toString();
 	}

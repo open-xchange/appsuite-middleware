@@ -156,7 +156,7 @@ public class AppointmentRequest {
 		return timestamp;
 	}
 	
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
 			actionConfirm(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -186,21 +186,21 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionNew(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+	public void actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		CalendarDataObject appointmentObj = new CalendarDataObject();
+		final CalendarDataObject appointmentObj = new CalendarDataObject();
 		appointmentObj.setContext(sessionObj.getContext());
 		
-		AppointmentParser appointmentParser = new AppointmentParser(timeZone);
+		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);
 		
 		if (!appointmentObj.containsParentFolderID()) {
 			throw new OXMandatoryFieldException("missing folder");
 		}
 		
-		AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-		CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+		final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 		
 		jsonWriter.object();
 		try {
@@ -208,7 +208,7 @@ public class AppointmentRequest {
 				jsonWriter.key("conflicts");
 				jsonWriter.array();
 				try {
-					AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
+					final AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
 					for (int a = 0; a < conflicts.length; a++) {
 						appointmentWriter.writeAppointment(conflicts[a]);
 					}
@@ -224,22 +224,22 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionUpdate(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
-		int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
+		final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		CalendarDataObject appointmentObj = new CalendarDataObject();
+		final CalendarDataObject appointmentObj = new CalendarDataObject();
 		appointmentObj.setContext(sessionObj.getContext());
 		
-		AppointmentParser appointmentParser = new AppointmentParser(timeZone);
+		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);
 		
 		appointmentObj.setObjectID(objectId);
 		
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
-		CalendarDataObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+		final CalendarDataObject[] conflicts = appointmentsql.updateAppointmentObject(appointmentObj, inFolder, timestamp);
 		
 		jsonWriter.object();
 		
@@ -250,7 +250,7 @@ public class AppointmentRequest {
 				
 				jsonWriter.key("conflicts");
 				jsonWriter.array();
-				AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
+				final AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
 				try {
 					for (int a = 0; a < conflicts.length; a++) {
 						appointmentWriter.writeAppointment(conflicts[a]);
@@ -267,23 +267,23 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionUpdates(JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
+	public void actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
 		Date lastModified = null;
 		
 		timestamp = new Date(0);
 		
 		SearchIterator it = null;
 		
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		final Date startUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
 		final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
 		final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
 		final Date end = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
-		String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+		final String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
-		int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
 		boolean showAppointmentInAllFolders = false;
 		
@@ -311,8 +311,8 @@ public class AppointmentRequest {
 			return;
 		}
 		
-		AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+		final AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		
 		try {
 			if (!bIgnoreModified) {
@@ -327,7 +327,7 @@ public class AppointmentRequest {
 				}
 
 				while (it.hasNext()) {
-					CalendarDataObject appointmentObj = (CalendarDataObject)it.next();
+					final CalendarDataObject appointmentObj = (CalendarDataObject)it.next();
 					
 					if (appointmentObj.getRecurrenceType() != CalendarObject.NONE && appointmentObj.getRecurrencePosition() == 0) {
 						appointmentObj.calculateRecurrence();
@@ -340,7 +340,7 @@ public class AppointmentRequest {
 						}
 						
 						for (int a = 0; a < recuResults.size(); a++) {
-							RecurringResult result = recuResults.getRecurringResult(a);
+							final RecurringResult result = recuResults.getRecurringResult(a);
 							appointmentObj.setStartDate(new Date(result.getStart()));
 							appointmentObj.setEndDate(new Date(result.getEnd()));
 							appointmentObj.setRecurrencePosition(result.getPosition());
@@ -370,7 +370,7 @@ public class AppointmentRequest {
 			if (!bIgnoreDelete) {
 				it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, timestamp);
 				while (it.hasNext()) {
-					AppointmentObject appointmentObj = (AppointmentObject)it.next();
+					final AppointmentObject appointmentObj = (AppointmentObject)it.next();
 					
 					jsonWriter.value(appointmentObj.getObjectID());
 					
@@ -391,13 +391,13 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionDelete(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		CalendarDataObject appointmentObj = new CalendarDataObject();
+		final CalendarDataObject appointmentObj = new CalendarDataObject();
 		appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
-		int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
+		final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
 		
 		if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
 			appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
@@ -405,7 +405,7 @@ public class AppointmentRequest {
 		
 		appointmentObj.setContext(sessionObj.getContext());
 		
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		
 		try {
 			appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
@@ -415,54 +415,54 @@ public class AppointmentRequest {
 //		jsonWriter.value("");
 	}
 	
-	public void actionList(JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
+	public void actionList(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
 		
 		SearchIterator it = null;
 		
-		HashMap<Integer, ArrayList> recurrencePositionMap = new HashMap();
+		final HashMap<Integer, ArrayList<Integer>> recurrencePositionMap = new HashMap<Integer, ArrayList<Integer>>();
 		
 		
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+		final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		HashMap<Integer, Integer> objectIdMap = new HashMap();
+		final HashMap<Integer, Integer> objectIdMap = new HashMap<Integer, Integer>();
 		for (int a = 0; a < jData.length(); a++) {
-			JSONObject jObject = jData.getJSONObject(a);
-			int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
-			int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
+			final JSONObject jObject = jData.getJSONObject(a);
+			final int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
+			final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 			
-			objectIdMap.put(objectId, folderId);
+			objectIdMap.put(Integer.valueOf(objectId), Integer.valueOf(folderId));
 			
 			if (jObject.has(CalendarFields.RECURRENCE_POSITION)) {
 				final int recurrencePosition = DataParser.checkInt(jObject, CalendarFields.RECURRENCE_POSITION);
 				ArrayList<Integer> recurrencePosList = null;
-				if (recurrencePositionMap.containsKey(objectId)) {
-					recurrencePosList = recurrencePositionMap.get(objectId);
+				if (recurrencePositionMap.containsKey(Integer.valueOf(objectId))) {
+					recurrencePosList = recurrencePositionMap.get(Integer.valueOf(objectId));
 				} else {
-					recurrencePosList = new ArrayList();
+					recurrencePosList = new ArrayList<Integer>();
 				}
-				recurrencePosList.add(recurrencePosition);
-				recurrencePositionMap.put(objectId, recurrencePosList);
+				recurrencePosList.add(Integer.valueOf(recurrencePosition));
+				recurrencePositionMap.put(Integer.valueOf(objectId), recurrencePosList);
 			}
 		}
 		
 		int[][] objectIdAndFolderId = new int[objectIdMap.size()][2];
 		int i = 0;
-		Iterator iterator = objectIdMap.keySet().iterator();
+		final Iterator iterator = objectIdMap.keySet().iterator();
 		while (iterator.hasNext()) {
-			int objectId = ((Integer)iterator.next()).intValue();
-			int folderId = ((Integer)objectIdMap.get(objectId)).intValue();
+			final int objectId = ((Integer)iterator.next()).intValue();
+			final int folderId = (objectIdMap.get(Integer.valueOf(objectId))).intValue();
 			
 			objectIdAndFolderId[i][0] = objectId;
 			objectIdAndFolderId[i][1] = folderId;
 			i++;
 		}
 		
-		AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
 		
 		int counter = 0;
@@ -479,15 +479,15 @@ public class AppointmentRequest {
 				
 				if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
 					appointmentobject.calculateRecurrence();
-					if (recurrencePositionMap.containsKey(appointmentobject.getObjectID())) {
-						final ArrayList<Integer> recurrencePosList = recurrencePositionMap.get(appointmentobject.getObjectID());
+					if (recurrencePositionMap.containsKey(Integer.valueOf(appointmentobject.getObjectID()))) {
+						final ArrayList<Integer> recurrencePosList = recurrencePositionMap.get(Integer.valueOf(appointmentobject.getObjectID()));
 						
 						for (int a = 0; a < recurrencePosList.size(); a++) {
 							appointmentobject.setStartDate(startDate);
 							appointmentobject.setEndDate(endDate);
 							final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, 0, 0, recurrencePosList.get(a).intValue());
 							if (recuResults.size() > 0) {
-								RecurringResult result = recuResults.getRecurringResult(0);
+								final RecurringResult result = recuResults.getRecurringResult(0);
 								appointmentobject.setStartDate(new Date(result.getStart()));
 								appointmentobject.setEndDate(new Date(result.getEnd()));
 								appointmentobject.setRecurrencePosition(result.getPosition());
@@ -503,7 +503,7 @@ public class AppointmentRequest {
 					} else {
 						final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentobject);
 						if (recuResults.size() > 0) {
-							RecurringResult result = recuResults.getRecurringResult(0);
+							final RecurringResult result = recuResults.getRecurringResult(0);
 							appointmentobject.setStartDate(new Date(result.getStart()));
 							appointmentobject.setEndDate(new Date(result.getEnd()));
 							appointmentobject.setRecurrencePosition(result.getPosition());
@@ -537,7 +537,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionAll(JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException {
 		timestamp = new Date(0);
 		
 		SearchIterator it = null;
@@ -550,8 +550,8 @@ public class AppointmentRequest {
 		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 		final int folderId = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
-		int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-		String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
 		boolean showAppointmentInAllFolders = false;
 		
@@ -559,31 +559,31 @@ public class AppointmentRequest {
 			showAppointmentInAllFolders = true;
 		}
 		
-		Date lastModified = new Date(0);
+		/*Date lastModified = new Date(0);*/
 		
 		
 		jsonWriter.array();
 		try {
-			AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 			if (showAppointmentInAllFolders) {
 				it = appointmentsql.getAppointmentsBetween(sessionObj.getUserObject().getId(), start, end, _appointmentFields, orderBy, orderDir);
 			} else {
 				it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
 			}
-			
+			Date lastModified = new Date(0);
 			while (it.hasNext()) {
-				CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
+				final CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
 				
 				if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
 					appointmentobject.calculateRecurrence();
-					RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+					final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
 					for (int a = 0; a < recuResults.size(); a++) {
-						RecurringResult result = recuResults.getRecurringResult(a);
+						final RecurringResult result = recuResults.getRecurringResult(a);
 						appointmentobject.setStartDate(new Date(result.getStart()));
 						appointmentobject.setEndDate(new Date(result.getEnd()));
 						appointmentobject.setRecurrencePosition(result.getPosition());
 						
-						AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+						final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 						
 						if (appointmentobject.getFullTime() && appointmentobject.getStartDate().getTime() == appointmentobject.getEndDate().getTime()) {
 							appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + (24*60*60*1000)));
@@ -592,7 +592,7 @@ public class AppointmentRequest {
 						appointmentwriter.writeArray(appointmentobject, columns, startUTC, endUTC);
 					}
 				} else {
-					AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+					final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 					
 					if (appointmentobject.getFullTime() && appointmentobject.getStartDate().getTime() == appointmentobject.getEndDate().getTime()) {
 						appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + (24*60*60*1000)));
@@ -617,22 +617,22 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionGet(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException {
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException {
 		timestamp = null;
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		int recurrencePosition = DataParser.parseInt(jsonObj, CalendarFields.RECURRENCE_POSITION);
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final int recurrencePosition = DataParser.parseInt(jsonObj, CalendarFields.RECURRENCE_POSITION);
 		
-		AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
 		try {
-			CalendarDataObject appointmentobject = appointmentSql.getObjectById(id, inFolder);
+			final CalendarDataObject appointmentobject = appointmentSql.getObjectById(id, inFolder);
 			
-			AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+			final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 			
 			if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
 				appointmentobject.calculateRecurrence();
-				RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, 0, 0, recurrencePosition);
-				RecurringResult result = recuResults.getRecurringResult(0);
+				final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, 0, 0, recurrencePosition);
+				final RecurringResult result = recuResults.getRecurringResult(0);
 				appointmentobject.setStartDate(new Date(result.getStart()));
 				appointmentobject.setEndDate(new Date(result.getEnd()));
 				appointmentobject.setRecurrencePosition(result.getPosition());
@@ -649,21 +649,21 @@ public class AppointmentRequest {
 		
 	}
 	
-	public void actionConfirm(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+	public void actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		CalendarDataObject appointmentObj = new CalendarDataObject();
+		final CalendarDataObject appointmentObj = new CalendarDataObject();
 		appointmentObj.setContext(sessionObj.getContext());
 		
-		AppointmentParser appointmentParser = new AppointmentParser(timeZone);
+		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);
 		
-		AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
 		appointmentSql.setUserConfirmation(appointmentObj.getObjectID(), sessionObj.getUserObject().getId(), appointmentObj.getConfirm(), appointmentObj.getConfirmMessage());
 //		jsonWriter.value("");
 	}
 	
-	public void actionHas(JSONObject jsonObj) throws JSONException, OXException {
+	public void actionHas(final JSONObject jsonObj) throws JSONException, OXException {
 		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
 		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 		
@@ -680,9 +680,9 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionSearch(JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException {
-		String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
-		int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+	public void actionSearch(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException {
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
 		timestamp = new Date(0);
 		
@@ -690,8 +690,8 @@ public class AppointmentRequest {
 		
 		SearchIterator it = null;
 		
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		AppointmentSearchObject searchObj = new AppointmentSearchObject();
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 		if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
 			searchObj.setFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
 		}
@@ -700,8 +700,8 @@ public class AppointmentRequest {
 			searchObj.setPattern(DataParser.parseString(jData, "pattern"));
 		}
 		
-		int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
-		String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
 		int limit = 0;
 		boolean hasLimit = false;
@@ -730,7 +730,7 @@ public class AppointmentRequest {
 		
 		
 		if (jData.has(CalendarFields.PARTICIPANTS)) {
-			Participants participants = new Participants();
+			final Participants participants = new Participants();
 			searchObj.setParticipants(CalendarParser.parseParticipants(jData, participants));
 		}
 		
@@ -741,8 +741,8 @@ public class AppointmentRequest {
 		jsonWriter.array();
 		
 		try {
-			AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
-			AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+			/*AppointmentWriter appointmentWriter = */new AppointmentWriter(jsonWriter, timeZone);
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 			
 			if (searchObj.getFolder() > 0 && searchObj.getPattern() != null) {
 				it = appointmentsql.searchAppointments(searchObj.getPattern(), searchObj.getFolder(), orderBy, orderDir, _appointmentFields);
@@ -776,19 +776,19 @@ public class AppointmentRequest {
 			int counter = 0;
 			
 			while (it.hasNext()) {
-				CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
+				final CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
 				
 				if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
 					appointmentobject.calculateRecurrence();
 					if (start != null && end != null) {
-						RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+						final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
 						if (recuResults.size() > 0) {
-							RecurringResult result = recuResults.getRecurringResult(0);
+							final RecurringResult result = recuResults.getRecurringResult(0);
 							appointmentobject.setStartDate(new Date(result.getStart()));
 							appointmentobject.setEndDate(new Date(result.getEnd()));
 							appointmentobject.setRecurrencePosition(result.getPosition());
 							
-							AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+							final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 							
 							if (appointmentobject.getFullTime() && appointmentobject.getStartDate().getTime() == appointmentobject.getEndDate().getTime()) {
 								appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + (24*60*60*1000)));
@@ -805,12 +805,12 @@ public class AppointmentRequest {
 							}
 						}
 					} else {
-						AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+						final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 						appointmentwriter.writeArray(appointmentobject, columns);
 						counter++;
 					}
 				} else {
-					AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
+					final AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter, timeZone);
 					
 					if (appointmentobject.getFullTime() && appointmentobject.getStartDate().getTime() == appointmentobject.getEndDate().getTime()) {
 						appointmentobject.setEndDate(new Date(appointmentobject.getStartDate().getTime() + (24*60*60*1000)));
@@ -833,10 +833,8 @@ public class AppointmentRequest {
 					timestamp = lastModified;
 				}
 				
-				if (hasLimit) {
-					if (counter >= limit) {
-						break;
-					}
+				if (hasLimit && counter >= limit) {
+					break;
 				}
 			}
 		} catch (SQLException e) {
@@ -849,9 +847,9 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionFreeBusy(JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException {
-		int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int type = DataParser.checkInt(jsonObj, "type");
+	public void actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException {
+		final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int type = DataParser.checkInt(jsonObj, "type");
 		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
 		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 		
@@ -862,12 +860,12 @@ public class AppointmentRequest {
 		jsonWriter.array();
 		
 		try {
-			AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
+			final AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
 			
-			AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 			it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
 			while (it.hasNext()) {
-				AppointmentObject appointmentObj = (AppointmentObject)it.next();
+				final AppointmentObject appointmentObj = (AppointmentObject)it.next();
 				appointmentWriter.writeAppointment(appointmentObj);
 			}
 		} finally {
@@ -878,31 +876,31 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionCopy(JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException {
-		int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);
-		JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
+	public void actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException {
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 		
-		AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
 		
 		timestamp = new Date(0);
 		
 		jsonWriter.object();
 		
 		try {
-			CalendarDataObject appointmentObj = appointmentSql.getObjectById(id, inFolder);
+			final CalendarDataObject appointmentObj = appointmentSql.getObjectById(id, inFolder);
 			appointmentObj.removeObjectID();
 			appointmentObj.setParentFolderID(folderId);
 			appointmentObj.setIgnoreConflicts(ignoreConflicts);
-			CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
+			final CalendarDataObject[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 			
 			if (conflicts != null) {
 				jsonWriter.key("conflicts");
 				jsonWriter.array();
 				try {
-					AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
+					final AppointmentWriter appointmentWriter = new AppointmentWriter(jsonWriter, timeZone);
 					for (int a = 0; a < conflicts.length; a++) {
 						appointmentWriter.writeAppointment(conflicts[a]);
 					}

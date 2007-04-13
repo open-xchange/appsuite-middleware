@@ -218,7 +218,7 @@ public class AJAXUserDictionary implements DeleteListener {
 			stmt.setInt(2, user);
 			rs = stmt.executeQuery();
 			if (!rs.next()) {
-				throw new AJAXUserDictionaryException(DictionaryCode.NOT_LOADED, user, ctx.getContextId());
+				throw new AJAXUserDictionaryException(DictionaryCode.NOT_LOADED, Integer.valueOf(user), Integer.valueOf(ctx.getContextId()));
 			}
 			parseCommaSeperatedWords(rs.getString(1));
 			return true;
@@ -231,20 +231,21 @@ public class AJAXUserDictionary implements DeleteListener {
 		return deleteUserDictionary(user, ctx, null);
 	}
 	
-	private static boolean deleteUserDictionary(final int user, final Context ctx, Connection writeConArg) throws SQLException, DBPoolingException {
+	private static boolean deleteUserDictionary(final int user, final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
 		PreparedStatement stmt = null;
 		Connection writeCon = writeConArg;
-		final boolean createCon = (writeCon == null);
+		boolean closeCon = false;
 		try {
-			if (createCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeCon = true;
 			}
 			stmt = writeCon.prepareStatement(SQL_DELETE);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, user);
 			return stmt.executeUpdate() > 0;
 		} finally {
-			closeResources(null, stmt, createCon ? writeCon : null, false, ctx);
+			closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
 		}
 	}
 	
@@ -252,6 +253,7 @@ public class AJAXUserDictionary implements DeleteListener {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return words.toString();
 	}
@@ -272,6 +274,7 @@ public class AJAXUserDictionary implements DeleteListener {
 		 * 
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode() {
 			return str.toLowerCase().hashCode();
 		}
@@ -284,6 +287,7 @@ public class AJAXUserDictionary implements DeleteListener {
 		 * 
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(final Object o) {
 			if (o instanceof IgnoreCaseString) {
 				final IgnoreCaseString otherStr = (IgnoreCaseString) o;
@@ -296,6 +300,7 @@ public class AJAXUserDictionary implements DeleteListener {
 		 * 
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return str;
 		}
@@ -304,6 +309,7 @@ public class AJAXUserDictionary implements DeleteListener {
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
+		@Override
 		public Object clone() {
 			// First make exact bitwise copy
 			IgnoreCaseString copy;

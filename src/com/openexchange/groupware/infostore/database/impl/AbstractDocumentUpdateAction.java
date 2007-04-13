@@ -60,7 +60,7 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 	private Metadata[] modified;
 	private long timestamp;
 
-	public void setOldDocuments(List<DocumentMetadata> oldDocuments) {
+	public void setOldDocuments(final List<DocumentMetadata> oldDocuments) {
 		this.oldDocuments = oldDocuments;
 	}
 	
@@ -68,7 +68,7 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 		return oldDocuments;
 	}
 	
-	public void setModified(Metadata...modified) {
+	public void setModified(final Metadata...modified) {
 		this.modified = modified;
 	}
 	
@@ -76,7 +76,7 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 		return modified;
 	}
 	
-	public void setTimestamp(long ts) {
+	public void setTimestamp(final long ts) {
 		this.timestamp = ts;
 	}
 	

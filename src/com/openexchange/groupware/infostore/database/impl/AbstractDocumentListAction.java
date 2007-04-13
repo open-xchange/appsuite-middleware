@@ -60,7 +60,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
 	private List<DocumentMetadata> documents;
 
-	public int doUpdates(String query, final Metadata[] fields , List<DocumentMetadata> docs) throws UpdateException, TransactionException {
+	public int doUpdates(final String query, final Metadata[] fields , final List<DocumentMetadata> docs) throws UpdateException, TransactionException {
 		UpdateBlock[] updates = new UpdateBlock[docs.size()];
 		int i = 0;
 				
@@ -80,7 +80,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 	
 	protected abstract Object[] getAdditionals(DocumentMetadata doc);
 
-	public void setDocuments(List<DocumentMetadata> documents) {
+	public void setDocuments(final List<DocumentMetadata> documents) {
 		this.documents = documents;
 	}
 	

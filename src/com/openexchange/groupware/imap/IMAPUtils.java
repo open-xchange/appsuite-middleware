@@ -2518,9 +2518,9 @@ public class IMAPUtils {
 			 */
 			Inner: for (++i; i < uids.length; i++) {
 				final long next = uids[i];
-				if (next == current + 1)
+				if (next == current + 1) {
 					current = next;
-				else {
+				} else {
 					/*
 					 * Break in sequence. Need to reexamine this message at the
 					 * top of the outer loop, so decrement 'i' to cancel the

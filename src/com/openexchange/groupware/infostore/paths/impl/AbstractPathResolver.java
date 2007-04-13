@@ -63,17 +63,19 @@ public abstract class AbstractPathResolver extends DBService implements
 	protected final String absolute(final int relativeToFolder, final String path, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		final String rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
 		final StringBuilder retVal = new StringBuilder(rel);
-		if(rel.length()==0 || rel.charAt(rel.length()-1)!= '/')
+		if(rel.length()==0 || rel.charAt(rel.length()-1)!= '/') {
 			retVal.append('/');
+		}
 		retVal.append(path);
 		return retVal.toString();
 	}
 	
-	protected final String relative(int relativeToFolder, String absolute, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	protected final String relative(final int relativeToFolder, final String absolute, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		final String rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
 		int index = rel.length();
-		if(rel.length()>0 && rel.charAt(index-1) == '/')
+		if(rel.length()>0 && rel.charAt(index-1) == '/') {
 			index--;
+		}
 		return absolute.substring(index);
 	}
 	
@@ -83,11 +85,13 @@ public abstract class AbstractPathResolver extends DBService implements
 	}
 	
 	protected final String normalize(String url) {
-		if(url.length()==0)
+		if(url.length()==0) {
 			return "/";
+		}
 		url = url.replaceAll("/+", "/");
-		if(url.charAt(url.length()-1)=='/')
+		if(url.charAt(url.length()-1)=='/') {
 			return url.substring(0,url.length()-1);
+		}
 		return url;
 	}
 	

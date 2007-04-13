@@ -187,7 +187,8 @@ public class WbxmlParser implements XmlPullParser {
 
             buf.append('>');
         }
-        else if (type == IGNORABLE_WHITESPACE);
+        else if (type == IGNORABLE_WHITESPACE)
+        	buf.append("");
         else if (type != TEXT)
             buf.append(getText());
         else if (isWhitespace)

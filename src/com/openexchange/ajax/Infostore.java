@@ -434,7 +434,6 @@ public class Infostore extends PermissionServlet {
 			close(w);
 		} catch (IOException e) {
 			LOG.warn(e);
-		} finally {
 		}
 	}
 	

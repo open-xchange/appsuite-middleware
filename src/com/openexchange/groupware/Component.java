@@ -234,7 +234,11 @@ public enum Component {
     /**
      * SyncML
      */
-    SYNCML("SYN");
+    SYNCML("SYN"),
+    /**
+     * Spell Check
+     */
+    SPELLCHECK("SPC");
 
     /**
      * The abbrevation for components.

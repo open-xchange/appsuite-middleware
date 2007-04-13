@@ -61,8 +61,8 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
 	private InfostoreQueryCatalog queries = null;
 	
-	protected final void fillStmt(PreparedStatement stmt, Metadata[] fields,DocumentMetadata doc, Object...additional) throws SQLException {
-		GetSwitch get = new GetSwitch(doc);
+	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
+		final GetSwitch get = new GetSwitch(doc);
 		int i = 1;
 		for(Metadata m : fields) {
 			stmt.setObject(i++, process(m, m.doSwitch(get)));
@@ -73,14 +73,14 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 		}
 	}
 	
-	private final Object process(Metadata field, Object value) {
+	private final Object process(final Metadata field, final Object value) {
 		switch(field.getId()) {
 		default : return value;
-		case Metadata.CREATION_DATE: case Metadata.LAST_MODIFIED: case Metadata.LOCKED_UNTIL : return ((Date)value).getTime();
+		case Metadata.CREATION_DATE: case Metadata.LAST_MODIFIED: case Metadata.LOCKED_UNTIL : return Long.valueOf(((Date)value).getTime());
 		}
 	}
 
-	public void setQueryCatalog(InfostoreQueryCatalog queries){
+	public void setQueryCatalog(final InfostoreQueryCatalog queries){
 		this.queries = queries;
 	}
 	
