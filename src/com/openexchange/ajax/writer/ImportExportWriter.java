@@ -51,18 +51,23 @@
 
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.CommonFields;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.importexport.ImportResult;
 import java.io.PrintWriter;
-import java.util.TimeZone;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
+
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  * ImportExportWriter
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a> (Refactoring comment and errorhandling workaround)
+ * TODO: Tierlieb: Refactoring. Removed this class, build: MultipleResponse extends ...ajax.container.Response
  */
 
 public class ImportExportWriter extends DataWriter {
@@ -81,8 +86,20 @@ public class ImportExportWriter extends DataWriter {
 		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
 		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
 		
+		//quick fix, should be refactored to MultipleResponse
 		if (importResult.hasError()) {
-			writeParameter("error", importResult.getException().getMessage());
+			OXException exception = importResult.getException();
+			writeParameter("error", exception.getOrigMessage());
+	        if (exception.getMessageArgs() != null) {
+	        	final JSONArray array = new JSONArray();
+	            for (Object tmp : exception.getMessageArgs()) {
+	            	array.put(tmp);
+	            }
+	            writeParameter("error_params", array.toString());
+	        }
+	        writeParameter("category", exception.getCategory().getCode());
+	        writeParameter("code", exception.getErrorCode());
+	        writeParameter("error_id", exception.getExceptionID());
 		}
 		jsonwriter.endObject();
 	}
