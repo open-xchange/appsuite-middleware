@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
@@ -446,6 +447,10 @@ public final class ConfigTree {
         vcard.setId(-1);
         mail.addElement(vcard);
 
+        final Setting spamButton = new Setting("spambutton", true);
+        spamButton.setId(-1);
+        mail.addElement(spamButton);
+
         final Setting gui = new Setting("gui", false);
         gui.setId(1);
         TREE.addElement(gui);
@@ -656,100 +661,100 @@ public final class ConfigTree {
         tmp.put(inbox.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-                MailInterface mi = null;
-            	try {
-                    setting.setSingleValue((mi = MailInterfaceImpl.getInstance(
-                        session)).getInboxFolder());
+                MailInterface mail = null;
+                try {
+                    mail = MailInterfaceImpl.getInstance(session);
+                    setting.setSingleValue(mail.getInboxFolder());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 } finally {
-                	if (mi != null) {
-                		try {
-							mi.close(true);
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
-						}
-                	}
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         });
         tmp.put(drafts.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-            	MailInterface mi = null;
-            	try {
-                    setting.setSingleValue((mi = MailInterfaceImpl.getInstance(
-                        session)).getDraftsFolder());
+                MailInterface mail = null;
+                try {
+                    mail = MailInterfaceImpl.getInstance(session);
+                    setting.setSingleValue(mail.getDraftsFolder());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 } finally {
-                	if (mi != null) {
-                		try {
-							mi.close(true);
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
-						}
-                	}
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         });
         tmp.put(sent.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-            	MailInterface mi = null;
-            	try {
-                    setting.setSingleValue((mi = MailInterfaceImpl.getInstance(
-                        session)).getSentFolder());
+                MailInterface mail = null;
+                try {
+                    mail = MailInterfaceImpl.getInstance(session);
+                    setting.setSingleValue(mail.getSentFolder());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 } finally {
-                	if (mi != null) {
-                		try {
-							mi.close(true);
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
-						}
-                	}
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         });
         tmp.put(spam.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-            	MailInterface mi = null;
-            	try {
-                    setting.setSingleValue((mi = MailInterfaceImpl.getInstance(
-                        session)).getSpamFolder());
+                MailInterface mail = null;
+                try {
+                    mail = MailInterfaceImpl.getInstance(session);
+                    setting.setSingleValue(mail.getSpamFolder());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 } finally {
-                	if (mi != null) {
-                		try {
-							mi.close(true);
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
-						}
-                	}
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         });
         tmp.put(trash.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-            	MailInterface mi = null;
-            	try {
-                    setting.setSingleValue((mi = MailInterfaceImpl.getInstance(
-                        session)).getTrashFolder());
+                MailInterface mail = null;
+                try {
+                    mail = MailInterfaceImpl.getInstance(session);
+                    setting.setSingleValue(mail.getTrashFolder());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 } finally {
-                	if (mi != null) {
-                		try {
-							mi.close(true);
-						} catch (OXException e) {
-							LOG.error(e.getMessage(), e);
-						}
-                	}
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
         });
@@ -824,16 +829,15 @@ public final class ConfigTree {
             protected Object isSet(final UserSettingMail settings) {
                 final String retval;
                 if (settings.isForwardAsAttachment()) {
-                	retval = ATTACHMENT;
+                    retval = ATTACHMENT;
                 } else {
-                	retval = INLINE;
+                    retval = INLINE;
                 }
                 return retval;
             }
             protected void setValue(final UserSettingMail settings,
                 final String value) {
-                final boolean forwardAsAttachment = ATTACHMENT.equals(value);
-                settings.setForwardAsAttachment(forwardAsAttachment);
+                settings.setForwardAsAttachment(ATTACHMENT.equals(value));
             }
         });
         tmp.put(linewrap.getName(), new SharedValue() {
@@ -872,6 +876,13 @@ public final class ConfigTree {
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setAppendVCard(Boolean.parseBoolean(value));
+            }
+        });
+        tmp.put(spamButton.getName(), new ReadOnlyValue() {
+            public void getValue(final SessionObject session,
+                final Setting setting) {
+                setting.setSingleValue(ServerConfig.getBoolean(ServerConfig
+                    .Property.SPAM_BUTTON));
             }
         });
         READERS = Collections.unmodifiableMap(tmp);
