@@ -90,7 +90,7 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.PROGRAMMING_ERROR,
 		Category.PROGRAMMING_ERROR,
-		Category.USER_INPUT,},
+		Category.USER_INPUT},
 	desc={"","","", ""}, 
 	exceptionId={0,1,2,3}, 
 	msg={
