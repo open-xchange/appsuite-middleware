@@ -2770,6 +2770,8 @@ public class MailInterfaceImpl implements MailInterface {
 			final SMTPMessage newSMTPMsg = new SMTPMessage(imapCon.getSession());
 			IMAPFolder originalMsgFolder = null;
 			MimeMessage originalMsg = null;
+			boolean isReadWrite = true;
+			Mail.MailIdentifier mailId = null;
 			MessageFiller msgFiller = null;
 			try {
 				if (msgObj.getMsgref() != null) {
@@ -2777,7 +2779,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 * A message reference is present. Either a reply, forward
 					 * or draft-edit message.
 					 */
-					final Mail.MailIdentifier mailId = new Mail.MailIdentifier(msgObj.getMsgref());
+					mailId = new Mail.MailIdentifier(msgObj.getMsgref());
 					originalMsgFolder = (IMAPFolder) imapStore.getFolder(mailId.getFolder());
 					/*
 					 * Check folder existence
@@ -2785,7 +2787,6 @@ public class MailInterfaceImpl implements MailInterface {
 					if (!originalMsgFolder.exists()) {
 						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, originalMsgFolder.getFullName());
 					}
-					boolean isReadWrite = true;
 					try {
 						originalMsgFolder.open(Folder.READ_WRITE);
 					} catch (ReadOnlyFolderException e) {
@@ -2794,32 +2795,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					mailInterfaceMonitor.changeNumActive(true);
 					originalMsg = (MimeMessage) originalMsgFolder.getMessageByUID(mailId.getMsgUID());
-					if (originalMsg.isSet(Flags.Flag.DRAFT) && msgObj.isDraft()) {
-						if (!isReadWrite) {
-							throw new OXMailException(MailCode.NO_DRAFT_EDIT, originalMsgFolder.getFullName());
-						}
-						/*
-						 * A draft-edit. Delete old draft version to replace
-						 * with newer one.
-						 */
-						originalMsg.setFlags(FLAGS_DELETED, true);
-						try {
-							originalMsgFolder.getProtocol().uidexpunge(
-									IMAPUtils.toUIDSet(new long[] { mailId.getMsgUID() }));
-						} catch (ProtocolException e) {
-							originalMsgFolder.close(true);
-							mailInterfaceMonitor.changeNumActive(false);
-						} finally {
-							if (originalMsgFolder.isOpen()) {
-								originalMsgFolder.close(false);
-								mailInterfaceMonitor.changeNumActive(false);
-							}
-						}
-						/*
-						 * Reset message reference cause not needed anymore
-						 */
-						msgObj.setMsgref(null);
-					} else if (sendType == SENDTYPE_REPLY) {
+					if (sendType == SENDTYPE_REPLY) {
 						/*
 						 * A reply! Appropiately set message headers
 						 */
@@ -2902,7 +2878,7 @@ public class MailInterfaceImpl implements MailInterface {
 					newSMTPMsg.setFlag(Flags.Flag.DRAFT, true);
 					newSMTPMsg.saveChanges();
 					/*
-					 * Append message to daftt folder
+					 * Append message to draft folder
 					 */
 					long uidNext = -1;
 					final long start = System.currentTimeMillis();
@@ -2926,6 +2902,41 @@ public class MailInterfaceImpl implements MailInterface {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);
 						mailInterfaceMonitor.changeNumActive(false);
+					}
+					/*
+					 * Check for draft-edit operation
+					 */
+					DeleteOrig: if (originalMsg != null && originalMsg.isSet(Flags.Flag.DRAFT)) {
+						/*
+						 * Delete old draft version
+						 */
+						if (originalMsgFolder == null) {
+							break DeleteOrig;
+						} else if (!isReadWrite) {
+							throw new OXMailException(MailCode.NO_DRAFT_EDIT, originalMsgFolder.getFullName());
+						} else if (mailId == null) {
+							break DeleteOrig;
+						}
+						/*
+						 * Delete old draft version to replace with newer one.
+						 */
+						originalMsg.setFlags(FLAGS_DELETED, true);
+						try {
+							originalMsgFolder.getProtocol().uidexpunge(
+									IMAPUtils.toUIDSet(new long[] { mailId.getMsgUID() }));
+						} catch (ProtocolException e) {
+							originalMsgFolder.close(true);
+							mailInterfaceMonitor.changeNumActive(false);
+						} finally {
+							if (originalMsgFolder.isOpen()) {
+								originalMsgFolder.close(false);
+								mailInterfaceMonitor.changeNumActive(false);
+							}
+						}
+						/*
+						 * Reset message reference cause not needed anymore
+						 */
+						msgObj.setMsgref(null);
 					}
 					return new StringBuilder(draftFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();

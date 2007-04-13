@@ -163,6 +163,18 @@ public class MessageFiller {
 
 	private final int linewrap;
 
+	/**
+	 * Creates a new instance of <code>MessageFiller</code>
+	 * 
+	 * @param session -
+	 *            the groupware session
+	 * @param originalMsg -
+	 *            the original message on reply, forward or draft-edit
+	 * @param mailSession -
+	 *            the mail session
+	 * @param destinationFolder -
+	 *            the destination folder; may be <code>null</code>
+	 */
 	public MessageFiller(final SessionObject session, final Message originalMsg, final Session mailSession,
 			final IMAPFolder destinationFolder) {
 		super();
@@ -432,7 +444,7 @@ public class MessageFiller {
 				final JSONMessageObject nestedMsgObj = iter.next();
 				final MimeMessage nestedMsg = new MimeMessage(mailSession);
 				fillMessage(nestedMsgObj, nestedMsg, uploadEvent, sendType);
-				MimeBodyPart msgBodyPart = new MimeBodyPart();
+				final MimeBodyPart msgBodyPart = new MimeBodyPart();
 				msgBodyPart.setContent(nestedMsg, "message/rfc822");
 				primaryMultipart.addBodyPart(msgBodyPart);
 			}
