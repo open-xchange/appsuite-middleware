@@ -89,13 +89,15 @@ import com.openexchange.sessiond.SessionObject;
 	category={
 		Category.USER_INPUT,
 		Category.PROGRAMMING_ERROR,
-		Category.PROGRAMMING_ERROR}, 
-	desc={"","",""}, 
-	exceptionId={0,1,2}, 
+		Category.PROGRAMMING_ERROR,
+		Category.USER_INPUT,},
+	desc={"","","", ""}, 
+	exceptionId={0,1,2,3}, 
 	msg={
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
-		"Cannot read given InputStream."})
+		"Cannot read given InputStream.",
+		"Could not find a field named %s"})
 		
 public class CSVContactImporter implements Importer {
 
@@ -180,7 +182,11 @@ public class CSVContactImporter implements Importer {
 		try{
 			for(int i = 0; i < fields.size(); i ++){
 				final ContactField currField = ContactField.getByDisplayName(fields.get(i));
-				currField.doSwitch(conSet, contactObj, entry.get(i));
+				if(currField == null){
+					result.setException(EXCEPTIONS.create(3, fields.get(i)));
+				} else {
+					currField.doSwitch(conSet, contactObj, entry.get(i));
+				}
 			}
 			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
 			contactsql.insertContactObject(contactObj);
