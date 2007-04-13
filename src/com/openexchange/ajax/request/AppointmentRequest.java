@@ -121,7 +121,7 @@ public class AppointmentRequest {
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
-                CalendarObject.RECURRENCE_CALCULATOR,
+		CalendarObject.RECURRENCE_CALCULATOR,
 		CalendarObject.RECURRENCE_ID,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
@@ -319,19 +319,26 @@ public class AppointmentRequest {
 				if (showAppointmentInAllFolders) {
 					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserObject().getId(), start, end, _appointmentFields, timestamp, 0, null);
 				} else {
-					if (start != null && end != null) {					
+					if (start != null && end != null) {
 						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, timestamp);
 					} else {
 						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, timestamp);
 					}
 				}
-				
+
 				while (it.hasNext()) {
 					CalendarDataObject appointmentObj = (CalendarDataObject)it.next();
 					
 					if (appointmentObj.getRecurrenceType() != CalendarObject.NONE && appointmentObj.getRecurrencePosition() == 0) {
 						appointmentObj.calculateRecurrence();
-						RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentObj, start.getTime(), end.getTime(), 0);
+						
+						RecurringResults recuResults = null;
+						if (start != null && end != null) {
+							recuResults = CalendarRecurringCollection.calculateRecurring(appointmentObj, start.getTime(), end.getTime(), 0);
+						} else {
+							recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentObj);
+						}
+						
 						for (int a = 0; a < recuResults.size(); a++) {
 							RecurringResult result = recuResults.getRecurringResult(a);
 							appointmentObj.setStartDate(new Date(result.getStart()));
