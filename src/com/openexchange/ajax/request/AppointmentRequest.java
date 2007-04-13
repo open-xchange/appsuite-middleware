@@ -349,14 +349,22 @@ public class AppointmentRequest {
 								appointmentObj.setEndDate(new Date(appointmentObj.getStartDate().getTime() + (24*60*60*1000)));
 							}
 							
-							appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC);
+							if (startUTC != null && endUTC != null) {
+								appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC);
+							} else {
+								appointmentWriter.writeArray(appointmentObj, columns);
+							}
 						}
 					} else {
 						if (appointmentObj.getFullTime() && appointmentObj.getStartDate().getTime() == appointmentObj.getEndDate().getTime()) {
 							appointmentObj.setEndDate(new Date(appointmentObj.getStartDate().getTime() + (24*60*60*1000)));
 						}
 						
-						appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC);
+						if (startUTC != null && endUTC != null) {
+							appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC);
+						} else {
+							appointmentWriter.writeArray(appointmentObj, columns);
+						}
 					}
 					
 					lastModified = appointmentObj.getLastModified();
