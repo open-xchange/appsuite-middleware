@@ -76,6 +76,17 @@ public class CSVParserTest {
 	private List< List<String> > result;
 	private CSVParser parser;
 	
+	@Test public void getLines(){
+		parser = new CSVParser(UNESCAPED_TEST );
+		assertEquals("title 1, title 2, title3",parser.getLine(0));
+		assertEquals("content 1, content2, content3",parser.getLine(1));
+		
+		parser = new CSVParser(UNEVEN_TEST );
+		assertEquals("title1, title 2",parser.getLine(0));
+		assertEquals("content 1",parser.getLine(1));
+		assertEquals("content1, content2,content3",parser.getLine(2));
+	}
+	
 	@Test public void parseUnescaped() throws ImportExportException{
 		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3);
 		doAsserts(UNESCAPED_TEST, "Un-escaped without final linebreak",2,3);
@@ -94,7 +105,11 @@ public class CSVParserTest {
 	@Test public void parseBugged() throws ImportExportException{
 		parser = new CSVParser(UNEVEN_TEST );
 		parser.parse();
-		assertEquals("Should have two unparsable lines", parser.getUnparsableLineNumbers().size(), 2);
+		List<Integer> unparsableLines = parser.getUnparsableLineNumbers();
+		assertEquals("Should have two unparsable lines", unparsableLines.size(), 2);
+		assertEquals("First wrong line" , "content 1", parser.getLine(unparsableLines.get(0)));
+		assertEquals("Second wrong line" , "content1, content2,content3", parser.getLine(unparsableLines.get(1)));
+		
 	}
 	
 	protected void doAsserts(String line, String comment, int lines, int cells) throws ImportExportException{

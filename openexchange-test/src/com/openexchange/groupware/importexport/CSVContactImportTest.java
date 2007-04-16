@@ -102,7 +102,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		folders.add("blaFolder");
 		try{
 			imp.canImport(sessObj, Format.ICAL, folders, null);
-			fail("Could import two foldersL, but should not");
+			fail("Could import two folders, but should not");
 		} catch (ImportExportException e){
 			assertTrue("Cannot import more than one folder", true);
 		}
