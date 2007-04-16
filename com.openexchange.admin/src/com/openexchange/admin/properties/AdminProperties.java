@@ -129,5 +129,7 @@ public class AdminProperties {
 	    public static final String AUTO_LOWERCASE           = "AUTO_TO_LOWERCASE_UID";
 	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_USER_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_USER_UID_NAMES";
+            public static final String CREATE_HOMEDIRECTORY     = "CREATE_HOMEDIRECTORY";
+            public static final String HOME_DIR_ROOT            = "HOME_DIR_ROOT";
 	}
 }
