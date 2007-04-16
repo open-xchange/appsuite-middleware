@@ -100,6 +100,7 @@ public class ImportExportWriter extends DataWriter {
 	        writeParameter("category", exception.getCategory().getCode());
 	        writeParameter("code", exception.getErrorCode());
 	        writeParameter("error_id", exception.getExceptionID());
+	        writeParameter("entry_number", importResult.getEntryNumber());
 		}
 		jsonwriter.endObject();
 	}

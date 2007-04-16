@@ -97,7 +97,7 @@ import com.openexchange.sessiond.SessionObject;
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
-		"Could not find the follwoing fields %s"})
+		"Could not find the following fields %s"})
 		
 public class CSVContactImporter implements Importer {
 
@@ -187,7 +187,7 @@ public class CSVContactImporter implements Importer {
 			for(int i = 0; i < fields.size(); i++){
 				final ContactField currField = ContactField.getByDisplayName(fields.get(i));
 				if(currField == null){
-					wrongField = false;
+					wrongField = true;
 					wrongFields.add(fields.get(i));
 				} else {
 					currField.doSwitch(conSet, contactObj, entry.get(i));
