@@ -71,4 +71,7 @@ public class ImportExportExceptionClasses {
 	public static final int IMPORTEREXPORTER = 11;
 	
 	public static final int MODULETYPETRANSLATOR = 12;
+	
+	public static final int IMPORTSERVLET = 13;
+	public static final int EXPORTSERVLET = 14;
 }

@@ -63,15 +63,36 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ImportExportWriter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadFile;
+
+@OXThrowsMultiple(
+	category = { 
+		Category.USER_INPUT, 
+		Category.USER_INPUT }, 
+	desc = { "" , "" }, 
+	exceptionId = { 0,1 }, 
+	msg = { 
+		"Can only handle one file, not %s",
+		"Unknown format: %s"})
+@OXExceptionSource(
+		classId=ImportExportExceptionClasses.IMPORTSERVLET, 
+		component=Component.IMPORT_EXPORT)
 
 /**
  * Servlet for doing imports of data like contacts stored in CSV format.
@@ -81,6 +102,7 @@ import com.openexchange.groupware.upload.UploadFile;
  */
 public class ImportServlet extends ImportExport {
 	
+	private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
 	public static final String JSON_CALLBACK = "import";
 	private static final long serialVersionUID = -4691910391290394603L;
 
@@ -89,73 +111,95 @@ public class ImportServlet extends ImportExport {
 		LOG = LogFactory.getLog(ImportServlet.class);
 	}
 	
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings({ "unchecked" })
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			//checking format
-			final Format format = Format.getFormatByConstantName(
-					DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION));
+			final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
+			final Format format = Format.getFormatByConstantName(formatStr);
 			if(format == null){
-				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
+				sendResponse(EXCEPTIONS.create(1, formatStr), resp);
+				return;
 			}
 			//getting folders
 			final List <String> folders = Arrays.asList(
 				DataServlet.parseStringParameterArray(req, PARAMETER_FOLDERID));
 			
 			//getting file
+			final List<ImportResult> importResult;
 			UploadEvent ue = null;
 			try {
 				ue = processUpload(req);
 				Iterator<UploadFile> iter = ue.getUploadFilesIterator();
 				if(ue.getNumberOfUploadFiles() != 1){
-					resp.sendError(HttpServletResponse.SC_CONFLICT, "can handle one and only one file in request");
+					sendResponse(EXCEPTIONS.create(0, ue.getNumberOfUploadFiles()), resp);
 					return;
 				}
 				final UploadFile uf = iter.next();
+				
 				//actual import
-				final List<ImportResult> importResult = importerExporter.importData(
-					getSessionObject(req), 
-					format, 
-					new FileInputStream(uf.getTmpFile()), 
-					folders, 
-					req.getParameterMap());
-				//writing response
-				final StringWriter stringWriter = new StringWriter();
-				final JSONWriter jsonWriter = new JSONWriter(stringWriter);
-				
-				final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
-				
-				jsonWriter.array();
-				for (int a = 0; a < importResult.size(); a++) {
-					importExportWriter.writeObject(importResult.get(a));
-				}
-				jsonWriter.endArray();
-				
-				//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
-				resp.setContentType("text/html");
-				final String content = stringWriter.toString();
-				Response resObj = new Response();
-				resObj.setData(new JSONArray(content) );
-				PrintWriter w = null;
-				try {
-					w = resp.getWriter();
-					w.write(substitute(JS_FRAGMENT,"json",resObj.getJSON().toString(),"action",JSON_CALLBACK));
-					close(w);
-				} catch (IOException e) {
-					LOG.warn(e);
-				}
-				
+				importResult = importerExporter.importData(
+					getSessionObject(req), format, new FileInputStream(uf.getTmpFile()), folders, req.getParameterMap());
+
 			} finally {
 				if (ue != null) {
 					ue.cleanUp();
 				}
 			}
-		} catch (ImportExportException ex) {
-			LOG.error(ex.toString(), ex);
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
-		} catch (Exception ex) {
-			LOG.error(ex.toString(), ex);
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
+			//writing response
+			final StringWriter stringWriter = new StringWriter();
+			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
+			
+			final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
+			
+			jsonWriter.array();
+			for (int a = 0; a < importResult.size(); a++) {
+				importExportWriter.writeObject(importResult.get(a));
+			}
+			jsonWriter.endArray();
+			
+			//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
+			final String content = stringWriter.toString();
+			Response resObj = new Response();
+			resObj.setData(new JSONArray(content) );
+			
+			sendResponse(resObj.getJSON(), resp);
+		} catch (JSONException e) {
+			LOG.error("Could not get JSON code of following exception: " , e);
+		} catch (AbstractOXException e){
+			sendResponse(e, resp);
+		}
+	}
+	
+	/**
+	 * Send JSON object through response
+	 * @param jsonObj
+	 * @param resp
+	 */
+	protected void sendResponse(JSONObject jsonObj, HttpServletResponse resp){
+		resp.setContentType("text/html");
+		PrintWriter w = null;
+		try {
+			w = resp.getWriter();
+			w.write(substitute(JS_FRAGMENT,"json",jsonObj.toString(),"import",JSON_CALLBACK));
+			close(w);
+		} catch (IOException e) {
+			LOG.warn(e);
+		}
+	}
+	
+	/**
+	 * Send error message through response
+	 * @param exception
+	 * @param resp
+	 */
+	protected void sendResponse(AbstractOXException exception, HttpServletResponse resp){
+		Response error = new Response();
+		error.setException(exception);
+		try {
+			sendResponse(error.getJSON(), resp);
+		} catch (JSONException e) {
+			LOG.error("Could not get JSON code of following exception" , exception);
 		}
 	}
 

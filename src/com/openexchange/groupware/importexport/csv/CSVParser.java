@@ -113,12 +113,7 @@ public class CSVParser {
 		if(file == null){
 			return null;
 		}
-		//changing all possible formats (Mac, DOS) to Unix
-		file = file.replace("\r\n", "\n").replace("\r", "\n");
-		//adding ending to create well-formed file
-		if(! file.endsWith("\n")){
-			file = file + "\n";
-		}
+		file = wellform(file);
 		//converting to char array to make it iterable
 		char[] arr = file.toCharArray();
 		//preparations
@@ -142,7 +137,7 @@ public class CSVParser {
 							structure.add(currentLine);
 						} else if(numberOfCells != currentLine.size() ){
 							//throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
-							unparsableLines.add(currentLineNumber);
+							unparsableLines.add(currentLineNumber-1);
 						} else {
 							structure.add(currentLine);
 						}
@@ -191,5 +186,20 @@ public class CSVParser {
 	
 	public void setFileContent(String content){
 		this.file = content;
+	}
+	
+	public String getLine(int lineNumber){
+		file = wellform(file);
+		return file.split("\n")[lineNumber];
+	}
+	
+	protected String wellform(String str){
+		//changing all possible formats (Mac, DOS) to Unix
+		str = str.replace("\r\n", "\n").replace("\r", "\n");
+		//adding ending to create well-formed file
+		if(! str.endsWith("\n")){
+			str = str + "\n";
+		}
+		return str;
 	}
 }

@@ -97,7 +97,7 @@ import com.openexchange.sessiond.SessionObject;
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
-		"Could not find a field named %s"})
+		"Could not find the follwoing fields %s"})
 		
 public class CSVContactImporter implements Importer {
 
@@ -159,9 +159,11 @@ public class CSVContactImporter implements Importer {
 		List<ImportResult> results = new LinkedList<ImportResult>();
 		ContactSetter conSet = new ContactSetter();
 		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
+		int lineNumber = 1;
 		while(iter.hasNext()){
 			//...and writing them
-			results.add( writeEntry(fields, iter.next(), folder, contactsql, conSet));
+			results.add( 
+				writeEntry(fields, iter.next(), folder, contactsql, conSet, lineNumber++));
 		}
 		return results;
 	}
@@ -175,18 +177,25 @@ public class CSVContactImporter implements Importer {
 	 * @param conSet The ContactSetter used for translating the given data 
 	 * @return a report containing either the object ID of the entry created OR an error message
 	 */
-	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSetter conSet){
+	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSetter conSet, int lineNumber){
 		final ImportResult result = new ImportResult();
 		final ContactObject contactObj = new ContactObject();
 		result.setFolder( folder );
 		try{
-			for(int i = 0; i < fields.size(); i ++){
+			List<String> wrongFields = new LinkedList<String>();
+			boolean wrongField = false;
+			for(int i = 0; i < fields.size(); i++){
 				final ContactField currField = ContactField.getByDisplayName(fields.get(i));
 				if(currField == null){
-					result.setException(EXCEPTIONS.create(3, fields.get(i)));
+					wrongField = false;
+					wrongFields.add(fields.get(i));
 				} else {
 					currField.doSwitch(conSet, contactObj, entry.get(i));
 				}
+			}
+			if(wrongField){
+				result.setException(EXCEPTIONS.create(3, wrongFields.toString()));
+				addErrorInformation(result, lineNumber , fields);
 			}
 			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
 			contactsql.insertContactObject(contactObj);
@@ -194,9 +203,24 @@ public class CSVContactImporter implements Importer {
 			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
 		} catch (ContactException e) {
 			result.setException(e);
+			addErrorInformation(result, lineNumber , fields);
 		} catch (OXException e) {
 			result.setException(e);
+			addErrorInformation(result, lineNumber , fields);
 		}
 		return result;
+	}
+	
+	protected void addErrorInformation(ImportResult result, int lineNumber, List<String> entry){
+		result.setEntryNumber(lineNumber);
+		StringBuilder bob = new StringBuilder();
+		for(int i = 0; i < entry.size(); i++){
+			bob.append("\"");
+			bob.append(entry.get(i));
+			bob.append("\"");
+			if( (i + 1) < entry.size() ){
+				bob.append(" , ");
+			}
+		}
 	}
 }

@@ -9,6 +9,11 @@
 
 * 2007-04-13 - tobias.prinz@open-xchange.com
 
+  - Again working on the response of the ImportServlet,
+    this time: error messages.
+
+* 2007-04-13 - tobias.prinz@open-xchange.com
+
   - Fixes to make response of ImportServlet nicer to handle for GUI
 
 * 2007-04-12 - tobias.prinz@open-xchange.com

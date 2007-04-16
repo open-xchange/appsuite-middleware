@@ -70,6 +70,8 @@ public class ImportResult {
 	private String folder;
 	private OXException exception;
 	private Date date;
+	private int entryNumber;
+	private String content;
 
 
 	/**
@@ -97,12 +99,25 @@ public class ImportResult {
 	 * @param exception
 	 */
 	public ImportResult(String objectId, String folder, Date date, OXException exception){
+		this(objectId, folder, date, exception, -1, null);
+	}
+
+	/**
+	 * Constructor for botched result with additional information on the error
+	 * @param objectId
+	 * @param type
+	 * @param timestamp
+	 * @param exception
+	 */
+	public ImportResult(String objectId, String folder, Date date, OXException exception, int entryNumber, String content){
 		this.objectId = objectId;
 		this.folder = folder;
 		this.date = date;
 		this.exception = exception;
+		this.content = content;
+		this.entryNumber = entryNumber;
 	}
-	
+
 	/** Constructor for correct result using timestamp instead of a Date
 	 * 
 	 * @param objectId
@@ -134,10 +149,10 @@ public class ImportResult {
 		return exception != null;
 	}
 	public OXException getException() {
-		return exception;
+		return this.exception;
 	}
-	public void setException(OXException error) {
-		this.exception = error;
+	public void setException(OXException exception){
+		this.exception = exception;
 	}
 	public String getObjectId() {
 		return objectId;
@@ -156,6 +171,18 @@ public class ImportResult {
 	}
 	public void setFolder(String folder) {
 		this.folder = folder;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public int getEntryNumber() {
+		return entryNumber;
+	}
+	public void setEntryNumber(int entryNumber) {
+		this.entryNumber = entryNumber;
 	}
 	
 	
