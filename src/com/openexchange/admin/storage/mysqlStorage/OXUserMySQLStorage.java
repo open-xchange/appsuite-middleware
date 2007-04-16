@@ -629,7 +629,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             try {
 
                 stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -674,6 +674,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 }
 
                 stmt.setInt(12, contact_id);
+
+                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+                homedir += "/" + usrdata.getUsername();
+                stmt.setString(13, homedir);
 
                 stmt.executeUpdate();
                 stmt.close();
