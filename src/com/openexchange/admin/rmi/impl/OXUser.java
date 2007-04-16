@@ -57,6 +57,8 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import com.openexchange.admin.exceptions.OXUserException;
@@ -70,6 +72,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.FileUtils;
 import com.openexchange.admin.tools.PropertyHandler;
 
 import java.util.ArrayList;
@@ -143,13 +146,25 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
         }
 
+
         // validate email adresss
         tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
+
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         final int retval = oxu.create(ctx, usr, access);
         usr.setId(retval);
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+
+        // homedirectory
+        String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+        homedir += "/" + usr.getUsername();
+        if( prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) &&
+                ! tools.isContextAdmin(ctx, usr.getId()) ) {
+            if( ! new File(homedir).mkdir() ) {
+                throw new StorageException("unable to create directory: " + homedir);
+            }
+        }
 
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
@@ -350,6 +365,16 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
+        if( prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) ) {
+            for(User usr : users) {
+                // homedirectory
+                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+                homedir += "/" + usr.getUsername();
+                // FIXME: if(! tools.isContextAdmin(ctx, usr.getId()) ) {} ??
+                FileUtils.deleteDirectory(homedir);
+            }
+        }
+        
         // FIXME: Change function from int to user object
         oxu.delete(ctx, user_ids);
     }
