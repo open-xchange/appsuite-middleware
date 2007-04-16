@@ -258,7 +258,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
                     throw CONTEXT_EXCEPTIONS.create(1, context_id);
                 }
                 if (srcFile.exists()) {
-                    AdminDaemonTools.deleteDirectory(source);
+                    FileUtils.deleteDirectory(source);
                 }
 //            } catch (RemoteException e) {
 //                log.error("Error copying filestore", e);
@@ -311,7 +311,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
                     throw CONTEXT_EXCEPTIONS.create(1, context_id);
                 }
                 if (srcFile.exists()) {
-                    AdminDaemonTools.deleteDirectory(source);
+                    FileUtils.deleteDirectory(source);
                 }
                 ret.clear();
                 ret.add("OK");
