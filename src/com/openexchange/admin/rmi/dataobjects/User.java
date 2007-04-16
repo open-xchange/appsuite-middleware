@@ -2391,20 +2391,21 @@ public class User implements Serializable, Cloneable {
     }
 
     /**
-     * This method is used to get an extensions through the name of this
-     * extension. This first occurence will be returned, or null if no fitting
-     * extension was found.
+     * This method is used to get the extensions through the name of the
+     * extension. An Array with all extensions where the name fits will be returned, 
+     * or an empty array if no fitting extension was found.
      * 
      * @param extname a String for the extension
-     * @return the {@link OXUserExtensionInterface} with extname
+     * @return the ArrayList of {@link OXUserExtensionInterface} with extname
      */
-    public OXUserExtensionInterface getExtensionbyName(final String extname) {
+    public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
+        final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXUserExtensionInterface ext : this.extensions) {
             if (ext.getExtensionName().equals(extname)) {
-                return ext;
+                retval.add(ext);
             }
         }
-        return null;
+        return retval;
     }
 
     /**
