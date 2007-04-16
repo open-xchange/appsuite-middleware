@@ -78,18 +78,6 @@ public class AdminDaemonTools {
     private static Log log = LogFactory.getLog( AdminDaemonTools.class );
     static UserExceptionFactory USER_EXCEPTIONS = new UserExceptionFactory(AdminDaemonTools.class);
     
-    public static void deleteDirectory(final String path) {
-        String[] list = new File(path).list();        
-        for (int i=0;i<list.length;i++) {
-            if (new File(path + System.getProperty("file.separator") + list[i]).isDirectory()) {
-                deleteDirectory(path + System.getProperty("file.separator") + list[i]);
-            } else {
-                new File(path + System.getProperty("file.separator") + list[i]).delete();
-            }
-        }
-        new File(path).delete();
-    }
-    
     public static boolean checkValidStoreURI( String uriToCheck ) {
         boolean isOK = true;
         
