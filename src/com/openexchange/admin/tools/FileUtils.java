@@ -56,14 +56,14 @@ import java.io.IOException;
  * @author choeger
  *
  */
-public class FileCopy {
+public class FileUtils {
 
     /**
      * @param src
      * @param dst
      * @throws IOException
      */
-    public static void copy(final String src, final String dst) throws IOException {
+    public static void copyFile(final String src, final String dst) throws IOException {
         File srcFile = new File(src);
         File dstFile = new File(dst);
 
@@ -76,6 +76,18 @@ public class FileCopy {
 
         in.close();
         out.close();
+    }
+
+    public static void deleteDirectory(final String path) {
+        String[] list = new File(path).list();        
+        for (int i=0;i<list.length;i++) {
+            if (new File(path + System.getProperty("file.separator") + list[i]).isDirectory()) {
+                deleteDirectory(path + System.getProperty("file.separator") + list[i]);
+            } else {
+                new File(path + System.getProperty("file.separator") + list[i]).delete();
+            }
+        }
+        new File(path).delete();
     }
 
 }
