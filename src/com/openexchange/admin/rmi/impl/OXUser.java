@@ -58,7 +58,10 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import com.openexchange.admin.exceptions.OXUserException;
@@ -162,8 +165,34 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if( prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) &&
                 ! tools.isContextAdmin(ctx, usr.getId()) ) {
             if( ! new File(homedir).mkdir() ) {
-                throw new StorageException("unable to create directory: " + homedir);
+                log.error("unable to create directory: " + homedir);
             }
+            final String CHOWN = "/bin/chown";
+            Process p;
+            try {
+                p = Runtime.getRuntime().exec(
+                        new String[] {CHOWN,
+                                usr.getUsername() + ":",
+                                homedir});
+                p.waitFor();
+                if( p.exitValue() != 0 ) {
+                    log.error(CHOWN + " exited abnormally");
+                    final BufferedReader prerr = new BufferedReader(new InputStreamReader(
+                            p.getErrorStream()));
+                    String line = null;
+                    while( (line = prerr.readLine()) != null ) {
+                        log.error(line);
+                    }
+                    log.error("Unable to chown homedirectory: " + homedir);
+                }
+            } catch (IOException e) {
+                log.error("Unable to chown homedirectory: " + homedir);
+                log.error(e);
+            } catch (InterruptedException e) {
+                log.error("Unable to chown homedirectory: " + homedir);
+                log.error(e);
+            }
+
         }
 
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
