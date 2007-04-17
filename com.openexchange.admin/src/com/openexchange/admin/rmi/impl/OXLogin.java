@@ -52,25 +52,36 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
 public class OXLogin extends BasicAuthenticator implements OXLoginInterface{ 
-   
+    
+    private BundleContext context = null;
     private final Log log = LogFactory.getLog(this.getClass());    
     
-    public OXLogin() throws RemoteException {
+    public OXLogin(final BundleContext context) throws RemoteException {
         super();
+        this.context = context;
         log.info("Class loaded: " + this.getClass().getName());
         
     }
@@ -94,6 +105,45 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
         }
         
         doAuthentication(auth);
+        
+    }
+
+
+    public User login2User(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        if(ctx==null || auth ==null){
+            throw new InvalidDataException();
+        }
+        doAuthentication(auth, ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+        
+        User retval = new User(user_id);
+        retval.setUsername(auth.getLogin());
+        
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        
+        User[] retusers = oxu.getData(ctx, new User[]{retval});        
+        
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
+                            final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
+                            log.info("Calling getData for plugin: " + bundlename);
+                            retusers = oxuserplugin.getData(ctx, retusers, auth);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return retusers[0];
         
     }
     
