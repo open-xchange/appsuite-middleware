@@ -1,6 +1,8 @@
 * 2007-04-17 - thorben.betten@open-xchange.com
 
  - Bugfix #6709: Correct email addresses filled on reply-all
+ - Bugfix #6678: Log a warning if GUI tries to mark an already expunged
+   message as /SEEN
 
 * 2007-04-13 - thorben.betten@open-xchange.com
 

@@ -970,6 +970,11 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			markAsSeen.setFlags(FLAGS_SEEN, true);
+		} catch (MessageRemovedException e) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
+			}
+			return;
 		} catch (MessagingException e) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
