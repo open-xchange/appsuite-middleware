@@ -1277,4 +1277,102 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         return retBool;
     }
 
+    @Override
+    public int getUserIDByUsername(Context ctx, String username) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT id from login2user where cid = ? and uid = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setString(2, username);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab user id and return 
+                return rs.getInt("id");
+            }else{
+                throw new StorageException("No such user "+username+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public String getUsernameByUserID(Context ctx, int user_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT uid from login2user where cid = ? and id = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setInt(2, user_id);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getString("uid");
+            }else{
+                throw new StorageException("No such user "+user_id+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
 }
