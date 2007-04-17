@@ -620,7 +620,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     
         if (usrdata.getPrimaryEmail() != null) {
-            if (!aliases.contains(usrdata.getPrimaryEmail())) {
+            if (aliases!=null && !aliases.contains(usrdata.getPrimaryEmail())) {
                 throw new InvalidDataException("primarymail sent but does not exists in aliases of the user!");
             }
         }
