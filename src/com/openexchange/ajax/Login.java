@@ -325,8 +325,17 @@ public class Login extends AJAXServlet {
 			writeError(resp, ERROR_INVALID_ACTION);
 		}
 	}
-	
-	protected void writeCookie(final HttpServletResponse resp,
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doPut(final HttpServletRequest req,
+        final HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+
+    protected void writeCookie(final HttpServletResponse resp,
         final SessionObject sessionObj) {
         final Cookie cookie = new Cookie(cookiePrefix + sessionObj.getSecret(),
             sessionObj.getSessionID());
