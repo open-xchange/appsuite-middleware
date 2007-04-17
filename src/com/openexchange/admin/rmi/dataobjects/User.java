@@ -2409,6 +2409,23 @@ public class User implements Serializable, Cloneable {
     }
 
     /**
+     * A convenience method for getting the first extension in a list of equal extension names. The
+     * use of this method is not recommended because you won't get notifications how many extensions
+     * of the same name exist.
+     * 
+     * @param extname
+     * @return
+     */
+    public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
+        final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
+        if (!list.isEmpty() && list.size() == 1) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
      * @return the passwordMech
      */
     public PASSWORDMECH getPasswordMech() {
