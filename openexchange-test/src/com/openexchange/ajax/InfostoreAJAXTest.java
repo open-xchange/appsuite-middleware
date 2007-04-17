@@ -229,6 +229,19 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		return gT(webConv, url.toString());
 	}
 	
+	private JSONObject toJSONArgs(Map<String, String> modified) throws JSONException {
+		JSONObject obj = new JSONObject();
+		for(String attr : modified.keySet()) {
+			if(attr.equals("categories")) {
+				obj.put(attr, new JSONArray(modified.get(attr)));
+			} else {
+				obj.put(attr, modified.get(attr));
+			}
+		}
+		return obj;
+	}
+
+	
 	public Response update(WebConversation webConv, String hostname, String sessionId, int id, long timestamp, Map<String,String> modified) throws MalformedURLException, IOException, SAXException, JSONException {
 		StringBuffer url = getUrl(sessionId,"update", hostname);
 		url.append("&id=");
@@ -236,10 +249,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		
 		url.append("&timestamp=");
 		url.append(timestamp);
-		JSONObject obj = new JSONObject();
-		for(String attr : modified.keySet()) {
-			obj.put(attr, modified.get(attr));
-		}
+		JSONObject obj = toJSONArgs(modified);
 		
 		return putT(webConv,url.toString(), obj.toString());
 	}
@@ -255,10 +265,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
 		req.setMimeEncoded(true);
 		
-		JSONObject obj = new JSONObject();
-		for(String attr : modified.keySet()) {
-			obj.put(attr, modified.get(attr));
-		}
+		JSONObject obj = toJSONArgs(modified);
 		
 		req.setParameter("json",obj.toString());
 		
@@ -272,10 +279,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	
 	public int createNew(WebConversation webConv, String hostname, String sessionId, Map<String,String> fields) throws MalformedURLException, IOException, SAXException, JSONException  {
 		StringBuffer url = getUrl(sessionId,"new", hostname);
-		JSONObject obj = new JSONObject();
-		for(String attr : fields.keySet()) {
-			obj.put(attr, fields.get(attr));
-		}
+		JSONObject obj = toJSONArgs(fields);
 		
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		
@@ -292,10 +296,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		PostMethodWebRequest req = new PostMethodWebRequest(url.toString());
 		req.setMimeEncoded(true);
 		
-		JSONObject obj = new JSONObject();
-		for(String attr : fields.keySet()) {
-			obj.put(attr, fields.get(attr));
-		}
+		JSONObject obj = toJSONArgs(fields);
 		
 		req.setParameter("json",obj.toString());
 		
@@ -330,10 +331,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		url.append(module);
 		url.append("&attachment=");
 		url.append(attachment);
-		JSONObject obj = new JSONObject();
-		for(String attr : fields.keySet()) {
-			obj.put(attr, fields.get(attr));
-		}
+		JSONObject obj = toJSONArgs(fields);
 		
 		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
 		

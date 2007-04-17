@@ -195,6 +195,19 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertTitles(res);
 	}
 	
+	public void testCategories() throws Exception {
+		int id = clean.get(0);
+		
+		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("categories" , "[\"curiosity\", \"cat\", \"danger\"]"));
+		assertNoError(res);
+		
+		res = search(getWebConversation(), getHostName(), sessionId, "curiosity", COLS);
+		assertNoError(res);
+		
+		assertTitles(res, "Test 0");
+		
+	}
+	
 	
 	public static void assertTitle(int index, JSONArray results, String title) throws JSONException {
 		JSONArray entry = results.getJSONArray(index);
