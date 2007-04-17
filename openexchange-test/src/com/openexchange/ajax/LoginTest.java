@@ -1,38 +1,50 @@
 /*
- * OPEN-XCHANGE - "the communication and information enviroment"
  *
- * All intellectual property rights in the Software are protected by
- * international copyright laws.
+ *    OPEN-XCHANGE legal information
  *
- * OPEN-XCHANGE is a trademark of Netline Internet Service GmbH and all other
- * brand and product names are or may be trademarks of, and are used to identify
- * products or services of, their respective owners.
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
  *
- * Please make sure that third-party modules and libraries are used according to
- * their respective licenses.
  *
- * Any modifications to this package must retain all copyright notices of the
- * original copyright holder(s) for the original code used.
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
  *
- * After any such modifications, the original code will still remain copyrighted
- * by the copyright holder(s) or original author(s).
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
  *
- * Copyright (C) 1998 - 2005 Netline Internet Service GmbH
- * mail:                    info@netline-is.de
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
  *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
  */
 
 package com.openexchange.ajax;
@@ -48,6 +60,7 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -103,7 +116,7 @@ public class LoginTest extends AbstractAJAXTest {
         final String hostname, final String login, final String password)
         throws IOException, SAXException, JSONException {
         LOG.trace("Logging in.");
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL
+        final WebRequest req = new PostMethodWebRequest(PROTOCOL
             + hostname + LOGIN_URL);
         req.setParameter("action", "login");
         req.setParameter("name", login);
