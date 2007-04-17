@@ -2828,7 +2828,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					mailInterfaceMonitor.changeNumActive(true);
 					originalMsg = (MimeMessage) originalMsgFolder.getMessageByUID(mailId.getMsgUID());
-					if (sendType == SENDTYPE_REPLY) {
+					if (originalMsg != null && sendType == SENDTYPE_REPLY) {
 						/*
 						 * A reply! Appropiately set message headers
 						 */

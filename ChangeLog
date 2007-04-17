@@ -5,6 +5,8 @@
    message as /SEEN
  - Bugfic #6676: Checking string values in UserSettingMail before filling
    SQL INSERT statement
+ - Bugfix #6677: Avoiding NPE on reply action if original message is not
+   present anymore
 
 * 2007-04-13 - thorben.betten@open-xchange.com
 
