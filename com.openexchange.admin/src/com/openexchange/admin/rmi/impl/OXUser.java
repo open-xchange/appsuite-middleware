@@ -520,7 +520,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {        
       
         if (ctx==null || ctx.getIdAsInt()==null || users ==null) {
-            throw new InvalidDataException();            
+            throw new InvalidDataException(); 
         }
         
         doAuthentication(auth,ctx);
@@ -528,20 +528,27 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         log.debug(ctx.toString()+" - "+Arrays.toString(users)+" - "+auth.toString());
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();            
         }
         
-        for (final User element : users) {
-            final String username = element.getUsername();
-            if(username==null){
-                throw new InvalidDataException("Username missing");
+        for (final User usr : users) {
+            final String username = usr.getUsername();
+            if(username==null && usr.getId()==null){
+                throw new InvalidDataException("Username and userid missing!Cannot resolve user data");            
             }else{
-                 if(!tools.existsUser(ctx, username)){
-                     throw new NoSuchUserException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
-                 }
+                // ok , try to get the username by id or username
+                if(username==null){
+                    usr.setUsername(tools.getUsernameByUserID(ctx, usr.getId().intValue()));
+                }
+                
+                if(usr.getId()==null ){
+                    usr.setId(new Integer(tools.getUserIDByUsername(ctx, username)));
+                }
             }
         }
+        
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         
         User[] retusers = oxu.getData(ctx, users);
