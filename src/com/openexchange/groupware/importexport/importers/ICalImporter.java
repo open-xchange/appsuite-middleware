@@ -129,7 +129,8 @@ public class ICalImporter implements Importer {
 			}
 			
 			//check format of folder
-			if (fo.getModule() != FolderObject.CALENDAR || fo.getModule() != FolderObject.TASK) {
+			int module = fo.getModule(); 
+			if (module  != FolderObject.CALENDAR && module != FolderObject.TASK) {
 				return false;
 			}
 			//check read access to folder
