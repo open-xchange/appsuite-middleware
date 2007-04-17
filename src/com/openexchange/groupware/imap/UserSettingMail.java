@@ -84,6 +84,8 @@ public class UserSettingMail implements DeleteListener {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserSettingMail.class);
 	
+	private static final String STR_EMPTY = "";
+	
 	private static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
 	
 	private static final int INT_USE_COLOR_QUOTE = 2;
@@ -377,15 +379,15 @@ public class UserSettingMail implements DeleteListener {
 						stmt.setInt(2, user);
 						stmt.setInt(3, 0);
 						//stmt.setString(4, signature);
-						stmt.setString(4, sendAddr);
-						stmt.setString(5, replyToAddr);
+						stmt.setString(4, sendAddr == null ? STR_EMPTY : sendAddr);
+						stmt.setString(5, replyToAddr == null ? STR_EMPTY : replyToAddr);
 						stmt.setInt(6, msgFormat);
 						stmt.setString(7, getDisplayMsgHeadersString());
 						stmt.setInt(8, autoLinebreak);
-						stmt.setString(9, stdTrashName);
-						stmt.setString(10, stdSentName);
-						stmt.setString(11, stdDraftsName);
-						stmt.setString(12, stdSpamName);
+						stmt.setString(9, stdTrashName == null ? STD_TRASH : stdTrashName);
+						stmt.setString(10, stdSentName == null ? STD_SENT : stdSentName);
+						stmt.setString(11, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
+						stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
 						stmt.setLong(13, uploadQuota);
 						stmt.setLong(14, uploadQuotaPerFile);
 						stmt.executeUpdate();
