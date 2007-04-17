@@ -330,7 +330,7 @@ public class Login extends AJAXServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void doPut(final HttpServletRequest req,
+    protected void doPost(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);
     }
