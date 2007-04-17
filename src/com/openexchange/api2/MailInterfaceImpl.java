@@ -2236,18 +2236,22 @@ public class MailInterfaceImpl implements MailInterface {
 					eliminateDuplicates(addrList, InternetAddress.parse(alternates, false));
 				}
 				/*
-				 * Cc all other original recipients
+				 * Determine if other original recipients should be added to Cc
 				 */
-				final String replyallccStr = mailSession == null ? null : mailSession.getProperty("mail.replyallcc");
-				final boolean replyallcc = STR_TRUE.equalsIgnoreCase(replyallccStr);
+				final boolean replyallcc = STR_TRUE.equalsIgnoreCase((mailSession == null ? null : mailSession
+						.getProperty("mail.replyallcc")));
+				/*
+				 * Add recipients from Reply-To vs. From field
+				 */
+				InternetAddress[] internetAddrs = eliminateDuplicates(addrList, recipientAddrs);
 				/*
 				 * Add recipients from To field
 				 */
-				eliminateDuplicates(addrList, recipientAddrs);
-				InternetAddress[] internetAddrs = eliminateDuplicates(addrList, ((InternetAddress[]) (originalMsg
-						.getRecipients(Message.RecipientType.TO))));
+				internetAddrs = eliminateDuplicates(array2List(internetAddrs), eliminateDuplicates(addrList,
+						((InternetAddress[]) (originalMsg.getRecipients(Message.RecipientType.TO)))));
 				final String[] userAddrs = sessionObj.getUserObject().getAliases();
-				if (internetAddrs != null && internetAddrs.length > 0) {
+				if (!addrList.isEmpty()) {
+					//final InternetAddress[] internetAddrs = addrList.toArray(new InternetAddress[addrList.size()]);
 					if (replyallcc) {
 						retval.addCCAddresses(removeUserAddresses(internetAddrs, userAddrs));
 					} else {
@@ -2255,8 +2259,10 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 				/*
-				 * Add recipients from Cc field
+				 * Add recipients from Cc field which do not already occur in
+				 * reply's To
 				 */
+				eliminateDuplicates(addrList, internetAddrs);
 				internetAddrs = eliminateDuplicates(addrList, ((InternetAddress[]) (originalMsg
 						.getRecipients(Message.RecipientType.CC))));
 				if (internetAddrs != null && internetAddrs.length > 0) {
@@ -2316,37 +2322,42 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		return tmp.toArray(new InternetAddress[tmp.size()]);
 	}
+	
+	private static final ArrayList<InternetAddress> array2List(final InternetAddress[] arr) {
+		final ArrayList<InternetAddress> retval = new ArrayList<InternetAddress>(arr.length);
+		retval.addAll(Arrays.asList(arr));
+		return retval;
+	}
 
-	private final InternetAddress[] eliminateDuplicates(final List<InternetAddress> editMe,
-			final InternetAddress[] staticAddrs) {
-		if (staticAddrs == null) {
+	private final InternetAddress[] eliminateDuplicates(final List<InternetAddress> l, final InternetAddress[] arr) {
+		if (arr == null) {
 			return null;
 		}
-		final List<InternetAddress> addrs = Arrays.asList(staticAddrs);
+		final int listSize = l.size();
+		final List<InternetAddress> addrs = array2List(arr);
 		final Iterator<InternetAddress> iter = addrs.iterator();
-		for (int i = 0; i < staticAddrs.length; i++) {
+		for (int i = 0; i < arr.length; i++) {
 			final InternetAddress intAddr = iter.next();
 			boolean found = false;
 			/*
 			 * Search in list for current address
 			 */
 			int j = 0;
-			while (j < editMe.size()) {
-				if (editMe.get(j).equals(intAddr)) {
+			while (j < listSize) {
+				if (l.get(j).equals(intAddr)) {
 					/*
-					 * Address found, so remove it
+					 * Address found, so remove it from address array
 					 */
 					found = true;
-					editMe.remove(j);
-				} else {
-					j++;
+					iter.remove();
 				}
+				j++;
 			}
 			if (!found) {
 				/*
-				 * Add new address to list
+				 * Add new address from array to list
 				 */
-				editMe.add(intAddr);
+				l.add(intAddr);
 			}
 		}
 		return addrs.toArray(new InternetAddress[addrs.size()]);
