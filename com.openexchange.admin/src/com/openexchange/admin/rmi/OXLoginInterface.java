@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -82,6 +83,20 @@ public interface OXLoginInterface extends Remote {
      * @throws InvalidDataException
      */
     public void login(Context ctx,Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    
+    /**
+     * Login method for a context admin. Returns a User object with all data of the logged in user.
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     */
+    public User login2User(Context ctx,Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
     
     /**
