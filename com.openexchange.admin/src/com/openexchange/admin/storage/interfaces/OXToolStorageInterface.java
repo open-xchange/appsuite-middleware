@@ -197,4 +197,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
+    
+    public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
+    
+    public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
 }
