@@ -47,53 +47,48 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
 import com.openexchange.api2.OXException;
 
-
 /**
- * SearchIterator
- *
+ * SearchIterator.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public interface SearchIterator<T> {
 
-public interface SearchIterator {
-	
-	public static final SearchIterator EMPTY_ITERATOR = new SearchIterator(){
+    SearchIterator EMPTY_ITERATOR = new SearchIterator() {
 
-		public boolean hasNext() {
-			return false;
-		}
+        public boolean hasNext() {
+            return false;
+        }
 
-		public Object next() throws SearchIteratorException, OXException {
-			return null;
-		}
+        public Object next() throws SearchIteratorException, OXException {
+            return null;
+        }
 
-		public void close() throws SearchIteratorException {
-		}
-		
-		public int size() {
-			return 0;
-		}
-		
-		public boolean hasSize() {
-			return true;
-		}
-		
-	};
+        public void close() throws SearchIteratorException {
+        }
 
-	public boolean hasNext();
+        public int size() {
+            return 0;
+        }
 
-	public Object next() throws SearchIteratorException, OXException;
-	
-	public void close() throws SearchIteratorException;
-	
-	public int size();
-	
-	public boolean hasSize();
+        public boolean hasSize() {
+            return true;
+        }
+
+    };
+
+    boolean hasNext();
+
+    T next() throws SearchIteratorException, OXException;
+
+    void close() throws SearchIteratorException;
+
+    int size();
+
+    boolean hasSize();
 
 }
 

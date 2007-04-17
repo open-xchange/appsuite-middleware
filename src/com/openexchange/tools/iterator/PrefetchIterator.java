@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
 import java.util.LinkedList;
@@ -59,34 +57,100 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
 /**
- * @author marcus
- *
+ * This iterator prefetches the delegating iterator results if the server
+ * configuration contains <code>true</code> for the prefetch parameter.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class PrefetchIterator<T> implements SearchIterator {
+public class PrefetchIterator<T> implements SearchIterator<T> {
 
-    private final SearchIterator delegate;
-
-    private final boolean prefetch;
-
-    private Queue<T> data;
-
-    private OXException oxExc;
-
-    private SearchIteratorException sie;
-
-    private SearchIteratorException closeexc;
+    /**
+     * The used implementation.
+     */
+    private final SearchIterator<T> impl;
 
     /**
      * Default constructor.
+     * @param delegate Delegating iterator.
      */
-    public PrefetchIterator(final SearchIterator delegate) {
-        this.delegate = delegate;
-        prefetch = ServerConfig.getBoolean(Property.PrefetchEnabled);
-        init();
+    public PrefetchIterator(final SearchIterator<T> delegate) {
+        final boolean prefetch = ServerConfig.getBoolean(Property
+            .PrefetchEnabled);
+        if (prefetch) {
+            impl = new Prefetch<T>(delegate);
+        } else {
+            impl = new NoPrefetch<T>(delegate);
+        }
     }
 
-    private void init() {
-        if (prefetch) {
+    /**
+     * {@inheritDoc}
+     */
+    public void close() throws SearchIteratorException {
+        impl.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasNext() {
+        return impl.hasNext();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasSize() {
+        return impl.hasSize();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public T next() throws SearchIteratorException, OXException {
+        return impl.next();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int size() {
+        return impl.size();
+    }
+
+    /**
+     * This class prefetches the result.
+     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     * @param <T> type of objects in this iterator.
+     */
+    private static final class Prefetch<T> implements SearchIterator<T> {
+
+        /**
+         * Iterator for the object.
+         */
+        private final SearchIterator<T> delegate;
+
+        private Queue<T> data;
+
+        private OXException oxExc;
+
+        private SearchIteratorException sie;
+
+        private SearchIteratorException closeexc;
+
+        /**
+         * Default constructor.
+         * @param delegate Iterator for the object.
+         */
+        Prefetch(final SearchIterator<T> delegate) {
+            super();
+            this.delegate = delegate;
+            fetch();
+        }
+
+        /**
+         * Reads all data from the delegate.
+         */
+        private void fetch() {
             if (delegate.hasSize()) {
                 data = new LinkedList<T>();
             } else {
@@ -109,44 +173,35 @@ public class PrefetchIterator<T> implements SearchIterator {
                 closeexc = e;
             }
         }
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void close() throws SearchIteratorException {
-        if (prefetch) {
+        /**
+         * {@inheritDoc}
+         */
+        public void close() throws SearchIteratorException {
             data.clear();
             if (null != closeexc) {
                 throw closeexc;
             }
-        } else {
-            delegate.close();
         }
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean hasNext() {
-        if (prefetch) {
-            return !data.isEmpty() || null != oxExc || null != sie; 
+        /**
+         * {@inheritDoc}
+         */
+        public boolean hasNext() {
+            return !data.isEmpty() || null != oxExc || null != sie;
         }
-        return delegate.hasNext();
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean hasSize() {
-        return prefetch || delegate.hasSize();
-    }
+        /**
+         * {@inheritDoc}
+         */
+        public boolean hasSize() {
+            return true;
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    public T next() throws SearchIteratorException, OXException {
-        if (prefetch) {
+        /**
+         * {@inheritDoc}
+         */
+        public T next() throws SearchIteratorException, OXException {
             if (data.isEmpty()) {
                 if (null != oxExc) {
                     throw oxExc;
@@ -158,16 +213,68 @@ public class PrefetchIterator<T> implements SearchIterator {
             }
             return data.poll();
         }
-        return (T) delegate.next();
+
+        /**
+         * {@inheritDoc}
+         */
+        public int size() {
+            return data.size();
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * This class doesn't prefetch the result.
+     * @param <T> type of objects in this iterator.
      */
-    public int size() {
-        if (prefetch) {
-            return data.size();
+    private static final class NoPrefetch<T> implements SearchIterator<T> {
+
+        /**
+         * Iterator for the object.
+         */
+        private final SearchIterator<T> delegate;
+
+        /**
+         * Default constructor.
+         * @param delegate Iterator for the object.
+         */
+        NoPrefetch(final SearchIterator<T> delegate) {
+            super();
+            this.delegate = delegate;
         }
-        return delegate.size();
+
+        /**
+         * {@inheritDoc}
+         */
+        public void close() throws SearchIteratorException {
+            delegate.close();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public boolean hasNext() {
+            return delegate.hasNext();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public boolean hasSize() {
+            return delegate.hasSize();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public T next() throws SearchIteratorException, OXException {
+            return delegate.next();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public int size() {
+            return delegate.size();
+        }
     }
 }
