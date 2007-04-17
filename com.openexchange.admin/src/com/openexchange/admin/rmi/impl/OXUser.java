@@ -519,7 +519,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {        
       
-        if (ctx==null || users ==null) {
+        if (ctx==null || ctx.getIdAsInt()==null || users ==null) {
             throw new InvalidDataException();            
         }
         
@@ -529,15 +529,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            
+            throw new NoSuchContextException();            
         }
+        
         for (final User element : users) {
             final String username = element.getUsername();
-            if (null != username && !tools.existsUser(ctx, element.getUsername())) {
-                throw new NoSuchUserException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
-            } else if (!tools.existsUser(ctx, element.getId())) {
-                throw new NoSuchUserException("No such user " + element.getId() + " in context " + ctx.getIdAsInt());
+            if(username==null){
+                throw new InvalidDataException("Username missing");
+            }else{
+                 if(!tools.existsUser(ctx, username)){
+                     throw new NoSuchUserException("No such user " + element.getUsername() + " in context " + ctx.getIdAsInt());
+                 }
             }
         }
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
