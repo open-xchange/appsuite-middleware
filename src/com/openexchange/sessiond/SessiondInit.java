@@ -47,48 +47,32 @@
  *
  */
 
+package com.openexchange.sessiond;
 
+import com.openexchange.server.ComfireConfig;
 
-package com.openexchange.server;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * ComfireListener
- * 
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * SessiondInit
+ *
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
-public class ComfireListener implements Runnable {
-
-	private final ServerSocket ss;
-
-	private final Thread run;
-
-	public ComfireListener(ServerSocket ss) {
-		this.ss = ss;
-		run = new Thread();
-		run();
+public class SessiondInit {
+	
+	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+	
+	public SessiondInit() {
+		super();
 	}
+	
+	public static void init() {
+		LOG.info("Parse Sessiond properties");
+		final SessiondConfigWrapper config = new SessiondConfigWrapper(ComfireConfig.properties.getProperty("SESSIONDPROPERTIES"));
+		SessiondConnector.setConfig(config);
 
-	public void run() {
-		while (true) {
-			try {
-				final Socket s = ss.accept();
-				s.setTcpNoDelay(false);
-				s.setSoTimeout(10000);
-				run.wait();
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
-			} catch (SocketException se) {
-				se.printStackTrace();
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-		}
+		LOG.info("Starting Sessiond");
+		new Sessiond(config);
 	}
-
 }

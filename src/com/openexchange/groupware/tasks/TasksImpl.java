@@ -57,8 +57,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.event.EventClient;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskStorage.StorageType;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -130,7 +130,7 @@ final class TasksImpl extends Tasks {
         } catch (TaskException e) {
             throw Tools.convert(e);
         } catch (SearchIteratorException e) {
-            throw new OXException("Problem while iterating listed tasks.", e);
+            throw new OXException(e);
         }
         try {
             for (UpdateData data : removeParticipant) {
@@ -170,7 +170,9 @@ final class TasksImpl extends Tasks {
         removeParticipant.removeAll(deleteTask);
         try {
             for (int taskId : deleteTask) {
-                storage.delete(ctx, taskId, userId, new Date());
+                final Task task = TaskLogic.loadTask(ctx, folderId, taskId,
+                    StorageType.ACTIVE);
+                TaskLogic.deleteTask(session, task, task.getLastModified());
             }
             for (UpdateData data : removeParticipant) {
                 if (deleteTask.contains(data.taskId)) {

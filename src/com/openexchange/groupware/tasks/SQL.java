@@ -49,21 +49,21 @@
 
 package com.openexchange.groupware.tasks;
 
-import java.sql.DataTruncation;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.groupware.tasks.TaskException.Detail;
 
 /**
  * This class contains methods for building the sql query for searches.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SQL {
+final class SQL {
 
     /**
      * SQL statement selecting all fields for a task.
@@ -71,10 +71,127 @@ public final class SQL {
     private static final String ALL_FIELDS;
 
     /**
+     * Tables for tasks.
+     */
+    static final Map<StorageType, String> TASK_TABLES =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * Tables for participants.
+     */
+    static final Map<StorageType, String> PARTS_TABLES =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * Tables for external participants.
+     */
+    static final Map<StorageType, String> EPARTS_TABLES =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * Tables for task folder mapping.
+     */
+    static final Map<StorageType, String> FOLDER_TABLES =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * Search for delegated tasks.
+     */
+    static final Map<StorageType, String> SEARCH_DELEGATED =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for selecting participants.
+     */
+    static final Map<StorageType, String> SELECT_PARTS =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for updating participants.
+     */
+    static final Map<StorageType, String> UPDATE_PARTS =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for deleting participants.
+     */
+    static final Map<StorageType, String> DELETE_PARTS =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * Search for tasks with a user as participant.
+     */
+    static final Map<StorageType, String> FIND_PARTICIPANT =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for finding group participants.
+     */
+    static final Map<StorageType, String> FIND_GROUP =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statement for selecting external participants.
+     */
+    static final Map<StorageType, String> SELECT_EXTERNAL =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statement for deleting external participants.
+     */
+    static final Map<StorageType, String> DELETE_EXTERNAL =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for inserting folder mappings.
+     */
+    static final Map<StorageType, String> INSERT_FOLDER =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for deleting folder mappings.
+     */
+    static final Map<StorageType, String> DELETE_FOLDER =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for selecting task folder mappings.
+     */
+    static final Map<StorageType, String> SELECT_FOLDER =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for selecting a task folder mapping by the user.
+     */
+    static final Map<StorageType, String> FOLDER_BY_USER =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statements for searching all task folder mapping by the user.
+     */
+    static final Map<StorageType, String> SEARCH_FOLDER_BY_USER =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
      * Prevent instanciation.
      */
     private SQL() {
         super();
+    }
+
+    /**
+     * Extends a SQL statement with enough ? characters in the last IN argument.
+     * @param sql SQL statment ending with "IN (";
+     * @param length number of entries.
+     * @return the ready to use SQL statement.
+     */
+    static String getIN(final String sql, final int length) {
+        final StringBuilder retval = new StringBuilder(sql);
+        for (int i = 0; i < length; i++) {
+            retval.append("?,");
+        }
+        retval.setCharAt(retval.length() - 1, ')');
+        return retval.toString();
     }
 
     /**
@@ -266,5 +383,103 @@ public final class SQL {
         }
         selectAll.setLength(selectAll.length() - 1);
         ALL_FIELDS = selectAll.toString();
+
+        final StorageType[] activeDelete = new StorageType[] {
+            StorageType.ACTIVE, StorageType.DELETED };
+        final String tableName = "@tableName@";
+
+        TASK_TABLES.put(StorageType.ACTIVE, "task");
+        TASK_TABLES.put(StorageType.DELETED, "del_task");
+        PARTS_TABLES.put(StorageType.ACTIVE, "task_participant");
+        PARTS_TABLES.put(StorageType.REMOVED, "task_removedparticipant");
+        PARTS_TABLES.put(StorageType.DELETED, "del_task_participant");
+        EPARTS_TABLES.put(StorageType.ACTIVE, "task_eparticipant");
+        EPARTS_TABLES.put(StorageType.DELETED, "del_task_eparticipant");
+        FOLDER_TABLES.put(StorageType.ACTIVE, "task_folder");
+        FOLDER_TABLES.put(StorageType.DELETED, "del_task_folder");
+
+        String sql = "SELECT id FROM @taskTable@ JOIN @participantTable@ "
+            + "ON @taskTable@.cid=@participantTable@.cid "
+            + "AND @taskTable@.id=@participantTable@.task "
+            + "WHERE @taskTable@.cid=? AND "
+            + "(@taskTable@.created_from=? OR @taskTable@.changed_from=?)";
+        for (StorageType type : activeDelete) {
+            SEARCH_DELEGATED.put(type, sql.replace("@taskTable@", TASK_TABLES
+                .get(type)).replace("@participantTable@", PARTS_TABLES
+                .get(type)));
+        }
+
+        SELECT_PARTS.put(StorageType.ACTIVE,
+            "SELECT user,group_id,accepted,description FROM task_participant "
+            + "WHERE cid=? AND task=?");
+        SELECT_PARTS.put(StorageType.REMOVED,
+            "SELECT user,group_id,accepted,description,folder "
+            + "FROM task_removedparticipant WHERE cid=? AND task=?");
+        SELECT_PARTS.put(StorageType.DELETED,
+            "SELECT user,group_id,accepted,description "
+            + "FROM del_task_participant WHERE cid=? AND task=?");
+        sql = "UPDATE " + tableName + " SET group_id=?, accepted=?, "
+            + "description=? WHERE cid=? AND task=? AND user=?";
+        for (StorageType type : StorageType.values()) {
+            UPDATE_PARTS.put(type, sql.replace(tableName, PARTS_TABLES
+                .get(type)));
+        }
+        sql = "DELETE FROM " + tableName
+            + " WHERE cid=? AND task=? AND user IN (";
+        for (StorageType type : StorageType.values()) {
+            DELETE_PARTS.put(type, sql.replace(tableName, PARTS_TABLES
+                .get(type)));
+        }
+        sql = "SELECT task FROM " + tableName + " WHERE cid=? AND user=?";
+        for (StorageType type : StorageType.values()) {
+            FIND_PARTICIPANT.put(type, sql.replace(tableName,
+                PARTS_TABLES.get(type)));
+        }
+        sql = "SELECT task FROM " + tableName + " WHERE cid=? AND group_id=?";
+        for (StorageType type : StorageType.values()) {
+            FIND_GROUP.put(type, sql.replace(tableName, PARTS_TABLES
+                .get(type)));
+        }
+        sql = "DELETE FROM " + tableName
+            + " WHERE cid=? AND task=? AND mail IN (";
+        for (StorageType type : activeDelete) {
+            DELETE_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
+                .get(type)));
+        }
+        sql = "SELECT mail,display_name FROM " + tableName
+            + " WHERE cid=? AND task=?";
+        for (StorageType type : activeDelete) {
+            SELECT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
+                .get(type)));
+        }
+
+        sql = "INSERT INTO " + tableName + " (cid, id, folder, user) "
+            + "VALUES (?,?,?,?)";
+        for (StorageType type : activeDelete) {
+            INSERT_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
+        sql = "DELETE FROM " + tableName
+            + " WHERE cid=? AND id=? AND folder IN (";
+        for (StorageType type : activeDelete) {
+            DELETE_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
+        sql = "SELECT folder,user FROM " + tableName + " WHERE cid=? AND id=?";
+        for (StorageType type : activeDelete) {
+            SELECT_FOLDER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
+        sql = "SELECT folder FROM " + tableName
+            + " WHERE cid=? AND id=? AND user=?";
+        for (StorageType type : activeDelete) {
+            FOLDER_BY_USER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
+        sql = "SELECT folder,id FROM " + tableName + " WHERE cid=? AND user=?";
+        for (StorageType type : activeDelete) {
+            SEARCH_FOLDER_BY_USER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
     }
 }

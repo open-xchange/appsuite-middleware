@@ -47,28 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.push.udp;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.event.EventQueue;
+import com.openexchange.server.ComfireConfig;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class ContactException extends OXException {
-	
-	private static final long serialVersionUID = -202902687980139008L;
-	
-	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder:: Folder id %1$d in Context %2$d with User %3$d";
-	public static final String NO_PERMISSION_MSG = "You do not have permission to store objects in Folder %1$d in Context %2$d with User %3$d";
-	public static final String OBJECT_HAS_CHANGED_MSG = "The object has changed on server side since it was last fetched.";
-	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from Folder %1$d in Context %2$d with User %3$d";
-	public static final String EVENT_QUEUE = "Unable to initialize Event queue";
-	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pickup a connection from the DBPool";
-	
-	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.CONTACT, category, id,message,cause,msgParams);
-	}
+/**
+ * EventInit
+ *
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ */
 
-	public ContactException(Category category, String message, int id, Object...msgParams){
-		this(category,id,message, null,msgParams);
+public class PushInit {
+	
+	private static final Log LOG = LogFactory.getLog(PushInit.class);
+	
+	public PushInit() {
+		super();
 	}
 	
+	public static void init() {
+		LOG.info("Parse Push properties");
+		final PushConfigInterface pushConfigInterface = new PushConfigInterfaceImpl(ComfireConfig.properties.getProperty("PUSHPROPERTIES"));
+		final PushSocket pushSocket = new PushSocket(pushConfigInterface);
+		final PushOutputQueue pushOutputQueue = new PushOutputQueue(pushConfigInterface);
+
+		if (pushConfigInterface.isPushEnabled()) {
+			final PushHandler pushHandler = new PushHandler();
+			EventQueue.addAppointmentEvent(pushHandler);
+			EventQueue.addTaskEvent(pushHandler);
+			EventQueue.addContactEvent(pushHandler);
+			EventQueue.addFolderEvent(pushHandler);
+		}
+		
+		final PushMulticastSocket pushMultiCastRequest = new PushMulticastSocket(pushConfigInterface);
+		final PushMulticastRequestTimer multicastRequest = new PushMulticastRequestTimer(pushConfigInterface);
+	}
 }

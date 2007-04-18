@@ -122,7 +122,7 @@ public class Task extends CalendarObject {
 
     private String currency = null;
     private int status = 0;
-    private String trip_meter = null;
+    private String tripMeter = null;
     private String billing_information = null;
     private String companies = null;
     private Date afterComplete = null;
@@ -133,16 +133,16 @@ public class Task extends CalendarObject {
     private boolean targetCostsSet = false;
     private boolean actualCostsSet = false;
     private boolean targetDurationSet = false;
-    private boolean b_actual_duration = false;
-    private boolean b_priority = false;
-    private boolean b_percent_complete = false;
-    private boolean b_currency = false;
-    private boolean b_status = false;
-    private boolean b_trip_meter = false;
-    private boolean b_billing_information = false;
-    private boolean b_companies = false;
-    private boolean b_after_complete = false;
-    private boolean b_date_completed = false;
+    private boolean actualDurationSet = false;
+    private boolean prioritySet = false;
+    private boolean percentCompleteSet = false;
+    private boolean currencySet = false;
+    private boolean statusSet = false;
+    private boolean tripMeterSet = false;
+    private boolean billingInformationSet = false;
+    private boolean companiesSet = false;
+    private boolean afterCompleteSet = false;
+    private boolean dateCompletedSet = false;
     private boolean bAlarm = false;
 
     public Task() {
@@ -197,7 +197,7 @@ public class Task extends CalendarObject {
     }
 
     public String getTripMeter() {
-        return trip_meter;
+        return tripMeter;
     }
 
     public String getBillingInformation() {
@@ -245,52 +245,52 @@ public class Task extends CalendarObject {
      */
     public void setActualDuration(final long actualDuration) {
         this.actualDuration = actualDuration;
-        b_actual_duration = true;
+        actualDurationSet = true;
     }
 
     public void setPriority(int priority) {
         this.priority = priority;
-        b_priority = true;
+        prioritySet = true;
     }
 
     public void setPercentComplete(int percent_complete) {
         this.percentComplete = percent_complete;
-        b_percent_complete = true;
+        percentCompleteSet = true;
     }
 
     public void setCurrency(String currency) {
         this.currency = currency;
-        b_currency = true;
+        currencySet = true;
     }
 
     public void setStatus(int status) {
         this.status = status;
-        b_status = true;
+        statusSet = true;
     }
 
     public void setTripMeter(String trip_meter) {
-        this.trip_meter = trip_meter;
-        b_trip_meter = true;
+        this.tripMeter = trip_meter;
+        tripMeterSet = true;
     }
 
     public void setBillingInformation(String billing_information) {
         this.billing_information = billing_information;
-        b_billing_information = true;
+        billingInformationSet = true;
     }
 
     public void setCompanies(String companies) {
         this.companies = companies;
-        b_companies = true;
+        companiesSet = true;
     }
 
     public void setAfterComplete(Date afterComplete) {
         this.afterComplete = afterComplete;
-        b_after_complete = true;
+        afterCompleteSet = true;
     }
 
     public void setDateCompleted(Date date_completed) {
         this.date_completed = date_completed;
-        b_date_completed = true;
+        dateCompletedSet = true;
     }
 
     public void setAlarm(Date alarm) {
@@ -321,52 +321,52 @@ public class Task extends CalendarObject {
 
     public void removeActualDuration() {
         actualDuration = 0;
-        b_actual_duration = false;
+        actualDurationSet = false;
     }
 
     public void removePriority() {
         priority = 0;
-        b_priority = false;
+        prioritySet = false;
     }
 
     public void removePercentComplete() {
         percentComplete = 0;
-        b_percent_complete = false;
+        percentCompleteSet = false;
     }
 
     public void removeCurrency() {
         currency = null;
-        b_currency = false;
+        currencySet = false;
     }
 
     public void removeStatus() {
         status = 0;
-        b_status = false;
+        statusSet = false;
     }
 
     public void removeTripMeter() {
-        trip_meter = null;
-        b_trip_meter = false;
+        tripMeter = null;
+        tripMeterSet = false;
     }
 
     public void removeBillingInformation() {
         billing_information = null;
-        b_billing_information = false;
+        billingInformationSet = false;
     }
 
     public void removeCompanies() {
         companies = null;
-        b_companies = false;
+        companiesSet = false;
     }
 
     public void removeAfterComplete() {
         afterComplete = null;
-        b_after_complete = false;
+        afterCompleteSet = false;
     }
 
     public void removeDateCompleted() {
         date_completed = null;
-        b_date_completed = false;
+        dateCompletedSet = false;
     }
 
     public void removeAlarm() {
@@ -392,43 +392,43 @@ public class Task extends CalendarObject {
     }
 
     public boolean containsActualDuration() {
-        return b_actual_duration;
+        return actualDurationSet;
     }
 
     public boolean containsPriority() {
-        return b_priority;
+        return prioritySet;
     }
 
     public boolean containsPercentComplete() {
-        return b_percent_complete;
+        return percentCompleteSet;
     }
 
     public boolean containsCurrency() {
-        return b_currency;
+        return currencySet;
     }
 
     public boolean containsStatus() {
-        return b_status;
+        return statusSet;
     }
 
     public boolean containsTripMeter() {
-        return b_trip_meter;
+        return tripMeterSet;
     }
 
     public boolean containsBillingInformation() {
-        return b_billing_information;
+        return billingInformationSet;
     }
 
     public boolean containsCompanies() {
-        return b_companies;
+        return companiesSet;
     }
 
     public boolean containsAfterComplete() {
-        return b_after_complete;
+        return afterCompleteSet;
     }
 
     public boolean containsDateCompleted() {
-        return b_date_completed;
+        return dateCompletedSet;
     }
 
     public boolean containsAlarm() {
@@ -451,7 +451,7 @@ public class Task extends CalendarObject {
 
         currency = null;
         status = 0;
-        trip_meter = null;
+        tripMeter = null;
         billing_information = null;
         companies = null;
         afterComplete = null;
@@ -462,16 +462,16 @@ public class Task extends CalendarObject {
         targetCostsSet = false;
         actualCostsSet = false;
         targetDurationSet = false;
-        b_actual_duration = false;
-        b_priority = false;
-        b_percent_complete = false;
-        b_currency = false;
-        b_status = false;
-        b_trip_meter = false;
-        b_billing_information = false;
-        b_companies = false;
-        b_after_complete = false;
-        b_date_completed = false;
+        actualDurationSet = false;
+        prioritySet = false;
+        percentCompleteSet = false;
+        currencySet = false;
+        statusSet = false;
+        tripMeterSet = false;
+        billingInformationSet = false;
+        companiesSet = false;
+        afterCompleteSet = false;
+        dateCompletedSet = false;
         bAlarm = false;
     }
 

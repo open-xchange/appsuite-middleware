@@ -654,6 +654,7 @@ public final class CalendarRecurringCollection {
             calc.setFirstDayOfWeek(Calendar.MONDAY);
             calc.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // Set to first day of week for calculation
             s = calc.getTimeInMillis();
+            Calendar calc_weekly = (Calendar)calc.clone();
             
             int days[] = new int[7];
             int c = 0;
@@ -712,7 +713,8 @@ public final class CalendarRecurringCollection {
                         ds_count++;
                     }
                 }
-                s += (MILLI_WEEK*cdao.getInterval());
+                calc_weekly.add(Calendar.WEEK_OF_YEAR, cdao.getInterval());
+                s = calc_weekly.getTimeInMillis();
                 sr += (MILLI_WEEK*cdao.getInterval());
                 calc.add(Calendar.WEEK_OF_YEAR, cdao.getInterval());
             }
@@ -1215,7 +1217,7 @@ public final class CalendarRecurringCollection {
         clone.removeDeleteExceptions();
         clone.removeChangeExceptions();
         clone.setChangeExceptions(new java.util.Date[] { clone.getRecurrenceDatePosition() }); // We store the date_position in the exception field
-        if (!clone.containsStartDate()  || !clone.containsEndDate()) {
+        if (!cdao.containsStartDate()  || !cdao.containsEndDate()) {
             // Calculate real times !!!!
             CalendarRecurringCollection.fillDAO(edao);
             RecurringResults rss = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());

@@ -126,7 +126,7 @@ public class SessionHandler extends TimerTask {
 		
 		if (!isInit) {
 			for (int a = 0; a < numberOfSessionContainers; a++) {
-				addContainer();
+				prependContainer();
 			}
 			
 			numberOfSessionsInContainer = new int[numberOfSessionContainers];
@@ -146,10 +146,16 @@ public class SessionHandler extends TimerTask {
 		}
 	}
 	
-	private static void addContainer() {
-		sessionList.add(new Hashtable<String, SessionObject>(maxSessions));
-		userList.add(new Hashtable<String, String>(maxSessions));
-		randomList.add(new Hashtable<String, String>(maxSessions));
+	private static void prependContainer() {
+		sessionList.add(0, new Hashtable<String, SessionObject>(maxSessions));
+		userList.add(0, new Hashtable<String, String>(maxSessions));
+		randomList.add(0, new Hashtable<String, String>(maxSessions));
+	}
+	
+	private static void removeContainer() {
+		sessionList.removeLast();
+		userList.removeLast();
+		randomList.removeLast();
 	}
 	
 	protected static SessionObject addSession(final String loginName, final String password, final String client_ip,
@@ -457,9 +463,9 @@ public class SessionHandler extends TimerTask {
 			}
 		}
 		
-		addContainer();
+		prependContainer();
 		MonitoringInfo.decrementNumberOfActiveSessions(sessionList.getLast().size());
-		sessionList.removeLast();
+		removeContainer();
 		
 		for (int a = 0; a < sessionList.size(); a++) {
 			numberOfSessionsInContainer[a] = sessionList.get(a).size();

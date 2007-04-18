@@ -89,7 +89,7 @@ public final class Task2Links {
         Task task;
         try {
             final TaskStorage storage = TaskStorage.getInstance();
-            task = storage.selectTask(ctx, taskId);
+            task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
         } catch (TaskException e) {
             LOG.error("Problem while reading task from database.", e);
             return false;

@@ -165,7 +165,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 	
 	protected int[] getAffectedUsers4Object(int folderId, SessionObject sessionObj, HashSet hs) {
 		try {
-			groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			
 			folderSql = new RdbFolderSQLInterface(sessionObj);
 			FolderObject folderObj = folderSql.getFolderById(folderId); 
@@ -193,7 +193,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 	
 	protected int[] getAffectedUsers4Folder(FolderObject folderObj, SessionObject sessionObj, HashSet hs) {
 		try {
-			groupStorage = GroupStorage.getInstance(sessionObj.getContext());
+			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			
 			OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 			

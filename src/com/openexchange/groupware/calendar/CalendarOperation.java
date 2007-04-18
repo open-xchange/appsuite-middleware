@@ -386,16 +386,17 @@ public class CalendarOperation implements SearchIterator {
                     if (!cdao.containsModifiedBy()) {
                         cdao.setModifiedBy(uid);
                     }
+                    handleFullTime(cdao);
                     if (cdao.isSequence()) {
                         CalendarRecurringCollection.fillDAO(cdao);
                     }
-                    handleFullTime(cdao);
                     prepareUpdate(cdao, inFolder);
                 } else {
+                    handleFullTime(cdao);
                     if (cdao.isSequence()) {
+                        cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));                    
                         CalendarRecurringCollection.fillDAO(cdao);
                     }
-                    handleFullTime(cdao);
                     prepareInsert(cdao);
                 }
                 
@@ -897,7 +898,7 @@ public class CalendarOperation implements SearchIterator {
                 userparticipants = new Participants(cdao.getUsers());
             }
             if (p.getType() == Participant.GROUP) {
-                GroupStorage gs = GroupStorage.getInstance(cdao.getContext());
+                GroupStorage gs = GroupStorage.getInstance(cdao.getContext(), true);
                 Group g = gs.getGroup(p.getIdentifier());
                 int m[] = g.getMember();
                 for (int b = 0; b < m.length; b++) {

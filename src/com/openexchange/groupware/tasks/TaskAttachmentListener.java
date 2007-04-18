@@ -98,7 +98,8 @@ public class TaskAttachmentListener implements AttachmentListener {
         task.setLastModified(lastModified);
         task.setModifiedBy(event.getUser().getId());
         try {
-            final Task oldTask = storage.selectTask(ctx, event.getAttachedId());
+            final Task oldTask = storage.selectTask(ctx, event.getAttachedId(),
+                StorageType.ACTIVE);
             final Date lastRead = oldTask.getLastModified();
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
             storage.update(ctx, task, lastRead, UPDATE_FIELDS, null, null, null,
@@ -124,7 +125,8 @@ public class TaskAttachmentListener implements AttachmentListener {
         task.setLastModified(lastModified);
         task.setModifiedBy(event.getUser().getId());
         try {
-            final Task oldTask = storage.selectTask(ctx, event.getAttachedId());
+            final Task oldTask = storage.selectTask(ctx, event.getAttachedId(),
+                StorageType.ACTIVE);
             final Date lastRead = oldTask.getLastModified();
             final int numOfAttachments = oldTask.getNumberOfAttachments()
                 - event.getDetached().length;

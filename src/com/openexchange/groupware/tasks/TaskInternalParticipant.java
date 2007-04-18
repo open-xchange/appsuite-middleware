@@ -74,7 +74,16 @@ public class TaskInternalParticipant extends TaskParticipant {
      * Unique identifier of the group if this participant is added through a
      * group or <code>null</code>.
      */
-    private final Integer groupId;
+    private Integer groupId;
+
+    /**
+     * Creates an empty task participant. Insure using the set methods for
+     * setting at least the user identifier.
+     */
+    TaskInternalParticipant() {
+        super();
+        this.user = new UserParticipant();
+    }
 
     /**
      * Default constructor.
@@ -83,6 +92,7 @@ public class TaskInternalParticipant extends TaskParticipant {
      * added through a group.
      */
     TaskInternalParticipant(final UserParticipant user, final Integer groupId) {
+        super();
         this.user = user;
         this.groupId = groupId;
     }
@@ -92,6 +102,7 @@ public class TaskInternalParticipant extends TaskParticipant {
      * @param copy participant to copy.
      */
     TaskInternalParticipant(final TaskInternalParticipant copy) {
+        super();
         user = new UserParticipant();
         user.setIdentifier(copy.getIdentifier());
         setFolderId(copy.getFolderId());
@@ -137,10 +148,16 @@ public class TaskInternalParticipant extends TaskParticipant {
         user.setPersonalFolderId(folderId);
     }
 
+    /**
+     * @param confirm the confirm to set
+     */
     final void setConfirm(final int confirm) {
         user.setConfirm(confirm);
     }
 
+    /**
+     * @return the confirm.
+     */
     int getConfirm() {
         return user.getConfirm();
     }
@@ -171,11 +188,11 @@ public class TaskInternalParticipant extends TaskParticipant {
      * {@inheritDoc}
      */
     public boolean equals(final Object obj) {
-        if (obj instanceof TaskInternalParticipant) {
-            return getIdentifier() == ((TaskInternalParticipant) obj)
-                .getIdentifier();
+        if (!(obj instanceof TaskInternalParticipant)) {
+            return false;
         }
-        return false;
+        return getIdentifier() == ((TaskInternalParticipant) obj)
+            .getIdentifier();
     }
 
     /**
@@ -193,5 +210,17 @@ public class TaskInternalParticipant extends TaskParticipant {
             + ", Folder: " + getFolderId();
     }
 
+    /**
+     * @param groupId the groupId to set
+     */
+    void setGroupId(final Integer groupId) {
+        this.groupId = groupId;
+    }
 
+    /**
+     * @param identifier the identifier to set.
+     */
+    void setIdentifier(final int identifier) {
+        user.setIdentifier(identifier);
+    }
 }

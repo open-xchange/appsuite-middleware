@@ -76,7 +76,8 @@ public class TaskAuthorization implements AttachmentAuthorization {
         throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         try {
-            final Task task = storage.selectTask(ctx, taskId);
+            final Task task = storage.selectTask(ctx, taskId, StorageType
+                .ACTIVE);
             task.setParentFolderID(folderId);
             TaskLogic.checkWriteInFolder(ctx, user, userConfig, task);
             // Check if task appears in folder.
@@ -104,7 +105,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
         final TaskStorage storage = TaskStorage.getInstance();
         Task task;
         try {
-            task = storage.selectTask(ctx, taskId);
+            task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }

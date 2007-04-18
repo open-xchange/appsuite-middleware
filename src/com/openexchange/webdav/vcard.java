@@ -249,8 +249,8 @@ public final class vcard extends PermissionServlet {
 				readCon = DBPool.pickup(context);
 				
 				principalStatement = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
-				principalStatement.setString(1, principal);
-				principalStatement.setLong(2, context.getContextId());
+				principalStatement.setLong(1, context.getContextId());
+				principalStatement.setString(2, principal);
 				rs = principalStatement.executeQuery();
 				
 				exists = rs.next();
@@ -321,7 +321,9 @@ public final class vcard extends PermissionServlet {
 						ps.close();
 					}
 				} else {
+					writeCon.setAutoCommit(false);
 					principal_id = IDGenerator.getId(context, Types.ICAL, writeCon);
+					writeCon.commit();
 					
 					ps = writeCon.prepareStatement(SQL_PRINCIPAL_INSERT);
 					ps.setInt(1, principal_id);
@@ -338,6 +340,7 @@ public final class vcard extends PermissionServlet {
 				}
 				
 				if (writeCon != null) {
+					writeCon.setAutoCommit(true);
 					DBPool.pushWrite(context, writeCon);
 				}
 			}
@@ -430,14 +433,15 @@ public final class vcard extends PermissionServlet {
 			
 			Connection readCon = null;
 			
-			PreparedStatement ps = null;
+			PreparedStatement principalStatement = null;
 			
 			ResultSet rs = null;
 			try {
 				readCon = DBPool.pickup(context);
-				ps = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
-				ps.setString(1, principal);
-				rs = ps.executeQuery();
+				principalStatement = readCon.prepareStatement(SQL_PRINCIPAL_SELECT);
+				principalStatement.setLong(1, context.getContextId());
+				principalStatement.setString(2, principal);
+				rs = principalStatement.executeQuery();
 				
 				int db_contactfolder_id = 0;
 				
@@ -460,8 +464,8 @@ public final class vcard extends PermissionServlet {
 					rs.close();
 				}
 				
-				if (ps != null) {
-					ps.close();
+				if (principalStatement != null) {
+					principalStatement.close();
 				}
 				
 				if (readCon != null) {
@@ -661,8 +665,12 @@ public final class vcard extends PermissionServlet {
 		
 		try {
 			writeCon = DBPool.pickupWriteable(context);
+			writeCon.setAutoCommit(false);
+			int objectId = IDGenerator.getId(context, Types.ICAL, writeCon);
+			writeCon.commit();
+			
 			ps = writeCon.prepareStatement(SQL_ENTRY_INSERT);
-			ps.setInt(1, IDGenerator.getId(context, Types.ICAL, writeCon));
+			ps.setInt(1, objectId);
 			ps.setLong(2, context.getContextId());
 			ps.setInt(3, principal_id);
 			ps.setString(4, client_id);
@@ -676,6 +684,7 @@ public final class vcard extends PermissionServlet {
 			}
 			
 			if (writeCon != null) {
+				writeCon.setAutoCommit(true);
 				DBPool.pushWrite(context, writeCon);
 			}
 		}

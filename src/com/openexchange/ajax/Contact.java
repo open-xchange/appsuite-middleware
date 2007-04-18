@@ -60,12 +60,14 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.Logging;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -152,34 +154,13 @@ public class Contact extends DataServlet {
 			} catch (JSONException e) {
 				response.setData(new JSONObject(sw.toString()));
 			}
-
-		} catch (OXMandatoryFieldException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (OXConflictException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (OXConcurrentModificationException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (SearchIteratorException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (AjaxException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-
+		} catch (AbstractOXException e) {
+            Logging.log(LOG, e);
 			response.setException(e);
 		}
 
@@ -237,33 +218,13 @@ public class Contact extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (OXMandatoryFieldException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (OXConflictException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (OXConcurrentModificationException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (SearchIteratorException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (AjaxException e) {
-			LOG.error("doGet", e);
-			response.setException(e);
-		} catch (OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-
+		} catch (AbstractOXException e) {
+            Logging.log(LOG, e);
 			response.setException(e);
 		}
 
@@ -365,22 +326,13 @@ public class Contact extends DataServlet {
 			} else {
 				throw new AjaxException(AjaxException.Code.UnknownAction, action);
 			}
-		} catch (AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (OXConcurrentModificationException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (UploadException e) {
-			LOG.error(e.getMessage(), e);
+		} catch (AbstractOXException e) {
+            Logging.log(LOG, e);
 			response.setException(e);
 		}
 		try {

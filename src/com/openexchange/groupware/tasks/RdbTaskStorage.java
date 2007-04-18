@@ -58,7 +58,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -105,18 +104,6 @@ public class RdbTaskStorage extends TaskStorage {
         + "task_folder.folder=?";
 
     /**
-     * Tables for tasks.
-     */
-    private static final Map<StorageType, String> TASK_TABLES =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
-     * Tables for participants.
-     */
-    private static final Map<StorageType, String> PARTS_TABLES =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
      * SQL statements for selecting modified tasks.
      */
     private static final Map<StorageType, String> LIST_MODIFIED =
@@ -135,39 +122,9 @@ public class RdbTaskStorage extends TaskStorage {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
-     * SQL statements for deleting participants.
-     */
-    private static final Map<StorageType, String> DELETE_PARTS =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
-     * SQL statement for selecting external participants.
-     */
-    private static final Map<StorageType, String> SELECT_EXTERNAL =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
      * SQL statement for inserting external participants.
      */
     private static final Map<StorageType, String> INSERT_EXTERNAL =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
-     * SQL statement for deleting external participants.
-     */
-    private static final Map<StorageType, String> DELETE_EXTERNAL =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
-     * SQL statements for deleting folder mappings.
-     */
-    private static final Map<StorageType, String> FOLDER_TABLES =
-        new EnumMap<StorageType, String>(StorageType.class);
-
-    /**
-     * SQL statements for inserting folder mappings.
-     */
-    private static final Map<StorageType, String> INSERT_FOLDER =
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
@@ -192,11 +149,6 @@ public class RdbTaskStorage extends TaskStorage {
      * folder.
      */
     private static final String NO_PRIVATE = " AND private=false";
-
-    /**
-     * Name of the table that stores the participants.
-     */
-    private static final String PARTICIPANT_TABLE = "task_participant";
 
     /**
      * Prevent instanciation.
@@ -266,8 +218,8 @@ public class RdbTaskStorage extends TaskStorage {
         try {
             con.setAutoCommit(false);
             if (modified.length > 0) {
-                updateTask(ctx, con, StorageType.ACTIVE, task, lastRead,
-                    modified);
+                updateTask(ctx, con, task, lastRead, modified, StorageType
+                    .ACTIVE);
             }
             if (null != add && add.size() > 0) {
                 insertParticipants(ctx, con, task.getObjectID(), add,
@@ -335,7 +287,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public void delete(final Context ctx, final int taskId, final int userId,
+    public void delete(final Context ctx, final Task task, final int userId,
         final Date lastRead) throws TaskException {
         Connection con;
         try {
@@ -345,13 +297,12 @@ public class RdbTaskStorage extends TaskStorage {
         }
         try {
             con.setAutoCommit(false);
-            final Task task = selectTask(ctx, taskId);
             task.setLastModified(new Date());
             task.setModifiedBy(userId);
             insertTask(ctx, con, task, StorageType.DELETED);
-            deleteParticipants(ctx, con, taskId);
-            deleteFolder(ctx, con, taskId);
-            delete(ctx, con, StorageType.ACTIVE, taskId, lastRead);
+            deleteParticipants(ctx, con, task.getObjectID());
+            deleteFolder(ctx, con, task.getObjectID());
+            delete(ctx, con, task.getObjectID(), lastRead, StorageType.ACTIVE);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -373,20 +324,19 @@ public class RdbTaskStorage extends TaskStorage {
      * Deletes a task from the given table.
      * @param ctx Context.
      * @param con writable database connection.
-     * @param type ACTIVE or DELETED.
      * @param taskId unique identifier of the task to delete.
      * @param lastRead timestamp when the task was last read.
-     * @throws SQLException if an SQL error occurs.
+     * @param type ACTIVE or DELETED.
      * @throws TaskException if the task has been changed in the meantime.
      */
-    private void delete(final Context ctx, final Connection con,
-        final StorageType type, final int taskId, final Date lastRead)
-        throws SQLException, TaskException {
+    void delete(final Context ctx, final Connection con,
+        final int taskId, final Date lastRead, final StorageType type)
+        throws TaskException {
         final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? "
             + "AND last_modified<=?";
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(sql.replace("@table@", TASK_TABLES
+            stmt = con.prepareStatement(sql.replace("@table@", SQL.TASK_TABLES
                 .get(type)));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
@@ -394,10 +344,12 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int count = stmt.executeUpdate();
             if (1 != count) {
-                final Task forTime = selectTask(ctx, con, type, taskId);
+                final Task forTime = selectTask(ctx, con, taskId, type);
                 throw new TaskException(Code.MODIFIED,
                     forTime.getLastModified().getTime(), lastRead.getTime());
             }
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -469,10 +421,10 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
         sql.append(" FROM ");
-        final String taskTable = TASK_TABLES.get(type);
+        final String taskTable = SQL.TASK_TABLES.get(type);
         sql.append(taskTable);
         sql.append(" JOIN ");
-        sql.append(FOLDER_TABLES.get(type));
+        sql.append(SQL.FOLDER_TABLES.get(type));
         sql.append(" USING (cid,id) WHERE ");
         sql.append(taskTable);
         sql.append(".cid=? AND folder=? AND last_modified>=?");
@@ -563,6 +515,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
                 for (int i : own) {
                     stmt.setInt(pos++, i);
+                    stmt.setInt(pos++, session.getUserObject().getId());
                 }
                 for (int i : shared) {
                     stmt.setInt(pos++, i);
@@ -656,7 +609,7 @@ public class RdbTaskStorage extends TaskStorage {
         TaskException {
         final StringBuilder insert = new StringBuilder();
         insert.append("INSERT INTO ");
-        insert.append(TASK_TABLES.get(type));
+        insert.append(SQL.TASK_TABLES.get(type));
         insert.append(" (");
         int values = 0;
         for (Mapper mapper : Mapping.MAPPERS) {
@@ -694,39 +647,14 @@ public class RdbTaskStorage extends TaskStorage {
     /**
      * {@inheritDoc}
      */
-    Task selectTask(final Context ctx, final int taskId) throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        try {
-            return selectTask(ctx, con, StorageType.ACTIVE, taskId);
-        } catch (SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
-        }
-    }
-
-    /**
-     * @param ctx Context.
-     * @param con readable database connection.
-     * @param type ACTIVE or DELETED.
-     * @param taskId unique identifier of the task to read.
-     * @return the selected task or <code>null</code> if it doesn't exist.
-     * @throws SQLException if an sql problem occurs.
-     * @throws TaskException if no task can be found.
-     */
-    private Task selectTask(final Context ctx, final Connection con,
-        final StorageType type, final int taskId) throws SQLException,
-        TaskException {
+    @Override
+    Task selectTask(final Context ctx, final Connection con,
+        final int taskId, final StorageType type) throws TaskException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getAllFields());
         sql.append(" FROM ");
-        sql.append(TASK_TABLES.get(type));
+        sql.append(SQL.TASK_TABLES.get(type));
         sql.append(" WHERE cid=? AND id=?");
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -744,6 +672,8 @@ public class RdbTaskStorage extends TaskStorage {
                 }
                 task.setObjectID(taskId);
             }
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -761,18 +691,18 @@ public class RdbTaskStorage extends TaskStorage {
      * @param type ACTIVE or DELETED.
      * @param task Task with the updated values.
      * @param lastRead timestamp when the client last requested the object.
-     * @param attrs attributes of the task that should be updated.
-     * @throws SQLException if a SQL problem occurs.
+     * @param modified attributes of the task that should be updated.
      * @throws TaskException if no task is updated.
      */
-    private void updateTask(final Context ctx, final Connection con,
-        final StorageType type, final Task task, final Date lastRead,
-        final int[] attrs) throws SQLException, TaskException {
+    @Override
+    void updateTask(final Context ctx, final Connection con, final Task task,
+        final Date lastRead, final int[] modified, final StorageType type)
+        throws TaskException {
         final StringBuilder sql = new StringBuilder();
         sql.append("UPDATE ");
-        sql.append(TASK_TABLES.get(type));
+        sql.append(SQL.TASK_TABLES.get(type));
         sql.append(" SET ");
-        for (int i : attrs) {
+        for (int i : modified) {
             sql.append(Mapping.getMapping(i).getDBColumnName());
             sql.append("=?,");
         }
@@ -782,7 +712,7 @@ public class RdbTaskStorage extends TaskStorage {
         try {
             stmt = con.prepareStatement(sql.toString());
             int pos = 1;
-            for (int i : attrs) {
+            for (int i : modified) {
                 Mapping.getMapping(i).toDB(stmt, pos++, task);
             }
             stmt.setInt(pos++, ctx.getContextId());
@@ -790,13 +720,15 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int updatedRows = stmt.executeUpdate();
             if (0 == updatedRows) {
-                final Task forTime = selectTask(ctx, con, type,
-                    task.getObjectID());
+                final Task forTime = selectTask(ctx, con, task.getObjectID(),
+                    type);
                 throw new TaskException(Code.MODIFIED,
                     forTime.getLastModified().getTime(), lastRead.getTime());
             }
         } catch (DataTruncation e) {
             throw parseTruncated(e);
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -805,18 +737,18 @@ public class RdbTaskStorage extends TaskStorage {
     /**
      * Parses the truncated fields out of the DataTruncation exception and
      * transforms this to a TaskException.
-     * @param e DataTruncation exception.
+     * @param exc DataTruncation exception.
      * @return a TaskException.
      */
-    private TaskException parseTruncated(final DataTruncation e) {
-        final String[] fields = DBUtils.parseTruncatedFields(e);
+    private TaskException parseTruncated(final DataTruncation exc) {
+        final String[] fields = DBUtils.parseTruncatedFields(exc);
         final StringBuilder sFields = new StringBuilder();
         for (String field : fields) {
             sFields.append(field);
             sFields.append(", ");
         }
         sFields.setLength(sFields.length() - 1);
-        final TaskException tske = new TaskException(Code.TRUNCATED, e,
+        final TaskException tske = new TaskException(Code.TRUNCATED, exc,
             sFields.toString());
         final int[] truncated = SQL.findTruncated(fields);
         for (int i : truncated) {
@@ -833,11 +765,12 @@ public class RdbTaskStorage extends TaskStorage {
      * @param taskId unique identifier of the task.
      * @param folders folders in that the task should appear.
      * @throws SQLException if a SQL problem occurs.
+     * @deprecated Use FolderStorage.
      */
     private void insertFolder(final Context ctx, final Connection con,
         final StorageType type, final int taskId, final Set<Folder> folders)
         throws SQLException {
-        final PreparedStatement stmt = con.prepareStatement(INSERT_FOLDER
+        final PreparedStatement stmt = con.prepareStatement(SQL.INSERT_FOLDER
             .get(type));
         int pos = 1;
         stmt.setInt(pos++, ctx.getContextId());
@@ -880,13 +813,14 @@ public class RdbTaskStorage extends TaskStorage {
      * identifier are user identifier or folder identifier.
      * @param ids user or folder identifier that should be deleted.
      * @throws SQLException if a SQL problem occurs.
+     * @deprecated Use FolderStorage.
      */
     private void deleteFolder(final Context ctx, final Connection con,
         final int taskId, final StorageType table, final String type,
         final int[] ids) throws SQLException {
         final StringBuilder sql = new StringBuilder();
         sql.append("DELETE FROM ");
-        sql.append(FOLDER_TABLES.get(table));
+        sql.append(SQL.FOLDER_TABLES.get(table));
         sql.append(" WHERE cid=? AND id=? AND ");
         sql.append(type);
         sql.append(" IN (");
@@ -912,6 +846,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * {@inheritDoc}
+     * @deprecated Use ParticipantStorage.
      */
     Set<TaskParticipant> selectParticipants(final Context ctx,
         final int taskId, final StorageType type) throws TaskException {
@@ -924,7 +859,8 @@ public class RdbTaskStorage extends TaskStorage {
         try {
             final Set<TaskParticipant> participants =
                 new HashSet<TaskParticipant>();
-            participants.addAll(selectInternal(ctx, con, taskId, type));
+            participants.addAll(ParticipantStorage.getInstance()
+                .selectInternal(ctx, con, taskId, type));
             participants.addAll(selectExternal(ctx, con, taskId, type));
             return participants;
         } catch (SQLException e) {
@@ -972,23 +908,21 @@ public class RdbTaskStorage extends TaskStorage {
         ResultSet result = null;
         TaskInternalParticipant participant = null;
         try {
-            stmt = con.prepareStatement(
-                SELECT_PARTS.get(StorageType.ACTIVE) + " AND user=?");
+            stmt = con.prepareStatement(SELECT_PARTS.get(StorageType.ACTIVE)
+                + " AND user=?");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
             stmt.setInt(pos++, userId);
             result = stmt.executeQuery();
             if (result.next()) {
-                final UserParticipant userParticipant = new UserParticipant();
+                participant = new TaskInternalParticipant();
                 pos = 1;
-                userParticipant.setIdentifier(result.getInt(pos++));
-                Integer groupId = result.getInt(pos++);
-                if (result.wasNull()) {
-                    groupId = null;
+                participant.setIdentifier(result.getInt(pos++));
+                final int groupId = result.getInt(pos++);
+                if (!result.wasNull()) {
+                    participant.setGroupId(groupId);
                 }
-                participant = new TaskInternalParticipant(userParticipant,
-                    groupId);
                 participant.setConfirm(result.getInt(pos++));
                 participant.setConfirmMessage(result.getString(pos++));
             }
@@ -1003,52 +937,8 @@ public class RdbTaskStorage extends TaskStorage {
     }
 
     /**
-     * Selects participants.
-     * @param ctx Context.
-     * @param con readable database connection.
-     * @param taskId unique identifier of the task that participants should be
-     * loaded.
-     * @param type type of participants that should be loaded.
-     * @return a set of participants.
-     * @throws SQLException if a SQL problem occurs.
+     * @deprecated Use ParticipantStorage.
      */
-    private Set<TaskInternalParticipant> selectInternal(final Context ctx,
-        final Connection con, final int taskId, final StorageType type)
-        throws SQLException {
-        final PreparedStatement stmt = con.prepareStatement(
-            SELECT_PARTS.get(type));
-        stmt.setInt(1, ctx.getContextId());
-        stmt.setInt(2, taskId);
-        final ResultSet result = stmt.executeQuery();
-        final Set<TaskInternalParticipant> participants =
-            new HashSet<TaskInternalParticipant>();
-        while (result.next()) {
-            final UserParticipant participant = new UserParticipant();
-            int pos = 1;
-            participant.setIdentifier(result.getInt(pos++));
-            Integer groupId = result.getInt(pos++);
-            if (result.wasNull()) {
-                groupId = null;
-            }
-            final TaskInternalParticipant taskParticipant =
-                new TaskInternalParticipant(participant, groupId);
-            taskParticipant.setConfirm(result.getInt(pos++));
-            taskParticipant.setConfirmMessage(result.getString(pos++));
-            if (StorageType.REMOVED == type) {
-                final int folderId = result.getInt(pos++);
-                if (0 == folderId) {
-                    taskParticipant.setFolderId(UserParticipant.NO_PFID);
-                } else {
-                    taskParticipant.setFolderId(folderId);
-                }
-            }
-            participants.add(taskParticipant);
-        }
-        result.close();
-        stmt.close();
-        return participants;
-    }
-
     private Set<TaskExternalParticipant> selectExternal(final Context ctx,
         final Connection con, final int taskId, final StorageType type)
         throws SQLException {
@@ -1058,7 +948,7 @@ public class RdbTaskStorage extends TaskStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement(SELECT_EXTERNAL.get(type));
+                stmt = con.prepareStatement(SQL.SELECT_EXTERNAL.get(type));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, taskId);
                 result = stmt.executeQuery();
@@ -1103,6 +993,9 @@ public class RdbTaskStorage extends TaskStorage {
             type, sanityCheck);
     }
 
+    /**
+     * @deprecated Use ParticipantStorage.
+     */
     private void deleteInternals(final Context ctx, final Connection con,
         final int taskId, final Set<TaskInternalParticipant> participants,
         final StorageType type, final boolean sanityCheck) throws SQLException {
@@ -1135,6 +1028,7 @@ public class RdbTaskStorage extends TaskStorage {
      * @param sanityCheck if <code>true</code> it will be checked if all given
      * participants have been deleted.
      * @throws SQLException if a SQL error occurs.
+     * @deprecated Use ParticipantStorage.
      */
     private void deleteInternals(final Context ctx, final Connection con,
         final int taskId, final int[] participants, final StorageType type,
@@ -1143,7 +1037,7 @@ public class RdbTaskStorage extends TaskStorage {
             return;
         }
         final StringBuilder sql = new StringBuilder();
-        sql.append(DELETE_PARTS.get(type));
+        sql.append(SQL.DELETE_PARTS.get(type));
         for (int i = 0; i < participants.length; i++) {
             sql.append("?,");
         }
@@ -1170,6 +1064,9 @@ public class RdbTaskStorage extends TaskStorage {
         }
     }
 
+    /**
+     * @deprecated Use ParticipantStorage.
+     */
     private void deleteExternals(final Context ctx, final Connection con,
         final int taskId, final String[] participants, final StorageType type,
         final boolean sanityCheck) throws SQLException {
@@ -1177,7 +1074,7 @@ public class RdbTaskStorage extends TaskStorage {
             return;
         }
         final StringBuilder sql = new StringBuilder();
-        sql.append(DELETE_EXTERNAL.get(type));
+        sql.append(SQL.DELETE_EXTERNAL.get(type));
         for (int i = 0; i < participants.length; i++) {
             sql.append("?,");
         }
@@ -1206,19 +1103,18 @@ public class RdbTaskStorage extends TaskStorage {
 
     private void deleteParticipants(final Context ctx, final Connection con,
         final int taskId) throws SQLException, TaskException {
-        final Set<TaskInternalParticipant> participants =
-            selectInternal(ctx, con, taskId, StorageType.ACTIVE);
-        insertInternals(ctx, con, taskId, participants,
-            StorageType.DELETED);
-        deleteInternals(ctx, con, taskId, participants,
-            StorageType.ACTIVE, true);
-        final Set<TaskInternalParticipant> removed =
-            selectInternal(ctx, con, taskId, StorageType.REMOVED);
-        insertInternals(ctx, con, taskId, removed, StorageType.DELETED);
-        deleteInternals(ctx, con, taskId, removed, StorageType.REMOVED,
+        final ParticipantStorage partStor = ParticipantStorage.getInstance();
+        final Set<TaskInternalParticipant> participants = partStor
+            .selectInternal(ctx, con, taskId, StorageType.ACTIVE);
+        deleteInternals(ctx, con, taskId, participants, StorageType.ACTIVE,
             true);
-        final Set<TaskExternalParticipant> externals =
-            selectExternal(ctx, con, taskId, StorageType.ACTIVE);
+        final Set<TaskInternalParticipant> removed = partStor
+            .selectInternal(ctx, con, taskId, StorageType.REMOVED);
+        deleteInternals(ctx, con, taskId, removed, StorageType.REMOVED, true);
+        participants.addAll(removed);
+        insertInternals(ctx, con, taskId, participants, StorageType.DELETED);
+        final Set<TaskExternalParticipant> externals = selectExternal(ctx, con,
+            taskId, StorageType.ACTIVE);
         insertExternals(ctx, con, taskId, externals, StorageType.DELETED);
         deleteExternals(ctx, con, taskId, externals, StorageType.ACTIVE, true);
     }
@@ -1373,299 +1269,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * {@inheritDoc}
-     */
-    @Override
-    void deleteGroup(final Context ctx, final Connection con, final int groupId)
-        throws TaskException {
-        try {
-            for (String table : PARTS_TABLES.values()) {
-                deleteGroup(ctx, con, table, groupId);
-            }
-        } catch (SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        }
-    }
-
-    /**
-     * Deletes a group from the given participant table.
-     * @param ctx Context.
-     * @param con writable database connection.
-     * @param table participant table (task_participant,
-     * task_removedparticipant, del_task_participant)
-     * @param groupId unique identifier of the group that will be deleted.
-     * @throws SQLException if an SQL problem occurs.
-     */
-    void deleteGroup(final Context ctx, final Connection con,
-        final String table, final int groupId) throws SQLException {
-        final String sql = "UPDATE @table@ SET group_id=? "
-            + "WHERE cid=? AND group_id=?";
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(sql.replace("@table@", table));
-            int pos = 1;
-            stmt.setNull(pos++, java.sql.Types.INTEGER);
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, groupId);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(null, stmt);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    void deleteUser(final Context ctx, final Connection readCon,
-        final Connection writeCon, final int userId) throws TaskException {
-        try {
-            removeUserFromParticipants(ctx, readCon, writeCon, userId);
-            assignToAdmin(ctx, readCon, writeCon, userId);
-            deletePrivateTasks(ctx, readCon, writeCon, userId);
-        } catch (SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        }
-    }
-
-    /**
-     * Searches all tasks where the user is participant and deletes the user
-     * from the participants. The folder mappings are also deleted.
-     * @param ctx Context.
-     * @param readCon readable database connection.
-     * @param writeCon writable database connection.
-     * @param userId unique identifier of the to delete user.
-     * @throws SQLException if a SQL error occurs.
-     */
-    private void removeUserFromParticipants(final Context ctx,
-        final Connection readCon, final Connection writeCon, final int userId)
-        throws SQLException {
-        final String sql = "SELECT task FROM task_participant WHERE cid=? "
-            + "AND user=?";
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        final List<Integer> tasks = new ArrayList<Integer>();
-        try {
-            stmt = readCon.prepareStatement(sql);
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos, userId);
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tasks.add(result.getInt(1));
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        for (int task : tasks) {
-            deleteInternals(ctx, writeCon, task, new int[] { userId },
-                StorageType.ACTIVE, true);
-            deleteFolder(ctx, writeCon, task, StorageType.ACTIVE, "user",
-                new int[] { userId });
-        }
-        try {
-            stmt = readCon.prepareStatement(sql.replace(PARTICIPANT_TABLE,
-                "task_removedparticipant"));
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, userId);
-            result = stmt.executeQuery();
-            tasks.clear();
-            while (result.next()) {
-                tasks.add(result.getInt(1));
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        for (int task : tasks) {
-            deleteInternals(ctx, writeCon, task, new int[] { userId },
-                StorageType.REMOVED, true);
-        }
-        try {
-            stmt = readCon.prepareStatement(sql.replace(PARTICIPANT_TABLE,
-                "del_task_participant"));
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, userId);
-            tasks.clear();
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tasks.add(result.getInt(1));
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        for (int task : tasks) {
-            deleteInternals(ctx, writeCon, task, new int[] { userId },
-                StorageType.DELETED, true);
-            deleteFolder(ctx, writeCon, task, StorageType.DELETED, "user",
-                new int[] { userId });
-        }
-    }
-
-    /**
-     * Assign delegated tasks from a user to the mailadmin.
-     * @param ctx Context.
-     * @param readCon readable database connection.
-     * @param writeCon writable database connection.
-     * @param userId unique identifier of the to delete user.
-     * @throws SQLException if a SQL problem occurs.
-     * @throws TaskException if the standard task folder of mailadmin can't be
-     * determined.
-     */
-    private void assignToAdmin(final Context ctx, final Connection readCon,
-        final Connection writeCon, final int userId) throws TaskException,
-        SQLException {
-        String sql = "SELECT id FROM task JOIN task_participant "
-            + "ON task.cid=task_participant.cid "
-            + "AND task.id=task_participant.task WHERE task.cid=? AND "
-            + "(created_from=? OR changed_from=?)";
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        final List<Integer> tasks = new ArrayList<Integer>();
-        try {
-            stmt = readCon.prepareStatement(sql);
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, userId);
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tasks.add(result.getInt(1));
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        final int adminTaskFolder = Tools.getUserTaskStandardFolder(ctx,
-            ctx.getMailadmin());
-        for (int taskId : tasks) {
-            final Task task = selectTask(ctx, readCon, StorageType.ACTIVE,
-                taskId);
-            final Date lastModified = task.getLastModified();
-            if (task.getCreatedBy() == userId) {
-                task.setCreatedBy(ctx.getMailadmin());
-            }
-            if (task.getModifiedBy() == userId) {
-                task.setModifiedBy(ctx.getMailadmin());
-            }
-            task.setLastModified(new Date());
-            updateTask(ctx, writeCon, StorageType.ACTIVE, task, lastModified,
-                new int[] { Task.CREATED_BY, Task.MODIFIED_BY,
-                Task.LAST_MODIFIED });
-            deleteFolder(ctx, writeCon, taskId, StorageType.ACTIVE, "user",
-                new int[] { userId });
-            final Folder folder = new Folder(adminTaskFolder,
-                ctx.getMailadmin());
-            final Set<Folder> folders = new HashSet<Folder>(1, 1);
-            folders.add(folder);
-            insertFolder(ctx, writeCon, StorageType.ACTIVE, taskId,
-                folders);
-        }
-        sql = "SELECT id FROM del_task JOIN del_task_participant "
-            + "ON del_task.cid=del_task_participant.cid "
-            + "AND del_task.id=del_task_participant.task "
-            + "WHERE del_task.cid=? AND (created_from=? OR changed_from=?)";
-        try {
-            stmt = readCon.prepareStatement(sql);
-            int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, userId);
-            tasks.clear();
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tasks.add(result.getInt(1));
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        for (int taskId : tasks) {
-            final Task task = selectTask(ctx, readCon, StorageType.DELETED,
-                taskId);
-            final Date lastModified = task.getLastModified();
-            if (task.getCreatedBy() == userId) {
-                task.setCreatedBy(ctx.getMailadmin());
-            }
-            if (task.getModifiedBy() == userId) {
-                task.setModifiedBy(ctx.getMailadmin());
-            }
-            task.setLastModified(new Date());
-            updateTask(ctx, writeCon, StorageType.DELETED, task, lastModified,
-                new int[] { Task.CREATED_BY, Task.MODIFIED_BY,
-                Task.LAST_MODIFIED });
-            deleteFolder(ctx, writeCon, taskId, StorageType.DELETED, "user",
-                new int[] { userId });
-            final Folder folder = new Folder(adminTaskFolder,
-                ctx.getMailadmin());
-            final Set<Folder> folders = new HashSet<Folder>(1, 1);
-            folders.add(folder);
-            insertFolder(ctx, writeCon, StorageType.DELETED, taskId,
-                folders);
-        }
-    }
-
-    /**
-     * Deletes all private tasks of a user.
-     * @param ctx Context.
-     * @param readCon readable database connection.
-     * @param writeCon writable database connection.
-     * @param userId unique identifier of the deleted user.
-     * @throws TaskException if an error occurs.
-     * @throws SQLException if an sql error occurs.
-     */
-    private void deletePrivateTasks(final Context ctx, final Connection readCon,
-        final Connection writeCon, final int userId) throws TaskException,
-        SQLException {
-        String sql = "SELECT id,last_modified FROM task_folder JOIN task "
-            + "USING (cid,id) LEFT JOIN task_participant "
-            + "ON task.cid=task_participant.cid AND "
-            + "task.id=task_participant.task WHERE task.cid=? "
-            + "AND task_folder.user=? AND task_participant.user IS NULL";
-        PreparedStatement stmt = readCon.prepareStatement(sql);
-        stmt.setInt(1, ctx.getContextId());
-        stmt.setInt(2, userId);
-        ResultSet result = stmt.executeQuery();
-        final List<Integer> tasks = new ArrayList<Integer>();
-        final List<Long> mods = new ArrayList<Long>();
-        while (result.next()) {
-            tasks.add(result.getInt(1));
-            mods.add(result.getLong(2));
-        }
-        result.close();
-        stmt.close();
-        for (int i = 0; i < tasks.size(); i++) {
-            deleteFolder(ctx, writeCon, tasks.get(i), StorageType.ACTIVE,
-                "user", new int[] { userId });
-            delete(ctx, writeCon, StorageType.ACTIVE, tasks.get(i), new Date(
-                mods.get(i)));
-        }
-        sql = "SELECT id,last_modified FROM del_task_folder JOIN del_task USING"
-            + " (cid,id) LEFT JOIN del_task_participant "
-            + "ON del_task.cid=del_task_participant.cid "
-            + "AND del_task.id=del_task_participant.task WHERE del_task.cid=? "
-            + "AND del_task_folder.user=? "
-            + "AND del_task_participant.user IS NULL";
-        stmt = readCon.prepareStatement(sql);
-        stmt.setInt(1, ctx.getContextId());
-        stmt.setInt(2, userId);
-        result = stmt.executeQuery();
-        tasks.clear();
-        mods.clear();
-        while (result.next()) {
-            tasks.add(result.getInt(1));
-            mods.add(result.getLong(2));
-        }
-        result.close();
-        stmt.close();
-        for (int i = 0; i < tasks.size(); i++) {
-            deleteFolder(ctx, writeCon, tasks.get(i), StorageType.DELETED,
-                "user", new int[] { userId });
-            delete(ctx, writeCon, StorageType.DELETED, tasks.get(i), new Date(
-                mods.get(i)));
-        }
-    }
-
-    /**
-     * {@inheritDoc}
+     * @deprecated Use FolderStore.
      */
     @Override
     Set<Folder> selectFolders(final Context ctx, final int taskId)
@@ -1730,6 +1334,9 @@ public class RdbTaskStorage extends TaskStorage {
         return retval;
     }
 
+    /**
+     * @deprecated Use FolderStore.
+     */
     private Set<Folder> selectFolder(final Context ctx, final Connection con,
         final int taskId) throws SQLException {
         final String sql = SELECT_FOLDERLINK;
@@ -1787,13 +1394,6 @@ public class RdbTaskStorage extends TaskStorage {
     }
 
     static {
-        TASK_TABLES.put(StorageType.ACTIVE, "task");
-        TASK_TABLES.put(StorageType.DELETED, "del_task");
-        FOLDER_TABLES.put(StorageType.ACTIVE, "task_folder");
-        FOLDER_TABLES.put(StorageType.DELETED, "del_task_folder");
-        PARTS_TABLES.put(StorageType.ACTIVE, "task_participant");
-        PARTS_TABLES.put(StorageType.REMOVED, "task_removedparticipant");
-        PARTS_TABLES.put(StorageType.DELETED, "del_task_participant");
         LIST_MODIFIED.put(StorageType.ACTIVE, "SELECT @fields@ FROM task JOIN "
             + "task_folder USING (cid,id) "
             + "WHERE task.cid=? AND folder=? AND last_modified>=?");
@@ -1815,30 +1415,10 @@ public class RdbTaskStorage extends TaskStorage {
         INSERT_PARTS.put(StorageType.DELETED,
             "INSERT INTO del_task_participant (cid,task,user,group_id,accepted,"
             + "description) VALUES (?,?,?,?,?,?)");
-        DELETE_PARTS.put(StorageType.ACTIVE, "DELETE FROM "
-            + "task_participant WHERE cid=? AND task=? AND user IN (");
-        DELETE_PARTS.put(StorageType.REMOVED, "DELETE FROM "
-            + "task_removedparticipant WHERE cid=? AND task=? AND user IN (");
-        DELETE_PARTS.put(StorageType.DELETED, "DELETE FROM "
-            + "del_task_participant WHERE cid=? AND task=? AND user IN (");
-        SELECT_EXTERNAL.put(StorageType.ACTIVE, "SELECT mail,display_name FROM "
-            + "task_eparticipant WHERE cid=? AND task=?");
-        SELECT_EXTERNAL.put(StorageType.DELETED, "SELECT mail,display_name FROM"
-            + " del_task_eparticipant WHERE cid=? AND task=?");
         INSERT_EXTERNAL.put(StorageType.ACTIVE, "INSERT INTO task_eparticipant"
             + " (cid,task,mail,display_name) VALUES (?,?,?,?)");
         INSERT_EXTERNAL.put(StorageType.DELETED, "INSERT INTO "
             + "del_task_eparticipant (cid,task,mail,display_name) VALUES "
             + "(?,?,?,?)");
-        DELETE_EXTERNAL.put(StorageType.ACTIVE, "DELETE FROM task_eparticipant "
-            + "WHERE cid=? AND task=? AND mail IN (");
-        DELETE_EXTERNAL.put(StorageType.DELETED, "DELETE FROM task_eparticipant"
-            + " WHERE cid=? AND task=? AND mail IN (");
-        INSERT_FOLDER.put(StorageType.ACTIVE, "INSERT INTO "
-            + FOLDER_TABLES.get(StorageType.ACTIVE)
-            + "(cid, id, folder, user) VALUES (?,?,?,?)");
-        INSERT_FOLDER.put(StorageType.DELETED, "INSERT INTO "
-            + FOLDER_TABLES.get(StorageType.DELETED)
-            + "(cid, id, folder, user) VALUES (?,?,?,?)");
     }
 }

@@ -109,6 +109,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	private Set<OXWebdavResource> children = new HashSet<OXWebdavResource>();;
 	
 	private boolean loadedChildren;
+	private ArrayList<OCLPermission> overrideNewACL;
 	
 	public FolderCollection(String url, InfostoreWebdavFactory factory) {
 		this(url,factory,null);
@@ -146,6 +147,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		} catch (OXFolderException x) {
 			if(isPermissionException(x)) {
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			} else {
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);			
 			}
 		} catch (Exception e) {
 			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -184,9 +187,19 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public WebdavResource move(String dest, boolean noroot, boolean overwrite) throws WebdavException {
 		FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(coll.exists()) {
-			WebdavResource res = mergeTo(coll, true, overwrite);
+			if(overwrite) {
+				loadFolder();
+				ArrayList<OCLPermission> override = new ArrayList<OCLPermission>();
+				for(OCLPermission perm : folder.getPermissions()) {
+					override.add(perm.deepClone());
+				}
+				coll.loadFolder();
+				coll.folder.setPermissions(override);
+				coll.save();
+			}
+			WebdavResource moved = mergeTo(coll, true, overwrite);
 			delete();
-			return res;
+			return moved;
 		}
 		loadFolder();
 		int index = dest.lastIndexOf('/');
@@ -218,8 +231,23 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public WebdavResource copy(String dest, boolean noroot, boolean overwrite) throws WebdavException {
 		FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(!coll.exists()) {
+			loadFolder();
+			ArrayList<OCLPermission> override = new ArrayList<OCLPermission>();
+			for(OCLPermission perm : folder.getPermissions()) {
+				override.add(perm.deepClone());
+			}
+			coll.overrideNewACL = override;
 			coll.create();
 			copyProperties(coll);
+		} else if (overwrite) {
+			ArrayList<OCLPermission> override = new ArrayList<OCLPermission>();
+			loadFolder();
+			for(OCLPermission perm : folder.getPermissions()) {
+				override.add(perm.deepClone());
+			}
+			coll.loadFolder();
+			coll.folder.setPermissions(override);
+			coll.save();
 		}
 		return mergeTo(coll, false, overwrite);
 	}
@@ -442,6 +470,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			} catch (OXFolderException x) {
 				if(isPermissionException(x)) {
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				} else {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			} catch (OXFolderPermissionException e) {
 				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
@@ -469,6 +499,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				//oxfa.updateMoveRenameFolder(folder, session, true, folder.getLastModified().getTime(), writeCon, writeCon);
 			} catch (OXFolderException x) {
 				if(isPermissionException(x)) {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				} else {
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
 				}
 			} catch (OXFolderPermissionException e) {
@@ -508,10 +540,31 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		
 	}
 
-	private void initDefaultAcl(FolderObject folder) {
-		// Owner has all permissions
+	private void initDefaultAcl(FolderObject folder) throws WebdavException {
+		
+		List<OCLPermission> copyPerms = null;
+		
+		if(this.overrideNewACL != null) {
+			copyPerms = this.overrideNewACL;
+		} else {
+			FolderCollection parent = (FolderCollection) parent();
+			parent.loadFolder();
+			FolderObject parentFolder = parent.folder;
+			copyPerms = parentFolder.getPermissions();			
+		}
+		
+		ArrayList<OCLPermission> newPerms = new ArrayList<OCLPermission>();
+
 		User owner = sessionHolder.getSessionObject().getUserObject();
 		
+		for(OCLPermission perm : copyPerms) {
+			if(perm.getEntity() != owner.getId()){
+				newPerms.add(perm.deepClone());
+			} 
+		}
+		
+		
+		// Owner has all permissions
 		OCLPermission perm = new OCLPermission();
 		perm.setEntity(owner.getId());
 		perm.setFolderAdmin(true);
@@ -520,17 +573,17 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		perm.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
 		perm.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
 		perm.setGroupPermission(false);
+		newPerms.add(perm);
 		
 		// All others may read and write
 		
-		OCLPermission perm2 = new OCLPermission();
+		/*OCLPermission perm2 = new OCLPermission();
 		perm2.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
 		perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
 		perm2.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
 		perm2.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
-		perm2.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS);
-		
-		folder.setPermissionsAsArray(new OCLPermission[]{perm, perm2});
+		perm2.setDeleteObjectPermission(OCLPermission.DELETE_ALL_OBJECTS); */
+		folder.setPermissions(newPerms);
 	}
 
 	private void loadChildren() throws WebdavException {

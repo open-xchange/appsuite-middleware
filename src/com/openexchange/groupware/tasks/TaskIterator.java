@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
-import com.openexchange.groupware.tasks.TaskStorage.StorageType;
 import com.openexchange.server.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

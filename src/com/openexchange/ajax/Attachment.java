@@ -118,7 +118,7 @@ public class Attachment extends PermissionServlet {
 	
 	private static transient final Log LOG = LogFactory.getLog(Attachment.class);
 
-	private long maxUploadSize = -1;
+	private long maxUploadSize = -2;
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
@@ -482,13 +482,11 @@ public class Attachment extends PermissionServlet {
 	}
 	
 	private void checkSize(final long size, UserConfiguration userConfig) throws UploadException {
-		if(maxUploadSize == -1)
+		if(maxUploadSize == -2)
 			maxUploadSize = AttachmentConfig.getMaxUploadSize();
-		
 		long maxSize = 0;
 		maxSize = userConfig.getUserSettingMail().getUploadQuota();
 		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
-		
 		if(maxSize == 0)
 			return;
 		
@@ -499,7 +497,7 @@ public class Attachment extends PermissionServlet {
 	
 	private void checkSingleSize(long size, UserConfiguration userConfig) throws UploadException {
 		long maxSize = userConfig.getUserSettingMail().getUploadQuotaPerFile();
-		if(maxSize == 0)
+		if(maxSize < 1)
 			return;
 		if(size > maxSize) {
 			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);

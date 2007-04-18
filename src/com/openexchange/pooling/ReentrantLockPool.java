@@ -211,8 +211,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      */
     public void back(final T pooled) throws PoolingException {
         if (null == pooled) {
-            throw new NullPointerException(
-                "A null object was returned to pool.");
+            throw new PoolingException(
+                "A null reference was returned to pool.");
         }
         back(pooled, true);
     }
@@ -306,12 +306,17 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     final Thread thread = Thread.currentThread();
                     other = data.getByThread(thread);
                     if (other != null && thread.equals(other.getThread())) {
-                        final StringBuilder sb = new StringBuilder();
-                        sb.append("Found thread using two objects: \n");
-                        createStackTrace(sb, other.getTrace());
-                        sb.append('\n');
-                        createStackTrace(sb, thread.getStackTrace());
-                        LOG.debug(sb.toString());
+                        PoolingException e = new PoolingException(
+                            "Found thread using two objects. First get.");
+                        if (null != other.getTrace()) {
+	                        e.setStackTrace(other.getTrace());
+	                    }
+                        LOG.debug("Found thread using two objects. First get.");
+                        LOG.debug(e.getMessage(), e);
+                        e = new PoolingException(
+                            "Found thread using two objects. Second get.");
+                        e.setStackTrace(thread.getStackTrace());
+                        LOG.debug(e.getMessage(), e);
                     }
                 }
                 retval = data.popIdle();
@@ -601,15 +606,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return back(pooled, false);
     }
 
-    private void createStackTrace(final StringBuilder sb,
-        final StackTraceElement[] trace) {
-        for (StackTraceElement e : trace) {
-            sb.append("\tat ");
-            sb.append(e);
-            sb.append('\n');
-        }
-    }
-
     private void removeIdle() {
         final PooledData<T> metaData;
         boolean remove = false;
@@ -687,11 +683,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     sb.append(metaData.getIdentifier());
                     sb.append(", Object: ");
                     sb.append(metaData.getPooled());
-                    sb.append('\n');
-                    if (testThreads) {
-                        createStackTrace(sb, metaData.getTrace());
+                    final PoolingException e = new PoolingException(sb
+                        .toString());
+                    if (testThreads && null != metaData.getTrace()) {
+                        e.setStackTrace(metaData.getTrace());
                     }
-                    LOG.error(sb.toString());
+                    LOG.error(e.getMessage(), e);
                     iter.remove();
                     idleAvailable.signal();
                 }

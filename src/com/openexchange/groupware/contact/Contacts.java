@@ -193,7 +193,6 @@ public class Contacts implements DeleteListener {
 		for (int h = 0;h < allowed_mime.length;h++){
 			if ( mime != null && mime.equals("image/"+allowed_mime[h])) {
 				check = true;
-				fileType="jpg";
 				//fileType = mime.substring(6,mime.length());
 			}
 		}
@@ -293,7 +292,19 @@ public class Contacts implements DeleteListener {
 			g2d.dispose();
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try{
 			ImageIO.write(scaledBufferedImage,fileType,baos);
+			} catch (Exception fallback){
+				/**
+				 * This is just a basic fallback i try when he is not able to scale the image 
+				 * with the given mimetype. then we try the common jpg.
+				 */
+				LOG.debug("Unable to Scale the Image with default Parameters. Gonna try fallback");
+			} finally {
+				if (baos.toByteArray().length < 1){
+					ImageIO.write(scaledBufferedImage,"JPG",baos);
+				}
+			}
 			
 			byte[] back =  baos.toByteArray();
 			
@@ -631,6 +642,9 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXPermissionException(11, co.getParentFolderID(), ctx.getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
+			if (!oclPerm.canCreateObjects()){
+				throw EXCEPTIONS.createOXPermissionException(12, co.getParentFolderID(), ctx.getContextId(), user);
+			}
 			if (!oclPerm.canWriteAllObjects()) {
 				if (oclPerm.canWriteOwnObjects()){
 					can_edit_only_own = true;
@@ -711,33 +725,57 @@ public class Contacts implements DeleteListener {
 				throw xoxo;
 			}
 			
-			if (co.containsDisplayName() && (co.getDisplayName() == null || co.getDisplayName().length() < 1)){
+			
+			String firstname = null;
+			if (co.containsGivenName() && co.getGivenName() != null){
+				firstname = co.getGivenName();
+			} else if (co.containsGivenName() && co.getGivenName() == null){
+				firstname = null;
+			} else if (original.containsGivenName() && original.getGivenName() != null){
+				firstname = original.getGivenName();
+			}
+			String secondname = null;
+			if (co.containsMiddleName() && co.getMiddleName() != null){
+				secondname = co.getMiddleName();
+			} else if (co.containsMiddleName() && co.getMiddleName() == null){
+				secondname = null;
+			} else if (original.containsMiddleName() && original.getMiddleName() != null){
+				secondname = original.getMiddleName();
+			}
+			
+			if (co.getDisplayName() == null || co.getDisplayName().length() < 1){
 				if (co.getSurName() != null && co.getSurName().length() > 0){
-					if (co.getGivenName() != null && co.getGivenName().length() > 0){
-						if (co.getMiddleName() != null && co.getMiddleName().length() > 0){
-							co.setDisplayName(co.getSurName()+", "+co.getGivenName()+' '+co.getMiddleName());
+					if (firstname != null){
+						if (secondname != null){
+							co.setDisplayName(co.getSurName()+", "+firstname+' '+secondname);
 						}else{
-							co.setDisplayName(co.getSurName()+", "+co.getGivenName());
+							co.setDisplayName(co.getSurName()+", "+firstname);
 						}
+					}else if (secondname != null){
+						co.setDisplayName(co.getSurName()+", "+secondname);
 					}else{
 						co.setDisplayName(co.getSurName());
 					}
 				}else{
-					if (co.getGivenName() != null && co.getGivenName().length() > 0){
-						if (co.getMiddleName() != null && co.getMiddleName().length() > 0){
-							co.setDisplayName(co.getGivenName()+' '+co.getMiddleName());
-						}else{
-							co.setDisplayName(co.getGivenName());
-						}
-					} else {
-						co.setDisplayName("<unknown>");
-					}
+					co.setDisplayName("<unknown>");
 				}
-			} else if (co.containsDisplayName() && (co.getDisplayName() != null || co.getDisplayName().length() > 0)) {
+			} else if (co.getDisplayName() != null || co.getDisplayName().length() > 0) {				
 				if (co.getSurName() == null || co.getSurName().length() < 1){
 					co.setSurName(co.getDisplayName());
+				} else if (co.getSurName() != null && co.getSurName().length() > 0) {					
+					if (firstname != null){
+						if (secondname != null){
+							co.setDisplayName(co.getSurName()+", "+firstname+' '+secondname);
+						}else{
+							co.setDisplayName(co.getSurName()+", "+firstname);
+						}
+					}else if (secondname != null){
+						co.setDisplayName(co.getSurName()+", "+secondname);
+					} else {
+						co.setDisplayName(co.getSurName());
+					}
 				}
-			}
+				}
 			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
 				co.setFileAs(co.getDisplayName());
 			}
@@ -1767,6 +1805,7 @@ public class Contacts implements DeleteListener {
 						}
 	)
 	public static void writeContactImage(int contact_id, byte[] img, int cid, String mime, Connection writecon) throws OXException {
+		//System.out.println("contact_id -> "+contact_id+" img -> "+img+" cid -> "+cid+" mime -> "+mime+" img.length -> "+img.length+" mime.length -> "+mime.length());
 		if (contact_id < 1 || img == null || img.length < 1 || cid < 1 || mime == null || mime.length() < 1){
 			throw EXCEPTIONS.createOXConflictException(36);
 			//throw new OXConflictException("Wrong Data in Image Save");

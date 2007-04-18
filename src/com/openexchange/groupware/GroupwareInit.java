@@ -51,10 +51,13 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.event.EventInit;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.groupware.integration.SetupLink;
+import com.openexchange.push.udp.PushInit;
+import com.openexchange.sessiond.SessiondInit;
 
 /**
  * This class contains the initialization for the groupware server.
@@ -78,5 +81,8 @@ public class GroupwareInit {
         SetupLink.init();
         CalendarConfig.init();
         ContactConfig.init();
+		SessiondInit.init();
+		EventInit.init();
+		PushInit.init();
     }
 }

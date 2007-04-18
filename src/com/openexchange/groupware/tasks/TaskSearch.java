@@ -47,28 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.groupware.tasks;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import java.sql.Connection;
 
-public class ContactException extends OXException {
-	
-	private static final long serialVersionUID = -202902687980139008L;
-	
-	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder:: Folder id %1$d in Context %2$d with User %3$d";
-	public static final String NO_PERMISSION_MSG = "You do not have permission to store objects in Folder %1$d in Context %2$d with User %3$d";
-	public static final String OBJECT_HAS_CHANGED_MSG = "The object has changed on server side since it was last fetched.";
-	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from Folder %1$d in Context %2$d with User %3$d";
-	public static final String EVENT_QUEUE = "Unable to initialize Event queue";
-	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pickup a connection from the DBPool";
-	
-	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.CONTACT, category, id,message,cause,msgParams);
-	}
+import com.openexchange.groupware.contexts.Context;
 
-	public ContactException(Category category, String message, int id, Object...msgParams){
-		this(category,id,message, null,msgParams);
-	}
-	
+/**
+ * Interface to different SQL implementations for searching for tasks and its
+ * participants.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+abstract class TaskSearch {
+
+    /**
+     * Singleton instance.
+     */
+    private static final TaskSearch SINGLETON = new RdbTaskSearch();
+
+    /**
+     * Default constructor.
+     */
+    protected TaskSearch() {
+        super();
+    }
+
+    /**
+     * @return the singleton implementation.
+     */
+    public static TaskSearch getInstance() {
+        return SINGLETON;
+    }
+
+    /**
+     * Finds all delegated tasks of one user.
+     * @param ctx Context.
+     * @param con readable database connection.
+     * @param userId unique identifier of the user.
+     * @param type storage type of task that should be searched.
+     * @return an int array with all task identifier found.
+     * @throws TaskException if an exception occurs.
+     */
+    abstract int[] findDelegatedTasks(Context ctx, Connection con, int userId,
+        StorageType type) throws TaskException;
 }

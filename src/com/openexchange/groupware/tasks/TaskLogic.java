@@ -49,7 +49,14 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.rollback;
+
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.ReminderSQLInterface;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,7 +65,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.event.EventClient;
+import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
@@ -71,18 +84,27 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
+import com.openexchange.server.DBPool;
+import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class contains logic methods for the tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TaskLogic {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(TaskLogic.class);
 
     /**
      * Prevent instanciation.
@@ -165,8 +187,8 @@ public final class TaskLogic {
         } catch (OXException e) {
             throw new TaskException(e);
         }
-        if (!permission.canReadAllObjects()
-            || !permission.canReadOwnObjects()) {
+        if (!permission.canReadAllObjects() && !permission
+            .canReadOwnObjects()) {
             throw new TaskException(Code.NO_READ_PERMISSION,
                 folder.getFolderName(), folder.getObjectID());
         }
@@ -234,8 +256,8 @@ public final class TaskLogic {
             throw new TaskException(e);
         }
         if (!permission.canWriteAllObjects()
-            && (!permission.canWriteOwnObjects()
-                || (user.getId() != task.getCreatedBy()))) {
+            && !(permission.canWriteOwnObjects()
+                && (user.getId() == task.getCreatedBy()))) {
             final FolderObject folder = Tools.getFolder(ctx, folderId);
             throw new TaskException(Code.NO_WRITE_PERMISSION,
                 folder.getFolderName(), folderId);
@@ -254,46 +276,11 @@ public final class TaskLogic {
             throw new TaskException(e);
         }
         if (!permission.canWriteAllObjects()
-            && (!permission.canWriteOwnObjects()
-                || (userId != taskCreator))) {
+            && !(permission.canWriteOwnObjects() && (userId == taskCreator))) {
             final FolderObject folder = Tools.getFolder(ctx, folderId);
             throw new TaskException(Code.NO_WRITE_PERMISSION,
                 folder.getFolderName(), folderId);
         }
-    }
-
-    /**
-     * Checks if the folder is a tasks folder and if the user is allowed to
-     * delete objects in that folder.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware access rights of the user.
-     * @param folder folder object that should be tested for read access.
-     * @return <code>true</code> if only own objects can be deleted.
-     * @throws TaskException if the deleting is not allowed.
-     */
-    static boolean checkDeleteInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder) throws TaskException {
-        if (!Tools.isFolderTask(folder)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER,
-                folder.getFolderName(), folder.getObjectID());
-        }
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(
-                folder.getObjectID(), userId, groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canDeleteAllObjects()
-            || !permission.canDeleteOwnObjects()) {
-            throw new TaskException(Code.NO_DELETE_PERMISSION);
-        }
-        final boolean onlyOwn = !permission.canDeleteAllObjects() && permission
-            .canDeleteOwnObjects();
-        return onlyOwn;
     }
 
     /**
@@ -702,12 +689,14 @@ public final class TaskLogic {
         final Date origStart = task.getStartDate();
         task.setRecurrenceCalculator((int) ((task.getEndDate().getTime()
             - origStart.getTime()) / (CalendarRecurringCollection.MILLI_DAY)));
-        if (task.containsOccurrence()) {
+        boolean removeUntil = false;
+        if (task.containsOccurrence() || !task.containsUntil()) {
+            removeUntil = true;
             task.setUntil(new Date(Long.MAX_VALUE));
         }
         final RecurringResults rr = CalendarRecurringCollection
             .calculateRecurring(task, 0, 0, 2);
-        if (task.containsOccurrence()) {
+        if (removeUntil) {
             task.removeUntil();
         }
         final RecurringResult result = rr.getRecurringResult(0);
@@ -732,6 +721,22 @@ public final class TaskLogic {
         return retval;
     }
 
+    /**
+     * @param folders Set of task folder mappings.
+     * @param userId unique identifier of a user.
+     * @return the folder mapping for the user.
+     */
+    static Folder getFolderOfUser(final Set<Folder> folders, final int userId) {
+        Folder retval = null;
+        for (Folder folder : folders) {
+            if (folder.getUser() == userId) {
+                retval = folder;
+                break;
+            }
+        }
+        return retval;
+    }
+
     static TaskInternalParticipant getParticipant(
         final Set<TaskInternalParticipant> participants, final int userId) {
         TaskInternalParticipant retval = null;
@@ -742,5 +747,192 @@ public final class TaskLogic {
             }
         }
         return retval;
+    }
+
+    /**
+     * Extracts all participants that are added by the group.
+     * @param participants internal task participants.
+     * @param groupId the group identifier.
+     * @return All participants that are added by the group.
+     */
+    static Set<TaskInternalParticipant> extractWithGroup(
+        final Set<TaskInternalParticipant> participants, final int groupId) {
+        final Set<TaskInternalParticipant> retval =
+            new HashSet<TaskInternalParticipant>();
+        for (TaskInternalParticipant participant : participants) {
+            if (null != participant.getGroupId()
+                && groupId == participant.getGroupId()) {
+                retval.add(participant);
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Task storage.
+     */
+    private static final TaskStorage storage = TaskStorage.getInstance();
+
+    /**
+     * Folder storage.
+     */
+    private static final FolderStorage foldStor = FolderStorage.getInstance();
+
+    /**
+     * Participant storage.
+     */
+    private static final ParticipantStorage partStor = ParticipantStorage
+        .getInstance();
+
+    /**
+     * Does all actions to load a complete task object.
+     * @param ctx Context.
+     * @param folderId unique identifier of the folder through that the task is
+     * accessed.
+     * @param taskId unique identifier of the task to load.
+     * @param type storage type of the task to load.
+     * @return the task object.
+     * @throws TaskException if an exception occurs.
+     */
+    public static Task loadTask(final Context ctx, final int folderId,
+        final int taskId, final StorageType type) throws TaskException {
+        final Task retval = storage.selectTask(ctx, taskId, type);
+        retval.setParentFolderID(folderId);
+        final Set<TaskParticipant> parts = loadParticipantsWithFolder(ctx,
+            folderId, taskId, type);
+        retval.setParticipants(TaskLogic.createParticipants(parts));
+        retval.setUsers(TaskLogic.createUserParticipants(parts));
+        return retval;
+    }
+
+    /**
+     * Loads participants of a task. If the task is in a public folder no folder
+     * mapping for the participants will be loaded.
+     * @param ctx Context.
+     * @param folderId Unique identifier of the folder through that the task is
+     * accessed.
+     * @param taskId Unique identifier of the task.
+     * @param type storage type of the participants (only ACTIVE or DELETED).
+     * @return the loaded participants.
+     * @throws TaskException if an exception occurs.
+     */
+    static Set<TaskParticipant> loadParticipantsWithFolder(final Context ctx,
+        final int folderId, final int taskId, final StorageType type)
+        throws TaskException {
+        final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
+            taskId, type);
+        if (!Tools.isFolderPublic(ctx, folderId)) {
+            final Set<Folder> folders = foldStor.selectFolder(ctx, taskId,
+                type);
+            Tools.fillStandardFolders(parts, folders);
+        }
+        return parts;
+    }
+
+    /**
+     * Deletes an ACTIVE task object. This stores the task as a DELETED task
+     * object, deletes all reminders and sends the task delete event.
+     * @param session Session.
+     * @param task fully loaded task object to delete.
+     * @param lastModified last modification timestamp for concurrent conflicts.
+     * @throws TaskException if an exception occurs.
+     */
+    public static void deleteTask(final SessionObject session, final Task task,
+        final Date lastModified) throws TaskException {
+        final Context ctx = session.getContext();
+        final int userId = session.getUserObject().getId();
+        storage.delete(ctx, task, userId, lastModified);
+        informDelete(session, task);
+    }
+
+    /**
+     * Informs other systems about a deleted task.
+     * @param session Session.
+     * @param task Task object.
+     * @throws TaskException if an exception occurs.
+     */
+    static void informDelete(final SessionObject session, final Task task)
+        throws TaskException {
+        final ReminderSQLInterface reminder = new ReminderHandler(session
+            .getContext());
+        try {
+            reminder.deleteReminder(task.getObjectID(), Types.TASK);
+        } catch (OXObjectNotFoundException e) {
+            // If the task does not have a reminder this exception is
+            // thrown. Which is quite okay because not every task must have
+            // a reminder.
+        } catch (OXException e) {
+            throw new TaskException(e);
+        }
+        try {
+            new EventClient(session).delete(task);
+        } catch (InvalidStateException e) {
+            throw new TaskException(Code.EVENT, e);
+        }
+    }
+
+    /**
+     * Removes a task object completely.
+     * @param session Session.
+     * @param folderId unique identifier of the folder through that the task is
+     * accessed.
+     * @param taskId unique identifier of the task to remove.
+     * @param type storage type of the task (only {@link StorageType#ACTIVE} or
+     * {@link StorageType#DELETED}).
+     * @throws TaskException if an exception occurs.
+     */
+    public static void removeTask(final SessionObject session,
+        final int folderId, final int taskId, final StorageType type)
+        throws TaskException {
+        final Context ctx = session.getContext();
+        // Load the task.
+        final Task task = storage.selectTask(ctx, taskId, type);
+        task.setParentFolderID(folderId);
+        final Set<TaskInternalParticipant> internal = partStor.selectInternal(
+            ctx, taskId, type);
+        final Set<TaskExternalParticipant> external = partStor.selectExternal(
+            ctx, taskId, type);
+        final Set<Folder> folders = foldStor.selectFolder(ctx, taskId, type);
+        final Set<TaskParticipant> parts = new HashSet<TaskParticipant>();
+        parts.addAll(internal); parts.addAll(external);
+        task.setParticipants(TaskLogic.createParticipants(parts));
+        task.setUsers(TaskLogic.createUserParticipants(parts));
+        // Now remove it.
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            partStor.deleteInternal(ctx, con, taskId, internal, type, true);
+            if (StorageType.ACTIVE == type) {
+                final Set<TaskInternalParticipant> removed = partStor
+                    .selectInternal(ctx, con, taskId, StorageType.REMOVED);
+                partStor.deleteInternal(ctx, con, taskId, removed,
+                    StorageType.REMOVED, true);
+            }
+            partStor.deleteExternal(ctx, con, taskId, external, type, true);
+            foldStor.deleteFolder(ctx, con, taskId, folders, type);
+            storage.delete(ctx, con, taskId, task.getLastModified(), type);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (TaskException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                final TaskException exc = new TaskException(Code.SQL_ERROR, e,
+                    e.getMessage());
+                LOG.error(exc.getMessage(), e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+        informDelete(session, task);
     }
 }

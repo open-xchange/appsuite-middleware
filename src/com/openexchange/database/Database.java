@@ -162,7 +162,10 @@ public final class Database {
             throw new DBPoolingException(Code.NO_CONNECTION, e, poolId);
         }
         try {
-            con.setCatalog(schema);
+            final String oldSchema = con.getCatalog();
+            if (!oldSchema.equals(schema)) {
+	            con.setCatalog(schema);
+            }
         } catch (SQLException e) {
             throw new DBPoolingException(Code.SCHEMA_FAILED, e);
         }

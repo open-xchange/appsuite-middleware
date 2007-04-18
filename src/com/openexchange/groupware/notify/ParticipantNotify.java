@@ -114,7 +114,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
 		mail.setSubject(messageTitle);
-		mail.setContentType("text/plain");
+		mail.setContentType("text/plain; charset=UTF-8");
 		
 		
 		//System.out.println(folderId);

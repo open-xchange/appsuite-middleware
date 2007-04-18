@@ -62,6 +62,7 @@ import java.util.Set;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.imap.UserSettingMail;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
 /**
@@ -108,6 +110,9 @@ public class DeleteRegistry {
 		registerDeleteListener(new AJAXUserDictionary());
 		registerDeleteListener(new UserConfiguration());
 		registerDeleteListener(new UserSettingMail());
+		registerDeleteListener(new QuotaUsageDelete());
+		registerDeleteListener(new AttachmentDelDelete());
+		
 		/*
 		 * At last insert folder delete listener
 		 */

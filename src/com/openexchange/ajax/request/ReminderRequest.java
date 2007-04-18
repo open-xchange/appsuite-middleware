@@ -67,6 +67,8 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.TimeZone;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -78,6 +80,8 @@ public class ReminderRequest {
 	private JSONWriter jsonWriter = null;
 	
 	private Date timestamp;
+	
+	private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
 	
 	public Date getTimestamp() {
 		return timestamp;
@@ -125,8 +129,26 @@ public class ReminderRequest {
 		try {
 			while (it.hasNext()) {
 				ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
-				reminderWriter.writeObject((ReminderObject)it.next());
+				ReminderObject reminderObj = (ReminderObject)it.next();
+				
+				if (reminderObj.isRecurrenceAppointment()) {
+					final int targetId = Integer.parseInt(reminderObj.getTargetId());
+					final int inFolder = Integer.parseInt(reminderObj.getFolder());
+					
+					final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
+					
+					if (alarm == null) {
+						LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
+						continue;
+					} else {
+						reminderObj.setDate(alarm);
+					}
+				}
+				
+				reminderWriter.writeObject(reminderObj);
 			}
+		} catch (SQLException e) {
+			throw new OXException("SQLException occured", e);
 		} finally {
 			if (null != it) {
 				it.close();				
@@ -144,7 +166,7 @@ public class ReminderRequest {
 		
 		try {
 			ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-			it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), end);
+			it = reminderSql.listReminder(sessionObj.getUserObject().getId(), end);
 			
 
 			while (it.hasNext()) {
@@ -152,9 +174,13 @@ public class ReminderRequest {
 				ReminderObject reminderObj = (ReminderObject)it.next();
 				
 				if (reminderObj.isRecurrenceAppointment()) {
-					Date alarm = CalendarCommonCollection.getNextReminderDate(Integer.parseInt(reminderObj.getTargetId()), Integer.parseInt(reminderObj.getFolder()), sessionObj);
+					final int targetId = Integer.parseInt(reminderObj.getTargetId());
+					final int inFolder = Integer.parseInt(reminderObj.getFolder());
+					
+					final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
 					
 					if (alarm == null) {
+						LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
 						continue;
 					} else {
 						reminderObj.setDate(alarm);

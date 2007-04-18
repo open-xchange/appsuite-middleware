@@ -50,18 +50,22 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.server.DBPool;
+import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * @author marcus
- *
+ * Interface to different SQL implementations for storing tasks.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 abstract class TaskStorage {
 
@@ -69,11 +73,6 @@ abstract class TaskStorage {
      * Singleton attribute.
      */
     private static final TaskStorage SINGLETON = new RdbTaskStorage();
-
-    /**
-     * Defines the types of participants.
-     */
-    static enum StorageType { ACTIVE, REMOVED, DELETED };
 
     /**
      * Default constructor.
@@ -102,6 +101,19 @@ abstract class TaskStorage {
         throws TaskException;
 
     /**
+     * Updates a task without touching folder mappings and participants.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param task Task.
+     * @param lastRead timestamp when the client read the task last.
+     * @param modified modified attributes.
+     * @param type storage type of the task (ACTIVE, DELETED).
+     * @throws TaskException if an exception occurs.
+     */
+    abstract void updateTask(Context ctx, Connection con, Task task,
+        Date lastRead, int[] modified, StorageType type) throws TaskException;
+
+    /**
      * Updates a task and its folder and participants.
      * @param ctx Context.
      * @param task task values.
@@ -119,14 +131,29 @@ abstract class TaskStorage {
         throws TaskException;
 
     /**
-     * Deletes a task from the underlying persistant storage.
-     * @param ctx Context
+     * Deletes a task.
+     * @param ctx Context.
+     * @param con writable database connection.
      * @param taskId unique identifier of the task to delete.
+     * @param lastRead timestamp when the task was last read.
+     * @param type ACTIVE or DELETED.
+     * @throws TaskException if the task has been changed in the meantime or an
+     * exception occured.
+     */
+    abstract void delete(Context ctx, Connection con, int taskId, Date lastRead,
+        StorageType type) throws TaskException;
+
+    /**
+     * Deletes a task from the underlying persistant storage. This method mainly
+     * moves the task from the ACTIVE storage type to the DELETED storage type.
+     * @param ctx Context
+     * @param task task to delete.
      * @param userId unique identifier of the user (own task, modified by).
      * @param lastRead timestamp when the client read the task last.
      * @throws TaskException if an error occurs while deleting the task.
+     * @deprecated Use {@link TaskLogic#deleteTask(SessionObject, Task, Date)}
      */
-    abstract void delete(Context ctx, int taskId, int userId, Date lastRead)
+    abstract void delete(Context ctx, Task task, int userId, Date lastRead)
         throws TaskException;
 
     /**
@@ -229,11 +256,37 @@ abstract class TaskStorage {
     /**
      * This method only reads the task without participants and folders.
      * @param context Context.
+     * @param con readable database connection.
      * @param taskId unique identifier of the task.
+     * @param type storage type of the task.
      * @return a task object without participants and folder.
      * @throws TaskException if an error occurs.
      */
-    abstract Task selectTask(Context context, int taskId) throws TaskException;
+    abstract Task selectTask(Context context, Connection con, int taskId,
+        StorageType type) throws TaskException;
+
+    /**
+     * This method only reads the task without participants and folders.
+     * @param ctx Context.
+     * @param taskId unique identifier of the task.
+     * @param type storage type of the task.
+     * @return a task object without participants and folder.
+     * @throws TaskException if an error occurs.
+     */
+    Task selectTask(final Context ctx, final int taskId, final StorageType type)
+        throws TaskException {
+        Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            return selectTask(ctx, con, taskId, type);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
 
     /**
      * Only for setConfirmation.
@@ -254,34 +307,10 @@ abstract class TaskStorage {
      * @param type type of participant that should be selected.
      * @return a set of participants.
      * @throws TaskException if an error occurs.
+     * @deprecated Use ParticipantStorage.
      */
     abstract Set<TaskParticipant> selectParticipants(Context ctx,
         int taskId, StorageType type) throws TaskException;
-
-    /**
-     * Deletes a group from participants of tasks. Afterwards the task will look
-     * like if all participants that are added through the group had been
-     * invited directly.
-     * @param ctx Context.
-     * @param con writable database connection.
-     * @param groupId unique identifier of the group.
-     * @throws TaskException if an error occurs.
-     */
-    abstract void deleteGroup(Context ctx, Connection con, int groupId)
-        throws TaskException;
-
-    /**
-     * Deletes a user from the participants of tasks. Private tasks of the user
-     * will be deleted. Private delegated tasks will be moved to mailadmin. If
-     * the user is only a participant of a task it will be simply deleted.
-     * @param ctx Context.
-     * @param readCon readable database connection.
-     * @param writeCon writable database connection.
-     * @param userId unique identifier of the to delete user.
-     * @throws TaskException if an error occurs.
-     */
-    abstract void deleteUser(Context ctx, Connection readCon,
-        Connection writeCon, int userId) throws TaskException;
 
     /**
      * Reads the folder of a task.
@@ -300,6 +329,7 @@ abstract class TaskStorage {
      * @param taskId unique identifier of the task.
      * @return the folder objects.
      * @throws TaskException if an error occurs.
+     * @deprecated Use FolderStorage.
      */
     abstract Set<Folder> selectFolders(Context ctx, int taskId)
         throws TaskException;

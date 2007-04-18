@@ -405,7 +405,7 @@ public class CalendarCommonCollection {
         start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
         long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10));
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
-        if (rss != null && rss.size() == 1) {
+        if (rss != null && rss.size() >= 1) {
             RecurringResult rs = rss.getRecurringResult(0);
             return new Date(rs.getStart()-(alarm*60*1000L));
         } else {
@@ -664,6 +664,7 @@ public class CalendarCommonCollection {
             SearchIterator si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
             EffectivePermission oclp = null;
             FolderObject fo = null;
+            try {
             cfo = new CalendarFolderObject(uid, c.getContextId(), false);
             while (si.hasNext()) {
                 fo  = (FolderObject)si.next();
@@ -675,6 +676,9 @@ public class CalendarCommonCollection {
             } catch (CacheException ex) {
                 LOG.error(ex.getMessage(), ex);
             }
+            } finally {
+                si.close();
+        }
         }
         return cfo;
     }
@@ -699,6 +703,7 @@ public class CalendarCommonCollection {
             SearchIterator si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
             EffectivePermission oclp = null;
             FolderObject fo = null;
+            try {
             cfo = new CalendarFolderObject(uid, c.getContextId(), true);
             while (si.hasNext()) {
                 fo  = (FolderObject)si.next();
@@ -710,6 +715,9 @@ public class CalendarCommonCollection {
             } catch (CacheException ex) {
                 LOG.error(ex.getMessage(), ex);
             }
+            } finally {
+                si.close();
+        }
         }
         return cfo;
     }
@@ -728,23 +736,33 @@ public class CalendarCommonCollection {
             Object private_read_own[] = cfo.getPrivateReadableOwn();
             Object public_read_all[] = cfo.getPublicReadableAll();
             Object public_read_own[] = cfo.getPublicReadableOwn();
+            /*
+            private_read_all = new Object[] { new Integer(60) } ;
+            private_read_own = new Object[] { new Integer(61) } ;
+            public_read_all = new Object[] { new Integer(62) } ;
+            public_read_own = new Object[] { new Integer(63) } ;
+            */
+            
             boolean private_query = false;
             boolean public_query = false;
+            int brack = 0;
             if (private_read_all.length > 0) {
                 sb.append(" AND (pdm.pfid IN ");
+                brack++;
                 sb.append(StringCollection.getSqlInString(private_read_all));
                 private_query = true;
             }
             
             if (private_read_own.length > 0) {
                 if (!private_query) {
-                    sb.append(" AND pd.created_from = ");
+                    sb.append(" AND (pd.created_from = ");
                 } else {
-                    sb.append("OR pd.created_from = ");
+                    sb.append("OR (pd.created_from = ");
                 }
                 sb.append(uid);
                 sb.append(" AND (pdm.pfid IN ");
                 sb.append(StringCollection.getSqlInString(private_read_own));
+                sb.append("))");
                 private_query = true;
             }
             
@@ -763,18 +781,20 @@ public class CalendarCommonCollection {
             
             if (public_read_own.length > 0) {
                 if (!private_query && !public_query) {
-                    sb.append(" AND pd.fid IN ");
+                    sb.append(" AND (pd.fid IN ");
                     sb.append(StringCollection.getSqlInString(public_read_own));
-                    sb.append(" AND pd.created_from = ");
+                    sb.append(" AND (pd.created_from = ");
                     sb.append(uid);
+                sb.append("))");
                 } else {
-                    sb.append(" OR pd.fid IN ");
+                    sb.append(" OR (pd.fid IN ");
                     sb.append(StringCollection.getSqlInString(public_read_own));
-                    sb.append(" AND pd.created_from = ");
+                    sb.append(" AND (pd.created_from = ");
                     sb.append(uid);
+                    sb.append("))");
                 }
             }
-            if (private_query) {
+            for (int a = 0; a < brack; a++) {
                 sb.append(")");
             }
         } else {
@@ -973,6 +993,9 @@ public class CalendarCommonCollection {
         }
         if (!clone.containsObjectID()  || clone.getObjectID() == 0) {
             clone.setObjectID(edao.getObjectID());
+        }
+        if (clone.getUsers() == null) {
+            clone.setUsers(edao.getUsers());
         }
         if (!cdao.containsResources() && edao.containsResources()) {
             // TODO: Take care if edao contains Ressources and remove and new ones !!! We have to merge this!

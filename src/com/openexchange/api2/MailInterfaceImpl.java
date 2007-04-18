@@ -853,6 +853,7 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					final long start = System.currentTimeMillis();
 					imapCon.getImapFolder().close(false);
+					mailInterfaceMonitor.changeNumActive(false);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} catch (MessagingException e) {
 					LOG.error(e.getMessage(), e);

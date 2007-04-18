@@ -113,7 +113,8 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 				throw EXCEPTIONS.create(0);
 				//throw new OXException("Numer of Attached Documents to this Contact is below zero. You can not remove more Attachments!");
 			}
-			co.setNumberOfAttachments(co.getNumberOfAttachments()-1);
+			int[] xx = e.getDetached();
+			co.setNumberOfAttachments(co.getNumberOfAttachments()-xx.length);
 			Date d = new Date(System.currentTimeMillis());
 			Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig());
 			return co.getLastModified().getTime();

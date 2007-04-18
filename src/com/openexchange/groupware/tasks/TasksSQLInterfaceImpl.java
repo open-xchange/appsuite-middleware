@@ -73,7 +73,6 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.groupware.tasks.TaskStorage.StorageType;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -180,7 +179,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final int userId = user.getId();
         final TaskStorage storage = TaskStorage.getInstance();
         try {
-            retval = storage.selectTask(ctx, taskId);
+            retval = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             // Check if task appears in folder
             retval.setParentFolderID(storage.selectFolderById(ctx, taskId,
                 folderId).getIdentifier());
@@ -367,7 +366,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             updateAlarm(task, userId);
         }
         try {
-            final Task reload = storage.selectTask(ctx, taskId);
+            final Task reload = storage.selectTask(ctx, taskId,
+                StorageType.ACTIVE);
             // Reload folder
             int newFolderId = folderId;
             if (task.containsParentFolderID()) {
@@ -385,10 +385,10 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         try {
             // Reload task for event handling. Given task may not contain all
             // values.
-            forEvent = storage.selectTask(ctx, taskId);
+            forEvent = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             // Reload participants
             final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
-                taskId, TaskStorage.StorageType.ACTIVE);
+                taskId, StorageType.ACTIVE);
             // Reload folder
             int newFolderId = folderId;
             if (task.containsParentFolderID()) {
@@ -492,61 +492,28 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final Context ctx = session.getContext();
         final User user = session.getUserObject();
         final int userId = user.getId();
-        final boolean onlyOwn;
         final Task task;
         try {
             // Check if folder exists
             folder = Tools.getFolder(ctx, folderId);
             // Check if folder is correct.
             storage.selectFolderById(ctx, taskId, folderId);
+            // Load task with participants.
+            task = TaskLogic.loadTask(ctx, folderId, taskId, StorageType
+                .ACTIVE);
             // TODO Switch to only delete the participant from task
-            // Check delete permission.
-            onlyOwn = TaskLogic.checkDeleteInFolder(ctx, userId, user
-                .getGroups(), session.getUserConfiguration(), folder);
-            final boolean noPrivate = Tools.isFolderShared(folder, userId);
-            // Load task
-            task = storage.selectTask(ctx, taskId);
             // Check delete permission
-            if ((onlyOwn && task.getCreatedBy() != userId)
-                || (noPrivate && task.getPrivateFlag())) {
-                throw new TaskException(Code.NO_DELETE_PERMISSION);
-            }
+            Access.checkDelete(ctx, userId, user.getGroups(), session
+                .getUserConfiguration(), folder, task);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final Set<TaskParticipant> parts;
         try {
-            // Load participants for event handling.
-            parts = storage.selectParticipants(ctx, taskId, StorageType.ACTIVE);
-            // Load folder for event handling.
-            if (!Tools.isFolderPublic(ctx, folderId)) {
-                final Set<Folder> folders = storage.selectFolders(ctx, taskId);
-                Tools.fillStandardFolders(parts, folders);
-            }
-            storage.delete(ctx, taskId, userId, lastModified);
-            final ReminderSQLInterface reminder = new ReminderHandler(ctx);
-            try {
-                reminder.deleteReminder(taskId, Types.TASK);
-            } catch (OXObjectNotFoundException e) {
-                // If the task does not have a reminder this exception is
-                // thrown. Which is quite okay because not every task must have
-                // a reminder.
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug(e.getMessage(), e);
-            	}
-            }
+            TaskLogic.deleteTask(session, task, lastModified);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        task.setParentFolderID(folderId);
-        task.setParticipants(TaskLogic.createParticipants(parts));
-        task.setUsers(TaskLogic.createUserParticipants(parts));
-        try {
-            new EventClient(session).delete(task);
-        } catch (InvalidStateException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
         }
-    }
 
     /**
      * {@inheritDoc}

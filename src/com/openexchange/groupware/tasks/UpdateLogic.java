@@ -59,7 +59,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskException.Detail;
-import com.openexchange.groupware.tasks.TaskStorage.StorageType;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
@@ -148,7 +147,7 @@ class UpdateLogic {
      */
     private Task getOrigTask() throws TaskException {
         if (null == origTask) {
-            origTask = storage.selectTask(ctx, taskId);
+            origTask = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             origTask.setParentFolderID(folderId);
         }
         return origTask;
@@ -222,9 +221,8 @@ class UpdateLogic {
             final FolderObject destFolder = Tools.getFolder(ctx, destFolderId);
             // task is deleted in source folder and created in destination
             // folder.
-            TaskLogic.checkDeleteInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folder);
-            TaskLogic.checkCreateInFolder(session, destFolderId);
+            Access.checkDelete(ctx, userId, user.getGroups(), session
+                .getUserConfiguration(), folder, getOrigTask());
             // move out of or into a shared folder is not allowed.
             if (Tools.isFolderShared(folder, userId)
                 || Tools.isFolderShared(destFolder, userId)) {

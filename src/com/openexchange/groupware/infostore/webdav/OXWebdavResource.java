@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;

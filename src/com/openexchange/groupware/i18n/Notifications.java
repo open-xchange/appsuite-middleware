@@ -113,9 +113,14 @@ public class Notifications {
 		"===========\n"+
 		"Created by:  [created_by]\n"+
 		"Title:       [title]\n"+
+		"Location:    [location]\n"+
 		"\n"+
 		"Start date:  [start]\n"+
 		"End date:    [end]\n"+
+		"\n"+
+		"Description:\n"+
+		"[description]\n"+
+		"\n"+
 		"\n"+
 		"==========================================";
 	
@@ -131,6 +136,8 @@ public class Notifications {
 		"Start date:  [start]\n"+
 		"End date:    [end]\n"+
 		"\n"+
+		"Description:\n"+
+		"[description]\n"+
 		"==========================================";
 	
 	public static final String APPOINTMENT_UPDATE_MAIL = 

@@ -47,28 +47,60 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.groupware.tasks;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
-public class ContactException extends OXException {
-	
-	private static final long serialVersionUID = -202902687980139008L;
-	
-	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder:: Folder id %1$d in Context %2$d with User %3$d";
-	public static final String NO_PERMISSION_MSG = "You do not have permission to store objects in Folder %1$d in Context %2$d with User %3$d";
-	public static final String OBJECT_HAS_CHANGED_MSG = "The object has changed on server side since it was last fetched.";
-	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from Folder %1$d in Context %2$d with User %3$d";
-	public static final String EVENT_QUEUE = "Unable to initialize Event queue";
-	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pickup a connection from the DBPool";
-	
-	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.CONTACT, category, id,message,cause,msgParams);
-	}
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-	public ContactException(Category category, String message, int id, Object...msgParams){
-		this(category,id,message, null,msgParams);
-	}
-	
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.Collections;
+
+/**
+ * Implementation of search for tasks interface using a relational database
+ * currently MySQL.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class RdbTaskSearch extends TaskSearch {
+
+    /**
+     * Default constructor.
+     */
+    RdbTaskSearch() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    int[] findDelegatedTasks(final Context ctx, final Connection con,
+        final int userId, final StorageType type) throws TaskException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final List<Integer> tasks = new ArrayList<Integer>();
+        try {
+            stmt = con.prepareStatement(SQL.SEARCH_DELEGATED.get(type));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, userId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                tasks.add(result.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw new TaskException(TaskException.Code.SQL_ERROR, e,
+                e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return Collections.toArray(tasks);
+    }
+
 }

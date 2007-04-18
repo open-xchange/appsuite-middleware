@@ -1028,6 +1028,8 @@ class CalendarMySQL implements CalendarSqlImp {
                         if (p[a].getEmailAddress() == null) {
                             if (p[a].getIdentifier() > 0) {
                                 pi.setNull(6, java.sql.Types.VARCHAR);
+                            } else if (p[a].getType() == Participant.GROUP && p[a].getIdentifier() == 0) {
+                                pi.setNull(6, 0);                                
                             } else {
                                 throw new OXCalendarException(OXCalendarException.Code.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD);
                             }
@@ -1815,7 +1817,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         if (edao.getFolderType() == FolderObject.PRIVATE) {
                             pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
                         } else if (edao.getFolderType() == FolderObject.PUBLIC) {
-                            pu.setInt(3, 0);
+                            pu.setNull(3, java.sql.Types.INTEGER);
                         } else if (edao.getFolderType() == FolderObject.SHARED) {
                             if (edao.getSharedFolderOwner() != 0) {
                                 if (edao.getSharedFolderOwner() == modified_userparticipants[a].getIdentifier()) {

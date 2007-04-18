@@ -67,6 +67,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.jcs.access.exception.CacheException;
+
 /**
  *  CalendarAdministration
  *  @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
@@ -74,6 +78,7 @@ import java.sql.SQLException;
 public class CalendarAdministration implements DeleteListener {
     
     private StringBuilder u1 = null;
+    private static final Log LOG = LogFactory.getLog(CalendarAdministration.class);
     
     public CalendarAdministration() {
         
@@ -125,7 +130,7 @@ public class CalendarAdministration implements DeleteListener {
         ResultSet rs = null;
         try {
             StringBuilder sb = new StringBuilder(128);
-            sb.append("SELECT object_id from ");
+            sb.append("SELECT object_id, cid, id, type from ");
             sb.append(table);
             sb.append(" WHERE cid = ");
             sb.append(deleteEvent.getContext().getContextId());
@@ -138,8 +143,6 @@ public class CalendarAdministration implements DeleteListener {
             PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs.next()) {
                 int object_id = rs.getInt(1);
-                rs.deleteRow();
-                addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 } catch (OXException ex) {
@@ -147,6 +150,8 @@ public class CalendarAdministration implements DeleteListener {
                 } catch (DBPoolingException ex) {
                     throw new DeleteFailedException(ex);
                 } 
+                rs.deleteRow();
+                addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
             }
             update.executeBatch();
             update.close();
@@ -169,6 +174,9 @@ public class CalendarAdministration implements DeleteListener {
         PreparedStatement pst2 = null;
         ResultSet rs2 = null;
         PreparedStatement pst3 = null;
+        PreparedStatement pst4 = null;
+        PreparedStatement pst5 = null;
+        PreparedStatement pst6 = null;
         try {
             StringBuilder sb = new StringBuilder(128);
             sb.append("SELECT pdr.object_id FROM ");
@@ -181,7 +189,7 @@ public class CalendarAdministration implements DeleteListener {
             sb.append(deleteEvent.getContext().getContextId());
             sb.append(" AND pdr.object_id = pdr2.object_id");
             sb.append(" WHERE pdr2.id = ");
-            sb.append(deleteEvent.getSession().getUserObject().getId());
+            sb.append(deleteEvent.getId());
             sb.append(" group by pdr.object_id having count(pdr.object_id ) = 1");
             pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = CalendarSql.getCalendarSqlImplementation().getResultSet(pst);
@@ -230,7 +238,7 @@ public class CalendarAdministration implements DeleteListener {
             sb2.append(deleteEvent.getContext().getContextId());
             sb2.append(" AND pd.intfield01 = pdm.object_id");
             sb2.append(" WHERE pdm.member_uid = ");
-            sb2.append(deleteEvent.getSession().getUserObject().getId());
+            sb2.append(deleteEvent.getId());
             pst2 = readcon.prepareStatement(sb2.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs2 = CalendarSql.getCalendarSqlImplementation().getResultSet(pst2);
             PreparedStatement update = getUpdatePreparedStatement(writecon);
@@ -248,7 +256,8 @@ public class CalendarAdministration implements DeleteListener {
             }
             update.executeBatch();
             update.close();
-            StringBuilder replace = new StringBuilder(96);
+            
+            StringBuilder replace = new StringBuilder(128);
             replace.append("UPDATE ");
             replace.append(CalendarSql.DATES_TABLE_NAME);
             replace.append(" pd SET ");
@@ -264,35 +273,85 @@ public class CalendarAdministration implements DeleteListener {
             replace.append(" AND ");
             replace.append(CalendarCommonCollection.getFieldName(AppointmentObject.CREATED_BY));
             replace.append(" = ");
-            replace.append(deleteEvent.getSession().getUserObject().getId());
+            replace.append(deleteEvent.getId());
             pst3 = writecon.prepareStatement(replace.toString());
             pst3.addBatch();
             pst3.executeBatch();
             
+            StringBuilder replace_modified_by = new StringBuilder(128);
+            replace_modified_by.append("UPDATE ");
+            replace_modified_by.append(CalendarSql.DATES_TABLE_NAME);
+            replace_modified_by.append(" pd SET ");
+            replace_modified_by.append(CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY));
+            replace_modified_by.append(" = ");
+            replace_modified_by.append(deleteEvent.getContext().getMailadmin());
+            replace_modified_by.append(", ");
+            replace_modified_by.append(CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED));
+            replace_modified_by.append(" = ");
+            replace_modified_by.append(System.currentTimeMillis());
+            replace_modified_by.append(" WHERE cid = ");
+            replace_modified_by.append(deleteEvent.getContext().getContextId());
+            replace_modified_by.append(" AND ");
+            replace_modified_by.append(CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY));
+            replace_modified_by.append(" = ");
+            replace_modified_by.append(deleteEvent.getId());
+            pst4 = writecon.prepareStatement(replace_modified_by.toString());
+            pst4.addBatch();
+            pst4.executeBatch();
+            
+            StringBuilder delete_participant_members = new StringBuilder(128);
+            delete_participant_members.append("DELETE FROM prg_dates_members WHERE cid = ");
+            delete_participant_members.append(deleteEvent.getContext().getContextId());
+            delete_participant_members.append(" AND member_uid = ");
+            delete_participant_members.append(deleteEvent.getId());
+            pst5 = writecon.prepareStatement(delete_participant_members.toString());
+            pst5.addBatch();
+            pst5.executeBatch();            
+            
+            StringBuilder delete_participant_rights = new StringBuilder(128);
+            delete_participant_rights.append("delete from prg_date_rights WHERE cid = ");
+            delete_participant_rights.append(deleteEvent.getContext().getContextId());
+            delete_participant_rights.append(" AND id = ");
+            delete_participant_rights.append(deleteEvent.getId());
+            delete_participant_rights.append(" AND type = ");
+            delete_participant_rights.append(Participant.USER);
+            pst6 = writecon.prepareStatement(delete_participant_rights.toString());
+            pst6.addBatch();
+            pst6.executeBatch();            
+            
         } finally {
             if (rs != null) {
-                rs.close();
+                CalendarCommonCollection.closeResultSet(rs);
             }
             if (pst != null) {
-                pst.close();
+                CalendarCommonCollection.closePreparedStatement(pst);
             }
             if (del_dates != null) {
-                del_dates.close();
+                CalendarCommonCollection.closePreparedStatement(del_dates);
             }
             if (del_rights != null) {
-                del_rights.close();
+                CalendarCommonCollection.closePreparedStatement(del_rights);
             }
             if (del_members != null) {
-                del_members.close();
+                CalendarCommonCollection.closePreparedStatement(del_members);
             }
             if (rs2 != null) {
-                rs2.close();
+                CalendarCommonCollection.closeResultSet(rs2);
             }
             if (pst2 != null) {
-                pst2.close();
+                CalendarCommonCollection.closePreparedStatement(pst2);
             }
             if (pst3 != null) {
-                pst3.close();
+                CalendarCommonCollection.closePreparedStatement(pst3);
+            }
+            if (pst4 != null) {
+                CalendarCommonCollection.closePreparedStatement(pst4);
+        }
+            if (pst5 != null) {
+                CalendarCommonCollection.closePreparedStatement(pst5);
+    }
+            if (pst6 != null) {
+                CalendarCommonCollection.closePreparedStatement(pst6);
             }
         }
     }
@@ -314,11 +373,11 @@ public class CalendarAdministration implements DeleteListener {
     
     public final void initializeUpdateString() {
         u1 = new StringBuilder(128);
-        u1.append("UPDATE prg_dates SET ");
+        u1.append("UPDATE prg_dates pd SET ");
         u1.append(CalendarCommonCollection.getFieldName(AppointmentObject.MODIFIED_BY));
-        u1.append(" ?,");
+        u1.append(" = ? ,");
         u1.append(CalendarCommonCollection.getFieldName(AppointmentObject.LAST_MODIFIED));
-        u1.append("? ,");
+        u1.append(" = ? ");
         u1.append(" WHERE cid = ? AND ");
         u1.append(CalendarCommonCollection.getFieldName(AppointmentObject.OBJECT_ID));
         u1.append(" = ?");
@@ -340,7 +399,7 @@ public class CalendarAdministration implements DeleteListener {
             } catch (OXPermissionException ex) {
                 throw new DeleteFailedException(ex);
             } catch (OXObjectNotFoundException ex) {
-                throw new DeleteFailedException(ex);
+                LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!");
             } catch (OXException ex) {
                 throw new DeleteFailedException(ex);
             }
