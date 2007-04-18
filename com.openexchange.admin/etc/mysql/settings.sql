@@ -18,6 +18,8 @@ CREATE TABLE user_setting_mail (
     std_sent text,
     std_drafts text,
     std_spam text,
+    confirmed_spam text,
+    confirmed_ham text,
     upload_quota integer,
     upload_quota_per_file integer
 );
