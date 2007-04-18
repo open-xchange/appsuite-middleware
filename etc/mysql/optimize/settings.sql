@@ -29,6 +29,8 @@ ALTER TABLE user_setting_mail
     MODIFY std_sent VARCHAR(128),
     MODIFY std_drafts VARCHAR(128),
     MODIFY std_spam VARCHAR(128),
+    MODIFY confirmed_spam VARCHAR(128),
+    MODIFY confirmed_ham VARCHAR(128),
     MODIFY upload_quota INT4 UNSIGNED,
     MODIFY upload_quota_per_file INT4 UNSIGNED,
     ADD PRIMARY KEY (cid, user),
