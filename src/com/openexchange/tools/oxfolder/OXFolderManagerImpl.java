@@ -1167,10 +1167,12 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderLogicException(FolderCode.NO_FOLDER_ADMIN, excPrefix);
 		}
 	}
+	
+	private static final String STR_EMPTY = "";
 
 	public static final String getFolderName(final FolderObject fo) {
-		return new StringBuilder().append(fo.getFolderName()).append(" (").append(fo.getObjectID()).append(')')
-				.toString();
+		return new StringBuilder().append(fo.getFolderName() == null ? STR_EMPTY : fo.getFolderName()).append(" (")
+				.append(fo.getObjectID()).append(')').toString();
 	}
 
 	public static final String getFolderName(final int folderId, final Context ctx) {

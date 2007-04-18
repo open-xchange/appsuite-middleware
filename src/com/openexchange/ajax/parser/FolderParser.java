@@ -151,8 +151,7 @@ public class FolderParser {
 		if (jsonObj.has(FolderFields.STANDARD_FOLDER)) {
 			fo.setDefaultFolder(jsonObj.getBoolean(FolderFields.STANDARD_FOLDER));
 		}
-		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)
-				&& jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
+		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
 			final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
 			final int arrayLength = jsonArr.length();
 			OCLPermission[] perms = new OCLPermission[arrayLength];

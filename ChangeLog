@@ -8,6 +8,7 @@
 
  - Added folder's message count information (total, new, unread & deleted)
    to JSON message representation
+ - Fixed bug when trying to update a folder with empty permissions
 
 * 2007-04-17 - marcus.klein@open-xchange.com
 
