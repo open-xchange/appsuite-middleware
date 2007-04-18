@@ -86,31 +86,31 @@ public class UserSettingMail implements DeleteListener {
 	
 	private static final String STR_EMPTY = "";
 	
-	private static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
+	public static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
 	
-	private static final int INT_USE_COLOR_QUOTE = 2;
+	public static final int INT_USE_COLOR_QUOTE = 2;
 	
-	private static final int INT_SHOW_GRAPHIC_EMOTICONS = 4;
+	public static final int INT_SHOW_GRAPHIC_EMOTICONS = 4;
 	
-	private static final int INT_HARD_DELETE_MSGS = 8;
+	public static final int INT_HARD_DELETE_MSGS = 8;
 	
-	private static final int INT_FORWARD_AS_ATTACHMENT = 16;
+	public static final int INT_FORWARD_AS_ATTACHMENT = 16;
 	
-	private static final int INT_APPEND_VCARD = 32;
+	public static final int INT_APPEND_VCARD = 32;
 	
-	private static final int INT_NOTIFY_ON_READ_ACK = 64;
+	public static final int INT_NOTIFY_ON_READ_ACK = 64;
 	
-	private static final int INT_MSG_PREVIEW = 128;
+	public static final int INT_MSG_PREVIEW = 128;
 	
-	private static final int INT_NOTIFY_APPOINTMENTS = 256;
+	public static final int INT_NOTIFY_APPOINTMENTS = 256;
 	
-	private static final int INT_NOTIFY_TASKS = 512;
+	public static final int INT_NOTIFY_TASKS = 512;
 	
-	private static final int INT_IGNORE_ORIGINAL_TEXT_ON_REPLY = 1024;
+	public static final int INT_IGNORE_ORIGINAL_TEXT_ON_REPLY = 1024;
 	
-	private static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits: 4095
+	public static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits: 4095
 	
-	private static final int INT_SPAM_ENABLED = 4096;
+	public static final int INT_SPAM_ENABLED = 4096;
 	
 	
 	public static final int MSG_FORMAT_TEXT_ONLY = 1;
@@ -198,7 +198,7 @@ public class UserSettingMail implements DeleteListener {
 	
 	public UserSettingMail() {
 		super();
-		stdFolderFullnames = new String[4];
+		stdFolderFullnames = new String[6];
 		stdFolderCreationLock = new ReentrantLock();
 		accessLock = new ReentrantLock();
 	}
