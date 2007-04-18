@@ -53,14 +53,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Date;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactConfig;
@@ -69,6 +66,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
@@ -203,7 +201,6 @@ public class AbstractCSVContactTest {
 
 	public static int createTestFolder(int type, SessionObject sessObj, String folderTitle) throws DBPoolingException, SQLException  {
 		final User user = sessObj.getUserObject();
-		final int[] groups = user.getGroups();
 		FolderObject fo = new FolderObject();
 		fo.setFolderName(folderTitle);
 		fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -263,9 +260,10 @@ public class AbstractCSVContactTest {
 	public static void initialize() throws SQLException, AbstractOXException {
 		Init.initDB();
 		ContactConfig.init();
+		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-		sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
+	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		userId = sessObj.getUserObject().getId();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "csvContactTestFolder");
 	}

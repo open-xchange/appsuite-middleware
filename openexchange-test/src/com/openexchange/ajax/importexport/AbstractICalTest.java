@@ -1,6 +1,7 @@
 package com.openexchange.ajax.importexport;
 
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -10,12 +11,14 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
@@ -139,25 +142,30 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		final URLParameter parameter = new URLParameter(true);
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, Format.ICAL.getConstantName());
 		if (appointmentFolderId != -1) {
 			parameter.setParameter("folder", appointmentFolderId);
-			parameter.setParameter("type", Types.APPOINTMENT);
 		}
 		
 		if (taskFolderId != -1) {
 			parameter.setParameter("folder", taskFolderId);
-			parameter.setParameter("type", Types.TASK);
 		}
 		
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-		WebRequest req = new PutMethodWebRequest(host + IMPORTEXPORT_URL
-				+ parameter.getURLParameters(), byteArrayInputStream, "text/calendar");
-		WebResponse resp = webCon.getResponse(req);
+		
+		WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
+		
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "ical-test.ics", byteArrayInputStream, Format.ICAL.getMimeType());
+		
+		WebResponse resp = webCon.getResource(req);
 		
 		assertEquals(200, resp.getResponseCode());
 		
-		JSONArray jsonArray = new JSONArray(resp.getText());
+		JSONObject response = extractFromCallback( resp.getText() );
+		
+		JSONArray jsonArray = response.getJSONArray("data");
+
 		
 		assertNotNull("json array in response is null", jsonArray);
 		
@@ -182,11 +190,10 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		final URLParameter parameter = new URLParameter(true);
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter("content-type", contentType);
 		parameter.setParameter("folder", appointmentFolderId);
-		parameter.setParameter("type", Types.APPOINTMENT);
+		parameter.setParameter("action", Format.ICAL.getConstantName());
 		
-		WebRequest req = new GetMethodWebRequest(host + IMPORTEXPORT_URL + parameter.getURLParameters());
+		WebRequest req = new GetMethodWebRequest(host + "/ajax/export" + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());

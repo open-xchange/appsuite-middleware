@@ -162,7 +162,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	/*
 	 * Currently, the API allows for duplicate entries...
 	 */
-	@Test public void testImportOfDuplicates() throws NumberFormatException, Exception{
+	@Test public void importOfDuplicates() throws NumberFormatException, Exception{
 		List<ImportResult> results = importStuff(IMPORT_DUPLICATE); 
 		assertEquals("Three results?" , results.size(), 3);
 		for(ImportResult res : results){
