@@ -1062,7 +1062,7 @@ public class CalendarCommonCollection {
         PreparedStatement prep = null;
         try {
             readcon = DBPool.pickup(c);
-            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT fid prg_dates WHERE intfield01 = "+ oid + " AND cid = "+ c.getContextId());
+            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT fid FROM prg_dates WHERE intfield01 = "+ oid + " AND cid = "+ c.getContextId());
             rs = calendarsqlimp.getResultSet(prep);
             if (rs.next()) {
                 int tmp = rs.getInt(1);
@@ -1072,7 +1072,7 @@ public class CalendarCommonCollection {
             }
             closePreparedStatement(prep);
             closeResultSet(rs);
-            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT pfid prg_dates_members WHERE object_id = "+ oid + " AND cid = "+ c.getContextId() + " AND member_uid = "+uid);
+            prep = calendarsqlimp.getPreparedStatement(readcon, "SELECT pfid FROM prg_dates_members WHERE object_id = "+ oid + " AND cid = "+ c.getContextId() + " AND member_uid = "+uid);
             rs = calendarsqlimp.getResultSet(prep);
             if (rs.next()) {            
                 ret = rs.getInt(1);
