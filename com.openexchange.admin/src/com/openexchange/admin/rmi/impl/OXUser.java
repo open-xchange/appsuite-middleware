@@ -534,6 +534,13 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         
         for (final User usr : users) {
+            
+            if (usr.getId()!=null && !tools.existsUser(ctx, usr.getId())) {
+                throw new NoSuchUserException("No such user "+usr);
+            }
+            if (usr.getUsername()!=null && !tools.existsUser(ctx, usr.getUsername())) {
+                throw new NoSuchUserException("No such user "+usr);
+            }
             final String username = usr.getUsername();
             if(username==null && usr.getId()==null){
                 throw new InvalidDataException("Username and userid missing!Cannot resolve user data");            
