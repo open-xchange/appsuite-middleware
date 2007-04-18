@@ -63,6 +63,7 @@ import java.util.TimeZone;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -652,15 +653,16 @@ public class JSONMessageHandler implements MessageHandler {
 		 * message object as seen
 		 */
 		msgObj.setSeen(true);
-		if (createVersionForDisplay) {
+		if (createVersionForDisplay && msg.getFolder() != null) {
 			/*
 			 * Try to fill folder information into message object
 			 */
+			final Folder fld = msg.getFolder();
 			try {
-				msgObj.setTotal(msg.getFolder().getMessageCount());
-				msgObj.setNew(msg.getFolder().getNewMessageCount());
-				msgObj.setUnread(msg.getFolder().getUnreadMessageCount());
-				msgObj.setDeleted(msg.getFolder().getDeletedMessageCount());
+				msgObj.setTotal(fld.getMessageCount());
+				msgObj.setNew(fld.getNewMessageCount());
+				msgObj.setUnread(fld.getUnreadMessageCount());
+				msgObj.setDeleted(fld.getDeletedMessageCount());
 			} catch (MessagingException e) {
 				LOG.error(e.getMessage(), e);
 			}

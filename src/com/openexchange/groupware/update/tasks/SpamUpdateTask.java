@@ -56,102 +56,98 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.openexchange.database.Database;
-import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.SchemaImpl;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
- * Creates the table version and inserts a single line.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * SpamUpdateTask - Inserts columns <tt>confirmed_spam</tt> and
+ * <tt>confirmed_ham</tt> to table <tt>user_setting_mail</tt>
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-@OXExceptionSource(
-	    classId = Classes.UPDATE_TASK,
-	    component = Component.UPDATE
-	)
-public final class CreateTableVersion implements UpdateTask {
-	
+@OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
+public class SpamUpdateTask implements UpdateTask {
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CreateTableVersion.class);
+			.getLog(SpamUpdateTask.class);
+
+	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(SpamUpdateTask.class);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
+	 */
+	public int addedWithVersion() {
+		return 1;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
+	 */
+	public int getPriority() {
+		/*
+		 * Modification on database: highest priority.
+		 */
+		return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
+	}
+
+	private static final String SQL_MODIFY = "ALTER TABLE user_setting_mail "
+			+ "ADD COLUMN confirmed_spam VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL, "
+			+ "ADD COLUMN confirmed_ham VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL";
 	
-	/**
-     * For creating exceptions.
-     */
-    private static final SchemaExceptionFactory EXCEPTION =
-        new SchemaExceptionFactory(CreateTableVersion.class);
+	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET confirmed_spam = ?, confirmed_ham = ?";
 	
-//	private static final String CREATE = "CREATE TABLE foobar (" +
-//			"version INT4 UNSIGNED NOT NULL," +
-//			"boolfield01 BOOLEAN NOT NULL," +
-//			"boolfield02 BOOLEAN NOT NULL," +
-//			"boolfield03 BOOLEAN NOT NULL," +
-//			"server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
-//			" ENGINE = InnoDB";
-//	
-//	private static final String INSERT = "INSERT INTO foobar VALUES (?, ?, ?, ?, ?)";
+	private static final String STR_INFO = "Performing update task 'SpamUpdateTask'";
 
-    /**
-     * Default constructor.
-     */
-    public CreateTableVersion() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int addedWithVersion() {
-        return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @OXThrowsMultiple(
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
+	 *      int)
+	 */
+	@OXThrowsMultiple(
 			category = { Category.PROGRAMMING_ERROR },
 			desc = { "" },
 			exceptionId = { 1 },
-			msg = { "A SQL error occured while performing task CreateTableVersion: %1$s." }
-	)
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-    	LOG.info("UpdateTask 'CreateTableVersion' performed!");
-//    	Connection writeCon = null;
-//    	PreparedStatement stmt = null;
-//        try {
-//            writeCon = Database.get(contextId, true);
-//            try {
-//				stmt = writeCon.prepareStatement(CREATE);
-//				stmt.executeUpdate();
-//				stmt.close();
-//				stmt = writeCon.prepareStatement(INSERT);
-//				stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
-//				stmt.setBoolean(2, true);
-//				stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
-//				stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
-//				stmt.setString(5, Server.getServerName());
-//				stmt.executeUpdate();
-//			} catch (SQLException e) {
-//				throw EXCEPTION.create(1, e, e.getMessage());
-//			}
-//        } finally {
-//        	closeSQLStuff(null, stmt);
-//        	if (writeCon != null) {
-//        		Database.back(contextId, true, writeCon);
-//        	}
-//        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-	public int getPriority() {
-		return UpdateTaskPriority.HIGH.priority;
+			msg = { "A SQL error occured while performing task SpamUpdateTask: %1$s." }
+		)
+	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+		if (LOG.isInfoEnabled()) {
+			LOG.info(STR_INFO);
+		}
+		Connection writeCon = null;
+		PreparedStatement stmt = null;
+		try {
+			writeCon = Database.get(contextId, true);
+			try {
+				stmt = writeCon.prepareStatement(SQL_MODIFY);
+				stmt.executeUpdate();
+				stmt.close();
+				stmt = writeCon.prepareStatement(SQL_UPDATE);
+				stmt.setString(1, UserSettingMail.STD_CONFIRMED_SPAM);
+				stmt.setString(2, UserSettingMail.STD_CONFIRMED_HAM);
+				stmt.executeUpdate();
+			} catch (SQLException e) {
+				throw EXCEPTION.create(1, e, e.getMessage());
+			}
+		} finally {
+			closeSQLStuff(null, stmt);
+			if (writeCon != null) {
+				Database.back(contextId, true, writeCon);
+			}
+		}
 	}
+
 }

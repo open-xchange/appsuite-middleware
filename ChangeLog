@@ -9,6 +9,8 @@
  - Added folder's message count information (total, new, unread & deleted)
    to JSON message representation
  - Fixed bug when trying to update a folder with empty permissions
+ - Added update tasks to extend table 'user_setting_mail' by necessary
+   columns for spam handling
 
 * 2007-04-17 - marcus.klein@open-xchange.com
 

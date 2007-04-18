@@ -110,6 +110,8 @@ public class UserSettingMail implements DeleteListener {
 	
 	private static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits: 4095
 	
+	private static final int INT_SPAM_ENABLED = 4096;
+	
 	
 	public static final int MSG_FORMAT_TEXT_ONLY = 1;
 	
@@ -124,6 +126,11 @@ public class UserSettingMail implements DeleteListener {
 	public static final String STD_SENT = "Sent";
 	
 	public static final String STD_SPAM = "Spam";
+	
+	public static final String STD_CONFIRMED_SPAM = "Confirmed Spam";
+	
+	public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
+	
 	
 	private boolean modifiedDuringSession;
 	
@@ -153,6 +160,8 @@ public class UserSettingMail implements DeleteListener {
 	
 	private boolean noCopyIntoStandardSentFolder;
 	
+	private boolean spamEnabled; 
+	
 	private Signature[] signatures;
 	
 	private String sendAddr;
@@ -173,6 +182,10 @@ public class UserSettingMail implements DeleteListener {
 	
 	private String stdSpamName;
 	
+	private String confirmedSpam;
+	
+	private String confirmedHam;
+	
 	private long uploadQuota;
 	
 	private long uploadQuotaPerFile;
@@ -191,11 +204,11 @@ public class UserSettingMail implements DeleteListener {
 	}
 	
 	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " +
-			"upload_quota, upload_quota_per_file FROM user_setting_mail WHERE cid = ? AND user = ?";
+			"upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham FROM user_setting_mail WHERE cid = ? AND user = ?";
 	
-	private static final String SQL_INSERT = "INSERT INTO user_setting_mail (cid, user, bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, upload_quota, upload_quota_per_file) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String SQL_INSERT = "INSERT INTO user_setting_mail (cid, user, bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
-	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET bits = ?, send_addr = ?, reply_to_addr = ?, msg_format = ?, display_msg_headers = ?, auto_linebreak = ?, std_trash = ?, std_sent = ?, std_drafts = ?, std_spam = ?, upload_quota = ?, upload_quota_per_file = ? WHERE cid = ? AND user = ?";
+	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET bits = ?, send_addr = ?, reply_to_addr = ?, msg_format = ?, display_msg_headers = ?, auto_linebreak = ?, std_trash = ?, std_sent = ?, std_drafts = ?, std_spam = ?, upload_quota = ?, upload_quota_per_file = ?, confirmed_spam = ?, confirmed_ham = ? WHERE cid = ? AND user = ?";
 	
 	private static final String SQL_DELETE = "DELETE FROM user_setting_mail WHERE cid = ? AND user = ?";
 	
@@ -253,12 +266,14 @@ public class UserSettingMail implements DeleteListener {
 					}
 					s = null;
 					stmt.setInt(8, autoLinebreak);
-					stmt.setString(9, stdTrashName);
-					stmt.setString(10, stdSentName);
-					stmt.setString(11, stdDraftsName);
-					stmt.setString(12, stdSpamName);
+					stmt.setString(9, stdTrashName == null ? STD_TRASH : stdTrashName);
+					stmt.setString(10, stdSentName == null ? STD_SENT : stdSentName);
+					stmt.setString(11, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
+					stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
 					stmt.setLong(13, uploadQuota);
 					stmt.setLong(14, uploadQuotaPerFile);
+					stmt.setString(15, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
+					stmt.setString(16, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
 				} else {
 					stmt = writeCon.prepareStatement(SQL_UPDATE);
 					stmt.setInt(1, getBitsValue());
@@ -274,14 +289,16 @@ public class UserSettingMail implements DeleteListener {
 					}
 					s = null;
 					stmt.setInt(6, autoLinebreak);
-					stmt.setString(7, stdTrashName);
-					stmt.setString(8, stdSentName);
-					stmt.setString(9, stdDraftsName);
-					stmt.setString(10, stdSpamName);
+					stmt.setString(7, stdTrashName == null ? STD_TRASH : stdTrashName);
+					stmt.setString(8, stdSentName == null ? STD_SENT : stdSentName);
+					stmt.setString(9, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
+					stmt.setString(10, stdSpamName == null ? STD_SPAM : stdSpamName);
 					stmt.setLong(11, uploadQuota);
 					stmt.setLong(12, uploadQuotaPerFile);
-					stmt.setInt(13, ctx.getContextId());
-					stmt.setInt(14, user);
+					stmt.setString(13, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
+					stmt.setString(14, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
+					stmt.setInt(15, ctx.getContextId());
+					stmt.setInt(16, user);
 				}
 				stmt.executeUpdate();
 				saveSignatures(user, ctx, writeCon);
@@ -390,6 +407,8 @@ public class UserSettingMail implements DeleteListener {
 						stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
 						stmt.setLong(13, uploadQuota);
 						stmt.setLong(14, uploadQuotaPerFile);
+						stmt.setString(15, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
+						stmt.setString(16, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
 						stmt.executeUpdate();
 						return;
 					} finally {
@@ -410,6 +429,8 @@ public class UserSettingMail implements DeleteListener {
 				stdSpamName = rs.getString(10);
 				uploadQuota = rs.getLong(11);
 				uploadQuotaPerFile = rs.getLong(12);
+				confirmedSpam = rs.getString(13);
+				confirmedHam = rs.getString(14);
 				loadSignatures(user, ctx, readCon);
 				modifiedDuringSession = false;
 			} finally {
@@ -527,6 +548,7 @@ public class UserSettingMail implements DeleteListener {
 		notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) == INT_NOTIFY_TASKS);
 		ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
 		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
+		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
 	}
 	
 	private final int getBitsValue() {
@@ -543,6 +565,7 @@ public class UserSettingMail implements DeleteListener {
 		retval = notifyTasks ? (retval | INT_NOTIFY_TASKS) : retval;
 		retval = ignoreOriginalMailTextOnReply ? (retval | INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) : retval;
 		retval = noCopyIntoStandardSentFolder ? (retval | INT_NO_COPY_INTO_SENT_FOLDER) : retval;
+		retval = spamEnabled ? (retval | INT_SPAM_ENABLED) : retval;
 		return retval;
 	}
 	
