@@ -69,6 +69,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
+import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
@@ -177,28 +178,32 @@ public class CSVContactImporter implements Importer {
 	 * @param conSet The ContactSetter used for translating the given data 
 	 * @return a report containing either the object ID of the entry created OR an error message
 	 */
-	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSetter conSet, int lineNumber){
+	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSwitcher conSet, int lineNumber){
 		final ImportResult result = new ImportResult();
 		final ContactObject contactObj = new ContactObject();
 		result.setFolder( folder );
 		try{
 			List<String> wrongFields = new LinkedList<String>();
-			boolean wrongField = false;
+			boolean atLeastOneFieldWithWrongName = false;
+			boolean atLeastOneFieldInserted = false;
 			for(int i = 0; i < fields.size(); i++){
-				final ContactField currField = ContactField.getByDisplayName(fields.get(i));
+				final ContactField currField = getRelevantField(fields.get(i));
 				if(currField == null){
-					wrongField = true;
+					atLeastOneFieldWithWrongName = true;
 					wrongFields.add(fields.get(i));
 				} else {
 					currField.doSwitch(conSet, contactObj, entry.get(i));
+					atLeastOneFieldInserted = true;
 				}
 			}
-			if(wrongField){
+			if(atLeastOneFieldWithWrongName){
 				result.setException(EXCEPTIONS.create(3, wrongFields.toString()));
 				addErrorInformation(result, lineNumber , fields);
 			}
 			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
-			contactsql.insertContactObject(contactObj);
+			if(atLeastOneFieldInserted){
+				contactsql.insertContactObject(contactObj);
+			}
 			result.setDate( contactObj.getLastModified() );
 			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
 		} catch (ContactException e) {
@@ -222,5 +227,9 @@ public class CSVContactImporter implements Importer {
 				bob.append(" , ");
 			}
 		}
+	}
+	
+	protected ContactField getRelevantField(String name){
+		return ContactField.getByDisplayName(name);
 	}
 }

@@ -54,12 +54,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactSetter;
+import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 
@@ -70,33 +67,18 @@ import com.openexchange.groupware.importexport.Importer;
  */
 public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
 
-	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSetter conSet){
+	@Override
+	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSwitcher conSet, int lineNumber){
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		switcher.setDateFormat(sdf);
 		switcher.setDelegate(conSet);
-		
-		final ImportResult result = new ImportResult();
-		final ContactObject contactObj = new ContactObject();
-		result.setFolder( folder );
-		try{
-			for(int i = 0; i < fields.size(); i ++){
-				final ContactField currField = ContactField.getByOutlookName(fields.get(i));
-				if(currField != null){
-					currField.doSwitch(switcher, contactObj, entry.get(i));
-				}
-			}
-			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
-			contactsql.insertContactObject(contactObj);
-			result.setDate( contactObj.getLastModified() );
-			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
-		} catch (ContactException e) {
-			result.setException(e);
-		} catch (OXException e) {
-			result.setException(e);
-		}
-		return result;
+		return super.writeEntry(fields, entry, folder, contactsql, switcher, lineNumber);
 	}
 
+	@Override
+	protected ContactField getRelevantField(String name) {
+		return ContactField.getByOutlookName(name);
+	}	
 }

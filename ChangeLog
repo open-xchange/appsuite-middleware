@@ -1,3 +1,9 @@
+* 2007-04-18 - tobias.prinz@open-xchange.com
+
+  - fixed import tests for iCal Importer, couldn't find bug in 
+    export though. Reassigned to developer.
+  - refactored CSV- and Outlook-CSV importers to make re-use easier. 
+
 * 2007-04-18 - thorben.betten@open-xchange.com
 
  - Added folder's message count information (total, new, unread & deleted)

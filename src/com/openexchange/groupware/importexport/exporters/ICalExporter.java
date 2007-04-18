@@ -182,7 +182,7 @@ public class ICalExporter implements Exporter {
 			return false;
 		}
 		//check format of folder
-		if (fo.getModule() != FolderObject.CALENDAR || fo.getModule() != FolderObject.TASK) {
+		if (fo.getModule() != FolderObject.CALENDAR && fo.getModule() != FolderObject.TASK) {
 			return false;
 		}
 		//check read access to folder
