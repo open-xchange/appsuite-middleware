@@ -54,6 +54,7 @@ import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
 
@@ -475,6 +476,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 folder_update.executeUpdate();
                 folder_update.close();
             }
+            final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
+            if (null != mailfolderconfirmedspam) {
+                folder_update = write_ox_con
+                        .prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
+                folder_update.setString(1, mailfolderconfirmedspam);
+                folder_update.setInt(2, context_id);
+                folder_update.setInt(3, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            }
+            final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
+            if (null != mailfolderconfirmedham) {
+                folder_update = write_ox_con
+                        .prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
+                folder_update.setString(1, mailfolderconfirmedspam);
+                folder_update.setInt(2, context_id);
+                folder_update.setInt(3, user_id);
+                folder_update.executeUpdate();
+                folder_update.close();
+            }
 
             if (folder_update != null) {
                 folder_update.close();
@@ -859,6 +880,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     std_mail_folder_spam = usrdata.getMail_folder_spam_name();
                 }
 
+                String std_mail_folder_confirmed_spam = prop.getUserProp(
+                        "CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
+                if (null != usrdata.getMail_folder_confirmed_spam_name()) {
+                    std_mail_folder_confirmed_spam = usrdata.getMail_folder_confirmed_spam_name();
+                }
+
+                String std_mail_folder_confirmed_ham = prop.getUserProp(
+                        "CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
+                if (null != usrdata.getMail_folder_confirmed_ham_name()) {
+                    std_mail_folder_confirmed_ham = usrdata.getMail_folder_confirmed_ham_name();
+                }
+
                 // insert all multi valued attribs to the user_attribute table,
                 // here we fill the alias attribute in it
                 if (usrdata.getAliases() != null
@@ -937,7 +970,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
 
                 // add users standard mail settings
                 stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits) VALUES (?,?,?,?,?,?,?,?)");
+                        .prepareStatement("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham) VALUES (?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, std_mail_folder_trash);
@@ -947,7 +980,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setString(7, usrdata.getPrimaryEmail());
                 // set the flag for "receiving notifications" in the ox, was bug
                 // #5336
-                stmt.setInt(8, 768);
+                // TODO: choeger: Extend API to allow setting of these flags
+                stmt.setInt(8, UserSettingMail.INT_NOTIFY_TASKS | UserSettingMail.INT_NOTIFY_APPOINTMENTS |
+                        UserSettingMail.INT_SPAM_ENABLED);
+                stmt.setString(9, std_mail_folder_confirmed_spam);
+                stmt.setString(10, std_mail_folder_confirmed_ham);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -1180,6 +1217,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         notallowed.add("setMailFolderSent");
         notallowed.add("setMailFolderSpam");
         notallowed.add("setMailFolderTrash");
+        notallowed.add("setMailFolderConfirmedSpam");
+        notallowed.add("setMailFolderConfirmedHam");
 
         final StringBuilder query = new StringBuilder("SELECT ");
 
@@ -1305,17 +1344,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.close();
 
                 stmt = read_ox_con
-                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam FROM user_setting_mail WHERE cid = ? and user = ?");
+                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham FROM user_setting_mail WHERE cid = ? and user = ?");
                 stmt.setInt(1, context_id);
                 stmt.setInt(2, user_id);
                 rs3 = stmt.executeQuery();
                 if (rs3.next()) {
-                    newuser.setMail_folder_drafts_name(rs3
-                            .getString("std_drafts"));
+                    newuser.setMail_folder_drafts_name(rs3.getString("std_drafts"));
                     newuser.setMail_folder_sent_name(rs3.getString("std_sent"));
                     newuser.setMail_folder_spam_name(rs3.getString("std_spam"));
-                    newuser.setMail_folder_trash_name(rs3
-                            .getString("std_trash"));
+                    newuser.setMail_folder_trash_name(rs3.getString("std_trash"));
+                    newuser.setMail_folder_confirmed_ham_name(rs3.getString("confirmed_ham"));
+                    newuser.setMail_folder_confirmed_spam_name(rs3.getString("confirmed_spam"));
                 }
                 rs3.close();
                 stmt.close();

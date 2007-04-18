@@ -212,6 +212,12 @@ public class User implements Serializable, Cloneable {
     private String mail_folder_trash_name;
     private boolean mail_folder_trash_nameset = false;
 
+    private String mail_folder_confirmed_spam_name;
+    private boolean mail_folder_confirmed_spam_nameset = false;
+
+    private String mail_folder_confirmed_ham_name;
+    private boolean mail_folder_confirmed_ham_nameset = false;
+
     private String manager_name;
     private boolean manager_nameset = false;
 
@@ -2451,6 +2457,42 @@ public class User implements Serializable, Cloneable {
     public final void setExtensionsok(boolean extensionsok) {
         this.extensionsok = extensionsok;
     }
+
+    /**
+     * @return the mail_folder_confirmed_ham_name
+     */
+    public final String getMail_folder_confirmed_ham_name() {
+        return mail_folder_confirmed_ham_name;
+    }
+
+    /**
+     * @param mail_folder_confirmed_ham_name the mail_folder_confirmed_ham_name to set
+     */
+    public final void setMail_folder_confirmed_ham_name(
+            String mail_folder_confirmed_ham_name) {
+        this.mail_folder_confirmed_ham_name = mail_folder_confirmed_ham_name;
+    }
+
+    /**
+     * @return the mail_folder_confirmed_spam_name
+     */
+    public final String getMail_folder_confirmed_spam_name() {
+        return mail_folder_confirmed_spam_name;
+    }
+
+    /**
+     * @param mail_folder_confirmed_spam_name the mail_folder_confirmed_spam_name to set
+     */
+    public final void setMail_folder_confirmed_spam_name(
+            String mail_folder_confirmed_spam_name) {
+        this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
+    }
     
-    
+    public boolean isMail_folder_confirmed_spamset() {
+        return mail_folder_confirmed_spam_nameset;
+    }
+
+    public boolean isMail_folder_confirmed_hamset() {
+        return mail_folder_confirmed_ham_nameset;
+    }
 }
