@@ -52,5 +52,6 @@ Export-Package: com.openexchange.admin.console,
  javax.mail,
  javax.activation,
  com.sun.mail.imap,
- com.sun.mail.imap.protocol
+ com.sun.mail.imap.protocol,
+ com.openexchange.groupware.update
 Eclipse-BuddyPolicy: registered
