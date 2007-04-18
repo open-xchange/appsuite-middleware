@@ -1,3 +1,8 @@
+* 2007-04-18 - thorben.betten@open-xchange.com
+
+ - Added folder's message count information (total, new, unread & deleted)
+   to JSON message representation
+
 * 2007-04-17 - marcus.klein@open-xchange.com
 
   - Bugfix #6724: Enabled POST method for login.

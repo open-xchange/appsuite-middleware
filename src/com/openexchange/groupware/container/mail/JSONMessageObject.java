@@ -74,6 +74,7 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
@@ -150,6 +151,14 @@ public class JSONMessageObject {
 	public static final String JSON_INFOSTORE_IDS = "infostore_ids";
 
 	public static final String JSON_VCARD = "vcard";
+	
+	public static final String JSON_TOTAL = "total";
+
+	public static final String JSON_NEW = "new";
+
+	public static final String JSON_UNREAD = "unread";
+
+	public static final String JSON_DELETED = "deleted";
 
 	/*
 	 * Constant integers for mail fields
@@ -192,6 +201,14 @@ public class JSONMessageObject {
 	public static final int FIELD_FOLDER = 650;
 
 	public static final int FIELD_FLAG_SEEN = 651;
+	
+	public static final int FIELD_TOTAL = FolderObject.TOTAL;
+
+	public static final int FIELD_NEW = FolderObject.NEW;
+
+	public static final int FIELD_UNREAD = FolderObject.UNREAD;
+
+	public static final int FIELD_DELETED = FolderObject.DELETED;
 
 	/*
 	 * Constant integers for bit-encoded flag set.
@@ -339,6 +356,14 @@ public class JSONMessageObject {
 	private boolean appendVCard;
 
 	private Map<String, String> headers;
+	
+	private int total;
+	
+	private int newi;
+	
+	private int unread;
+	
+	private int deleted;
 
 	/**
 	 * Something like { "x-mailer": "foo", "x-spam": "bar" }
@@ -663,6 +688,38 @@ public class JSONMessageObject {
 		this.msgref = msgref;
 	}
 
+	public int getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(final int deleted) {
+		this.deleted = deleted;
+	}
+
+	public int getNew() {
+		return newi;
+	}
+
+	public void setNew(final int newi) {
+		this.newi = newi;
+	}
+
+	public int getTotal() {
+		return total;
+	}
+
+	public void setTotal(final int total) {
+		this.total = total;
+	}
+
+	public int getUnread() {
+		return unread;
+	}
+
+	public void setUnread(final int unread) {
+		this.unread = unread;
+	}
+
 	public boolean isAppendVCard() {
 		return appendVCard;
 	}
@@ -689,10 +746,10 @@ public class JSONMessageObject {
 		retval.put(JSON_RECIPIENT_BCC, getAddressesAsArray(this.bcc));
 		retval.put(JSON_SUBJECT, subject);
 		retval.put(JSON_SIZE, size);
-		retval.put(JSON_SENT_DATE, (sentDate == null ? JSONObject.NULL : addUserTimezone(sentDate.getTime(),
-				userTimeZone)));
-		retval.put(JSON_RECEIVED_DATE, (receivedDate == null ? JSONObject.NULL : addUserTimezone(
-				receivedDate.getTime(), userTimeZone)));
+		retval.put(JSON_SENT_DATE, (sentDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(sentDate.getTime(),
+				userTimeZone))));
+		retval.put(JSON_RECEIVED_DATE, (receivedDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(
+				receivedDate.getTime(), userTimeZone))));
 		retval.put(JSON_FLAGS, flags);
 		retval.put(JSON_THREAD_LEVEL, threadLevel);
 		retval.put(JSON_USER, getUserFieldsAsObject(userFlags));
@@ -709,6 +766,10 @@ public class JSONMessageObject {
 		} catch (OXException e) {
 			retval.put(JSON_COLOR_LABEL, COLOR_LABEL_NONE);
 		}
+		retval.put(JSON_TOTAL, total);
+		retval.put(JSON_NEW, newi);
+		retval.put(JSON_UNREAD, unread);
+		retval.put(JSON_DELETED, deleted);
 		retval.putOpt(JSON_ATTACHMENTS, getAttachmentsAsArray(msgAttachments));
 		retval.putOpt(JSON_NESTED_MESSAGES, getNestedMsgsAsArray(nestedMsgs));
 		return retval;
@@ -729,9 +790,9 @@ public class JSONMessageObject {
 		jw.key(JSON_SIZE);
 		jw.value(size);
 		jw.key(JSON_SENT_DATE);
-		jw.value(sentDate == null ? JSONObject.NULL : addUserTimezone(sentDate.getTime(), userTimeZone));
+		jw.value(sentDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(sentDate.getTime(), userTimeZone)));
 		jw.key(JSON_RECEIVED_DATE);
-		jw.value(receivedDate == null ? JSONObject.NULL : addUserTimezone(receivedDate.getTime(), userTimeZone));
+		jw.value(receivedDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(receivedDate.getTime(), userTimeZone)));
 		jw.key(JSON_FLAGS);
 		jw.value(flags);
 		jw.key(JSON_THREAD_LEVEL);
@@ -754,6 +815,14 @@ public class JSONMessageObject {
 		} catch (OXException e) {
 			jw.value(COLOR_LABEL_NONE);
 		}
+		jw.key(JSON_TOTAL);
+		jw.value(total);
+		jw.key(JSON_NEW);
+		jw.value(newi);
+		jw.key(JSON_UNREAD);
+		jw.value(unread);
+		jw.key(JSON_DELETED);
+		jw.value(deleted);
 		if (msgref != null) {
 			jw.key(JSON_MSGREF);
 			jw.value(msgref);

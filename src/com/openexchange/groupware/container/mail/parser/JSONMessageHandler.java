@@ -652,6 +652,18 @@ public class JSONMessageHandler implements MessageHandler {
 		 * message object as seen
 		 */
 		msgObj.setSeen(true);
+		/*
+		 * Try to fill folder information into message object
+		 */
+		try {
+			msgObj.setTotal(msg.getFolder().getMessageCount());
+			msgObj.setNew(msg.getFolder().getNewMessageCount());
+			msgObj.setUnread(msg.getFolder().getUnreadMessageCount());
+			msgObj.setDeleted(msg.getFolder().getDeletedMessageCount());
+		} catch (MessagingException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		
 	}
 
 }

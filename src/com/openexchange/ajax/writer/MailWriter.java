@@ -404,7 +404,50 @@ public class MailWriter extends DataWriter {
 					}
 				};
 				break Fields;
-
+			case JSONMessageObject.FIELD_TOTAL:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_TOTAL);
+						}
+						jsonwriter.value(msg.getFolder().getMessageCount());
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_NEW:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_NEW);
+						}
+						jsonwriter.value(msg.getFolder().getNewMessageCount());
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_UNREAD:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_UNREAD);
+						}
+						jsonwriter.value(msg.getFolder().getUnreadMessageCount());
+					}
+				};
+				break Fields;
+			case JSONMessageObject.FIELD_DELETED:
+				retval[i] = new MailFieldWriter() {
+					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
+							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (withKey) {
+							jsonwriter.key(JSONMessageObject.JSON_DELETED);
+						}
+						jsonwriter.value(msg.getFolder().getDeletedMessageCount());
+					}
+				};
+				break Fields;
 			default:
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
@@ -557,6 +600,30 @@ public class MailWriter extends DataWriter {
 					}
 				}
 				jsonwriter.value(JSONMessageObject.COLOR_LABEL_NONE);
+				break Fields;
+			case JSONMessageObject.FIELD_TOTAL:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_TOTAL);
+				}
+				jsonwriter.value(msg.getFolder().getMessageCount());
+				break Fields;
+			case JSONMessageObject.FIELD_NEW:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_NEW);
+				}
+				jsonwriter.value(msg.getFolder().getNewMessageCount());
+				break Fields;
+			case JSONMessageObject.FIELD_UNREAD:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_UNREAD);
+				}
+				jsonwriter.value(msg.getFolder().getUnreadMessageCount());
+				break Fields;
+			case JSONMessageObject.FIELD_DELETED:
+				if (withKey) {
+					jsonwriter.key(JSONMessageObject.JSON_DELETED);
+				}
+				jsonwriter.value(msg.getFolder().getDeletedMessageCount());
 				break Fields;
 			default:
 				if (withKey) {
