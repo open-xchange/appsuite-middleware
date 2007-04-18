@@ -780,6 +780,22 @@ public class UserSettingMail implements DeleteListener {
 		modifiedDuringSession = true;
 	}
 
+	public final String getConfirmedHam() {
+		return confirmedHam;
+	}
+
+	public final void setConfirmedHam(final String confirmedHam) {
+		this.confirmedHam = confirmedHam;
+	}
+
+	public final String getConfirmedSpam() {
+		return confirmedSpam;
+	}
+
+	public final void setConfirmedSpam(final String confirmedSpam) {
+		this.confirmedSpam = confirmedSpam;
+	}
+
 	public final boolean isNotifyAppointments() {
 		return notifyAppointments;
 	}
@@ -814,6 +830,14 @@ public class UserSettingMail implements DeleteListener {
 	public final void setNoCopyIntoStandardSentFolder(final boolean noCopyIntoStandardSentFolder) {
 		this.noCopyIntoStandardSentFolder = noCopyIntoStandardSentFolder;
 		modifiedDuringSession = true;
+	}
+
+	public final boolean isSpamEnabled() {
+		return spamEnabled;
+	}
+
+	public final void setSpamEnabled(final boolean spamEnabled) {
+		this.spamEnabled = spamEnabled;
 	}
 
 	public final long getUploadQuota() {
