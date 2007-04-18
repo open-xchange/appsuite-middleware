@@ -97,7 +97,9 @@ public class ServletContextWrapper implements ServletContext {
 	}
 
 	public void log(final String string) {
-		LOG.info(string);
+		if (LOG.isInfoEnabled()) {
+			LOG.info(string);
+		}
 	}
 
 	public String getMimeType(final String string) {
@@ -148,11 +150,15 @@ public class ServletContextWrapper implements ServletContext {
 	}
 
 	public void log(final Exception exception, final String string) {
-        LOG.info(string, exception);
+        if (LOG.isInfoEnabled()) {
+        	LOG.info(string, exception);
+        }
 	}
 
 	public void log(final String string, final Throwable throwable) {
-        LOG.info(string, throwable);
+		if (LOG.isInfoEnabled()) {
+			LOG.info(string, throwable);
+		}
 	}
 
 	public int getMajorVersion() {
