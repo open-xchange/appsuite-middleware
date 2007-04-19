@@ -1248,6 +1248,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // context
                 final Integer dbid = db.getId();
 
+                boolean newSchemaCreated = false;
                 if (CONTEXTS_PER_SCHEMA == 1) {
                     // synchronized (ClientAdminThread.create_mutex) {
                     // FIXME: generate unique schema name
@@ -1261,7 +1262,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                     db.setScheme(schema_name);
                     oxu.createDatabase(db);                   
-
+                    newSchemaCreated = true;
+                    
                     fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                     // }
                 } else {
@@ -1276,6 +1278,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             schema_name = db.getDisplayname() + '_' + srv_id;
                             db.setScheme(schema_name);
                             oxu.createDatabase(db);                            
+                            newSchemaCreated = true;
                             fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                         } else {
                             db.setScheme(schema_name);
@@ -1295,9 +1298,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // seqs must be
                 // deleted on
                 // exception
-                initVersionTable(context_id, ox_write_con);
                 ox_write_con.commit();
 
+                if( newSchemaCreated ) {
+                    initVersionTable(context_id, ox_write_con);
+                    ox_write_con.commit();
+                }
+                
                 // must be fetched before any other actions, else all statements
                 // are commited on this con
                 final int group_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, ox_write_con);
