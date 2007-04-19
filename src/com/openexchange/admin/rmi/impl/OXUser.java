@@ -385,7 +385,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
                                 log.error("Error while calling delete for plugin: " + bundlename, e);
-                                throw new StorageException(e);
                             }
                         }
                     }
