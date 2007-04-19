@@ -75,13 +75,13 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.FileUtils;
 import com.openexchange.admin.tools.PropertyHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
@@ -399,7 +399,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usr.getUsername();
                 // FIXME: if(! tools.isContextAdmin(ctx, usr.getId()) ) {} ??
-                FileUtils.deleteDirectory(homedir);
+                try {
+                    FileUtils.deleteDirectory(new File(homedir));
+                } catch (IOException e) {
+                    log.error("Could not delete homedir for user: " + usr);
+                }
             }
         }
         
