@@ -50,29 +50,31 @@ package com.openexchange.admin.console.group;
 
 import java.util.ArrayList;
 
-import org.apache.commons.cli.Option;
-
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 public abstract class GroupAbstraction extends BasicCommandlineOptions {
 
     protected static final String OPT_NAME_GROUPNAME_LONG = "name";
-    protected static final String OPT_NAME_GROUPNAME = "n";
+    protected static final char OPT_NAME_GROUPNAME = 'n';
 
     protected static final String OPT_NAME_GROUPDISPLAYNAME_LONG = "displayname";
-    protected static final String OPT_NAME_GROUPDISPLAYNAME = "d";
+    protected static final char OPT_NAME_GROUPDISPLAYNAME = 'd';
 
     protected static final String OPT_NAME_GROUPID_LONG = "groupid";
-    protected static final String OPT_NAME_GROUPID = "i";
+    protected static final char OPT_NAME_GROUPID = 'i';
 
     protected static final String OPT_NAME_ADDMEMBERS_LONG = "addmembers";
-    protected static final String OPT_NAME_ADDMEMBERS = "a";
+    protected static final char OPT_NAME_ADDMEMBERS = 'a';
     
     protected static final String OPT_NAME_REMOVEMEMBERS_LONG = "removemembers";
-    protected static final String OPT_NAME_REMOVEMEMBERS = "r";
-
+    protected static final char OPT_NAME_REMOVEMEMBERS = 'r';
+    
+    protected static final String OPT_MAILADDRESS_LONG = "mailaddress";
+    protected static final char OPT_MAILADDRESS_SHORT = 'm';
     
     protected void printExtensionsError(Group grp){
         //+ loop through extensions and check for errors       
@@ -86,33 +88,47 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
         }
     }
     
-    protected Option getAddMembersOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, true);
-        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
-        return retval;
+    protected void setAddMembersOption(final AdminParser admp,boolean required) {
+        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, required);
+//        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
+        
     }
 
-    protected Option getRemoveMembersOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, true);
-        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
-        return retval;
+    protected void setRemoveMembersOption(final AdminParser admp,boolean required) {
+        removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, required);
+//        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
+       
     }
 
-    protected Option getGroupIdOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group which will be deleted", true, true);
-        retval.setArgName("id");
-        return retval;
+    protected void setGroupIdOption(final AdminParser admp,boolean required) {
+        IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, required);
+//        retval.setArgName("id");
+        
     }
     
-    protected Option getGroupNameOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, true);
-        retval.setArgName(OPT_NAME_GROUPDISPLAYNAME_LONG);
-        return retval;
+    protected void setGroupNameOption(final AdminParser admp,boolean required) {
+        nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, required);
+//        retval.setArgName(OPT_NAME_GROUPDISPLAYNAME_LONG);
+        
     }
     
-    protected Option getGroupDisplayNameOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, true);
-        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
-        return retval;
+    protected void setGroupDisplayNameOption(final AdminParser admp,boolean required) {
+        displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, required);
+//        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
+        
     }
+    
+    protected void setMailOption(final AdminParser admp,boolean required) {
+        mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, required);
+//        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
+        
+    }
+    
+    protected Option addMemberOption = null;
+    protected Option removeMemberOption = null;
+    protected Option IdOption = null;
+    protected Option nameOption = null;
+    protected Option displayNameOption = null;
+    protected Option mailOption = null;
+   
 }

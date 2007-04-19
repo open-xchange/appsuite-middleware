@@ -50,27 +50,37 @@ package com.openexchange.admin.console.resource;
 
 import java.util.ArrayList;
 
-import org.apache.commons.cli.Option;
-
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
 public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     
     protected static final String _OPT_NAME_LONG = "name";
-    protected static final String _OPT_NAME_SHORT = "n";
+    protected static final char _OPT_NAME_SHORT = 'n';
     protected static final String _OPT_DISPNAME_LONG = "displayname";
-    protected static final String _OPT_DISPNAME_SHORT = "d";
+    protected static final char _OPT_DISPNAME_SHORT = 'd';
     protected static final String _OPT_DESCRIPTION_LONG = "description";
-    protected static final String _OPT_DESCRIPTION_SHORT = "D";
-    protected static final String _OPT_AVAILABLE_SHORT = "a";
+    protected static final char _OPT_DESCRIPTION_SHORT = 'D';
+    protected static final char _OPT_AVAILABLE_SHORT = 'a';
     protected static final String _OPT_AVAILABLE_LONG = "available";
-    protected static final String _OPT_EMAIL_SHORT = "e";
+    protected static final char _OPT_EMAIL_SHORT = 'e';
     protected static final String _OPT_EMAIL_LONG = "email";
-    protected static final String _OPT_RESOURCEID_SHORT = "i";
+    protected static final char _OPT_RESOURCEID_SHORT = 'i';
     protected static final String _OPT_RESOURCEID_LONG = "resourceid";
+    protected static final String OPT_RECIPIENTS_LONG = "mailrecipients";
+    protected static final char OPT_RECIPIENTS_SHORT = 'm';
     
+    protected Option resourceDisplayNameOption = null;
+    protected Option resourceNameOption = null;
+    protected Option resourceAvailableOption = null;
+    protected Option resourceDescriptionOption = null;
+    protected Option resourceEmailOption = null;
+    protected Option resourceIdOption = null;
+
+    protected Option resourceRecipientsOption = null;
     
     protected void printExtensionsError(Resource res){
         //+ loop through extensions and check for errors       
@@ -84,28 +94,34 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
         }
     }
     
-    protected Option getDisplayNameOption(){
-        return getShortLongOpt( _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, true);        
+    protected void setDisplayNameOption(final AdminParser admp,final boolean required){
+        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, required);        
     }
     
-    protected Option getNameOption(){
-        return getShortLongOpt( _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, true); 
+    protected void setRecipientsOption(final AdminParser admp,final boolean required){
+        resourceRecipientsOption = setShortLongOpt(admp, OPT_RECIPIENTS_SHORT,OPT_RECIPIENTS_LONG,"Recipients who should receive mail addressed to the resource",true, required);        
     }
     
-    protected Option getAvailableOption(){
-        return getShortLongOpt( _OPT_AVAILABLE_SHORT,_OPT_AVAILABLE_LONG,"Toggle resource availability",false, false);                
+    protected void setNameOption(final AdminParser admp,final boolean required){
+        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required); 
     }
     
-    protected Option getDescriptionOption(){
-        return  getShortLongOpt(_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, false);        
+    protected void setAvailableOption(final AdminParser admp,final boolean required){
+        resourceAvailableOption = setShortLongOpt(admp, _OPT_AVAILABLE_SHORT,_OPT_AVAILABLE_LONG,"Toggle resource availability",true, required);                
     }
     
-    protected Option getEmailOption(){
-        return getShortLongOpt(_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, true); 
+    protected void setDescriptionOption(final AdminParser admp,final boolean required){
+        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, required);        
     }
     
-    protected Option getIdOption(){
-        return getShortLongOpt(_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, true); 
+    protected void setEmailOption(final AdminParser admp,final boolean required){
+        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, required); 
     }
-
+    
+    protected void setIdOption(final AdminParser admp,final boolean required){
+        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, required); 
+    }    
+    
+   
+    
 }
