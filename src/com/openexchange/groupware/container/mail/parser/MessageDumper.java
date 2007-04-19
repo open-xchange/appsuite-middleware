@@ -104,8 +104,44 @@ public class MessageDumper {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageDumper.class);
+	/*
+	 * +++++++++++++++++++ MIME TYPES +++++++++++++++++++
+	 */
+	private static final String MIME_TEXT_PLAIN = "text/plain";
+		
+	private static final String MIME_TEXT_ENRICHED = "text/enriched";
+	
+	private static final String MIME_TEXT_RTF = "text/rtf";
+	
+	private static final String MIME_TEXT_HTML = "text/html";
+	
+	private static final String MIME_TEXT_RFC822_HDRS = "text/rfc822-headers";
+	
+	private static final String MIME_TEXT_ALL_CARD = "text/*card";
+	
+	private static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
+	
+	private static final String MIME_MULTIPART_ALL = "multipart/*";
+	
+	private static final String MIME_IMAGE_ALL = "image/*";
 
-	private static final String MESSAGE_RFC822 = "message/rfc822";
+	private static final String MIME_MESSAGE_RFC822 = "message/rfc822";
+	
+	private static final String MIME_APPL_OCTET = "application/octet-stream";
+	
+	private static final String MIME_MESSAGE_DELIVERY_STATUS = "message/delivery-status";
+	
+	private static final String MIME_MESSAGE_DISP_NOTIFICATION = "message/disposition-notification";
+	
+	/*
+	 * +++++++++++++++++++ HEADERS +++++++++++++++++++
+	 */
+	private static final String HEADER_CONTENT_TYPE = "Content-Type";
+	
+	/*
+	 * +++++++++++++++++++ TNEF CONSTANTS +++++++++++++++++++
+	 */
+	private static final String TNEF_IPM_CONTACT = "IPM.Contact";
 
 	private final SessionObject session;
 
@@ -180,7 +216,7 @@ public class MessageDumper {
 		final String filename = MessageUtils.getFileName(part, MessageUtils.getIdentifier(prefix, partCount));
 		final ContentType contentType = new ContentType();
 		try {
-			contentType.setContentType(part.getContentType() == null ? "application/octet-stream" : part
+			contentType.setContentType(part.getContentType() == null ? MIME_APPL_OCTET : part
 					.getContentType());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -197,7 +233,7 @@ public class MessageDumper {
 		 */
 		final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) && part
 				.getFileName() == null);
-		if (contentType.isMimeType("text/plain") || contentType.isMimeType("text/enriched")) {
+		if (contentType.isMimeType(MIME_TEXT_PLAIN) || contentType.isMimeType(MIME_TEXT_ENRICHED)) {
 			if (isInline) {
 				final String content = MessageUtils.getStringObject(part);
 				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -243,7 +279,7 @@ public class MessageDumper {
 					return;
 				}
 			}
-		} else if (contentType.isMimeType("text/html")) {
+		} else if (contentType.isMimeType(MIME_TEXT_HTML)) {
 			if (isInline) {
 				if (!msgHandler.handleInlineHtml(MessageUtils.getStringObject(part), contentType.getBaseType(), size,
 						filename, MessageUtils.getIdentifier(prefix, partCount))) {
@@ -257,7 +293,7 @@ public class MessageDumper {
 					return;
 				}
 			}
-		} else if (contentType.isMimeType("multipart/*")) {
+		} else if (contentType.isMimeType(MIME_MULTIPART_ALL)) {
 			final Multipart mp = (Multipart) part.getContent();
 			final int count = mp.getCount();
 			final String mpId = MessageUtils.getIdentifier(prefix, partCount);
@@ -276,13 +312,13 @@ public class MessageDumper {
 				final Part multiPartBodyPart = mp.getBodyPart(i);
 				dumpPart(multiPartBodyPart, msgHandler, mpPrefix, i + 1);
 			}
-		} else if (contentType.isMimeType("image/*")) {
+		} else if (contentType.isMimeType(MIME_IMAGE_ALL)) {
 			if (!msgHandler.handleImagePart(part, ((MimePart) part).getContentID(), contentType.getBaseType(),
 					MessageUtils.getIdentifier(prefix, partCount))) {
 				stop = true;
 				return;
 			}
-		} else if (contentType.isMimeType(MESSAGE_RFC822)) {
+		} else if (contentType.isMimeType(MIME_MESSAGE_RFC822)) {
 			final Message nestedMsg = (Message) part.getContent();
 			if (!msgHandler.handleNestedMessage(nestedMsg, MessageUtils.getIdentifier(prefix, partCount))) {
 				stop = true;
@@ -302,8 +338,10 @@ public class MessageDumper {
 			 * Handle special conversion
 			 */
 			final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-			if (messageClass != null && "IPM.Contact".equalsIgnoreCase((String) messageClass.getValue())) {
-				// convert contact to standard vCard
+			if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase((String) messageClass.getValue())) {
+				/*
+				 * Convert contact to standard vCard
+				 */
 				final BodyPart bodyPart = TNEFMime.convertContact(message);
 				dumpPart(bodyPart, msgHandler, prefix, partCount);
 				return;
@@ -327,7 +365,7 @@ public class MessageDumper {
 					final String content = new String(TNEFUtils.decompressRTF(rtfBody), ServerConfig
 							.getProperty(Property.DefaultEncoding));
 					bodyPart.setText(content);
-					bodyPart.setHeader("Content-Type", "text/rtf");
+					bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_TEXT_RTF);
 					bodyPart.setSize(content.length());
 					dumpPart(bodyPart, msgHandler, prefix, partCount++);
 				}
@@ -356,11 +394,11 @@ public class MessageDumper {
 						contentTypeStr = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachFilename);
 					}
 					if (contentTypeStr == null) {
-						contentTypeStr = "application/octet-stream";
+						contentTypeStr = MIME_APPL_OCTET;
 					}
 					final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
 					bodyPart.setDataHandler(new DataHandler(ds));
-					bodyPart.setHeader("Content-Type", contentTypeStr);
+					bodyPart.setHeader(HEADER_CONTENT_TYPE, contentTypeStr);
 					final ByteArrayOutputStream os = new ByteArrayOutputStream();
 					attachment.writeTo(os);
 					bodyPart.setSize(os.size());
@@ -371,15 +409,15 @@ public class MessageDumper {
 					 */
 					final MimeMessage nestedMessage = TNEFMime.convert(session.getMailSession(), attachment
 							.getNestedMessage());
-					bodyPart.setDataHandler(new DataHandler(nestedMessage, MESSAGE_RFC822));
-					bodyPart.setHeader("Content-Type", MESSAGE_RFC822);
+					bodyPart.setDataHandler(new DataHandler(nestedMessage, MIME_MESSAGE_RFC822));
+					bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_MESSAGE_RFC822);
 					dumpPart(bodyPart, msgHandler, prefix, partCount++);
 				}
 			}
-		} else if (contentType.isMimeType("message/delivery-status")
-				|| contentType.isMimeType("message/disposition-notification")
-				|| contentType.isMimeType("text/rfc822-headers") || contentType.isMimeType("text/*card")
-				|| contentType.isMimeType("text/*calendar")) {
+		} else if (contentType.isMimeType(MIME_MESSAGE_DELIVERY_STATUS)
+				|| contentType.isMimeType(MIME_MESSAGE_DISP_NOTIFICATION)
+				|| contentType.isMimeType(MIME_TEXT_RFC822_HDRS) || contentType.isMimeType(MIME_TEXT_ALL_CARD)
+				|| contentType.isMimeType(MIME_TEXT_ALL_CALENDAR)) {
 			if (!msgHandler.handleSpecialPart(part, contentType.getBaseType(), MessageUtils.getIdentifier(prefix,
 					partCount))) {
 				stop = true;
