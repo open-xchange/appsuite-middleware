@@ -72,8 +72,12 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_SEARCHPATTERN_LONG = "searchpattern";
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
     
-    protected static String RMI_HOSTNAME ="rmi://localhost";    
-   
+    protected static String RMI_HOSTNAME ="rmi://localhost";
+    
+    protected Option contextOption = null;
+    protected Option adminUserOption = null;
+    protected Option adminPassOption = null;
+    protected Option searchOption = null;
     
     protected static void printServerResponse(String msg){
         System.err.println("Server response:\n "+msg);    
@@ -119,14 +123,13 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
     
-    protected Option setShortLongOptWithDefault(final AdminParser admp,final String shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
+    protected Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
         desc.append(defaultvalue);
-        final Option retval = admp.addOption(shortopt,longopt, desc.toString(), required,hasarg);    
         
-        return retval;
+        return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
     protected Option getContextOption(final AdminParser admp) {
@@ -203,9 +206,4 @@ public abstract class BasicCommandlineOptions {
         options[1] = adminUserOption;
         options[2] = adminPassOption;
     }
-    
-    protected Option contextOption = null;
-    protected Option adminUserOption = null;
-    protected Option adminPassOption = null;
-    protected Option searchOption = null;
 }
