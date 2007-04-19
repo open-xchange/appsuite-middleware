@@ -51,14 +51,26 @@ package com.openexchange.admin.console.user;
 
 import java.util.ArrayList;
 
-import org.apache.commons.cli.Option;
-
-
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
+    
+    protected Option userNameOption = null;
+    protected Option displayNameOption = null;
+    protected Option givenNameOption = null;
+    protected Option surNameOption = null;
+    protected Option passwordOption = null;
+    protected Option primaryMailOption = null;
+    protected Option languageOption = null;
+    protected Option timezoneOption = null;
+    protected Option departmentOption = null;
+    protected Option companyOption = null;
+    protected Option aliasesOption = null;
+    protected Option idOption = null;
     
     protected void printExtensionsError(User usr){
         //+ loop through extensions and check for errors       
@@ -72,87 +84,87 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         }
     }
     
-    protected Option getIdOption(){
-        return getShortLongOpt(OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true); 
+    protected void setIdOption(final AdminParser admp){
+        idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true); 
     }
     
-    protected Option getUsernameOption(){
-        return getShortLongOpt(OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, true); 
+    protected void setUsernameOption(final AdminParser admp){
+        userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, true);
     }
     
-    protected Option getDisplayNameOption(){
-        return getShortLongOpt(OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, true); 
+    protected void setDisplayNameOption(final AdminParser admp){
+        displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, true); 
     }
     
-    protected Option getPasswordOption(){
-        return getShortLongOpt(OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, true); 
+    protected void setPasswordOption(final AdminParser admp){
+        passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, true); 
     }
     
-    protected Option getGivenNameOption(){
-        return getShortLongOpt(OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, true); 
+    protected void setGivenNameOption(final AdminParser admp){
+        givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, true); 
     }
     
-    protected Option getSurNameOption(){
-        return getShortLongOpt(OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, true); 
+    protected void setSurNameOption(final AdminParser admp){
+        surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, true); 
     }
     
-    protected Option getLanguageOption(){
-        return getShortLongOpt(OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, false); 
+    protected void setLanguageOption(final AdminParser admp){
+        languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, false); 
     }
     
-    protected Option getTimezoneOption(){
-        return getShortLongOpt(OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, false); 
+    protected void setTimezoneOption(final AdminParser admp){
+        timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, false); 
     }
     
-    protected Option getPrimaryMailOption(){
-        return getShortLongOpt(OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, true); 
+    protected void setPrimaryMailOption(final AdminParser admp){
+        primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, true); 
     }
     
-    protected Option getDepartmentOption(){
-        return getShortLongOpt(OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, false); 
+    protected void setDepartmentOption(final AdminParser admp){
+        departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, false); 
     }
     
-    protected Option getCompanyOption(){
-        return getShortLongOpt(OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
+    protected void setCompanyOption(final AdminParser admp){
+        companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
     }
 
-    protected Option getAliasesOption(){
-        return getShortLongOpt(OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
+    protected void setAliasesOption(final AdminParser admp){
+        aliasesOption =  setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
-    
-    protected static final String OPT_ID_SHORT = "i";
+
+    protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "userid";
     
-    protected static final String OPT_USERNAME_SHORT = "u";
+    protected static final char OPT_USERNAME_SHORT = 'u';
     protected static final String OPT_USERNAME_LONG = "username";
     
-    protected static final String OPT_DISPLAYNAME_SHORT = "d";
+    protected static final char OPT_DISPLAYNAME_SHORT = 'd';
     protected static final String OPT_DISPLAYNAME_LONG = "displayname";
     
-    protected static final String OPT_PASSWORD_SHORT = "p";
+    protected static final char OPT_PASSWORD_SHORT = 'p';
     protected static final String OPT_PASSWORD_LONG = "password";
     
-    protected static final String OPT_GIVENNAME_SHORT = "g";
+    protected static final char OPT_GIVENNAME_SHORT = 'g';
     protected static final String OPT_GIVENNAME_LONG = "givenname";
     
-    protected static final String OPT_SURNAME_SHORT = "s";
+    protected static final char OPT_SURNAME_SHORT = 's';
     protected static final String OPT_SURNAME_LONG = "surname";
     
-    protected static final String OPT_LANGUAGE_SHORT = "l";
+    protected static final char OPT_LANGUAGE_SHORT = 'l';
     protected static final String OPT_LANGUAGE_LONG = "language";
     
-    protected static final String OPT_TIMEZONE_SHORT = "t";
+    protected static final char OPT_TIMEZONE_SHORT = 't';
     protected static final String OPT_TIMEZONE_LONG = "timezone";
     
-    protected static final String OPT_PRIMARY_EMAIL_SHORT = "e";
+    protected static final char OPT_PRIMARY_EMAIL_SHORT = 'e';
     protected static final String OPT_PRIMARY_EMAIL_LONG = "email";
     
-    protected static final String OPT_DEPARTMENT_SHORT = "x";
+    protected static final char OPT_DEPARTMENT_SHORT = 'x';
     protected static final String OPT_DEPARTMENT_LONG = "department";
     
-    protected static final String OPT_COMPANY_SHORT = "z";
+    protected static final char OPT_COMPANY_SHORT = 'z';
     protected static final String OPT_COMPANY_LONG = "company";
     
-    protected static final String OPT_ALIASES_SHORT = "a";
+    protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
 }

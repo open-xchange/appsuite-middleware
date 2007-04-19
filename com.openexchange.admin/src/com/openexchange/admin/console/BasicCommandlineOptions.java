@@ -50,29 +50,27 @@ package com.openexchange.admin.console;
 
 import java.rmi.NotBoundException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
+import com.openexchange.admin.console.CmdLineParser.Option;
+
+
 
 public abstract class BasicCommandlineOptions {
     
     protected static final int DEFAULT_CONTEXT=1;
-    protected static final String OPT_NAME_CONTEXT_SHORT="c";
+    protected static final char OPT_NAME_CONTEXT_SHORT='c';
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
-    protected static final String OPT_NAME_CONTEXT_NAME_SHORT="N";
+    protected static final char OPT_NAME_CONTEXT_NAME_SHORT='N';
     protected static final String OPT_NAME_CONTEXT_NAME_LONG="contextname";
     protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION="The name of the context";
     protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context";
-    protected static final String OPT_NAME_ADMINUSER_SHORT="A";
+    protected static final char OPT_NAME_ADMINUSER_SHORT='A';
     protected static final String OPT_NAME_ADMINUSER_LONG="adminuser";
-    protected static final String OPT_NAME_ADMINPASS_SHORT="P";
+    protected static final char OPT_NAME_ADMINPASS_SHORT='P';
     protected static final String OPT_NAME_ADMINPASS_LONG="adminpass";
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="Admin password";
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="Admin username";
     protected static final String OPT_NAME_SEARCHPATTERN_LONG = "searchpattern";
-    protected static final String OPT_NAME_SEARCHPATTERN = "s";
+    protected static final char OPT_NAME_SEARCHPATTERN = 's';
     
     protected static String RMI_HOSTNAME ="rmi://localhost";    
    
@@ -86,17 +84,12 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected static void printError(String msg){
-        System.err.println("Error:\n "+msg);    
+        System.err.println("Error:\n "+msg+"\n");    
     }
     
     protected static void printInvalidInputMsg(String msg){
         System.err.println("Invalid input detected: "+msg);    
-    }
-    
-    protected static void printHelpText(String msg,Options opts){
-        HelpFormatter helpf = new HelpFormatter();
-        helpf.printHelp(msg,opts);
-    }
+    }    
     
     protected static void setRMI_HOSTNAME(String rmi_hostname) {       
         String host = rmi_hostname;
@@ -110,75 +103,73 @@ public abstract class BasicCommandlineOptions {
         
     }
    
-    protected Option getLongOpt(final String longopt, final String description, final boolean hasarg, final boolean required) {
-        final Option retval = OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
-        if (hasarg) {
-            retval.hasArg();
-        }
-        retval.setRequired(required);
-        return retval;
-    }
-    
-    protected Option getShortOpt(final String shortopt, final String description, final boolean hasarg, final boolean required) {
-        final Option retval = new Option(shortopt, hasarg, description);
-        retval.setRequired(required);
+    protected Option setLongOpt(final AdminParser admp,final String longopt, final String description, final boolean hasarg, final boolean required) {
+        
+        final Option retval = admp.addOption(longopt, longopt, description, required,hasarg);
+//        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
+//        if (hasarg) {
+//            retval.hasArg();
+//        }
+//        retval.setRequired(required);
         return retval;
     }
 
-    protected Option getShortLongOpt(final String shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
-        final Option retval = new Option(shortopt, longopt, hasarg, description);
-        retval.setRequired(required);
+    protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
+        final Option retval = admp.addOption(shortopt,longopt,longopt, description, required,hasarg);       
         return retval;
     }
     
-    protected Option getShortLongOptWithDefault(final String shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
+    protected Option setShortLongOptWithDefault(final AdminParser admp,final String shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
         desc.append(defaultvalue);
-        final Option retval = new Option(shortopt, longopt, hasarg, desc.toString());
-        retval.setRequired(required);
+        final Option retval = admp.addOption(shortopt,longopt, desc.toString(), required,hasarg);    
+        
         return retval;
     }
 
-    protected Option getContextOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);
-        retval.setArgName("Context ID");
+    protected Option getContextOption(final AdminParser admp) {
+        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
+//        retval.setArgName("Context ID");
         return retval;
     }
     
-    protected Option getContextNameOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, false);
-        retval.setArgName("Context Name");
+    protected Option getContextNameOption(final AdminParser admp) {
+        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, false);
+//        retval.setArgName("Context Name");
         return retval;
     }
     
-    protected Option getAdminPassOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
-        retval.setArgName("Admin password");
+    protected Option getAdminPassOption(final AdminParser admp) {
+        final Option retval = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
+//        retval.setArgName("Admin password");
         return retval;
     }
     
-    protected Option getAdminUserOption() {
-        final Option retval = getShortLongOpt(OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
-        retval.setArgName("Admin username");
+    protected Option getAdminUserOption(final AdminParser admp) {
+        final Option retval = setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
+//        retval.setArgName("Admin username");
         return retval;
     }
     
-    protected Option getSearchPatternOption(){
-        final Option opt = getShortLongOpt(OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
-        opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
-        return  opt;
+    protected Option getSearchPatternOption(final AdminParser admp){
+        searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
+//        opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
+        return  searchOption;
     }
 
-    protected Option addArgName(final Option option, final String argname) {
-        final Option retval = option;
-        retval.setArgName(argname);
-        return retval;
-    }
+//    protected Option addArgName(final Option option, final String argname) {
+//        final Option retval = option;
+////        retval.setArgName(argname);
+//        return retval;
+//    }
     
-    protected Option addDefaultArgName(final Option option) {
-        return addArgName(option, option.getLongOpt());
+    @Deprecated
+    protected Option addDefaultArgName(final AdminParser admp,final Option option) {
+//        return addArgName(option, option.getLongOpt(admp));
+        // FIXME
+        return null;
     }
 
     protected int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
@@ -197,27 +188,24 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected String verifySetAndGetOption(final CommandLine cmd, final String optionname) {
-        if (cmd.hasOption(optionname)) {
-            return cmd.getOptionValue(optionname);
-        } else {
-            return null;
-        }
-    }
-
-    
     /**
      * 
      * @return Options containing context,adminuser,adminpass Option objects.
      */
-    protected Options getDefaultCommandLineOptions(){
+    protected void setDefaultCommandLineOptions(final AdminParser admp){
         
-        Options options = new Options();
+        Option[] options = new Option[3];
+        contextOption = getContextOption(admp);
+        adminUserOption = getAdminUserOption(admp); 
+        adminPassOption = getAdminPassOption(admp);
         
-        options.addOption(getContextOption());        
-        options.addOption(getAdminUserOption());
-        options.addOption(getAdminPassOption());
-        
-        return options;
+        options[0] = contextOption;
+        options[1] = adminUserOption;
+        options[2] = adminPassOption;
     }
+    
+    protected Option contextOption = null;
+    protected Option adminUserOption = null;
+    protected Option adminPassOption = null;
+    protected Option searchOption = null;
 }
