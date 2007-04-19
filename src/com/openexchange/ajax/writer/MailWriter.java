@@ -368,7 +368,7 @@ public class MailWriter extends DataWriter {
 							jsonwriter.key(JSONMessageObject.JSON_PRIORITY);
 						}
 						final String val = getSingleMessageHeader("X-Priority", msg);
-						jsonwriter.value(val == null ? JSONObject.NULL : Integer.parseInt(val.split(" +")[0]));
+						jsonwriter.value(val == null ? JSONObject.NULL : Integer.valueOf(val.split(" +")[0]));
 					}
 				};
 				break Fields;
@@ -380,7 +380,7 @@ public class MailWriter extends DataWriter {
 							jsonwriter.key(JSONMessageObject.JSON_MSGREF);
 						}
 						final String msgref = getSingleMessageHeader("X-Msgref", msg);
-						jsonwriter.value(msgref == null ? JSONObject.NULL : Long.parseLong(msgref.split(" +")[0]));
+						jsonwriter.value(msgref == null ? JSONObject.NULL : Long.valueOf(msgref.split(" +")[0]));
 					}
 				};
 				break Fields;
@@ -408,6 +408,12 @@ public class MailWriter extends DataWriter {
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
 							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (msg.getFolder() == null) {
+							/*
+							 * Skip
+							 */
+							return;
+						}
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_TOTAL);
 						}
@@ -419,6 +425,12 @@ public class MailWriter extends DataWriter {
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
 							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (msg.getFolder() == null) {
+							/*
+							 * Skip
+							 */
+							return;
+						}
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_NEW);
 						}
@@ -430,6 +442,12 @@ public class MailWriter extends DataWriter {
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
 							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (msg.getFolder() == null) {
+							/*
+							 * Skip
+							 */
+							return;
+						}
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_UNREAD);
 						}
@@ -441,6 +459,12 @@ public class MailWriter extends DataWriter {
 				retval[i] = new MailFieldWriter() {
 					public void writeField(final JSONWriter jsonwriter, final Message msg, final int level,
 							final boolean withKey) throws JSONException, MessagingException, OXException {
+						if (msg.getFolder() == null) {
+							/*
+							 * Skip
+							 */
+							return;
+						}
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_DELETED);
 						}
@@ -577,14 +601,14 @@ public class MailWriter extends DataWriter {
 					jsonwriter.key(JSONMessageObject.JSON_PRIORITY);
 				}
 				final String val = getSingleMessageHeader("X-Priority", msg);
-				jsonwriter.value(val == null ? JSONObject.NULL : Integer.parseInt(val.split(" +")[0]));
+				jsonwriter.value(val == null ? JSONObject.NULL : Integer.valueOf(val.split(" +")[0]));
 				break Fields;
 			case JSONMessageObject.FIELD_MSG_REF:
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_MSGREF);
 				}
 				final String msgref = getSingleMessageHeader("X-Msgref", msg);
-				jsonwriter.value(msgref == null ? JSONObject.NULL : Long.parseLong(msgref.split(" +")[0]));
+				jsonwriter.value(msgref == null ? JSONObject.NULL : Long.valueOf(msgref.split(" +")[0]));
 				break Fields;
 			case JSONMessageObject.FIELD_COLOR_LABEL:
 				if (withKey) {
@@ -602,24 +626,48 @@ public class MailWriter extends DataWriter {
 				jsonwriter.value(JSONMessageObject.COLOR_LABEL_NONE);
 				break Fields;
 			case JSONMessageObject.FIELD_TOTAL:
+				if (msg.getFolder() == null) {
+					/*
+					 * Skip
+					 */
+					break Fields;
+				}
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_TOTAL);
 				}
 				jsonwriter.value(msg.getFolder().getMessageCount());
 				break Fields;
 			case JSONMessageObject.FIELD_NEW:
+				if (msg.getFolder() == null) {
+					/*
+					 * Skip
+					 */
+					break Fields;
+				}
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_NEW);
 				}
 				jsonwriter.value(msg.getFolder().getNewMessageCount());
 				break Fields;
 			case JSONMessageObject.FIELD_UNREAD:
+				if (msg.getFolder() == null) {
+					/*
+					 * Skip
+					 */
+					break Fields;
+				}
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_UNREAD);
 				}
 				jsonwriter.value(msg.getFolder().getUnreadMessageCount());
 				break Fields;
 			case JSONMessageObject.FIELD_DELETED:
+				if (msg.getFolder() == null) {
+					/*
+					 * Skip
+					 */
+					break Fields;
+				}
 				if (withKey) {
 					jsonwriter.key(JSONMessageObject.JSON_DELETED);
 				}

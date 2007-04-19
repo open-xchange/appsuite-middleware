@@ -49,15 +49,19 @@
 
 package com.openexchange.groupware.update;
 
+import com.openexchange.database.ConfigDBStorage;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.server.DBPoolingException;
 
 /**
  * Implementation for the updater interface.
@@ -113,7 +117,10 @@ public class UpdaterImpl extends Updater {
 	 */
 	@Override
 	public boolean toUpdate(final Context context) throws UpdateException {
-		final Schema schema = getSchema(context);
+		return toUpdateInternal(getSchema(context));
+	}
+
+	private static final boolean toUpdateInternal(final Schema schema) {
 		return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
 	}
 
@@ -135,5 +142,35 @@ public class UpdaterImpl extends Updater {
 			throw new UpdateException(e);
 		}
 		return schema;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final boolean isLocked(final String schema, final int writePoolId) throws UpdateException {
+		try {
+			return SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
+					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)).isLocked();
+		} catch (DBPoolingException e) {
+			throw new UpdateException(e);
+		} catch (SchemaException e) {
+			throw new UpdateException(e);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final boolean toUpdate(final String schema, final int writePoolId) throws UpdateException {
+		try {
+			return toUpdateInternal(SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(
+					ConfigDBStorage.getOneContextFromSchema(schema, writePoolId)));
+		} catch (DBPoolingException e) {
+			throw new UpdateException(e);
+		} catch (SchemaException e) {
+			throw new UpdateException(e);
+		}
 	}
 }

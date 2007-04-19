@@ -1,3 +1,9 @@
+* 2007-04-19 - tobias.prinz@open-xchange.com
+
+ - Added methods to update package (especially in class Updater) to check
+   both if a schema is locked and is a schema needs to be updated
+ - Added rudimentary implementation of spam handling
+
 * 2007-04-18 - tobias.prinz@open-xchange.com
 
   - fixed import tests for iCal Importer, couldn't find bug in 

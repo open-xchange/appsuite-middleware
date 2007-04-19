@@ -77,7 +77,11 @@ public interface MailInterface {
 
 	public static final int INDEX_TRASH = 3;
 	
-	public static final int INDEX_INBOX = 4;
+	public static final int INDEX_CONFIRMED_SPAM = 4;
+	
+	public static final int INDEX_CONFIRMED_HAM = 5;
+	
+	public static final int INDEX_INBOX = 6;
 
 	public static final int MAIL_PARAM_HARD_DELETE = 1;
 	
@@ -371,6 +375,16 @@ public interface MailInterface {
 	 * Returns user-defined trash folder
 	 */
 	public String getTrashFolder() throws OXException;
+	
+	/**
+	 * Returns user-defined confirmed spam folder
+	 */
+	public String getConfirmedSpamFolder() throws OXException;
+	
+	/**
+	 * Returns user-defined confirmed ham folder
+	 */
+	public String getConfirmedHamFolder() throws OXException;
 
 	/**
 	 * Returns underlying imap store

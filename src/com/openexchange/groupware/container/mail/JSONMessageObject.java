@@ -272,6 +272,13 @@ public class JSONMessageObject {
 	 * @value 64
 	 */
 	public static final int BIT_USER = 64;
+	
+	/**
+	 * Virtal Spam flags
+	 * 
+	 * @value 128
+	 */
+	public static final int BIT_SPAM = 128;
 
 	/*
 	 * ------------------- Priority ------------------------------
@@ -356,6 +363,8 @@ public class JSONMessageObject {
 	private boolean appendVCard;
 
 	private Map<String, String> headers;
+	
+	private boolean messageCountInfoSet;
 	
 	private int total;
 	
@@ -693,6 +702,7 @@ public class JSONMessageObject {
 	}
 
 	public void setDeleted(final int deleted) {
+		messageCountInfoSet = true;
 		this.deleted = deleted;
 	}
 
@@ -701,6 +711,7 @@ public class JSONMessageObject {
 	}
 
 	public void setNew(final int newi) {
+		messageCountInfoSet = true;
 		this.newi = newi;
 	}
 
@@ -709,6 +720,7 @@ public class JSONMessageObject {
 	}
 
 	public void setTotal(final int total) {
+		messageCountInfoSet = true;
 		this.total = total;
 	}
 
@@ -717,8 +729,17 @@ public class JSONMessageObject {
 	}
 
 	public void setUnread(final int unread) {
+		messageCountInfoSet = true;
 		this.unread = unread;
 	}
+
+	public boolean isMessageCountInfoSet() {
+		return messageCountInfoSet;
+	}
+
+	/*public void setMessageCountInfoSet(final boolean messageCountInfoSet) {
+		this.messageCountInfoSet = messageCountInfoSet;
+	}*/
 
 	public boolean isAppendVCard() {
 		return appendVCard;
@@ -766,10 +787,12 @@ public class JSONMessageObject {
 		} catch (OXException e) {
 			retval.put(JSON_COLOR_LABEL, COLOR_LABEL_NONE);
 		}
-		retval.put(JSON_TOTAL, total);
-		retval.put(JSON_NEW, newi);
-		retval.put(JSON_UNREAD, unread);
-		retval.put(JSON_DELETED, deleted);
+		if (messageCountInfoSet) {
+			retval.put(JSON_TOTAL, total);
+			retval.put(JSON_NEW, newi);
+			retval.put(JSON_UNREAD, unread);
+			retval.put(JSON_DELETED, deleted);
+		}
 		retval.putOpt(JSON_ATTACHMENTS, getAttachmentsAsArray(msgAttachments));
 		retval.putOpt(JSON_NESTED_MESSAGES, getNestedMsgsAsArray(nestedMsgs));
 		return retval;
@@ -815,14 +838,16 @@ public class JSONMessageObject {
 		} catch (OXException e) {
 			jw.value(COLOR_LABEL_NONE);
 		}
-		jw.key(JSON_TOTAL);
-		jw.value(total);
-		jw.key(JSON_NEW);
-		jw.value(newi);
-		jw.key(JSON_UNREAD);
-		jw.value(unread);
-		jw.key(JSON_DELETED);
-		jw.value(deleted);
+		if (messageCountInfoSet) {
+			jw.key(JSON_TOTAL);
+			jw.value(total);
+			jw.key(JSON_NEW);
+			jw.value(newi);
+			jw.key(JSON_UNREAD);
+			jw.value(unread);
+			jw.key(JSON_DELETED);
+			jw.value(deleted);
+		}
 		if (msgref != null) {
 			jw.key(JSON_MSGREF);
 			jw.value(msgref);

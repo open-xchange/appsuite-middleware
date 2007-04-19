@@ -133,4 +133,32 @@ public abstract class Updater {
      */
     public abstract boolean isLocked(final Context context)
         throws UpdateException;
+    
+    /**
+	 * Determines if given database schema is currently locked due to a running
+	 * update process
+	 * 
+	 * @param schema -
+	 *            the schema name
+	 * @param writePoolId -
+	 *            the ID of write pool (master database)
+	 * @return <code>true</code> if the schema is currently updates; otherwise
+	 *         <code>false</code>
+	 * @throws UpdateException - if any exception occurs
+	 */
+    public abstract boolean isLocked(final String schema, final int writePoolId)
+    	throws UpdateException;
+    
+    /**
+	 * Determines if given database schema needs to be updated
+	 * 
+	 * @param schema -
+	 *            the schema name
+	 * @param writePoolId -
+	 *            the ID of write pool (master database)
+	 * @return <code>true</code> if the schema needs to be updated; otherwise <code>false</code>
+	 * @throws UpdateException - if any exception occurs
+	 */
+	public abstract boolean toUpdate(final String schema, final int writePoolId)
+		throws UpdateException;
 }

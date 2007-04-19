@@ -544,7 +544,7 @@ public class MailInterfaceImpl implements MailInterface {
 				if (usm.isStdFoldersSetDuringSession()) {
 					break CheckDefaultFolders;
 				}
-				String[] stdFolderNames = new String[4];
+				String[] stdFolderNames = new String[6];
 				if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
 						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Drafts");
@@ -580,6 +580,24 @@ public class MailInterfaceImpl implements MailInterface {
 					stdFolderNames[INDEX_TRASH] = UserSettingMail.STD_TRASH;
 				} else {
 					stdFolderNames[INDEX_TRASH] = usm.getStdTrashName();
+				}
+				if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Confirmed Spam");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
+					}
+					stdFolderNames[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
+				} else {
+					stdFolderNames[INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
+				}
+				if (usm.getConfirmedHam() == null || usm.getConfirmedHam().length() == 0) {
+					if (LOG.isWarnEnabled()) {
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Confirmed Ham");
+						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
+					}
+					stdFolderNames[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
+				} else {
+					stdFolderNames[INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
 				}
 				checkDefaultFolders(stdFolderNames, false);
 				usm.setStdFoldersSetDuringSession(true);
@@ -733,6 +751,56 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				usm.setStandardFolder(INDEX_TRASH, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
+				/*
+				 * Check confirmed spam folder
+				 */
+				checkSubscribed = true;
+				f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_SPAM])).toString());
+				tmp.setLength(0);
+				start = System.currentTimeMillis();
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_CONFIRMED_SPAM]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				usm.setStandardFolder(INDEX_CONFIRMED_SPAM, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
+				/*
+				 * Check confirmed ham folder
+				 */
+				checkSubscribed = true;
+				f = imapStore.getFolder(tmp.append(prefix).append(
+						prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_HAM])).toString());
+				tmp.setLength(0);
+				start = System.currentTimeMillis();
+				if (!f.exists() && !f.create(type)) {
+					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
+							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_CONFIRMED_HAM]).toString());
+					LOG.error(oxme.getMessage(), oxme);
+					checkSubscribed = false;
+				}
+				if (checkSubscribed && !f.isSubscribed()) {
+					try {
+						f.setSubscribed(true);
+					} catch (MethodNotSupportedException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (MessagingException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				usm.setStandardFolder(INDEX_CONFIRMED_HAM, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
 			}
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -3608,6 +3676,39 @@ public class MailInterfaceImpl implements MailInterface {
 			if (affectedFlags.getSystemFlags().length > 0) {
 				msg.setFlags(affectedFlags, flagsVal);
 			}
+			/*
+			 * Check for spam handling
+			 */
+			if (usm.isSpamEnabled() && ((flagBits & JSONMessageObject.BIT_SPAM) > 0)) {
+				final boolean locatedInSpamFolder = prepareMailFolderParam(getSpamFolder()).equals(
+						imapCon.getImapFolder().getFullName());
+				if (flagsVal) {
+					/*
+					 * Mark as spam
+					 */
+					if (locatedInSpamFolder) {
+						/*
+						 * Copy to confirmed spam
+						 */
+
+					} else {
+
+					}
+				} else {
+					/*
+					 * Mark as ham
+					 */
+					if (locatedInSpamFolder) {
+						/*
+						 * Append to confirmed ham & move to INBOX
+						 */
+
+					} else {
+
+					}
+				}
+			}
+			
 			return true;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
@@ -4212,6 +4313,22 @@ public class MailInterfaceImpl implements MailInterface {
 	 */
 	public String getTrashFolder() throws OXException {
 		return getStdFolder(INDEX_TRASH);
+	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#getConfirmedSpamFolder()
+	 */
+	public String getConfirmedSpamFolder() throws OXException {
+		return getStdFolder(INDEX_CONFIRMED_SPAM);
+	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#getConfirmedHamFolder()
+	 */
+	public String getConfirmedHamFolder() throws OXException {
+		return getStdFolder(INDEX_CONFIRMED_HAM);
 	}
 
 	private String getStdFolder(final int index) throws OXException {

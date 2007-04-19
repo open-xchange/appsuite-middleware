@@ -93,7 +93,7 @@ public class SchemaStoreImpl extends SchemaStore {
      * SQL command for selecting the version from the schema.
      */
     private static final String SELECT = "SELECT version,locked,gw_compatible,"
-        + "admin_compatible,server FROM version";
+        + "admin_compatible,server FROM version FOR UPDATE";
 
     /**
      * For creating exceptions.
