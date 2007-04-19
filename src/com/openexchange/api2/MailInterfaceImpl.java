@@ -3432,7 +3432,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (spamAction != SPAM_NOOP) {
 						for (int i = 0; i < msgUIDs.length; i++) {
 							try {
-								trainSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]), spamAction == SPAM_SPAM,
+								handleSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]), spamAction == SPAM_SPAM,
 										false);
 							} catch (OXException e) {
 								if (LOG.isWarnEnabled()) {
@@ -3510,9 +3510,9 @@ public class MailInterfaceImpl implements MailInterface {
 			if (spamAction != SPAM_NOOP) {
 				for (int i = 0; i < msgs.length; i++) {
 					if (spamAction == SPAM_SPAM) {
-						trainSpam(msgs[i], true, false);
+						handleSpam(msgs[i], true, false);
 					} else if (spamAction == SPAM_HAM) {
-						trainSpam(msgs[i], false, false);
+						handleSpam(msgs[i], false, false);
 					}
 				}
 			}
@@ -3694,7 +3694,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Check for spam action
 			 */
 			if (((flagBits & JSONMessageObject.BIT_SPAM) > 0)) {
-				trainSpam(msg, flagsVal, true);
+				handleSpam(msg, flagsVal, true);
 			}
 			return true;
 		} catch (MessagingException e) {
@@ -3702,7 +3702,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	private final boolean trainSpam(final Message msg, final boolean isSpam, final boolean move) throws OXException,
+	private final boolean handleSpam(final Message msg, final boolean isSpam, final boolean move) throws OXException,
 			MessagingException {
 		/*
 		 * Check for spam handling
@@ -4088,11 +4088,9 @@ public class MailInterfaceImpl implements MailInterface {
 					final String newFullName = renameFolder.getFullName();
 					final String oldFullName = updateMe.getFullName();
 					boolean success = false;
-					updateMe.setSubscribed(false);
 					final long start = System.currentTimeMillis();
 					try {
 						success = updateMe.renameTo(renameFolder);
-						updateMe.setSubscribed(true);
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
@@ -4107,6 +4105,7 @@ public class MailInterfaceImpl implements MailInterface {
 						deleteFolder(updateMe);
 					}
 					updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
+					updateMe.setSubscribed(true);
 				}
 				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
@@ -4362,8 +4361,10 @@ public class MailInterfaceImpl implements MailInterface {
 	private boolean isDefaultFolder(final String folderFullName) throws OXException {
 		boolean isDefaultFolder = false;
 		isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
-		for (int index = 0; index < 4 && !isDefaultFolder; index++) {
-			isDefaultFolder |= (folderFullName.equalsIgnoreCase(prepareMailFolderParam(getStdFolder(index))));
+		for (int index = 0; index < 6 && !isDefaultFolder; index++) {
+			if (folderFullName.equalsIgnoreCase(prepareMailFolderParam(getStdFolder(index)))) {
+				return true;
+			}
 		}
 		return isDefaultFolder;
 	}

@@ -4,6 +4,7 @@
    both if a schema is locked and is a schema needs to be updated
  - Added rudimentary implementation of spam handling
  - Spam handling completed
+ - Setting a renamed folder to be subscribed
 
 * 2007-04-18 - tobias.prinz@open-xchange.com
 
