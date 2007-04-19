@@ -293,10 +293,9 @@ public final class Collections {
 	}
 
 	/**
-	 * Returns a copy of the object, or null if the object cannot be serialized.
+	 * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
 	 */
 	public static Object copy(final Serializable orig) {
-		Object obj = null;
 		try {
 			/*
 			 * Write the object out to a byte array
@@ -311,13 +310,14 @@ public final class Collections {
 			 * the object back in
 			 */
 			final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-			obj = in.readObject();
+			return in.readObject();
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
+			return null;
 		} catch (ClassNotFoundException cnfe) {
 			LOG.error(cnfe.getMessage(), cnfe);
+			return null;
 		}
-		return obj;
 	}
 
 }
