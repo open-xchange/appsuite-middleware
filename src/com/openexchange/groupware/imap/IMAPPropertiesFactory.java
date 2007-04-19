@@ -140,6 +140,8 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_IGNORE_SUBSCRIPTION = "ignoreSubscription";
 	
 	private static final String PROP_SET_SMTP_ENVELOPE_FROM = "setSMTPEnvelopeFrom";
+	
+	private static final String PROP_SPAM_ENABLED = "spamEnabled";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
@@ -448,6 +450,11 @@ public class IMAPPropertiesFactory {
 				IMAPProperties.setSMTPEnvelopeFrom(Boolean.parseBoolean(props.getProperty(PROP_SET_SMTP_ENVELOPE_FROM,
 						STR_FALSE)));
 				logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(IMAPProperties.isSMTPEnvelopeFromInternal())
+						.append('\n');
+				
+				IMAPProperties.setSpamEnabled(Boolean.parseBoolean(props.getProperty(PROP_SPAM_ENABLED,
+						STR_FALSE)));
+				logBuilder.append("\tSpam Enabled: ").append(IMAPProperties.isSpamEnabledInternal())
 						.append('\n');
 				
 				IMAPProperties.setJavaMailProperties(javaMailProps);

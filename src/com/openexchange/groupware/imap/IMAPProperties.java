@@ -127,6 +127,8 @@ public class IMAPProperties {
 	private static boolean smtpEnvelopeFrom;
 	
 	private static Properties javaMailProperties;
+	
+	private static boolean spamEnabled;
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -496,6 +498,19 @@ public class IMAPProperties {
 
 	public static void setSMTPEnvelopeFrom(final boolean setSMTPEnvelopeFrom) {
 		IMAPProperties.smtpEnvelopeFrom = setSMTPEnvelopeFrom;
+	}
+
+	public static boolean isSpamEnabled() throws IMAPException {
+		checkGlobalImapProperties();
+		return spamEnabled;
+	}
+	
+	static boolean isSpamEnabledInternal() {
+		return spamEnabled;
+	}
+
+	public static void setSpamEnabled(final boolean spamEnabled) {
+		IMAPProperties.spamEnabled = spamEnabled;
 	}
 
 	public static Properties getJavaMailProperties() throws IMAPException {

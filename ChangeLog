@@ -5,6 +5,8 @@
  - Added rudimentary implementation of spam handling
  - Spam handling completed
  - Setting a renamed folder to be subscribed
+ - Global config option to enabled/disable spam functionaliy inside mail
+   module
 
 * 2007-04-18 - tobias.prinz@open-xchange.com
 

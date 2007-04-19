@@ -146,7 +146,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * Mail
+ * Mail - the servlet to handle mail requests
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -417,6 +417,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
+	
+	private static final String STR_ASC = "asc";
+	
+	private static final String STR_DESC = "desc";
 
 	private final void actionGetAllMails(final SessionObject sessionObj, final Writer writer,
 			final Object paramContainer, final int paramSrcType, final MailInterface mailInterfaceArg)
@@ -494,9 +498,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 					final int sortCol = sort == null ? JSONMessageObject.FIELD_RECEIVED_DATE : Integer.parseInt(sort);
 					int orderDir = MailInterface.ORDER_ASC;
 					if (order != null) {
-						if (order.equalsIgnoreCase("asc")) {
+						if (order.equalsIgnoreCase(STR_ASC)) {
 							orderDir = MailInterface.ORDER_ASC;
-						} else if (order.equalsIgnoreCase("desc")) {
+						} else if (order.equalsIgnoreCase(STR_DESC)) {
 							orderDir = MailInterface.ORDER_DESC;
 						} else {
 							throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
@@ -883,9 +887,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final int sortCol = sort == null ? JSONMessageObject.FIELD_SENT_DATE : Integer.parseInt(sort);
 				int orderDir = MailInterface.ORDER_ASC;
 				if (order != null) {
-					if (order.equalsIgnoreCase("asc")) {
+					if (order.equalsIgnoreCase(STR_ASC)) {
 						orderDir = MailInterface.ORDER_ASC;
-					} else if (order.equalsIgnoreCase("desc")) {
+					} else if (order.equalsIgnoreCase(STR_DESC)) {
 						orderDir = MailInterface.ORDER_DESC;
 					} else {
 						throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
@@ -1303,9 +1307,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 								.parseInt(sort);
 						int orderDir = MailInterface.ORDER_ASC;
 						if (order != null) {
-							if (order.equalsIgnoreCase("asc")) {
+							if (order.equalsIgnoreCase(STR_ASC)) {
 								orderDir = MailInterface.ORDER_ASC;
-							} else if (order.equalsIgnoreCase("desc")) {
+							} else if (order.equalsIgnoreCase(STR_DESC)) {
 								orderDir = MailInterface.ORDER_DESC;
 							} else {
 								throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
