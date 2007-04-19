@@ -93,7 +93,7 @@ public class Database implements Serializable{
     /**
      * @param id
      */
-    public Database(int id) {
+    public Database(final int id) {
         super();
         init();
         this.id = id;
@@ -103,7 +103,7 @@ public class Database implements Serializable{
      * @param id
      * @param schema
      */
-    public Database(int id, String schema) {
+    public Database(final int id, final String schema) {
         super();
         init();
         this.id = id;
@@ -118,7 +118,7 @@ public class Database implements Serializable{
      * @param id
      * @param displayname
      */
-    public Database(String login, String password, String driver, String url, int id, String displayname) {
+    public Database(final String login, final String password, final String driver, final String url, final int id, final String displayname) {
         super();
         this.login = login;
         this.password = password;
@@ -140,70 +140,70 @@ public class Database implements Serializable{
 	// Getter and Setter
 	//
     public Integer getId () {
-        return id;
+        return this.id;
     }
 
-    public void setId (int val) {
+    public void setId (final int val) {
         this.id = val;
     }
 
     public String getUrl () {
-        return url;
+        return this.url;
     }
 
-    public void setUrl (String val) {
+    public void setUrl (final String val) {
         this.url = val;
     }
 
     public String getLogin () {
-        return login;
+        return this.login;
     }
 
-    public void setLogin (String val) {
+    public void setLogin (final String val) {
         this.login = val;
     }
 
     public String getPassword () {
-        return password;
+        return this.password;
     }
 
-    public void setPassword (String val) {
+    public void setPassword (final String val) {
         this.password = val;
     }
 
     public String getDisplayname () {
-        return displayname;
+        return this.displayname;
     }
 
-    public void setDisplayname (String val) {
+    public void setDisplayname (final String val) {
         this.displayname = val;
     }
 
     public String getDriver () {
-        return driver;
+        return this.driver;
     }
 
-    public void setDriver (String val) {
+    public void setDriver (final String val) {
         this.driver = val;
     }
 
     public String getScheme () {
-        return scheme;
+        return this.scheme;
     }
 
-    public void setScheme (String scheme) {
+    public void setScheme (final String scheme) {
         this.scheme = scheme;
     }
     
     public Integer getClusterWeight () {
-        return clusterWeight;
+        return this.clusterWeight;
     }
 
     /**
      * The system weight factor of this database in percent, value is Integer
      * This value defines how contexts will be distributed over multiple databases/db pools.
      */
-    public void setClusterWeight (int clusterWeight) {
+    public void setClusterWeight (final int clusterWeight) {
         this.clusterWeight = clusterWeight;
     }
 
@@ -211,47 +211,47 @@ public class Database implements Serializable{
         return this.maxUnits;
     }
 
-    public void setMaxUnits (int maxunits) {
+    public void setMaxUnits (final int maxunits) {
         this.maxUnits = maxunits;
     }
 
     public Integer getPoolInitial () {
-        return poolInitial;
+        return this.poolInitial;
     }
 
-    public void setPoolInitial (int poolInitial) {
+    public void setPoolInitial (final int poolInitial) {
         this.poolInitial = poolInitial;
     }
 
     public Integer getPoolMax () {
-        return poolMax;
+        return this.poolMax;
     }
 
-    public void setPoolMax (int poolMax) {
+    public void setPoolMax (final int poolMax) {
         this.poolMax = poolMax;
     }
 
     public Integer getMasterId() {
-        return masterId;
+        return this.masterId;
     }
 
-    public void setMasterId(int masterId) {
+    public void setMasterId(final int masterId) {
         this.masterId = masterId;
     }
 
     public Boolean isMaster() {
-        return master;
+        return this.master;
     }
 
-    public void setMaster(boolean master) {
+    public void setMaster(final boolean master) {
         this.master = master;
     }
 
     public Integer getRead_id() {
-        return read_id;
+        return this.read_id;
     }
 
-    public void setRead_id(int read_id) {
+    public void setRead_id(final int read_id) {
         this.read_id = read_id;
     }
 
@@ -259,15 +259,15 @@ public class Database implements Serializable{
         return this.currentUnits;
     }
 
-    public void setCurrentUnits(int units) {
+    public void setCurrentUnits(final int units) {
         this.currentUnits = units;
     }
 
     public Integer getPoolHardLimit () {
-        return poolHardLimit;
+        return this.poolHardLimit;
     }
 
-    public void setPoolHardLimit (int poolHardLimit) {
+    public void setPoolHardLimit (final int poolHardLimit) {
         this.poolHardLimit = poolHardLimit;
     }
 
@@ -308,13 +308,14 @@ public class Database implements Serializable{
     		
     }
     
+    @Override
     public String toString() {
-    	StringBuilder ret = new StringBuilder();
+    	final StringBuilder ret = new StringBuilder();
     	ret.append("[ \n");
     	for( final Field f : this.getClass().getDeclaredFields() ) {
     		try {
-				Object ob = f.get(this);
-				String tname = f.getName();
+				final Object ob = f.get(this);
+				final String tname = f.getName();
 				if( ob != null && ! tname.equals("serialVersionUID") ) {
 					ret.append("  ");
 					ret.append(tname);
@@ -322,9 +323,9 @@ public class Database implements Serializable{
 					ret.append(ob);
 					ret.append("\n");
 				}
-    		} catch (IllegalArgumentException e) {
+    		} catch (final IllegalArgumentException e) {
 				ret.append("IllegalArgument\n");
-			} catch (IllegalAccessException e) {
+			} catch (final IllegalAccessException e) {
 				ret.append("IllegalAccessException\n");
 			}
     	}
@@ -339,7 +340,7 @@ public class Database implements Serializable{
      * @param url
      * @param scheme
      */
-    public Database(String login, String password, String driver, String url, String scheme) {
+    public Database(final String login, final String password, final String driver, final String url, final String scheme) {
         super();
         this.login = login;
         this.password = password;
