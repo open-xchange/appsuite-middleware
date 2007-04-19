@@ -54,10 +54,17 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -316,6 +323,27 @@ public class UserTest extends AbstractTest {
         }else{
             fail("Expected to get correct changed user data");
         } 
+    }
+    
+    // This test is used to check how the change method deals with changing values which are null before changing
+    @Test
+    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        final Credentials cred = DummyCredentials();
+        final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(OXLoginInterface.RMI_NAME);
+        // Here we get the user object of the admin from the database
+        // The admin has no company set by default, so we can test here, how a change work on field's which
+        // aren't set by default
+        final User usr = oxl.login2User(new Context(1), cred);
+        
+        final OXUserInterface user = (OXUserInterface) Naming.lookup(OXUserInterface.RMI_NAME);
+        usr.setNickname("test");
+
+        usr.setCompany("test");
+        usr.setSur_name("test");
+        System.out.println(usr.isCompanyset());
+        user.change(new Context(1), usr, cred);
+        final User usr2 = oxl.login2User(new Context(1), cred);
+        compareUser(usr, usr2);
     }
     
     @Test(expected=AssertionError.class)
