@@ -45,3 +45,7 @@ CACHECCF:@oxconfdir@/cache.ccf
 IMAPPROPERTIES=@oxconfdir@/imap.properties
 SPELLCHECKCFG=@oxconfdir@/spellcheck.cfg
 
+# this must point to the latest ox server updatetasks config
+# if not, automatic db schema updates upon login might not work
+# properly
+UPDATETASKSCFG=@serverconfdir@/updatetasks.cfg
