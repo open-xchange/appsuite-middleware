@@ -104,8 +104,7 @@ public class CSVContactImporter implements Importer {
 
 	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
-	public boolean canImport(SessionObject sessObj, Format format,
-			List<String> folders,
+	public boolean canImport(SessionObject sessObj, Format format, List<String> folders,
 			Map<String, String[]> optionalParams) throws ImportExportException {
 		String folder;
 		if(folders.size() != 1){
@@ -176,6 +175,7 @@ public class CSVContactImporter implements Importer {
 	 * @param folder The folder this is line meant to be written into
 	 * @param contactsql The interface to store data in the OX
 	 * @param conSet The ContactSetter used for translating the given data 
+	 * @param lineNumber Number of the entry ins the CSV file (used for precise error message)
 	 * @return a report containing either the object ID of the entry created OR an error message
 	 */
 	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSwitcher conSet, int lineNumber){
@@ -215,7 +215,13 @@ public class CSVContactImporter implements Importer {
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Adds error information to a given ImportResult 
+	 * @param result ImportResult to be written into.
+	 * @param lineNumber Number of the buggy line in the CSV script.
+	 * @param entry CSV line that was buggy.
+	 */
 	protected void addErrorInformation(ImportResult result, int lineNumber, List<String> entry){
 		result.setEntryNumber(lineNumber);
 		StringBuilder bob = new StringBuilder();
@@ -229,6 +235,11 @@ public class CSVContactImporter implements Importer {
 		}
 	}
 	
+	/**
+	 * Method used to find a ContactField based on the given field name
+	 * @param name Name of the field
+	 * @return a ContactField that was identified by the given name
+	 */
 	protected ContactField getRelevantField(String name){
 		return ContactField.getByDisplayName(name);
 	}
