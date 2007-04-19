@@ -45,6 +45,7 @@
         <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
         <filter token="nonoxlibpath"      value="${lib.dir}"/>
         <filter token="oxlibpath"         value="${lib.dir}"/>
+        <filter token="serverconfdir"     value="${serverconfdir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
