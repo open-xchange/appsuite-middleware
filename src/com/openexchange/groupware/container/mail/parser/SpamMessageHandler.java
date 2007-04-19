@@ -276,9 +276,10 @@ public class SpamMessageHandler implements MessageHandler {
 
 	/**
 	 * 
-	 * @return the inlined rfc822 message or <code>null</code> if spam header
-	 *         <code>X-Spam-Flag</code> has not been detected in message
-	 *         headers
+	 * @return the inlined rfc822 message or <code>null</code> if none present
+	 *         or if spam header <code>X-Spam-Flag</code> has not been
+	 *         detected in message headers
+	 * @see #isSpam()
 	 */
 	public final Message getInlineMessage() {
 		return inlineMessage;
