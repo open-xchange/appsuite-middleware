@@ -92,6 +92,7 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 import java.util.Locale;
@@ -1208,6 +1209,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
+    private void initVersionTable(final int context_id, final Connection con) throws SQLException, StorageException {
+        PreparedStatement ps = null;
+
+        try {
+                ps = con.prepareStatement("INSERT INTO version (version,locked,gw_compatible,admin_compatible,server) VALUES(?,?,?,?,?);");
+                ps.setInt(1,UpdateTaskCollection.getHighestVersion());
+                ps.setInt(2,0);
+                ps.setInt(3,1);
+                ps.setInt(4,1);
+                ps.setString(5,prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+                ps.executeUpdate();
+                ps.close();
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (final SQLException e) {
+                log.error(LOG_ERROR_CLOSING_STATEMENT, e);
+            }
+        }
+    }
+
     public Context create(final Context ctx, final User admin_user, final long quota_max) throws StorageException,InvalidDataException {
         Connection configdb_write_con = null;
         Connection ox_write_con = null;
@@ -1271,6 +1295,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // seqs must be
                 // deleted on
                 // exception
+                initVersionTable(context_id, ox_write_con);
                 ox_write_con.commit();
 
                 // must be fetched before any other actions, else all statements
