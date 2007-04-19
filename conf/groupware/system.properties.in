@@ -10,9 +10,6 @@ LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
 
-# Properties file that configures the Context for OxAdapter.
-OxAdapter=@oxgroupwaresysconfdir@/oxadapter.properties
-
 # Properties file that configures the LDAP context for authenticating against
 # LDAP.
 LDAP=@oxgroupwaresysconfdir@/ldaplogin.properties
