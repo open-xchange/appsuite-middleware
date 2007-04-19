@@ -59,6 +59,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -258,7 +259,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
                     throw CONTEXT_EXCEPTIONS.create(1, context_id);
                 }
                 if (srcFile.exists()) {
-                    FileUtils.deleteDirectory(source);
+                    FileUtils.deleteDirectory(new File(source));
                 }
 //            } catch (RemoteException e) {
 //                log.error("Error copying filestore", e);
@@ -267,6 +268,8 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
             } catch (ContextException e) {
                 log.error("Error copying filestore", e);
             } catch (StorageException e) {
+                log.error("Error copying filestore", e);
+            } catch (IOException e) {
                 log.error("Error copying filestore", e);
             }
         }
@@ -311,7 +314,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
                     throw CONTEXT_EXCEPTIONS.create(1, context_id);
                 }
                 if (srcFile.exists()) {
-                    FileUtils.deleteDirectory(source);
+                    FileUtils.deleteDirectory(new File(source));
                 }
                 ret.clear();
                 ret.add("OK");
@@ -321,6 +324,10 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
 //                ret.add("ERROR");
 //                ret.add("" + e.getMessage());
             } catch (ContextException e) {
+                log.error("Error copying filestore", e);
+                ret.add("ERROR");
+                ret.add("" + e.getMessage());
+            } catch (IOException e) {
                 log.error("Error copying filestore", e);
                 ret.add("ERROR");
                 ret.add("" + e.getMessage());
