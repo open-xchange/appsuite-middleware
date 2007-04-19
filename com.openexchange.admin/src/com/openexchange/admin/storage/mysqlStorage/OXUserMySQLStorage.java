@@ -1297,12 +1297,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                         final String paramtype = method.getParameterTypes()[0]
                                 .getName();
                         if (paramtype.equalsIgnoreCase("java.lang.String")) {
-                            method.invoke(newuser, rs3.getString(fieldname));
-                        } else if (paramtype
-                                .equalsIgnoreCase("java.lang.Integer")) {
+                            final String fieldvalue = rs3.getString(fieldname);
+                            if (null != fieldvalue) {
+                                method.invoke(newuser, fieldvalue);
+                            }
+                        } else if (paramtype.equalsIgnoreCase("java.lang.Integer")) {
                             method.invoke(newuser, rs3.getInt(fieldname));
-                        } else if (paramtype
-                                .equalsIgnoreCase("java.lang.Boolean")) {
+                        } else if (paramtype.equalsIgnoreCase("java.lang.Boolean")) {
                             if (methodnamewithoutset.equals(Mapper.notallowed
                                     .toArray(new String[Mapper.notallowed
                                             .size()])[7])) {
@@ -1314,17 +1315,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                             }
 
                         } else if (paramtype.equalsIgnoreCase("java.util.Date")) {
-                            method.invoke(newuser, rs3.getDate(fieldname));
-                        } else if (paramtype
-                                .equalsIgnoreCase("java.util.Locale")) {
+                            final Date fieldvalue = rs3.getDate(fieldname);
+                            if (null != fieldvalue) {
+                                method.invoke(newuser, fieldvalue);
+                            }
+                        } else if (paramtype.equalsIgnoreCase("java.util.Locale")) {
                             final String locale = rs3.getString(fieldname);
                             final Locale loc = new Locale(locale
                                     .substring(0, 2), locale.substring(3, 5));
                             method.invoke(newuser, loc);
-                        } else if (paramtype
-                                .equalsIgnoreCase("java.util.TimeZone")) {
-                            method.invoke(newuser, TimeZone.getTimeZone(rs3
-                                    .getString(fieldname)));
+                        } else if (paramtype.equalsIgnoreCase("java.util.TimeZone")) {
+                            final String fieldvalue = rs3.getString(fieldname);
+                            if (null != fieldvalue) {
+                                method.invoke(newuser, TimeZone.getTimeZone(fieldvalue));
+                            }                            
                         }
 
                     }
