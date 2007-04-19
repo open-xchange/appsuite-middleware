@@ -141,6 +141,57 @@ public final class Collections {
 			return trimmedArray;
 		}
 	}
+	
+	/**
+	 * 
+	 * SmartLongArray - A tiny helper class to increase arrays of
+	 * <code>long</code> as dynamical lists
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * 
+	 */
+	public static class SmartLongArray {
+		/**
+		 * Pointer to keep track of position in the array
+		 */
+		private int pointer;
+
+		private long[] array;
+
+		private final int growthSize;
+
+		public SmartLongArray() {
+			this(1024);
+		}
+
+		public SmartLongArray(final int initialSize) {
+			this(initialSize, (initialSize / 4));
+		}
+
+		public SmartLongArray(final int initialSize, final int growthSize) {
+			this.growthSize = growthSize;
+			array = new long[initialSize];
+		}
+
+		public SmartLongArray append(final long i) {
+			if (pointer >= array.length) {
+				/*
+				 * time to grow!
+				 */
+				final long[] tmpArray = new long[array.length + growthSize];
+				System.arraycopy(array, 0, tmpArray, 0, array.length);
+				array = tmpArray;
+			}
+			array[pointer++] = i;
+			return this;
+		}
+
+		public long[] toArray() {
+			final long[] trimmedArray = new long[pointer];
+			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
+			return trimmedArray;
+		}
+	}
 
 	/**
 	 * ByteArrayOutputStream implementation that does not synchronize methods and

@@ -64,18 +64,21 @@ import com.openexchange.api2.OXException;
 import com.openexchange.tools.mail.UUEncodedPart;
 
 /**
- * SpamMessageHandler
+ * SpamMessageHandler - Gets the inlined original message out of wrapping
+ * message created by SpamAssassin
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class SpamMessageHandler implements MessageHandler {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpamMessageHandler.class);
+
+	private boolean spam;
 	
 	private Message inlineMessage;
-	
+
 	public SpamMessageHandler() {
 		super();
 	}
@@ -99,9 +102,9 @@ public class SpamMessageHandler implements MessageHandler {
 	public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
 		return true;
 	}
-	
+
 	private static final String HEADER_X_SPAM_FLAG = "X-Spam-Flag";
-	
+
 	private static final String STR_YES = "YES";
 
 	/*
@@ -111,7 +114,7 @@ public class SpamMessageHandler implements MessageHandler {
 	 */
 	public boolean handleHeaders(final Map<String, String> headerMap) throws OXException {
 		final String val = headerMap.get(HEADER_X_SPAM_FLAG);
-		return (val != null && STR_YES.equals(val.toUpperCase(Locale.ENGLISH)));
+		return (spam = (val != null && STR_YES.equals(val.toUpperCase(Locale.ENGLISH))));
 	}
 
 	/*
@@ -167,7 +170,7 @@ public class SpamMessageHandler implements MessageHandler {
 			final int size, final String fileName, final String id) throws OXException {
 		return true;
 	}
-	
+
 	private static final String STR_TRACE = "Invocation of SpamMessageHandler.handleMessageEnd()";
 
 	/*
@@ -279,6 +282,15 @@ public class SpamMessageHandler implements MessageHandler {
 	 */
 	public final Message getInlineMessage() {
 		return inlineMessage;
+	}
+
+	/**
+	 * @return <code>true</code> if message contains header
+	 *         <code>X-Spam-Flag</code> and its value is set to
+	 *         "<code>YES</code>"; otherwise <code>false</code>
+	 */
+	public boolean isSpam() {
+		return spam;
 	}
 
 }
