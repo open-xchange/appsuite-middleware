@@ -167,7 +167,7 @@ public class RdbContextStorage extends ContextStorage {
             if (result.next()) {
                 identifier = result.getInt(1);
             } else {
-                throw new ContextException(Code.NO_MAILADMIN, contextId);
+                throw new ContextException(Code.NO_MAILADMIN, Integer.valueOf(contextId));
             }
         } catch (SQLException e) {
             throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
