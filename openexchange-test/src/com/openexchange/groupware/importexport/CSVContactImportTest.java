@@ -166,7 +166,20 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		try {
 			imp.importData(sessObj, Format.CSV, is, folders, null);
 		} catch (ImportExportException e) {
-			assertTrue(true);
+			assertEquals("I_E-1000", e.getErrorCode());
+			return;
+		}
+		fail("Should throw exception");
+	}
+
+	@Test public void importBullshit2(){
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		InputStream is = new ByteArrayInputStream( "Bla\nbla\nbla".getBytes() );
+
+		try {
+			imp.importData(sessObj, Format.CSV, is, folders, null);
+		} catch (ImportExportException e) {
+			assertEquals("I_E-0804", e.getErrorCode());
 			return;
 		}
 		fail("Should throw exception");

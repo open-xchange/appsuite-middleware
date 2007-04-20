@@ -157,8 +157,26 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
 		WebResponse webRes = webconv.getResource(req);
 		JSONObject response = extractFromCallback( webRes.getText() );
-		assertNotSame("Must contain error ", "I_E-1000", response.optString("code"));
+		assertEquals("Must contain error ", "I_E-1000", response.optString("code"));
+	}
+	
+	public void testUnknownCSVFormat() throws Exception{
+		//preparations
+		final String insertedCSV = "bla\nbla\nbla";
+		final Format format = Format.CSV;
+		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		
+		//test: import
+		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+		WebConversation webconv = getWebConversation();
+		WebRequest req = new PostMethodWebRequest(
+				getUrl(IMPORT_SERVLET, folderId, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "contacts.csv", is, format.getMimeType());
+		WebResponse webRes = webconv.getResource(req);
+		JSONObject response = extractFromCallback( webRes.getText() );
+		assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
 	}
 	
 	private int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {
