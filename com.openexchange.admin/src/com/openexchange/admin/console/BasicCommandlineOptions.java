@@ -49,11 +49,16 @@
 package com.openexchange.admin.console;
 
 import java.rmi.NotBoundException;
+import java.util.ArrayList;
 
 import com.openexchange.admin.console.CmdLineParser.Option;
 
 
-
+/**
+ * 
+ * @author cutmasta,d7
+ *
+ */
 public abstract class BasicCommandlineOptions {
     
     protected static final int DEFAULT_CONTEXT=1;
@@ -94,6 +99,50 @@ public abstract class BasicCommandlineOptions {
     protected static void printInvalidInputMsg(String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
+    
+    
+    /**
+     * Prints out the given data as csv output.
+     * The first ArrayList contains the columns which describe the following data lines.<br><br>
+     * 
+     * Example output:<br><br>
+     * username,email,mycolumn<br>
+     * testuser,test@test.org,mycolumndata<br>
+     * 
+     * @param columns
+     * @param data
+     */
+    protected static void doCSVOutput(final ArrayList<String> columns, ArrayList<ArrayList<String>> data){
+        if(columns!=null && data!=null){
+            
+            // first prepare the columns line
+            StringBuilder sb = new StringBuilder();
+            for (String column_entry : columns) {
+                sb.append(column_entry);
+                sb.append(",");
+            }
+            // remove last ","
+            sb.deleteCharAt(sb.length()-1);
+            
+            // print the columns line
+            System.out.println(sb.toString()+"\n");            
+            
+            // now prepare all data lines
+            for (ArrayList<String> data_list : data) {
+                sb = new StringBuilder();
+                for (String data_column : data_list) {
+                    if(data_column!=null){
+                        sb.append("\""+data_column+"\"");
+                    }
+                    sb.append(",");
+                }
+                // remove trailing ","
+                sb.deleteCharAt(sb.length()-1);               
+                // print out data line with linebreak
+                System.out.println(sb.toString()+"\n");
+            }
+        }
+    }
     
     protected static void setRMI_HOSTNAME(String rmi_hostname) {       
         String host = rmi_hostname;
