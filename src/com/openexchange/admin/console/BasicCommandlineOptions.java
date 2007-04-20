@@ -206,7 +206,7 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected void setCSVOutputOption(final AdminParser admp) {
-        csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, true, false);
+        csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
     protected Option getAdminUserOption(final AdminParser admp) {
