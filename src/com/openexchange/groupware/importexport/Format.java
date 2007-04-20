@@ -93,6 +93,10 @@ public enum Format {
 				return f;
 			}
 		}
+		if(mimeType.equals("text/comma-separated-values"))
+			return CSV;
+		if(mimeType.equals("text/vcard"))
+			return VCARD;
 		return null;
 	}
 	

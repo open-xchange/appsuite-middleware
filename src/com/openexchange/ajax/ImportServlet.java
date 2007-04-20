@@ -179,12 +179,7 @@ public class ImportServlet extends ImportExport {
 	}
 	
 	protected boolean isKnownContentType(String mime) {
-		for(Format comp: Format.values()){
-			if( mime.equals( comp.getMimeType() ) ){
-				return true;
-			}
-		}
-		return false;
+		return Format.getFormatByMimeType(mime) != null;
 	}
 
 	/**
