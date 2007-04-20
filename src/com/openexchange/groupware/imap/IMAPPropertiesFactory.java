@@ -305,13 +305,13 @@ public class IMAPPropertiesFactory {
 			imapProps.setSmtpPort(smtpPort);
 			if (credSrc == null || credSrc.equalsIgnoreCase("session")) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
 			} else if (credSrc.equalsIgnoreCase("other")) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
 			} else if (credSrc.equalsIgnoreCase("user.imapLogin")) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
 			}
 		} else if (loginType.equalsIgnoreCase("anonymous")) {
 			String imapServer = userObj.getImapServer();
