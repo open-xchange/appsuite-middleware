@@ -321,6 +321,7 @@ public class JSONMessageHandler implements MessageHandler {
 		mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 		mao.setSize(formattedText.length());
 		msgObj.addMessageAttachment(mao);
+        textFound = true;
 		return true;
 	}
 
