@@ -78,6 +78,7 @@ public abstract class BasicCommandlineOptions {
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
     
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
+    protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
     
     protected static String RMI_HOSTNAME ="rmi://localhost";
     
@@ -205,7 +206,7 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected void setCSVOutputOption(final AdminParser admp) {
-        csvOutputOption = setLongOpt(admp, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, false);
+        csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, true, false);
     }
     
     protected Option getAdminUserOption(final AdminParser admp) {

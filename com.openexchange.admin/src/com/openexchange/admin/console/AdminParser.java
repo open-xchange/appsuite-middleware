@@ -158,8 +158,9 @@ public class AdminParser extends CmdLineParser {
             
             for (final OptionInfo optInfo : optinfolist) {          
                 String format_this = " %s,%-30s %s\n";
-                if(optInfo.shortForm==null){                    
-                    Object[] format_with_ = {"","--"+optInfo.longForm,optInfo.description};
+                if(optInfo.shortForm==null){  
+                    format_this = " %s %-30s %s\n";                 
+                    Object[] format_with_ = {"  ","--"+optInfo.longForm,optInfo.description};
                     System.err.format(format_this, format_with_);                
                 }else{
                     // example result :
