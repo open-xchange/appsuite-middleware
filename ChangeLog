@@ -1,3 +1,7 @@
+* 2007-04-20 - thorben.betten@open-xchange.com
+
+ - Allowing to subscribe/unsubscribe default folders
+
 * 2007-04-19 - thorben.betten@open-xchange.com
 
  - Added methods to update package (especially in class Updater) to check

@@ -4024,9 +4024,6 @@ public class MailInterfaceImpl implements MailInterface {
 				if (updateMe.getFullName().equalsIgnoreCase(INBOX)) {
 					throw new OXMailException(MailCode.NO_FOLDER_UPDATE, INBOX);
 				}
-				if (isDefaultFolder(updateMe.getFullName())) {
-					throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
-				}
 				/*
 				 * Is move operation?
 				 */
@@ -4040,6 +4037,9 @@ public class MailInterfaceImpl implements MailInterface {
 				final String newName = folderObj.getName();
 				final boolean rename = (!move && newName != null && !newName.equalsIgnoreCase(oldName));
 				if (move) {
+					if (isDefaultFolder(updateMe.getFullName())) {
+						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+					}
 					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(newParent) ? imapStore
 							.getDefaultFolder()
 							: imapStore.getFolder(newParent)));
@@ -4067,6 +4067,9 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Rename.
 					 */
+					if (isDefaultFolder(updateMe.getFullName())) {
+						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+					}
 					try {
 						if (IMAPProperties.isSupportsACLs() && ((updateMe.getType() & Folder.HOLDS_MESSAGES) > 0)
 								&& !updateMe.myRights().contains(Rights.Right.CREATE)) {
@@ -4128,6 +4131,9 @@ public class MailInterfaceImpl implements MailInterface {
 					ACL[] newACLs = folderObj.getACL();
 					if (equals(oldACLs, newACLs)) {
 						break ACLS;
+					}
+					if (isDefaultFolder(updateMe.getFullName())) {
+						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
 					try {
 						if (IMAPProperties.isSupportsACLs() && !updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
