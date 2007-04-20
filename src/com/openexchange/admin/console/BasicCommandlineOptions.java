@@ -133,9 +133,9 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected Option getContextOption(final AdminParser admp) {
-        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
+        contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
 //        retval.setArgName("Context ID");
-        return retval;
+        return contextOption;
     }
     
     protected Option getContextNameOption(final AdminParser admp) {
@@ -145,15 +145,15 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected Option getAdminPassOption(final AdminParser admp) {
-        final Option retval = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
+        adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
 //        retval.setArgName("Admin password");
-        return retval;
+        return adminPassOption;
     }
     
     protected Option getAdminUserOption(final AdminParser admp) {
-        final Option retval = setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
+        adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
 //        retval.setArgName("Admin username");
-        return retval;
+        return adminUserOption;
     }
     
     protected Option getSearchPatternOption(final AdminParser admp){
