@@ -135,7 +135,9 @@ public abstract class BasicCommandlineOptions {
                 sb = new StringBuilder();
                 for (String data_column : data_list) {
                     if(data_column!=null){
-                        sb.append("\""+data_column+"\"");
+                        sb.append("\"");
+                        sb.append(data_column);
+                        sb.append("\"");
                     }
                     sb.append(",");
                 }
