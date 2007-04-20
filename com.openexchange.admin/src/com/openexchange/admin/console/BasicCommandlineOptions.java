@@ -77,12 +77,15 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_SEARCHPATTERN_LONG = "searchpattern";
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
     
+    protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
+    
     protected static String RMI_HOSTNAME ="rmi://localhost";
     
     protected Option contextOption = null;
     protected Option adminUserOption = null;
     protected Option adminPassOption = null;
     protected Option searchOption = null;
+    protected Option csvOutputOption = null;
     
     protected static void printServerResponse(String msg){
         System.err.println("Server response:\n "+msg);    
@@ -138,7 +141,7 @@ public abstract class BasicCommandlineOptions {
                 }
                 // remove trailing ","
                 sb.deleteCharAt(sb.length()-1);               
-                // print out data line with linebreak
+                // print out data line with linessbreak
                 System.out.println(sb.toString()+"\n");
             }
         }
@@ -197,6 +200,10 @@ public abstract class BasicCommandlineOptions {
         adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
 //        retval.setArgName("Admin password");
         return adminPassOption;
+    }
+    
+    protected void setCSVOutputOption(final AdminParser admp) {
+        csvOutputOption = setLongOpt(admp, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, false);
     }
     
     protected Option getAdminUserOption(final AdminParser admp) {
