@@ -99,7 +99,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 
@@ -366,7 +366,11 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXConflictException(3,  fid, so.getContext().getContextId(),user);
 				//throw new OXException("saveContactObject() called with a non-Contact-Folder! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
-			final EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
+
+			OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, so.getUserConfiguration());
+			
+				//OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(4, fid, so.getContext().getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
@@ -637,14 +641,14 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXConflictException(10, co.getParentFolderID(), ctx.getContextId(), user);
 				//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(co.getParentFolderID(), user,group, ctx,uc, readcon);
+			OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
+			EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, uc);
+
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(11, co.getParentFolderID(), ctx.getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
-			if (!oclPerm.canCreateObjects()){
-				throw EXCEPTIONS.createOXPermissionException(12, co.getParentFolderID(), ctx.getContextId(), user);
-			}
+
 			if (!oclPerm.canWriteAllObjects()) {
 				if (oclPerm.canWriteOwnObjects()){
 					can_edit_only_own = true;
@@ -660,6 +664,10 @@ public class Contacts implements DeleteListener {
 			 *  Check Rights if this is a Move
 			 */
 			if(co.getParentFolderID() != fid){
+				if (!oclPerm.canCreateObjects()){
+					throw EXCEPTIONS.createOXPermissionException(12, co.getParentFolderID(), ctx.getContextId(), user);
+				}
+				
 				FolderObject source;
 				if (FolderCacheManager.isEnabled()){
 					source = FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, readcon);
@@ -670,7 +678,8 @@ public class Contacts implements DeleteListener {
 					throw EXCEPTIONS.createOXConflictException(13,fid, ctx.getContextId(), user);
 					//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid"+fid);
 				}
-				EffectivePermission op = OXFolderTools.getEffectiveFolderOCL(fid, user,group,ctx,uc, readcon);
+
+				final EffectivePermission op = oxfs.getFolderPermission(fid, user, uc);
 				
 				if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 					throw EXCEPTIONS.createOXPermissionException(14, fid, ctx.getContextId(), user);
@@ -2024,8 +2033,10 @@ public class Contacts implements DeleteListener {
 			}
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
-			}			
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId, user, group,ctx,uc, readCon);		
+			}
+			OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
+			EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
+
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				return false;
 			}	    		
@@ -2128,7 +2139,8 @@ public class Contacts implements DeleteListener {
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
 			}
-			EffectivePermission oclPerm = OXFolderTools.getEffectiveFolderOCL(folderId, user, group,ctx, uc, readCon);		
+			OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
+			EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				return false;
 			}	    		
