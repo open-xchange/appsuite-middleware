@@ -129,7 +129,7 @@ public abstract class BasicCommandlineOptions {
             sb.deleteCharAt(sb.length()-1);
             
             // print the columns line
-            System.out.println(sb.toString()+"\n");            
+            System.out.println(sb.toString());            
             
             // now prepare all data lines
             for (ArrayList<String> data_list : data) {
@@ -145,7 +145,7 @@ public abstract class BasicCommandlineOptions {
                 // remove trailing ","
                 sb.deleteCharAt(sb.length()-1);               
                 // print out data line with linessbreak
-                System.out.println(sb.toString()+"\n");
+                System.out.println(sb.toString());
             }
         }
     }
