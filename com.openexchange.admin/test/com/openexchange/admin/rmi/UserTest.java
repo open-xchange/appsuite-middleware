@@ -340,6 +340,7 @@ public class UserTest extends AbstractTest {
 
         usr.setCompany("test");
         usr.setSur_name("test");
+        usr.setEmail1(usr.getPrimaryEmail());
         System.out.println(usr.isCompanyset());
         user.change(new Context(1), usr, cred);
         final User usr2 = oxl.login2User(new Context(1), cred);
