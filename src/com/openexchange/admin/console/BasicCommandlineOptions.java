@@ -144,8 +144,10 @@ public abstract class BasicCommandlineOptions {
                     }
                     sb.append(",");
                 }
-                // remove trailing ","
-                sb.deleteCharAt(sb.length()-1);               
+                if(sb.length()>0){
+                    // remove trailing ","
+                    sb.deleteCharAt(sb.length()-1);
+                }
                 // print out data line with linessbreak
                 System.out.println(sb.toString());
             }
