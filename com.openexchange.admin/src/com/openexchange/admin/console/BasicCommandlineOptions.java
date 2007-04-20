@@ -125,8 +125,10 @@ public abstract class BasicCommandlineOptions {
                 sb.append(column_entry);
                 sb.append(",");
             }
-            // remove last ","
-            sb.deleteCharAt(sb.length()-1);
+            if(sb.length()>0){
+                // remove last ","
+                sb.deleteCharAt(sb.length()-1);
+            }
             
             // print the columns line
             System.out.println(sb.toString());            
