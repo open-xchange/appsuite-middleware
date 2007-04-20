@@ -5,12 +5,11 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
+import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -19,48 +18,32 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
- * @author d7
+ * @author d7,cutmasta
  *
  */
 public class RemoveReason extends UtilAbstraction {
-    private final static String GENERAL_UTILITY_NAME = "removeReason";
-
-    // Setting names for options
-    private final static String OPT_NAME_REASON_ID_SHORT = "r";
-    private final static String OPT_NAME_REASON_ID_LONG = "reasonid";
 
     public RemoveReason(final String[] args2) {
 
-        final CommandLineParser parser = new PosixParser();
+        AdminParser parser = new AdminParser("removereason");
 
-        final Options options = getOptions();
+        setOptions(parser);
 
         try {
-            final CommandLine cmd = parser.parse(options, args2);
+            parser.ownparse(args2);
 
-            final Credentials auth = new Credentials(cmd.getOptionValue(OPT_NAME_ADMINUSER_SHORT), cmd.getOptionValue(OPT_NAME_ADMINPASS_SHORT));
-
+            final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
+            
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
-            int reason_id = Integer.parseInt(cmd.getOptionValue(OPT_NAME_REASON_ID_SHORT));
+            int reason_id = Integer.parseInt((String)parser.getOptionValue(reasonIDOption));
             
             oxutil.deleteMaintenanceReason(new int[]{reason_id}, auth);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-        } catch (final org.apache.commons.cli.MissingArgumentException as) {
-            printError("Missing arguments on the command line: " + as.getMessage());
-            printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (final org.apache.commons.cli.UnrecognizedOptionException ux) {
-            printError("Unrecognized options on the command line: " + ux.getMessage());
-            printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (final org.apache.commons.cli.MissingOptionException mis) {
-            printError("Missing options on the command line: " + mis.getMessage());
-            printHelpText(GENERAL_UTILITY_NAME, options);
-        } catch (final ParseException e) {
-            e.printStackTrace();
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
         } catch (final RemoteException e) {
@@ -73,6 +56,15 @@ public class RemoveReason extends UtilAbstraction {
             printServerResponse(e.getMessage());
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
+        } catch (IllegalOptionValueException e) {            
+            printError("Illegal option value : " + e.getMessage());
+            parser.printUsage();
+        } catch (UnknownOptionException e) {
+            printError("Unrecognized options on the command line: " + e.getMessage());
+            parser.printUsage(); 
+        } catch (MissingOptionException e) {
+            printError(e.getMessage());
+            parser.printUsage();
         }
 
     }
@@ -81,12 +73,18 @@ public class RemoveReason extends UtilAbstraction {
         new RemoveReason(args);
     }
 
-    private Options getOptions() {
-        final Options retval = getDefaultCommandLineOptions();
+    private void setOptions(AdminParser parser) {
+        setDefaultCommandLineOptions(parser);
 
-        retval.addOption(addDefaultArgName(getShortLongOpt(OPT_NAME_REASON_ID_SHORT, OPT_NAME_REASON_ID_LONG, "the id for the reason to be deleted", true, true)));
-        return retval;
+        reasonIDOption = setShortLongOpt(parser, OPT_NAME_REASON_ID_SHORT,OPT_NAME_REASON_ID_LONG,"the id for the reason to be deleted",true, true);
+                
     }
+    
+    private Option reasonIDOption = null;
+    
+//  Setting names for options
+    private final static char OPT_NAME_REASON_ID_SHORT = 'r';
+    private final static String OPT_NAME_REASON_ID_LONG = "reasonid";
 
 
 }
