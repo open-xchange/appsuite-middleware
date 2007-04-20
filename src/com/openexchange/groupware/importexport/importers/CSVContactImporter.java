@@ -91,14 +91,16 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.PROGRAMMING_ERROR,
 		Category.PROGRAMMING_ERROR,
+		Category.USER_INPUT,
 		Category.USER_INPUT},
-	desc={"","","", ""}, 
-	exceptionId={0,1,2,3}, 
+	desc={"","","", "", ""}, 
+	exceptionId={0,1,2,3, 4}, 
 	msg={
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
-		"Could not find the following fields %s"})
+		"Could not find the following fields %s",
+		"Does not appear to be a CSV file"})
 		
 public class CSVContactImporter implements Importer {
 
@@ -150,7 +152,9 @@ public class CSVContactImporter implements Importer {
 		}
 		String folder = folders.get(0);
 		String csvStr = transformInputStreamToString(is);
-		List <List <String> >csv = new CSVParser().parse(csvStr);
+		CSVParser csvParser = new CSVParser();
+		List <List <String> >csv = csvParser.parse(csvStr);
+		
 		Iterator< List<String> > iter = csv.iterator();
 		//get header fields
 		List<String> fields = (List<String>) iter.next();

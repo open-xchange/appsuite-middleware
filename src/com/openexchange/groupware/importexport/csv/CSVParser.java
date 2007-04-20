@@ -83,7 +83,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 	desc={"",""}, 
 	exceptionId={0,1}, 
 	msg={
-		"Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d",
+		"Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?",
 		"Illegal state: Found data after presumed last line."})
 public class CSVParser {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVParser.class);
@@ -136,8 +136,8 @@ public class CSVParser {
 							numberOfCells = currentLine.size();
 							structure.add(currentLine);
 						} else if(numberOfCells != currentLine.size() ){
-							//throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
-							unparsableLines.add(currentLineNumber-1);
+							throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+							//unparsableLines.add(currentLineNumber-1);
 						} else {
 							structure.add(currentLine);
 						}
