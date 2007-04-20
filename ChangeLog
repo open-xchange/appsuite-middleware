@@ -1,3 +1,8 @@
+* 2007-04-20 - ben.pahne@open-xchange.com
+
+- Fixed Bug #6779: Users can now edit their own information in the global
+   address book
+
 * 2007-04-20 - thorben.betten@open-xchange.com
 
  - Allowing to subscribe/unsubscribe default folders
