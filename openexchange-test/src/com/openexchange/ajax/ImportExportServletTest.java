@@ -141,6 +141,26 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		removeFolder(folderId);
 	}
 	
+	public void testCSVBrokenFile() throws Exception{
+		//preparations
+		final String insertedCSV = "bla\nbla,bla";
+		final Format format = Format.CSV;
+		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
+		
+		//test: import
+		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+		WebConversation webconv = getWebConversation();
+		WebRequest req = new PostMethodWebRequest(
+				getUrl(IMPORT_SERVLET, folderId, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "contacts.csv", is, format.getMimeType());
+		WebResponse webRes = webconv.getResource(req);
+		JSONObject response = extractFromCallback( webRes.getText() );
+		assertNotSame("Must contain error ", "I_E-1000", response.optString("code"));
+		
+	}
+	
 	private int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {
 		final FolderObject folderObj = com.openexchange.ajax.FolderTest
 		.getStandardCalendarFolder(getWebConversation(),

@@ -159,6 +159,19 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		}
 	}
 	
+	@Test public void importBullshit(){
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		InputStream is = new ByteArrayInputStream( "Bla\nbla,bla".getBytes() );
+
+		try {
+			imp.importData(sessObj, Format.CSV, is, folders, null);
+		} catch (ImportExportException e) {
+			assertTrue(true);
+			return;
+		}
+		fail("Should throw exception");
+	}
+	
 	/*
 	 * Currently, the API allows for duplicate entries...
 	 */

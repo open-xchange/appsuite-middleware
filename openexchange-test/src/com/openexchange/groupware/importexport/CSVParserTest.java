@@ -102,13 +102,19 @@ public class CSVParserTest {
 		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3);
 	}
 	
-	@Test public void parseBugged() throws ImportExportException{
+	@Test public void parseBugged() {
 		parser = new CSVParser(UNEVEN_TEST );
-		parser.parse();
-		List<Integer> unparsableLines = parser.getUnparsableLineNumbers();
-		assertEquals("Should have two unparsable lines", unparsableLines.size(), 2);
-		assertEquals("First wrong line" , "content 1", parser.getLine(unparsableLines.get(0)));
-		assertEquals("Second wrong line" , "content1, content2,content3", parser.getLine(unparsableLines.get(1)));
+		try {
+			parser.parse();
+		} catch (ImportExportException e){
+			assertTrue("Exception caught" , true);
+			return;
+		}
+		fail("Unparsable CSV given, but no exception thrown!");
+//		List<Integer> unparsableLines = parser.getUnparsableLineNumbers();
+//		assertEquals("Should have two unparsable lines", unparsableLines.size(), 2);
+//		assertEquals("First wrong line" , "content 1", parser.getLine(unparsableLines.get(0)));
+//		assertEquals("Second wrong line" , "content1, content2,content3", parser.getLine(unparsableLines.get(1)));
 		
 	}
 	
