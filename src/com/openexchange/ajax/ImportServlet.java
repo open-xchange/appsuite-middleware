@@ -84,12 +84,14 @@ import com.openexchange.groupware.upload.UploadFile;
 @OXThrowsMultiple(
 	category = { 
 		Category.USER_INPUT, 
-		Category.USER_INPUT }, 
-	desc = { "" , "" }, 
-	exceptionId = { 0,1 }, 
+		Category.USER_INPUT,
+		Category.USER_INPUT}, 
+	desc = { "" , "" , ""}, 
+	exceptionId = { 0,1,2 }, 
 	msg = { 
 		"Can only handle one file, not %s",
-		"Unknown format: %s"})
+		"Unknown format: %s",
+		"Uploaded file is of type %s, cannot handle that"})
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.IMPORTSERVLET, 
 		component=Component.IMPORT_EXPORT)
@@ -137,6 +139,11 @@ public class ImportServlet extends ImportExport {
 				}
 				final UploadFile uf = iter.next();
 				
+				//checking content type of file for additional security
+				if(! isKnownContentType( uf.getContentType() ) ){
+					sendResponse(EXCEPTIONS.create(2, uf.getContentType()), resp);
+				}
+				
 				//actual import
 				importResult = importerExporter.importData(
 					getSessionObject(req), format, new FileInputStream(uf.getTmpFile()), folders, req.getParameterMap());
@@ -171,6 +178,15 @@ public class ImportServlet extends ImportExport {
 		}
 	}
 	
+	protected boolean isKnownContentType(String mime) {
+		for(Format comp: Format.values()){
+			if( mime.equals( comp.getMimeType() ) ){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Send JSON object through response
 	 * @param jsonObj

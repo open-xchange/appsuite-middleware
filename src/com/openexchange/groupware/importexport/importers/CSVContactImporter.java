@@ -94,13 +94,13 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.USER_INPUT},
 	desc={"","","", "", ""}, 
-	exceptionId={0,1,2,3, 4}, 
+	exceptionId={0,1,2,3,4}, 
 	msg={
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
 		"Could not find the following fields %s",
-		"Does not appear to be a CSV file"})
+		"Could not translate a single column title. Is this a valid CSV file?"})
 		
 public class CSVContactImporter implements Importer {
 
@@ -158,6 +158,9 @@ public class CSVContactImporter implements Importer {
 		Iterator< List<String> > iter = csv.iterator();
 		//get header fields
 		List<String> fields = (List<String>) iter.next();
+		if ( ! _atLeastOneCorrectField(fields) ){
+			throw EXCEPTIONS.create(4);
+		}
 		
 		//reading entries...
 		List<ImportResult> results = new LinkedList<ImportResult>();
@@ -172,6 +175,16 @@ public class CSVContactImporter implements Importer {
 		return results;
 	}
 	
+	protected boolean _atLeastOneCorrectField(List<String> fields) {
+		for(String fieldname : fields){
+			if(getRelevantField(fieldname) != null){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	/**
 	 * 
 	 * @param fields Headers of the table; column title
