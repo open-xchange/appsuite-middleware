@@ -306,6 +306,7 @@ public class JSONMessageHandler implements MessageHandler {
 			textFound = true;
 			return true;
 		}
+		textFound = true;
 		final boolean isEnriched = MIME_TEXT_ENRICHED.equals(baseContentType.toLowerCase(Locale.ENGLISH));
 		final String plainTextContent;
 		if (isEnriched) {
