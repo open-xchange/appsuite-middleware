@@ -528,14 +528,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage {
     }
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResourceGroup(int,
-     *      java.lang.String, int)
-     */
-    public boolean existsResourceGroup(final Context ctx, final String identifier, final int resource_group) throws StorageException {
-        return selectwithintstringint(ctx.getIdAsInt(), "SELECT id FROM resource_group WHERE cid = ? AND identifier = ? OR id = ?", ctx.getIdAsInt(), identifier, resource_group);
-    }
-
-    /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
      */
     public boolean existsServer(final int server_id) throws StorageException {
