@@ -49,7 +49,9 @@
 package com.openexchange.admin.console.user;
 
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
@@ -59,6 +61,50 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
+    protected class MethodAndNames {
+        private Method method;
+        
+        private String name;
+        
+        private String returntype;
+        
+        /**
+         * @param method
+         * @param name
+         */
+        public MethodAndNames(final Method method, final String name, final String returntype) {
+            super();
+            this.method = method;
+            this.name = name;
+            this.returntype = returntype;
+        }
+        
+        public Method getMethod() {
+            return this.method;
+        }
+        
+        public void setMethod(final Method method) {
+            this.method = method;
+        }
+        
+        public String getName() {
+            return this.name;
+        }
+        
+        public void setName(final String name) {
+            this.name = name;
+        }
+        
+        public final void setReturntype(final String returntype) {
+            this.returntype = returntype;
+        }
+        
+        public final String getReturntype() {
+            return this.returntype;
+        }
+        
+    }
+
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "userid";
     protected static final char OPT_USERNAME_SHORT = 'u';
@@ -83,6 +129,14 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String OPT_COMPANY_LONG = "company";
     protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
+    
+    protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
+    protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
+    protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
+    protected static final String JAVA_UTIL_DATE = "java.util.Date";
+    protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
+    protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
+    protected static final String JAVA_LANG_STRING = "java.lang.String";
     
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
@@ -156,4 +210,47 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected void setAliasesOption(final AdminParser admp){
         aliasesOption =  setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
+
+    protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
+        final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
+    
+        // Here we define which methods we don't want to get
+        final HashSet<String> notallowed = new HashSet<String>();
+        notallowed.add("test");
+    
+        // Define the returntypes we search for
+        final HashSet<String> returntypes = new HashSet<String>(7);
+        returntypes.add(JAVA_LANG_STRING);
+        returntypes.add(JAVA_LANG_INTEGER);
+        returntypes.add(JAVA_LANG_BOOLEAN);
+        returntypes.add(JAVA_UTIL_DATE);
+        returntypes.add(JAVA_UTIL_HASH_SET);
+        returntypes.add(JAVA_UTIL_TIME_ZONE);
+        returntypes.add(PASSWORDMECH_CLASS);
+    
+        // First we get all the getters of the user data class
+        for (final Method method : theMethods) {
+            final String methodname = method.getName();
+    
+            if (methodname.startsWith("get")) {
+                final String methodnamewithoutprefix = methodname.substring(3);
+                if (!notallowed.contains(methodnamewithoutprefix)) {
+                    final String returntype = method.getReturnType().getName();
+                    if (returntypes.contains(returntype)) {
+                        retlist.add(new MethodAndNames(method, methodnamewithoutprefix, returntype));
+                    }
+                }
+            } else if (methodname.startsWith("is")) {
+                final String methodnamewithoutprefix = methodname.substring(2);
+                if (!notallowed.contains(methodnamewithoutprefix)) {
+                    final String returntype = method.getReturnType().getName();
+                    if (returntypes.contains(returntype)) {
+                        retlist.add(new MethodAndNames(method, methodnamewithoutprefix, returntype));
+                    }
+                }
+            }
+        }
+        return retlist;
+    }
 }
+
