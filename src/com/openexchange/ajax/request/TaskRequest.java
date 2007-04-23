@@ -113,7 +113,6 @@ public class TaskRequest {
 		Task.COMPANIES,
 		Task.CURRENCY,
 		Task.DATE_COMPLETED,
-		Task.IN_PROGRESS,
 		Task.PERCENT_COMPLETED,
 		Task.PRIORITY,
 		Task.STATUS,
