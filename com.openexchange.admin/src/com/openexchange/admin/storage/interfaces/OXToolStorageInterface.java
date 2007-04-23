@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.interfaces;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 import java.lang.reflect.Constructor;
@@ -203,4 +204,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
 
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
+    
+    public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+
+    public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 }
