@@ -50,7 +50,6 @@ package com.openexchange.admin.daemons;
 
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXGroupInterface;
-//import com.openexchange.admin.rmi.OXResourceGroupInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -76,7 +75,6 @@ import org.osgi.framework.BundleListener;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 
-//import com.openexchange.admin.dataSource.I_OXResourceGroup;
 
 public class AdminDaemon {
 
@@ -152,8 +150,6 @@ public class AdminDaemon {
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
             
-//            oxresgrp_v2 = new com.openexchange.admin.rmi.impl.OXResourceGroup();
-//            OXResourceGroupInterface oxresgrp_stub_v2 = (OXResourceGroupInterface) UnicastRemoteObject.exportObject(oxresgrp_v2, 0);
 
             // END of NEW export
 
@@ -162,7 +158,6 @@ public class AdminDaemon {
     	    registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
     	    registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
     	    registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
-//            registry.bind(OXResourceGroupInterface.RMI_NAME, oxresgrp_stub_v2);
 
     	} catch (RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
@@ -177,7 +172,6 @@ public class AdminDaemon {
             registry.unbind(OXGroupInterface.RMI_NAME);
             registry.unbind(OXResourceInterface.RMI_NAME);
             registry.unbind(OXLoginInterface.RMI_NAME);
-//            registry.unbind(OXResourceGroupInterface.RMI_NAME);
             
         } catch (AccessException e) {
             log.error("Error unregistering RMI", e);
