@@ -131,16 +131,20 @@ public final class folders extends XmlServlet {
 						} else {
 							folderobject.setParentFolderID(inFolder);
 						}
-
+						
 						folderobject = foldersql.saveFolderObject(folderobject, lastModified);
 						break;
 					case DataParser.DELETE:
+						if (lastModified == null) {
+							throw new OXMandatoryFieldException("missing field last_modified");
+						}
+						
 						foldersql.deleteFolderObject(folderobject, lastModified);
 						break;
 					default:
 						throw new OXConflictException(_invalidMethodError);
 				}
-
+				
 				writeResponse(folderobject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
 			} catch (OXMandatoryFieldException exc) {
 				LOG.debug(_parsePropChilds, exc);
