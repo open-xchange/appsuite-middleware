@@ -65,6 +65,7 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
@@ -1382,7 +1383,7 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             ps.setInt(1,ctx.getIdAsInt().intValue());
             rs = ps.executeQuery();
             if( ! rs.next() ) {
-                throw new StorageException("Unable to determine Database update status");
+                throw new SQLException("Unable to determine Database update status");
             }
             schema = rs.getString("db_schema");
             writePoolId = rs.getInt("write_db_pool_id");
@@ -1429,6 +1430,88 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         } catch (UpdateException e) {
             log.error("UpdateCheck Error",e);
             throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT bits FROM user_setting_mail WHERE cid = ? AND user = ?");
+            stmt.setInt(1, ctx.getIdAsInt());
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int bits = rs.getInt("bits");
+                if( (bits & bit) == bit ) {
+                    return true;
+                } else
+                    return false;
+            } else {
+                throw new SQLException("Unable to get features from bitfield for User: " + user.getId() + ", Context: " + ctx.getIdAsInt());
+            }
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+    }
+
+    @Override
+    public void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT bits FROM user_setting_mail WHERE cid = ? AND user = ?");
+            stmt.setInt(1, ctx.getIdAsInt());
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int bits = rs.getInt("bits");
+                rs.close();
+                stmt.close();
+                bits |= bit;
+                stmt = con.prepareStatement("UPDATE user_setting_mail SET bits = ? WHERE cid = ? AND user = ?");
+                stmt.setInt(1, bits);
+                stmt.setInt(2, ctx.getIdAsInt());
+                stmt.setInt(3, user.getId());
+                stmt.executeUpdate();
+            } else {
+                throw new SQLException("Unable to set features from bitfield for User: " + user.getId() + ", Context: " + ctx.getIdAsInt());
+            }
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
         }
     }
 }

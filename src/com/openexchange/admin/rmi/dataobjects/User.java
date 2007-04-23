@@ -218,6 +218,9 @@ public class User implements Serializable, Cloneable {
     private String mail_folder_confirmed_ham_name;
     private boolean mail_folder_confirmed_ham_nameset = false;
 
+    private Boolean spam_filter_enabled;
+    private boolean spam_filter_enabledset = false;
+    
     private String manager_name;
     private boolean manager_nameset = false;
 
@@ -2470,6 +2473,9 @@ public class User implements Serializable, Cloneable {
      */
     public final void setMail_folder_confirmed_ham_name(
             String mail_folder_confirmed_ham_name) {
+        if( mail_folder_confirmed_ham_name != null ) {
+            this.mail_folder_confirmed_ham_nameset = true;
+        }
         this.mail_folder_confirmed_ham_name = mail_folder_confirmed_ham_name;
     }
 
@@ -2485,6 +2491,9 @@ public class User implements Serializable, Cloneable {
      */
     public final void setMail_folder_confirmed_spam_name(
             String mail_folder_confirmed_spam_name) {
+        if( mail_folder_confirmed_spam_name != null ) {
+            this.mail_folder_confirmed_ham_nameset = true;
+        }
         this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
     }
     
@@ -2494,5 +2503,26 @@ public class User implements Serializable, Cloneable {
 
     public boolean isMail_folder_confirmed_hamset() {
         return mail_folder_confirmed_ham_nameset;
+    }
+
+    public boolean isSpam_filter_enabledset() {
+        return spam_filter_enabledset;
+    }
+
+    /**
+     * @return the spam_filter_enabled
+     */
+    public final Boolean getSpam_filter_enabled() {
+        return spam_filter_enabled;
+    }
+
+    /**
+     * @param spam_filter_enabled the spam_filter_enabled to set
+     */
+    public final void setSpam_filter_enabled(Boolean spam_filter_enabled) {
+        if( spam_filter_enabled != null ) {
+            this.spam_filter_enabledset = true;
+        }
+        this.spam_filter_enabled = spam_filter_enabled;
     }
 }
