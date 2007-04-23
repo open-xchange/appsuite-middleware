@@ -964,14 +964,20 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			imapCon.close();
 			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-			LOCK_CON.lock();
 			try {
-				LOCK_CON_CONDITION.signalAll();
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Sending signal to possible waiting threads");
+				if (IMAPProperties.getMaxNumOfIMAPConnections() > 0) {
+					LOCK_CON.lock();
+					try {
+						LOCK_CON_CONDITION.signalAll();
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("Sending signal to possible waiting threads");
+						}
+					} finally {
+						LOCK_CON.unlock();
+					}
 				}
-			} finally {
-				LOCK_CON.unlock();
+			} catch (IMAPException e) {
+				throw new MessagingException(e.getMessage(), e);
 			}
 			return true;
 		}

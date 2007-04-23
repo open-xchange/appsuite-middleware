@@ -662,6 +662,9 @@ public class IMAPUtils {
 				prev = current;
 			}
 		}
+		if (continguous) {
+			sb.append(':').append(prev);
+		}
 		return sb.toString();
 	}
 
@@ -2322,7 +2325,9 @@ public class IMAPUtils {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(msgs[0].getMessageNumber());
 		for (int i = 1; i < msgs.length; i++) {
-			sb.append(',').append(msgs[i].getMessageNumber());
+			if (msgs[i] != null) {
+				sb.append(',').append(msgs[i].getMessageNumber());
+			}
 		}
 		/*
 		 * Split into fitting blocks

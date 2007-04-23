@@ -3,6 +3,7 @@
  - Fixed bug when an instance of MailFolderObject is constructed from an
    IMAPFolder object: getType() implicitely calls checkExists() which may
    throw a FolderNotFoundException.
+ - Bugfix #6785: Portal view of mails behaves correct.
 #################### ATTENTION ! #####################
   - CONFIG change: New property in 'imap.properties' to define socket I/O
     timeout value in milliseconds
