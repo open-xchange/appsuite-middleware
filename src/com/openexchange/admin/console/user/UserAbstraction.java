@@ -130,6 +130,8 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
     
+    protected static final String OPT_EXTENDED_LONG = "extendedoptions";
+    
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
@@ -139,7 +141,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String OPT_IMAPONLY_LONG = "imap";
     protected static final String OPT_DBONLY_LONG = "db";
-    
     
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
@@ -155,6 +156,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option idOption = null;
     protected Option imapOnlyOption = null;
     protected Option dbOnlyOption = null;
+    protected Option extendedOption = null;
     
     protected void printExtensionsError(User usr){
         //+ loop through extensions and check for errors       
@@ -213,7 +215,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     }
 
     protected void setAliasesOption(final AdminParser admp){
-        aliasesOption =  setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
+        aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
     
     protected void setImapOnlyOption(final AdminParser admp){
@@ -222,6 +224,10 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     
     protected void setDBOnlyOption(final AdminParser admp){
         dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Create/Delete only in Database system", false, false); 
+    }
+    
+    protected void setExtendedOption(final AdminParser admp) {
+        extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options", false, false);
     }
 
     protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
@@ -262,6 +268,43 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
                     }
                 }
             }
+        }
+        return retlist;
+    }
+    
+    protected ArrayList<MethodAndNames> getSetters(final Method[] theMethods) {
+        final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
+        
+        // Here we define which methods we don't want to get
+        final HashSet<String> notallowed = new HashSet<String>();
+        notallowed.add("test");
+        
+        // Define the returntypes we search for
+        final HashSet<String> allowedparametertypes = new HashSet<String>(7);
+        allowedparametertypes.add(JAVA_LANG_STRING);
+        allowedparametertypes.add(JAVA_LANG_INTEGER);
+        allowedparametertypes.add(JAVA_LANG_BOOLEAN);
+        allowedparametertypes.add(JAVA_UTIL_DATE);
+        allowedparametertypes.add(JAVA_UTIL_HASH_SET);
+        allowedparametertypes.add(JAVA_UTIL_TIME_ZONE);
+        allowedparametertypes.add(PASSWORDMECH_CLASS);
+        
+        // First we get all the getters of the user data class
+        for (final Method method : theMethods) {
+            final String methodname = method.getName();
+            
+            if (methodname.startsWith("set")) {
+                final String methodnamewithoutprefix = methodname.substring(3);
+                if (!notallowed.contains(methodnamewithoutprefix)) {
+                    final Class[] parametertypes = method.getParameterTypes();
+                    if (parametertypes.length == 1) {
+                        final String parametertype = parametertypes[0].getName();
+                        if (allowedparametertypes.contains(parametertype)) {
+                            retlist.add(new MethodAndNames(method, methodnamewithoutprefix, parametertype));
+                        }
+                    }
+                }
+            } 
         }
         return retlist;
     }
