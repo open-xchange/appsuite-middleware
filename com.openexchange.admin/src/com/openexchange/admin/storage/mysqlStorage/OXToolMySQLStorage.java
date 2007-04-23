@@ -1377,7 +1377,7 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         String schema = null;
         int writePoolId = -1;
         try {
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            con = cache.getWRITEConnectionForCONFIGDB();
             ps = con.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid = ?");
             ps.setInt(1,ctx.getIdAsInt().intValue());
             rs = ps.executeQuery();
@@ -1412,7 +1412,7 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             }
 
             try {
-                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+                cache.pushConfigDBWrite(con);
             } catch (PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
