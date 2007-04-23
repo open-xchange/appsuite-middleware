@@ -116,7 +116,7 @@ public abstract class BasicCommandlineOptions {
      * @param columns
      * @param data
      */
-    protected static void doCSVOutput(final ArrayList<String> columns, ArrayList<ArrayList<String>> data){
+    protected static void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
         if(columns!=null && data!=null){
             
             // first prepare the columns line
@@ -166,7 +166,7 @@ public abstract class BasicCommandlineOptions {
         
     }
    
-    protected Option setLongOpt(final AdminParser admp,final String longopt, final String description, final boolean hasarg, final boolean required) {
+    protected Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
         
         final Option retval = admp.addOption(longopt, longopt, description, required,hasarg);
 //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
@@ -174,6 +174,12 @@ public abstract class BasicCommandlineOptions {
 //            retval.hasArg();
 //        }
 //        retval.setRequired(required);
+        return retval;
+    }
+
+    protected Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+        
+        final Option retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
         return retval;
     }
 
