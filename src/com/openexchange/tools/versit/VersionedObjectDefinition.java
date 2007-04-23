@@ -119,7 +119,12 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 			throws IOException {
 		final Scanner s = (Scanner) reader;
 		Property property = Definition.parseProperty(s);
-		while (property != null && !property.name.equalsIgnoreCase("END")) {
+		while (property != null) {
+			if (property.name.equalsIgnoreCase("END")) {
+				if (((String) property.getValue()).equalsIgnoreCase(object.name)) {
+					break;
+				}
+			}
 			if (property.name.equalsIgnoreCase("BEGIN")) {
 				final String childName = ((String) property.getValue()).toUpperCase();
 				final VersitDefinition def = Definition.getChildDef(childName);
