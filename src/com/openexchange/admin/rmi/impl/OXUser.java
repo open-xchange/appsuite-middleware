@@ -69,6 +69,7 @@ import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -127,7 +128,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || usr==null || access==null){
             throw new InvalidDataException();            
@@ -141,6 +142,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
+        }
+
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         checkCreateUserData(ctx, usr, this.prop);
@@ -274,7 +279,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || usrdata==null|| usrdata.getId()==null){
             throw new InvalidDataException();
@@ -291,6 +296,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new NoSuchContextException();
         }
 
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+        
         if (!tools.existsUser(ctx, usrdata.getId())) {
             throw new InvalidDataException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
         }
@@ -326,12 +335,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         delete(ctx, new User[]{user}, auth);
     }
 
     public void delete(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || users ==null){
             throw new InvalidDataException();            
@@ -346,6 +355,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
             
+        }
+
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         final int[] user_ids = getUserIdArrayFromUsers(users);
@@ -420,7 +433,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null){
             throw new InvalidDataException();            
@@ -436,6 +449,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
         }
 
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         if (!tools.existsUser(ctx, user_id)) {
             throw new InvalidDataException("No such user " + user_id + " in context " + ctx.getIdAsInt());
            
@@ -447,7 +464,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
     
         if(ctx==null || moduleAccess ==null){
             throw new InvalidDataException();            
@@ -464,6 +481,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
            
         }
 
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         if (!tools.existsUser(ctx, user_id)) {
             throw new InvalidDataException("No such user " + user_id + " in context " + ctx.getIdAsInt());
             
@@ -475,7 +496,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null){
             throw new InvalidDataException();            
@@ -491,17 +512,21 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
            
         }
 
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getAll(ctx);
 
     }
 
-    public User getData(Context ctx, int user_id, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
+    public User getData(Context ctx, int user_id, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new int[]{user_id}, auth)[0];
     }
 
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         
         if (ctx==null||user_ids==null) {
             throw new InvalidDataException();
@@ -515,12 +540,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return getData(ctx, users, auth);
     }
 
-    public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {
+    public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new User[]{user}, auth)[0];
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException {        
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
       
         if (ctx==null || ctx.getIdAsInt()==null || users ==null) {
             throw new InvalidDataException(); 
@@ -534,6 +559,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();            
+        }
+
+        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
         
         for (final User usr : users) {
