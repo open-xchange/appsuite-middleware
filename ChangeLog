@@ -1,7 +1,7 @@
 * 2007-04-23 - thorben.betten@open-xchange.com
 
  - Fixed bug when an instance of MailFolderObject is constructed from an
-   IMAPFolder object: getType() implictely calls checkExists() which may
+   IMAPFolder object: getType() implicitely calls checkExists() which may
    throw a FolderNotFoundException.
 
 * 2007-04-23 - tobias.prinz@open-xchange.com
