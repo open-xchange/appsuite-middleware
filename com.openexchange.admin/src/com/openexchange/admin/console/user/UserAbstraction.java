@@ -138,6 +138,8 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String OPT_IMAPONLY_LONG = "imap";
+    protected static final String OPT_DBONLY_LONG = "db";
+    
     
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
@@ -152,6 +154,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option aliasesOption = null;
     protected Option idOption = null;
     protected Option imapOnlyOption = null;
+    protected Option dbOnlyOption = null;
     
     protected void printExtensionsError(User usr){
         //+ loop through extensions and check for errors       
@@ -215,6 +218,10 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     
     protected void setImapOnlyOption(final AdminParser admp){
         imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Create/Delete only IMAP account of the user", false, false); 
+    }
+    
+    protected void setDBOnlyOption(final AdminParser admp){
+        dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Create/Delete only in Database system", false, false); 
     }
 
     protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
