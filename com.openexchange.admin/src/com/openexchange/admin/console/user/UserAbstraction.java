@@ -52,6 +52,8 @@ package com.openexchange.admin.console.user;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
@@ -330,5 +332,80 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
             System.exit(0);
         }
     }
+
+    /**
+     * Get the mandatory options from the command line and set's them in the user object
+     * 
+     * @param parser The parser object
+     * @param usr User object which will be changed
+     */
+    protected final void setMandatoryOptionsinUser(final AdminParser parser, User usr) {
+        final String optionValue = (String) parser.getOptionValue(userNameOption);
+        if (null != optionValue) {
+            usr.setUsername(optionValue);
+        }        
+        final String optionValue2 = (String) parser.getOptionValue(displayNameOption);
+        if (null != optionValue2) {
+            usr.setDisplay_name(optionValue2);
+        }        
+        final String optionValue3 = (String) parser.getOptionValue(givenNameOption);
+        if (null != optionValue3) {
+            usr.setGiven_name(optionValue3);
+        }        
+        final String optionValue4 = (String) parser.getOptionValue(surNameOption);
+        if (null != optionValue4) {
+            usr.setSur_name(optionValue4);
+        }        
+        final String optionValue5 = (String) parser.getOptionValue(passwordOption);
+        if (null != optionValue5) {
+            usr.setPassword(optionValue5);
+        }        
+        final String optionValue6 = (String) parser.getOptionValue(primaryMailOption);
+        if (null != optionValue6) {
+            usr.setPrimaryEmail(optionValue6);
+            usr.setEmail1(optionValue6);
+        }        
+    }
+
+    /**
+     * Get the optional options from the command line and set's them in the user object
+     * 
+     * @param parser The parser object
+     * @param usr User object which will be changed
+     */
+    protected final void setOptionalOptionsinUser(final AdminParser parser, User usr) {
+        final String optionValue = (String) parser.getOptionValue(companyOption);
+        if (null != optionValue) {
+            usr.setCompany(optionValue);
+        }
+    
+        final String optionValue2 = (String) parser.getOptionValue(departmentOption);
+        if (null != optionValue2) {
+            usr.setDepartment(optionValue2);
+        }
+    
+        final String optionValue3 = (String) parser.getOptionValue(languageOption);
+        if (null != optionValue3) {
+            String[] lange = optionValue3.split("_");
+            if (lange != null && lange.length == 2) {
+                usr.setLanguage(new Locale(lange[0].toLowerCase(), lange[1].toUpperCase()));
+            }
+        }
+    
+        final String optionValue4 = (String) parser.getOptionValue(timezoneOption);
+        if (null != optionValue4) {
+            usr.setTimezone(TimeZone.getTimeZone(optionValue4));
+        }
+    
+        final String aliasOpt = (String) parser.getOptionValue(aliasesOption);
+        if (null != aliasOpt) {
+            final HashSet<String> aliases = new HashSet<String>();
+            for (final String alias : aliasOpt.split(",")) {
+                aliases.add(alias.trim());
+            }
+            usr.setAliases(aliases);
+        }
+    }
+
 }
 
