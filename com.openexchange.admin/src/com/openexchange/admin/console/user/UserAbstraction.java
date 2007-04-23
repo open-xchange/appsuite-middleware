@@ -141,6 +141,12 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String OPT_IMAPONLY_LONG = "imap";
     protected static final String OPT_DBONLY_LONG = "db";
+    protected static final String OPT_IMAP_QUOTA_LONG = "imapquota";
+    protected static final char OPT_IMAP_QUOTA_SHORT = 'I';
+    protected static final String OPT_NO_INET_MAIL_ACCESS_LONG = "inetmailaccess";
+    protected static final char OPT_NO_INET_MAIL_ACCESS_SHORT = 'M';
+    protected static final char OPT_SPAM_FILTER_ENABLE_SHORT = 'S';
+    protected static final String OPT_SPAM_FILTER_ENABLE_LONG = "spamfilter";
     
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
@@ -157,6 +163,9 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option imapOnlyOption = null;
     protected Option dbOnlyOption = null;
     protected Option extendedOption = null;
+    protected Option imapQuotaOption = null;
+    protected Option inetMailAccessOption = null;
+    protected Option spamFilterOption = null;
     
     protected void printExtensionsError(User usr){
         //+ loop through extensions and check for errors       
@@ -227,7 +236,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setExtendedOption(final AdminParser admp) {
-        extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options", false, false);
+        extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
     }
 
     protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
