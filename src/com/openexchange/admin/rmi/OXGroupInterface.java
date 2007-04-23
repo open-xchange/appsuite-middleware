@@ -52,6 +52,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -86,9 +87,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException if the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     /**
      * Create new group in given context.
@@ -102,9 +104,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public int create(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     
     /**
@@ -119,9 +122,10 @@ public interface OXGroupInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @return The Group with its data.
+     * @throws DatabaseUpdateException 
      */
     public Group get(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
   
     /**
@@ -135,9 +139,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void change(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;    
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;    
     
     
     /**
@@ -151,9 +156,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final Group[] grps, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     /**
      * Convenience method for deleting group within given context.
@@ -166,9 +172,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     /**
      * Adds a new member to the group within given context.
@@ -182,9 +189,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void addMember(final Context ctx, final Group grp, int [] member_ids, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     
     /**
@@ -199,9 +207,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void removeMember(final Context ctx, final Group grp, int[] member_ids, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
    
     /**
@@ -216,9 +225,10 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public int[] getMembers(final Context ctx,final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     
     /**
@@ -233,8 +243,9 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
 }
