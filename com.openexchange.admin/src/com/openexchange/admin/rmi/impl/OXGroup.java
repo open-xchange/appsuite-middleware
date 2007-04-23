@@ -70,6 +70,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -101,7 +102,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
    
     public int create(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || grp==null){
             throw new InvalidDataException();
@@ -114,6 +115,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
         if (!grp.attributesforcreateset()) {
             throw new InvalidDataException("Mandatory fields not set");           
@@ -183,7 +187,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
   
     public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
     
         if(ctx==null){
             throw new InvalidDataException();
@@ -202,6 +206,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();          
         }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.list(ctx, pattern);
@@ -210,7 +217,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
   
     public Group get(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null){
             throw new InvalidDataException();
@@ -225,6 +232,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
             
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         if (!tool.existsGroup(ctx, grp_id)) {
@@ -258,7 +268,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
   
     public void change(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         
         if(ctx==null || grp==null){
             throw new InvalidDataException();
@@ -271,6 +281,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
+        }
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         if (!grp.attributesforchangeset()) {
@@ -324,7 +338,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
    
     public void addMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || member_ids==null){
             throw new InvalidDataException();
@@ -338,6 +352,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
+        }
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         if (!tool.existsGroup(ctx, grp_id)) {
@@ -359,7 +377,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
     
     public void removeMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || member_ids==null){
             throw new InvalidDataException();
@@ -374,6 +392,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
             
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         if (!tool.existsUser(ctx, member_ids)) {
@@ -391,7 +412,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
    
-    public void delete(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    public void delete(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         if (null == grp) {
             throw new InvalidDataException();
         }
@@ -400,7 +421,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
 
     public void delete(final Context ctx, final Group[] grp, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null || grp==null){
             throw new InvalidDataException();
@@ -413,6 +434,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         final int[] grp_ids = new int[grp.length];
@@ -467,7 +491,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
    
     public int[] getMembers(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
         if(ctx==null){
             throw new InvalidDataException();
@@ -481,6 +505,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
            
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
 
         if (!tool.existsGroup(ctx, grp_id)) {
@@ -504,7 +531,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
 
-	public Group[] getGroupsForUser(Context ctx, User usr, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+	public Group[] getGroupsForUser(Context ctx, User usr, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
 		 	
 			if(ctx==null){
 	            throw new InvalidDataException();
@@ -519,6 +546,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 	            throw new NoSuchContextException();
 	           
 	        }
+                if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+                    throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+                }
 	        
 	        if(!tool.existsUser(ctx, usr.getId().intValue())){
 	        	throw new InvalidDataException("No such user");
