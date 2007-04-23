@@ -8,6 +8,10 @@ import java.util.ArrayList;
  * 2. The ability to have mandatory options
  */
 public class AdminParser extends CmdLineParser {
+    private static final String OPT_HELP_LONG = "help";
+
+    private static final char OPT_HELP_SHORT = 'h';
+
     public class MissingOptionException extends Exception {
         /**
          * 
@@ -75,6 +79,8 @@ public class AdminParser extends CmdLineParser {
     ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
 
     private String appname = null;
+
+    private Option helpoption;
 
     /**
      * This method is used to add an option with a mandatory field
@@ -196,7 +202,11 @@ public class AdminParser extends CmdLineParser {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);
-        StringBuilder sb = new StringBuilder();
+        if (null != this.getOptionValue(helpoption)) {
+            printUsage();
+            System.exit(0);
+        }
+        final StringBuilder sb = new StringBuilder();
         for (final OptionInfo optInfo : optinfolist) {
             if (optInfo.needed) {
                 if (null == getOptionValue(optInfo.option)) {
@@ -255,6 +265,7 @@ public class AdminParser extends CmdLineParser {
     public AdminParser(String appname) {
         super();
         this.appname = appname;
+        helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help message", false, false);
     }
 
 }
