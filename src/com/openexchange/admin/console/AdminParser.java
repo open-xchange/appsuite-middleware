@@ -265,7 +265,7 @@ public class AdminParser extends CmdLineParser {
     public AdminParser(String appname) {
         super();
         this.appname = appname;
-        helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help message", false, false);
+        helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help text", false, false);
     }
 
 }
