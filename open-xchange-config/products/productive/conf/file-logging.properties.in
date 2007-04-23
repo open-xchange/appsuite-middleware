@@ -12,6 +12,3 @@ sun.rmi.level=INFO
 org.apache.level=INFO
 com.sun.level=INFO
 javax.management.level=INFO
-
-com.openexchange.pooling.level=FINE
-com.openexchange.database.level=FINE
