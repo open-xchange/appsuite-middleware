@@ -58,6 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -401,7 +402,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     @OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR, Category.USER_INPUT, Category.PROGRAMMING_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " ", "not implemented", "", "", "" }, exceptionId = { 12, 13, 14, 37, 38, 39 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s", "Not implemented", OXUtilException.NO_SUCH_REASON + " %s", "Context %s is already disabled.Move already in progress?", "Database with id %s is NOT a master!" })
     public String moveContextDatabase(final Context ctx, final Database database_id, final MaintenanceReason reason, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
+    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException, DatabaseUpdateException {
         
         doAuthentication(auth);
         
@@ -418,6 +419,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
                 // throw CONTEXT_EXCEPTIONS.create(13, context_id);
+            }
+
+            if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
             }
 
             if (!tool.isContextEnabled(ctx)) {
@@ -510,7 +515,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.PROGRAMMING_ERROR, Category.SETUP_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED, MSG_INTERNAL_ERROR }, exceptionId = { 21, 22, 23 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR, MSG_INTERNAL_ERROR + "-%s" })
     public void delete(final Context ctx, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException {
+    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException {
         
         doAuthentication(auth);
         
@@ -522,6 +527,11 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw new NoSuchContextException();
             // throw CONTEXT_EXCEPTIONS.create(21, context_id);
         }
+        
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         oxcox.delete(ctx);
         // }catch(SQLException sql){

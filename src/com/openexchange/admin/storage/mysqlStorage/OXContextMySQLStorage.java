@@ -72,6 +72,7 @@ import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1267,6 +1268,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             newSchemaCreated = true;
                             fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                         } else {
+                            OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+                            if( oxt.schemaBeingLockedOrNeedsUpdate(db.getId(), schema_name) ) {
+                                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+                            }
                             db.setScheme(schema_name);
                             fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                         }
