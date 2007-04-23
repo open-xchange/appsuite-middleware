@@ -85,7 +85,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setIdOption(final AdminParser admp){
-        idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true); 
+        idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true);
     }
     
     protected void setUsernameOption(final AdminParser admp){
