@@ -1387,16 +1387,12 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             schema = rs.getString("db_schema");
             writePoolId = rs.getInt("write_db_pool_id");
 
-            Updater updater = Updater.getInstance();
-            return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
+            return schemaBeingLockedOrNeedsUpdate(writePoolId, schema);
         } catch (PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error",e);
-            throw new StorageException(e);
-        } catch (UpdateException e) {
-            log.error("UpdateCheck Error",e);
             throw new StorageException(e);
         } finally {
             if (null != rs) {
@@ -1421,6 +1417,18 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 log.error("Error pushing ox db read connection to pool!", e);
             }
 
+        }
+    }
+
+    @Override
+    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
+        Updater updater;
+        try {
+            updater = Updater.getInstance();
+            return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
+        } catch (UpdateException e) {
+            log.error("UpdateCheck Error",e);
+            throw new StorageException(e);
         }
     }
 }
