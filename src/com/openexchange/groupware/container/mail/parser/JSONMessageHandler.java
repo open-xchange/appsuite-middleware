@@ -177,6 +177,14 @@ public class JSONMessageHandler implements MessageHandler {
 		msgObj.setReceivedDate(receivedDate);
 		return true;
 	}
+	
+	private static final String HEADER_X_PRIORITY = "X-Priority";
+	
+	private static final String HEADER_X_MSGREF = "X-Msgref";
+	
+	private static final String HEADER_X_MAILER = "X-Mailer";
+	
+	private static final String HEADER_DISP_NOTIFICATION_TO = "Disposition-Notification-To";
 
 	/*
 	 * (non-Javadoc)
@@ -191,7 +199,7 @@ public class JSONMessageHandler implements MessageHandler {
 		final Iterator<Map.Entry<String, String>> iter = headerMap.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			final Map.Entry<String, String> entry = iter.next();
-			if ("Disposition-Notification-To".equalsIgnoreCase(entry.getKey())) {
+			if (HEADER_DISP_NOTIFICATION_TO.equalsIgnoreCase(entry.getKey())) {
 				if (!msgObj.isSeen()) {
 					/*
 					 * Disposition-Notification: Indicate an expected read ack
@@ -200,7 +208,7 @@ public class JSONMessageHandler implements MessageHandler {
 					 */
 					msgObj.setDispositionNotification(entry.getValue());
 				}
-			} else if ("X-Priority".equalsIgnoreCase(entry.getKey())) {
+			} else if (HEADER_X_PRIORITY.equalsIgnoreCase(entry.getKey())) {
 				/*
 				 * Priority
 				 */
@@ -210,15 +218,16 @@ public class JSONMessageHandler implements MessageHandler {
 					priority = Integer.parseInt(tmp[0]);
 				} catch (NumberFormatException nfe) {
 					LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
+					priority = JSONMessageObject.PRIORITY_NORMAL;
 				}
 				msgObj.setPriority(priority);
-			} else if ("X-Msgref".equalsIgnoreCase(entry.getKey())) {
+			} else if (HEADER_X_MSGREF.equalsIgnoreCase(entry.getKey())) {
 				/*
 				 * Message Reference
 				 */
 				final String[] tmp = entry.getValue().split(" +");
 				msgObj.setMsgref(tmp[0]);
-			} else if ("X-Mailer".equalsIgnoreCase(entry.getKey())) {
+			} else if (HEADER_X_MAILER.equalsIgnoreCase(entry.getKey())) {
 				msgObj.addHeader(entry.getKey(), entry.getValue());
 			} else {
 				continue;
@@ -335,6 +344,8 @@ public class JSONMessageHandler implements MessageHandler {
 			final int size, final String fileName, final String id) throws OXException {
 		return handleInlinePlainText(decodedTextContent, baseContentType, size, fileName, id);
 	}
+	
+	private final String MIME_APPL_OCTET_STREAM = "application/octet-stream";
 
 	/*
 	 * (non-Javadoc)
@@ -344,7 +355,7 @@ public class JSONMessageHandler implements MessageHandler {
 	 */
 	public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
 		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
-		String contentType = "application/octet-stream";
+		String contentType = MIME_APPL_OCTET_STREAM;
 		final String filename = part.getFileName();
 		try {
 			contentType = new MimetypesFileTypeMap().getContentType(
@@ -377,6 +388,8 @@ public class JSONMessageHandler implements MessageHandler {
 		msgObj.addMessageAttachment(mao);
 		return true;
 	}
+	
+	private static final String MIME_TEXT_PLAIN = "TEXT/PLAIN";
 
 	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
 
@@ -417,7 +430,7 @@ public class JSONMessageHandler implements MessageHandler {
 				 * Still no text found til here. Insert text-converted html
 				 * content
 				 */
-				mao.setContentType("TEXT/PLAIN");
+				mao.setContentType(MIME_TEXT_PLAIN);
 				try {
 					/*
 					 * Try to convert the given html to regular text
@@ -532,6 +545,7 @@ public class JSONMessageHandler implements MessageHandler {
 			mao.setContentType(contentType.getBaseType());
 			mao.setDisposition(Part.ATTACHMENT);
 			if (isInline && contentType.isMimeType(MIME_TEXT_ALL)) {
+				// TODO: Add rtf2html conversion here!
 				if (contentType.isMimeType(MIME_TEXT_RTF)) {
 					mao.setContent(null);
 					mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);

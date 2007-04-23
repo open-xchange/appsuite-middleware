@@ -281,7 +281,7 @@ public class MessageUtils {
 						line.substring(linewrap)).toString(), linewrap)).toString();
 	}
 	
-	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s>)+)(\\s?)(.*)");
+	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
 	
 	private static final String getQuotePrefix(final String line) {
 		final Matcher m = PATTERN_QP.matcher(line);
@@ -587,6 +587,8 @@ public class MessageUtils {
 		}
 		return formattedText.toString();
 	}
+	
+	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
 	/**
 	 * Replaces all occurences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
@@ -604,7 +606,7 @@ public class MessageUtils {
 				final StringBuffer cidBuffer = new StringBuffer(foundImg.length());
 				while (cidMatcher.find()) {
 					final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
-					final StringBuilder linkBuilder = new StringBuilder().append("\"/ajax/mail?").append(
+					final StringBuilder linkBuilder = new StringBuilder().append(STR_AJAX_MAIL).append(
 							Mail.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
 							Mail.PARAMETER_ACTION).append('=').append(Mail.ACTION_MATTACH).append('&').append(
 							Mail.PARAMETER_ID).append('=').append(msgUID).append('&').append(Mail.PARAMETER_MAILCID)

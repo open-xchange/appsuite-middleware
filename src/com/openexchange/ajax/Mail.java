@@ -52,11 +52,13 @@ package com.openexchange.ajax;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -143,6 +145,7 @@ import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.UploadServletException;
+import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -1158,17 +1161,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 */
 			try {
 				resp.setContentType("text/html; charset=UTF-8");
-				final PrintWriter p = resp.getWriter();
+				final PrintWriter p = getResponseWriter(resp);
 				final String errorPage = ERROR_PAGE_TEMPLATE.replaceAll("#STATUS_MSG#", "Internal Server Error")
 						.replaceAll("#STATUS_CODE#", "500").replaceAll("#STATUS_DESC#", e.getMessage()).replaceAll(
 								"#IP_ADR#", getOwnIP()).replaceAll("#DATE#", getCurrentDate(sessionObj));
 				p.write(errorPage);
 				p.flush();
-			} catch (IllegalStateException ise) {
-				/*
-				 * Ok, output has already been selected
-				 */
-				LOG.warn("actionGetAttachment", ise);
+			} catch (UnsupportedEncodingException uee) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("actionGetAttachment", uee);
+				}
+			} catch (IOException ioe) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("actionGetAttachment", ioe);
+				}
 			}
 			return;
 		}
@@ -1177,8 +1183,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 */
 		resp.getOutputStream().flush();
 	}
+	
+	private static final PrintWriter getResponseWriter(final HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
+		final PrintWriter writer;
+		if (((HttpServletResponseWrapper) resp).getOutputSelection() != HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
+			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
+					.getCharacterEncoding())), true);
+		} else {
+			writer = resp.getWriter();
+		}
+		return writer;
+	}
 
-	private static String getOwnIP() {
+	private static final String getOwnIP() {
 		String ip = null;
 		try {
 			final InetAddress myAddr = InetAddress.getLocalHost();
@@ -1189,7 +1206,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return ip;
 	}
 
-	private static String getCurrentDate(final SessionObject session) {
+	private static final String getCurrentDate(final SessionObject session) {
 		if (session.getLocale() == null) {
 			return null;
 		}
