@@ -140,7 +140,7 @@ public class MailFolderObject {
 		/*
 		 * Determine if subfolders exist
 		 */
-		if ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
+		if (this.exists && (folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
 			this.hasSubfolders = false;
 		} else {
 			this.hasSubfolders = false;
@@ -151,7 +151,7 @@ public class MailFolderObject {
 				}
 			}
 		}
-		this.holdsMessages = ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0);
+		this.holdsMessages = this.exists ? ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) : false;
 		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if (holdsMessages) {
