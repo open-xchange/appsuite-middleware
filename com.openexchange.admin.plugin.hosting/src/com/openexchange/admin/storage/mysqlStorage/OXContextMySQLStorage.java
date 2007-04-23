@@ -288,20 +288,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 del_stmt.executeUpdate();
                 del_stmt.close();
 
-                log.debug("Deleting resource members for context " + context_id);
-                // delete from resource_group_member
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM resource_group_member WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
-                log.debug("Deleting resource groups for context " + context_id);
-                // delete from resource_group
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM resource_group WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
                 log.debug("Deleting resources for context " + context_id);
                 // delete from resource
                 del_stmt = write_ox_con.prepareStatement("DELETE FROM resource WHERE cid = ?");
