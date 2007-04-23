@@ -132,6 +132,10 @@ public final class calendar extends XmlServlet {
 								appointmentobject.setAlarm(-1);
 							}
 							
+							if (lastModified == null) {
+								throw new OXMandatoryFieldException("missing field last_modified");
+							}
+							
 							conflicts = appointmentsql.updateAppointmentObject(appointmentobject, inFolder, lastModified);
 							hasConflicts = (conflicts != null);
 						} else {
@@ -146,6 +150,11 @@ public final class calendar extends XmlServlet {
 						break;
 					case DataParser.DELETE:
 						LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+						
+						if (lastModified == null) {
+							throw new OXMandatoryFieldException("missing field last_modified");
+						}
+						
 						appointmentsql.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
 						break;
 					case DataParser.CONFIRM:
@@ -180,6 +189,9 @@ public final class calendar extends XmlServlet {
 				writeResponse(appointmentobject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os, xo);
 			} catch (OXCalendarException exc) {
 				if (exc.getCategory() == Category.USER_INPUT) {
+					LOG.debug(_parsePropChilds, exc);
+					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id, os, xo);
+				} else if (exc.getCategory() == Category.TRUNCATED) {
 					LOG.debug(_parsePropChilds, exc);
 					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id, os, xo);
 				} else {
