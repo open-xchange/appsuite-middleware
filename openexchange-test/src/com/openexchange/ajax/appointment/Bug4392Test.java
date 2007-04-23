@@ -39,7 +39,7 @@ public class Bug4392Test extends AppointmentTest {
 		CalendarDataObject.TIMEZONE
 	};
 
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = LogFactory.getLog(Bug4392Test.class);
 	
 	public Bug4392Test(String name) {
 		super(name);
