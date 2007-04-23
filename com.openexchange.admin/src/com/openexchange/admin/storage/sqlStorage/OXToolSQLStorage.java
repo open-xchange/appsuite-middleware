@@ -64,7 +64,8 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 
-	/**
+
+    /**
 	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#checkPrimaryMail(int, java.lang.String)
 	 */
 	public abstract void checkPrimaryMail(final Context ctx, final String primary_mail)
@@ -228,4 +229,8 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 	 */
 	public abstract boolean storeInUse(final int store_id) throws StorageException;
 
+        /* (non-Javadoc)
+         * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
+         */
+        public abstract boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException;
 }

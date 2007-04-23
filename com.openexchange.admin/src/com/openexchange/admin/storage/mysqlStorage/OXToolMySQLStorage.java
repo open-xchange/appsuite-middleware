@@ -69,6 +69,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * @author d7
@@ -1367,4 +1369,58 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         }
     }
 
+    @Override
+    public boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String schema = null;
+        int writePoolId = -1;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            ps = con.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid = ?");
+            ps.setInt(1,ctx.getIdAsInt().intValue());
+            rs = ps.executeQuery();
+            if( ! rs.next() ) {
+                throw new StorageException("Unable to determine Database update status");
+            }
+            schema = rs.getString("db_schema");
+            writePoolId = rs.getInt("write_db_pool_id");
+
+            Updater updater = Updater.getInstance();
+            return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (UpdateException e) {
+            log.error("UpdateCheck Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != ps) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
 }

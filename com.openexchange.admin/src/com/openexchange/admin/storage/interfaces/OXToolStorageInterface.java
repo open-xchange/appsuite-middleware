@@ -199,4 +199,6 @@ public abstract class OXToolStorageInterface {
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
     
     public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
+    
+    public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
 }

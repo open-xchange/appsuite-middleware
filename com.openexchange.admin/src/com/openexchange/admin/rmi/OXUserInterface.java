@@ -52,6 +52,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
@@ -93,9 +94,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public int create(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Manipulate user data within the given context.
@@ -112,9 +114,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void change(Context ctx, User usrdata, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Delete user from given context.
@@ -131,9 +134,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Delete user from given context.
@@ -150,9 +154,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final User user, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve the ModuleAccess for an user.
@@ -170,9 +175,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public UserModuleAccess getModuleAccess(Context ctx, int user_id, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Manipulate user module access within the given context.
@@ -191,9 +197,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public void changeModuleAccess(Context ctx, int user_id, UserModuleAccess moduleAccess, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all user ids for a given context.
@@ -209,9 +216,10 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
      */
     public int[] getAll(Context ctx, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve user objects for a range of users by id
@@ -231,10 +239,11 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException
+     * @throws DatabaseUpdateException 
      */
     @Deprecated
     public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
      * Retrieve user objects for a range of users by id
@@ -254,10 +263,11 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException 
+     * @throws DatabaseUpdateException 
      */
     @Deprecated
     public User getData(Context ctx, int user_id, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
      * Retrieve user objects for a range of users by name
@@ -277,9 +287,10 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException 
+     * @throws DatabaseUpdateException 
      */
     public User[] getData(Context ctx, User[] users, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
      * Retrieve user objects for a range of users by name
@@ -299,8 +310,9 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws NoSuchUserException 
+     * @throws DatabaseUpdateException 
      */
     public User getData(Context ctx, User user, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
 }
