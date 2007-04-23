@@ -204,49 +204,6 @@ public class AdminDaemonTools {
     }
     
     //FIXME: d7 remove this function when old rmi interface is removed
-    public static boolean existsResourceGroup( int context_ID, String identifier,int resource_group ) throws SQLException, PoolException {
-        boolean         retBool = false;
-        AdminCache      cache   = ClientAdminThread.cache;
-        Connection      con     = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        try {
-            con = cache.getWRITEConnectionForContext( context_ID );
-            prep_check = con.prepareStatement( "SELECT id FROM resource_group WHERE cid = ? AND identifier = ? OR id = ?" );
-            prep_check.setInt( 1, context_ID );
-            prep_check.setString( 2, identifier );
-            prep_check.setInt( 3,resource_group );
-            
-            rs = prep_check.executeQuery();
-            if(rs.next()){
-                retBool = true;
-            }else{
-                retBool = false;
-            }
-        } finally {
-            try {
-                if(prep_check!=null){
-                    prep_check.close();
-                }
-            } catch ( Exception e ) {
-                log.error("Error closing prepared statement!",e);
-            }
-            
-            try {
-                cache.pushOXDBWrite(context_ID,con);
-            } catch ( Exception e ) {
-                log.error("Error pushing ox db write connection to pool!",e);
-            }
-            
-            if(rs!=null){
-                rs.close();
-            }
-        }
-        
-        return retBool;
-    }
-    
-    //FIXME: d7 remove this function when old rmi interface is removed
     public static boolean existsResource( int context_ID, String identifier,int resource_id ) throws SQLException, PoolException {
         boolean         retBool = false;
         AdminCache      cache   = ClientAdminThread.cache;
