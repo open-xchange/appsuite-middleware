@@ -3,6 +3,10 @@
 - Fixed bug #6440: Prevent a ArrayOutOfBoundsException in CalendarWriter if
   a the user wasn't found in the participant array.
 
+- Fixed bug #6455: Log data truncation exception as debug log
+
+- Fixed bug #6486: Check if last modified is not null in update request
+
 * 2007-04-20 - tobias.prinz@open-xchange.com
 
 - Changed behavior of ImporterServlet to be stricter: Now broken files
