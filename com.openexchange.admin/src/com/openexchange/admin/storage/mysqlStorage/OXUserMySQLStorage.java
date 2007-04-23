@@ -1240,8 +1240,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         // query.deleteCharAt(query.length() - 1);
         query.delete(query.length() - 2, query.length() - 1);
 
-        query
-                .append(" FROM user JOIN login2user USING (cid,id) JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.id=prg_contacts.userid) ");
+        query.append(" FROM user JOIN login2user USING (cid,id) JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.id=prg_contacts.userid) ");
         query.append("WHERE user.id = ? ");
         query.append("AND user.cid = ? ");
 
