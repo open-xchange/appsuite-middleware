@@ -73,6 +73,7 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.UserDataHandler;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -283,8 +284,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             notallowed.add("Enabled");
             notallowed.add("ImapServer");
             notallowed.add("SmtpServer");
-            notallowed.add("PasswordExpired");
+            notallowed.add("Password_expired");
             notallowed.add("Locale");
+            notallowed.add("Spam_filter_enabled");
 
             final ArrayList<MethodAndNames> methodlist = getGetters(theMethods);
 
@@ -424,6 +426,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
 
             }
 
+            
+            final Boolean spam_filter_enabled = usrdata.getSpam_filter_enabled();
+            if(null != spam_filter_enabled ) {
+                final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+                if( ! tool.isUserSettingMailBitSet(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con) ) {
+                    tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con);
+                }
+            }
+            
             // update the mailfolder mapping
             final String send_addr = usrdata.getPrimaryEmail();
             if (null != send_addr) {
@@ -981,8 +992,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 // set the flag for "receiving notifications" in the ox, was bug
                 // #5336
                 // TODO: choeger: Extend API to allow setting of these flags
-                stmt.setInt(8, UserSettingMail.INT_NOTIFY_TASKS | UserSettingMail.INT_NOTIFY_APPOINTMENTS |
-                        UserSettingMail.INT_SPAM_ENABLED);
+                int flags = UserSettingMail.INT_NOTIFY_TASKS | UserSettingMail.INT_NOTIFY_APPOINTMENTS;
+
+                if( usrdata.getSpam_filter_enabled() != null && usrdata.getSpam_filter_enabled() ) {
+                    flags |= UserSettingMail.INT_SPAM_ENABLED;
+                }
+                stmt.setInt(8, flags);
                 stmt.setString(9, std_mail_folder_confirmed_spam);
                 stmt.setString(10, std_mail_folder_confirmed_ham);
                 stmt.executeUpdate();
@@ -1347,7 +1362,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.close();
 
                 stmt = read_ox_con
-                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham FROM user_setting_mail WHERE cid = ? and user = ?");
+                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits FROM user_setting_mail WHERE cid = ? and user = ?");
                 stmt.setInt(1, context_id);
                 stmt.setInt(2, user_id);
                 rs3 = stmt.executeQuery();
@@ -1358,6 +1373,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     newuser.setMail_folder_trash_name(rs3.getString("std_trash"));
                     newuser.setMail_folder_confirmed_ham_name(rs3.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs3.getString("confirmed_spam"));
+                    int bits = rs3.getInt("bits");
+                    if( (bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED ) {
+                        newuser.setSpam_filter_enabled(true);
+                    }
                 }
                 rs3.close();
                 stmt.close();
