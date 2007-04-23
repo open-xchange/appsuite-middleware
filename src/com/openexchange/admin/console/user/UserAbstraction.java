@@ -59,6 +59,31 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
+    protected static final char OPT_ID_SHORT = 'i';
+    protected static final String OPT_ID_LONG = "userid";
+    protected static final char OPT_USERNAME_SHORT = 'u';
+    protected static final String OPT_USERNAME_LONG = "username";
+    protected static final char OPT_DISPLAYNAME_SHORT = 'd';
+    protected static final String OPT_DISPLAYNAME_LONG = "displayname";
+    protected static final char OPT_PASSWORD_SHORT = 'p';
+    protected static final String OPT_PASSWORD_LONG = "password";
+    protected static final char OPT_GIVENNAME_SHORT = 'g';
+    protected static final String OPT_GIVENNAME_LONG = "givenname";
+    protected static final char OPT_SURNAME_SHORT = 's';
+    protected static final String OPT_SURNAME_LONG = "surname";
+    protected static final char OPT_LANGUAGE_SHORT = 'l';
+    protected static final String OPT_LANGUAGE_LONG = "language";
+    protected static final char OPT_TIMEZONE_SHORT = 't';
+    protected static final String OPT_TIMEZONE_LONG = "timezone";
+    protected static final char OPT_PRIMARY_EMAIL_SHORT = 'e';
+    protected static final String OPT_PRIMARY_EMAIL_LONG = "email";
+    protected static final char OPT_DEPARTMENT_SHORT = 'x';
+    protected static final String OPT_DEPARTMENT_LONG = "department";
+    protected static final char OPT_COMPANY_SHORT = 'z';
+    protected static final String OPT_COMPANY_LONG = "company";
+    protected static final char OPT_ALIASES_SHORT = 'a';
+    protected static final String OPT_ALIASES_LONG = "aliases";
+    
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
     protected Option givenNameOption = null;
@@ -131,40 +156,4 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected void setAliasesOption(final AdminParser admp){
         aliasesOption =  setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
-
-    protected static final char OPT_ID_SHORT = 'i';
-    protected static final String OPT_ID_LONG = "userid";
-    
-    protected static final char OPT_USERNAME_SHORT = 'u';
-    protected static final String OPT_USERNAME_LONG = "username";
-    
-    protected static final char OPT_DISPLAYNAME_SHORT = 'd';
-    protected static final String OPT_DISPLAYNAME_LONG = "displayname";
-    
-    protected static final char OPT_PASSWORD_SHORT = 'p';
-    protected static final String OPT_PASSWORD_LONG = "password";
-    
-    protected static final char OPT_GIVENNAME_SHORT = 'g';
-    protected static final String OPT_GIVENNAME_LONG = "givenname";
-    
-    protected static final char OPT_SURNAME_SHORT = 's';
-    protected static final String OPT_SURNAME_LONG = "surname";
-    
-    protected static final char OPT_LANGUAGE_SHORT = 'l';
-    protected static final String OPT_LANGUAGE_LONG = "language";
-    
-    protected static final char OPT_TIMEZONE_SHORT = 't';
-    protected static final String OPT_TIMEZONE_LONG = "timezone";
-    
-    protected static final char OPT_PRIMARY_EMAIL_SHORT = 'e';
-    protected static final String OPT_PRIMARY_EMAIL_LONG = "email";
-    
-    protected static final char OPT_DEPARTMENT_SHORT = 'x';
-    protected static final String OPT_DEPARTMENT_LONG = "department";
-    
-    protected static final char OPT_COMPANY_SHORT = 'z';
-    protected static final String OPT_COMPANY_LONG = "company";
-    
-    protected static final char OPT_ALIASES_SHORT = 'a';
-    protected static final String OPT_ALIASES_LONG = "aliases";
 }
