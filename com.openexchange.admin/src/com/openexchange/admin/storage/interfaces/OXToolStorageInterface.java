@@ -132,8 +132,6 @@ public abstract class OXToolStorageInterface {
     
     public abstract void checkPrimaryMail(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
 
-    public abstract boolean existsResourceGroup(final Context ctx, final String identifier, final int resource_group) throws StorageException;
-
     public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
 
     public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;

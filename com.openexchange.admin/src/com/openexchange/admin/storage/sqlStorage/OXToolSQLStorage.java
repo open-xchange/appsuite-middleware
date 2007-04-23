@@ -140,12 +140,6 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 			throws StorageException;
 
 	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResourceGroup(int, java.lang.String, int)
-	 */
-	public abstract boolean existsResourceGroup(final Context ctx, final String identifier,
-			final int resource_group) throws StorageException;
-
-	/**
 	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
 	 */
 	public abstract boolean existsServer(final int server_id) throws StorageException;

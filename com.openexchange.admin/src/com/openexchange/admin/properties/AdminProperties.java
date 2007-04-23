@@ -100,16 +100,6 @@ public class AdminProperties {
 	}
 	
 	/**
-	 * The properties for resourcegroups
-	 * @author d7
-	 *
-	 */
-	public class ResourceGroup {
-	    public static final String AUTO_LOWERCASE           = "AUTO_TO_LOWERCASE_UID";
-	    public static final String CHECK_NOT_ALLOWED_CHARS  = "CHECK_RES_UID_FOR_NOT_ALLOWED_CHARS";
-	}
-	
-	/**
 	 * The properties for RMI
 	 * @author d7
 	 *

@@ -84,7 +84,6 @@ public class PropertyHandler {
     // The following lines define the property values for the database implementations
     public static final String GROUP_STORAGE = "GROUP_STORAGE";
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
-    public static final String RESOURCEGROUP_STORAGE = "RESOURCEGROUP_STORAGE";
     public static final String TOOL_STORAGE = "TOOL_STORAGE";
     public static final String USER_STORAGE = "USER_STORAGE";
     
@@ -267,35 +266,6 @@ public class PropertyHandler {
         
         return retBool; 
     }
-    
-    
-    
-    /**
-     * 
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public boolean getResourceGroupProp( String key, boolean fallBack ) {
-        boolean retBool = fallBack;
-        
-        if ( resGroupPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_RESOURCE_GROUP ) ) {
-                resGroupPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE_GROUP );
-            } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE_GROUP + "' not found in file: " + configdirname ) );
-            }
-        }
-        
-        if ( resGroupPropValues != null && resGroupPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( resGroupPropValues.get( key ).toString() ); 
-        } else {
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_GROUP_FILE ) +"! Using fallback :" + fallBack );
-        }
-        
-        return retBool; 
-    }
-    
     
     
     /**
