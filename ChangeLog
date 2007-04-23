@@ -3,6 +3,10 @@
  - Fixed bug when an instance of MailFolderObject is constructed from an
    IMAPFolder object: getType() implicitely calls checkExists() which may
    throw a FolderNotFoundException.
+#################### ATTENTION ! #####################
+  - CONFIG change: New property in 'imap.properties' to define socket I/O
+    timeout value in milliseconds
+######################################################
 
 * 2007-04-23 - tobias.prinz@open-xchange.com
 

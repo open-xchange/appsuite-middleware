@@ -101,6 +101,8 @@ public class IMAPProperties {
 	private static PartModifier partModifierImpl;
 
 	private static boolean smtpAuth;
+	
+	private static int imapTimeout;
 
 	private static int imapConnectionTimeout;
 
@@ -348,6 +350,19 @@ public class IMAPProperties {
 
 	public static void setImapConnectionTimeout(final int imapConnectionTimeout) {
 		IMAPProperties.imapConnectionTimeout = imapConnectionTimeout;
+	}
+	
+	public static int getImapTimeout() throws IMAPException {
+		checkGlobalImapProperties();
+		return imapTimeout;
+	}
+	
+	static int getImapTimeoutInternal() {
+		return imapTimeout;
+	}
+
+	public static void setImapTimeout(final int imapConnectionTimeout) {
+		IMAPProperties.imapTimeout = imapConnectionTimeout;
 	}
 
 	public static boolean isUserFlagsEnabled() throws IMAPException {

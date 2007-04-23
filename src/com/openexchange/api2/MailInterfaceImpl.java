@@ -266,6 +266,23 @@ public class MailInterfaceImpl implements MailInterface {
 		IMAP_PROPS.put(PROPERTY_ALLOWREADONLYSELECT, STR_TRUE);
 		IMAP_PROPS.put("mail.mime.encodeeol.strict", STR_TRUE);
 		IMAP_PROPS.put("mail.mime.decodetext.strict", STR_FALSE);
+		/*
+		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
+		 * use in communicating with the IMAP server. The IMAPStore will create
+		 * the initial AUTHENTICATED connection and seed the pool with this
+		 * connection. As folders are opened and new IMAP protocol objects are
+		 * needed, the IMAPStore will provide them from the connection pool, or
+		 * create them if none are available. When a folder is closed, its IMAP
+		 * protocol object is returned to the connection pool if the pool is not
+		 * over capacity.
+		 */
+		IMAP_PROPS.put("mail.imap.connectionpoolsize", "1");
+		/*
+		 * A mechanism is provided for timing out idle connection pool IMAP
+		 * protocol objects. Timed out connections are closed and removed
+		 * (pruned) from the connection pool.
+		 */
+		IMAP_PROPS.put("mail.imap.connectionpooltimeout", "1000"); // 1 sec
 		try {
 			IMAP_PROPS.put("mail.mime.charset", IMAPProperties.getDefaultMimeCharset());
 		} catch (IMAPException e1) {
@@ -326,22 +343,15 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
+	/**
+	 * This method can only be exclusively accessed
+	 */
 	private final static void initializeIMAPProperties() throws OXException {
 		/*
 		 * Fill global IMAP Properties only once and switch flag
 		 */
 		if (!IMAPProperties.isGlobalPropertiesLoaded()) {
-			LOCK_INIT.lock();
-			try {
-				if (IMAPProperties.isGlobalPropertiesLoaded()) {
-					return;
-				}
-				IMAPPropertiesFactory.loadGlobalImapProperties();
-			} catch (IMAPException e) {
-				throw new OXException(e);
-			} finally {
-				LOCK_INIT.unlock();
-			}
+			IMAPPropertiesFactory.loadGlobalImapProperties();
 		}
 		try {
 			if (IMAPProperties.getJavaMailProperties() != null) {
@@ -350,9 +360,11 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
 		}
+		if (IMAPProperties.getImapTimeout() > 0) {
+			IMAP_PROPS.put("mail.imap.timeout", Integer.valueOf(IMAPProperties.getImapTimeout()));
+		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
 			IMAP_PROPS.put("mail.imap.connectiontimeout", Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
-			IMAP_PROPS.put("mail.imap.timeout", Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
 		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
@@ -365,8 +377,15 @@ public class MailInterfaceImpl implements MailInterface {
 	 */
 	public final static Properties getDefaultIMAPProperties() throws OXException {
 		if (!imapPropsInitialized) {
-			initializeIMAPProperties();
-			imapPropsInitialized = true;
+			LOCK_INIT.lock();
+			try {
+				if (!imapPropsInitialized) {
+					initializeIMAPProperties();
+					imapPropsInitialized = true;
+				}
+			} finally {
+				LOCK_INIT.unlock();
+			}
 		}
 		return (Properties) IMAP_PROPS.clone();
 	}

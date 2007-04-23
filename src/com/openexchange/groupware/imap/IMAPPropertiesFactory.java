@@ -124,6 +124,8 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_IMAP_PART_MODIFIER = "partModifierImpl";
 
 	private static final String PROP_IMAP_SMTP_AUTH = "smtpAuthentication";
+	
+	private static final String PROP_IMAP_TIMEOUT = "imapTimeout";
 
 	private static final String PROP_IMAP_CONNECTION_TIMEOUT = "imapConnectionTimeout";
 
@@ -412,6 +414,9 @@ public class IMAPPropertiesFactory {
 				IMAPProperties.setSupportsACLs(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SUPPORTS_ACL,
 						STR_FALSE)));
 				logBuilder.append("\tSupport ACLs: ").append(IMAPProperties.isSupportsACLsInternal()).append('\n');
+				
+				IMAPProperties.setImapTimeout(Integer.parseInt(props.getProperty(PROP_IMAP_TIMEOUT, "0")));
+				logBuilder.append("\tIMAP Timeout: ").append(IMAPProperties.getImapTimeoutInternal()).append('\n');
 
 				IMAPProperties.setImapConnectionTimeout(Integer.parseInt(props.getProperty(
 						PROP_IMAP_CONNECTION_TIMEOUT, "0")));
@@ -489,6 +494,9 @@ public class IMAPPropertiesFactory {
 					LOG.error("SpellCheck config file \"" + SPELL_CHECK_CONFIG_FILE
 							+ "\" could not be properly loaded & parsed:\n" + e.getMessage(), e);
 				}
+				/*
+				 * Switch flag
+				 */
 				IMAPProperties.setGlobalPropertiesLoaded(true);
 				logBuilder.append("Global IMAP properties successfully loaded...");
 				if (LOG.isInfoEnabled()) {
