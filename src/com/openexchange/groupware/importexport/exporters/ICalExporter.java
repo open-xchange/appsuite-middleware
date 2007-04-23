@@ -286,6 +286,8 @@ public class ICalExporter implements Exporter {
 			} else {
 				throw importExportExceptionFactory.create(3, fo.getModule());
 			}
+			
+			versitWriter.flush();
 		} catch (Exception exc) {
 			throw importExportExceptionFactory.create(4, folder);
 		}
@@ -299,10 +301,12 @@ public class ICalExporter implements Exporter {
 	protected void exportAppointment(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, AppointmentObject appointmentObj) throws Exception {
 		VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
 		versitDef.write(writer, versitObject);
+		writer.flush();
 	}
 	
 	protected void exportTask(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, Task taskObj) throws Exception {
 		VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
 		versitDef.write(writer, versitObject);
+		writer.flush();
 	}
 }
