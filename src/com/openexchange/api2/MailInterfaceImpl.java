@@ -2882,6 +2882,7 @@ public class MailInterfaceImpl implements MailInterface {
 			init();
 			final SMTPMessage newSMTPMsg = new SMTPMessage(imapCon.getSession());
 			IMAPFolder originalMsgFolder = null;
+			boolean originalMsgFolderOpened = false;
 			MimeMessage originalMsg = null;
 			boolean isReadWrite = true;
 			Mail.MailIdentifier mailId = null;
@@ -2906,6 +2907,7 @@ public class MailInterfaceImpl implements MailInterface {
 						originalMsgFolder.open(Folder.READ_ONLY);
 						isReadWrite = false;
 					}
+					originalMsgFolderOpened = true;
 					mailInterfaceMonitor.changeNumActive(true);
 					originalMsg = (MimeMessage) originalMsgFolder.getMessageByUID(mailId.getMsgUID());
 					if (originalMsg != null && sendType == SENDTYPE_REPLY) {
@@ -3041,7 +3043,7 @@ public class MailInterfaceImpl implements MailInterface {
 							originalMsgFolder.close(true);
 							mailInterfaceMonitor.changeNumActive(false);
 						} finally {
-							if (originalMsgFolder.isOpen()) {
+							if (originalMsgFolderOpened) {
 								originalMsgFolder.close(false);
 								mailInterfaceMonitor.changeNumActive(false);
 							}

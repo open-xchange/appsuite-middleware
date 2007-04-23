@@ -98,6 +98,10 @@ public class MessageUtils {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageUtils.class);
+	
+	private static final int INT_100 = 100;
+	
+	private static final int INT_1000 = 1000;
 
 	private static final String HTML_BREAK = "<br>";
 
@@ -198,7 +202,7 @@ public class MessageUtils {
 		if (linewrap <= 0) {
 			return content;
 		}
-		final StringBuilder sb = new StringBuilder(content.length() + 100);
+		final StringBuilder sb = new StringBuilder(content.length() + INT_100);
 		if (isHtml) {
 			return content;
 //			/*
@@ -246,6 +250,7 @@ public class MessageUtils {
 		if (length <= linewrap) {
 			return line;
 		}
+		final String quote = getQuotePrefix(line);
 		final char[] chars = line.toCharArray();
 		final char c = chars[linewrap];
 		if (Character.isWhitespace(c) && c != CHAR_BREAK && c != CHAR_CONTROL) {
@@ -255,7 +260,8 @@ public class MessageUtils {
 			for (int i = linewrap - 1; i >= 0; i--) {
 				if (!Character.isWhitespace(chars[i])) {
 					return new StringBuilder(length + 5).append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
-							wrapTextLine(line.substring(i + 1), linewrap)).toString();
+							wrapTextLine(quote == null ? line.substring(i + 1) : new StringBuilder().append(quote)
+									.append(line.substring(i + 1)).toString(), linewrap)).toString();
 				}
 			}
 		} else {
@@ -265,12 +271,21 @@ public class MessageUtils {
 			for (int i = linewrap - 1; i >= 0; i--) {
 				if (Character.isWhitespace(chars[i])) {
 					return new StringBuilder(length + 5).append(line.substring(0, i)).append(CHAR_BREAK).append(
-							wrapTextLine(line.substring(i + 1), linewrap)).toString();
+							wrapTextLine(quote == null ? line.substring(i + 1) : new StringBuilder().append(quote)
+									.append(line.substring(i + 1)).toString(), linewrap)).toString();
 				}
 			}
 		}
 		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
-				wrapTextLine(line.substring(linewrap), linewrap)).toString();
+				wrapTextLine(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote).append(
+						line.substring(linewrap)).toString(), linewrap)).toString();
+	}
+	
+	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s>)+)(\\s?)(.*)");
+	
+	private static final String getQuotePrefix(final String line) {
+		final Matcher m = PATTERN_QP.matcher(line);
+		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
 	}
 
 	private static String wrapHtmlText(final String line, final int linewrap) {
@@ -367,7 +382,7 @@ public class MessageUtils {
 	 * colors in file "imap.properties"
 	 */
 	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText) {
-		final StringBuilder sb = new StringBuilder(htmlText.length() + 100);
+		final StringBuilder sb = new StringBuilder(htmlText.length() + INT_100);
 		int offset = 0;
 		int pos = -1;
 		int quotelevel = 0;
@@ -471,10 +486,10 @@ public class MessageUtils {
 	 *         html content
 	 */
 	public final static String convertAndKeepQuotes(final String htmlContent) throws IOException {
-		final StringBuilder sb = new StringBuilder(htmlContent.length() + 100);
+		final StringBuilder sb = new StringBuilder(htmlContent.length() + INT_100);
 		final Matcher m = PATTERN_BLOCKQUOTE.matcher(htmlContent);
 		int lastMatch = 0;
-		FindBlockquote: while (m.find()) {
+		while (m.find()) {
 			sb.append(MailTools.htmlFormat(CONVERTER.convert(htmlContent.substring(lastMatch, m.start()))));
 			sb.append(m.group());
 			lastMatch = m.end();
@@ -509,11 +524,13 @@ public class MessageUtils {
 			reader = new BufferedReader(new StringReader(text));
 			String line = "";
 			int quotelevel_before = 0;
+			final StringBuffer sb = new StringBuffer(INT_100);
+			final StringBuilder colorBuilder = new StringBuilder();
 			while ((line = reader.readLine()) != null) {
 				if (usm.isUseColorQuote()) {
 					int quotelevel = 0;
 					final Matcher quoteMatcher = PLAIN_TEXT_QUOTE_PATTERN.matcher(line);
-					final StringBuffer sb = new StringBuffer(line.length());
+					sb.setLength(0);
 					while (quoteMatcher.find()) {
 						quotelevel++;
 						quoteMatcher.appendReplacement(sb, " ");
@@ -522,7 +539,7 @@ public class MessageUtils {
 					line = MailTools.htmlFormat(sb.toString());
 					if (quotelevel > quotelevel_before) {
 						for (int u = 0; u < (quotelevel - quotelevel_before); u++) {
-							final StringBuilder colorBuilder = new StringBuilder();
+							colorBuilder.setLength(0);
 							final String styleStart = " style=\"color:";
 							final String borderColor = "; border-color:";
 							final String styleEnd = ";\"";
@@ -685,7 +702,7 @@ public class MessageUtils {
 	 * implicitely.
 	 */
 	public static final String getStringObject(final Part p) throws MessagingException, OXException {
-		final StringBuilder sb = new StringBuilder(1000);
+		final StringBuilder sb = new StringBuilder(INT_1000);
 		BufferedReader br = null;
 		final String charsetStr = new ContentType(p.getContentType()).getParameter(STR_CHARSET);
 		Charset charset = null;
