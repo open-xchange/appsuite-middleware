@@ -80,7 +80,6 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -116,6 +115,9 @@ public class ICalImporter implements Importer {
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalImporter.class);
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException{
+		if(!format.equals(Format.ICAL)){
+			return false;
+		}
 		final Iterator iterator = folders.iterator();
 		while (iterator.hasNext()) {
 			final String folder = iterator.next().toString();
@@ -144,9 +146,7 @@ public class ICalImporter implements Importer {
 			}
 			
 			if (perm.canCreateObjects()) {
-				if (format.getMimeType().equals("text/calendar")) {
-					return true;
-				}
+				return true;
 			}
 		}
 		
@@ -204,7 +204,7 @@ public class ICalImporter implements Importer {
 			while (versitObject != null) {
 				ImportResult importResult = new ImportResult();
 				try {
-					final Property property = versitObject.getProperty("UID");
+					//final Property property = versitObject.getProperty("UID");
 					
 					if ("VEVENT".equals(versitObject.name) && importAppointment) {
 						importResult.setFolder(String.valueOf(appointmentFolderId));

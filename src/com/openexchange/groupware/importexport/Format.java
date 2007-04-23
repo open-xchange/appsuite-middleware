@@ -97,6 +97,8 @@ public enum Format {
 			return CSV;
 		if(mimeType.equals("text/vcard"))
 			return VCARD;
+		if(mimeType.equals("text/directory"))
+			return VCARD;
 		return null;
 	}
 	
