@@ -68,7 +68,6 @@ public class PropertyHandler {
     private Hashtable       userPropValues      = null;
     protected Hashtable       groupPropValues     = null;
     private Hashtable       resPropValues       = null;
-    private Hashtable       resGroupPropValues  = null;
     private Hashtable       rmiPropValues       = null;
     private Log log = LogFactory.getLog(this.getClass());
     
@@ -78,7 +77,6 @@ public class PropertyHandler {
     private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
     protected static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
     private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
-    private static final String PROPERTIES_RESOURCE_GROUP   = "RESOURCE_GROUP_PROP_CONFIG";
     private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
     
     // The following lines define the property values for the database implementations

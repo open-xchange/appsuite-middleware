@@ -83,7 +83,6 @@ public class AdminProperties {
 	    public static final String PROPERTIES_USER_FILE             = "USER_PROP";
 	    public static final String PROPERTIES_GROUP_FILE            = "GROUP_PROP";
 	    public static final String PROPERTIES_RESOURCE_FILE         = "RESOURE_PROP";
-	    public static final String PROPERTIES_RESOURCE_GROUP_FILE   = "RESOURE_GROUP_PROP";
 	    public static final String PROPERTIES_RMI_FILE              = "RMI_PROP";
 	}
 	
