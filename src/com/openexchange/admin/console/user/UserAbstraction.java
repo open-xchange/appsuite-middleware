@@ -308,5 +308,18 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         }
         return retlist;
     }
+
+    /**
+     * This method is used to show the full help text, if the extended option is set.
+     * Be careful to check only for that option, if you have added this option before.
+     * 
+     * @param parser
+     */
+    protected final void printExtendedOutputIfSet(final AdminParser parser) {
+        if (null != parser.getOptionValue(extendedOption)) {
+            parser.printUsageExtended();
+            System.exit(0);
+        }
+    }
 }
 
