@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -108,9 +109,10 @@ public interface OXContextInterface extends Remote {
      * 
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @throws DatabaseUpdateException 
      */
     public void delete(Context ctx,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException;
     
    
     /**
@@ -172,9 +174,10 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * 
      * @throws StorageException When an error in the subsystems occured.
+     * @throws DatabaseUpdateException 
      */
     public String moveContextDatabase(Context ctx,Database dst_database_id,MaintenanceReason reason,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     
     /**
