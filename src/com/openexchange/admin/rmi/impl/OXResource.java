@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.9 2007/04/12 08:59:13 cutmasta Exp $
+ * $Id: OXResource.java,v 1.10 2007/04/23 12:57:43 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -104,7 +105,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
    public int create(final Context ctx, final Resource res, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {        
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
         
         if(ctx==null||res==null){
             throw new InvalidDataException();
@@ -120,7 +121,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             throw new NoSuchContextException();
             
         }
-        
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         if (tool.existsResource(ctx, res.getName())) {
             throw new InvalidDataException("Resource with this name already exist");
            
@@ -194,7 +199,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     
     public void change(final Context ctx, final Resource res, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
                 
         if(ctx==null||res==null || res.getId()==null){
             throw new InvalidDataException();
@@ -210,6 +215,10 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
            
+        }
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
         
         if (!tool.existsResource(ctx, resource_ID)) {
@@ -261,7 +270,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
     public void delete(final Context ctx, final Resource res, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         
         if(ctx==null||res==null||res.getId()==null){
             throw new InvalidDataException();
@@ -277,7 +286,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             throw new NoSuchContextException();
            
         }
-        
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         if (!tool.existsResource(ctx, resource_id)) {
             throw new InvalidDataException("Resource with this id does not exist");
            
@@ -320,7 +333,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
     public Resource get(final Context ctx, final Resource res, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         
         if(ctx==null||res==null||res.getId()==null){
             throw new InvalidDataException();
@@ -334,7 +347,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
         }
-        
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         if (!tool.existsResource(ctx, resource_id)) {
             throw new InvalidDataException("resource with with this id does not exist");           
         }
@@ -370,7 +387,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         
         if(ctx==null){
             throw new InvalidDataException();
@@ -388,7 +405,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();            
         }
-        
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         return oxRes.list(ctx,pattern);
         
