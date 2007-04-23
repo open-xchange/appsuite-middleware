@@ -123,6 +123,10 @@ public final class tasks extends XmlServlet {
 								taskobject.setAlarm(null);
 							}
 							
+							if (lastModified == null) {
+								throw new OXMandatoryFieldException("missing field last_modified");
+							}
+							
 							tasksql.updateTaskObject(taskobject, inFolder, lastModified);
 						} else {
 							if (!taskobject.getAlarmFlag()) {
@@ -134,6 +138,10 @@ public final class tasks extends XmlServlet {
 						}
 						break;
 					case DataParser.DELETE:
+						if (lastModified == null) {
+							throw new OXMandatoryFieldException("missing field last_modified");
+						}
+						
 						tasksql.deleteTaskObject(taskobject.getObjectID(), inFolder, lastModified);
 						break;
 					case DataParser.CONFIRM:

@@ -119,6 +119,10 @@ public final class contacts extends XmlServlet {
 				switch (method) {
 					case DataParser.SAVE:
 						if (contactobject.containsObjectID()) {
+							if (lastModified == null) {
+								throw new OXMandatoryFieldException("missing field last_modified");
+							}
+							
 							contactsql.updateContactObject(contactobject, inFolder, lastModified);
 						} else {
 							contactobject.setParentFolderID(inFolder);
@@ -126,11 +130,15 @@ public final class contacts extends XmlServlet {
 							if (contactobject.containsImage1() && contactobject.getImage1() == null) {
 								contactobject.removeImage1();
 							}
-
+							
 							contactsql.insertContactObject(contactobject);
 						}
 						break;
 					case DataParser.DELETE:
+						if (lastModified == null) {
+							throw new OXMandatoryFieldException("missing field last_modified");
+						}
+						
 						contactsql.deleteContactObject(contactobject.getObjectID(), inFolder, lastModified);
 						break;
 					default:
