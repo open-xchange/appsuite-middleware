@@ -2169,7 +2169,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				sessionObj = getSessionObject(req);
 				mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				if (req.getContentType().toLowerCase().startsWith("multipart/")) {
-					LOG.info("Incoming POST with multipart content.");
 					/*
 					 * Set response headers according to html spec
 					 */

@@ -3153,9 +3153,6 @@ public class MailInterfaceImpl implements MailInterface {
 						}
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Message successfully sent ! ! ! (subject=" + newSMTPMsg.getSubject() + ')');
-					}
 				} catch (MessagingException e) {
 					throw handleMessagingException(e, sessionObj.getIMAPProperties());
 				}
