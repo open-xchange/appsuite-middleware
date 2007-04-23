@@ -138,7 +138,7 @@ public abstract class CalendarWriter extends CommonWriter {
 				addElement(CalendarFields.UNTIL, calendarobject.getUntil(), e_prop);
 			}
 		}
-
+		
 		if (calendarobject.containsOccurrence()) {
 			addElement(CalendarFields.OCCURRENCES, calendarobject.getOccurrence(), e_prop);
 		}
@@ -176,16 +176,18 @@ public abstract class CalendarWriter extends CommonWriter {
 						if (hasUserParticipants) {
 							int userPos = Arrays.binarySearch(userparticipant, participant[a]);
 							
-							if (userparticipant[userPos].getConfirm() == CalendarObject.NONE) {
-								eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
-							} else if (userparticipant[userPos].getConfirm() == CalendarObject.ACCEPT) {
-								eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "accept", XmlServlet.NS);
-							} else if (userparticipant[userPos].getConfirm() == CalendarObject.DECLINE) {
-								eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "decline", XmlServlet.NS);
-							} else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
-								eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
-							} else {
-								throw new OXConflictException("invalid value in confirm: " + userparticipant[a].getConfirm());
+							if (userPos >= 0) {
+								if (userparticipant[userPos].getConfirm() == CalendarObject.NONE) {
+									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
+								} else if (userparticipant[userPos].getConfirm() == CalendarObject.ACCEPT) {
+									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "accept", XmlServlet.NS);
+								} else if (userparticipant[userPos].getConfirm() == CalendarObject.DECLINE) {
+									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "decline", XmlServlet.NS);
+								} else if (userparticipant[userPos].getConfirm() == CalendarObject.TENTATIVE) {
+									eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "tentative", XmlServlet.NS);
+								} else {
+									throw new OXConflictException("invalid value in confirm: " + userparticipant[a].getConfirm());
+								}
 							}
 						} else {
 							eParticipant.setAttribute(CONFIRM_ATTRIBUTE, "none", XmlServlet.NS);
@@ -229,7 +231,7 @@ public abstract class CalendarWriter extends CommonWriter {
 							eParticipant.setAttribute("mail", participant[a].getEmailAddress(), XmlServlet.NS);
 						} else {
 							eParticipant.setAttribute("mail", "", XmlServlet.NS);
-						}	
+						}
 						external = true;
 						break;
 					default:
