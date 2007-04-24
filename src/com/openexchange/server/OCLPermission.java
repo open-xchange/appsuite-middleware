@@ -492,6 +492,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(50);
 		sb.append((folderAdmin ? "FolderAdmin" : "") + (groupPermission ? "Group_" : "User_") + entity + "@" + fp + "."
@@ -504,11 +505,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@SuppressWarnings("cast")
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return ((OCLPermission) super.clone());
 	}
 	
 	/* (non-Javadoc)
+	 * 
 	 * @see com.openexchange.tools.OXCloneable#deepClone()
 	 */
 	public OCLPermission deepClone() {

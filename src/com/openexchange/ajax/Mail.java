@@ -1031,9 +1031,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final CommonObject[] insertedObjs = mailInterface.saveVersitAttachment(mailIdentifier.folder,
 						mailIdentifier.msgUID, partIdentifier);
+				final JSONObject jo = new JSONObject();
 				for (int i = 0; i < insertedObjs.length; i++) {
 					final CommonObject current = insertedObjs[i];
-					final JSONObject jo = new JSONObject();
+					jo.reset();
 					jo.put(CommonFields.ID, current.getObjectID());
 					jo.put(CommonFields.FOLDER_ID, current.getParentFolderID());
 					jsonWriter.value(jo);
@@ -1557,23 +1558,23 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final int length) {
 		final Matcher m = PATTERN_IDS.matcher(requestBody);
 		String folder = null;
-		SmartLongArray list = null;
+		SmartLongArray sla = null;
 		while (m.find()) {
 			boolean found = false;
 			do {
 				if (folder == null || !folder.equals(m.group(2))) {
 					folder = m.group(2);
-					list = new SmartLongArray(length);
-					idMap.put(folder, list);
+					sla = new SmartLongArray(length);
+					idMap.put(folder, sla);
 				}
-				list.append(Long.parseLong(m.group(1)));
+				sla.append(Long.parseLong(m.group(1)));
 				found = m.find();
 			} while (found && folder.equals(m.group(2)));
 			if (found) {
 				folder = m.group(2);
-				list = new SmartLongArray(length);
-				list.append(Long.parseLong(m.group(1)));
-				idMap.put(folder, list);
+				sla = new SmartLongArray(length);
+				sla.append(Long.parseLong(m.group(1)));
+				idMap.put(folder, sla);
 			}
 		}
 	}

@@ -302,6 +302,7 @@ public class Folder extends SessionServlet {
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
 			final int size = q.size();
 			final Iterator<FolderObject> iter = q.iterator();
+			final OCLPermission perm = new OCLPermission();
 			NextRootFolder: for (int i = 0; i < size; i++) {
 				final FolderObject rootFolder = iter.next();
 				if (rootFolder.getObjectID() == FolderObject.SYSTEM_FOLDER_ID
@@ -315,13 +316,13 @@ public class Folder extends SessionServlet {
 					 * Reset infostore's permission to read-only, cause virtual
 					 * folder 'UserStore' is going to be used instead
 					 */
-					final OCLPermission perm = new OCLPermission();
+					perm.reset();
 					perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
 					perm.setFolderAdmin(false);
 					perm.setGroupPermission(true);
 					perm.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
 							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-					rootFolder.setPermissionsAsArray(new OCLPermission[] { perm });
+					rootFolder.setPermissionsAsArray(new OCLPermission[] { (OCLPermission) perm.clone() });
 				}
 				lastModified = rootFolder.getLastModified() == null ? lastModified : Math.max(lastModified, rootFolder
 						.getLastModified().getTime());
@@ -574,6 +575,7 @@ public class Folder extends SessionServlet {
 							FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
 					final int size = q.size();
 					final Iterator<FolderObject> iter = q.iterator();
+					final StringBuilder fnBuilder = new StringBuilder(20);
 					for (int i = 0; i < size; i++) {
 						final FolderObject sharedFolder = iter.next();
 						if (us == null) {
@@ -592,8 +594,9 @@ public class Folder extends SessionServlet {
 							continue;
 						}
 						displayNames.add(creatorDisplayName);
-						final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
-								new StringBuilder(20).append(SHARED_PREFIX).append(sharedFolder.getCreatedBy()).toString(),
+						fnBuilder.setLength(0);
+						final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(fnBuilder
+								.append(SHARED_PREFIX).append(sharedFolder.getCreatedBy()).toString(),
 								creatorDisplayName, FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 						jsonWriter.array();
 						try {
