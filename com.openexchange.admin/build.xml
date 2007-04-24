@@ -23,7 +23,6 @@
         <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
         <pathelement location="${lib.dir}/commons-io.jar"/>
         <pathelement location="${lib.dir}/commons-logging.jar"/>
-        <pathelement location="${lib.dir}/commons-cli-1.0.jar"/>
         <pathelement location="${lib.dir}/concurrent.jar"/>
         <pathelement location="${lib.dir}/activation.jar"/>
         <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
