@@ -127,10 +127,12 @@ public class GroupParticipant implements Participant, Comparable {
 		return GROUP;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
 	}
 	
+	@Override
 	public boolean equals(final Object o) {
 		return (hashCode() == o.hashCode());
 	}
@@ -142,7 +144,7 @@ public class GroupParticipant implements Participant, Comparable {
 		return s1.compareTo(s2);
 	}
 	
-	private String getHashString(final int id, final int type, String displayName, String emailaddress) {
+	private String getHashString(final int id, final int type, final String displayName, final String emailaddress) {
 		final StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append('I');
 		stringBuilder.append(id);

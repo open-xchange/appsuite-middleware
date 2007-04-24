@@ -156,12 +156,10 @@ public class LinkEntryObject {
 		if (getContactID() == leo.getContactID()){
 			if (getLinkID() == leo.getLinkID()){
 				return true;
-			}else{
-				return false;
 			}
-		}else{
 			return false;
 		}
+		return false;
 	}
 	
 	public void reset() {

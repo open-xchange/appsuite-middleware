@@ -74,7 +74,7 @@ public class LinkObject {
 		
 	}
 	
-	public LinkObject(int first_id, int first_type, int first_folder, int second_id, int second_type, int second_folder, int cid){
+	public LinkObject(final int first_id, final int first_type, final int first_folder, final int second_id, final int second_type, final int second_folder, final int cid){
 		this.first_id = first_id;
 		this.first_type = first_type;
 		this.first_folder = first_folder;
@@ -84,7 +84,7 @@ public class LinkObject {
 		this.cid = cid;
 	}
 	
-	public void setLink(int first_id, int first_type, int first_folder, int second_id, int second_type, int second_folder, int cid){
+	public void setLink(final int first_id, final int first_type, final int first_folder, final int second_id, final int second_type, final int second_folder, final int cid){
 		this.first_id = first_id;
 		this.first_type = first_type;
 		this.first_folder = first_folder;
@@ -94,25 +94,25 @@ public class LinkObject {
 		this.cid = cid;
 	}
 	
-	public void setFirstId(int id){
+	public void setFirstId(final int id){
 		this.first_id = id;
 	}
-	public void setFirstType(int id){
+	public void setFirstType(final int id){
 		this.first_type = id;
 	}
-	public void setFirstFolder(int id){
+	public void setFirstFolder(final int id){
 		this.first_folder = id;
 	}
-	public void setSecondId(int id){
+	public void setSecondId(final int id){
 		this.second_id = id;
 	}
-	public void setSecondType(int id){
+	public void setSecondType(final int id){
 		this.second_type = id;
 	}
-	public void setSecondFolder(int id){
+	public void setSecondFolder(final int id){
 		this.second_folder = id;
 	}	
-	public void setContext(int id){
+	public void setContext(final int id){
 		this.cid = id;
 	}
 	

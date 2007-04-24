@@ -128,10 +128,12 @@ public class ResourceGroupParticipant implements Participant, Comparable
 		return RESOURCEGROUP;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getHashString(getIdentifier(), getType()).hashCode();
 	}
 	
+	@Override
 	public boolean equals(final Object o) {
 		return (hashCode() == o.hashCode());
 	}

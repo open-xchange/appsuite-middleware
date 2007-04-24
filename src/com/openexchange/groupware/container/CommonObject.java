@@ -217,6 +217,7 @@ public abstract class CommonObject extends FolderChildObject {
 		return bLabel;
 	}
 	
+	@Override
 	public void reset() {
 		super.reset();
 		

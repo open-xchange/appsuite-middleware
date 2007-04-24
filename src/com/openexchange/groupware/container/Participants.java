@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -65,8 +66,8 @@ import java.util.List;
 
 public class Participants {
     
-    private List participants = null;
-    private HashSet h_users = null;
+    private List<Participant> participants = null;
+    private Set<UserParticipant> h_users = null;
 	
 	public Participants() {
 		
@@ -74,7 +75,7 @@ public class Participants {
 	
 	public Participants(final UserParticipant[] users) {
 		if (h_users == null) {
-			h_users = new HashSet();
+			h_users = new HashSet<UserParticipant>();
 		}
 		
 		if (users != null) {
@@ -86,7 +87,7 @@ public class Participants {
 	
 	public Participants(final UserParticipant[] users, final Participant[] participants) {
 		if (h_users == null) {
-			h_users = new HashSet();
+			h_users = new HashSet<UserParticipant>();
 		}
 		
 		for (int a = 0; a < users.length; a++) {
@@ -98,21 +99,21 @@ public class Participants {
 	
     public Participant[] getList() {
 		if (participants != null) {
-            return (Participant[])participants.toArray(new Participant[participants.size()]);
+            return participants.toArray(new Participant[participants.size()]);
 		} 
         return null;
     }
 
     public UserParticipant[] getUsers() {
         if (h_users != null) {
-            return (UserParticipant[])h_users.toArray(new UserParticipant[h_users.size()]);
+            return h_users.toArray(new UserParticipant[h_users.size()]);
 		} 
         return null;
     }
 
     public void add(final Participant p) {
         if (participants == null) {
-            participants = new ArrayList();
+            participants = new ArrayList<Participant>();
 		} 
         if (!participants.contains(p)) {
             participants.add(p);
@@ -121,12 +122,12 @@ public class Participants {
 	
     public void add(final UserParticipant p) {
         if (h_users == null) {
-            h_users = new HashSet();
+            h_users = new HashSet<UserParticipant>();
 		} 
         h_users.add(p);
         
         if (participants == null) {
-            participants = new ArrayList();
+            participants = new ArrayList<Participant>();
 		} 
         if (!participants.contains(p)) {
             participants.add(p);        

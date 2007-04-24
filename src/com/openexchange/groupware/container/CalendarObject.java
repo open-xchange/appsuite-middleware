@@ -381,41 +381,41 @@ public abstract class CalendarObject extends CommonObject
 		b_day_in_month = true;
 	}
 	
-	public void setMonth( final int month ) {
+	public void setMonth(final int month ) {
 		this.month = month;
 		b_month = true;
 	}
 
-	public void setInterval( final int interval ) {
+	public void setInterval(final int interval ) {
 		this.interval = interval;
 		b_interval = true;
 	}
 	
-	public void setUntil( final Date until ) {
+	public void setUntil(final Date until ) {
 		this.until = until;
 		b_until = true;
 	}
 	
-	public void setNotification( final boolean notification ) {
+	public void setNotification(final boolean notification ) {
 		this.notification = notification;
 		b_notification = true;
 	}
 	
-	public void setConfirm( final int confirm) {
+	public void setConfirm(final int confirm) {
 		this.confirm = confirm;
 		b_confirm = true;
 	}
 	
-	public void setConfirmMessage( final String confirmMessage) {
+	public void setConfirmMessage(final String confirmMessage) {
 		this.confirmMessage = confirmMessage;
 		b_confirmMessage = true;
 	}
 	
-	public void setAlarmFlag( boolean alarmFlag) {
+	public void setAlarmFlag(final boolean alarmFlag) {
 		this.alarmFlag = alarmFlag;
 	}
 	
-	public void setOccurrence(int occurrence) {
+	public void setOccurrence(final int occurrence) {
 		this.occurrence = occurrence;
                 b_occurrence = true;
 	}
@@ -598,8 +598,8 @@ public abstract class CalendarObject extends CommonObject
         b_participants = true;
 	}
 	
-	public void setParticipants(final List participants) {
-		this.participants = (Participant[])participants.toArray(new Participant[participants.size()]);
+	public void setParticipants(final List<? extends Participant> participants) {
+		this.participants = participants.toArray(new Participant[participants.size()]);
         b_participants = true;
 	}
 	
@@ -634,8 +634,8 @@ public abstract class CalendarObject extends CommonObject
 		b_users = true;
 	}
 	
-	public void setUsers(final List users) {
-		this.users = (UserParticipant[])users.toArray(new UserParticipant[users.size()]);
+	public void setUsers(final List<UserParticipant> users) {
+		this.users = users.toArray(new UserParticipant[users.size()]);
 		b_users = true;
 	}
 
@@ -653,6 +653,7 @@ public abstract class CalendarObject extends CommonObject
 		return b_users;
 	}
 	
+	@Override
 	public void reset() {
 		super.reset();
 		

@@ -560,7 +560,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			final UserConfiguration userConfig, final Context ctx) throws DBPoolingException, OXException,
 			SQLException, SearchIteratorException {
 		if (objectId == VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
-			throw new OXFolderException(FolderCode.UNSUPPORTED_OPERATION, objectId, ctx.getContextId());
+			throw new OXFolderException(FolderCode.UNSUPPORTED_OPERATION, String.valueOf(objectId), String.valueOf(ctx.getContextId()));
 		} else if (b_subfolderFlag && !subfolderFlag) {
 			return new ArrayList<FolderObject>(0);
 		}
@@ -605,7 +605,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	public final List<Integer> getSubfolderIds() throws OXFolderException {
 		if (!b_subfolderIds) {
-			throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "", "subfolderIds", getObjectID(), "");
+			throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "", "subfolderIds", String.valueOf(getObjectID()), "");
 		}
 		return subfolderIds;
 	}
@@ -634,7 +634,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				return new ArrayList<Integer>(0);
 			}
 			if (!enforce) {
-				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "", "subfolderIds", getObjectID(), "");
+				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "", "subfolderIds", String.valueOf(getObjectID()), "");
 			}
 			subfolderIds = getSubfolderIds(objectId, ctx, readCon);
 			b_subfolderIds = true;
@@ -680,6 +680,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * 
 	 * @see com.openexchange.groupware.container.DataObject#reset()
 	 */
+	@Override
 	public final void reset() {
 		super.reset();
 		removeCreator();
@@ -862,6 +863,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		return maxPerm;
 	}
 
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(super.toString()).append('\n');
@@ -932,6 +934,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Object clone() {
 		try {
 			final FolderObject clone = (FolderObject) super.clone();
@@ -1031,12 +1034,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			final String table, final String permTable) throws OXException {
 		try {
 			Connection readCon = readConArg;
-			final boolean createCon = (readCon == null);
+			boolean closeCon = false;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				if (createCon) {
+				if (readCon == null) {
 					readCon = DBPool.pickup(ctx);
+					closeCon = true;
 				}
 				stmt = readCon.prepareStatement(SQL_LOAD_F.replaceFirst("#TABLE#", table));
 				stmt.setInt(1, ctx.getContextId());
@@ -1069,12 +1073,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				}
 				return folderObj;
 			} finally {
-				closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
 		} catch (SQLException e) {
-			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, -1, folderId, ctx.getContextId());
+			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
 		} catch (DBPoolingException e) {
-			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, -1, folderId, ctx.getContextId());
+			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
 		}
 	}
 
@@ -1114,12 +1118,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final OCLPermission[] getFolderPermissions(final int folderId, final Context ctx,
 			final Connection readConArg, final String table) throws SQLException, DBPoolingException {
 		Connection readCon = readConArg;
-		final boolean createCon = (readCon == null);
+		boolean closeCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
 			stmt.setInt(1, ctx.getContextId());
@@ -1138,7 +1143,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			stmt.close();
 			return permList.toArray(new OCLPermission[permList.size()]);
 		} finally {
-			closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 		}
 	}
 
@@ -1152,12 +1157,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx,
 			final Connection readConArg, final String table) throws SQLException, DBPoolingException {
 		Connection readCon = readConArg;
-		final boolean createCon = (readCon == null);
+		boolean closeCon = false;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			if (createCon) {
+			if (readCon == null) {
 				readCon = DBPool.pickup(ctx);
+				closeCon = true;
 			}
 			stmt = readCon.prepareStatement(SQL_SEL.replaceFirst("#TABLE#", table));
 			stmt.setInt(1, ctx.getContextId());
@@ -1169,7 +1175,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			}
 			return retval;
 		} finally {
-			closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
+			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 		}
 	}
 
