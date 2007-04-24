@@ -35,12 +35,12 @@
 
     <!-- Replacements in Version.java.in -->
     <filterset id="version">
-        <filter token="@ox_major@" value="${ox_major}" />
-        <filter token="@ox_minor@" value="${ox_minor}" />
-        <filter token="@ox_patch@" value="${ox_patch}" />
-        <filter token="@ox_buildnumber@" value="${ox_buildnumber}" />
-        <filter token="@ox_codename@" value="${ox_codename}" />
-        <filter token="@ox_name@" value="${ox_name}" />
+        <filter token="ox_major" value="${ox_major}" />
+        <filter token="ox_minor" value="${ox_minor}" />
+        <filter token="ox_patch" value="${ox_patch}" />
+        <filter token="ox_buildnumber" value="${ox_buildnumber}" />
+        <filter token="ox_codename" value="${ox_codename}" />
+        <filter token="ox_name" value="${ox_name}" />
     </filterset>
 
     <!-- JAR names for classpath -->
