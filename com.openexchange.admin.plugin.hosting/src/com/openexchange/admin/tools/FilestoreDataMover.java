@@ -229,7 +229,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
          * @param log_file
          */
         @OXThrowsMultiple(
-        category={Category.PROGRAMMING_ERROR,Category.PROGRAMMING_ERROR},
+        category={Category.CODE_ERROR,Category.CODE_ERROR},
                 desc={" "," "},
                 exceptionId={0,1},
                 msg={"Unable to change Storage data in configdb: %s","Unable to enable Context %s"}
@@ -283,7 +283,7 @@ public class FilestoreDataMover implements Callable<Vector>, I_AdminProgressEnab
      * @param log_file
      */
     @OXThrowsMultiple(
-    category={Category.PROGRAMMING_ERROR,Category.PROGRAMMING_ERROR},
+    category={Category.CODE_ERROR,Category.CODE_ERROR},
             desc={" "," "},
             exceptionId={0,1},
             msg={"Unable to change Storage data in configdb: %s","Unable to enable Context %s"}
