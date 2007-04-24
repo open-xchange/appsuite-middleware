@@ -38,11 +38,20 @@ public class AdminParser extends CmdLineParser {
 
         public boolean extended = false;
 
-        public OptionInfo(final boolean needed, final Option option, final String shortForm, final String longForm, final String longFormParameterDescription, final String description) {
+        public OptionInfo(final boolean needed, final Option option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
             super();
             this.needed = needed;
             this.option = option;
-            this.shortForm = shortForm;
+            this.shortForm = String.valueOf(shortForm);
+            this.longForm = longForm;
+            this.longFormParameterDescription = longFormParameterDescription;
+            this.description = description;
+        }
+
+        public OptionInfo(final boolean needed, final Option option, final String longForm, final String longFormParameterDescription, final String description) {
+            super();
+            this.needed = needed;
+            this.option = option;
             this.longForm = longForm;
             this.longFormParameterDescription = longFormParameterDescription;
             this.description = description;
@@ -74,6 +83,22 @@ public class AdminParser extends CmdLineParser {
             this.extended = extended;
         }
 
+        public OptionInfo(final boolean needed, final Option option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
+            super();
+            this.needed = needed;
+            this.option = option;
+            this.longForm = longForm;
+            this.longFormParameterDescription = longFormParameterDescription;
+            this.description = description;
+            this.extended = extended;
+        }
+
+    }
+
+    public AdminParser(final String appname) {
+        super();
+        this.appname = appname;
+        this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help text", false, false);
     }
 
     ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
@@ -93,7 +118,7 @@ public class AdminParser extends CmdLineParser {
      */
     public Option addOption(final char shortForm, final String longForm, final String description, final boolean needed) {
         final Option retval = addStringOption(shortForm, longForm);
-        optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
+        this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
 
         return retval;
     }
@@ -111,7 +136,7 @@ public class AdminParser extends CmdLineParser {
      */
     public Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
         final Option retval = this.addStringOption(shortForm, longForm);
-        optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
+        this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
         return retval;
     }
 
@@ -127,11 +152,11 @@ public class AdminParser extends CmdLineParser {
     public Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
         if (hasarg) {
             final Option retval = this.addStringOption(shortForm, longForm);
-            optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
+            this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
             return retval;
         } else {
             final Option retval = this.addBooleanOption(shortForm, longForm);
-            optinfolist.add(new OptionInfo(false, retval, shortForm, longForm, description));
+            this.optinfolist.add(new OptionInfo(false, retval, shortForm, longForm, description));
             return retval;
         }
     }
@@ -146,7 +171,7 @@ public class AdminParser extends CmdLineParser {
      */
     public Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
         final Option retval = this.addStringOption(longForm);
-        optinfolist.add(new OptionInfo(needed, retval, longForm, description));
+        this.optinfolist.add(new OptionInfo(needed, retval, longForm, longFormParameterDescription, description));
         return retval;
     }
 
@@ -162,11 +187,11 @@ public class AdminParser extends CmdLineParser {
 
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
-            optinfolist.add(new OptionInfo(needed, retval, longForm, description));
+            this.optinfolist.add(new OptionInfo(needed, retval, longForm, longFormParameterDescription, description));
             return retval;
         } else {
             final Option retval = this.addBooleanOption(longForm);
-            optinfolist.add(new OptionInfo(false, retval, longForm, description));
+            this.optinfolist.add(new OptionInfo(false, retval, longForm, description));
             return retval;
         }
 
@@ -185,11 +210,11 @@ public class AdminParser extends CmdLineParser {
 
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
-            optinfolist.add(new OptionInfo(needed, retval, longForm, description, extended));
+            this.optinfolist.add(new OptionInfo(needed, retval, longForm, longFormParameterDescription, description, extended));
             return retval;
         } else {
             final Option retval = this.addBooleanOption(longForm);
-            optinfolist.add(new OptionInfo(false, retval, longForm, description, extended));
+            this.optinfolist.add(new OptionInfo(false, retval, longForm, description, extended));
             return retval;
         }
 
@@ -202,12 +227,12 @@ public class AdminParser extends CmdLineParser {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);
-        if (null != this.getOptionValue(helpoption)) {
+        if (null != this.getOptionValue(this.helpoption)) {
             printUsage();
             System.exit(0);
         }
         final StringBuilder sb = new StringBuilder();
-        for (final OptionInfo optInfo : optinfolist) {
+        for (final OptionInfo optInfo : this.optinfolist) {
             if (optInfo.needed) {
                 if (null == getOptionValue(optInfo.option)) {
                     sb.append(optInfo.longForm);
@@ -227,19 +252,9 @@ public class AdminParser extends CmdLineParser {
     public void printUsage() {
         System.err.println("Usage: " + this.appname);
 
-        for (final OptionInfo optInfo : optinfolist) {
+        for (final OptionInfo optInfo : this.optinfolist) {
             if (!optInfo.extended) {
-                String format_this = " %s,%-30s %s\n";
-                if (optInfo.shortForm == null) {
-                    format_this = " %s %-30s %s\n";
-                    Object[] format_with_ = { "  ", "--" + optInfo.longForm, optInfo.description };
-                    System.err.format(format_this, format_with_);
-                } else {
-                    // example result :
-                    // -c,--contextid The id of the context
-                    Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, optInfo.description };
-                    System.err.format(format_this, format_with);
-                }
+                basicOutput(optInfo);
             }
         }
     }
@@ -247,25 +262,46 @@ public class AdminParser extends CmdLineParser {
     public void printUsageExtended() {
         System.err.println("Usage: " + this.appname);
         
-        for (final OptionInfo optInfo : optinfolist) {
-            String format_this = " %s,%-30s %s\n";
-            if (optInfo.shortForm == null) {
-                format_this = " %s %-30s %s\n";
-                Object[] format_with_ = { "  ", "--" + optInfo.longForm, optInfo.description };
-                System.err.format(format_this, format_with_);
-            } else {
-                // example result :
-                // -c,--contextid The id of the context
-                Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, optInfo.description };
-                System.err.format(format_this, format_with);
-            }
+        for (final OptionInfo optInfo : this.optinfolist) {
+            basicOutput(optInfo);
         }
     }
 
-    public AdminParser(String appname) {
-        super();
-        this.appname = appname;
-        helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help text", false, false);
+    private void basicOutput(final OptionInfo optInfo) {
+        if (optInfo.shortForm == null) {
+            final String format_this = " %s %-46s %-28s\n";
+            if (null != optInfo.longFormParameterDescription) {
+                final StringBuilder sb = new StringBuilder();
+                sb.append("--");
+                sb.append(optInfo.longForm);
+                sb.append(" <");
+                sb.append(optInfo.longFormParameterDescription);
+                sb.append(">");
+                final Object[] format_with_ = { "  ", sb.toString(), optInfo.description };
+                System.err.format(format_this, format_with_);
+            } else {
+                final Object[] format_with_ = { "  ", "--" + optInfo.longForm, optInfo.description };
+                System.err.format(format_this, format_with_);
+            }
+        } else {
+            final String format_this = " %s,%-46s %-28s\n";
+            if (null != optInfo.longFormParameterDescription) {
+                // example result :
+                // -c,--contextid The id of the context
+                final StringBuilder sb = new StringBuilder();
+                sb.append("--");
+                sb.append(optInfo.longForm);
+                sb.append(" <");
+                sb.append(optInfo.longFormParameterDescription);
+                sb.append(">");
+
+                final Object[] format_with = { "-" + optInfo.shortForm, sb.toString(), optInfo.description };
+                System.err.format(format_this, format_with);
+            } else {
+                final Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, optInfo.description };
+                System.err.format(format_this, format_with);
+            }
+        }
     }
 
 }
