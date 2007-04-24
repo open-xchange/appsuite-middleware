@@ -88,19 +88,19 @@ public abstract class BasicCommandlineOptions {
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
     
-    protected static void printServerResponse(String msg){
+    protected static void printServerResponse(final String msg){
         System.err.println("Server response:\n "+msg);    
     }
     
-    protected static void printNotBoundResponse(NotBoundException nbe){
+    protected static void printNotBoundResponse(final NotBoundException nbe){
         printServerResponse("RMI module "+nbe.getMessage()+" not available on server");
     }
     
-    protected static void printError(String msg){
+    protected static void printError(final String msg){
         System.err.println("Error:\n "+msg+"\n");    
     }
     
-    protected static void printInvalidInputMsg(String msg){
+    protected static void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
     
@@ -121,7 +121,7 @@ public abstract class BasicCommandlineOptions {
             
             // first prepare the columns line
             StringBuilder sb = new StringBuilder();
-            for (String column_entry : columns) {
+            for (final String column_entry : columns) {
                 sb.append(column_entry);
                 sb.append(",");
             }
@@ -134,9 +134,9 @@ public abstract class BasicCommandlineOptions {
             System.out.println(sb.toString());            
             
             // now prepare all data lines
-            for (ArrayList<String> data_list : data) {
+            for (final ArrayList<String> data_list : data) {
                 sb = new StringBuilder();
-                for (String data_column : data_list) {
+                for (final String data_column : data_list) {
                     if(data_column!=null){
                         sb.append("\"");
                         sb.append(data_column);
@@ -154,7 +154,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected static void setRMI_HOSTNAME(String rmi_hostname) {       
+    protected static void setRMI_HOSTNAME(final String rmi_hostname) {       
         String host = rmi_hostname;
         if(!host.startsWith("rmi://")){
             host = "rmi://"+host;
@@ -183,8 +183,14 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
+    protected Option setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+        
+        final Option retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
+        return retval;
+    }
+
     protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
-        final Option retval = admp.addOption(shortopt,longopt, argdescription, description, required);       
+        final Option retval = admp.addOption(shortopt, longopt, argdescription, description, required);       
         return retval;
     }
 
@@ -203,9 +209,9 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected Option getContextOption(final AdminParser admp) {
-        contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
+        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
 //        retval.setArgName("Context ID");
-        return contextOption;
+        return this.contextOption;
     }
     
     protected Option getContextNameOption(final AdminParser admp) {
@@ -215,25 +221,25 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected Option getAdminPassOption(final AdminParser admp) {
-        adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
 //        retval.setArgName("Admin password");
-        return adminPassOption;
+        return this.adminPassOption;
     }
     
     protected void setCSVOutputOption(final AdminParser admp) {
-        csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
+        this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
     protected Option getAdminUserOption(final AdminParser admp) {
-        adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
 //        retval.setArgName("Admin username");
-        return adminUserOption;
+        return this.adminUserOption;
     }
     
     protected Option getSearchPatternOption(final AdminParser admp){
-        searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
+        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
 //        opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
-        return  searchOption;
+        return  this.searchOption;
     }
 
 //    protected Option addArgName(final Option option, final String argname) {
@@ -271,13 +277,13 @@ public abstract class BasicCommandlineOptions {
      */
     protected void setDefaultCommandLineOptions(final AdminParser admp){
         
-        Option[] options = new Option[3];
-        contextOption = getContextOption(admp);
-        adminUserOption = getAdminUserOption(admp); 
-        adminPassOption = getAdminPassOption(admp);
+        final Option[] options = new Option[3];
+        this.contextOption = getContextOption(admp);
+        this.adminUserOption = getAdminUserOption(admp); 
+        this.adminPassOption = getAdminPassOption(admp);
         
-        options[0] = contextOption;
-        options[1] = adminUserOption;
-        options[2] = adminPassOption;
+        options[0] = this.contextOption;
+        options[1] = this.adminUserOption;
+        options[2] = this.adminPassOption;
     }
 }

@@ -396,7 +396,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         allowedparametertypes.add(JAVA_LANG_INTEGER);
         allowedparametertypes.add(JAVA_LANG_BOOLEAN);
         allowedparametertypes.add(JAVA_UTIL_DATE);
-        allowedparametertypes.add(JAVA_UTIL_HASH_SET);
         allowedparametertypes.add(JAVA_UTIL_TIME_ZONE);
         allowedparametertypes.add(PASSWORDMECH_CLASS);
         
@@ -532,22 +531,19 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
             
             if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
                 if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "booleanvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
-                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
-                } else if (methodandnames.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 }
             }            
