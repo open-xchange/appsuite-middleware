@@ -13,7 +13,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see jargs.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -32,6 +32,10 @@ public class CmdLineParser {
      * English).
      */
     public static class UnknownOptionException extends OptionException {
+        /**
+         * For serialization
+         */
+        private static final long serialVersionUID = -1049865797798108513L;
         UnknownOptionException( String optionName ) {
             this(optionName, "Unknown option '" + optionName + "'");
         }
@@ -57,6 +61,10 @@ public class CmdLineParser {
      */
     public static class UnknownSuboptionException
         extends UnknownOptionException {
+        /**
+         * For serialization
+         */
+        private static final long serialVersionUID = -7502208741895194814L;
         private char suboption;
 
         UnknownSuboptionException( String option, char suboption ) {
@@ -74,6 +82,10 @@ public class CmdLineParser {
      * @author Vidar Holen
      */
     public static class NotFlagException extends UnknownOptionException {
+        /**
+         * For serialization
+         */
+        private static final long serialVersionUID = -897017845636041361L;
         private char notflag;
 
         NotFlagException( String option, char unflaggish ) {
@@ -95,6 +107,10 @@ public class CmdLineParser {
      * English).
      */
     public static class IllegalOptionValueException extends OptionException {
+        /**
+         * For serialization
+         */
+        private static final long serialVersionUID = 4975707165294344735L;
         public IllegalOptionValueException( Option opt, String value ) {
             super("Illegal value '" + value + "' for option " +
                   (opt.shortForm() != null ? "-" + opt.shortForm() + "/" : "") +
@@ -391,7 +407,7 @@ public class CmdLineParser {
      * given Option, or an empty Vector if the option was not set.
      */
     public final Vector getOptionValues( Option option ) {
-        Vector result = new Vector();
+        Vector<Object> result = new Vector<Object>();
 
         while (true) {
             Object o = getOptionValue(option, null);
@@ -440,9 +456,9 @@ public class CmdLineParser {
         // backwards compatibility with old user code we throw the two
         // exceptions above instead.
 
-        Vector otherArgs = new Vector();
+        Vector<String> otherArgs = new Vector<String>();
         int position = 0;
-        this.values = new Hashtable(10);
+        this.values = new Hashtable<String, Vector>(10);
         while ( position < argv.length ) {
             String curArg = argv[position];
             if ( curArg.startsWith("-") ) {
@@ -507,14 +523,14 @@ public class CmdLineParser {
         otherArgs.copyInto(remainingArgs);
     }
 
-
+    @SuppressWarnings("unchecked")
     private void addValue(Option opt, Object value) {
         String lf = opt.longForm();
 
-        Vector v = (Vector)values.get(lf);
+        Vector<Object> v = (Vector)values.get(lf);
 
         if (v == null) {
-            v = new Vector();
+            v = new Vector<Object>();
             values.put(lf, v);
         }
 
@@ -523,6 +539,6 @@ public class CmdLineParser {
 
 
     private String[] remainingArgs = null;
-    private Hashtable options = new Hashtable(10);
-    private Hashtable values = new Hashtable(10);
+    private Hashtable<String, Option> options = new Hashtable<String, Option>(10);
+    private Hashtable<String, Vector> values = new Hashtable<String, Vector>(10);
 }
