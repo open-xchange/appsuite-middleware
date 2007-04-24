@@ -876,7 +876,7 @@ public class MessageUtils {
 		final String[] sa = id.split("\\.");
 		final int[] retval = new int[sa.length];
 		for (int i = 0; i < sa.length; i++) {
-			retval[i] = Integer.valueOf(sa[i]);
+			retval[i] = Integer.parseInt(sa[i]);
 		}
 		return retval;
 	}

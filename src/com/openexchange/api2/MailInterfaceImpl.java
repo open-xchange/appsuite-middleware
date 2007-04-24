@@ -2433,7 +2433,7 @@ public class MailInterfaceImpl implements MailInterface {
 		return tmp.toArray(new InternetAddress[tmp.size()]);
 	}
 
-	private static final ArrayList<InternetAddress> array2List(final InternetAddress[] arr) {
+	private static final List<InternetAddress> array2List(final InternetAddress[] arr) {
 		final ArrayList<InternetAddress> retval = new ArrayList<InternetAddress>(arr.length);
 		retval.addAll(Arrays.asList(arr));
 		return retval;
