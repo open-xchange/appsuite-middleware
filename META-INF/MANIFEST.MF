@@ -17,7 +17,6 @@ Import-Package: org.apache.commons.logging.impl,
  com.openexchange.configuration,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools,
- org.apache.commons.cli,
  com.openexchange.groupware.update,
  org.apache.commons.io,
  org.osgi.framework;version="1.3.0"
