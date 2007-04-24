@@ -600,7 +600,7 @@ public class MailInterfaceImpl implements MailInterface {
 				} else {
 					stdFolderNames[INDEX_TRASH] = usm.getStdTrashName();
 				}
-				if (IMAPProperties.isSpamEnabled()) {
+				if (usm.isSpamEnabled()) {
 					if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
 						if (LOG.isWarnEnabled()) {
 							final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME,
@@ -774,7 +774,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				usm.setStandardFolder(INDEX_TRASH, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
-				if (IMAPProperties.isSpamEnabled()) {
+				if (usm.isSpamEnabled()) {
 					/*
 					 * Check confirmed spam folder
 					 */

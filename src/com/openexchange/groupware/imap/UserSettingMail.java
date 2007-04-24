@@ -834,8 +834,8 @@ public class UserSettingMail implements DeleteListener {
 
 	/**
 	 * @return <code>true</code> if both global property for spam enablement
-	 *         <b>AND</b> user-defined property for spam enablement are turned
-	 *         on; otherwise <code>false</code>
+	 *         <small><b>AND</b></small> user-defined property for spam
+	 *         enablement are turned on; otherwise <code>false</code>
 	 * @throws IMAPException
 	 */
 	public final boolean isSpamEnabled() throws IMAPException {
