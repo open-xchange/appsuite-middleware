@@ -18,7 +18,9 @@ public class NotificationConfig extends AbstractConfig {
 	
 	enum NotificationProperty{
 		
-		NOTIFY_ON_DELETE("notify_participants_on_delete");
+		NOTIFY_ON_DELETE("notify_participants_on_delete"),
+		OBJECT_LINK("object_link");
+		
 		
 		private String name;
 		

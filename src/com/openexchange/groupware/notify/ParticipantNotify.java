@@ -224,8 +224,6 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			LOG.debug(e);
 		}
 		
-		// We need to generate one message per Locale and TimeZone and send it once for each internal user and collected for the external participants
-		Map<String, Map<TimeZone,String>> messagesPerTZ = new HashMap<String, Map<TimeZone, String>>();
 		List<MailMessage> messages = new ArrayList<MailMessage>();
 		for(Locale locale : receivers.keySet()) {
 			
@@ -235,11 +233,6 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale);
 			df = tryAppendingTimeZone(df);
 			List<EmailableParticipant> participants = receivers.get(locale);
-			Map<TimeZone, String> tz2text = messagesPerTZ.get(strings.getString(titleKey));
-			if(tz2text == null) {
-				tz2text = new HashMap<TimeZone, String>();
-				messagesPerTZ.put(strings.getString(titleKey), tz2text);
-			}
 			
 			for(EmailableParticipant p : participants) {
 				TimeZone tz = TimeZone.getDefault();
@@ -258,11 +251,9 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				}
 				
 				if(sendMail) {
-					String text = tz2text.get(tz);
-					if(text == null) {
-						df.setTimeZone(tz);
+					df.setTimeZone(tz);
 
-						Map<String,String> m = m(
+					Map<String,String> m = m(
 						"start" 	,	(null == obj.getStartDate()) ? "" : df.format(obj.getStartDate()),
 						"end"		,	(null == obj.getEndDate()) ? "" : df.format(obj.getEndDate()),
 						"title"		,	(null == obj.getTitle()) ? "" : obj.getTitle(),
@@ -271,15 +262,13 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 						"created_by",		createdByDisplayName,
 						"changed_by",		modifiedByDisplayName,
 						"description",		(null == obj.getNote()) ? "" : obj.getNote()
-						);
+					);
 							
-						state.addSpecial(obj,m);
+					state.addSpecial(obj,m,p);
 							
-						text = createTemplate.render(m);
-						tz2text.put(tz,text);
-					}
+					
 					MailMessage msg = new MailMessage();
-					msg.message = text;
+					msg.message = createTemplate.render(m);
 					msg.title = strings.getString(titleKey)+": "+obj.getTitle();
 					msg.addresses.add(p.email);
 					msg.folderId = p.folderId;
@@ -628,17 +617,52 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	// Special handling for Appointments or Tasks goes here
 	static interface State {
 		public boolean sendMail(UserConfiguration userConfig);
-		public void addSpecial(CalendarObject obj, Map<String,String> subst);
+		public void addSpecial(CalendarObject obj, Map<String,String> subst, EmailableParticipant p);
 		public int getModule();
 	}
 	
-	private static class AppointmentState implements State {
+	private static abstract class LinkableState implements State {
+		
+		private static Template object_link_template = null;
+		
+		public void addSpecial(CalendarObject obj, Map<String, String> subst, EmailableParticipant p){
+			subst.put("link", generateLink(obj, p));
+		}
+
+		private String generateLink(CalendarObject obj, EmailableParticipant p) {
+			if(object_link_template == null)
+				loadTemplate();
+			
+			Map<String, String> subst = new HashMap<String,String>();
+			switch(getModule()) {
+			case Types.APPOINTMENT : subst.put("module", "calendar"); break;
+			case Types.TASK : subst.put("module", "task"); break;
+			default : subst.put("module", "unknown"); break;
+			}
+			
+			subst.put("folder", String.valueOf(p.folderId));
+			subst.put("object", String.valueOf(obj.getObjectID()));
+			
+			return object_link_template.render(subst);
+		}
+		
+		private static final void loadTemplate(){
+			synchronized (LinkableState.class) {
+				object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK, ""));
+			}
+		}
+
+	}
+	
+	private static class AppointmentState extends LinkableState {
 
 		public boolean sendMail(UserConfiguration userConfig) {
 			return userConfig.getUserSettingMail().isNotifyAppointments();
 		}
-
-		public void addSpecial(CalendarObject obj, Map<String, String> subst) {
+		
+		@Override
+		public void addSpecial(CalendarObject obj, Map<String, String> subst, EmailableParticipant p) {
+			super.addSpecial(obj, subst, p);
 			AppointmentObject appointmentObj = (AppointmentObject) obj;
 			subst.put("location", appointmentObj.getLocation());
 		}
@@ -648,14 +672,10 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 	}
 	
-	private static class TaskState implements State {
+	private static class TaskState extends LinkableState {
 
 		public boolean sendMail(UserConfiguration userConfig) {
 			return userConfig.getUserSettingMail().isNotifyTasks();
-		}
-
-		public void addSpecial(CalendarObject obj, Map<String, String> subst) {
-			//Task task = (Task) obj;
 		}
 		
 		public int getModule(){

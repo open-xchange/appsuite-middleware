@@ -51,8 +51,9 @@ package com.openexchange.groupware.i18n;
 
 public class Notifications {
 	public static final String APPOINTMENT_CREATE_MAIL = 
-		"A new appointment was created by [created_by].\n"+
+		"A new appointment has been created by [created_by].\n"+
 		"\n"+
+		"Direct Link: [link]\n"+
 		"\n"+
 		"Appointment\n"+
 		"===========\n"+
@@ -79,8 +80,9 @@ public class Notifications {
 		"==========================================";
 	
 	public static final String TASK_CREATE_MAIL = 
-		"A new task was created by [created_by].\n"+
+		"A new task has been created by [created_by].\n"+
 		"\n"+
+		"Direct Link: [link]\n"+
 		"\n"+
 		"Task\n"+
 		"====\n"+
@@ -106,7 +108,7 @@ public class Notifications {
 		"==========================================";	
 	
 	public static final String APPOINTMENT_DELETE_MAIL = 
-		"This appointment was deleted by [changed_by].\n"+
+		"This appointment has been deleted by [changed_by].\n"+
 		"\n"+
 		"\n"+
 		"Appointment\n"+
@@ -125,7 +127,7 @@ public class Notifications {
 		"==========================================";
 	
 	public static final String TASK_DELETE_MAIL = 
-		"This task was deleted by [changed_by].\n"+
+		"This task has been deleted by [changed_by].\n"+
 		"\n"+
 		"\n"+
 		"Task\n"+
@@ -141,8 +143,9 @@ public class Notifications {
 		"==========================================";
 	
 	public static final String APPOINTMENT_UPDATE_MAIL = 
-		"This appointment was changed by [changed_by].\n"+
+		"This appointment has been changed by [changed_by].\n"+
 		"\n"+
+		"Direct Link: [link]\n"+
 		"\n"+
 		"Appointment\n"+
 		"===========\n"+
@@ -169,8 +172,9 @@ public class Notifications {
 		"==========================================";
 
 	public static final String TASK_UPDATE_MAIL = 
-		"This task was changed by [changed_by].\n"+
+		"This task has been changed by [changed_by].\n"+
 		"\n"+
+		"Direct Link: [link]\n"+
 		"\n"+
 		"Task\n"+
 		"====\n"+
@@ -195,11 +199,11 @@ public class Notifications {
 		"\n"+
 		"==========================================";;
 	
-	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment was created";
-	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment was changed";
-	public static final String APPOINTMENT_DELETE_TITLE = "An appointment was removed";
-	public static final String TASK_CREATE_TITLE = "A new task was created";
-	public static final String TASK_UPDATE_TITLE = "A task was changed";
-	public static final String TASK_DELETE_TITLE = "A task was removed";
-	public static final String NO_RESOURCES = "No resources were scheduled.";
+	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment has been created";
+	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment has been changed";
+	public static final String APPOINTMENT_DELETE_TITLE = "An appointment has been removed";
+	public static final String TASK_CREATE_TITLE = "A new task has been created";
+	public static final String TASK_UPDATE_TITLE = "A task has been changed";
+	public static final String TASK_DELETE_TITLE = "A task has been removed";
+	public static final String NO_RESOURCES = "No resources have been scheduled.";
 }
