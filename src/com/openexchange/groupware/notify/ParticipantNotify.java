@@ -566,7 +566,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		
 	}
 	
-	private static final class EmailableParticipant {
+	public static final class EmailableParticipant {
 		public String email;
 		public String displayName;
 		public Locale locale;
