@@ -42,7 +42,9 @@ import org.json.JSONObject;
 
 public class AbstractICalTest extends AbstractAJAXTest {
 	
-	protected static final String IMPORTEXPORT_URL = "/ajax/importexport";
+	protected static final String IMPORT_URL = "/ajax/import";
+	
+	protected static final String EXPORT_URL = "/ajax/export";
 	
 	protected Date startTime = null;
 	
@@ -96,7 +98,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		startTime = c.getTime();
-		startTime.setTime(timeZone.getOffset(startTime.getTime()));
+		// startTime.setTime(sta + timeZone.getOffset(startTime.getTime()));
 		endTime = new Date(startTime.getTime() + 3600000);
 	}
 	
@@ -140,6 +142,12 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		versitWriter.flush();
 		oxContainerConverter.close();
 		
+		return importICal(webCon, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), appointmentFolderId, taskFolderId, timeZone, emailaddress, host, session);
+	}
+		
+	public static ImportResult[] importICal(WebConversation webCon, ByteArrayInputStream byteArrayInputStream, int appointmentFolderId, int taskFolderId, TimeZone timeZone, String emailaddress, String host, String session) throws Exception, TestException {
+		host = appendPrefix(host);
+		
 		final URLParameter parameter = new URLParameter(true);
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, Format.ICAL.getConstantName());
@@ -150,8 +158,6 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		if (taskFolderId != -1) {
 			parameter.setParameter("folder", taskFolderId);
 		}
-		
-		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 		
 		WebRequest req = new PostMethodWebRequest(host + "/ajax/import" + parameter.getURLParameters());
 		
@@ -165,7 +171,6 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		JSONObject response = extractFromCallback( resp.getText() );
 		
 		JSONArray jsonArray = response.getJSONArray("data");
-
 		
 		assertNotNull("json array in response is null", jsonArray);
 		
@@ -173,11 +178,16 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		for (int a = 0; a < jsonArray.length(); a++) {
 			JSONObject jsonObj = jsonArray.getJSONObject(a);
 			
-			String objectId = jsonObj.getString("id");
-			String folder = jsonObj.getString("folder_id");
-			long timestamp = jsonObj.getLong("last_modified");
+			if (jsonObj.has("error")) {
+				importResult[a] = new ImportResult();
+				importResult[a].setException(new OXException("server error"));
+			} else {
+				String objectId = jsonObj.getString("id");
+				String folder = jsonObj.getString("folder_id");
+				long timestamp = jsonObj.getLong("last_modified");
 			
-			importResult[a] = new ImportResult(objectId, folder, timestamp);
+				importResult[a] = new ImportResult(objectId, folder, timestamp);
+			} 
 		}
 		
 		return importResult;
@@ -212,7 +222,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 				final Property property = versitObject.getProperty("UID");
 				
 				if ("VEVENT".equals(versitObject.name)) {
-					final CalendarDataObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
+					final AppointmentObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
 					appointmentObj.setParentFolderID(appointmentFolderId);
 					exportData.add(appointmentObj);
 				} else {
@@ -235,11 +245,11 @@ public class AbstractICalTest extends AbstractAJAXTest {
 		
 		final URLParameter parameter = new URLParameter(true);
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter("content-type", contentType);
+		parameter.setParameter("action", Format.ICAL.getConstantName());
 		parameter.setParameter("folder", taskFolderId);
 		parameter.setParameter("type", Types.TASK);
 		
-		WebRequest req = new GetMethodWebRequest(host + IMPORTEXPORT_URL + parameter.getURLParameters());
+		WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
