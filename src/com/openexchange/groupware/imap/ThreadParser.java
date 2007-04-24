@@ -65,8 +65,6 @@ public class ThreadParser {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ThreadParser.class);
 
-	private boolean debug;
-
 	private final List<TreeNode> threads;
 
 	public ThreadParser() {
@@ -82,13 +80,13 @@ public class ThreadParser {
 	 * @param threads
 	 */
 	private void parse(final String threadList, final List<TreeNode> recthreads) throws Exception {
-		if (debug) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
 		}
 		if (threadList.charAt(0) >= '0' && threadList.charAt(0) <= '9') {
 			// Now in a thread the thread starts normally with a number.
 			final int message = getMessageID(threadList);
-			if (debug) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("Found message: ").append(message).toString());
 			}
 			final TreeNode actual = new TreeNode(message);
@@ -96,7 +94,7 @@ public class ThreadParser {
 			// Now thread ends or answers are there.
 			final int messageIDLength = String.valueOf(message).length();
 			if (threadList.length() > messageIDLength && threadList.charAt(messageIDLength) == ' ') {
-				if (debug) {
+				if (LOG.isDebugEnabled()) {
 					LOG.debug("Parsing child threads.");
 				}
 				final List<TreeNode> childThreads = new ArrayList<TreeNode>();
@@ -106,25 +104,25 @@ public class ThreadParser {
 				throw new Exception("Found not expected character: " + threadList.charAt(messageIDLength));
 			}
 		} else if (threadList.charAt(0) == '(') {
-			if (debug) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("Parsing list.");
 			}
 			// Parse list of threads.
 			int pos = 0;
 			do {
-				if (debug) {
+				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder("Position: ").append(pos).toString());
 				}
 				final int closingBracket = findMatchingBracket(threadList.substring(pos));
 				if (closingBracket == -1) {
 					throw new Exception("Closing bracket not found.");
 				}
-				if (debug) {
+				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder("Closing bracket: ").append((pos + closingBracket)).toString());
 				}
 				final String subList = threadList.substring(pos + 1, pos + closingBracket);
 				if (subList.charAt(0) == '(') {
-					if (debug) {
+					if (LOG.isDebugEnabled()) {
 						LOG.debug("Parsing childs of thread with no parent.");
 					}
 					final TreeNode emptyParent = new TreeNode(-1);
@@ -139,7 +137,7 @@ public class ThreadParser {
 				}
 				pos += closingBracket + 1;
 			} while (pos < threadList.length());
-			if (debug) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
 			}
 
@@ -173,7 +171,7 @@ public class ThreadParser {
 	 * @return
 	 */
 	private int getMessageID(final String threadList) {
-		if (debug) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Parsing messageID: ").append(threadList).toString());
 		}
 		int pos = 0;
@@ -187,7 +185,7 @@ public class ThreadParser {
 		if (pos == 0) {
 			return -1;
 		}
-		if (debug) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Parsed number: ").append(Integer.parseInt(threadList.substring(0, pos)))
 					.toString());
 		}
@@ -201,7 +199,7 @@ public class ThreadParser {
 	private int findMatchingBracket(final String threadList) {
 		int openingBrackets = 0;
 		int pos = 0;
-		if (debug) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("findAccordingBracket: ").append(threadList).toString());
 		}
 		do {
@@ -211,25 +209,18 @@ public class ThreadParser {
 			} else if (actual == ')') {
 				openingBrackets--;
 			}
-			if (debug) {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("Char: ").append(actual).append(" Pos ").append(pos).toString());
 			}
 			pos++;
 		} while (openingBrackets > 0 && pos < threadList.length());
 		pos--;
-		if (debug) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Found: ").append(pos).toString());
 		}
 		return pos;
 	}
-
-	/**
-	 * @param b
-	 */
-	public void setDebug(final boolean b) {
-		debug = b;
-	}
-
+	
 	/**
 	 * 
 	 */
@@ -243,11 +234,10 @@ public class ThreadParser {
 		for (int i = 0; i < size; i++) {
 			TreeNode actual = (TreeNode) threads.get(i);
 			if (actual.msgNum == -1) {
-				final List childs = actual.getChilds();
-				actual = (TreeNode) childs.remove(0);
+				final List<TreeNode> childs = actual.getChilds();
+				actual = childs.remove(0);
 				newthreads.add(actual);
 				actual.addChilds(childs);
-				// newthreads.addAll(actual.getChilds());
 			} else {
 				newthreads.add(actual);
 			}

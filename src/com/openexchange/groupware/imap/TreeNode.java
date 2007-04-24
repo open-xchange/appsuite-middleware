@@ -65,7 +65,7 @@ public class TreeNode {
 	
 	public int msgNum;
 
-	private ArrayList<TreeNode> childs;
+	private List<TreeNode> childs;
 
 	public TreeNode(int msgNum) {
 		this.msgNum = msgNum;

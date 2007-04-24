@@ -131,6 +131,7 @@ public class SpellCheckConfig {
 			this.id = id;
 		}
 
+		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder();
 			sb.append("Dictionary: id=").append(id).append(" | debug=").append(debug);
