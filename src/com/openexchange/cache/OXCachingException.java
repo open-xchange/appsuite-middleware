@@ -107,15 +107,15 @@ public class OXCachingException extends OXException {
         /**
          * A put into the cache failed.
          */
-        FAILED_PUT("Put into cache failed.", Category.PROGRAMMING_ERROR, 1),
+        FAILED_PUT("Put into cache failed.", Category.CODE_ERROR, 1),
         /**
          * The default element attributes could not be retrieved
          */
-        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.PROGRAMMING_ERROR, 2),
+        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 2),
         /**
          * Remove on cache failed
          */
-        FAILED_REMOVE("Remove on cache failed", Category.PROGRAMMING_ERROR, 3),
+        FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 3),
         /**
          * Cache %s could not be initialized due to following error: %s
          */

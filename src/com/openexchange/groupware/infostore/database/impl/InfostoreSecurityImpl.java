@@ -165,7 +165,7 @@ public class InfostoreSecurityImpl extends DBService{
 	}
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "The client tries to put an infoitem into a non infoitem folder.",
 			exceptionId = 2,
 			msg = "The folder %d is not an Infostore Folder"

@@ -90,7 +90,7 @@ public final class FilestoreTools {
      * @return read to use URI to the file store.
      */
     @OXThrowsMultiple(
-        category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR },
+        category = { Category.CODE_ERROR, Category.SETUP_ERROR },
         desc = { "", "" },
         exceptionId = { 1, 2 },
         msg = { "Wrong filestore %1$d for context %2$d needing filestore %3$d.",

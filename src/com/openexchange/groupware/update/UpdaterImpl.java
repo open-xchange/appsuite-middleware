@@ -95,7 +95,7 @@ public class UpdaterImpl extends Updater {
 	 * {@inheritDoc}
 	 */
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "",
 			exceptionId = 1,
 			msg = "Update process initialization failed: %1$s."

@@ -92,11 +92,11 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * AJP Connection is not set to status "ASSIGNED"
 		 */
-		INVALID_CONNECTION_STATE("AJP Connection is not set to status \"ASSIGNED\"", Category.PROGRAMMING_ERROR, 5),
+		INVALID_CONNECTION_STATE("AJP Connection is not set to status \"ASSIGNED\"", Category.CODE_ERROR, 5),
 		/**
 		 * Response package exceeds max package size value of 8192k: %s
 		 */
-		MAX_PACKAGE_SIZE("Response package exceeds max package size value of 8192k: %s", Category.PROGRAMMING_ERROR, 6),
+		MAX_PACKAGE_SIZE("Response package exceeds max package size value of 8192k: %s", Category.CODE_ERROR, 6),
 		/**
 		 * Unknown Request Prefix Code: %s
 		 */
@@ -108,16 +108,16 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * Empty SEND_BODY_CHUNK package MUST NOT be sent
 		 */
-		NO_EMPTY_SENT_BODY_CHUNK("Empty SEND_BODY_CHUNK package MUST NOT be sent", Category.PROGRAMMING_ERROR, 9),
+		NO_EMPTY_SENT_BODY_CHUNK("Empty SEND_BODY_CHUNK package MUST NOT be sent", Category.CODE_ERROR, 9),
 		/**
 		 * Integer value exceeds max allowed value ([MAX_INT_VALUE]): %d
 		 */
 		INTEGER_VALUE_TOO_BIG(new StringBuilder("Integer value exceeds max allowed value (").append(
-				AJPv13Response.MAX_INT_VALUE).append("): %d").toString(), Category.PROGRAMMING_ERROR, 10),
+				AJPv13Response.MAX_INT_VALUE).append("): %d").toString(), Category.CODE_ERROR, 10),
 		/**		
 		 * Invalid content-type header value: %s
 		 */
-		INVALID_CONTENT_TYPE("Invalid content-type header value: %s", Category.PROGRAMMING_ERROR, 11),
+		INVALID_CONTENT_TYPE("Invalid content-type header value: %s", Category.CODE_ERROR, 11),
 		/**
 		 * Unparseable header field %s in forward request package
 		 */
@@ -129,11 +129,11 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * Unsupported encoding: %s
 		 */
-		UNSUPPORTED_ENCODING("Unsupported encoding: %s", Category.PROGRAMMING_ERROR, 14),
+		UNSUPPORTED_ENCODING("Unsupported encoding: %s", Category.CODE_ERROR, 14),
 		/**
 		 * No attribute name could be found for code: %d
 		 */
-		NO_ATTRIBUTE_NAME("No attribute name could be found for code: %d", Category.PROGRAMMING_ERROR, 15),
+		NO_ATTRIBUTE_NAME("No attribute name could be found for code: %d", Category.CODE_ERROR, 15),
 		/**
 		 * An I/O error occured: %s
 		 */
@@ -141,7 +141,7 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * A messaging error occured: %s
 		 */
-		MESSAGING_ERROR("A messaging error occured: %s", Category.PROGRAMMING_ERROR, 17),
+		MESSAGING_ERROR("A messaging error occured: %s", Category.CODE_ERROR, 17),
 		/**
 		 * Missing property AJP_JVM_ROUTE in file "ajp.properties"
 		 */

@@ -98,8 +98,8 @@ public class QuotaFileStorageException extends FileStorageException {
          * Invalid constructor parameter at %1$d with type %2$s.
          */
         INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
-            Category.PROGRAMMING_ERROR, 1),
-        SQL_EXCEPTION("An invalid SQL query was sent to the server.", Category.PROGRAMMING_ERROR, 2),
+            Category.CODE_ERROR, 1),
+        SQL_EXCEPTION("An invalid SQL query was sent to the server.", Category.CODE_ERROR, 2),
         TOO_LARGE("The file can't be added to filestore. File size: %s Quota: %s Used: %s", Category.USER_INPUT, 3),
         UNDERLYING_EXCEPTION("Got a FileStorageException for FileStorage with id %s in Context %s . Underlying message is: %s. Check the StackTrace", Category.INTERNAL_ERROR, 4);
         ;

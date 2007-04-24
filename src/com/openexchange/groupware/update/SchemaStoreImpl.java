@@ -129,7 +129,7 @@ public class SchemaStoreImpl extends SchemaStore {
     }
     
     @OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR, Category.PROGRAMMING_ERROR },
+			category = { Category.CODE_ERROR, Category.CODE_ERROR },
 			desc = { "", "" },
 			exceptionId = { 14, 15 },
 			msg = { "A SQL error occured while creating table 'version': %1$s.",
@@ -187,7 +187,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	 * @see com.openexchange.groupware.update.SchemaStore#lockSchema(com.openexchange.groupware.update.Schema)
 	 */
 	@OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
+			category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
 			desc = { "", "", "", "" },
 			exceptionId = { 6, 7, 8, 9 },
 			msg = { "A SQL error occured while reading schema version information: %1$s.",
@@ -280,7 +280,7 @@ public class SchemaStoreImpl extends SchemaStore {
 	 * @see com.openexchange.groupware.update.SchemaStore#unlockSchema(com.openexchange.groupware.update.Schema)
 	 */
 	@OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
+			category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
 			desc = { "", "", "", "" },
 			exceptionId = { 10, 11, 12, 13 },
 			msg = { "A SQL error occured while reading schema version information: %1$s.",
@@ -377,8 +377,8 @@ public class SchemaStoreImpl extends SchemaStore {
 	 *             if loading fails.
 	 */
     @OXThrowsMultiple(
-        category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR,
-            Category.SETUP_ERROR, Category.PROGRAMMING_ERROR },
+        category = { Category.CODE_ERROR, Category.SETUP_ERROR,
+            Category.SETUP_ERROR, Category.CODE_ERROR },
         desc = {"", "", "", "" },
         exceptionId = { 1, 2, 4, 16 },
         msg = { "A SQL error occured while reading schema version information: "
@@ -431,7 +431,7 @@ public class SchemaStoreImpl extends SchemaStore {
      * @throws SchemaException if the check fails.
      */
     @OXThrowsMultiple(
-        category = { Category.PROGRAMMING_ERROR, Category.SETUP_ERROR },
+        category = { Category.CODE_ERROR, Category.SETUP_ERROR },
         desc = { "Checking if a table exist failed.", "Strange context "
             + "identifier or a mapping is missing." },
         exceptionId = { 3, 5 },

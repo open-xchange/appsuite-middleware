@@ -111,7 +111,7 @@ public class AJAXSpellCheck {
 		return dicConfig.getCommand();
 	}
 
-	@OXThrowsMultiple(category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.PROGRAMMING_ERROR },
+	@OXThrowsMultiple(category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR },
 			desc={ "", "", "" },
 			exceptionId={ 4, 5, 6 },
 			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occured: %1$s." })

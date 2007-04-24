@@ -127,7 +127,7 @@ public class OXMailException extends OXException {
 		 * state.
 		 * </p>
 		 */
-		FOLDER_CLOSED("Folder is closed: %s", Category.PROGRAMMING_ERROR, 9),
+		FOLDER_CLOSED("Folder is closed: %s", Category.CODE_ERROR, 9),
 		/**
 		 * Folder not found: %s
 		 * <p>
@@ -135,7 +135,7 @@ public class OXMailException extends OXException {
 		 * invoked on a non existent folder.
 		 * </p>
 		 */
-		FOLDER_NOT_FOUND("Folder not found: %s", Category.PROGRAMMING_ERROR, 10),
+		FOLDER_NOT_FOUND("Folder not found: %s", Category.CODE_ERROR, 10),
 		/**
 		 * Illegal write attempt: %s
 		 * <p>
@@ -143,7 +143,7 @@ public class OXMailException extends OXException {
 		 * attribute of any Messaging object.
 		 * </p>
 		 */
-		ILLEGAL_WRITE("Illegal write attempt: %s", Category.PROGRAMMING_ERROR, 11),
+		ILLEGAL_WRITE("Illegal write attempt: %s", Category.CODE_ERROR, 11),
 		/**
 		 * Invalid method on a expunged message: %s
 		 * <p>
@@ -152,7 +152,7 @@ public class OXMailException extends OXException {
 		 * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 		 * </p>
 		 */
-		MESSAGE_REMOVED("Invalid method on an expunged message: %s", Category.PROGRAMMING_ERROR, 12),
+		MESSAGE_REMOVED("Invalid method on an expunged message: %s", Category.CODE_ERROR, 12),
 		/**
 		 * Method not supported: %s
 		 * <p>
@@ -160,12 +160,12 @@ public class OXMailException extends OXException {
 		 * implementation
 		 * </p>
 		 */
-		METHOD_NOT_SUPPORTED("Method not supported: %s", Category.PROGRAMMING_ERROR, 13),
+		METHOD_NOT_SUPPORTED("Method not supported: %s", Category.CODE_ERROR, 13),
 		/**
 		 * Session attempts to instantiate a provider that doesn't exist: %s
 		 */
 		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %s",
-				Category.PROGRAMMING_ERROR, 14),
+				Category.CODE_ERROR, 14),
 		/**
 		 * Wrong message %sheader: %s
 		 * <p>
@@ -181,7 +181,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Invalid search expression: %s
 		 */
-		SEARCH_ERROR("Invalid search expression: %s", Category.PROGRAMMING_ERROR, 17),
+		SEARCH_ERROR("Invalid search expression: %s", Category.CODE_ERROR, 17),
 		/**
 		 * Message could not be sent to following recipients: %s
 		 * <p>
@@ -194,11 +194,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Store already closed: %s
 		 */
-		STORE_CLOSED("Store already closed: %s", Category.PROGRAMMING_ERROR, 19),
+		STORE_CLOSED("Store already closed: %s", Category.CODE_ERROR, 19),
 		/**
 		 * Internal error: %s
 		 */
-		INTERNAL_ERROR("Internal error: %s", Category.PROGRAMMING_ERROR, 20),
+		INTERNAL_ERROR("Internal error: %s", Category.CODE_ERROR, 20),
 		/**
 		 * User %s has no access on IMAP-Folder %s
 		 */
@@ -214,11 +214,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Missing field %s in message %s
 		 */
-		MISSING_FIELD("Missing field %s in message %s", Category.PROGRAMMING_ERROR, 24),
+		MISSING_FIELD("Missing field %s in message %s", Category.CODE_ERROR, 24),
 		/**
 		 * Missing header %s in message %s
 		 */
-		MISSING_HEADER("Missing header %s in message %s", Category.PROGRAMMING_ERROR, 25),
+		MISSING_HEADER("Missing header %s in message %s", Category.CODE_ERROR, 25),
 		/**
 		 * User %s has no delete access on IMAP-Folder %s
 		 */
@@ -226,7 +226,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Missing %s folder in mail move operation
 		 */
-		MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %s folder in mail move operation", Category.PROGRAMMING_ERROR, 27),
+		MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %s folder in mail move operation", Category.CODE_ERROR, 27),
 		/**
 		 * User %s has no insert access on IMAP-Folder %s
 		 */
@@ -234,7 +234,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Message(s) %s could not be found in folder %s
 		 */
-		MESSAGE_NOT_FOUND("Message(s) %s could not be found in folder %s", Category.PROGRAMMING_ERROR, 29),
+		MESSAGE_NOT_FOUND("Message(s) %s could not be found in folder %s", Category.CODE_ERROR, 29),
 		/**
 		 * User %s has no lookup access on IMAP-Folder %s
 		 */
@@ -258,7 +258,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Update of folder %s failed
 		 */
-		UPDATE_FAILED("Update of folder %s failed", Category.PROGRAMMING_ERROR, 35),
+		UPDATE_FAILED("Update of folder %s failed", Category.CODE_ERROR, 35),
 		/**
 		 * User %s has no administer access on IMAP-Folder %s
 		 */
@@ -266,7 +266,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Deletion of folder %s failed
 		 */
-		DELETE_FAILED("Deletion of folder %s failed", Category.PROGRAMMING_ERROR, 37),
+		DELETE_FAILED("Deletion of folder %s failed", Category.CODE_ERROR, 37),
 		/**
 		 * Folder %s must not be deleted
 		 */
@@ -286,7 +286,7 @@ public class OXMailException extends OXException {
 		 */
 		INVALID_ATTACHMENT_ON_SEND(
 				"The message to send contains an invalid attachment %s: neither content nor attachment's filename is set",
-				Category.PROGRAMMING_ERROR, 41),
+				Category.CODE_ERROR, 41),
 		/**
 		 * User %s has no write access on IMAP-Folder %s
 		 */
@@ -294,26 +294,26 @@ public class OXMailException extends OXException {
 		/**
 		 * IMAP default folder %s could not be created
 		 */
-		NO_DEFAULT_FOLDER_CREATION("IMAP default folder %s could not be created", Category.PROGRAMMING_ERROR, 43),
+		NO_DEFAULT_FOLDER_CREATION("IMAP default folder %s could not be created", Category.CODE_ERROR, 43),
 		/**
 		 * Missing default %s folder in user mail settings
 		 */
-		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.PROGRAMMING_ERROR, 44),
+		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.CODE_ERROR, 44),
 		/**
 		 * Number of search fields (%d) do not match number of search patterns
 		 * (%d)
 		 */
 		INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)",
-				Category.PROGRAMMING_ERROR, 45),
+				Category.CODE_ERROR, 45),
 		/**
 		 * No send address could be found for user %s in user configuration
 		 */
 		NO_SEND_ADDRESS_FOUND("No send address could be found for user %s in user configuration",
-				Category.PROGRAMMING_ERROR, 46),
+				Category.CODE_ERROR, 46),
 		/**
 		 * Folder "%s" could not be created
 		 */
-		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created", Category.PROGRAMMING_ERROR, 47),
+		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created", Category.CODE_ERROR, 47),
 		/**
 		 * Message could not be moved to trash folder
 		 */
@@ -321,29 +321,29 @@ public class OXMailException extends OXException {
 		/**
 		 * Invalid attachment %s: %s
 		 */
-		INVAILD_ATTACHMENT("Invalid attachment %s: %s", Category.PROGRAMMING_ERROR, 49),
+		INVAILD_ATTACHMENT("Invalid attachment %s: %s", Category.CODE_ERROR, 49),
 		/**
 		 * Missing key %s in message's JSON representation
 		 */
-		MISSING_JSON_KEY("Missing key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 50),
+		MISSING_JSON_KEY("Missing key %s in message's JSON representation", Category.CODE_ERROR, 50),
 		/**
 		 * Missing value in key %s in message's JSON representation
 		 */
-		MISSING_JSON_VALUE("Missing value in key %s in message's JSON representation", Category.PROGRAMMING_ERROR, 51),
+		MISSING_JSON_VALUE("Missing value in key %s in message's JSON representation", Category.CODE_ERROR, 51),
 		/**
 		 * Either key %s or key %s is mssing in message's JSON representation
 		 */
 		MISSING_JSON_KEY_XOR("Either key %s or key %s is mssing in message's JSON representation",
-				Category.PROGRAMMING_ERROR, 52),
+				Category.CODE_ERROR, 52),
 		/**
 		 * Both %s and %s must not be present in message's JSON representation
 		 */
 		INVALID_KEY_COMBINATION("Both %s and %s must not be present in message's JSON representation",
-				Category.PROGRAMMING_ERROR, 53),
+				Category.CODE_ERROR, 53),
 		/**
 		 * Missing parameter %s
 		 */
-		MISSING_PARAM("Missing parameter %s", Category.PROGRAMMING_ERROR, 54),
+		MISSING_PARAM("Missing parameter %s", Category.CODE_ERROR, 54),
 		/**
 		 * Invalid email address %s
 		 */
@@ -351,16 +351,16 @@ public class OXMailException extends OXException {
 		/**
 		 * Message could not be sent
 		 */
-		SEND_FAILED_UNKNOWN("Message could not be sent", Category.PROGRAMMING_ERROR, 56),
+		SEND_FAILED_UNKNOWN("Message could not be sent", Category.CODE_ERROR, 56),
 		/**
 		 * Invalid unique message identifier: %s
 		 */
-		INVALID_MAIL_IDENTIFIER("Invalid unique message identifier: %s", Category.PROGRAMMING_ERROR, 57),
+		INVALID_MAIL_IDENTIFIER("Invalid unique message identifier: %s", Category.CODE_ERROR, 57),
 		/**
 		 * Could not create a PartModifier instance from name %s
 		 */
 		PART_MODIFIER_CREATION_FAILED("Could not create a PartModifier instance from name %s",
-				Category.PROGRAMMING_ERROR, 58),
+				Category.CODE_ERROR, 58),
 		/**
 		 * User %s has no keep-seen access on IMAP-Folder %s
 		 */
@@ -368,19 +368,19 @@ public class OXMailException extends OXException {
 		/**
 		 * Unknown parameter container type %d
 		 */
-		UNKNOWN_PARAM_CONTAINER_TYPE("Unknown parameter container type %d", Category.PROGRAMMING_ERROR, 60),
+		UNKNOWN_PARAM_CONTAINER_TYPE("Unknown parameter container type %d", Category.CODE_ERROR, 60),
 		/**
 		 * Invalid integer value %s
 		 */
-		INVALID_INT_VALUE("Invalid integer value %s", Category.PROGRAMMING_ERROR, 61),
+		INVALID_INT_VALUE("Invalid integer value %s", Category.CODE_ERROR, 61),
 		/**
 		 * Action %s is not supported by %s
 		 */
-		UNSUPPORTED_ACTION("Action %s is not supported by %s", Category.PROGRAMMING_ERROR, 62),
+		UNSUPPORTED_ACTION("Action %s is not supported by %s", Category.CODE_ERROR, 62),
 		/**
 		 * Deletion of message %s failed
 		 */
-		MESSAGE_DELETE_FAILED("Deletion of message %s failed", Category.PROGRAMMING_ERROR, 63),
+		MESSAGE_DELETE_FAILED("Deletion of message %s failed", Category.CODE_ERROR, 63),
 		/**
 		 * No attachment was found with id %s in message %s
 		 */
@@ -401,7 +401,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Unknown (IMAP) folder open mode %d
 		 */
-		UNKNOWN_FOLDER_MODE("Unknown (IMAP) folder open mode %d", Category.PROGRAMMING_ERROR, 68),
+		UNKNOWN_FOLDER_MODE("Unknown (IMAP) folder open mode %d", Category.CODE_ERROR, 68),
 		/**
 		 * %s attachment could not be save due to an unsupported MIME type %s
 		 */
@@ -410,11 +410,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Versit object %s could not be saved
 		 */
-		FAILED_VERSIT_SAVE("Versit object could not be saved", Category.PROGRAMMING_ERROR, 70),
+		FAILED_VERSIT_SAVE("Versit object could not be saved", Category.CODE_ERROR, 70),
 		/**
 		 * Unsupported MIME type %s
 		 */
-		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %s", Category.PROGRAMMING_ERROR, 71),
+		UNSUPPORTED_MIME_TYPE("Unsupported MIME type %s", Category.CODE_ERROR, 71),
 		/**
 		 * IMAP search failed due to following reason: %s Switching to
 		 * application-based search
@@ -438,7 +438,7 @@ public class OXMailException extends OXException {
 		/**
 		 * Folder read-only check failed
 		 */
-		FAILED_READ_ONLY_CHECK("Folder read-only check failed", Category.PROGRAMMING_ERROR, 76),
+		FAILED_READ_ONLY_CHECK("Folder read-only check failed", Category.CODE_ERROR, 76),
 		/**
 		 * IMAP Property error: %s
 		 */
@@ -446,17 +446,17 @@ public class OXMailException extends OXException {
 		/**
 		 * Unknown action: %s
 		 */
-		UNKNOWN_ACTION("Unknown or unsupported action: %s", Category.PROGRAMMING_ERROR, 78),
+		UNKNOWN_ACTION("Unknown or unsupported action: %s", Category.CODE_ERROR, 78),
 		/**
 		 * Unknown color label index: %d
 		 */
-		UNKNOWN_COLOR_LABEL("Unknown color label: %s", Category.PROGRAMMING_ERROR, 79),
+		UNKNOWN_COLOR_LABEL("Unknown color label: %s", Category.CODE_ERROR, 79),
 		/**
 		 * Move/Copy failed. New message with UID %d could not be found in
 		 * destination folder %s
 		 */
 		MOVE_COPY_FAILED("Move/Copy failed. New message with UID %d could not be found in destination folder %s",
-				Category.PROGRAMMING_ERROR, 80),
+				Category.CODE_ERROR, 80),
 		/**
 		 * Invalid Content-Type value: %s
 		 */
@@ -501,7 +501,7 @@ public class OXMailException extends OXException {
 		/**
 		 * A JSON syntax error occured: %s
 		 */
-		JSON_ERROR("A JSON syntax error occured: %s", Category.PROGRAMMING_ERROR, 89),
+		JSON_ERROR("A JSON syntax error occured: %s", Category.CODE_ERROR, 89),
 		/**
 		 * A part's content could not be read from message %s in mail folder %s of user %s
 		 */
@@ -509,15 +509,15 @@ public class OXMailException extends OXException {
 		/**
 		 * A IMAP error occured: %s
 		 */
-		IMAP_ERROR("A IMAP error occured: %s", Category.PROGRAMMING_ERROR, 91),
+		IMAP_ERROR("A IMAP error occured: %s", Category.CODE_ERROR, 91),
 		/**
 		 * A socket error occured: %s
 		 */
-		SOCKET_ERROR("A socket error occured: %s", Category.PROGRAMMING_ERROR, 92),
+		SOCKET_ERROR("A socket error occured: %s", Category.CODE_ERROR, 92),
 		/**
 		 * Html-2-Text conversion failed: %s
 		 */
-		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.PROGRAMMING_ERROR, 93),
+		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.CODE_ERROR, 93),
 		/**
 		 * Login to imap server %s failed for user %s in context %s. Please try again later
 		 */

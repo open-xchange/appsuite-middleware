@@ -78,7 +78,7 @@ import com.openexchange.groupware.container.LinkEntryObject;
 	classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTER, 
 	component=Component.CONTACT)
 @OXThrowsMultiple(
-	category={Category.PROGRAMMING_ERROR}, 
+	category={Category.CODE_ERROR}, 
 	desc={""}, 
 	exceptionId={0}, 
 	msg={"Need at least a ContactObject and a value to set %s"})

@@ -318,12 +318,12 @@ public class Contacts implements DeleteListener {
 			category={	Category.PERMISSION,
 									Category.PERMISSION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
 									Category.TRY_AGAIN,
 									Category.TRY_AGAIN
 								},
@@ -567,16 +567,16 @@ public class Contacts implements DeleteListener {
 									Category.PERMISSION, 
 									Category.PERMISSION, 
 									Category.PERMISSION, 
-									Category.PROGRAMMING_ERROR, 
+									Category.CODE_ERROR, 
 									Category.PERMISSION, 
 									Category.PERMISSION, 
 									Category.PERMISSION, 
-									Category.PROGRAMMING_ERROR, 
-									Category.PROGRAMMING_ERROR, 
+									Category.CODE_ERROR, 
+									Category.CODE_ERROR, 
 									Category.USER_INPUT,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
 									Category.USER_INPUT,
 									Category.TRY_AGAIN,
 									Category.TRY_AGAIN
@@ -991,8 +991,8 @@ public class Contacts implements DeleteListener {
 	
 	
 	@OXThrowsMultiple(
-			category={	Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+			category={	Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"25","26"},
 			exceptionId={25,26},
@@ -1043,7 +1043,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="27",
 			exceptionId=27,
 			msg="Unable to delete Contact: Context %1$d Contact %2$d"
@@ -1075,7 +1075,7 @@ public class Contacts implements DeleteListener {
 	}		
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="28",
 			exceptionId=28,
 			msg="Unable to load Dristributionlist : Context %1$d Contact %2$d"
@@ -1166,8 +1166,8 @@ public class Contacts implements DeleteListener {
 	
 
 	@OXThrowsMultiple(
-			category={	Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+			category={	Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"29","60"},
 			exceptionId={29,60},
@@ -1348,8 +1348,8 @@ public class Contacts implements DeleteListener {
 
 
 		@OXThrowsMultiple(
-			category={	Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+			category={	Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"30","61"},
 			exceptionId={30,61},
@@ -1438,8 +1438,8 @@ public class Contacts implements DeleteListener {
 	
 	
 	@OXThrowsMultiple(
-			category={	Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+			category={	Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"48","31"},
 			exceptionId={48,31},
@@ -1508,7 +1508,7 @@ public class Contacts implements DeleteListener {
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="32",
 			exceptionId=32,
 			msg="Unable to Load Linked Contacts : Context %1$d Contact %2$d"
@@ -1587,7 +1587,7 @@ public class Contacts implements DeleteListener {
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="33",
 			exceptionId=33,
 			msg="Unable to save Linking between Contacts : Context %1$d Contact %2$d"
@@ -1694,7 +1694,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="34",
 			exceptionId=34,
 			msg="Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
@@ -1763,7 +1763,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="35",
 			exceptionId=35,
 			msg="Unable to load Contact Image : Context %1$d Contact %2$d"
@@ -1805,7 +1805,7 @@ public class Contacts implements DeleteListener {
 
 	@OXThrowsMultiple(
 			category={	Category.USER_INPUT,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR
 								},
 			desc={"36","37"},
 			exceptionId={36,37},
@@ -1848,7 +1848,7 @@ public class Contacts implements DeleteListener {
 
 	@OXThrowsMultiple(
 			category={	Category.USER_INPUT,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR
 								},
 			desc={"38","39"},
 			exceptionId={38,39},
@@ -1952,7 +1952,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="50",
 			exceptionId=50,
 			msg=ContactException.INIT_CONNECTION_FROM_DBPOOL
@@ -2056,7 +2056,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="49",
 			exceptionId=49,
 			msg=ContactException.INIT_CONNECTION_FROM_DBPOOL
@@ -2160,7 +2160,7 @@ public class Contacts implements DeleteListener {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="40",
 			exceptionId=40,
 			msg="Unable to perform Contact Folder check for readable content: Context %1$d Folder %2$d"
@@ -2252,9 +2252,9 @@ public class Contacts implements DeleteListener {
 	
 	@OXThrowsMultiple(
 			category={	Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"42","44","45","46"},
 			exceptionId={42,44,45,46},

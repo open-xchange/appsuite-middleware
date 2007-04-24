@@ -66,7 +66,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 	classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTSETTERFORSIMPLEDATEGFORMAT, 
 	component=Component.CONTACT)
 @OXThrowsMultiple(
-	category={Category.PROGRAMMING_ERROR}, 
+	category={Category.CODE_ERROR}, 
 	desc={""}, 
 	exceptionId={0}, 
 	msg={

@@ -115,7 +115,7 @@ public final class CreateTableVersion implements UpdateTask {
      * {@inheritDoc}
      */
     @OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR },
+			category = { Category.CODE_ERROR },
 			desc = { "" },
 			exceptionId = { 1 },
 			msg = { "A SQL error occured while performing task CreateTableVersion: %1$s." }

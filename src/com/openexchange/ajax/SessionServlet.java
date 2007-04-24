@@ -151,7 +151,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws SessionException if the cookie identifier can not be found.
      */
     @OXThrows(
-        category = Category.PROGRAMMING_ERROR,
+        category = Category.CODE_ERROR,
         desc = "Every AJAX request must contain a parameter named session "
             + "that value contains the identifier of the session cookie.",
         exceptionId = 1,
@@ -186,7 +186,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * cookie.
      */
     @OXThrows(
-        category = Category.PROGRAMMING_ERROR,
+        category = Category.CODE_ERROR,
         desc = "Your browser does not send the cookie for identifying your "
             + "session.",
         exceptionId = 2,

@@ -427,7 +427,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An SQL Error occurred while trying to generate an id for the new attachment.",
 			exceptionId = 2,
 			msg = "Cannot generate ID for new attachment: %s"
@@ -481,7 +481,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR, desc = "An invalid SQL Query was sent to the server", exceptionId = 3, msg = "Invalid SQL Query: %s"
+			category = Category.CODE_ERROR, desc = "An invalid SQL Query was sent to the server", exceptionId = 3, msg = "Invalid SQL Query: %s"
 	)
 	private List<String> getFiles(int folderId, int objectId, int moduleId, int[] ids, Context ctx, User user) throws OXException {
 		List<String> files = new ArrayList<String>();
@@ -532,7 +532,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 
 	@OXThrowsMultiple(
-			category={Category.USER_INPUT, Category.PROGRAMMING_ERROR},
+			category={Category.USER_INPUT, Category.CODE_ERROR},
 			desc={"An attachment with the given ID does not exist, so it cannot be downloaded.","An invalid SQL Query was sent to the database."},
 			exceptionId={5,6},
 			msg={"The attachment you requested no longer exists. Please refresh the view.", "Invalid SQL Query: %s"}
@@ -609,7 +609,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 	
 	@OXThrowsMultiple(
-			category = { Category.INTERNAL_ERROR, Category.PROGRAMMING_ERROR, Category.PROGRAMMING_ERROR },
+			category = { Category.INTERNAL_ERROR, Category.CODE_ERROR, Category.CODE_ERROR },
 			desc = { "Didn't find an attachment with the given file_id, so the file is propably orphaned or does not belong to the Attachments.","An invalid SQL Query was sent to the database.","An invalid SQL Query was sent to the database" },
 			exceptionId = { 8,9,10 },
 			msg = { "Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module.", "Invalid SQL Query: %s", "Invalid SQL Query: %s" }
@@ -682,7 +682,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 
 	@OXThrowsMultiple(
-			category={Category.PROGRAMMING_ERROR, Category.PROGRAMMING_ERROR},
+			category={Category.CODE_ERROR, Category.CODE_ERROR},
 			desc={"An invalid SQL Query was sent to the database.", "An invalid SQL Query was sent to the database."},
 			exceptionId={11,12},
 			msg={"Invalid SQL Query: %s", "Invalid SQL Query: %s"})
@@ -772,7 +772,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 	
 	@OXThrowsMultiple(
-			category = { Category.USER_INPUT, Category.PROGRAMMING_ERROR },
+			category = { Category.USER_INPUT, Category.CODE_ERROR },
 			desc = { "The Attachment does not exist (anymore). Reloading the view will propably help.","An invalid SQL Query was snet to the database." },
 			exceptionId = { 13,14 },
 			msg = { "The attachment you requested no longer exists. Please refresh the view.","Invalid SQL Query: %s" }
@@ -939,7 +939,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			}
 		}
 		
-		@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "An error occurred executing the search in the database", exceptionId = 16, msg = "An error occurred executing the search in the database.")
+		@OXThrows(category = Category.CODE_ERROR, desc = "An error occurred executing the search in the database", exceptionId = 16, msg = "An error occurred executing the search in the database.")
 		public Object next() throws SearchIteratorException, OXException {
 			if(delegate != null) {
 				return delegate.next();

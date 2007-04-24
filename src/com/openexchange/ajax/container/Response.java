@@ -282,7 +282,7 @@ public class Response {
             final int categoryCode = response.optInt(ERROR_CATEGORY, -1);
             final Category category;
             if (-1 == categoryCode) {
-                category = Category.PROGRAMMING_ERROR;
+                category = Category.CODE_ERROR;
             } else {
                 category = Category.byCode(categoryCode);
             }

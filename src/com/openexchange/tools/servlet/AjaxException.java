@@ -97,22 +97,22 @@ public class AjaxException extends AbstractOXException {
          * Unknown AJAX action: %s.
          */
         UnknownAction("Unknown AJAX action: %s.",
-            Category.PROGRAMMING_ERROR, 1),
+            Category.CODE_ERROR, 1),
         /**
          * Missing the following field: %s
          */    
         NoField("Missing the following field: %s",
-        	Category.PROGRAMMING_ERROR, 2),
+        	Category.CODE_ERROR, 2),
         /**
          * Missing upload image.
          */
         NoUploadImage("Missing upload image.",
-            Category.PROGRAMMING_ERROR, 3),
+            Category.CODE_ERROR, 3),
         /**
          * Invalid parameter: %s
          */
         InvalidParameter("Invalid parameter: %s",
-            Category.PROGRAMMING_ERROR, 4),
+            Category.CODE_ERROR, 4),
         /**
          * I/O error while writing to Writer Object: %s
          */
@@ -120,7 +120,7 @@ public class AjaxException extends AbstractOXException {
         /**
          * Missing parameter: %s
          */
-        MissingParameter("Missing parameter: %s", Category.PROGRAMMING_ERROR, 6);
+        MissingParameter("Missing parameter: %s", Category.CODE_ERROR, 6);
         	
 
         /**

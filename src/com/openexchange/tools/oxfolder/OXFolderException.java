@@ -111,14 +111,14 @@ public class OXFolderException extends OXException {
 		 * Operation was canceled due to a missing folder attribute
 		 * </p>
 		 */
-		MISSING_FOLDER_ATTRIBUTE("Missing field %s in folder %s in context %s", Category.PROGRAMMING_ERROR, 7),
+		MISSING_FOLDER_ATTRIBUTE("Missing field %s in folder %s in context %s", Category.CODE_ERROR, 7),
 		/**
 		 * Folder %s does not exist in context %s
 		 * <p>
 		 * Folder does not exist
 		 * </p>
 		 */
-		NOT_EXISTS("Folder %s does not exist in context %s", Category.PROGRAMMING_ERROR, 8),
+		NOT_EXISTS("Folder %s does not exist in context %s", Category.CODE_ERROR, 8),
 		/**
 		 * Folder %s has been modified after last sync timestamp in context %s
 		 * <p>
@@ -156,7 +156,7 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		INVALID_TYPE("Parent folder %s does not allow folder's type setting %s in context %s",
-				Category.PROGRAMMING_ERROR, 13),
+				Category.CODE_ERROR, 13),
 		/**
 		 * Parent folder %s does not allow folder's module setting (%s) in context %s
 		 * <p>
@@ -164,7 +164,7 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		INVALID_MODULE("Parent folder %s does not allow folder's module setting (%s) in context %s",
-				Category.PROGRAMMING_ERROR, 14),
+				Category.CODE_ERROR, 14),
 		/**
 		 * Only one admin permission is allowed on a private folder
 		 * <p>
@@ -172,7 +172,7 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		ONLY_ONE_PRIVATE_FOLDER_ADMIN("Only one admin permission is allowed on a private folder",
-				Category.PROGRAMMING_ERROR, 15),
+				Category.CODE_ERROR, 15),
 		/**
 		 * A group must not hold admin permission on a private folder
 		 * <p>
@@ -180,7 +180,7 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		NO_PRIVATE_FOLDER_ADMIN_GROUP("A group must not hold admin permission on a private folder",
-				Category.PROGRAMMING_ERROR, 16),
+				Category.CODE_ERROR, 16),
 		/**
 		 * Only folder owner may hold admin permission on a private folder
 		 * <p>
@@ -188,21 +188,21 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		ONLY_PRIVATE_FOLDER_OWNER_ADMIN("Only folder owner may hold admin permission on a private folder",
-				Category.PROGRAMMING_ERROR, 17),
+				Category.CODE_ERROR, 17),
 		/**
 		 * No admin permission found
 		 * <p>
 		 * No entity has been defined as admin
 		 * </p>
 		 */
-		NO_FOLDER_ADMIN("No admin permission found", Category.PROGRAMMING_ERROR, 18),
+		NO_FOLDER_ADMIN("No admin permission found", Category.CODE_ERROR, 18),
 		/**
 		 * Invalid object ID %s
 		 * <p>
 		 * An invalid object ID
 		 * </p>
 		 */
-		INVALID_OBJECT_ID("Invalid object ID %s", Category.PROGRAMMING_ERROR, 19),
+		INVALID_OBJECT_ID("Invalid object ID %s", Category.CODE_ERROR, 19),
 		/**
 		 * Not allowed to change parent id of folder %s through an update call.
 		 * Use move method instead
@@ -212,7 +212,7 @@ public class OXFolderException extends OXException {
 		 */
 		NO_MOVE_THROUGH_UPDATE(
 				"Not allowed to change parent id of folder %s through an update call. Use move method instead",
-				Category.PROGRAMMING_ERROR, 20),
+				Category.CODE_ERROR, 20),
 		/**
 		 * Not allowed to move default folder %s in context %s
 		 * <p>
@@ -314,7 +314,7 @@ public class OXFolderException extends OXException {
 		 * No admin user was found in context in question
 		 * </p>
 		 */
-		NO_ADMIN_USER_FOUND_IN_CONTEXT("No admin user found in context %s", Category.PROGRAMMING_ERROR, 33),
+		NO_ADMIN_USER_FOUND_IN_CONTEXT("No admin user found in context %s", Category.CODE_ERROR, 33),
 		/**
 		 * No default folder could be found in module %s for user %s in context
 		 * %s
@@ -324,14 +324,14 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		NO_DEFAULT_FOLDER_FOUND("No default folder could be found in module %s for user %s in context %s",
-				Category.PROGRAMMING_ERROR, 34),
+				Category.CODE_ERROR, 34),
 		/**
 		 * Folder %s could not be loaded in context %s
 		 * <p>
 		 * Folder could not be loaded from storage
 		 * </p>
 		 */
-		FOLDER_COULD_NOT_BE_LOADED("Folder %s could not be loaded in context %s", Category.PROGRAMMING_ERROR, 35),
+		FOLDER_COULD_NOT_BE_LOADED("Folder %s could not be loaded in context %s", Category.CODE_ERROR, 35),
 		/**
 		 * Folder %s could not be put into cache in context %s
 		 * <p>
@@ -348,63 +348,63 @@ public class OXFolderException extends OXException {
 		 * </p>
 		 */
 		NO_EFFECTIVE_PERMISSION("Effective permission of Folder %s could not determined for user %s in context %s",
-				Category.PROGRAMMING_ERROR, 37),
+				Category.CODE_ERROR, 37),
 		/**
 		 * A SQL error occured in context %s
 		 */
-		SQL_ERROR("A SQL error occured in context %s", Category.PROGRAMMING_ERROR, 38),
+		SQL_ERROR("A SQL error occured in context %s", Category.CODE_ERROR, 38),
 		/**
 		 * A DBPool error occured in context %s
 		 */
-		DBPOOLING_ERROR("A SQL error occured in context %s", Category.PROGRAMMING_ERROR, 39),
+		DBPOOLING_ERROR("A SQL error occured in context %s", Category.CODE_ERROR, 39),
 		/**
 		 * Caller does not allow to fetch a connection from pool in context %s
 		 */
 		NO_CONNECTION_FETCH("Caller does not allow to fetch a connection from pool in context %s",
-				Category.PROGRAMMING_ERROR, 40),
+				Category.CODE_ERROR, 40),
 		/**
 		 * Delivered sequence id %s from database is less than allowed min
 		 * folder id of %s in context %s
 		 */
 		INVALID_SEQUENCE_ID(
 				"Delivered sequence id %s from database is less than allowed min folder id of %s in context %s",
-				Category.PROGRAMMING_ERROR, 41),
+				Category.CODE_ERROR, 41),
 		/**
 		 * Module %s is unknown in context %s
 		 */
-		UNKNOWN_MODULE("Module %s is unknown in context %s", Category.PROGRAMMING_ERROR, 42),
+		UNKNOWN_MODULE("Module %s is unknown in context %s", Category.CODE_ERROR, 42),
 		/**
 		 * Folder %s could not be updated in context %s
 		 * <p>
 		 * Folder update failed for any reason
 		 * </p>
 		 */
-		UPDATE_FAILED("Folder %s could not be updated in context %s", Category.PROGRAMMING_ERROR, 43),
+		UPDATE_FAILED("Folder %s could not be updated in context %s", Category.CODE_ERROR, 43),
 		/**
 		 * Invalid entity id %s detected in permissions of folder %s in context
 		 * %s
 		 */
 		INVALID_ENTITY("Invalid entity id %s detected in permissions of folder %s in context %s",
-				Category.PROGRAMMING_ERROR, 44),
+				Category.CODE_ERROR, 44),
 		/**
 		 * Folder %s must not be moved to one of its subfolders in context %s
 		 */
 		NO_SUBFOLDER_MOVE("Folder %s must not be moved to one of its subfolders in context %s",
-				Category.PROGRAMMING_ERROR, 45),
+				Category.CODE_ERROR, 45),
 		/**
 		 * Inserted for those exception that will turn to an
 		 * <code>OXException</code> in future
 		 */
-		UNKNOWN_EXCEPTION("UNKNOWN EXCEPTION", Category.PROGRAMMING_ERROR, 46),
+		UNKNOWN_EXCEPTION("UNKNOWN EXCEPTION", Category.CODE_ERROR, 46),
 		/**
 		 * A LDAP error occurred in context %s
 		 */
-		LDAP_ERROR("A LDAP error occurred in context %s", Category.PROGRAMMING_ERROR, 47),
+		LDAP_ERROR("A LDAP error occurred in context %s", Category.CODE_ERROR, 47),
 		/**
 		 * Attribute \"%s\" is not set in FolderObject instance %s in context %s
 		 */
 		ATTRIBUTE_NOT_SET("Attribute \"%s\" is not set in FolderObject instance %s in context %s",
-				Category.PROGRAMMING_ERROR, 48),
+				Category.CODE_ERROR, 48),
 		/**
 		 * A source folder of module %s must not be moved to a target folder of
 		 * module %s
@@ -414,22 +414,22 @@ public class OXFolderException extends OXException {
 		/**
 		 * Operation not executeable on folder %s in context %sResponse
 		 */
-		UNSUPPORTED_OPERATION("Operation not executeable on folder %s in context %s", Category.PROGRAMMING_ERROR, 50),
+		UNSUPPORTED_OPERATION("Operation not executeable on folder %s in context %s", Category.CODE_ERROR, 50),
 		/**
 		 * Folder cache (region name = %s) could not be initialized due to
 		 * following reason: %s
 		 */
 		FOLDER_CACHE_INITIALIZATION_FAILED(
 				"Folder cache (region name = %s) could not be initialized due to following reason: %s",
-				Category.PROGRAMMING_ERROR, 51),
+				Category.CODE_ERROR, 51),
 		/**
 		 * Folder cache has not been enabled in config file %s
 		 */
-		CACHE_NOT_ENABLED("Folder cache has not been enabled in config file %s", Category.PROGRAMMING_ERROR, 52),
+		CACHE_NOT_ENABLED("Folder cache has not been enabled in config file %s", Category.CODE_ERROR, 52),
 		/**
 		 * Folder %s could not be removed from folder cache
 		 */
-		CACHE_ERROR_ON_REMOVE("Folder %s could not be removed from folder cache", Category.PROGRAMMING_ERROR, 53),
+		CACHE_ERROR_ON_REMOVE("Folder %s could not be removed from folder cache", Category.CODE_ERROR, 53),
 		/**
 		 * User %s has no write permission on folder %s in context %s
 		 */
@@ -437,15 +437,15 @@ public class OXFolderException extends OXException {
 		/**
 		 * A JSON error occured: %s
 		 */
-		JSON_ERROR("A JSON error occured: %s", Category.PROGRAMMING_ERROR, 55),
+		JSON_ERROR("A JSON error occured: %s", Category.CODE_ERROR, 55),
 		/**
 		 * Unknown parameter container type: %d
 		 */
-		UNKNOWN_PARAMETER_CONTAINER_TYPE("Unknown parameter container type: %d", Category.PROGRAMMING_ERROR, 56),
+		UNKNOWN_PARAMETER_CONTAINER_TYPE("Unknown parameter container type: %d", Category.CODE_ERROR, 56),
 		/**
 		 * Missing parameter %s
 		 */
-		MISSING_PARAMETER("Missing parameter %s", Category.PROGRAMMING_ERROR, 57),
+		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 57),
 		/**
 		 * Bad JSON value %s in key %s
 		 */
@@ -453,19 +453,19 @@ public class OXFolderException extends OXException {
 		/**
 		 * Unknown field: %d
 		 */
-		UNKNOWN_FIELD("Unknown field: %d", Category.PROGRAMMING_ERROR, 59),
+		UNKNOWN_FIELD("Unknown field: %d", Category.CODE_ERROR, 59),
 		/**
 		 * Parameter %s does not match JSON key %s
 		 */
-		PARAMETER_MISMATCH("Parameter %s does not match JSON key %s", Category.PROGRAMMING_ERROR, 60),
+		PARAMETER_MISMATCH("Parameter %s does not match JSON key %s", Category.CODE_ERROR, 60),
 		/**
 		 * Invalid permission values: fp=%d orp=%d owp=%d odp=%d
 		 */
-		INVALID_PERMISSION("Invalid permission values: fp=%d orp=%d owp=%d odp=%d", Category.PROGRAMMING_ERROR, 61),
+		INVALID_PERMISSION("Invalid permission values: fp=%d orp=%d owp=%d odp=%d", Category.CODE_ERROR, 61),
 		/**
 		 * Unknown action: %s
 		 */
-		UNKNOWN_ACTION("Unknown action: %s", Category.PROGRAMMING_ERROR, 62),
+		UNKNOWN_ACTION("Unknown action: %s", Category.CODE_ERROR, 62),
 		/**
 		 * Shared folder %s MUST NOT be updated in context %s
 		 */
@@ -477,11 +477,11 @@ public class OXFolderException extends OXException {
 		/**
 		 * Unable to map OCL permission value %s to a JSON permission value
 		 */
-		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.PROGRAMMING_ERROR, 65),
+		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.CODE_ERROR, 65),
 		/**
 		 * Folder existence cannot be checked due to unsufficient folder information
 		 */
-		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)", Category.PROGRAMMING_ERROR, 66),
+		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)", Category.CODE_ERROR, 66),
 		/**
 		 * A runtime error occured in context %s
 		 */
@@ -489,7 +489,7 @@ public class OXFolderException extends OXException {
 		/**
 		 * This method is not applicable to an IMAP permission
 		 */
-		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.PROGRAMMING_ERROR, 68);
+		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.CODE_ERROR, 68);
 
 		/**
 		 * Message of the exception.

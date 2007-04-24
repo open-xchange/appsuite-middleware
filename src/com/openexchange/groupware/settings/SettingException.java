@@ -110,7 +110,7 @@ public class SettingException extends AbstractOXException {
          * A SQL problem occures while reading information from the config
          * database.
          */
-        SQL_ERROR(null, Category.PROGRAMMING_ERROR, 2),
+        SQL_ERROR(null, Category.CODE_ERROR, 2),
         /**
          * Writing the setting %1$s is not permitted.
          */
@@ -119,22 +119,22 @@ public class SettingException extends AbstractOXException {
         /**
          * Unknown setting path %1$s.
          */
-        UNKNOWN_PATH("Unknown setting path %1$s.", Category.PROGRAMMING_ERROR,
+        UNKNOWN_PATH("Unknown setting path %1$s.", Category.CODE_ERROR,
             4),
         /**
          * Setting "%1$s" is not a leaf one.
          */
         NOT_LEAF("Setting \"%1$s\" is not a leaf one.",
-            Category.PROGRAMMING_ERROR, 5),
+            Category.CODE_ERROR, 5),
         /**
          * Exception while parsing JSON.
          */
         JSON_READ_ERROR("Exception while parsing JSON.",
-            Category.PROGRAMMING_ERROR, 6),
+            Category.CODE_ERROR, 6),
         /**
          * Can't clone tree.
          */
-        CLONE("Can't clone tree.", Category.PROGRAMMING_ERROR, 7);
+        CLONE("Can't clone tree.", Category.CODE_ERROR, 7);
 
         /**
          * Message of the exception.

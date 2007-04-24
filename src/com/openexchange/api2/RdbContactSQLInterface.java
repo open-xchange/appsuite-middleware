@@ -115,7 +115,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="0",
 			exceptionId=0,
 			msg= ContactException.EVENT_QUEUE
@@ -143,7 +143,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="1",
 			exceptionId=1,
 			msg= ContactException.EVENT_QUEUE
@@ -174,7 +174,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 									Category.SOCKET_CONNECTION,
 									Category.PERMISSION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR
 								},
 			desc={"2","3","4","5","6"},
 			exceptionId={2,3,4,5,6},
@@ -251,11 +251,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR								
+									Category.CODE_ERROR,
+									Category.CODE_ERROR								
 									
 								},
 			desc={"7","8","9","10","11","12"},
@@ -352,11 +352,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
 									Category.SOCKET_CONNECTION
 								},
 			desc={"13","14","15","16","17","18","19"},
@@ -460,11 +460,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"20","21","22","23","24","25"},
 			exceptionId={20,21,22,23,24,25},
@@ -565,7 +565,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 	@OXThrowsMultiple(
 			category={	Category.TRY_AGAIN,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
 									Category.SOCKET_CONNECTION
 								},
@@ -622,11 +622,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR,
+									Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"30","31","32","33","34","35"},
 			exceptionId={30,31,32,33,34,35},
@@ -709,8 +709,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR,
+									Category.CODE_ERROR
 								},
 			desc={"36","37","38"},
 			exceptionId={36,37,38},
@@ -748,16 +748,16 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	}
 
 	@OXThrowsMultiple(
-			category={ 	Category.PROGRAMMING_ERROR,
+			category={ 	Category.CODE_ERROR,
 									Category.TRY_AGAIN,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.PERMISSION,
 									Category.PERMISSION,
 									Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,
+									Category.CODE_ERROR,
 									Category.SOCKET_CONNECTION,
 									Category.PERMISSION,
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR
 								},
 			desc={"39","40","41","42","58","43","44","45","46","56"},
 			exceptionId={39,40,41,42,58,43,44,45,46,56},
@@ -905,8 +905,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 	@OXThrowsMultiple(
 			category={ 	Category.SOCKET_CONNECTION,
-									Category.PROGRAMMING_ERROR,				
-									Category.PROGRAMMING_ERROR
+									Category.CODE_ERROR,				
+									Category.CODE_ERROR
 								},
 			desc={"47","48","49"},
 			exceptionId={47,48,49},
@@ -944,8 +944,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 	@OXThrowsMultiple(
 			category={ 	
-								Category.PROGRAMMING_ERROR,				
-								Category.PROGRAMMING_ERROR
+								Category.CODE_ERROR,				
+								Category.CODE_ERROR
 								},
 			desc={"50","51"},
 			exceptionId={50,51},
@@ -1008,8 +1008,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
     	@OXThrowsMultiple(
     			category={ 	
-    								Category.PROGRAMMING_ERROR,				
-    								Category.PROGRAMMING_ERROR
+    								Category.CODE_ERROR,				
+    								Category.CODE_ERROR
     								},
     			desc={"52","53"},
     			exceptionId={52,53},
@@ -1041,8 +1041,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		
     	@OXThrowsMultiple(
     			category={ 	
-    								Category.PROGRAMMING_ERROR,				
-    								Category.PROGRAMMING_ERROR
+    								Category.CODE_ERROR,				
+    								Category.CODE_ERROR
     								},
     			desc={"54","55"},
     			exceptionId={54,55},
@@ -1077,8 +1077,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		
     	@OXThrowsMultiple(
     			category={ 	
-    								Category.PROGRAMMING_ERROR,				
-    								Category.PROGRAMMING_ERROR
+    								Category.CODE_ERROR,				
+    								Category.CODE_ERROR
     								},
     			desc={"56","57"},
     			exceptionId={56,57},

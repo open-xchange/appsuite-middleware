@@ -174,7 +174,7 @@ public class SessionHandler extends TimerTask {
 		} catch (LoginException e) {
 			switch (e.getCategory()) {
 				case SUBSYSTEM_OR_SERVICE_DOWN:
-				case PROGRAMMING_ERROR:
+				case CODE_ERROR:
 				case SETUP_ERROR:
 				case SOCKET_CONNECTION:
 					throw new SessiondException(e);

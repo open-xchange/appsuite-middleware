@@ -70,7 +70,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(DeleteDocumentAction.class);
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 0,
 			msg = "Invalid SQL Query : %s")
@@ -107,7 +107,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 	}
 
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 1,
 			msg = "Invalid SQL Query : %s")

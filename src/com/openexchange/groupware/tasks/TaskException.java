@@ -151,7 +151,7 @@ public class TaskException extends AbstractOXException {
          * Error while inserting task: %s.
          */
         INSERT_FAILED("Error while inserting task: %s.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 1),
+            Category.CODE_ERROR, Detail.OTHER, 1),
         /**
          * Setting autoCommit to true failed.
          */
@@ -166,11 +166,11 @@ public class TaskException extends AbstractOXException {
          * Unimplemented feature.
          */
         UNIMPLEMENTED("This method is not implemented.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 4),
+            Category.CODE_ERROR, Detail.OTHER, 4),
         /**
          * SQL Problem: "%s".
          */
-        SQL_ERROR("SQL Problem: \"%s\".", Category.PROGRAMMING_ERROR,
+        SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
             Detail.OTHER, 5),
         /**
          * Folder %1$s (%2$d) is not a task folder.
@@ -194,27 +194,27 @@ public class TaskException extends AbstractOXException {
          * SQL problem while updating task: %s.
          */
         UPDATE_FAILED("SQL problem while updating task: %s.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 9),
+            Category.CODE_ERROR, Detail.OTHER, 9),
         /**
          * Counting tasks did not return a result.
          */
         NO_COUNT_RESULT("Counting tasks did not return a result.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 10),
+            Category.CODE_ERROR, Detail.OTHER, 10),
         /**
          * SQL problem while deleting task: %s.
          */
         DELETE_FAILED("SQL problem while deleting task: %s.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 11),
+            Category.CODE_ERROR, Detail.OTHER, 11),
         /**
          * Can't find folder of task participant.
          */
         PARTICIPANT_FOLDER_INCONSISTENCY("Can't find folder of task "
-            + "participant.", Category.PROGRAMMING_ERROR, Detail.OTHER, 12),
+            + "participant.", Category.CODE_ERROR, Detail.OTHER, 12),
         /**
          * SQL problem while listing tasks: %s.
          */
         SEARCH_FAILED("SQL problem while listing tasks: %s.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 13),
+            Category.CODE_ERROR, Detail.OTHER, 13),
         /**
          * You are not allowed to delete the task %d.
          */
@@ -224,44 +224,44 @@ public class TaskException extends AbstractOXException {
          * Tried to delete %1$d folders but only %2$d were deleted.
          */
         FOLDER_DELETE_WRONG("Tried to delete %1$d folders but only %2$d were "
-            + "deleted.", Category.PROGRAMMING_ERROR, Detail.OTHER, 15),
+            + "deleted.", Category.CODE_ERROR, Detail.OTHER, 15),
         /**
          * Tried to delete %1$d participants but only %2$d were deleted.
          */
         PARTICIPANT_DELETE_WRONG("Tried to delete %1$d participants but only "
-            + "%2$d were deleted.", Category.PROGRAMMING_ERROR, Detail.OTHER,
+            + "%2$d were deleted.", Category.CODE_ERROR, Detail.OTHER,
             16),
         /**
          * Folder %d for task %d cannot be found.
          */
         FOLDER_NOT_FOUND("Folder %d for task %d cannot be found.",
-            Category.PROGRAMMING_ERROR, Detail.NOT_FOUND, 17),
+            Category.CODE_ERROR, Detail.NOT_FOUND, 17),
         /**
          * Participant %d for task %d is not found.
          */
         PARTICIPANT_NOT_FOUND("Participant %d for task %d is not found.",
-            Category.PROGRAMMING_ERROR, Detail.NOT_FOUND, 18),
+            Category.CODE_ERROR, Detail.NOT_FOUND, 18),
         /**
          * Can't find task %d in context %d.
          */
         TASK_NOT_FOUND("Can't find task %d in context %d.",
-            Category.PROGRAMMING_ERROR, Detail.NOT_FOUND, 19),
+            Category.CODE_ERROR, Detail.NOT_FOUND, 19),
         /**
          * Unknown task attribute %d.
          */
         UNKNOWN_ATTRIBUTE("Unknown task attribute %d.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 20),
+            Category.CODE_ERROR, Detail.OTHER, 20),
         /**
          * Date range in search must contain 2 and not %d values.
          */
         WRONG_DATE_RANGE("Date range in search must contain 2 and not %d "
-            + "values.", Category.PROGRAMMING_ERROR, Detail.MANDATORY_FIELD,
+            + "values.", Category.CODE_ERROR, Detail.MANDATORY_FIELD,
             21),
         /**
          * Cannot decrease number of attachments below zero.
          */
         WRONG_ATTACHMENT_COUNT("Cannot decrease number of attachments below "
-            + "zero.", Category.PROGRAMMING_ERROR, Detail.OTHER, 22),
+            + "zero.", Category.CODE_ERROR, Detail.OTHER, 22),
         /**
          * You are not allowed to read the contents of folder %1$s (%2$d).
          */
@@ -286,7 +286,7 @@ public class TaskException extends AbstractOXException {
          * Missing folder id for creating task.
          */
         FOLDER_IS_MISSING("Missing folder id for creating task.",
-            Category.PROGRAMMING_ERROR, Detail.MANDATORY_FIELD, 27),
+            Category.CODE_ERROR, Detail.MANDATORY_FIELD, 27),
         /**
          * Private flagged tasks can't be delegated.
          */
@@ -312,7 +312,7 @@ public class TaskException extends AbstractOXException {
         /**
          * Can't send event to event system.
          */
-        EVENT("Can't send event to event system.", Category.PROGRAMMING_ERROR,
+        EVENT("Can't send event to event system.", Category.CODE_ERROR,
             Detail.OTHER, 32),
         /**
          * You are not allowed to edit tasks in folder %1$s (%2$d).
@@ -350,7 +350,7 @@ public class TaskException extends AbstractOXException {
          * Invalid task state %d.
          */
         INVALID_TASK_STATE("Invalid task state %d.",
-            Category.PROGRAMMING_ERROR, Detail.OTHER, 39),
+            Category.CODE_ERROR, Detail.OTHER, 39),
         /**
          * Start date %1$s must be before end date %2$s.
          */

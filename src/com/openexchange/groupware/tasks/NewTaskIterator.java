@@ -47,66 +47,75 @@
  *
  */
 
-package com.openexchange.groupware.infostore.database.impl;
+package com.openexchange.groupware.tasks;
 
-import java.sql.SQLException;
+import com.openexchange.api2.OXException;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+/**
+ * This class implements the new iterator for tasks that fixes problems with
+ * connection timeouts if a lot of tasks are read and that improved performance
+ * while reading from database.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class NewTaskIterator implements SearchIterator, Runnable {
 
-@OXExceptionSource(
-		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CREATEDOCUMENTACTION,
-		component = Component.INFOSTORE
-)
-public class CreateDocumentAction extends AbstractDocumentListAction {
+    /**
+     * Default constructor.
+     */
+    public NewTaskIterator() {
+        // TODO Auto-generated constructor stub
+    }
 
-	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(CreateDocumentAction.class);
-	
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 0,
-			msg = "Invalid SQL Query : %s")
-	@Override
-	protected void undoAction() throws AbstractOXException {
-		UpdateBlock update = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+    /**
+     * {@inheritDoc}
+     */
 
-			@Override
-			public void fillStatement() throws SQLException {
-				stmt.setInt(1, getContext().getContextId());
-			}
-			
-		};
-		
-		try {
-			doUpdates(update);
-		} catch (UpdateException e) {
-			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
-		}
-	}
-	
-	@OXThrows(
-			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the server",
-			exceptionId = 1,
-			msg = "Invalid SQL Query : %s")
-	public void perform() throws AbstractOXException {
-		try {
-			doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getDocumentFields(), getDocuments());
-		} catch (UpdateException e) {
-			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
-		}
-	}
+    public void close() throws SearchIteratorException {
+        // TODO Auto-generated method stub
 
-	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
-		return new Object[]{getContext().getContextId()};
-	}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public boolean hasNext() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public boolean hasSize() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public Object next() throws SearchIteratorException, OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public int size() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public void run() {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

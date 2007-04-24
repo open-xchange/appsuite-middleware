@@ -141,7 +141,7 @@ public class UserException extends AbstractOXException {
          * A problem with distinguished names occured.
          */
         DN_PROBLEM("Can't build distinguished name from %s.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 2),
+            Category.CODE_ERROR, Detail.ERROR, 2),
         /**
          * Class can not be found.
          */
@@ -160,12 +160,12 @@ public class UserException extends AbstractOXException {
         /**
          * Can't clone object %1$s.
          */
-        NOT_CLONEABLE("Can't clone object %1$s.", Category.PROGRAMMING_ERROR,
+        NOT_CLONEABLE("Can't clone object %1$s.", Category.CODE_ERROR,
             Detail.ERROR, 6),
         /**
          * SQL Problem: \"%s\".
          */
-        SQL_ERROR("SQL Problem: \"%s\".", Category.PROGRAMMING_ERROR,
+        SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
             Detail.ERROR, 7);
 
         /**

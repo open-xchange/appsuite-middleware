@@ -60,15 +60,15 @@ public class UserConfigurationException extends OXException {
 		/**
 		 * A SQL error occured
 		 */
-		SQL_ERROR("A SQL error occured", Category.PROGRAMMING_ERROR, 1),
+		SQL_ERROR("A SQL error occured", Category.CODE_ERROR, 1),
 		/**
 		 * A DBPooling error occured
 		 */
-		DBPOOL_ERROR("A DBPooling error occured", Category.PROGRAMMING_ERROR, 2),
+		DBPOOL_ERROR("A DBPooling error occured", Category.CODE_ERROR, 2),
 		/**
 		 * Configuration for user %s could not found in context %d
 		 */
-		NOT_FOUND("Configuration for user %s could not found in context %d", Category.PROGRAMMING_ERROR, 3);
+		NOT_FOUND("Configuration for user %s could not found in context %d", Category.CODE_ERROR, 3);
 		
 		private final String message;
 		

@@ -71,7 +71,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 	
 	
 	@OXThrowsMultiple(
-			category = {Category.PROGRAMMING_ERROR, Category.CONCURRENT_MODIFICATION},
+			category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
 			desc ={ "An invalid SQL Query was sent to the server","The document was updated in between do and undo. The Database is now probably inconsistent."},
 			exceptionId = {0,3},
 			msg = {"Invalid SQL Query : %s","The document was updated in between do and undo. The Database is now probalby inconsistent."} )
@@ -90,7 +90,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 	}
 
 	@OXThrowsMultiple(
-			category = {Category.PROGRAMMING_ERROR, Category.CONCURRENT_MODIFICATION},
+			category = {Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION},
 			desc = {"An invalid SQL Query was sent to the server","The document could not be updated because it was modified."},
 			exceptionId = {1,2},
 			msg = {"Invalid SQL Query : %s","The document could not be updated because it was modified. Reload the view." })

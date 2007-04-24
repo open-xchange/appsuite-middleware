@@ -145,7 +145,7 @@ public class LoginException extends AbstractOXException {
         /**
          * Unknown Problem: "%s".
          */
-        UNKNOWN("Unknown Problem: \"%s\".", Category.PROGRAMMING_ERROR,
+        UNKNOWN("Unknown Problem: \"%s\".", Category.CODE_ERROR,
             Source.SYSTEM, 3),
         /**
          * Too few (%d) login attributes.
@@ -167,7 +167,7 @@ public class LoginException extends AbstractOXException {
          * Instanciating the class failed.
          */
         INSTANCIATION_FAILED("Instanciating the class failed.",
-            Category.PROGRAMMING_ERROR, Source.SYSTEM, 7),
+            Category.CODE_ERROR, Source.SYSTEM, 7),
         /**
          * Class %1$s can not be found.
          */

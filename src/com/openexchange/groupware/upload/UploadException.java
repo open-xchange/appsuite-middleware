@@ -74,15 +74,15 @@ public class UploadException extends AbstractOXException {
 		/**
 		 * Missing affiliation id
 		 */
-		MISSING_AFFILIATION_ID("Missing affiliation id", Category.PROGRAMMING_ERROR, 2),
+		MISSING_AFFILIATION_ID("Missing affiliation id", Category.CODE_ERROR, 2),
 		/**
 		 * Unknown action value: %s
 		 */
-		UNKNOWN_ACTION_VALUE("Unknown action value: %s", Category.PROGRAMMING_ERROR, 3),
+		UNKNOWN_ACTION_VALUE("Unknown action value: %s", Category.CODE_ERROR, 3),
 		/**
 		 * Header "content-type" does not indicate multipart content
 		 */
-		NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.PROGRAMMING_ERROR,
+		NO_MULTIPART_CONTENT("Header \"content-type\" does not indicate multipart content", Category.CODE_ERROR,
 				4),
 		/**
 		 * Request rejected because its size (%d) exceeds the maximum configured

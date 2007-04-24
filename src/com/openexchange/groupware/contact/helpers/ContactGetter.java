@@ -74,7 +74,7 @@ import com.openexchange.groupware.container.ContactObject;
 	classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTGETTER, 
 	component=Component.CONTACT)
 @OXThrowsMultiple(
-	category={Category.PROGRAMMING_ERROR}, 
+	category={Category.CODE_ERROR}, 
 	desc={""}, 
 	exceptionId={0}, 
 	msg={"Need at least a ContactObject to get the value of %s"})

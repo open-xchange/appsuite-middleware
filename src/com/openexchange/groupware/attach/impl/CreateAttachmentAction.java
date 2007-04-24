@@ -69,7 +69,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(CreateAttachmentAction.class);
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 0,
 			msg = "Invalid SQL Query: %s"
@@ -94,7 +94,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 1,
 			msg = "Invalid SQL Query: %s"

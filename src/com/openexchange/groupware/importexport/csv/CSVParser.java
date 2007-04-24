@@ -79,7 +79,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 	classId=ImportExportExceptionClasses.CSVPARSER, 
 	component=Component.IMPORT_EXPORT)
 @OXThrowsMultiple(
-	category={Category.USER_INPUT, Category.PROGRAMMING_ERROR}, 
+	category={Category.USER_INPUT, Category.CODE_ERROR}, 
 	desc={"",""}, 
 	exceptionId={0,1}, 
 	msg={

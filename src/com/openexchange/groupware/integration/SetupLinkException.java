@@ -100,7 +100,7 @@ public class SetupLinkException extends AbstractOXException {
         /**
          * Unknown Problem: "%s".
          */
-        UNKNOWN("Unknown Problem: \"%s\".", Category.PROGRAMMING_ERROR, 1),
+        UNKNOWN("Unknown Problem: \"%s\".", Category.CODE_ERROR, 1),
         /**
          * Too few (%d) login attributes.
          */
@@ -115,7 +115,7 @@ public class SetupLinkException extends AbstractOXException {
          * Instanciating the class failed.
          */
         INSTANCIATION_FAILED("Instanciating the class failed.",
-            Category.PROGRAMMING_ERROR, 4),
+            Category.CODE_ERROR, 4),
         /**
          * Class %1$s can not be found.
          */
@@ -130,7 +130,7 @@ public class SetupLinkException extends AbstractOXException {
          * URL "%s" is malformed.
          */
         MALFORMED_URL("URL \"%s\" is malformed.",
-            Category.PROGRAMMING_ERROR, 7),
+            Category.CODE_ERROR, 7),
         /**
          * Link is not implemented.
          */

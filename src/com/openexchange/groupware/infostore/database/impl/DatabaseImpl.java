@@ -237,7 +237,7 @@ public class DatabaseImpl extends DBService {
 
 	private ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 0, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 0, msg = "Invalid SQL Query: %s")
 	public boolean exists(int id, int version, Context ctx, User user,
 			UserConfiguration userConfig) throws OXException {
 		boolean retval = false;
@@ -277,7 +277,7 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 1, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 1, msg = "Invalid SQL Query: %s")
 	public DocumentMetadata getDocumentMetadata(int id, int version,
 			Context ctx, User user, UserConfiguration userConfig)
 			throws OXException {
@@ -395,8 +395,8 @@ public class DatabaseImpl extends DBService {
 		return result;
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
-			Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.PROGRAMMING_ERROR }, desc = {
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
+			Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR }, desc = {
 			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
 			"This indicates a problem accessing the underlying filestorage. Look at the exceptions given as cause for this one.",
 			"The context specific data about a filestorage could not be loaded. Look at the underlying exceptions for a hint." }, exceptionId = {
@@ -449,8 +449,8 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
-			Category.PROGRAMMING_ERROR }, desc = {
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
+			Category.CODE_ERROR }, desc = {
 			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
 			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D" }, exceptionId = {
 			14, 15 }, msg = { "Invalid SQL Query: %s", "Invalid SQL Query: %s" })
@@ -856,8 +856,8 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
-			Category.PROGRAMMING_ERROR }, desc = {
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
+			Category.CODE_ERROR }, desc = {
 			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
 			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D" }, exceptionId = {
 			16, 17 }, msg = { "Invalid SQL Query: %s", "Invalid SQL Query: %s" })
@@ -1057,7 +1057,7 @@ public class DatabaseImpl extends DBService {
 		return notDeletedVersions;
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.TRY_AGAIN },
 
 	desc = {
@@ -1166,7 +1166,7 @@ public class DatabaseImpl extends DBService {
 		return _strReturnArray;
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.TRY_AGAIN },
 
 	desc = {
@@ -1222,7 +1222,7 @@ public class DatabaseImpl extends DBService {
 		}
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.TRY_AGAIN },
 
 	desc = {
@@ -1273,7 +1273,7 @@ public class DatabaseImpl extends DBService {
 		}
 	}
 
-	@OXThrowsMultiple(category = { Category.PROGRAMMING_ERROR,
+	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.TRY_AGAIN },
 
 	desc = {
@@ -1386,7 +1386,7 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 26, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 26, msg = "Invalid SQL Query: %s")
 	public int countDocuments(long folderId, boolean onlyOwnObjects,
 			Context ctx, User user, UserConfiguration userConfig)
 			throws OXException {
@@ -1445,7 +1445,7 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 27, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 27, msg = "Invalid SQL Query: %s")
 	public boolean hasFolderForeignObjects(long folderId, Context ctx,
 			User user, UserConfiguration userConfig) throws OXException {
 		boolean retval = true;
@@ -1479,7 +1479,7 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 28, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 28, msg = "Invalid SQL Query: %s")
 	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
 		boolean retval = false;
 
@@ -1512,7 +1512,7 @@ public class DatabaseImpl extends DBService {
 	private static final List<String> tables = Arrays.asList("infostore",
 			"infostore_document");
 
-	@OXThrows(category = Category.PROGRAMMING_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
 	
 	public void removeUser(int id, Context ctx, SessionObject session, EntityLockManager locks) throws OXException {
 		removePrivate(id,ctx,session);
@@ -2214,7 +2214,7 @@ public class DatabaseImpl extends DBService {
 	}
 
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server.",
 			exceptionId = 34,
 			msg = "Invalid SQL Query : %s"

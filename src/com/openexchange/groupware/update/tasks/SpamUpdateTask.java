@@ -118,7 +118,7 @@ public class SpamUpdateTask implements UpdateTask {
 	 *      int)
 	 */
 	@OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR },
+			category = { Category.CODE_ERROR },
 			desc = { "" },
 			exceptionId = { 1 },
 			msg = { "A SQL error occured while performing task SpamUpdateTask: %1$s." }

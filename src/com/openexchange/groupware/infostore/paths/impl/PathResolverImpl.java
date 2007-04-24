@@ -112,7 +112,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		MODE = new CACHE_MODE(provider);
 	}
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="A WebdavPath for a document without an attached file was requested. In WebDAV only infoitems with files are visible. This points to a problem with the cola supply for the developer and can only be fixed by R&D.",
 			exceptionId=0,
 			msg="Illegal Argument: Document %d contains no file"
@@ -178,7 +178,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	}
 	
 	@OXThrowsMultiple(
-			category = { Category.PROGRAMMING_ERROR, Category.PROGRAMMING_ERROR },
+			category = { Category.CODE_ERROR, Category.CODE_ERROR },
 			desc = { "A folder contains two folders with the same folder name. This points to an inconsistency in the database, as the second folder by the same name should not have been created. This will certainly cause some headaches in R&D.", "A faulty SQL statement was sent to the DB. R&D must fix this." },
 			exceptionId = { 1,2 },
 			msg = { "Folder %d has two subfolders named %s. Your database is not consistent.", "Incorrect SQL Query: %s" }

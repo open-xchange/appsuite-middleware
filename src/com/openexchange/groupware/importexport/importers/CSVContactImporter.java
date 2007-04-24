@@ -89,8 +89,8 @@ import com.openexchange.sessiond.SessionObject;
 @OXThrowsMultiple(
 	category={
 		Category.USER_INPUT,
-		Category.PROGRAMMING_ERROR,
-		Category.PROGRAMMING_ERROR,
+		Category.CODE_ERROR,
+		Category.CODE_ERROR,
 		Category.USER_INPUT,
 		Category.USER_INPUT},
 	desc={"","","", "", ""}, 

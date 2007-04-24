@@ -68,11 +68,11 @@ public class AJAXUserDictionaryException extends OXException {
 		/**
 		 * User's %s dictionary could not be loaded in context %d
 		 */
-		NOT_LOADED("User's %s dictionary could not be loaded in context %d", Category.PROGRAMMING_ERROR, 50),
+		NOT_LOADED("User's %s dictionary could not be loaded in context %d", Category.CODE_ERROR, 50),
 		/**
 		 * Word contains illegal comma character(s): %s
 		 */
-		INVALID_WORD("Word contains illegal comma character(s): %s", Category.PROGRAMMING_ERROR, 51),
+		INVALID_WORD("Word contains illegal comma character(s): %s", Category.CODE_ERROR, 51),
 		/**
 		 * Missing data for spell check
 		 */

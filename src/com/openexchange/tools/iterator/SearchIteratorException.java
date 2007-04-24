@@ -68,28 +68,28 @@ public class SearchIteratorException extends AbstractOXException {
 		/**
 		 * A SQL error occured: %s
 		 */
-		SQL_ERROR("A SQL error occured: %s", Category.PROGRAMMING_ERROR, 1),
+		SQL_ERROR("A SQL error occured: %s", Category.CODE_ERROR, 1),
 		/**
 		 * A DBPool error occured: %s
 		 */
-		DBPOOLING_ERROR("A DBPool error occured: %s", Category.PROGRAMMING_ERROR, 2),
+		DBPOOLING_ERROR("A DBPool error occured: %s", Category.CODE_ERROR, 2),
 		/**
 		 * Operation not allowed on a closed SearchIterator
 		 */
-		CLOSED("Operation not allowed on a closed SearchIterator", Category.PROGRAMMING_ERROR, 3),
+		CLOSED("Operation not allowed on a closed SearchIterator", Category.CODE_ERROR, 3),
         /**
          * Not implemented
          */
-        NOT_IMPLEMENTED("Mapping for %d not implemented", Category.PROGRAMMING_ERROR, 4),
+        NOT_IMPLEMENTED("Mapping for %d not implemented", Category.CODE_ERROR, 4),
         
         /**
          * FreeBusyResults Calc issue
          */
-        CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %d", Category.PROGRAMMING_ERROR, 5),
+        CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %d", Category.CODE_ERROR, 5),
         /**
          * Invalid constructor argument. Instance of %s not supported
          */
-        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %s not supported", Category.PROGRAMMING_ERROR, 6);
+        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %s not supported", Category.CODE_ERROR, 6);
                 
 		
 		private final String message;

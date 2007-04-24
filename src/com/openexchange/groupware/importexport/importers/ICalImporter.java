@@ -93,8 +93,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.PERMISSION, 
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.USER_INPUT,
-		Category.PROGRAMMING_ERROR,
-		Category.PROGRAMMING_ERROR}, 
+		Category.CODE_ERROR,
+		Category.CODE_ERROR}, 
 	desc={"","","","",""}, 
 	exceptionId={0,1,2,3,4}, 
 	msg={

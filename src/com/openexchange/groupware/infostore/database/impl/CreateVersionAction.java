@@ -72,7 +72,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 	
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 0,
 			msg = "Invalid SQL Query : %s")
@@ -97,7 +97,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 	}
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the server",
 			exceptionId = 1,
 			msg = "Invalid SQL Query : %s")

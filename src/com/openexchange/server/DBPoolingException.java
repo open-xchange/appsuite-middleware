@@ -135,7 +135,7 @@ public class DBPoolingException extends AbstractOXException {
          * Resolving the database failed.
          */
         RESOLVE_FAILED("Resolving database for context %1$d and server %2$d not "
-            + "possible!", Category.PROGRAMMING_ERROR, 2),
+            + "possible!", Category.CODE_ERROR, 2),
         /**
          * Connection to a database can't be created.
          */
@@ -150,18 +150,18 @@ public class DBPoolingException extends AbstractOXException {
          * Null is returned to the pool instead a connection object.
          */
         NULL_CONNECTION("Null is returned to connection pool.",
-            Category.PROGRAMMING_ERROR, 5),
+            Category.CODE_ERROR, 5),
         /**
          * A SQL problem occures while reading information from the config
          * database.
          */
-        SQL_ERROR("Problem with executing SQL: %s", Category.PROGRAMMING_ERROR,
+        SQL_ERROR("Problem with executing SQL: %s", Category.CODE_ERROR,
             6),
         /**
          * A database pool entry can't be found in the config database.
          */
         NO_DBPOOL("Can't get information for pool %d.",
-            Category.PROGRAMMING_ERROR, 7),
+            Category.CODE_ERROR, 7),
         /**
          * A driver class could not be found.
          */
@@ -170,7 +170,7 @@ public class DBPoolingException extends AbstractOXException {
          * Returning a connection to the pool failed.
          */
         RETURN_FAILED("Can't return connection to pool %d.",
-            Category.PROGRAMMING_ERROR, 9),
+            Category.CODE_ERROR, 9),
         /**
          * Server name is not defined.
          */
@@ -179,7 +179,7 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * %s is not initialized.
          */
-        NOT_INITIALIZED("%s is not initialized.", Category.PROGRAMMING_ERROR,
+        NOT_INITIALIZED("%s is not initialized.", Category.CODE_ERROR,
             11),
         /**
          * Connection used for %1$d milliseconds.
@@ -190,12 +190,12 @@ public class DBPoolingException extends AbstractOXException {
          * %1$d statements aren't closed.
          */
         ACTIVE_STATEMENTS("%1$d statements aren't closed.", Category
-            .PROGRAMMING_ERROR, 13),
+            .CODE_ERROR, 13),
         /**
          * Found not committed transaction.
          */
         IN_TRANSACTION("Found not committed transaction.", Category
-            .PROGRAMMING_ERROR, 14);
+            .CODE_ERROR, 14);
 
         /**
          * Message of the exception.

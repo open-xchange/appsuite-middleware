@@ -151,7 +151,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=0,
 			msg="Invalid SQL: '%s'"
@@ -183,7 +183,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=1,
 			msg="Error in SQL Update"
@@ -198,7 +198,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=2,
 			msg="Invalid SQL: '%s'"
@@ -226,7 +226,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=3,
 			msg="Invalid SQL: '%s'"
@@ -249,7 +249,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=4,
 			msg="Invalid SQL: '%s'"
@@ -300,7 +300,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		}
 	}
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=5,
 			msg="Invalid SQL: '%s'"
@@ -324,7 +324,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=6,
 			msg="Invalid SQL: '%s'"

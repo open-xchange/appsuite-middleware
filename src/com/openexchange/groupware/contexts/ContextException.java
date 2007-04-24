@@ -126,7 +126,7 @@ public class ContextException extends AbstractOXException {
         /**
          * SQL problem: %1$s.
          */
-        SQL_ERROR("SQL problem: %1$s.", Category.PROGRAMMING_ERROR, 6),
+        SQL_ERROR("SQL problem: %1$s.", Category.CODE_ERROR, 6),
         /**
          * Your database is currently updated.
          */

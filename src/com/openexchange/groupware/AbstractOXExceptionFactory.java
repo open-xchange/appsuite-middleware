@@ -157,7 +157,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     public T createException(final int id, final Throwable cause, final Object... msgParams) {
         final ExceptionInfo throwsInfo = throwsMap.get(Integer.valueOf(id));
         if (throwsInfo == null) {
-            return buildException(component, Category.PROGRAMMING_ERROR, getClassId() * 100,
+            return buildException(component, Category.CODE_ERROR, getClassId() * 100,
                     "Missing OXException annotation " + id, cause);
         }
         return buildException(component, throwsInfo.category, classId * 100 + id, throwsInfo.message, cause, msgParams);

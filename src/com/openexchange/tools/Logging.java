@@ -88,7 +88,7 @@ public final class Logging {
         case SUBSYSTEM_OR_SERVICE_DOWN:
         case SOCKET_CONNECTION:
         case INTERNAL_ERROR:
-        case PROGRAMMING_ERROR:
+        case CODE_ERROR:
         case SETUP_ERROR:
         default:
             log.error(exc.getMessage(), exc);

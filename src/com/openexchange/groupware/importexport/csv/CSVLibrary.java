@@ -77,8 +77,8 @@ import com.openexchange.sessiond.SessionObject;
 @OXThrowsMultiple(
 	category={
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
-		Category.PROGRAMMING_ERROR,
-		Category.PROGRAMMING_ERROR}, 
+		Category.CODE_ERROR,
+		Category.CODE_ERROR}, 
 	desc={"","",""}, 
 	exceptionId={0,1,2}, 
 	msg={

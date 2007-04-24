@@ -256,9 +256,9 @@ public class Links {
 			category={
 					Category.PERMISSION,
 					Category.USER_INPUT,
-					Category.PROGRAMMING_ERROR,
-					Category.PROGRAMMING_ERROR,
-					Category.PROGRAMMING_ERROR
+					Category.CODE_ERROR,
+					Category.CODE_ERROR,
+					Category.CODE_ERROR
 				},
 			desc={"", "","","",""},
 			exceptionId={0,1,2,3,4},
@@ -339,7 +339,7 @@ public class Links {
 			category={
 					Category.PERMISSION,
 					Category.PERMISSION,
-					Category.PROGRAMMING_ERROR
+					Category.CODE_ERROR
 				},
 			desc={"", "",""},
 			exceptionId={5,6,7},
@@ -394,7 +394,7 @@ public class Links {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="",
 			exceptionId=9,
 			msg="Unable to load all links from this Objects. Object %1$d Folder %2$d User %3$d Context %4$d"
@@ -452,7 +452,7 @@ public class Links {
 	@OXThrowsMultiple(
 			category={
 					Category.PERMISSION,
-					Category.PROGRAMMING_ERROR
+					Category.CODE_ERROR
 				},
 			desc={"", ""},
 			exceptionId={10,11},
@@ -540,7 +540,7 @@ public class Links {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR,
+			category=Category.CODE_ERROR,
 			desc="",
 			exceptionId=12,
 			msg="Unable to delete all links from this Objects. Object %1$d Context %2$d"

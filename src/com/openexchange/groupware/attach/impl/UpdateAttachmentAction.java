@@ -69,7 +69,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 	private List<AttachmentMetadata> oldAttachments;
 
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 0,
 			msg = "Invalid SQL Query: %s"
@@ -86,7 +86,7 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 	}
 
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 1,
 			msg = "Invalid SQL Query: %s"

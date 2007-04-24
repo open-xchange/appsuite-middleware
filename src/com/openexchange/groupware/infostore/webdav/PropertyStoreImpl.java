@@ -102,7 +102,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=0,
 			msg="Invalid SQL: '%s'"
@@ -157,7 +157,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=1,
 			msg="Invalid SQL: '%s'"
@@ -197,7 +197,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=2,
 			msg="Invalid SQL: '%s'"
@@ -232,7 +232,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=3,
 			msg="Invalid SQL: '%s'"
@@ -266,7 +266,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=4,
 			msg="Invalid SQL: '%s'"
@@ -307,7 +307,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 	
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=5,
 			msg="Invalid SQL: '%s'"
@@ -343,7 +343,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	}
 
 	@OXThrows(
-			category=Category.PROGRAMMING_ERROR, 
+			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
 			exceptionId=6,
 			msg="Invalid SQL: '%s'"

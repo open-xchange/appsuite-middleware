@@ -142,7 +142,7 @@ public class LdapException extends AbstractOXException {
          * A problem with distinguished names occured.
          */
         DN_PROBLEM("Can't build distinguished name from %s.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 2),
+            Category.CODE_ERROR, Detail.ERROR, 2),
         /**
          * Class can not be found.
          */
@@ -161,65 +161,65 @@ public class LdapException extends AbstractOXException {
         /**
          * SQL Problem: "%s".
          */
-        SQL_ERROR("SQL Problem: \"%s\"", Category.PROGRAMMING_ERROR,
+        SQL_ERROR("SQL Problem: \"%s\"", Category.CODE_ERROR,
             Detail.ERROR, 6),
         /**
          * Problem putting an object into the cache.
          */
         CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 7),
+            Category.CODE_ERROR, Detail.ERROR, 7),
         /**
          * Hash algorithm %s isn't found.
          */
         HASH_ALGORITHM("Hash algorithm %s isn't found.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 8),
+            Category.CODE_ERROR, Detail.ERROR, 8),
         /**
          * Encoding %s can't be used.
          */
         UNSUPPORTED_ENCODING("Encoding %s can't be used.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 9),
+            Category.CODE_ERROR, Detail.ERROR, 9),
         /**
          * Can't find resource group with identifier %d.
          */
         RESOURCEGROUP_NOT_FOUND(
             "Can't find resource group with identifier %d.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 10),
+            Category.CODE_ERROR, Detail.ERROR, 10),
         /**
          * Found resource groups with same identifier %d.
          */
         RESOURCEGROUP_CONFLICT("Found resource groups with same identifier %d.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 11),
+            Category.CODE_ERROR, Detail.ERROR, 11),
         /**
          * Can't find resource with identifier %d.
          */
         RESOURCE_NOT_FOUND("Can't find resource with identifier %d.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 12),
+            Category.CODE_ERROR, Detail.ERROR, 12),
         /**
          * Found resources with same identifier %d.
          */
         RESOURCE_CONFLICT("Found resources with same identifier %d.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 13),
+            Category.CODE_ERROR, Detail.ERROR, 13),
         /**
          * Can't find user with email %s.
          */
         NO_USER_BY_MAIL("Can't find user with email %s.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 14),
+            Category.CODE_ERROR, Detail.ERROR, 14),
         /**
          * Can't find user with identifier %1$s in context %2$d.
          */
         USER_NOT_FOUND("Can't find user with identifier %1$s in context %2$d.",
-            Category.PROGRAMMING_ERROR, Detail.NOT_FOUND, 15),
+            Category.CODE_ERROR, Detail.NOT_FOUND, 15),
         /**
          * Found two user with same identifier %1$s in context %2$d.
          */
         USER_CONFLICT("Found two user with same identifier %1$s in context "
-            + "%2$d.", Category.PROGRAMMING_ERROR, Detail.ERROR, 16),
+            + "%2$d.", Category.CODE_ERROR, Detail.ERROR, 16),
         /**
          * Can't find group with identifier %1$s in context %2$d.
          */
         GROUP_NOT_FOUND(
             "Can't find group with identifier %1$s in context %2$d.",
-            Category.PROGRAMMING_ERROR, Detail.ERROR, 17);
+            Category.CODE_ERROR, Detail.ERROR, 17);
 
         /**
          * Message of the exception.

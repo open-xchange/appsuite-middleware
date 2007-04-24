@@ -87,12 +87,12 @@ public class OXJSONException extends AbstractOXException {
          * Exception while writing JSON.
          */
         JSON_WRITE_ERROR("Exception while writing JSON.",
-            Category.PROGRAMMING_ERROR, 1),
+            Category.CODE_ERROR, 1),
         /**
          * Exception while parsing JSON.
          */
         JSON_READ_ERROR("Exception while parsing JSON.",
-            Category.PROGRAMMING_ERROR, 2),
+            Category.CODE_ERROR, 2),
         /**
          * Invalid cookie.
          */

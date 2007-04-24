@@ -235,7 +235,7 @@ public class InfostoreIterator implements SearchIterator {
 	
 	
 	@OXThrows(
-			category = Category.PROGRAMMING_ERROR,
+			category = Category.CODE_ERROR,
 			desc = "An invalid query was sent to the database.",
 			exceptionId = 1,
 			msg = "Invalid SQL Query: %s"

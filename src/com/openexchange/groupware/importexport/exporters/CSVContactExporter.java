@@ -99,7 +99,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 		Category.PERMISSION, 
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
-		Category.PROGRAMMING_ERROR,
+		Category.CODE_ERROR,
 		Category.INTERNAL_ERROR}, 
 	desc={"","","","",""}, 
 	exceptionId={0,1,2,3,4}, 

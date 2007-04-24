@@ -133,7 +133,7 @@ public class FileStorageException extends AbstractOXException {
          * Invalid constructor parameter at %1$d with type %2$s.
          */
         INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
-            Category.PROGRAMMING_ERROR, 5),
+            Category.CODE_ERROR, 5),
         /**
          * Can't create directory \"%1$s\" for FileStorage.
          */
@@ -143,20 +143,20 @@ public class FileStorageException extends AbstractOXException {
          * Depth must be >= 1 but is %1$d.
          */
         INVALID_DEPTH("Depth must be >= 1 but is %1$d.",
-            Category.PROGRAMMING_ERROR, 7),
+            Category.CODE_ERROR, 7),
         /**
          * Entries must be >= 1 but is %1$d.
          */
         INVALID_ENTRIES("Entries must be >= 1 but is %1$d.",
-            Category.PROGRAMMING_ERROR, 8),
+            Category.CODE_ERROR, 8),
         /**
          * Unsupported encoding.
          */
-        ENCODING("Unsupported encoding.", Category.PROGRAMMING_ERROR, 9),
+        ENCODING("Unsupported encoding.", Category.CODE_ERROR, 9),
         /**
          * Number parsing problem.
          */
-        NO_NUMBER("Number parsing problem.", Category.PROGRAMMING_ERROR, 10),
+        NO_NUMBER("Number parsing problem.", Category.CODE_ERROR, 10),
         /**
          * FileStorage is full.
          */
@@ -165,7 +165,7 @@ public class FileStorageException extends AbstractOXException {
          * Depth mismatch while computing next entry.
          */
         DEPTH_MISMATCH("Depth mismatch while computing next entry.",
-            Category.PROGRAMMING_ERROR, 12),
+            Category.CODE_ERROR, 12),
         /**
          * Can't remove lock file.
          */
