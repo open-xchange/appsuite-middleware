@@ -5,7 +5,6 @@ SQL_PROP=$PWD/@oxconfdir@/Sql.properties
 USER_PROP=$PWD/@oxconfdir@/User.properties
 GROUP_PROP=$PWD/@oxconfdir@/Group.properties
 RESOURCE_PROP=$PWD/@oxconfdir@/Resource.properties
-RESOURCE_GROUP_PROP=$PWD/@oxconfdir@/ResourceGroup.properties
 RMI_PROP=$PWD/@oxconfdir@/RMI.properties
 
 MASTER_AUTH_FILE=$PWD/@oxconfdir@/mpasswd
@@ -14,4 +13,3 @@ USER_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUserMySQLStorage
 GROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXGroupMySQLStorage
 TOOL_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage
 RESOURCE_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceMySQLStorage
-RESOURCEGROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceGroupMySQLStorage
