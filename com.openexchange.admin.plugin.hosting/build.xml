@@ -10,7 +10,6 @@
     <path id="project.classpath">
 	<pathelement location="${lib.dir}/ox_server.jar"/>
 	<pathelement location="${lib.dir}/commons-logging.jar"/>
-    <pathelement location="${lib.dir}/commons-cli-1.0.jar"/>
     <pathelement location="${lib.dir}/commons-io.jar"/>
 	<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
         <pathelement location="../open-xchange-admin/classes"/>
