@@ -112,6 +112,16 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class Folder extends SessionServlet {
 
+	private static final String SPLIT_PAT = " *, *";
+
+	private static final String JSON_KEY_DATA = "data";
+
+	private static final String DEF_NAME_INBOX = "Inbox";
+
+	private static final String STR_INBOX = "INBOX";
+
+	private static final String SHARED_PREFIX = "u:";
+
 	/**
 	 * 
 	 */
@@ -583,7 +593,7 @@ public class Folder extends SessionServlet {
 						}
 						displayNames.add(creatorDisplayName);
 						final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
-								new StringBuilder(20).append("u:").append(sharedFolder.getCreatedBy()).toString(),
+								new StringBuilder(20).append(SHARED_PREFIX).append(sharedFolder.getCreatedBy()).toString(),
 								creatorDisplayName, FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 						jsonWriter.array();
 						try {
@@ -740,7 +750,7 @@ public class Folder extends SessionServlet {
 					}
 				}
 				lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
-			} else if (parentIdentifier.startsWith("u:")) {
+			} else if (parentIdentifier.startsWith(SHARED_PREFIX)) {
 				/*
 				 * Client requests shared folders
 				 */
@@ -790,12 +800,12 @@ public class Folder extends SessionServlet {
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
 						final MailFolderObject f = (MailFolderObject) it.next();
-						if (f.getName().equals("INBOX")) {
+						if (f.getName().equals(STR_INBOX)) {
 							jsonWriter.array();
 							try {
 								// TODO: Translation for INBOX?!
 								for (int j = 0; j < writers.length; j++) {
-									writers[j].writeField(jsonWriter, f, false, "Inbox", -1);
+									writers[j].writeField(jsonWriter, f, false, DEF_NAME_INBOX, -1);
 								}
 							} finally {
 								jsonWriter.endArray();
@@ -1264,7 +1274,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutUpdateFolder(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
 			throws JSONException {
-		actionPutUpdateFolder(sessionObj, pw, requestObj.getString("data"), requestObj, PARAM_SRC_TYPE_JSON);
+		actionPutUpdateFolder(sessionObj, pw, requestObj.getString(JSON_KEY_DATA), requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
 	private final void actionPutUpdateFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1343,7 +1353,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutInsertFolder(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
 			throws JSONException {
-		actionPutInsertFolder(sessionObj, pw, requestObj.getString("data"), requestObj, PARAM_SRC_TYPE_JSON);
+		actionPutInsertFolder(sessionObj, pw, requestObj.getString(JSON_KEY_DATA), requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
 	private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1416,7 +1426,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutDeleteFolder(final SessionObject sessionObj, final Writer pw, final JSONObject requestObj)
 			throws JSONException {
-		actionPutDeleteFolder(sessionObj, pw, requestObj.getString("data"), requestObj, PARAM_SRC_TYPE_JSON);
+		actionPutDeleteFolder(sessionObj, pw, requestObj.getString(JSON_KEY_DATA), requestObj, PARAM_SRC_TYPE_JSON);
 	}
 
 	private final void actionPutDeleteFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1628,7 +1638,7 @@ public class Folder extends SessionServlet {
 		if (tmp == null) {
 			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 		}
-		final String[] sa = tmp.split(" *, *");
+		final String[] sa = tmp.split(SPLIT_PAT);
 		tmp = null;
 		int intArray[] = new int[sa.length];
 		for (int a = 0; a < sa.length; a++) {
@@ -1646,7 +1656,7 @@ public class Folder extends SessionServlet {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
 			}
-			final String[] tmp = jo.getString(paramName).split(" *, *");
+			final String[] tmp = jo.getString(paramName).split(SPLIT_PAT);
 			int intArray[] = new int[tmp.length];
 			for (int i = 0; i < tmp.length; i++) {
 				try {

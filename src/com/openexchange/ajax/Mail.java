@@ -156,6 +156,44 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
+	private static final String ENC_Q = "Q";
+
+	private static final String MIME_MULTIPART = "multipart/";
+
+	private static final String SPLIT_PAT = " *, *";
+
+	private static final String PARAMETER_PATTERN = "pattern";
+
+	private static final String PARAMETER_COL = "col";
+
+	private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
+
+	private static final String STR_INLINE_FILENAME = "inline; filename=\"";
+
+	private static final String STR_NAME = "name";
+
+	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+	private static final String STR_ATTACHMENT_FILENAME = "attachment; filename=\"";
+
+	private static final String STR_CONTENT_DISPOSITION = "Content-disposition";
+
+	private static final String STR_OCTET_STREAM = "octet-stream";
+
+	private static final String STR_APPLICATION = "application";
+
+	private static final String STR_WINDOWS = "windows";
+
+	private static final String STR_MSIE = "msie";
+
+	private static final String STR_USER_AGENT = "user-agent";
+
+	private static final String STR_DELIM = ": ";
+
+	private static final String STR_CRLF = "\r\n";
+
+	private static final String STR_THREAD = "thread";
+
 	private static final int PARAM_SRC_TYPE_REQUEST = 1;
 
 	private static final int PARAM_SRC_TYPE_JSON = 2;
@@ -194,7 +232,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String STR_UTF8 = "UTF-8";
 
-	private static final String STR_DATA = "data";
+	private static final String JSON_KEY_DATA = "data";
 
 	private static final String STR_1 = "1";
 	
@@ -257,7 +295,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private final static void writeError(final String error, final JSONWriter jsonWriter) {
 		try {
 			startResponse(jsonWriter);
-			jsonWriter.value("");
+			jsonWriter.value(STR_EMPTY);
 			endResponse(jsonWriter, null, error);
 		} catch (Exception exc) {
 			LOG.error("writeError", exc);
@@ -447,7 +485,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final int[] columns = checkIntArrayParam(paramContainer, PARAMETER_COLUMNS, paramSrcType);
 			final String sort = getStringParam(paramContainer, PARAMETER_SORT, paramSrcType);
 			final String order = getStringParam(paramContainer, PARAMETER_ORDER, paramSrcType);
-			final boolean threadSort = ("thread".equalsIgnoreCase(sort));
+			final boolean threadSort = (STR_THREAD.equalsIgnoreCase(sort));
 			if (sort != null && !threadSort && order == null) {
 				throw new OXMailException(MailCode.MISSING_PARAM, PARAMETER_ORDER);
 			}
@@ -830,7 +868,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		final StringBuilder sb = new StringBuilder(500);
 		while (e.hasMoreElements()) {
 			final Header hdr = e.nextElement();
-			sb.append(hdr.getName()).append(": ").append(hdr.getValue()).append("\r\n");
+			sb.append(hdr.getName()).append(STR_DELIM).append(hdr.getValue()).append(STR_CRLF);
 		}
 		return sb.toString();
 	}
@@ -1094,20 +1132,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 */
 				final Object content = mao.getContent();
 				if (mao.getContentID() == JSONMessageAttachmentObject.CONTENT_INPUT_STREAM) {
-					final String userAgent = req.getHeader("user-agent").toLowerCase(Locale.ENGLISH);
-					final boolean internetExplorer = (userAgent != null && userAgent.indexOf("msie") > -1 && userAgent
-							.indexOf("windows") > -1);
+					final String userAgent = req.getHeader(STR_USER_AGENT).toLowerCase(Locale.ENGLISH);
+					final boolean internetExplorer = (userAgent != null && userAgent.indexOf(STR_MSIE) > -1 && userAgent
+							.indexOf(STR_WINDOWS) > -1);
 					final ContentType contentType;
 					if (saveToDisk) {
 						contentType = new ContentType();
-						contentType.setPrimaryType("application");
-						contentType.setSubType("octet-stream");
-						resp.setHeader("Content-disposition", new StringBuilder(50).append("attachment; filename=\"")
+						contentType.setPrimaryType(STR_APPLICATION);
+						contentType.setSubType(STR_OCTET_STREAM);
+						resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_ATTACHMENT_FILENAME)
 								.append(getSaveAsFileName(mao.getFileName(), internetExplorer)).append('"').toString());
 					} else {
 						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer);
 						contentType = new ContentType(mao.getContentType());
-						if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
+						if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
 							/*
 							 * Try to determine MIME type via JAF
 							 */
@@ -1116,8 +1154,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 							contentType.setPrimaryType(ct.substring(0, pos));
 							contentType.setSubType(ct.substring(pos + 1));
 						}
-						contentType.addParameter("name", fileName);
-						resp.setHeader("Content-disposition", new StringBuilder(50).append("inline; filename=\"")
+						contentType.addParameter(STR_NAME, fileName);
+						resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_INLINE_FILENAME)
 								.append(fileName).append('"').toString());
 					}
 					resp.setContentType(contentType.toString());
@@ -1160,7 +1198,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 * Assume output stream has NOT been selected, yet
 			 */
 			try {
-				resp.setContentType("text/html; charset=UTF-8");
+				resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
 				final PrintWriter p = getResponseWriter(resp);
 				final String errorPage = ERROR_PAGE_TEMPLATE.replaceAll("#STATUS_MSG#", "Internal Server Error")
 						.replaceAll("#STATUS_CODE#", "500").replaceAll("#STATUS_DESC#", e.getMessage()).replaceAll(
@@ -1231,7 +1269,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutMailSearch(final SessionObject session, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException, SearchIteratorException {
-		actionPutMailSearch(session, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
+		actionPutMailSearch(session, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
 	}
 
 	private final void actionPutMailSearch(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1268,7 +1306,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final int[] columns = checkIntArrayParam(paramContainer, PARAMETER_COLUMNS, paramSrcType);
 			final String sort = getStringParam(paramContainer, PARAMETER_SORT, paramSrcType);
 			final String order = getStringParam(paramContainer, PARAMETER_ORDER, paramSrcType);
-			final boolean threadSort = ("thread".equalsIgnoreCase(sort));
+			final boolean threadSort = (STR_THREAD.equalsIgnoreCase(sort));
 			if (sort != null && !threadSort && order == null) {
 				throw new OXMailException(MailCode.MISSING_PARAM, PARAMETER_ORDER);
 			}
@@ -1282,8 +1320,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final String[] searchPats = new String[length];
 				for (int i = 0; i < length; i++) {
 					final JSONObject tmp = ja.getJSONObject(i);
-					searchCols[i] = tmp.getInt("col");
-					searchPats[i] = tmp.getString("pattern");
+					searchCols[i] = tmp.getInt(PARAMETER_COL);
+					searchPats[i] = tmp.getString(PARAMETER_PATTERN);
 				}
 				/*
 				 * Search mails
@@ -1382,7 +1420,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutMailList(final SessionObject session, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		actionPutMailList(session, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
+		actionPutMailList(session, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
 	}
 
 	private final void actionPutMailList(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1542,7 +1580,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutDeleteMails(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		actionPutDeleteMails(sessionObj, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
+		actionPutDeleteMails(sessionObj, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
 	}
 
 	private final void actionPutDeleteMails(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1645,7 +1683,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutUpdateMail(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mailInterface) throws JSONException {
-		actionPutUpdateMail(sessionObj, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON,
+		actionPutUpdateMail(sessionObj, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON,
 				mailInterface);
 	}
 
@@ -1750,7 +1788,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutCopyMail(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mailInterface) throws JSONException {
-		actionPutCopyMail(sessionObj, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mailInterface);
+		actionPutCopyMail(sessionObj, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mailInterface);
 	}
 
 	private final void actionPutCopyMail(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1832,7 +1870,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutAttachment(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		actionPutAttachment(sessionObj, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
+		actionPutAttachment(sessionObj, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
 	}
 
 	private final void actionPutAttachment(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1934,7 +1972,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					final String contentStr = (String) mao.getContent();
 					in = new ByteArrayInputStream(contentStr.getBytes(STR_UTF8));
 				} else {
-					in = new ByteArrayInputStream("".getBytes(STR_UTF8));
+					in = new ByteArrayInputStream(STR_EMPTY.getBytes(STR_UTF8));
 				}
 				db.saveDocument(docMetaData, in, System.currentTimeMillis(), sessionObj);
 				db.commit();
@@ -1973,7 +2011,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutReceiptAck(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		actionPutReceiptAck(sessionObj, writer, jsonObj.getString(STR_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
+		actionPutReceiptAck(sessionObj, writer, jsonObj.getString(JSON_KEY_DATA), jsonObj, PARAM_SRC_TYPE_JSON, mi);
 	}
 
 	private final void actionPutReceiptAck(final HttpServletRequest req, final HttpServletResponse resp)
@@ -2115,7 +2153,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			throw new OXMandatoryFieldException(Component.EMAIL, MailCode.MISSING_PARAM.getCategory(),
 					MailCode.MISSING_PARAM.getNumber(), null, paramName);
 		}
-		final String[] sa = tmp.split(" *, *");
+		final String[] sa = tmp.split(SPLIT_PAT);
 		tmp = null;
 		int intArray[] = new int[sa.length];
 		for (int a = 0; a < sa.length; a++) {
@@ -2134,7 +2172,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				throw new OXMandatoryFieldException(Component.EMAIL, MailCode.MISSING_PARAM.getCategory(),
 						MailCode.MISSING_PARAM.getNumber(), null, paramName);
 			}
-			final String[] tmp = jsonObj.getString(paramName).split(" *, *");
+			final String[] tmp = jsonObj.getString(paramName).split(SPLIT_PAT);
 			int intArray[] = new int[tmp.length];
 			for (int i = 0; i < tmp.length; i++) {
 				try {
@@ -2168,11 +2206,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			try {
 				sessionObj = getSessionObject(req);
 				mailInterface = MailInterfaceImpl.getInstance(sessionObj);
-				if (req.getContentType().toLowerCase().startsWith("multipart/")) {
+				if (req.getContentType().toLowerCase().startsWith(MIME_MULTIPART)) {
 					/*
 					 * Set response headers according to html spec
 					 */
-					resp.setContentType("text/html; charset=UTF-8");
+					resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
 					final String actionStr = req.getParameter(PARAMETER_ACTION);
 					/*
 					 * Append UploadListener instances
@@ -2340,7 +2378,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 				mao.setContentType(uf.getContentType());
 				try {
-					mao.setFileName(MimeUtility.encodeText(uf.getFileName(), IMAPProperties.getDefaultMimeCharset(), "Q"));
+					mao.setFileName(MimeUtility.encodeText(uf.getFileName(), IMAPProperties.getDefaultMimeCharset(), ENC_Q));
 				} catch (UnsupportedEncodingException e) {
 					mao.setFileName(uf.getFileName());
 				} catch (IMAPException e) {
@@ -2384,7 +2422,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setContentType(docMeta.getFileMIMEType());
 				try {
 					mao.setFileName(MimeUtility.encodeText(docMeta.getFileName(), IMAPProperties
-							.getDefaultMimeCharset(), "Q"));
+							.getDefaultMimeCharset(), ENC_Q));
 				} catch (UnsupportedEncodingException e) {
 					mao.setFileName(docMeta.getFileName());
 				} catch (IMAPException e) {
