@@ -65,7 +65,7 @@ public class OXMailException extends OXException {
 	public static enum MailCode {
 		/**
 		 * Connect error: Connection was refused while attempting to connect to
-		 * remote IMAP server %s
+		 * remote IMAP server %s for user %s
 		 * <p>
 		 * An error occurred while attempting to connect to remote IMAP server.
 		 * Typically, the connection was refused remotely (e.g., no process is

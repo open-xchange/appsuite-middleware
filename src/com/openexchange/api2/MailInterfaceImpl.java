@@ -4567,20 +4567,16 @@ public class MailInterfaceImpl implements MailInterface {
 			} else if (e.getNextException() instanceof ConnectException) {
 				OXMailException tmp = null;
 				try {
+					mailInterfaceMonitor.changeNumTimeoutConnections(true);
+					tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
+							.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 					if (IMAPProperties.getImapConnectionTimeout() > 0) {
 						/*
 						 * Most modern IP stack implementations sense connection
 						 * idleness, and abort the connection attempt, resulting
 						 * in a java.net.ConnectionException
 						 */
-						mailInterfaceMonitor.changeNumTimeoutConnections(true);
-						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
-								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 						tmp.setCategory(Category.TRY_AGAIN);
-					} else {
-						mailInterfaceMonitor.changeNumBrokenConnections(true);
-						tmp = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
-								.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 					}
 				} catch (IMAPException oxExc) {
 					LOG.error(oxExc.getMessage(), e);
