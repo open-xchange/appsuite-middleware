@@ -184,6 +184,18 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public class MailInterfaceImpl implements MailInterface {
 
+	private static final String MIME_TEXT_CALENDAR = "text/calendar";
+
+	private static final String MIME_TEXT_X_V_CALENDAR = "text/x-vCalendar";
+
+	private static final String VERSIT_VTODO = "VTODO";
+
+	private static final String VERSIT_VEVENT = "VEVENT";
+
+	private static final String MIME_TEXT_VCARD = "text/vcard";
+
+	private static final String MIME_TEXT_X_VCARD = "text/x-vcard";
+
 	private static final Log LOG = LogFactory.getLog(MailInterfaceImpl.class);
 
 	public static final MailInterfaceMonitor mailInterfaceMonitor;
@@ -2080,7 +2092,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Save dependent on content type
 			 */
 			final List<CommonObject> retvalList = new ArrayList<CommonObject>();
-			if (versitPart.isMimeType("text/x-vcard") || versitPart.isMimeType("text/vcard")) {
+			if (versitPart.isMimeType(MIME_TEXT_X_VCARD) || versitPart.isMimeType(MIME_TEXT_VCARD)) {
 				/*
 				 * Define versit reader
 				 */
@@ -2103,7 +2115,7 @@ public class MailInterfaceImpl implements MailInterface {
 					int defaultTaskFolder = -1;
 					while ((vo = def.parseChild(r, rootVersitObj)) != null) {
 						try {
-							if ("VEVENT".equals(vo.name)) {
+							if (VERSIT_VEVENT.equals(vo.name)) {
 								/*
 								 * An appointment
 								 */
@@ -2126,7 +2138,7 @@ public class MailInterfaceImpl implements MailInterface {
 								 * Add to list
 								 */
 								retvalList.add(appointmentObj);
-							} else if ("VTODO".equals(vo.name)) {
+							} else if (VERSIT_VTODO.equals(vo.name)) {
 								/*
 								 * A task
 								 */
@@ -2162,7 +2174,7 @@ public class MailInterfaceImpl implements MailInterface {
 						oxc = null;
 					}
 				}
-			} else if (versitPart.isMimeType("text/x-vCalendar") || versitPart.isMimeType("text/calendar")) {
+			} else if (versitPart.isMimeType(MIME_TEXT_X_V_CALENDAR) || versitPart.isMimeType(MIME_TEXT_CALENDAR)) {
 				/*
 				 * Define versit reader for VCard
 				 */
