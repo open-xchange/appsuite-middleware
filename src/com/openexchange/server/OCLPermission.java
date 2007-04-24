@@ -111,6 +111,16 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	 * 
 	 */
 
+	private static final char CHAR_DOT = '.';
+
+	private static final String STR_USER = "User";
+
+	private static final String STR_GROUP = "Group";
+
+	private static final String STR_EMPTY = "";
+
+	private static final String STR_FOLDER_ADMIN = "_FolderAdmin";
+
 	private static final long serialVersionUID = 3740098766897625419L;
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OCLPermission.class);
@@ -155,7 +165,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
 	/**
 	 * This property defines if this permission declares the owner to be the
-	 * folder administrator who posseses the rights to alter folder properties
+	 * folder administrator who posseses the rights to alter a folder's
+	 * properties or to rename a folder
 	 */
 	private boolean folderAdmin = false;
 
@@ -210,21 +221,21 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	public void setEntity(final int entity) {
 		this.entity = entity;
 		if (name == null) {
-			name = entity + (folderAdmin ? "_FolderAdmin" : "") + (groupPermission ? "Group" : "User");
+			name = entity + (folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY) + (groupPermission ? STR_GROUP : STR_USER);
 		}
 	}
 
 	public void setFolderAdmin(final boolean folderAdmin) {
 		this.folderAdmin = folderAdmin;
 		if (name == null) {
-			name = entity + (folderAdmin ? "_FolderAdmin" : "") + (groupPermission ? "Group" : "User");
+			name = entity + (folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY) + (groupPermission ? STR_GROUP : STR_USER);
 		}
 	}
 
 	public void setGroupPermission(final boolean groupPermission) {
 		this.groupPermission = groupPermission;
 		if (name == null) {
-			name = entity + (folderAdmin ? "_FolderAdmin" : "") + (groupPermission ? "Group" : "User");
+			name = entity + (folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY) + (groupPermission ? STR_GROUP : STR_USER);
 		}
 	}
 
@@ -296,10 +307,6 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	public boolean isGroupPermission() {
 		return groupPermission;
 	}
-
-	// public int getRole() {
-	// return role;
-	// }
 
 	public int getFolderPermission() {
 		return fp;
@@ -390,11 +397,12 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			throw new Exception("Invalid entity specified: " + entity);
 		}
 		Connection writeCon = writeConArg;
-		final boolean createCon = (writeCon == null);
+		boolean closeCon = false;
 		PreparedStatement pst = null;
 		try {
-			if (createCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeCon = true;
 			}
 			if (insert) {
 				pst = writeCon.prepareStatement(P_INSERT_STRING);
@@ -421,7 +429,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			}
 			pst.executeUpdate();
 		} finally {
-			closeResources(null, pst, createCon ? writeCon : null, false, ctx);
+			closeResources(null, pst, closeCon ? writeCon : null, false, ctx);
 		}
 	}
 
@@ -432,11 +440,12 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			throw new SQLException("Invalid fuid specified: " + fuid);
 		}
 		Connection writeCon = writeConArg;
-		final boolean createCon = (writeCon == null);
+		boolean closeCon = false;
 		PreparedStatement pst = null;
 		try {
-			if (createCon) {
+			if (writeCon == null) {
 				writeCon = DBPool.pickupWriteable(ctx);
+				closeCon = true;
 			}
 			pst = writeCon.prepareStatement(P_DELETE_STRING);
 			pst.setInt(1, ctx.getContextId());
@@ -444,7 +453,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			pst.setInt(3, fuid);
 			pst.executeUpdate();
 		} finally {
-			closeResources(null, pst, createCon ? writeCon : null, false, ctx);
+			closeResources(null, pst, closeCon ? writeCon : null, false, ctx);
 		}
 	}
 
@@ -455,13 +464,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			throw new SQLException("Invalid fuid specified: " + fuid);
 		}
 		Connection con = conArg;
-		final boolean createCon = (con == null);
+		boolean closeCon = false;
 		boolean load = false;
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
-			if (createCon) {
+			if (con == null) {
 				con = DBPool.pickup(ctx);
+				closeCon = true;
 			}
 			pst = con.prepareStatement(P_SELECT_STRING);
 			pst.setInt(1, ctx.getContextId());
@@ -483,7 +493,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 			pst.close();
 			return load;
 		} finally {
-			closeResources(rs, pst, createCon ? con : null, true, ctx);
+			closeResources(rs, pst, closeCon ? con : null, true, ctx);
 		}
 	}
 
@@ -495,8 +505,9 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(50);
-		sb.append((folderAdmin ? "FolderAdmin" : "") + (groupPermission ? "Group_" : "User_") + entity + "@" + fp + "."
-				+ orp + "." + owp + "." + odp);
+		sb.append((folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY)).append((groupPermission ? STR_GROUP : STR_USER))
+				.append(entity).append('@').append(fp).append(CHAR_DOT).append(orp).append(CHAR_DOT).append(owp)
+				.append(CHAR_DOT).append(odp);
 		return sb.toString();
 	}
 
