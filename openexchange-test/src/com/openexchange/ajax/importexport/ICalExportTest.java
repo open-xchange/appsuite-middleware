@@ -23,15 +23,16 @@ public class ICalExportTest extends AbstractICalTest {
 		
 	}
 	
-	public void testExportICalAppointment() throws Exception {
+	public void _testExportICalAppointment() throws Exception {
 		final String title = "testExportICalAppointment" + System.currentTimeMillis();
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle(title);
 		appointmentObj.setStartDate(startTime);
 		appointmentObj.setEndDate(endTime);
-		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setShownAs(AppointmentObject.RESERVED);
 		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setIgnoreConflicts(true);
 		
 		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 
@@ -50,7 +51,7 @@ public class ICalExportTest extends AbstractICalTest {
 		AppointmentTest.deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _notestExportICalTask() throws Exception {
+	public void _testExportICalTask() throws Exception {
 		final String title = "testExportICalTask" + System.currentTimeMillis();
 		
 		Task taskObj = new Task();
