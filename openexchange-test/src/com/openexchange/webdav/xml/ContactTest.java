@@ -57,7 +57,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		dateTime = c.getTimeInMillis();
 	}
 	
-	protected void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
+	public static void compareObject(ContactObject contactObj1, ContactObject contactObj2) throws Exception {
 		assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
 		assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
 		assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
@@ -595,7 +595,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return (ContactObject)response[0].getDataObject();
 	}
 	
-	private HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
+	private static HashSet links2String(LinkEntryObject[] linkEntryObject) throws Exception {
 		if (linkEntryObject == null) {
 			return null;
 		}
@@ -609,7 +609,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return hs;
 	}
 	
-	private String link2String(LinkEntryObject linkEntryObject) throws Exception {
+	private static String link2String(LinkEntryObject linkEntryObject) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("ID" + linkEntryObject.getLinkID());
 		sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
@@ -617,7 +617,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return sb.toString();
 	}
 	
-	private HashSet distributionlist2String(DistributionListEntryObject[] distributionListEntry) throws Exception {
+	private static HashSet distributionlist2String(DistributionListEntryObject[] distributionListEntry) throws Exception {
 		if (distributionListEntry == null) {
 			return null;
 		}
@@ -631,7 +631,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		return hs;
 	}
 	
-	private String entry2String(DistributionListEntryObject entry) throws Exception {
+	private static String entry2String(DistributionListEntryObject entry) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("ID" + entry.getEntryID());
 		sb.append("D" + entry.getDisplayname());
