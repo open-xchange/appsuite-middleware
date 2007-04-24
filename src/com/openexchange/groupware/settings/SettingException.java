@@ -130,7 +130,11 @@ public class SettingException extends AbstractOXException {
          * Exception while parsing JSON.
          */
         JSON_READ_ERROR("Exception while parsing JSON.",
-            Category.PROGRAMMING_ERROR, 6);
+            Category.PROGRAMMING_ERROR, 6),
+        /**
+         * Can't clone tree.
+         */
+        CLONE("Can't clone tree.", Category.PROGRAMMING_ERROR, 7);
 
         /**
          * Message of the exception.

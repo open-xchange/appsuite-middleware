@@ -62,6 +62,8 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.imap.IMAPException;
+import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -124,7 +126,7 @@ public final class ConfigTree {
         try {
             retval = (Setting) retval.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Can't clone tree.", e);
+            throw new SettingException(SettingException.Code.CLONE, e);
         }
         return retval;
     }
@@ -880,9 +882,12 @@ public final class ConfigTree {
         });
         tmp.put(spamButton.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
-                final Setting setting) {
-                setting.setSingleValue(ServerConfig.getBoolean(ServerConfig
-                    .Property.SPAM_BUTTON));
+                final Setting setting) throws SettingException {
+                try {
+                    setting.setSingleValue(IMAPProperties.isSpamEnabled());
+                } catch (IMAPException e) {
+                    throw new SettingException(e);
+                }
             }
         });
         READERS = Collections.unmodifiableMap(tmp);

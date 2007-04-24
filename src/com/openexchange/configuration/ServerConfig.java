@@ -283,11 +283,7 @@ public final class ServerConfig extends AbstractConfig {
         /**
          * MonitorJMXPort
          */
-        JMX_PORT("MonitorJMXPort"),
-        /**
-         * Option if spam button is shown in GUI or not.
-         */
-        SPAM_BUTTON("SpamButton");
+        JMX_PORT("MonitorJMXPort");
 
         /**
          * Name of the property in the server.properties file.
