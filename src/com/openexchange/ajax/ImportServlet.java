@@ -174,6 +174,7 @@ public class ImportServlet extends ImportExport {
 		} catch (JSONException e) {
 			LOG.error("Could not get JSON code of following exception: " , e);
 		} catch (AbstractOXException e){
+			LOG.error("unknown exception: " , e);
 			sendResponse(e, resp);
 		}
 	}
