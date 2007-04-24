@@ -66,12 +66,14 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
+    private static final String JAVA_UTIL_ARRAY_LIST = "java.util.ArrayList";
+
     protected class MethodAndNames {
-        private Method method;
+        private Method method = null;
         
-        private String name;
+        private String name = null;
         
-        private String returntype;
+        private String returntype = null;
         
         /**
          * @param method
@@ -188,8 +190,8 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
     protected static final String JAVA_LANG_STRING = "java.lang.String";
-    protected static final String OPT_IMAPONLY_LONG = "imap";
-    protected static final String OPT_DBONLY_LONG = "db";
+    protected static final String OPT_IMAPONLY_LONG = "imaponly";
+    protected static final String OPT_DBONLY_LONG = "dbonly";
     protected static final String OPT_IMAP_QUOTA_LONG = "imapquota";
     protected static final char OPT_IMAP_QUOTA_SHORT = 'I';
     protected static final String OPT_NO_INET_MAIL_ACCESS_LONG = "inetmailaccess";
@@ -227,7 +229,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         standardoptions.add(OPT_IMAP_QUOTA_LONG);
         standardoptions.add(OPT_NO_INET_MAIL_ACCESS_LONG);
         standardoptions.add("spam_filter_enabled");
-        standardoptions.add(OPT_ID_LONG);
+        standardoptions.add("id");
         standardoptions.add(OPT_USERNAME_LONG);
         standardoptions.add("display_name");
         standardoptions.add(OPT_PASSWORD_LONG);
@@ -241,7 +243,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     }
 
     
-    protected void printExtensionsError(final User usr){
+    protected final void printExtensionsError(final User usr){
         //+ loop through extensions and check for errors       
         if(usr!=null && usr.getExtensions()!=null){
             final ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
@@ -253,67 +255,67 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         }
     }
     
-    protected void setIdOption(final AdminParser admp){
+    protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true);
     }
     
-    protected void setUsernameOption(final AdminParser admp){
+    protected final void setUsernameOption(final AdminParser admp){
         this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, true);
     }
     
-    protected void setDisplayNameOption(final AdminParser admp){
+    protected final void setDisplayNameOption(final AdminParser admp){
         this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, true); 
     }
     
-    protected void setPasswordOption(final AdminParser admp){
+    protected final void setPasswordOption(final AdminParser admp){
         this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, true); 
     }
     
-    protected void setGivenNameOption(final AdminParser admp){
+    protected final void setGivenNameOption(final AdminParser admp){
         this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, true); 
     }
     
-    protected void setSurNameOption(final AdminParser admp){
+    protected final void setSurNameOption(final AdminParser admp){
         this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, true); 
     }
     
-    protected void setLanguageOption(final AdminParser admp){
+    protected final void setLanguageOption(final AdminParser admp){
         this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, false); 
     }
     
-    protected void setTimezoneOption(final AdminParser admp){
+    protected final void setTimezoneOption(final AdminParser admp){
         this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, false); 
     }
     
-    protected void setPrimaryMailOption(final AdminParser admp){
+    protected final void setPrimaryMailOption(final AdminParser admp){
         this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, true); 
     }
     
-    protected void setDepartmentOption(final AdminParser admp){
+    protected final void setDepartmentOption(final AdminParser admp){
         this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, false); 
     }
     
-    protected void setCompanyOption(final AdminParser admp){
+    protected final void setCompanyOption(final AdminParser admp){
         this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
     }
 
-    protected void setAliasesOption(final AdminParser admp){
+    protected final void setAliasesOption(final AdminParser admp){
         this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
     
-    protected void setImapOnlyOption(final AdminParser admp){
-        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Create/Delete only IMAP account of the user", false, false); 
+    protected final void setImapOnlyOption(final AdminParser admp){
+        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Do this operation only for the IMAP account of the user", false, false); 
     }
     
-    protected void setDBOnlyOption(final AdminParser admp){
-        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Create/Delete only in Database system", false, false); 
+    protected final void setDBOnlyOption(final AdminParser admp){
+        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false); 
     }
     
-    protected void setExtendedOption(final AdminParser admp) {
+    protected final void setExtendedOption(final AdminParser admp) {
         this.extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
     }
 
-    protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
+    protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
         final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
     
         // Here we define which methods we don't want to get
@@ -355,7 +357,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         return retlist;
     }
     
-    protected ArrayList<MethodAndNames> getSetters(final Method[] theMethods) {
+    protected final ArrayList<MethodAndNames> getSetters(final Method[] theMethods) {
         final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
         
         // Here we define which methods we don't want to get
