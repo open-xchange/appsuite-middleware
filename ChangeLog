@@ -1,3 +1,7 @@
+* 2007-04-24 - francisco.laguna@open-xchange.com
+
+  - Partially fixed Bug #5659 : Added timezone to dates.
+
 * 2007-04-24 - marcus.klein@open-xchange.com
 
   - Replaced spam button option in server properties with the one from imap

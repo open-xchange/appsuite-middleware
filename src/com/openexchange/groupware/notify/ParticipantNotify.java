@@ -51,6 +51,7 @@ package com.openexchange.groupware.notify;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -232,7 +233,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			Template createTemplate = new StringTemplate(strings.getString(msgKey));
 			
 			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale);
-			
+			df = tryAppendingTimeZone(df);
 			List<EmailableParticipant> participants = receivers.get(locale);
 			Map<TimeZone, String> tz2text = messagesPerTZ.get(strings.getString(titleKey));
 			if(tz2text == null) {
@@ -260,7 +261,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 					String text = tz2text.get(tz);
 					if(text == null) {
 						df.setTimeZone(tz);
-							
+
 						Map<String,String> m = m(
 						"start" 	,	(null == obj.getStartDate()) ? "" : df.format(obj.getStartDate()),
 						"end"		,	(null == obj.getEndDate()) ? "" : df.format(obj.getEndDate()),
@@ -291,6 +292,15 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state);
 		}
 		
+	}
+
+	private DateFormat tryAppendingTimeZone(DateFormat df) {
+		if (df instanceof SimpleDateFormat) {
+			SimpleDateFormat sdf = (SimpleDateFormat) df;
+			String format = sdf.toPattern();
+			return new SimpleDateFormat(format+", z");
+		}
+		return df;
 	}
 
 	private String list(SortedSet<String> sSet) {
