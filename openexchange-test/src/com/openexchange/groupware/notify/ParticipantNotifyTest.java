@@ -13,6 +13,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.CalendarObject;
@@ -31,6 +32,8 @@ import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
+import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
+import com.openexchange.groupware.notify.ParticipantNotify.State;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.sessiond.SessionObject;
@@ -52,6 +55,7 @@ public class ParticipantNotifyTest extends TestCase{
 	private Date start = new Date();
 	private Date end = new Date();
 	private SessionObject session = null;
+	
 	
 	
 	public void testSimple() throws Exception{
@@ -334,6 +338,8 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	public void setUp() throws Exception {
 		
+		System.setProperty("openexchange.propfile", Init.getTestProperty("openexchange.propfile"));
+		SystemConfig.init();
 		String templates = Init.getTestProperty("templatePath");
 		TemplateListResourceBundle.setTemplatePath(new File(templates));
 		
@@ -407,6 +413,7 @@ public class ParticipantNotifyTest extends TestCase{
 	private static final class TestParticipantNotify extends ParticipantNotify {
 
 		private List<Message> messageCollector = new ArrayList<Message>();
+		private EmailableParticipant p;
 		
 		@Override
 		protected Group[] resolveGroups(Context ctx, int... ids) throws LdapException {
@@ -428,16 +435,16 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		public void clearMessages(){
 			messageCollector.clear();
-		}
-		
-		@Override
-		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state) {
-			messageCollector.add(new Message(messageTitle,message,name, folderId));
-		}
+		}	
 		
 		@Override
 		protected UserConfiguration getUserConfiguration(int id, int[] groups, Context context) throws SQLException {
 			return USER_CONFIGS.getConfiguration(id);
+		}
+
+		@Override
+		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state, boolean suppressOXReminderHeader) {
+			messageCollector.add(new Message(messageTitle,message,name, folderId));
 		}		
 	}
 }
