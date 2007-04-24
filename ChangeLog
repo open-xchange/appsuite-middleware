@@ -15,6 +15,8 @@
  - Checking both global system property for spam enablement and
    user-defined property for spam enablement when creating/checking
    standard mail folders for confirmed spam/ham
+ - Bugfix #6872: Href declarations inside plain text messages are skipped
+   on linebreak to maintain a proper link
 
 * 2007-04-23 - thorben.betten@open-xchange.com
 

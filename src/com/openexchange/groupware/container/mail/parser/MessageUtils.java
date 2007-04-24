@@ -73,6 +73,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import javax.swing.border.LineBorder;
 import javax.swing.text.html.HTMLEditorKit;
 
 import com.openexchange.ajax.Mail;
@@ -253,15 +254,19 @@ public class MessageUtils {
 		final String quote = getQuotePrefix(line);
 		final char[] chars = line.toCharArray();
 		final char c = chars[linewrap];
+		final StringBuilder sb = new StringBuilder(length + 5);
+		final StringBuilder sub = new StringBuilder();
 		if (Character.isWhitespace(c) && c != CHAR_BREAK && c != CHAR_CONTROL) {
 			/*
 			 * Find last non-whitespace character before
 			 */
 			for (int i = linewrap - 1; i >= 0; i--) {
-				if (!Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
-							wrapTextLine(quote == null ? line.substring(i + 1) : new StringBuilder().append(quote)
-									.append(line.substring(i + 1)).toString(), linewrap)).toString();
+				if (!Character.isWhitespace(chars[i]) && isLineBreakInsideHref(line, i) == null) {
+					sb.setLength(0);
+					sub.setLength(0);
+					return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
+							wrapTextLine(quote == null ? line.substring(i + 1) : sub.append(quote).append(
+									line.substring(i + 1)).toString(), linewrap)).toString();
 				}
 			}
 		} else {
@@ -269,16 +274,31 @@ public class MessageUtils {
 			 * Find last whitespace before
 			 */
 			for (int i = linewrap - 1; i >= 0; i--) {
-				if (Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i)).append(CHAR_BREAK).append(
-							wrapTextLine(quote == null ? line.substring(i + 1) : new StringBuilder().append(quote)
-									.append(line.substring(i + 1)).toString(), linewrap)).toString();
+				if (Character.isWhitespace(chars[i]) && isLineBreakInsideHref(line, i) == null) {
+					sb.setLength(0);
+					sub.setLength(0);
+					return sb.append(line.substring(0, i)).append(CHAR_BREAK).append(
+							wrapTextLine(quote == null ? line.substring(i + 1) : sub.append(quote).append(
+									line.substring(i + 1)).toString(), linewrap)).toString();
 				}
 			}
 		}
-		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
-				wrapTextLine(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote).append(
-						line.substring(linewrap)).toString(), linewrap)).toString();
+		final int[] sep = isLineBreakInsideHref(line, linewrap);
+		if (sep == null) {
+			return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
+					wrapTextLine(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote).append(
+							line.substring(linewrap)).toString(), linewrap)).toString();
+		} else if (sep[1] == length) {
+			if (sep[0] == 0) {
+				return line;
+			}
+			return new StringBuilder(line.length() + 1).append(line.substring(0, sep[0])).append(CHAR_BREAK).append(
+					wrapTextLine(quote == null ? line.substring(sep[0]) : new StringBuilder().append(quote).append(
+							line.substring(sep[0])).toString(), linewrap)).toString();
+		}
+		return new StringBuilder(line.length() + 1).append(line.substring(0, sep[1])).append(CHAR_BREAK).append(
+				wrapTextLine(quote == null ? line.substring(sep[1]) : new StringBuilder().append(quote).append(
+						line.substring(sep[1])).toString(), linewrap)).toString();
 	}
 	
 	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
@@ -286,6 +306,19 @@ public class MessageUtils {
 	private static final String getQuotePrefix(final String line) {
 		final Matcher m = PATTERN_QP.matcher(line);
 		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
+	}
+	
+	private static final int[] isLineBreakInsideHref(final String line, final int linewrap) {
+		final Matcher m = MailTools.PATTERN_HREF.matcher(line);
+		while (m.find()) {
+			if (m.start() <= linewrap && m.end() > linewrap) {
+				return new int[] { m.start(), m.end() };
+			}
+		}
+		/*
+		 * Not inside a href declaration
+		 */
+		return null;
 	}
 
 	private static String wrapHtmlText(final String line, final int linewrap) {

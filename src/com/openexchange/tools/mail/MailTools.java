@@ -147,7 +147,7 @@ public class MailTools {
 		return tColor[1];
 	}
 
-	private static final Pattern htmlPattern = Pattern.compile(
+	public static final Pattern PATTERN_HREF = Pattern.compile(
 			"<a\\s+href[^>]+>.*?</a>|((?:http|https|ftp|mailto|news|www)(?::|://)[^<\\s]+)", Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 
@@ -160,11 +160,13 @@ public class MailTools {
 	public static String formatHrefLinks(final String lineArg) {
 		String line = lineArg;
 		try {
-			final Matcher m = htmlPattern.matcher(line);
+			final Matcher m = PATTERN_HREF.matcher(line);
 			final StringBuffer sb = new StringBuffer(line.length());
+			final StringBuilder tmp = new StringBuilder(200);
 			while (m.find()) {
 				if (m.group(1) != null) {
-					m.appendReplacement(sb, new StringBuilder(200).append("<a href=\"").append(
+					tmp.setLength(0);
+					m.appendReplacement(sb, tmp.append("<a href=\"").append(
 							(m.group(1).startsWith("www") ? "http://" : "")).append(
 							"$1\" target=\"_blank\" class=\"a-external\">$1</a>").toString());
 				} else {
