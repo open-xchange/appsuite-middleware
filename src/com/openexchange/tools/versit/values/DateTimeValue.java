@@ -73,5 +73,9 @@ public class DateTimeValue {
 	public boolean needsVTIMEZONE = false;
 	
 	public boolean isUTC = true;
-
+	
+	public DateTimeValue() {
+		calendar.setTimeZone(GMT);
+		calendar.setTimeInMillis(0);
+	}
 }
