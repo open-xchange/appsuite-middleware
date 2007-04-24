@@ -183,8 +183,13 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
+    protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
+        final Option retval = admp.addOption(shortopt,longopt, argdescription, description, required);       
+        return retval;
+    }
+
     protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
-        final Option retval = admp.addOption(shortopt,longopt,longopt, description, required,hasarg);       
+        final Option retval = admp.addOption(shortopt,longopt, longopt, description, required,hasarg);       
         return retval;
     }
     
