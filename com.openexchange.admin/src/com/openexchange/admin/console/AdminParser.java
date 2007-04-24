@@ -116,7 +116,7 @@ public class AdminParser extends CmdLineParser {
      * @param needed
      * @return
      */
-    public Option addOption(final char shortForm, final String longForm, final String description, final boolean needed) {
+    public final Option addOption(final char shortForm, final String longForm, final String description, final boolean needed) {
         final Option retval = addStringOption(shortForm, longForm);
         this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
 
@@ -134,7 +134,7 @@ public class AdminParser extends CmdLineParser {
      * @param description
      * @return
      */
-    public Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
+    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
         final Option retval = this.addStringOption(shortForm, longForm);
         this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
         return retval;
@@ -149,7 +149,7 @@ public class AdminParser extends CmdLineParser {
      * @param hasarg
      * @return
      */
-    public Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
+    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
         if (hasarg) {
             final Option retval = this.addStringOption(shortForm, longForm);
             this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
@@ -169,7 +169,7 @@ public class AdminParser extends CmdLineParser {
      * @param needed
      * @return
      */
-    public Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
+    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
         final Option retval = this.addStringOption(longForm);
         this.optinfolist.add(new OptionInfo(needed, retval, longForm, longFormParameterDescription, description));
         return retval;
@@ -183,7 +183,7 @@ public class AdminParser extends CmdLineParser {
      * @param hasarg
      * @return
      */
-    public Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
+    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
 
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
@@ -206,7 +206,7 @@ public class AdminParser extends CmdLineParser {
      * @param extended
      * @return
      */
-    public Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
 
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
@@ -223,7 +223,7 @@ public class AdminParser extends CmdLineParser {
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
-    public void ownparse(final String[] args) throws IllegalOptionValueException, UnknownOptionException, MissingOptionException {
+    public final void ownparse(final String[] args) throws IllegalOptionValueException, UnknownOptionException, MissingOptionException {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);
@@ -249,7 +249,7 @@ public class AdminParser extends CmdLineParser {
 
     }
 
-    public void printUsage() {
+    public final void printUsage() {
         System.err.println("Usage: " + this.appname);
 
         for (final OptionInfo optInfo : this.optinfolist) {
@@ -259,7 +259,7 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
-    public void printUsageExtended() {
+    public final void printUsageExtended() {
         System.err.println("Usage: " + this.appname);
         
         for (final OptionInfo optInfo : this.optinfolist) {
@@ -267,7 +267,7 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
-    private void basicOutput(final OptionInfo optInfo) {
+    private final void basicOutput(final OptionInfo optInfo) {
         if (optInfo.shortForm == null) {
             final String format_this = " %s %-46s %-28s\n";
             if (null != optInfo.longFormParameterDescription) {

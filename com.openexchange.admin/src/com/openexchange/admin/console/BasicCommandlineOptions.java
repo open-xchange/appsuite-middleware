@@ -88,19 +88,19 @@ public abstract class BasicCommandlineOptions {
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
     
-    protected static void printServerResponse(final String msg){
+    protected final static void printServerResponse(final String msg){
         System.err.println("Server response:\n "+msg);    
     }
     
-    protected static void printNotBoundResponse(final NotBoundException nbe){
+    protected final static void printNotBoundResponse(final NotBoundException nbe){
         printServerResponse("RMI module "+nbe.getMessage()+" not available on server");
     }
     
-    protected static void printError(final String msg){
+    protected final static void printError(final String msg){
         System.err.println("Error:\n "+msg+"\n");    
     }
     
-    protected static void printInvalidInputMsg(final String msg){
+    protected final static void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
     
@@ -116,7 +116,7 @@ public abstract class BasicCommandlineOptions {
      * @param columns
      * @param data
      */
-    protected static void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
+    protected final static void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
         if(columns!=null && data!=null){
             
             // first prepare the columns line
@@ -154,7 +154,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected static void setRMI_HOSTNAME(final String rmi_hostname) {       
+    protected final static void setRMI_HOSTNAME(final String rmi_hostname) {       
         String host = rmi_hostname;
         if(!host.startsWith("rmi://")){
             host = "rmi://"+host;
@@ -166,7 +166,7 @@ public abstract class BasicCommandlineOptions {
         
     }
    
-    protected Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
+    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
         
         final Option retval = admp.addOption(longopt, longopt, description, required,hasarg);
 //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
@@ -177,29 +177,29 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
-    protected Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
         final Option retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
         return retval;
     }
 
-    protected Option setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
         final Option retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
         return retval;
     }
 
-    protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
+    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
         final Option retval = admp.addOption(shortopt, longopt, argdescription, description, required);       
         return retval;
     }
 
-    protected Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
+    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
         final Option retval = admp.addOption(shortopt,longopt, longopt, description, required,hasarg);       
         return retval;
     }
     
-    protected Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
+    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -208,54 +208,54 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
-    protected Option getContextOption(final AdminParser admp) {
+    protected final Option getContextOption(final AdminParser admp) {
         this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
 //        retval.setArgName("Context ID");
         return this.contextOption;
     }
     
-    protected Option getContextNameOption(final AdminParser admp) {
+    protected final Option getContextNameOption(final AdminParser admp) {
         final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, false);
 //        retval.setArgName("Context Name");
         return retval;
     }
     
-    protected Option getAdminPassOption(final AdminParser admp) {
+    protected final Option getAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
 //        retval.setArgName("Admin password");
         return this.adminPassOption;
     }
     
-    protected void setCSVOutputOption(final AdminParser admp) {
+    protected final void setCSVOutputOption(final AdminParser admp) {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
-    protected Option getAdminUserOption(final AdminParser admp) {
+    protected final Option getAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
 //        retval.setArgName("Admin username");
         return this.adminUserOption;
     }
     
-    protected Option getSearchPatternOption(final AdminParser admp){
+    protected final Option getSearchPatternOption(final AdminParser admp){
         this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
 //        opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
         return  this.searchOption;
     }
 
-//    protected Option addArgName(final Option option, final String argname) {
+//    protected final Option addArgName(final Option option, final String argname) {
 //        final Option retval = option;
 ////        retval.setArgName(argname);
 //        return retval;
 //    }
     
     @Deprecated
-    protected Option addDefaultArgName(final AdminParser admp,final Option option) {
+    protected final Option addDefaultArgName(final AdminParser admp,final Option option) {
 //        return addArgName(option, option.getLongOpt(admp));
         // FIXME
         return null;
     }
 
-    protected int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
+    protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
         if (null != test) {
             return Integer.parseInt(test);
         } else {
@@ -263,7 +263,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
+    protected final String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
         if (null != test) {
             return test;
         } else {
