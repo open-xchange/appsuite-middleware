@@ -245,13 +245,18 @@ public class MessageUtils {
 		}
 		return sb.toString();
 	}
-
+	
 	private static final String wrapTextLine(final String line, final int linewrap) {
+		return wrapTextLineRecursive(line, linewrap, null, true);
+	}
+
+	private static final String wrapTextLineRecursive(final String line, final int linewrap, final String quoteArg,
+			final boolean lookUpQuote) {
 		final int length = line.length();
 		if (length <= linewrap) {
 			return line;
 		}
-		final String quote = getQuotePrefix(line);
+		final String quote = lookUpQuote ? getQuotePrefix(line) : quoteArg;
 		final char[] chars = line.toCharArray();
 		final char c = chars[linewrap];
 		final StringBuilder sb = new StringBuilder(length + 5);
@@ -265,8 +270,8 @@ public class MessageUtils {
 					sb.setLength(0);
 					sub.setLength(0);
 					return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
-							wrapTextLine(quote == null ? line.substring(i + 1) : sub.append(quote).append(
-									line.substring(i + 1)).toString(), linewrap)).toString();
+							wrapTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
+									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
 				}
 			}
 		} else {
@@ -278,36 +283,36 @@ public class MessageUtils {
 					sb.setLength(0);
 					sub.setLength(0);
 					return sb.append(line.substring(0, i)).append(CHAR_BREAK).append(
-							wrapTextLine(quote == null ? line.substring(i + 1) : sub.append(quote).append(
-									line.substring(i + 1)).toString(), linewrap)).toString();
+							wrapTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
+									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
 				}
 			}
 		}
 		final int[] sep = isLineBreakInsideHref(line, linewrap);
 		if (sep == null) {
 			return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
-					wrapTextLine(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote).append(
-							line.substring(linewrap)).toString(), linewrap)).toString();
+					wrapTextLineRecursive(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote)
+							.append(line.substring(linewrap)).toString(), linewrap, quote, false)).toString();
 		} else if (sep[1] == length) {
 			if (sep[0] == 0) {
 				return line;
 			}
 			return new StringBuilder(line.length() + 1).append(line.substring(0, sep[0])).append(CHAR_BREAK).append(
-					wrapTextLine(quote == null ? line.substring(sep[0]) : new StringBuilder().append(quote).append(
-							line.substring(sep[0])).toString(), linewrap)).toString();
+					wrapTextLineRecursive(quote == null ? line.substring(sep[0]) : new StringBuilder().append(quote)
+							.append(line.substring(sep[0])).toString(), linewrap, quote, false)).toString();
 		}
 		return new StringBuilder(line.length() + 1).append(line.substring(0, sep[1])).append(CHAR_BREAK).append(
-				wrapTextLine(quote == null ? line.substring(sep[1]) : new StringBuilder().append(quote).append(
-						line.substring(sep[1])).toString(), linewrap)).toString();
+				wrapTextLineRecursive(quote == null ? line.substring(sep[1]) : new StringBuilder().append(quote)
+						.append(line.substring(sep[1])).toString(), linewrap, quote, false)).toString();
 	}
-	
+
 	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
-	
+
 	private static final String getQuotePrefix(final String line) {
 		final Matcher m = PATTERN_QP.matcher(line);
 		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
 	}
-	
+
 	private static final int[] isLineBreakInsideHref(final String line, final int linewrap) {
 		final Matcher m = MailTools.PATTERN_HREF.matcher(line);
 		while (m.find()) {
