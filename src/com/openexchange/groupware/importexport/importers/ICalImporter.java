@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import com.openexchange.tools.versit.converter.ConverterException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -199,11 +201,20 @@ public class ICalImporter implements Importer {
 		try {
 			final VersitDefinition def = Versit.getDefinition(format.getMimeType());
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
-			final VersitObject rootVersitObject = def.parseBegin(versitReader);
-			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-			while (versitObject != null) {
+			VersitObject rootVersitObject = def.parseBegin(versitReader);
+			
+			boolean hasMoreObjects = true;
+			
+			while (hasMoreObjects) {
 				ImportResult importResult = new ImportResult();
 				try {
+					VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+					
+					if (versitObject == null) {
+						hasMoreObjects = false;
+						break;
+					}
+
 					//final Property property = versitObject.getProperty("UID");
 					
 					if ("VEVENT".equals(versitObject.name) && importAppointment) {
@@ -212,6 +223,7 @@ public class ICalImporter implements Importer {
 						final CalendarDataObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
 						appointmentObj.setContext(sessObj.getContext());
 						appointmentObj.setParentFolderID(appointmentFolderId);
+						appointmentObj.setIgnoreConflicts(true);
 						appointmentInterface.insertAppointmentObject(appointmentObj);
 						
 						importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
@@ -229,16 +241,20 @@ public class ICalImporter implements Importer {
 						LOG.warn("invalid versit object: " + versitObject.name);
 					}
 				} catch (OXException exc) {
-					LOG.debug("cannot import calendar object", exc);
+					LOG.error("cannot import calendar object", exc);
 					importResult.setException(exc);
+				} catch (ConverterException exc) {
+					LOG.error("cannot convert calendar object", exc);
+					importResult.setException(new OXException("cannot parse ical object", exc));
+				} catch (VersitException exc) {
+					LOG.error("cannot parse calendar object", exc);
+					importResult.setException(new OXException("cannot parse ical object", exc));
 				}
 				
 				list.add(importResult);
-				
-				versitObject = def.parseChild(versitReader, rootVersitObject);
 			}
 		} catch (Exception exc) {
-			throw importExportExceptionFactory.create(4, exc);
+			throw importExportExceptionFactory.create(3, exc);
 		} finally {
 			oxContainerConverter.close();
 		}
