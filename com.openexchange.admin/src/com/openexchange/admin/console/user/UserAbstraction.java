@@ -67,8 +67,6 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
     private static final String SIMPLE_INT = "int";
-    private static final String JAVA_LANG_LONG = "java.lang.Long";
-
     protected class MethodAndNames {
         private Method method = null;
         
@@ -191,6 +189,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
     protected static final String JAVA_UTIL_ARRAY_LIST = "java.util.ArrayList";
+    protected static final String JAVA_LANG_LONG = "java.lang.Long";
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
