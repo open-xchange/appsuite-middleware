@@ -103,14 +103,21 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	public ParticipantNotify() {
 	}
 
-	protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state) {
+	protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state, boolean suppressOXReminderHeader) {
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Sending message to: "+name);
 			LOG.debug("=====["+messageTitle+"]====\n\n");
 			LOG.debug(message);
 			LOG.debug("\n\n============");
 		}
-		MailObject mail = new MailObject(session, obj.getObjectID(), folderId == -1 ? obj.getParentFolderID() : folderId, state.getModule());
+		if(folderId == -1)
+			folderId = obj.getParentFolderID();
+		
+		if(suppressOXReminderHeader) {
+			folderId = MailObject.DONT_SET;
+		}
+		
+		MailObject mail = new MailObject(session, obj.getObjectID(), folderId, state.getModule());
 		mail.setFromAddr(session.getUserObject().getMail());
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
@@ -164,34 +171,34 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
 	public void appointmentCreated(AppointmentObject appointmentObj,
 			SessionObject sessionObj) {
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_CREATE_MAIL,Notifications.APPOINTMENT_CREATE_TITLE, new AppointmentState(),false);
+		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_CREATE_MAIL,Notifications.APPOINTMENT_CREATE_TITLE, new AppointmentState(),false, false);
 	}
 
 	public void appointmentModified(AppointmentObject appointmentObj,
 			SessionObject sessionObj) {
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false);
+		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
 	}
 
 	public void appointmentDeleted(AppointmentObject appointmentObj,
 			SessionObject sessionObj) {
 
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_DELETE_MAIL,Notifications.APPOINTMENT_DELETE_TITLE, new AppointmentState(), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false));
+		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_DELETE_MAIL,Notifications.APPOINTMENT_DELETE_TITLE, new AppointmentState(), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
 	public void taskCreated(Task taskObj, SessionObject sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_CREATE_MAIL,Notifications.TASK_CREATE_TITLE, new TaskState(),false);	
+		sendNotification(taskObj, sessionObj, Notifications.TASK_CREATE_MAIL,Notifications.TASK_CREATE_TITLE, new TaskState(),false, false);	
 	}
 
 	public void taskModified(Task taskObj, SessionObject sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false);
+		sendNotification(taskObj, sessionObj, Notifications.TASK_UPDATE_MAIL,Notifications.TASK_UPDATE_TITLE, new TaskState(), false, false);
 		
 	}
 
 	public void taskDeleted(Task taskObj, SessionObject sessionObj) {
-		sendNotification(taskObj, sessionObj, Notifications.TASK_DELETE_MAIL,Notifications.TASK_DELETE_TITLE, new TaskState(),NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false));
+		sendNotification(taskObj, sessionObj, Notifications.TASK_DELETE_MAIL,Notifications.TASK_DELETE_TITLE, new TaskState(),NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
-	private void sendNotification(CalendarObject obj, SessionObject sessionObj, String msgKey, String titleKey, State state, boolean forceNotifyOthers) {
+	private void sendNotification(CalendarObject obj, SessionObject sessionObj, String msgKey, String titleKey, State state, boolean forceNotifyOthers, boolean suppressOXReminderHeader) {
 		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserObject().getId() && !forceNotifyOthers)
 			return;
 		if(obj.getParticipants() == null)
@@ -278,7 +285,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 		
 		for(MailMessage mmsg : messages) {
-			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state);
+			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader);
 		}
 		
 	}

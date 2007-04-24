@@ -1,10 +1,13 @@
 * 2007-04-24 - francisco.laguna@open-xchange.com
-
+  
+  - Fixed Bug #6893 Omit X-OX-Reminder header on appointment and task delete
+  - Fixed Bug #6618 Change server.pot strings.
   - Partially fixed Bug #5659 : Added timezone to dates.
   - Fixed the other half of Bug #5659
 #################### ALARM ! ALARM ! #####################
   - CONFIG change: New property in 'notification.properties' to set web gui location (object_link)!
 ######################################################
+
 
 * 2007-04-24 - marcus.klein@open-xchange.com
 
