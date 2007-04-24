@@ -73,7 +73,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-import javax.swing.border.LineBorder;
 import javax.swing.text.html.HTMLEditorKit;
 
 import com.openexchange.ajax.Mail;
