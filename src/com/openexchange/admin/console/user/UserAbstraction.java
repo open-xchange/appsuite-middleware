@@ -49,8 +49,10 @@
 package com.openexchange.admin.console.user;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -59,6 +61,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.User.PASSWORDMECH;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
@@ -107,6 +110,50 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         
     }
 
+    protected class OptionAndMethod {
+        private Method method = null;
+        
+        private Option option = null;
+        
+        private String returntype = null;
+        
+        public final Method getMethod() {
+            return this.method;
+        }
+        
+        public final void setMethod(final Method method) {
+            this.method = method;
+        }
+        
+        public final Option getOption() {
+            return this.option;
+        }
+        
+        public final void setOption(final Option option) {
+            this.option = option;
+        }
+        
+        /**
+         * @param method
+         * @param option
+         */
+        public OptionAndMethod(final Method method, final Option option, final String returntype) {
+            super();
+            this.method = method;
+            this.option = option;
+            this.returntype = returntype;
+        }
+        
+        public final String getReturntype() {
+            return this.returntype;
+        }
+        
+        public final void setReturntype(final String returntype) {
+            this.returntype = returntype;
+        }
+        
+    }
+
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "userid";
     protected static final char OPT_USERNAME_SHORT = 'u';
@@ -149,7 +196,8 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final char OPT_NO_INET_MAIL_ACCESS_SHORT = 'M';
     protected static final char OPT_SPAM_FILTER_ENABLE_SHORT = 'S';
     protected static final String OPT_SPAM_FILTER_ENABLE_LONG = "spamfilter";
-    
+    public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
+
     protected Option userNameOption = null;
     protected Option displayNameOption = null;
     protected Option givenNameOption = null;
@@ -169,11 +217,35 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option inetMailAccessOption = null;
     protected Option spamFilterOption = null;
     
-    protected void printExtensionsError(User usr){
+    /**
+     * This field holds all the options which are displayed by default. So this options can be
+     * deducted from the other dynamically created options
+     */
+    public static final HashSet<String> standardoptions = new HashSet<String>(15);
+    
+    static {
+        standardoptions.add(OPT_IMAP_QUOTA_LONG);
+        standardoptions.add(OPT_NO_INET_MAIL_ACCESS_LONG);
+        standardoptions.add("spam_filter_enabled");
+        standardoptions.add(OPT_ID_LONG);
+        standardoptions.add(OPT_USERNAME_LONG);
+        standardoptions.add("display_name");
+        standardoptions.add(OPT_PASSWORD_LONG);
+        standardoptions.add("given_name");
+        standardoptions.add("sur_name");
+        standardoptions.add(OPT_LANGUAGE_LONG);
+        standardoptions.add("primaryemail");
+        standardoptions.add(OPT_DEPARTMENT_LONG);
+        standardoptions.add(OPT_COMPANY_LONG);
+        standardoptions.add(OPT_ALIASES_LONG);
+    }
+
+    
+    protected void printExtensionsError(final User usr){
         //+ loop through extensions and check for errors       
         if(usr!=null && usr.getExtensions()!=null){
-            ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
-            for (OXUserExtensionInterface usr_extension : usr_exts) {
+            final ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
+            for (final OXUserExtensionInterface usr_extension : usr_exts) {
                 if(usr_extension.getExtensionError()!=null){
                     printServerResponse(usr_extension.getExtensionError());
                 }
@@ -182,63 +254,63 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setIdOption(final AdminParser admp){
-        idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true);
+        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true);
     }
     
     protected void setUsernameOption(final AdminParser admp){
-        userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, true);
+        this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, true);
     }
     
     protected void setDisplayNameOption(final AdminParser admp){
-        displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, true); 
+        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, true); 
     }
     
     protected void setPasswordOption(final AdminParser admp){
-        passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, true); 
+        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, true); 
     }
     
     protected void setGivenNameOption(final AdminParser admp){
-        givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, true); 
+        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, true); 
     }
     
     protected void setSurNameOption(final AdminParser admp){
-        surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, true); 
+        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, true); 
     }
     
     protected void setLanguageOption(final AdminParser admp){
-        languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, false); 
+        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, false); 
     }
     
     protected void setTimezoneOption(final AdminParser admp){
-        timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, false); 
+        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, false); 
     }
     
     protected void setPrimaryMailOption(final AdminParser admp){
-        primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, true); 
+        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, true); 
     }
     
     protected void setDepartmentOption(final AdminParser admp){
-        departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, false); 
+        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, false); 
     }
     
     protected void setCompanyOption(final AdminParser admp){
-        companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
+        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, false); 
     }
 
     protected void setAliasesOption(final AdminParser admp){
-        aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
+        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, false); 
     }
     
     protected void setImapOnlyOption(final AdminParser admp){
-        imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Create/Delete only IMAP account of the user", false, false); 
+        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Create/Delete only IMAP account of the user", false, false); 
     }
     
     protected void setDBOnlyOption(final AdminParser admp){
-        dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Create/Delete only in Database system", false, false); 
+        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Create/Delete only in Database system", false, false); 
     }
     
     protected void setExtendedOption(final AdminParser admp) {
-        extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
+        this.extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
     }
 
     protected ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
@@ -327,7 +399,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
      * @param parser
      */
     protected final void printExtendedOutputIfSet(final AdminParser parser) {
-        if (null != parser.getOptionValue(extendedOption)) {
+        if (null != parser.getOptionValue(this.extendedOption)) {
             parser.printUsageExtended();
             System.exit(0);
         }
@@ -339,28 +411,28 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
      * @param parser The parser object
      * @param usr User object which will be changed
      */
-    protected final void setMandatoryOptionsinUser(final AdminParser parser, User usr) {
-        final String optionValue = (String) parser.getOptionValue(userNameOption);
+    protected final void setMandatoryOptionsinUser(final AdminParser parser, final User usr) {
+        final String optionValue = (String) parser.getOptionValue(this.userNameOption);
         if (null != optionValue) {
             usr.setUsername(optionValue);
         }        
-        final String optionValue2 = (String) parser.getOptionValue(displayNameOption);
+        final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
         if (null != optionValue2) {
             usr.setDisplay_name(optionValue2);
         }        
-        final String optionValue3 = (String) parser.getOptionValue(givenNameOption);
+        final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
         if (null != optionValue3) {
             usr.setGiven_name(optionValue3);
         }        
-        final String optionValue4 = (String) parser.getOptionValue(surNameOption);
+        final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
         if (null != optionValue4) {
             usr.setSur_name(optionValue4);
         }        
-        final String optionValue5 = (String) parser.getOptionValue(passwordOption);
+        final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
         if (null != optionValue5) {
             usr.setPassword(optionValue5);
         }        
-        final String optionValue6 = (String) parser.getOptionValue(primaryMailOption);
+        final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
         if (null != optionValue6) {
             usr.setPrimaryEmail(optionValue6);
             usr.setEmail1(optionValue6);
@@ -373,31 +445,31 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
      * @param parser The parser object
      * @param usr User object which will be changed
      */
-    protected final void setOptionalOptionsinUser(final AdminParser parser, User usr) {
-        final String optionValue = (String) parser.getOptionValue(companyOption);
+    protected final void setOptionalOptionsinUser(final AdminParser parser, final User usr) {
+        final String optionValue = (String) parser.getOptionValue(this.companyOption);
         if (null != optionValue) {
             usr.setCompany(optionValue);
         }
     
-        final String optionValue2 = (String) parser.getOptionValue(departmentOption);
+        final String optionValue2 = (String) parser.getOptionValue(this.departmentOption);
         if (null != optionValue2) {
             usr.setDepartment(optionValue2);
         }
     
-        final String optionValue3 = (String) parser.getOptionValue(languageOption);
+        final String optionValue3 = (String) parser.getOptionValue(this.languageOption);
         if (null != optionValue3) {
-            String[] lange = optionValue3.split("_");
+            final String[] lange = optionValue3.split("_");
             if (lange != null && lange.length == 2) {
                 usr.setLanguage(new Locale(lange[0].toLowerCase(), lange[1].toUpperCase()));
             }
         }
     
-        final String optionValue4 = (String) parser.getOptionValue(timezoneOption);
+        final String optionValue4 = (String) parser.getOptionValue(this.timezoneOption);
         if (null != optionValue4) {
             usr.setTimezone(TimeZone.getTimeZone(optionValue4));
         }
     
-        final String aliasOpt = (String) parser.getOptionValue(aliasesOption);
+        final String aliasOpt = (String) parser.getOptionValue(this.aliasesOption);
         if (null != aliasOpt) {
             final HashSet<String> aliases = new HashSet<String>();
             for (final String alias : aliasOpt.split(",")) {
@@ -407,5 +479,115 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         }
     }
 
+    protected final void setMandatoryOptions(final AdminParser parser) {
+        setUsernameOption(parser);
+        setDisplayNameOption(parser);
+        setGivenNameOption(parser);
+        setSurNameOption(parser);
+        setPasswordOption(parser);
+        setPrimaryMailOption(parser);
+    }
+
+    protected final void setOptionalOptions(final AdminParser parser) {
+        setLanguageOption(parser);
+        setTimezoneOption(parser);
+        setDepartmentOption(parser);
+        setCompanyOption(parser);
+        setAliasesOption(parser);
+    }
+
+    protected void setExtendedOptions(final AdminParser parser) {
+        final Method[] methods = User.class.getMethods();
+        final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
+    
+        for (final MethodAndNames methodandnames : methArrayList) {
+            
+            if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
+                if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                }
+            }            
+        }
+    
+    }
+
+    /**
+     * This method goes through the dynamically created options, and sets the corresponding values
+     * in the user object.
+     * 
+     * Attention the user object given as parameter is changed
+     * 
+     * @param parser
+     * @param usr
+     * @throws InvocationTargetException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     */
+    protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
+            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
+                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {
+                final Integer value = (Integer)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
+                final Boolean value = (Boolean)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
+                final Date value = (Date)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
+                final HashSet value = (HashSet)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            } else if (optionAndMethod.getReturntype().equals(PASSWORDMECH_CLASS)) {
+                final PASSWORDMECH value = (PASSWORDMECH)parser.getOptionValue(optionAndMethod.getOption());
+                if (null != value) {
+                    optionAndMethod.getMethod().invoke(usr, value);
+                }
+            }
+    
+        }
+    }
+
+    /**
+     * This method is used to find the right output
+     * 
+     * @param parser
+     */
+    protected void printrightoptions(final AdminParser parser) {
+        if (null != parser.getOptionValue(this.extendedOption)) {
+            parser.printUsageExtended();
+        } else {
+            parser.printUsage();
+        }
+    }
 }
+
 
