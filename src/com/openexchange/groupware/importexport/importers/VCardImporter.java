@@ -79,13 +79,15 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.VCARDIMPORTER,
 		component=Component.IMPORT_EXPORT)
-@OXThrowsMultiple(
+		@OXThrowsMultiple(
 		category={
 	Category.PERMISSION,
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
@@ -100,12 +102,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 	"User input Error %s",
 	"Programming Error - Folder %s",
 	"Could not load folder %s"})
-
-/**
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
- */
-public class VCardImporter implements Importer {
+	
+	/**
+	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+	 * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+	 */
+	public class VCardImporter implements Importer {
 	
 	private static final Log LOG = LogFactory.getLog(VCardImporter.class);
 	
@@ -178,29 +180,40 @@ public class VCardImporter implements Importer {
 		try {
 			final VersitDefinition def = Versit.getDefinition(format.getMimeType());
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
-			final VersitObject rootVersitObject = def.parseBegin(versitReader);
-			VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
-			while (versitObject != null) {
+			
+			boolean hasMoreObjects = true;
+			
+			while (hasMoreObjects) {
 				ImportResult importResult = new ImportResult();
+				
 				try {
-					//final Property property = versitObject.getProperty("UID");
+					VersitObject versitObject = def.parse(versitReader);
 					
+					if (versitObject == null) {
+						hasMoreObjects = false;
+						break;
+					}
+
 					importResult.setFolder(String.valueOf(contactFolderId));
-								
+					
 					final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
 					contactObj.setParentFolderID(contactFolderId);
 					contactInterface.insertContactObject(contactObj);
-						
+					
 					importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
 					importResult.setDate(contactObj.getLastModified());
 				} catch (OXException exc) {
 					LOG.debug("cannot import contact object", exc);
 					importResult.setException(exc);
+				} catch (ConverterException exc) {
+					LOG.error("cannot convert contact object", exc);
+					importResult.setException(new OXException("cannot parse vcard object", exc));
+				} catch (VersitException exc) {
+					LOG.error("cannot parse contact object", exc);
+					importResult.setException(new OXException("cannot parse vcard object", exc));
 				}
 				
 				list.add(importResult);
-				
-				versitObject = def.parseChild(versitReader, rootVersitObject);
 			}
 		} catch (Exception exc) {
 			throw importExportExceptionFactory.create(4, contactFolderId);
