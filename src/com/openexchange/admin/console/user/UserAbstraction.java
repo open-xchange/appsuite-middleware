@@ -66,7 +66,8 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
-    private static final String JAVA_UTIL_ARRAY_LIST = "java.util.ArrayList";
+    private static final String SIMPLE_INT = "int";
+    private static final String JAVA_LANG_LONG = "java.lang.Long";
 
     protected class MethodAndNames {
         private Method method = null;
@@ -189,6 +190,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String JAVA_UTIL_DATE = "java.util.Date";
     protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
+    protected static final String JAVA_UTIL_ARRAY_LIST = "java.util.ArrayList";
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
@@ -315,12 +317,13 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         this.extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
     }
 
-    protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
-        final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
-    
-        // Here we define which methods we don't want to get
-        final HashSet<String> notallowed = new HashSet<String>();
-        notallowed.add("test");
+    /**
+     * @param theMethods
+     * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
+     * get or is
+     * @return
+     */
+    protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final HashSet<String> notallowed) {
     
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<String>(7);
@@ -331,7 +334,31 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         returntypes.add(JAVA_UTIL_HASH_SET);
         returntypes.add(JAVA_UTIL_TIME_ZONE);
         returntypes.add(PASSWORDMECH_CLASS);
-    
+        
+        return getGetterGeneral(theMethods, notallowed, returntypes);
+    }
+
+    /**
+     * @param theMethods
+     * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
+     * get or is
+     * @return
+     */
+    protected final ArrayList<MethodAndNames> getGettersforExtensions(final Method[] theMethods, final HashSet<String> notallowed) {
+        
+        // Define the returntypes we search for
+        final HashSet<String> returntypes = new HashSet<String>(7);
+        returntypes.add(JAVA_LANG_STRING);
+        returntypes.add(JAVA_LANG_INTEGER);
+        returntypes.add(JAVA_LANG_LONG);
+        returntypes.add(SIMPLE_INT);
+        
+        
+        return getGetterGeneral(theMethods, notallowed, returntypes);
+    }
+
+    private final ArrayList<MethodAndNames> getGetterGeneral(final Method[] theMethods, final HashSet<String> notallowed, final HashSet<String> returntypes) {
+        final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
             final String methodname = method.getName();
