@@ -60,9 +60,26 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 public class EffectivePermission extends OCLPermission {
 
+	private static final char CHAR_AT = '@';
+
+	private static final char CHAR_BREAK = '\n';
+
+	private static final char CHAR_PIPE = '|';
+
+	private static final String STR_EFFECTIVE_PERMISSION = "EffectivePermission_";
+
+	private static final String STR_EMPTY = "";
+
+	private static final String STR_ADMIN = "Admin";
+
+	private static final String STR_USER = "User";
+
+	private static final String STR_GROUP = "Group";
+
 	private static final long serialVersionUID = -1303754404748836561L;
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(EffectivePermission.class);
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(EffectivePermission.class);
 
 	/**
 	 * The configuration profile of the current logged in user
@@ -85,8 +102,7 @@ public class EffectivePermission extends OCLPermission {
 
 	private boolean userConfigAlreadyValidated = false;
 
-	public EffectivePermission(int entity, int fuid, int folderType,
-			int folderModule, UserConfiguration userConfig) {
+	public EffectivePermission(int entity, int fuid, int folderType, int folderModule, UserConfiguration userConfig) {
 		super(entity, fuid);
 		this.folderType = folderType;
 		this.folderModule = folderModule;
@@ -118,10 +134,10 @@ public class EffectivePermission extends OCLPermission {
 		return true;
 	}
 
+	@Override
 	public boolean isFolderAdmin() {
 		if (validateUserConfig()) {
-			if (folderType == FolderObject.PUBLIC
-					&& folderModule != FolderObject.INFOSTORE
+			if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE
 					&& !userConfig.hasFullPublicFolderAccess()) {
 				return false;
 			} else if (!hasModuleAccess(folderModule)) {
@@ -131,71 +147,65 @@ public class EffectivePermission extends OCLPermission {
 		return super.isFolderAdmin();
 	}
 
+	@Override
 	public int getFolderPermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC) {
-				if (folderModule != FolderObject.INFOSTORE
-						&& !userConfig.hasFullPublicFolderAccess()) {
-					return super.getFolderPermission() > READ_FOLDER ? READ_FOLDER
-							: super.getFolderPermission();
+				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+					return super.getFolderPermission() > READ_FOLDER ? READ_FOLDER : super.getFolderPermission();
 				}
-			} else if (!userConfig.hasFullSharedFolderAccess()
-					&& folderType == FolderObject.SHARED) {
+			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
 		return super.getFolderPermission();
 	}
 
+	@Override
 	public int getReadPermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC) {
-				if (folderModule != FolderObject.INFOSTORE
-						&& !userConfig.hasFullPublicFolderAccess()) {
-					return super.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS
-							: super.getReadPermission();
+				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+					return super.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : super.getReadPermission();
 				}
-			} else if (!userConfig.hasFullSharedFolderAccess()
-					&& folderType == FolderObject.SHARED) {
+			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
 		return super.getReadPermission();
 	}
 
+	@Override
 	public int getWritePermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC) {
-				if (folderModule != FolderObject.INFOSTORE
-						&& !userConfig.hasFullPublicFolderAccess()) {
+				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return NO_PERMISSIONS;
 				}
-			} else if (!userConfig.hasFullSharedFolderAccess()
-					&& folderType == FolderObject.SHARED) {
+			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
 		return super.getWritePermission();
 	}
 
+	@Override
 	public int getDeletePermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC) {
-				if (folderModule != FolderObject.INFOSTORE
-						&& !userConfig.hasFullPublicFolderAccess()) {
-					return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS
-							: super.getDeletePermission();
+				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+					return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super
+							.getDeletePermission();
 				}
-			} else if (!userConfig.hasFullSharedFolderAccess()
-					&& folderType == FolderObject.SHARED) {
+			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
@@ -231,23 +241,21 @@ public class EffectivePermission extends OCLPermission {
 				}
 				folderModule = folderAccess.getFolderModule(getFuid());
 			}
-		}
-		catch (OXException e) {
+		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			return userConfigIsValid;
 		}
 		if (userConfig.getUserId() == getEntity()) {
 			userConfigIsValid = true;
-		}
-		else {
-			for (int i = 0; i < userConfig.getGroups().length
-					&& !userConfigIsValid; i++) {
+		} else {
+			for (int i = 0; i < userConfig.getGroups().length && !userConfigIsValid; i++) {
 				userConfigIsValid = (userConfig.getGroups()[i] == getEntity());
 			}
 		}
 		return userConfigIsValid;
 	}
 
+	@Override
 	public boolean isFolderVisible() {
 		if (isFolderAdmin()) {
 			return true;
@@ -255,34 +263,42 @@ public class EffectivePermission extends OCLPermission {
 		return (getFolderPermission() >= READ_FOLDER);
 	}
 
+	@Override
 	public boolean canCreateObjects() {
 		return (getFolderPermission() >= CREATE_OBJECTS_IN_FOLDER);
 	}
 
+	@Override
 	public boolean canCreateSubfolders() {
 		return (getFolderPermission() >= CREATE_SUB_FOLDERS);
 	}
 
+	@Override
 	public boolean canReadOwnObjects() {
 		return (getReadPermission() >= READ_OWN_OBJECTS);
 	}
 
+	@Override
 	public boolean canReadAllObjects() {
 		return (getReadPermission() >= READ_ALL_OBJECTS);
 	}
 
+	@Override
 	public boolean canWriteOwnObjects() {
 		return (getWritePermission() >= WRITE_OWN_OBJECTS);
 	}
 
+	@Override
 	public boolean canWriteAllObjects() {
 		return (getWritePermission() >= WRITE_ALL_OBJECTS);
 	}
 
+	@Override
 	public boolean canDeleteOwnObjects() {
 		return (getDeletePermission() >= DELETE_OWN_OBJECTS);
 	}
 
+	@Override
 	public boolean canDeleteAllObjects() {
 		return (getDeletePermission() >= DELETE_ALL_OBJECTS);
 	}
@@ -300,35 +316,34 @@ public class EffectivePermission extends OCLPermission {
 		return p;
 	}
 
-	public void storePermissions(final Context ctx, final Connection writeCon,
-			final boolean action) throws Exception {
-		throw new Exception(
-				"Instances of type EffectivePermission MUST NOT be saved");
+	@Override
+	public void storePermissions(final Context ctx, final Connection writeCon, final boolean action) throws Exception {
+		throw new Exception("Instances of type EffectivePermission MUST NOT be saved");
 	}
 
-	public void storePermissions(final Context ctx, final Connection writeCon, final int fuid,
-			final boolean insert) throws Exception {
-		throw new Exception(
-				"Instances of type EffectivePermission MUST NOT be saved");
+	@Override
+	public void storePermissions(final Context ctx, final Connection writeCon, final int fuid, final boolean insert)
+			throws Exception {
+		throw new Exception("Instances of type EffectivePermission MUST NOT be saved");
 	}
 
-	public void deletePermission(final Context ctx, final Connection writeCon)
-			throws SQLException {
-		throw new SQLException(
-				"Instances of EffectivePermission CAN NOT be deleted");
+	@Override
+	public void deletePermission(final Context ctx, final Connection writeCon) throws SQLException {
+		throw new SQLException("Instances of EffectivePermission CAN NOT be deleted");
 	}
 
-	public boolean loadPermissions(final Context ctx, final Connection con)
-			throws SQLException {
-		throw new SQLException(
-				"Instances of EffectivePermission CAN NOT be loaded");
+	@Override
+	public boolean loadPermissions(final Context ctx, final Connection con) throws SQLException {
+		throw new SQLException("Instances of EffectivePermission CAN NOT be loaded");
 	}
 
+	@Override
 	public String toString() {
-		return new StringBuilder(150).append("EffectivePermission_").append((isFolderAdmin() ? "Admin" : "")).append(
-				(isGroupPermission() ? "Group" : "User")).append('@').append(getFolderPermission()).append('|').append(
-				getReadPermission()).append('|').append(getWritePermission()).append('|').append(getDeletePermission())
-				.append('\n').append(super.toString()).toString();
+		return new StringBuilder(150).append(STR_EFFECTIVE_PERMISSION)
+				.append((isFolderAdmin() ? STR_ADMIN : STR_EMPTY)).append((isGroupPermission() ? STR_GROUP : STR_USER))
+				.append(CHAR_AT).append(getFolderPermission()).append(CHAR_PIPE).append(getReadPermission()).append(
+						CHAR_PIPE).append(getWritePermission()).append(CHAR_PIPE).append(getDeletePermission()).append(
+						CHAR_BREAK).append(super.toString()).toString();
 	}
 
 }

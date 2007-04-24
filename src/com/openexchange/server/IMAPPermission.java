@@ -67,7 +67,7 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IMAPPermission extends OCLPermission {
+public class IMAPPermission extends OCLPermission implements Cloneable {
 
 	private static final long serialVersionUID = -4781017654229881491L;
 
@@ -128,6 +128,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setEntity(int)
 	 */
+	@Override
 	public void setEntity(final int entity) {
 		super.setEntity(entity);
 		this.acl = null;
@@ -138,6 +139,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setFolderAdmin(boolean)
 	 */
+	@Override
 	public void setFolderAdmin(final boolean folderAdmin) {
 		super.setFolderAdmin(folderAdmin);
 		this.acl = null;
@@ -148,6 +150,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setGroupPermission(boolean)
 	 */
+	@Override
 	public void setGroupPermission(final boolean groupPermission) {
 		super.setGroupPermission(groupPermission);
 		this.acl = null;
@@ -158,6 +161,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setFolderPermission(int)
 	 */
+	@Override
 	public boolean setFolderPermission(final int p) {
 		this.acl = null;
 		return super.setFolderPermission(p);
@@ -168,6 +172,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setReadObjectPermission(int)
 	 */
+	@Override
 	public boolean setReadObjectPermission(final int p) {
 		this.acl = null;
 		return super.setReadObjectPermission(p);
@@ -178,6 +183,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setWriteObjectPermission(int)
 	 */
+	@Override
 	public boolean setWriteObjectPermission(final int p) {
 		this.acl = null;
 		return super.setWriteObjectPermission(p);
@@ -188,6 +194,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setDeleteObjectPermission(int)
 	 */
+	@Override
 	public boolean setDeleteObjectPermission(final int p) {
 		this.acl = null;
 		return super.setDeleteObjectPermission(p);
@@ -199,6 +206,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int,
 	 *      int, int)
 	 */
+	@Override
 	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
 		this.acl = null;
 		return super.setAllObjectPermission(pr, pw, pd);
@@ -210,6 +218,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#setAllPermission(int, int,
 	 *      int, int)
 	 */
+	@Override
 	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
 		this.acl = null;
 		return super.setAllPermission(fp, opr, opw, opd);
@@ -220,6 +229,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setFuid(int)
 	 */
+	@Override
 	public void setFuid(final int pid) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -231,6 +241,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#getFuid()
 	 */
+	@Override
 	public int getFuid() {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -244,6 +255,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
 	 *      java.sql.Connection, boolean)
 	 */
+	@Override
 	public void storePermissions(final Context ctx, final Connection writeCon, final boolean insert) throws Exception {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -256,6 +268,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
 	 *      java.sql.Connection, int, boolean)
 	 */
+	@Override
 	public void storePermissions(final Context ctx, final Connection writeConArg, final int fuid, final boolean insert)
 			throws Exception {
 		if (LOG.isWarnEnabled()) {
@@ -269,6 +282,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#deletePermission(com.openexchange.groupware.contexts.Context,
 	 *      java.sql.Connection)
 	 */
+	@Override
 	public void deletePermission(final Context ctx, final Connection writeConArg) throws SQLException,
 			DBPoolingException {
 		if (LOG.isWarnEnabled()) {
@@ -282,6 +296,7 @@ public class IMAPPermission extends OCLPermission {
 	 * @see com.openexchange.server.OCLPermission#loadPermissions(com.openexchange.groupware.contexts.Context,
 	 *      java.sql.Connection)
 	 */
+	@Override
 	public boolean loadPermissions(final Context ctx, final Connection conArg) throws SQLException, DBPoolingException {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
@@ -294,6 +309,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see com.openexchange.server.OCLPermission#reset()
 	 */
+	@Override
 	public void reset() {
 		super.reset();
 		folderFullname = null;
@@ -467,6 +483,7 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Object clone() {
 		try {
 			final IMAPPermission clone = (IMAPPermission) super.clone();
