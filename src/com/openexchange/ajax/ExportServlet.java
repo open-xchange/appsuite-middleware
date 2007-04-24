@@ -102,7 +102,7 @@ public class ExportServlet extends ImportExport {
 				outputStream.flush();
 			}		
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LOG.error("unknown exception: " , ex);
 		}		
 	}
 
