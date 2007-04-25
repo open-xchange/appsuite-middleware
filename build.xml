@@ -436,23 +436,24 @@
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@jdbcjar@"    value="${lib.subst.patch}/${jdbcjar}"/>
-            <replacefilter token="@mailjar@"    value="${lib.subst.patch}/${mailjar}"/>
+            <replacefilter token="@jdbcjar@" value="${lib.subst.patch}/${jdbcjar}"/>
+            <replacefilter token="@mailjar@" value="${lib.subst.patch}/${mailjar}"/>
             <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
-            <replacefilter token="@jdomjar@"    value="${lib.subst.patch}/${jdomjar}"/>
-            <replacefilter token="@jsdkjar@"    value="${lib.subst.patch}/${jsdkjar}"/>
-            <replacefilter token="@jcsjar@"    value="${lib.subst.patch}/${jcsjar}"/>
-            <replacefilter token="@concurrentjar@"    value="${lib.subst.patch}/${concurrentjar}"/>
-            <replacefilter token="@loggingjar@"    value="${lib.subst.patch}/${loggingjar}"/>
-            <replacefilter token="@jsonjar@"    value="${lib.subst.patch}/${jsonjar}"/>
+            <replacefilter token="@jdomjar@" value="${lib.subst.patch}/${jdomjar}"/>
+            <replacefilter token="@jsdkjar@" value="${lib.subst.patch}/${jsdkjar}"/>
+            <replacefilter token="@jcsjar@" value="${lib.subst.patch}/${jcsjar}"/>
+            <replacefilter token="@concurrentjar@" value="${lib.subst.patch}/${concurrentjar}"/>
+            <replacefilter token="@loggingjar@" value="${lib.subst.patch}/${loggingjar}"/>
+            <replacefilter token="@jsonjar@" value="${lib.subst.patch}/${jsonjar}"/>
             <replacefilter token="@fileuploadjar@" value="${lib.subst.patch}/${fileuploadjar}"/>
             <replacefilter token="@iojar@" value="${lib.subst.patch}/${iojar}" />
             <replacefilter token="@webdavjar@" value="${lib.subst.patch}/${webdavjar}" />
             <replacefilter token="@httpclientjar@" value="${lib.subst.patch}/${httpclientjar}" />
             <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
             <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
-            <replacefilter token="@oxgroupwarelibdir@"    value="${lib.subst.patch}"/>
+            <replacefilter token="@oxgroupwarelibdir@" value="${lib.subst.patch}"/>
 	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
 
@@ -483,6 +484,7 @@
             <replacefilter token="@springbeanjar@" value= "${lib.subst.patch}/${springbeanjar}"/>
             <replacefilter token="@oxgroupwarelibdir@"    value="${lib.subst.patch}"/>
 	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
 
