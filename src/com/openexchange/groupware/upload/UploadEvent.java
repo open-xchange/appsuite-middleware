@@ -89,6 +89,8 @@ public class UploadEvent {
 	private String action;
 	
 	private final Map<String,Object> parameters;
+	
+	private List<UploadFile> sequentialList;
 
 	public UploadEvent() {
 		super();
@@ -106,6 +108,12 @@ public class UploadEvent {
 	}
 	
 	public final void addUploadFile(final UploadFile uploadFile) {
+		if (sequentialList != null) {
+			/*
+			 * Discard cached sequential list
+			 */
+			sequentialList = null;
+		}
 		if (uploadFiles.containsKey(uploadFile.getFileName())) {
 			UploadFile current = uploadFiles.get(uploadFile.getFileName());
 			while (current.getHomonymous() != null) {
@@ -118,6 +126,12 @@ public class UploadEvent {
 	}
 	
 	public final void removeUploadFile(final String fileName) {
+		if (sequentialList != null) {
+			/*
+			 * Discard cached sequential list
+			 */
+			sequentialList = null;
+		}
 		UploadFile uploadFile = uploadFiles.remove(fileName);
 		while (uploadFile != null) {
 			if (uploadFile.getTmpFile().exists()) {
@@ -164,21 +178,31 @@ public class UploadEvent {
 		return createList().iterator();
 	}
 	
+	public final List<UploadFile> getUploadFiles() {
+		return createList();
+	}
+	
 	private final List<UploadFile> createList() {
+		if (sequentialList != null) {
+			/*
+			 * Return cached sequential list
+			 */
+			return sequentialList;
+		}
 		final int size = uploadFiles.size();
 		if (size == 0) {
 			return new ArrayList<UploadFile>(0);
 		}
-		final List<UploadFile> retvalList = new ArrayList<UploadFile>(size);
+		sequentialList = new ArrayList<UploadFile>(size);
 		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			UploadFile uf = iter.next().getValue();
 			while (uf != null) {
-				retvalList.add(uf);
+				sequentialList.add(uf);
 				uf = uf.getHomonymous();
 			}
 		}
-		return retvalList;
+		return sequentialList;
 	}
 
 	public final void addFormField(final String fieldName, final String fieldValue) {
@@ -232,8 +256,10 @@ public class UploadEvent {
 	 * <code>DeleteEvent</code> instance and clears upload files.
 	 */
 	public final void cleanUp() {
-		final Iterator<UploadFile> iter = getUploadFilesIterator();
-		while (iter.hasNext()) {
+		final List<UploadFile> l = createList();
+		final int size = l.size();
+		final Iterator<UploadFile> iter = l.iterator();
+		for (int i = 0; i < size; i++) {
 			final UploadFile uploadFile = iter.next();
 			final File tmpFile = uploadFile.getTmpFile();
 			if (tmpFile.exists()) {

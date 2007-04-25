@@ -40,11 +40,11 @@ public class Document extends Node {
         return encoding;
     }
     
-    public void setEncoding(String enc) {
+    public void setEncoding(final String enc) {
         this.encoding = enc;
     }
     
-    public void setStandalone (Boolean standalone) {
+    public void setStandalone (final Boolean standalone) {
         this.standalone = standalone;
     }
     
@@ -60,15 +60,16 @@ public class Document extends Node {
     /** Adds a child at the given index position. Throws
     an exception when a second root element is added */
 
-    public void addChild(int index, int type, Object child) {
+    public void addChild(final int index, final int type, final Object child) {
         if (type == ELEMENT) {
          //   if (rootIndex != -1)
            //     throw new RuntimeException("Only one document root element allowed");
 
             rootIndex = index;
         }
-        else if (rootIndex >= index)
-            rootIndex++;
+        else if (rootIndex >= index) {
+			rootIndex++;
+		}
 
         super.addChild(index, type, child);
     }
@@ -78,7 +79,7 @@ public class Document extends Node {
     The end event is consumed. For parsing partial
         XML structures, consider using Node.parse (). */
 
-    public void parse(XmlPullParser parser)
+    public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
 		parser.require(XmlPullParser.START_DOCUMENT, null, null);
@@ -89,16 +90,18 @@ public class Document extends Node {
         
         super.parse(parser);
 
-        if (parser.getEventType() != XmlPullParser.END_DOCUMENT)
-            throw new RuntimeException("Document end expected!");
+        if (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+			throw new RuntimeException("Document end expected!");
+		}
 
     }
 
-    public void removeChild(int index) {
-        if (index == rootIndex)
-            rootIndex = -1;
-        else if (index < rootIndex)
-            rootIndex--;
+    public void removeChild(final int index) {
+        if (index == rootIndex) {
+			rootIndex = -1;
+		} else if (index < rootIndex) {
+			rootIndex--;
+		}
 
         super.removeChild(index);
     }
@@ -106,8 +109,9 @@ public class Document extends Node {
     /** returns the root element of this document. */
 
     public Element getRootElement() {
-        if (rootIndex == -1)
-            throw new RuntimeException("Document has no root element!");
+        if (rootIndex == -1) {
+			throw new RuntimeException("Document has no root element!");
+		}
 
         return (Element) getChild(rootIndex);
     }
@@ -117,7 +121,7 @@ public class Document extends Node {
         this method is identical to writeChildren, except that the
         stream is flushed automatically. */
 
-    public void write(XmlSerializer writer)
+    public void write(final XmlSerializer writer)
         throws IOException {
         
         writer.startDocument(encoding, standalone);

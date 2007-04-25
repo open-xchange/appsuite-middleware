@@ -24,10 +24,14 @@
 
 package org.kxml2.wap;
 
-import java.io.*;
-import java.util.Vector;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.xmlpull.v1.*;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 
 public class WbxmlParser implements XmlPullParser {
@@ -41,7 +45,7 @@ public class WbxmlParser implements XmlPullParser {
 
     private InputStream in;
 
-	private int TAG_TABLE = 0;
+	private int TAG_TABLE;
 	private int ATTR_START_TABLE = 1;
 	private int ATTR_VALUE_TABLE = 2;
 
@@ -60,7 +64,7 @@ public class WbxmlParser implements XmlPullParser {
     private String[] attributes = new String[16];
 	private int nextId = -2;
 
-	private Vector tables = new Vector();
+	private List<String[]> tables = new ArrayList<String[]>();
 
     int version;
     int publicIdentifierId;
@@ -86,10 +90,10 @@ public class WbxmlParser implements XmlPullParser {
     public boolean getFeature(String feature) {
         if (XmlPullParser
             .FEATURE_PROCESS_NAMESPACES
-            .equals(feature))
-            return processNsp;
-        else
-            return false;
+            .equals(feature)) {
+			return processNsp;
+		}
+		return false;
     }
 
     public String getInputEncoding() {
@@ -98,47 +102,52 @@ public class WbxmlParser implements XmlPullParser {
     }
 
     public void defineEntityReplacementText(
-        String entity,
-        String value)
+    		final String entity,
+    		final String value)
         throws XmlPullParserException {
 
         // just ignore, has no effect
     }
 
-    public Object getProperty(String property) {
+    public Object getProperty(final String property) {
         return null;
     }
 
-    public int getNamespaceCount(int depth) {
-        if (depth > this.depth)
-            throw new IndexOutOfBoundsException();
+    public int getNamespaceCount(final int depth) {
+        if (depth > this.depth) {
+			throw new IndexOutOfBoundsException();
+		}
         return nspCounts[depth];
     }
 
-    public String getNamespacePrefix(int pos) {
+    public String getNamespacePrefix(final int pos) {
         return nspStack[pos << 1];
     }
 
-    public String getNamespaceUri(int pos) {
+    public String getNamespaceUri(final int pos) {
         return nspStack[(pos << 1) + 1];
     }
 
-    public String getNamespace(String prefix) {
+    public String getNamespace(final String prefix) {
 
-        if ("xml".equals(prefix))
-            return "http://www.w3.org/XML/1998/namespace";
-        if ("xmlns".equals(prefix))
-            return "http://www.w3.org/2000/xmlns/";
+        if ("xml".equals(prefix)) {
+			return "http://www.w3.org/XML/1998/namespace";
+		}
+        if ("xmlns".equals(prefix)) {
+			return "http://www.w3.org/2000/xmlns/";
+		}
 
         for (int i = (getNamespaceCount(depth) << 1) - 2;
             i >= 0;
             i -= 2) {
             if (prefix == null) {
-                if (nspStack[i] == null)
-                    return nspStack[i + 1];
+                if (nspStack[i] == null) {
+					return nspStack[i + 1];
+				}
             }
-            else if (prefix.equals(nspStack[i]))
-                return nspStack[i + 1];
+            else if (prefix.equals(nspStack[i])) {
+				return nspStack[i + 1];
+			}
         }
         return null;
     }
@@ -149,54 +158,47 @@ public class WbxmlParser implements XmlPullParser {
 
     public String getPositionDescription() {
 
-        StringBuffer buf =
-            new StringBuffer(
+    	final StringBuilder buf =
+            new StringBuilder(
                 type < TYPES.length ? TYPES[type] : "unknown");
         buf.append(' ');
 
         if (type == START_TAG || type == END_TAG) {
-            if (degenerated)
-                buf.append("(empty) ");
+            if (degenerated) {
+				buf.append("(empty) ");
+			}
             buf.append('<');
-            if (type == END_TAG)
-                buf.append('/');
+            if (type == END_TAG) {
+				buf.append('/');
+			}
 
-            if (prefix != null)
-                buf.append("{" + namespace + "}" + prefix + ":");
+            if (prefix != null) {
+				buf.append('{').append(namespace).append('}').append(prefix).append(':');
+			}
             buf.append(name);
 
-            int cnt = attributeCount << 2;
+            final int cnt = attributeCount << 2;
             for (int i = 0; i < cnt; i += 4) {
                 buf.append(' ');
-                if (attributes[i + 1] != null)
-                    buf.append(
-                        "{"
-                            + attributes[i]
-                            + "}"
-                            + attributes[i
-                            + 1]
-                            + ":");
-                buf.append(
-                    attributes[i
-                        + 2]
-                        + "='"
-                        + attributes[i
-                        + 3]
-                        + "'");
+                if (attributes[i + 1] != null) {
+					buf.append('{').append(attributes[i]).append('}').append(attributes[i + 1]).append(':');
+				}
+                buf.append(attributes[i + 2]).append("='").append(attributes[i + 3]).append('\'');
             }
 
             buf.append('>');
         }
-        else if (type == IGNORABLE_WHITESPACE)
-        	buf.append("");
-        else if (type != TEXT)
-            buf.append(getText());
-        else if (isWhitespace)
-            buf.append("(whitespace)");
-        else {
+        else if (type == IGNORABLE_WHITESPACE) {
+			buf.append("");
+		} else if (type != TEXT) {
+			buf.append(getText());
+		} else if (isWhitespace) {
+			buf.append("(whitespace)");
+		} else {
             String text = getText();
-            if (text.length() > 16)
-                text = text.substring(0, 16) + "...";
+            if (text.length() > 16) {
+				text = text.substring(0, 16) + "...";
+			}
             buf.append(text);
         }
 
@@ -215,8 +217,9 @@ public class WbxmlParser implements XmlPullParser {
         throws XmlPullParserException {
         if (type != TEXT
             && type != IGNORABLE_WHITESPACE
-            && type != CDSECT)
-            exception(ILLEGAL_TYPE);
+            && type != CDSECT) {
+			exception(ILLEGAL_TYPE);
+		}
         return isWhitespace;
     }
 
@@ -228,7 +231,7 @@ public class WbxmlParser implements XmlPullParser {
         if (type >= TEXT) {
             poslen[0] = 0;
             poslen[1] = text.length();
-            char[] buf = new char[text.length()];
+            final char[] buf = new char[text.length()];
             text.getChars(0, text.length(), buf, 0);
             return buf;
         }
@@ -252,8 +255,9 @@ public class WbxmlParser implements XmlPullParser {
 
     public boolean isEmptyElementTag()
         throws XmlPullParserException {
-        if (type != START_TAG)
-            exception(ILLEGAL_TYPE);
+        if (type != START_TAG) {
+			exception(ILLEGAL_TYPE);
+		}
         return degenerated;
     }
 
@@ -261,49 +265,54 @@ public class WbxmlParser implements XmlPullParser {
         return attributeCount;
     }
 
-    public String getAttributeType(int index) {
+    public String getAttributeType(final int index) {
         return "CDATA";
     }
 
-    public boolean isAttributeDefault(int index) {
+    public boolean isAttributeDefault(final int index) {
         return false;
     }
 
-    public String getAttributeNamespace(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeNamespace(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[index << 2];
     }
 
-    public String getAttributeName(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeName(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 2];
     }
 
-    public String getAttributePrefix(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributePrefix(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 1];
     }
 
-    public String getAttributeValue(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeValue(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 3];
     }
 
     public String getAttributeValue(
-        String namespace,
-        String name) {
+    		final String namespace,
+    		final String name) {
 
         for (int i = (attributeCount << 2) - 4;
             i >= 0;
             i -= 4) {
             if (attributes[i + 2].equals(name)
                 && (namespace == null
-                    || attributes[i].equals(namespace)))
-                return attributes[i + 3];
+                    || attributes[i].equals(namespace))) {
+				return attributes[i + 3];
+			}
         }
 
         return null;
@@ -320,18 +329,23 @@ public class WbxmlParser implements XmlPullParser {
 
         while (true) {
 
-			String save = text;
+        	final String save = text;
 
             nextImpl();
 
-            if (type < minType)
-                minType = type;
+            if (type < minType) {
+				minType = type;
+			}
 
-			if (minType > CDSECT) continue; // no "real" event so far
+			if (minType > CDSECT) {
+				continue; // no "real" event so far
+			}
 
 			if (minType >= TEXT) {  // text, see if accumulate
 				
-				if (save != null) text = text == null ? save : save + text;
+				if (save != null) {
+					text = text == null ? save : save + text;
+				}
 				
 				switch(peekId()) {
 					case Wbxml.ENTITY:
@@ -340,16 +354,17 @@ public class WbxmlParser implements XmlPullParser {
 					case Wbxml.LITERAL_C:
 					case Wbxml.LITERAL_A:
 					case Wbxml.LITERAL_AC: continue;
+					default:
 				}
-			}
-				
+			}	
             break; 
         }
 
         type = minType;
 
-        if (type > TEXT)
-            type = TEXT;
+        if (type > TEXT) {
+			type = TEXT;
+		}
 
         return type;
     }
@@ -367,19 +382,22 @@ public class WbxmlParser implements XmlPullParser {
     public int nextTag() throws XmlPullParserException, IOException {
 
         next();
-        if (type == TEXT && isWhitespace)
-            next();
+        if (type == TEXT && isWhitespace) {
+			next();
+		}
 
-        if (type != END_TAG && type != START_TAG)
-            exception("unexpected type");
+        if (type != END_TAG && type != START_TAG) {
+			exception("unexpected type");
+		}
 
         return type;
     }
 
 
     public String nextText() throws XmlPullParserException, IOException {
-        if (type != START_TAG)
-            exception("precondition: START_TAG");
+        if (type != START_TAG) {
+			exception("precondition: START_TAG");
+		}
 
         next();
 
@@ -388,33 +406,35 @@ public class WbxmlParser implements XmlPullParser {
         if (type == TEXT) {
             result = getText();
             next();
-        }
-        else
-            result = "";
+        } else {
+			result = "";
+		}
 
-        if (type != END_TAG)
-            exception("END_TAG expected");
+        if (type != END_TAG) {
+			exception("END_TAG expected");
+		}
 
         return result;
     }
 
 
-    public void require(int type, String namespace, String name)
+    public void require(final int type, final String namespace, final String name)
         throws XmlPullParserException, IOException {
 
         if (type != this.type
             || (namespace != null && !namespace.equals(getNamespace()))
-            || (name != null && !name.equals(getName())))
-            exception(
-                "expected: " + TYPES[type] + " {" + namespace + "}" + name);
+            || (name != null && !name.equals(getName()))) {
+			exception(
+                "expected: " + TYPES[type] + " {" + namespace + '}' + name);
+		}
     }
 
 
-	public void setInput(Reader reader) throws XmlPullParserException {
+	public void setInput(final Reader reader) throws XmlPullParserException {
 		exception("InputStream required");
 	}
 
-    public void setInput(InputStream in, String enc)
+    public void setInput(final InputStream in, final String enc)
         throws XmlPullParserException {
 
         this.in = in;
@@ -423,17 +443,19 @@ public class WbxmlParser implements XmlPullParser {
             version = readByte();
             publicIdentifierId = readInt();
 
-            if (publicIdentifierId == 0)
-                readInt();
+            if (publicIdentifierId == 0) {
+				readInt();
+			}
 
             charSet = readInt(); // skip charset
 
-            int strTabSize = readInt();
+            final int strTabSize = readInt();
 
-            StringBuffer buf = new StringBuffer(strTabSize);
+            final StringBuilder buf = new StringBuilder(strTabSize);
 
-            for (int i = 0; i < strTabSize; i++)
-                buf.append((char) readByte());
+            for (int i = 0; i < strTabSize; i++) {
+				buf.append((char) readByte());
+			}
 	        stringTable = buf.toString();
 	        
 	   //     System.out.println("String table: "+stringTable);
@@ -447,15 +469,16 @@ public class WbxmlParser implements XmlPullParser {
         }
     }
 
-    public void setFeature(String feature, boolean value)
+    public void setFeature(final String feature, final boolean value)
         throws XmlPullParserException {
-        if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature))
-            processNsp = value;
-        else
-            exception("unsupported feature: " + feature);
+        if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature)) {
+			processNsp = value;
+		} else {
+			exception("unsupported feature: " + feature);
+		}
     }
 
-    public void setProperty(String property, Object value)
+    public void setProperty(final String property, final Object value)
         throws XmlPullParserException {
         throw new XmlPullParserException("unsupported property: " + property);
     }
@@ -471,7 +494,7 @@ public class WbxmlParser implements XmlPullParser {
             // * 4 - 4; i >= 0; i -= 4) {
 
             String attrName = attributes[i + 2];
-            int cut = attrName.indexOf(':');
+            final int cut = attrName.indexOf(':');
             String prefix;
 
             if (cut != -1) {
@@ -481,23 +504,24 @@ public class WbxmlParser implements XmlPullParser {
             else if (attrName.equals("xmlns")) {
                 prefix = attrName;
                 attrName = null;
-            }
-            else
-                continue;
+            } else {
+				continue;
+			}
 
             if (!prefix.equals("xmlns")) {
                 any = true;
             }
             else {
-                int j = (nspCounts[depth]++) << 1;
+            	final int j = (nspCounts[depth]++) << 1;
 
                 nspStack = ensureCapacity(nspStack, j + 2);
                 nspStack[j] = attrName;
                 nspStack[j + 1] = attributes[i + 3];
 
                 if (attrName != null
-                    && attributes[i + 3].equals(""))
-                    exception("illegal empty namespace");
+                    && attributes[i + 3].equals("")) {
+					exception("illegal empty namespace");
+				}
 
                 //  prefixMap = new PrefixMap (prefixMap, attrName, attr.getValue ());
 
@@ -520,29 +544,29 @@ public class WbxmlParser implements XmlPullParser {
                 i -= 4) {
 
                 String attrName = attributes[i + 2];
-                int cut = attrName.indexOf(':');
+                final int cut = attrName.indexOf(':');
 
-                if (cut == 0)
-                    throw new RuntimeException(
+                if (cut == 0) {
+					throw new RuntimeException(
                         "illegal attribute name: "
                             + attrName
                             + " at "
                             + this);
-
-                else if (cut != -1) {
-                    String attrPrefix =
+				} else if (cut != -1) {
+					final String attrPrefix =
                         attrName.substring(0, cut);
 
                     attrName = attrName.substring(cut + 1);
 
-                    String attrNs = getNamespace(attrPrefix);
+                    final String attrNs = getNamespace(attrPrefix);
 
-                    if (attrNs == null)
-                        throw new RuntimeException(
+                    if (attrNs == null) {
+						throw new RuntimeException(
                             "Undefined Prefix: "
                                 + attrPrefix
                                 + " in "
                                 + this);
+					}
 
                     attributes[i] = attrNs;
                     attributes[i + 1] = attrPrefix;
@@ -550,23 +574,25 @@ public class WbxmlParser implements XmlPullParser {
 
                     for (int j = (attributeCount << 2) - 4;
                         j > i;
-                        j -= 4)
-                        if (attrName.equals(attributes[j + 2])
-                            && attrNs.equals(attributes[j]))
-                            exception(
+                        j -= 4) {
+						if (attrName.equals(attributes[j + 2])
+                            && attrNs.equals(attributes[j])) {
+							exception(
                                 "Duplicate Attribute: {"
                                     + attrNs
-                                    + "}"
+                                    + '}'
                                     + attrName);
+						}
+					}
                 }
             }
         }
 
-        int cut = name.indexOf(':');
+        final int cut = name.indexOf(':');
 
-        if (cut == 0)
-            exception("illegal tag name: " + name);
-        else if (cut != -1) {
+        if (cut == 0) {
+			exception("illegal tag name: " + name);
+		} else if (cut != -1) {
             prefix = name.substring(0, cut);
             name = name.substring(cut + 1);
         }
@@ -574,52 +600,54 @@ public class WbxmlParser implements XmlPullParser {
         this.namespace = getNamespace(prefix);
 
         if (this.namespace == null) {
-            if (prefix != null)
-                exception("undefined prefix: " + prefix);
+            if (prefix != null) {
+				exception("undefined prefix: " + prefix);
+			}
             this.namespace = NO_NAMESPACE;
         }
 
         return any;
     }
 
-	private final void setTable(int page, int type, String[] table) {
+	private final void setTable(final int page, final int type, final String[] table) {
 		if(stringTable != null){
 			throw new RuntimeException("setXxxTable must be called before setInput!");
 		}
 		while(tables.size() < 3*page +3){
-			tables.addElement(null);
+			tables.add(null);
 		}
-		tables.setElementAt(table, page*3+type);
+		tables.add(page*3+type, table);
 	}
 		
 		
 
 
 
-    private final void exception(String desc)
+    private final void exception(final String desc)
         throws XmlPullParserException {
         throw new XmlPullParserException(desc, this, null);
     }
 
 
-	private void selectPage(int nr, boolean tags) throws XmlPullParserException{
-		if(tables.size() == 0 && nr == 0) return;
+	private void selectPage(final int nr, final boolean tags) throws XmlPullParserException{
+		if(tables.size() == 0 && nr == 0) {
+			return;
+		}
 		
-		if(nr*3 > tables.size())
+		if(nr*3 > tables.size()) {
 			exception("Code Page "+nr+" undefined!");
+		}
 		
-		if(tags)
-			tagTable = (String[]) tables.elementAt(nr * 3 + TAG_TABLE);
-		else {
-			attrStartTable = (String[]) tables.elementAt(nr * 3 + ATTR_START_TABLE);
-			attrValueTable = (String[]) tables.elementAt(nr * 3 + ATTR_VALUE_TABLE);
+		if(tags) {
+			tagTable = tables.get(nr * 3 + TAG_TABLE);
+		} else {
+			attrStartTable = tables.get(nr * 3 + ATTR_START_TABLE);
+			attrValueTable = tables.get(nr * 3 + ATTR_VALUE_TABLE);
 		}
 	}
 
     private final void nextImpl()
         throws IOException, XmlPullParserException {
-
-        String s;
 
         if (type == END_TAG) {
             depth--;
@@ -650,7 +678,7 @@ public class WbxmlParser implements XmlPullParser {
 
             case Wbxml.END :
                 {
-                    int sp = (depth - 1) << 2;
+                	final int sp = (depth - 1) << 2;
 
                     type = END_TAG;
                     namespace = elementStack[sp];
@@ -662,7 +690,7 @@ public class WbxmlParser implements XmlPullParser {
             case Wbxml.ENTITY :
                 {
                     type = ENTITY_REF;
-                    char c = (char) readInt();
+                    final char c = (char) readInt();
                     text = "" + c;
                     name = "#" + ((int) c);
                 }
@@ -695,8 +723,8 @@ public class WbxmlParser implements XmlPullParser {
             case Wbxml.STR_T :
                 {
                     type = TEXT;
-                    int pos = readInt();
-                    int end = stringTable.indexOf('\0', pos);
+                    final int pos = readInt();
+                    final int end = stringTable.indexOf('\0', pos);
                     text = stringTable.substring(pos, end);
                 }
                 break;
@@ -712,7 +740,7 @@ public class WbxmlParser implements XmlPullParser {
 
     
 
-    public void parseWapExtension(int id)
+    public void parseWapExtension(final int id)
         throws IOException, XmlPullParserException {
 
         type = WAP_EXTENSION;
@@ -738,13 +766,14 @@ public class WbxmlParser implements XmlPullParser {
 
             case Wbxml.OPAQUE :
                 {
-                    int len = readInt();
+                	final int len = readInt();
                     byte[] buf = new byte[len];
 
                     for (int i = 0;
                         i < len;
-                        i++) // enhance with blockread!
-                        buf[i] = (byte) readByte();
+                        i++) {
+						buf[i] = (byte) readByte();
+					}
 
                     wapExtensionData = buf;
                 } // case OPAQUE
@@ -768,15 +797,15 @@ public class WbxmlParser implements XmlPullParser {
             } 
         	
             String name = resolveId(attrStartTable, id);
-            StringBuffer value;
+            StringBuilder value;
 
-            int cut = name.indexOf('=');
+            final int cut = name.indexOf('=');
 
-            if (cut == -1)
-                value = new StringBuffer();
-            else {
+            if (cut == -1) {
+				value = new StringBuilder();
+			} else {
                 value =
-                    new StringBuffer(name.substring(cut + 1));
+                    new StringBuilder(name.substring(cut + 1));
                 name = name.substring(0, cut);
             }
 
@@ -860,20 +889,22 @@ public class WbxmlParser implements XmlPullParser {
 		
 
 
-    String resolveId(String[] tab, int id) throws IOException {
-        int idx = (id & 0x07f) - 5;
-        if (idx == -1)
-            return readStrT();
+    String resolveId(final String[] tab, final int id) throws IOException {
+    	final int idx = (id & 0x07f) - 5;
+        if (idx == -1) {
+			return readStrT();
+		}
         if (idx < 0
             || tab == null
             || idx >= tab.length
-            || tab[idx] == null)
-            throw new IOException("id " + id + " undef.");
+            || tab[idx] == null) {
+			throw new IOException("id " + id + " undef.");
+		}
 
         return tab[idx];
     }
 
-    void parseElement(int id)
+    void parseElement(final int id)
         throws IOException, XmlPullParserException {
 
 		type = START_TAG;
@@ -886,7 +917,7 @@ public class WbxmlParser implements XmlPullParser {
 
         degenerated = (id & 64) == 0;
 
-        int sp = depth++ << 2;
+        final int sp = depth++ << 2;
 
         // transfer to element stack
 
@@ -894,7 +925,7 @@ public class WbxmlParser implements XmlPullParser {
         elementStack[sp + 3] = name;
 
         if (depth >= nspCounts.length) {
-             int[] bigger = new int[depth + 4];
+        	final int[] bigger = new int[depth + 4];
              System.arraycopy(nspCounts, 0, bigger, 0, nspCounts.length);
              nspCounts = bigger;
         }
@@ -904,17 +935,19 @@ public class WbxmlParser implements XmlPullParser {
         for (int i = attributeCount - 1; i > 0; i--) {
             for (int j = 0; j < i; j++) {
                 if (getAttributeName(i)
-                    .equals(getAttributeName(j)))
-                    exception(
+                    .equals(getAttributeName(j))) {
+					exception(
                         "Duplicate Attribute: "
                             + getAttributeName(i));
+				}
             }
         }
 
-        if (processNsp)
-            adjustNsp();
-        else
-            namespace = "";
+        if (processNsp) {
+			adjustNsp();
+		} else {
+			namespace = "";
+		}
 
         elementStack[sp] = namespace;
         elementStack[sp + 1] = prefix;
@@ -923,19 +956,21 @@ public class WbxmlParser implements XmlPullParser {
     }
 
     private final String[] ensureCapacity(
-        String[] arr,
-        int required) {
-        if (arr.length >= required)
-            return arr;
-        String[] bigger = new String[required + 16];
+    		final String[] arr,
+    		final int required) {
+        if (arr.length >= required) {
+			return arr;
+		}
+        final String[] bigger = new String[required + 16];
         System.arraycopy(arr, 0, bigger, 0, arr.length);
         return bigger;
     }
 
     int readByte() throws IOException {
-        int i = in.read();
-        if (i == -1)
-            throw new IOException("Unexpected EOF");
+    	final int i = in.read();
+        if (i == -1) {
+			throw new IOException("Unexpected EOF");
+		}
         return i;
     }
 
@@ -953,16 +988,19 @@ public class WbxmlParser implements XmlPullParser {
     }
 
     String readStrI() throws IOException {
-        StringBuffer buf = new StringBuffer();
+    	final StringBuilder buf = new StringBuilder();
         boolean wsp = true;
         while (true) {
-            int i = in.read();
-            if (i == -1)
-                throw new IOException("Unexpected EOF");
-            if (i == 0)
-                break;
-            if (i > 32)
-                wsp = false;
+        	final int i = in.read();
+            if (i == -1) {
+				throw new IOException("Unexpected EOF");
+			}
+            if (i == 0) {
+				break;
+			}
+            if (i > 32) {
+				wsp = false;
+			}
             buf.append((char) i);
         }
         isWhitespace = wsp;
@@ -970,8 +1008,8 @@ public class WbxmlParser implements XmlPullParser {
     }
 
     String readStrT() throws IOException {
-        int pos = readInt();
-        int end = stringTable.indexOf('\0', pos);
+    	final int pos = readInt();
+    	final int end = stringTable.indexOf('\0', pos);
 
         return stringTable.substring(pos, end);
     }
@@ -981,7 +1019,7 @@ public class WbxmlParser implements XmlPullParser {
      * The first string in the array defines tag 5, the second tag 6 etc.
      */
 
-    public void setTagTable(int page, String[] table) {
+    public void setTagTable(final int page, final String[] table) {
     	setTable(page, TAG_TABLE, table);
     	
 //        this.tagTable = tagTable;
@@ -998,8 +1036,8 @@ public class WbxmlParser implements XmlPullParser {
      */
 
     public void setAttrStartTable(
-        int page,
-        String[] table) {
+    		final int page,
+    		final String[] table) {
 
 		setTable(page, ATTR_START_TABLE, table);
     }
@@ -1011,8 +1049,8 @@ public class WbxmlParser implements XmlPullParser {
      */
 
     public void setAttrValueTable(
-        int page,
-        String[] table) {
+    		final int page,
+    		final String[] table) {
 
 		setTable(page, ATTR_VALUE_TABLE, table);
     }

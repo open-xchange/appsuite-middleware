@@ -34,9 +34,9 @@ public class Element extends Node {
 
     protected String namespace;
     protected String name;
-    protected Vector attributes;
+    protected List<String[]> attributes;
     protected Node parent;
-    protected Vector prefixes;
+    protected List<String[]> prefixes;
 
     public Element() {
     }
@@ -65,8 +65,8 @@ public class Element extends Node {
      * calls super.createElement. */
 
     public Element createElement(
-        String namespace,
-        String name) { 
+    		final String namespace,
+    		final String name) { 
 
         return (this.parent == null)
             ? super.createElement(namespace, name)
@@ -79,26 +79,26 @@ public class Element extends Node {
     public int getAttributeCount() {
         return attributes == null ? 0 : attributes.size ();
     }
-
-	public String getAttributeNamespace (int index) {
-		return ((String []) attributes.elementAt (index)) [0];
+ 
+	public String getAttributeNamespace (final int index) {
+		return attributes.get(index)[0];
 	}
 
 /*	public String getAttributePrefix (int index) {
 		return ((String []) attributes.elementAt (index)) [1];
 	}*/
 	
-	public String getAttributeName (int index) {
-		return ((String []) attributes.elementAt (index)) [1];
+	public String getAttributeName (final int index) {
+		return attributes.get(index)[1];
 	}
 	
 
-	public String getAttributeValue (int index) {
-		return ((String []) attributes.elementAt (index)) [2];
+	public String getAttributeValue (final int index) {
+		return attributes.get(index)[2];
 	}
 	
 	
-	public String getAttributeValue (String namespace, String name) {
+	public String getAttributeValue (final String namespace, final String name) {
 		for (int i = 0; i < getAttributeCount (); i++) {
 			if (name.equals (getAttributeName (i)) 
 				&& (namespace == null || namespace.equals (getAttributeNamespace(i)))) {
@@ -117,7 +117,9 @@ public class Element extends Node {
         Element current = this;
         
         while (current.parent != null) {
-            if (!(current.parent instanceof Element)) return current.parent;
+            if (!(current.parent instanceof Element)) {
+				return current.parent;
+			}
             current = (Element) current.parent;
         }
         
@@ -142,12 +144,14 @@ public class Element extends Node {
     /** 
      * returns the namespace for the given prefix */
     
-    public String getNamespaceUri (String prefix) {
-    	int cnt = getNamespaceCount ();
+    public String getNamespaceUri (final String prefix) {
+    	final int cnt = getNamespaceCount ();
 		for (int i = 0; i < cnt; i++) {
+			// TODO: Check if String.equals() should be used instead!
 			if (prefix == getNamespacePrefix (i) ||
-				(prefix != null && prefix.equals (getNamespacePrefix (i))))
-				return getNamespaceUri (i);	
+				(prefix != null && prefix.equals (getNamespacePrefix (i)))) {
+				return getNamespaceUri (i);
+			}	
 		}
 		return parent instanceof Element ? ((Element) parent).getNamespaceUri (prefix) : null;
     }
@@ -162,12 +166,12 @@ public class Element extends Node {
 	}
 
 
-	public String getNamespacePrefix (int i) {
-		return ((String []) prefixes.elementAt (i)) [0];
+	public String getNamespacePrefix (final int i) {
+		return prefixes.get (i)[0];
 	}
 
-	public String getNamespaceUri (int i) {
-		return ((String []) prefixes.elementAt (i)) [1];
+	public String getNamespaceUri (final int i) {
+		return prefixes.get (i)[1];
 	}
 
 
@@ -193,7 +197,7 @@ public class Element extends Node {
      * parse, an element can take complete control over parsing its 
      * subtree. */
 
-    public void parse(XmlPullParser parser)
+    public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
         for (int i = parser.getNamespaceCount (parser.getDepth () - 1);
@@ -202,11 +206,12 @@ public class Element extends Node {
         }
         
         
-        for (int i = 0; i < parser.getAttributeCount (); i++) 
-	        setAttribute (parser.getAttributeNamespace (i),
+        for (int i = 0; i < parser.getAttributeCount (); i++) {
+			setAttribute (parser.getAttributeNamespace (i),
 //	        			  parser.getAttributePrefix (i),
 	        			  parser.getAttributeName (i),
 	        			  parser.getAttributeValue (i));
+		}
 
 
         //        if (prefixMap == null) throw new RuntimeException ("!!");
@@ -214,14 +219,15 @@ public class Element extends Node {
         init();
 
 
-		if (parser.isEmptyElementTag()) 
+		if (parser.isEmptyElementTag()) {
 			parser.nextToken ();
-		else {
+		} else {
 			parser.nextToken ();
 	        super.parse(parser);
 
-        	if (getChildCount() == 0)
-            	addChild(IGNORABLE_WHITESPACE, "");
+        	if (getChildCount() == 0) {
+				addChild(IGNORABLE_WHITESPACE, "");
+			}
 		}
 		
         parser.require(
@@ -236,20 +242,22 @@ public class Element extends Node {
     /** 
      * Sets the given attribute; a value of null removes the attribute */
 
-	public void setAttribute (String namespace, String name, String value) {
-		if (attributes == null) 
-			attributes = new Vector ();
+	public void setAttribute (String namespace, final String name, final String value) {
+		if (attributes == null) {
+			attributes = new ArrayList<String[]>();
+		}
 
-		if (namespace == null) 
+		if (namespace == null) {
 			namespace = "";
+		}
 		
         for (int i = attributes.size()-1; i >=0; i--){
-            String[] attribut = (String[]) attributes.elementAt(i);
+            String[] attribut = attributes.get(i);
             if (attribut[0].equals(namespace) &&
 				attribut[1].equals(name)){
 					
 				if (value == null) {
-	                attributes.removeElementAt(i);
+	                attributes.remove(i);
 				}
 				else {
 					attribut[2] = value;
@@ -258,8 +266,7 @@ public class Element extends Node {
 			}
         }
 
-		attributes.addElement 
-			(new String [] {namespace, name, value});
+		attributes.add(new String [] {namespace, name, value});
 	}
 
 
@@ -267,16 +274,18 @@ public class Element extends Node {
      * Sets the given prefix; a namespace value of null removess the 
 	 * prefix */
 
-	public void setPrefix (String prefix, String namespace) {
-		if (prefixes == null) prefixes = new Vector ();
-		prefixes.addElement (new String [] {prefix, namespace});		
+	public void setPrefix (final String prefix, final String namespace) {
+		if (prefixes == null) {
+			prefixes = new ArrayList<String[]>();
+		}
+		prefixes.add(new String [] {prefix, namespace});		
 	}
 
 
     /** 
      * sets the name of the element */
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -286,9 +295,10 @@ public class Element extends Node {
      * value. Currently, null is converted to Xml.NO_NAMESPACE, but
      * future versions may throw an exception. */
 
-    public void setNamespace(String namespace) {
-        if (namespace == null) 
-        	throw new NullPointerException ("Use \"\" for empty namespace");
+    public void setNamespace(final String namespace) {
+        if (namespace == null) {
+			throw new NullPointerException ("Use \"\" for empty namespace");
+		}
         this.namespace = namespace;
     }
 
@@ -298,7 +308,7 @@ public class Element extends Node {
      * create inconsitencies in the document tree structure using
      * this method!  */
 
-    protected void setParent(Node parent) {
+    protected void setParent(final Node parent) {
         this.parent = parent;
     }
 
@@ -306,7 +316,7 @@ public class Element extends Node {
     /** 
      * Writes this element and all children to the given XmlWriter. */
 
-    public void write(XmlSerializer writer)
+    public void write(final XmlSerializer writer)
         throws IOException {
 
 		if (prefixes != null) {
@@ -319,7 +329,7 @@ public class Element extends Node {
             getNamespace(),
             getName());
 
-        int len = getAttributeCount();
+        final int len = getAttributeCount();
 
         for (int i = 0; i < len; i++) {
             writer.attribute(

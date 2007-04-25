@@ -105,6 +105,12 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class Attachment extends PermissionServlet {
 	
+	private static final String MIME_TEXT_HTML_CHARSET_UTF8 = "text/html; charset=UTF-8";
+
+	private static final String MIME_TEXT_HTML = "text/html";
+
+	private static final String PREFIX_JSON = "json_";
+
 	private static final long serialVersionUID = -5819944675070929520L;
 
 	private static transient final AttachmentParser PARSER = new AttachmentParser();
@@ -199,7 +205,7 @@ public class Attachment extends PermissionServlet {
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		
-		res.setContentType("text/html");
+		res.setContentType(MIME_TEXT_HTML);
 		
 		final SessionObject session = getSessionObject(req);
 		
@@ -224,11 +230,14 @@ public class Attachment extends PermissionServlet {
 					
 					long sum = 0;
 					final JSONObject json = new JSONObject();
-					for(final Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
+					final List<UploadFile> l = upload.getUploadFiles();
+					final int size = l.size();
+					final Iterator<UploadFile> iter = l.iterator();
+					for (int a = 0; a < size; a++) {
 						final UploadFile uploadFile = iter.next();
 						final String fileField = uploadFile.getFieldName();
 						final int index = Integer.parseInt(fileField.substring(5));
-						final String obj = upload.getFormField("json_"+index);
+						final String obj = upload.getFormField(PREFIX_JSON+index);
 						if (obj == null || obj.length() == 0) {
 							continue;
 						}
@@ -260,7 +269,7 @@ public class Attachment extends PermissionServlet {
 			final Response resp = new Response();
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
-				res.setContentType("text/html; charset=UTF-8");
+				res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 				
 				throw new UploadServletException(res, substitute(JS_FRAGMENT, "json", resp.getJSON().toString(), "action","error"),x.getMessage(),x);
 			} catch (JSONException e) {
@@ -268,8 +277,9 @@ public class Attachment extends PermissionServlet {
 			}
 			
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (LOG.isErrorEnabled()) {
+				LOG.error(e.getMessage(), e);
+			}
 		} 
 	}
 
@@ -318,10 +328,12 @@ public class Attachment extends PermissionServlet {
 			
 			ATTACHMENT_BASE.commit();
 		} catch (Throwable t) {
-//			 This is a bit convoluted: In case the contentType is not overridden the returned file will be opened
-//			 in a new window. To call the JS callback routine from a popup we can use parent.callback_error() but
-//			 must use window.opener.callback_error()
-			rollback(t,res, "error", contentType == null ? JS_FRAGMENT_POPUP : null ); 
+			// This is a bit convoluted: In case the contentType is not
+			// overridden the returned file will be opened
+			// in a new window. To call the JS callback routine from a popup we
+			// can use parent.callback_error() but
+			// must use window.opener.callback_error()
+			rollback(t, res, "error", contentType == null ? JS_FRAGMENT_POPUP : null);
 			return;
 		} finally {
 			if(documentData != null) {
@@ -370,7 +382,7 @@ public class Attachment extends PermissionServlet {
 		PrintWriter w = null;
 		try {
 			ATTACHMENT_BASE.startTransaction();
-			final Iterator<AttachmentMetadata> attIter = attachments.iterator();
+			//final Iterator<AttachmentMetadata> attIter = attachments.iterator();
 			final Iterator<UploadFile> ufIter = uploadFiles.iterator();
 			
 			final JSONObject result = new JSONObject();
@@ -378,8 +390,9 @@ public class Attachment extends PermissionServlet {
 			
 			long timestamp = 0;
 			
-			while(attIter.hasNext()) {
-				final AttachmentMetadata attachment = attIter.next();
+			for (AttachmentMetadata attachment : attachments) {
+			//while(attIter.hasNext()) {
+				//final AttachmentMetadata attachment = attIter.next();
 				final UploadFile uploadFile = ufIter.next();
 			
 				attachment.setId(AttachmentBase.NEW);
@@ -431,12 +444,14 @@ public class Attachment extends PermissionServlet {
 
 
 	private void initAttachments(final List<AttachmentMetadata> attachments, final List<UploadFile> uploads) {
-		final Iterator<AttachmentMetadata> attIter = new ArrayList<AttachmentMetadata>(attachments).iterator();
+		final List<AttachmentMetadata> attList = new ArrayList<AttachmentMetadata>(attachments);
+		// final Iterator<AttachmentMetadata> attIter = new ArrayList<AttachmentMetadata>(attachments).iterator();
 		final Iterator<UploadFile> ufIter = new ArrayList<UploadFile>(uploads).iterator();
 		
 		int index = 0;
-		while(attIter.hasNext()) {
-			final AttachmentMetadata attachment = attIter.next();
+		for (AttachmentMetadata attachment : attList) {
+		// while(attIter.hasNext()) {
+			// final AttachmentMetadata attachment = attIter.next();
 			if(attachment == null) {
 				attachments.remove(index);
 				ufIter.next();
@@ -472,7 +487,7 @@ public class Attachment extends PermissionServlet {
 	private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
 		LOG.debug("",t);
 		
-		res.setContentType("text/html; charset=UTF-8");
+		res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
 		final Response resp = new Response();
 		resp.setException(t);

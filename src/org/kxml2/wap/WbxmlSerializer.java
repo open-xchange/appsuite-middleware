@@ -21,10 +21,15 @@
 
 package org.kxml2.wap;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
-import org.xmlpull.v1.*;
+import org.xmlpull.v1.XmlSerializer;
 
 // TODO: make some of the "direct" WBXML token writing methods public??
 
@@ -37,7 +42,9 @@ import org.xmlpull.v1.*;
 
 public class WbxmlSerializer implements XmlSerializer {
 
-    Hashtable stringTable = new Hashtable();
+    private static final String ERR_NYI = "NYI";
+
+	Hashtable<String, Integer> stringTable = new Hashtable<String, Integer>();
 
     OutputStream out;
 
@@ -48,24 +55,24 @@ public class WbxmlSerializer implements XmlSerializer {
     int depth;
     String name;
     String namespace;
-    Vector attributes = new Vector();
+    List<String> attributes = new ArrayList<String>();
 
-    Hashtable attrStartTable = new Hashtable();
-    Hashtable attrValueTable = new Hashtable();
-    Hashtable tagTable = new Hashtable();
+    Hashtable<String, int[]> attrStartTable = new Hashtable<String, int[]>();
+    Hashtable<String, int[]> attrValueTable = new Hashtable<String, int[]>();
+    Hashtable<String, int[]> tagTable = new Hashtable<String, int[]>();
 
 	private int attrPage;
 	private int tagPage;
 
 
-    public XmlSerializer attribute(String namespace, String name, String value) {
-        attributes.addElement(name);
-        attributes.addElement(value);
+    public XmlSerializer attribute(final String namespace, final String name, final String value) {
+        attributes.add(name);
+        attributes.add(value);
         return this;
     }
 
 
-    public void cdsect (String cdsect) throws IOException{
+    public void cdsect (final String cdsect) throws IOException{
         text (cdsect);
     }
 
@@ -73,16 +80,16 @@ public class WbxmlSerializer implements XmlSerializer {
 
     /* silently ignore comment */
 
-    public void comment (String comment) {
+    public void comment (final String comment) {
     }
 
     
-    public void docdecl (String docdecl) {
+    public void docdecl (final String docdecl) {
         throw new RuntimeException ("Cannot write docdecl for WBXML");
     }
 
 
-    public void entityRef (String er) {
+    public void entityRef (final String er) {
         throw new RuntimeException ("EntityReference not supported for WBXML");
     }
     
@@ -91,28 +98,28 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
-    public boolean getFeature (String name) {
+    public boolean getFeature (final String name) {
         return false;
     }
     
 	public String getNamespace() {
-		throw new RuntimeException("NYI");
+		throw new RuntimeException(ERR_NYI);
 	}
 	
 	public String getName() {
-		throw new RuntimeException("NYI");
+		throw new RuntimeException(ERR_NYI);
 	}
 	
-	public String getPrefix(String nsp, boolean create) {
-        throw new RuntimeException ("NYI");
+	public String getPrefix(final String nsp, final boolean create) {
+        throw new RuntimeException (ERR_NYI);
     }
     
     
-    public Object getProperty (String name) {
+    public Object getProperty (final String name) {
         return null;
     }
 
-    public void ignorableWhitespace (String sp) {
+    public void ignorableWhitespace (final String sp) {
     }
     
 
@@ -140,13 +147,14 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
-    public void checkPending(boolean degenerated) throws IOException {
-        if (pending == null)
-            return;
+    public void checkPending(final boolean degenerated) throws IOException {
+        if (pending == null) {
+			return;
+		}
 
-        int len = attributes.size();
+        final int len = attributes.size();
 
-        int[] idx = (int[]) tagTable.get(pending);
+        int[] idx = tagTable.get(pending);
 
         // if no entry in known table, then add as literal
         if (idx == null) {
@@ -174,11 +182,11 @@ public class WbxmlSerializer implements XmlSerializer {
         }
 
         for (int i = 0; i < len;) {
-            idx = (int[]) attrStartTable.get(attributes.elementAt(i));
+            idx = attrStartTable.get(attributes.get(i));
             
             if (idx == null) {
                 buf.write(Wbxml.LITERAL);
-                writeStrT((String) attributes.elementAt(i));
+                writeStrT(attributes.get(i));
             }
             else {
 				if(idx[0] != attrPage){
@@ -188,10 +196,10 @@ public class WbxmlSerializer implements XmlSerializer {
 				}
                 buf.write(idx[1]);
             }
-            idx = (int[]) attrValueTable.get(attributes.elementAt(++i));
+            idx = attrValueTable.get(attributes.get(++i));
             if (idx == null) {
                 buf.write(Wbxml.STR_I);
-                writeStrI(buf, (String) attributes.elementAt(i));
+                writeStrI(buf, attributes.get(i));
             }
             else {
 				if(idx[0] != attrPage){
@@ -204,32 +212,35 @@ public class WbxmlSerializer implements XmlSerializer {
             ++i;
         }
 
-        if (len > 0)
-            buf.write(Wbxml.END);
+        if (len > 0) {
+			buf.write(Wbxml.END);
+		}
 
         pending = null;
-        attributes.removeAllElements();
+        attributes.clear();
     }
 
 
-    public void processingInstruction(String pi) {
+    public void processingInstruction(final String pi) {
         throw new RuntimeException ("PI NYI");
     }
 
 
-    public void setFeature(String name, boolean value) {
+    public void setFeature(final String name, final boolean value) {
         throw new IllegalArgumentException ("unknown feature "+name);
     }
         
 
 
-    public void setOutput (Writer writer) {
+    public void setOutput (final Writer writer) {
         throw new RuntimeException ("Wbxml requires an OutputStream!");
     }
 
-    public void setOutput (OutputStream out, String encoding) throws IOException {
+    public void setOutput (final OutputStream out, final String encoding) throws IOException {
         
-        if (encoding != null) throw new IllegalArgumentException ("encoding not yet supported for WBXML");
+        if (encoding != null) {
+			throw new IllegalArgumentException ("encoding not yet supported for WBXML");
+		}
         
         this.out = out;
 
@@ -240,26 +251,27 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
-    public void setPrefix(String prefix, String nsp) {
-        throw new RuntimeException("NYI");
+    public void setPrefix(final String prefix, final String nsp) {
+        throw new RuntimeException(ERR_NYI);
     }
 
-    public void setProperty(String property, Object value) {
+    public void setProperty(final String property, final Object value) {
         throw new IllegalArgumentException ("unknown property "+property);
     }
 
     
-    public void startDocument(String s, Boolean b) throws IOException{
+    public void startDocument(final String s, final Boolean b) throws IOException{
         out.write(0x01); // version
         out.write(0x01); // unknown or missing public identifier
         out.write(0x04); // iso-8859-1
     }
 
 
-    public XmlSerializer startTag(String namespace, String name) throws IOException {
+    public XmlSerializer startTag(final String namespace, final String name) throws IOException {
 
-        if (namespace != null && !"".equals(namespace)) 
-            throw new RuntimeException ("NSP NYI");
+        if (namespace != null && !"".equals(namespace)) {
+			throw new RuntimeException ("NSP NYI");
+		}
 
         //current = new State(current, prefixMap, name);
 
@@ -270,7 +282,7 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
 
-    public XmlSerializer text(char[] chars, int start, int len) throws IOException {
+    public XmlSerializer text(final char[] chars, final int start, final int len) throws IOException {
 
         checkPending(false);
 
@@ -280,7 +292,7 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
 
-    public XmlSerializer text(String text) throws IOException {
+    public XmlSerializer text(final String text) throws IOException {
 
         checkPending(false);
 
@@ -292,14 +304,15 @@ public class WbxmlSerializer implements XmlSerializer {
     
     
 
-    public XmlSerializer endTag(String namespace, String name) throws IOException {
+    public XmlSerializer endTag(final String namespace, final String name) throws IOException {
 
 //        current = current.prev;
 
-        if (pending != null)
-            checkPending(true);
-        else
-            buf.write(Wbxml.END);
+        if (pending != null) {
+			checkPending(true);
+		} else {
+			buf.write(Wbxml.END);
+		}
 
 		depth--;
 
@@ -308,12 +321,12 @@ public class WbxmlSerializer implements XmlSerializer {
 
     /** currently ignored! */
 
-    public void writeLegacy(int type, String data) {
+    public void writeLegacy(final int type, final String data) {
     }
 
     // ------------- internal methods --------------------------
 
-    static void writeInt(OutputStream out, int i) throws IOException {
+    static void writeInt(final OutputStream out, int i) throws IOException {
         byte[] buf = new byte[5];
         int idx = 0;
 
@@ -329,16 +342,16 @@ public class WbxmlSerializer implements XmlSerializer {
         out.write(buf[0]);
     }
 
-    static void writeStrI(OutputStream out, String s) throws IOException {
+    static void writeStrI(final OutputStream out, final String s) throws IOException {
         for (int i = 0; i < s.length(); i++) {
             out.write((byte) s.charAt(i));
         }
         out.write(0);
     }
 
-    void writeStrT(String s) throws IOException {
+    void writeStrT(final String s) throws IOException {
 
-        Integer idx = (Integer) stringTable.get(s);
+        Integer idx = stringTable.get(s);
 
         if (idx == null) {
             idx = Integer.valueOf(stringTableBuf.size());
@@ -355,14 +368,15 @@ public class WbxmlSerializer implements XmlSerializer {
      * The first string in the array defines tag 5, the second tag 6 etc.
      */
     
-    public void setTagTable(int page, String[] tagTable) {
+    public void setTagTable(final int page, final String[] tagTable) {
         // clear entries in tagTable!
-		if (page != 0)
+		if (page != 0) {
 			return;
+		}
 
         for (int i = 0; i < tagTable.length; i++) {
             if (tagTable[i] != null) {
-                Object idx = new int[]{page, i+5};
+                final int[] idx = new int[]{page, i+5};
                 this.tagTable.put(tagTable[i], idx);
             }
         }
@@ -376,11 +390,11 @@ public class WbxmlSerializer implements XmlSerializer {
      *  character '=' (without quote!) as delimiter 
      *  between the attribute name and the (start of the) value 
      */
-    public void setAttrStartTable(int page, String[] attrStartTable) {
+    public void setAttrStartTable(final int page, final String[] attrStartTable) {
         
         for (int i = 0; i < attrStartTable.length; i++) {
             if (attrStartTable[i] != null) {
-                Object idx = new int[] {page, i + 5};
+                final int[] idx = new int[] {page, i + 5};
                 this.attrStartTable.put(attrStartTable[i], idx);
             }
         }
@@ -391,11 +405,11 @@ public class WbxmlSerializer implements XmlSerializer {
      * The first string in the array defines attribute value 0x85, 
      * the second attribute value 0x86 etc.
      */
-    public void setAttrValueTable(int page, String[] attrValueTable) {
+    public void setAttrValueTable(final int page, final String[] attrValueTable) {
         // clear entries in this.table!
         for (int i = 0; i < attrValueTable.length; i++) {
             if (attrValueTable[i] != null) {
-                Object idx = new int[]{page, i + 0x085};
+                final int[] idx = new int[]{page, i + 0x085};
                 this.attrValueTable.put(attrValueTable[i], idx);
             }
         }

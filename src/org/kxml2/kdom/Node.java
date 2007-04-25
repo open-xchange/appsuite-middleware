@@ -38,38 +38,41 @@ public class Node { //implements XmlIO{
     public static final int COMMENT = 9;
     public static final int DOCDECL = 10;
 
-    protected Vector children;
-    protected StringBuffer types;
+    protected List<Object> children;
+    protected StringBuilder types;
 
     /** inserts the given child object of the given type at the
     given index. */
 
-    public void addChild(int index, int type, Object child) {
+    public void addChild(final int index, final int type, final Object child) {
 
-        if (child == null)
-            throw new NullPointerException();
+        if (child == null) {
+			throw new NullPointerException();
+		}
 
         if (children == null) {
-            children = new Vector();
-            types = new StringBuffer();
+            children = new ArrayList<Object>();
+            types = new StringBuilder();
         }
 
         if (type == ELEMENT) {
-            if (!(child instanceof Element))
-                throw new RuntimeException("Element obj expected)");
+            if (!(child instanceof Element)) {
+				throw new RuntimeException("Element obj expected)");
+			}
 
             ((Element) child).setParent(this);
         }
-        else if (!(child instanceof String))
-            throw new RuntimeException("String expected");
+        else if (!(child instanceof String)) {
+			throw new RuntimeException("String expected");
+		}
 
-        children.insertElementAt(child, index);
+        children.add(index, child);
         types.insert(index, (char) type);
     }
 
     /** convenience method for addChild (getChildCount (), child) */
 
-    public void addChild(int type, Object child) {
+    public void addChild(final int type, final Object child) {
         addChild(getChildCount(), type, child);
     }
 
@@ -81,9 +84,9 @@ public class Node { //implements XmlIO{
     legal value. Currently, null is converted to Xml.NO_NAMESPACE,
     but future versions may throw an exception. */
 
-    public Element createElement(String namespace, String name) {
+    public Element createElement(final String namespace, final String name) {
 
-        Element e = new Element();
+    	final Element e = new Element();
         e.namespace = namespace == null ? "" : namespace;
         e.name = name;
         return e;
@@ -93,8 +96,8 @@ public class Node { //implements XmlIO{
         elements, an Element object is returned. For all other child
         types, a String is returned. */
 
-    public Object getChild(int index) {
-        return children.elementAt(index);
+    public Object getChild(final int index) {
+        return children.get(index);
     }
 
     /** Returns the number of child objects */
@@ -106,8 +109,8 @@ public class Node { //implements XmlIO{
     /** returns the element at the given index. If the node at the
     given index is a text node, null is returned */
 
-    public Element getElement(int index) {
-        Object child = getChild(index);
+    public Element getElement(final int index) {
+    	final Object child = getChild(index);
         return (child instanceof Element) ? (Element) child : null;
     }
 
@@ -115,19 +118,20 @@ public class Node { //implements XmlIO{
         element is not found, or more than one matching elements are
         found, an exception is thrown. */
 
-    public Element getElement(String namespace, String name) {
+    public Element getElement(final String namespace, final String name) {
 
-        int i = indexOf(namespace, name, 0);
-        int j = indexOf(namespace, name, i + 1);
+    	final int i = indexOf(namespace, name, 0);
+    	final int j = indexOf(namespace, name, i + 1);
 
-        if (i == -1 || j != -1)
-            throw new RuntimeException(
+        if (i == -1 || j != -1) {
+			throw new RuntimeException(
                 "Element {"
                     + namespace
-                    + "}"
+                    + '}'
                     + name
                     + (i == -1 ? " not found in " : " more than once in ")
                     + this);
+		}
 
         return getElement(i);
     }
@@ -171,14 +175,14 @@ public class Node { //implements XmlIO{
     /** Returns the text node with the given index or null if the node
         with the given index is not a text node. */
 
-    public String getText(int index) {
+    public String getText(final int index) {
         return (isText(index)) ? (String) getChild(index) : null;
     }
 
     /** Returns the type of the child at the given index. Possible 
     types are ELEMENT, TEXT, COMMENT, and PROCESSING_INSTRUCTION */
 
-    public int getType(int index) {
+    public int getType(final int index) {
         return types.charAt(index);
     }
 
@@ -195,24 +199,25 @@ public class Node { //implements XmlIO{
     matches any namespace, please use Xml.NO_NAMESPACE for no
     namespace).  returns -1 if no matching element was found. */
 
-    public int indexOf(String namespace, String name, int startIndex) {
+    public int indexOf(final String namespace, final String name, final int startIndex) {
 
-        int len = getChildCount();
+    	final int len = getChildCount();
 
         for (int i = startIndex; i < len; i++) {
 
-            Element child = getElement(i);
+        	final Element child = getElement(i);
 
             if (child != null
                 && name.equals(child.getName())
-                && (namespace == null || namespace.equals(child.getNamespace())))
-                return i;
+                && (namespace == null || namespace.equals(child.getNamespace()))) {
+				return i;
+			}
         }
         return -1;
     }
 
-    public boolean isText(int i) {
-        int t = getType(i);
+    public boolean isText(final int i) {
+    	final int t = getType(i);
         return t == TEXT || t == IGNORABLE_WHITESPACE || t == CDSECT;
     }
 
@@ -220,13 +225,13 @@ public class Node { //implements XmlIO{
     until an end tag or end document is found. 
         The end tag is not consumed. */
 
-    public void parse(XmlPullParser parser)
+    public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
         boolean leave = false;
 
         do {
-            int type = parser.getEventType();
+        	final int type = parser.getEventType();
             
    //         System.out.println(parser.getPositionDescription());
             
@@ -234,7 +239,7 @@ public class Node { //implements XmlIO{
 
                 case XmlPullParser.START_TAG :
                     {
-                        Element child =
+                    	final Element child =
                             createElement(
                                 parser.getNamespace(),
                                 parser.getName());
@@ -254,11 +259,11 @@ public class Node { //implements XmlIO{
                     break;
 
                 default :
-                    if (parser.getText() != null)
-                        addChild(
+                    if (parser.getText() != null) {
+						addChild(
                             type == XmlPullParser.ENTITY_REF ? TEXT : type,
                             parser.getText());
-                    else if (
+					} else if (
                         type == XmlPullParser.ENTITY_REF
                             && parser.getName() != null) {
                         addChild(ENTITY_REF, parser.getName());
@@ -271,16 +276,17 @@ public class Node { //implements XmlIO{
 
     /** Removes the child object at the given index */
 
-    public void removeChild(int idx) {
-        children.removeElementAt(idx);
+    public void removeChild(final int idx) {
+        children.remove(idx);
 
         /***  Modification by HHS - start ***/
         //      types.deleteCharAt (index);
         /***/
-        int n = types.length() - 1;
+        final int n = types.length() - 1;
 
-        for (int i = idx; i < n; i++)
-            types.setCharAt(i, types.charAt(i + 1));
+        for (int i = idx; i < n; i++) {
+			types.setCharAt(i, types.charAt(i + 1));
+		}
 
         types.setLength(n);
 
@@ -309,22 +315,23 @@ public class Node { //implements XmlIO{
         this method is identical to writeChildren, except that the
         stream is flushed automatically. */
 
-    public void write(XmlSerializer writer) throws IOException {
+    public void write(final XmlSerializer writer) throws IOException {
         writeChildren(writer);
         writer.flush();
     }
 
     /** Writes the children of this node to the given XmlWriter. */
 
-    public void writeChildren(XmlSerializer writer) throws IOException {
-        if (children == null)
-            return;
+    public void writeChildren(final XmlSerializer writer) throws IOException {
+        if (children == null) {
+			return;
+		}
 
-        int len = children.size();
+        final  int len = children.size();
 
         for (int i = 0; i < len; i++) {
-            int type = getType(i);
-            Object child = children.elementAt(i);
+        	final int type = getType(i);
+        	final Object child = children.get(i);
             switch (type) {
                 case ELEMENT :
                      ((Element) child).write(writer);

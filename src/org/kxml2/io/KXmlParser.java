@@ -43,7 +43,7 @@ public class KXmlParser implements XmlPullParser {
 
     private boolean processNsp;
     private boolean relaxed;
-    private Hashtable entityMap;
+    private Hashtable<String, String> entityMap;
     private int depth;
     private String[] elementStack = new String[16];
     private String[] nspStack = new String[8];
@@ -78,7 +78,7 @@ public class KXmlParser implements XmlPullParser {
     private boolean degenerated;
     private int attributeCount;
     private String[] attributes = new String[16];
-    private int stackMismatch = 0;
+    private int stackMismatch;
     private String error;
 
     /** 
@@ -88,7 +88,7 @@ public class KXmlParser implements XmlPullParser {
     private int[] peek = new int[2];
     private int peekCount;
     private boolean wasCR;
-    private boolean preserveText = false;
+    private boolean preserveText;
 
     private boolean unresolved;
     private boolean token;
@@ -98,13 +98,14 @@ public class KXmlParser implements XmlPullParser {
             new char[Runtime.getRuntime().freeMemory() >= 1048576 ? 8192 : 128];
     }
 
-    private final boolean isProp(String n1, boolean prop, String n2) {
-        if (!n1.startsWith("http://xmlpull.org/v1/doc/"))
-            return false;
-        if (prop)
-            return n1.substring(42).equals(n2);
-        else
-            return n1.substring(40).equals(n2);
+    private final boolean isProp(final String n1, final boolean prop, final String n2) {
+        if (!n1.startsWith("http://xmlpull.org/v1/doc/")) {
+			return false;
+		}
+        if (prop) {
+			return n1.substring(42).equals(n2);
+		}
+		return n1.substring(40).equals(n2);
     }
 
     private final boolean adjustNsp() throws XmlPullParserException {
@@ -115,7 +116,7 @@ public class KXmlParser implements XmlPullParser {
             // * 4 - 4; i >= 0; i -= 4) {
 
             String attrName = attributes[i + 2];
-            int cut = attrName.indexOf(':');
+            final int cut = attrName.indexOf(':');
             String prefix;
 
             if (cut != -1) {
@@ -125,22 +126,23 @@ public class KXmlParser implements XmlPullParser {
             else if (attrName.equals("xmlns")) {
                 prefix = attrName;
                 attrName = null;
-            }
-            else
-                continue;
+            } else {
+				continue;
+			}
 
             if (!prefix.equals("xmlns")) {
                 any = true;
             }
             else {
-                int j = (nspCounts[depth]++) << 1;
+            	final int j = (nspCounts[depth]++) << 1;
 
                 nspStack = ensureCapacity(nspStack, j + 2);
                 nspStack[j] = attrName;
                 nspStack[j + 1] = attributes[i + 3];
 
-                if (attrName != null && attributes[i + 3].equals(""))
-                    error("illegal empty namespace");
+                if (attrName != null && attributes[i + 3].equals("")) {
+					error("illegal empty namespace");
+				}
 
                 //  prefixMap = new PrefixMap (prefixMap, attrName, attr.getValue ());
 
@@ -161,22 +163,22 @@ public class KXmlParser implements XmlPullParser {
             for (int i = (attributeCount << 2) - 4; i >= 0; i -= 4) {
 
                 String attrName = attributes[i + 2];
-                int cut = attrName.indexOf(':');
+                final int cut = attrName.indexOf(':');
 
-                if (cut == 0 && !relaxed)
-                    throw new RuntimeException(
+                if (cut == 0 && !relaxed) {
+					throw new RuntimeException(
                         "illegal attribute name: " + attrName + " at " + this);
-
-                else if (cut != -1) {
-                    String attrPrefix = attrName.substring(0, cut);
+				} else if (cut != -1) {
+					final String attrPrefix = attrName.substring(0, cut);
 
                     attrName = attrName.substring(cut + 1);
 
-                    String attrNs = getNamespace(attrPrefix);
+                    final String attrNs = getNamespace(attrPrefix);
 
-                    if (attrNs == null && !relaxed)
-                        throw new RuntimeException(
+                    if (attrNs == null && !relaxed) {
+						throw new RuntimeException(
                             "Undefined Prefix: " + attrPrefix + " in " + this);
+					}
 
                     attributes[i] = attrNs;
                     attributes[i + 1] = attrPrefix;
@@ -198,10 +200,11 @@ public class KXmlParser implements XmlPullParser {
             }
         }
 
-        int cut = name.indexOf(':');
+        final int cut = name.indexOf(':');
 
-        if (cut == 0)
-            error("illegal tag name: " + name);
+        if (cut == 0) {
+			error("illegal tag name: " + name);
+		}
 
         if (cut != -1) {
             prefix = name.substring(0, cut);
@@ -211,32 +214,35 @@ public class KXmlParser implements XmlPullParser {
         this.namespace = getNamespace(prefix);
 
         if (this.namespace == null) {
-            if (prefix != null)
-                error("undefined prefix: " + prefix);
+            if (prefix != null) {
+				error("undefined prefix: " + prefix);
+			}
             this.namespace = NO_NAMESPACE;
         }
 
         return any;
     }
 
-    private final String[] ensureCapacity(String[] arr, int required) {
-        if (arr.length >= required)
-            return arr;
-        String[] bigger = new String[required + 16];
+    private final String[] ensureCapacity(final String[] arr, final int required) {
+        if (arr.length >= required) {
+			return arr;
+		}
+        final String[] bigger = new String[required + 16];
         System.arraycopy(arr, 0, bigger, 0, arr.length);
         return bigger;
     }
 
-    private final void error(String desc) throws XmlPullParserException {
+    private final void error(final String desc) throws XmlPullParserException {
         if (relaxed) {
-            if (error == null)
-                error = "ERR: " + desc;
-        }
-        else
-            exception(desc);
+            if (error == null) {
+				error = "ERR: " + desc;
+			}
+        } else {
+			exception(desc);
+		}
     }
 
-    private final void exception(String desc) throws XmlPullParserException {
+    private final void exception(final String desc) throws XmlPullParserException {
         throw new XmlPullParserException(
             desc.length() < 100 ? desc : desc.substring(0, 100) + "\n",
             this,
@@ -249,11 +255,13 @@ public class KXmlParser implements XmlPullParser {
 
     private final void nextImpl() throws IOException, XmlPullParserException {
 
-        if (reader == null)
-            exception("No Input specified");
+        if (reader == null) {
+			exception("No Input specified");
+		}
 
-        if (type == END_TAG)
-            depth--;
+        if (type == END_TAG) {
+			depth--;
+		}
 
         while (true) {
             attributeCount = -1;
@@ -269,8 +277,9 @@ public class KXmlParser implements XmlPullParser {
 
 
             if (error != null) {
-                for (int i = 0; i < error.length(); i++)
-                    push(error.charAt(i));
+                for (int i = 0; i < error.length(); i++) {
+					push(error.charAt(i));
+				}
                 //				text = error;
                 error = null;
                 type = COMMENT;
@@ -280,15 +289,17 @@ public class KXmlParser implements XmlPullParser {
 
             if (relaxed
                 && (stackMismatch > 0 || (peek(0) == -1 && depth > 0))) {
-                int sp = (depth - 1) << 2;
+            	final int sp = (depth - 1) << 2;
                 type = END_TAG;
                 namespace = elementStack[sp];
                 prefix = elementStack[sp + 1];
                 name = elementStack[sp + 2];
-                if (stackMismatch != 1)
-                    error = "missing end tag /" + name + " inserted";
-                if (stackMismatch > 0)
-                    stackMismatch--;
+                if (stackMismatch != 1) {
+					error = "missing end tag /" + name + " inserted";
+				}
+                if (stackMismatch > 0) {
+					stackMismatch--;
+				}
                 return;
             }
 
@@ -318,19 +329,21 @@ public class KXmlParser implements XmlPullParser {
 
                 case TEXT :
                     pushText('<', !token);
-                    if (depth == 0) {
-                        if (isWhitespace)
-                            type = IGNORABLE_WHITESPACE;
+                    if (depth == 0 && isWhitespace) {
+                        // if (isWhitespace) {
+							type = IGNORABLE_WHITESPACE;
                         // make exception switchable for instances.chg... !!!!
                         //	else 
                         //    exception ("text '"+getText ()+"' not allowed outside root element");
+						// }
                     }
                     return;
 
                 default :
                     type = parseLegacy(token);
-                    if (type != XML_DECL)
-                        return;
+                    if (type != XML_DECL) {
+						return;
+					}
             }
         }
     }
@@ -359,13 +372,15 @@ public class KXmlParser implements XmlPullParser {
 
                 if ((peek(0) == 'l' || peek(0) == 'L') && peek(1) <= ' ') {
 
-                    if (line != 1 || column > 4)
-                        error("PI must not start with xml");
+                    if (line != 1 || column > 4) {
+						error("PI must not start with xml");
+					}
 
                     parseStartTag(true);
 
-                    if (attributeCount < 1 || !"version".equals(attributes[2]))
-                        error("version expected");
+                    if (attributeCount < 1 || !"version".equals(attributes[2])) {
+						error("version expected");
+					}
 
                     version = attributes[3];
 
@@ -379,18 +394,20 @@ public class KXmlParser implements XmlPullParser {
 
                     if (pos < attributeCount
                         && "standalone".equals(attributes[4 * pos + 2])) {
-                        String st = attributes[3 + 4 * pos];
-                        if ("yes".equals(st))
-                            standalone = Boolean.TRUE;
-                        else if ("no".equals(st))
-                            standalone = Boolean.FALSE;
-                        else
-                            error("illegal standalone value: " + st);
+                    	final String st = attributes[3 + 4 * pos];
+                        if ("yes".equals(st)) {
+							standalone = Boolean.TRUE;
+						} else if ("no".equals(st)) {
+							standalone = Boolean.FALSE;
+						} else {
+							error("illegal standalone value: " + st);
+						}
                         pos++;
                     }
 
-                    if (pos != attributeCount)
-                        error("illegal xmldecl");
+                    if (pos != attributeCount) {
+						error("illegal xmldecl");
+					}
 
                     isWhitespace = true;
                     txtPos = 0;
@@ -429,12 +446,13 @@ public class KXmlParser implements XmlPullParser {
             return COMMENT;
         }
 
-        for (int i = 0; i < req.length(); i++)
-            read(req.charAt(i));
+        for (int i = 0; i < req.length(); i++) {
+			read(req.charAt(i));
+		}
 
-        if (result == DOCDECL)
-            parseDoctype(push);
-        else {
+        if (result == DOCDECL) {
+			parseDoctype(push);
+		} else {
             while (true) {
                 c = read();
                 if (c == -1){
@@ -442,25 +460,29 @@ public class KXmlParser implements XmlPullParser {
                     return COMMENT;
                 }
 
-                if (push)
-                    push(c);
+                if (push) {
+					push(c);
+				}
 
                 if ((term == '?' || c == term)
                     && peek(0) == term
-                    && peek(1) == '>')
-                    break;
+                    && peek(1) == '>') {
+					break;
+				}
 
                 prev = c;
             }
 
-            if (term == '-' && prev == '-')
-                error("illegal comment delimiter: --->");
+            if (term == '-' && prev == '-') {
+				error("illegal comment delimiter: --->");
+			}
 
             read();
             read();
 
-            if (push && term != '?')
-                txtPos--;
+            if (push && term != '?') {
+				txtPos--;
+			}
 
         }
         return result;
@@ -468,7 +490,7 @@ public class KXmlParser implements XmlPullParser {
 
     /** precondition: &lt! consumed */
 
-    private final void parseDoctype(boolean push)
+    private final void parseDoctype(final boolean push)
         throws IOException, XmlPullParserException {
 
         int nesting = 1;
@@ -477,31 +499,26 @@ public class KXmlParser implements XmlPullParser {
         // read();
 
         while (true) {
-            int i = read();
-            switch (i) {
-
-                case -1 :
-                    error(UNEXPECTED_EOF);
-                    return;
-
-                case '\'' :
-                    quoted = !quoted;
-                    break;
-
-                case '<' :
-                    if (!quoted)
-                        nesting++;
-                    break;
-
-                case '>' :
-                    if (!quoted) {
-                        if ((--nesting) == 0)
-                            return;
-                    }
-                    break;
-            }
-            if (push)
-                push(i);
+        	final int i = read();
+            if (i == -1) {
+				error(UNEXPECTED_EOF);
+				return;
+			} else if (i == '\'') {
+				quoted = !quoted;
+			} else if (i == '<') {
+				if (!quoted) {
+					nesting++;
+				}
+			} else if (i == '>' && !quoted && (--nesting) == 0) {
+				// if (!quoted && (--nesting) == 0) {
+				    // if ((--nesting) == 0) {
+						return;
+					// }
+				// }
+			}
+            if (push) {
+				push(i);
+			}
         }
     }
 
@@ -516,7 +533,7 @@ public class KXmlParser implements XmlPullParser {
         skip();
         read('>');
 
-        int sp = (depth - 1) << 2;
+        final int sp = (depth - 1) << 2;
 
         if (depth == 0) {
             error("element stack empty");
@@ -530,7 +547,7 @@ public class KXmlParser implements XmlPullParser {
 			// become case insensitive in relaxed mode
 
             int probe = sp;
-            while (probe >= 0 && !name.toLowerCase().equals(elementStack[probe + 3].toLowerCase())) {
+            while (probe >= 0 && !name.equalsIgnoreCase(elementStack[probe + 3])) {
                 stackMismatch++;
                 probe -= 4;
             }
@@ -569,7 +586,7 @@ public class KXmlParser implements XmlPullParser {
         }
     }
 
-    private final String get(int pos) {
+    private final String get(final int pos) {
         return new String(txtBuf, pos, txtPos - pos);
     }
 
@@ -581,12 +598,12 @@ public class KXmlParser implements XmlPullParser {
     }
     */
 
-    private final void push(int c) {
+    private final void push(final int c) {
 
         isWhitespace &= c <= ' ';
 
         if (txtPos == txtBuf.length) {
-            char[] bigger = new char[txtPos * 4 / 3 + 4];
+        	final char[] bigger = new char[txtPos * 4 / 3 + 4];
             System.arraycopy(txtBuf, 0, bigger, 0, txtPos);
             txtBuf = bigger;
         }
@@ -596,18 +613,19 @@ public class KXmlParser implements XmlPullParser {
 
     /** Sets name and attributes */
 
-    private final void parseStartTag(boolean xmldecl)
+    private final void parseStartTag(final boolean xmldecl)
         throws IOException, XmlPullParserException {
 
-        if (!xmldecl)
-            read();
+        if (!xmldecl) {
+			read();
+		}
         name = readName();
         attributeCount = 0;
 
         while (true) {
             skip();
 
-            int c = peek(0);
+            final int c = peek(0);
 
             if (xmldecl) {
                 if (c == '?') {
@@ -637,7 +655,7 @@ public class KXmlParser implements XmlPullParser {
                 return;
             }
 
-            String attrName = readName();
+            final String attrName = readName();
 
             if (attrName.length() == 0) {
                 error("attr name expected");
@@ -667,28 +685,29 @@ public class KXmlParser implements XmlPullParser {
                 if (delimiter != '\'' && delimiter != '"') {
                     error("attr value delimiter missing!");
                     delimiter = ' ';
-                }
-				else 
+                } else {
 					read();
+				}
 				
-                int p = txtPos;
+                final int p = txtPos;
                 pushText(delimiter, true);
 
                 attributes[i] = get(p);
                 txtPos = p;
 
-                if (delimiter != ' ')
-                    read(); // skip endquote
+                if (delimiter != ' ') {
+					read(); // skip endquote
+				}
             }
         }
 
-        int sp = depth++ << 2;
+        final int sp = depth++ << 2;
 
         elementStack = ensureCapacity(elementStack, sp + 4);
         elementStack[sp + 3] = name;
 
         if (depth >= nspCounts.length) {
-            int[] bigger = new int[depth + 4];
+        	final int[] bigger = new int[depth + 4];
             System.arraycopy(nspCounts, 0, bigger, 0, nspCounts.length);
             nspCounts = bigger;
         }
@@ -705,10 +724,11 @@ public class KXmlParser implements XmlPullParser {
                 }
         		}
         */
-        if (processNsp)
-            adjustNsp();
-        else
-            namespace = "";
+        if (processNsp) {
+			adjustNsp();
+		} else {
+			namespace = "";
+		}
 
         elementStack[sp] = namespace;
         elementStack[sp + 1] = prefix;
@@ -723,12 +743,13 @@ public class KXmlParser implements XmlPullParser {
 
         read(); // &
 
-        int pos = txtPos;
+        final int pos = txtPos;
 
         while (true) {
-            int c = read();
-            if (c == ';')
-                break;
+        	final int c = read();
+            if (c == ';') {
+				break;
+			}
             if (c < 128
                 && (c < '0' || c > '9')
                 && (c < 'a' || c > 'z')
@@ -738,21 +759,23 @@ public class KXmlParser implements XmlPullParser {
                 && c != '#') {
                 error("unterminated entity ref");
                 //; ends with:"+(char)c);           
-                if (c != -1)
-                    push(c);
+                if (c != -1) {
+					push(c);
+				}
                 return;
             }
 
             push(c);
         }
 
-        String code = get(pos);
+        final String code = get(pos);
         txtPos = pos;
-        if (token && type == ENTITY_REF)
-            name = code;
+        if (token && type == ENTITY_REF) {
+			name = code;
+		}
 
         if (code.charAt(0) == '#') {
-            int c =
+        	final int c =
                 (code.charAt(1) == 'x'
                     ? Integer.parseInt(code.substring(2), 16)
                     : Integer.parseInt(code.substring(1)));
@@ -760,17 +783,19 @@ public class KXmlParser implements XmlPullParser {
             return;
         }
 
-        String result = (String) entityMap.get(code);
+        final String result = entityMap.get(code);
 
         unresolved = result == null;
 
         if (unresolved) {
-            if (!token)
-                error("unresolved: &" + code + ";");
+            if (!token) {
+				error("unresolved: &" + code + ';');
+			}
         }
         else {
-            for (int i = 0; i < result.length(); i++)
-                push(result.charAt(i));
+            for (int i = 0; i < result.length(); i++) {
+				push(result.charAt(i));
+			}
         }
     }
 
@@ -780,7 +805,7 @@ public class KXmlParser implements XmlPullParser {
     ' ': parse to whitespace or '>'
     */
 
-    private final void pushText(int delimiter, boolean resolveEntities)
+    private final void pushText(final int delimiter, final boolean resolveEntities)
         throws IOException, XmlPullParserException {
 
         int next = peek(0);
@@ -788,48 +813,53 @@ public class KXmlParser implements XmlPullParser {
 
         while (next != -1 && next != delimiter) { // covers eof, '<', '"'
 
-            if (delimiter == ' ')
-                if (next <= ' ' || next == '>')
-                    break;
+            if (delimiter == ' ' && (next <= ' ' || next == '>')) {
+				// if (next <= ' ' || next == '>') {
+					break;
+				// }
+			}
 
             if (next == '&') {
-                if (!resolveEntities)
-                    break;
-
+                if (!resolveEntities) {
+					break;
+				}
                 pushEntity();
             }
             else if (next == '\n' && type == START_TAG) {
                 read();
                 push(' ');
-            }
-            else
-                push(read());
+            } else {
+				push(read());
+			}
 
-            if (next == '>' && cbrCount >= 2 && delimiter != ']')
-                error("Illegal: ]]>");
+            if (next == '>' && cbrCount >= 2 && delimiter != ']') {
+				error("Illegal: ]]>");
+			}
 
-            if (next == ']')
-                cbrCount++;
-            else
-                cbrCount = 0;
+            if (next == ']') {
+				cbrCount++;
+			} else {
+				cbrCount = 0;
+			}
 
             next = peek(0);
         }
     }
 
-    private final void read(char c)
+    private final void read(final char c)
         throws IOException, XmlPullParserException {
-        int a = read();
-        if (a != c)
-            error("expected: '" + c + "' actual: '" + ((char) a) + "'");
+    	final int a = read();
+        if (a != c) {
+			error("expected: '" + c + "' actual: '" + ((char) a) + '\'');
+		}
     }
 
     private final int read() throws IOException {
         int result;
 
-        if (peekCount == 0)
-            result = peek(0);
-        else {
+        if (peekCount == 0) {
+			result = peek(0);
+		} else {
             result = peek[0];
             peek[0] = peek[1];
         }
@@ -852,40 +882,42 @@ public class KXmlParser implements XmlPullParser {
 
     /** Does never read more than needed */
 
-    private final int peek(int pos) throws IOException {
+    private final int peek(final int pos) throws IOException {
 
         while (pos >= peekCount) {
 
             int nw;
 
-            if (srcBuf.length <= 1)
-                nw = reader.read();
-            else if (srcPos < srcCount)
-                nw = srcBuf[srcPos++];
-            else {
+            if (srcBuf.length <= 1) {
+				nw = reader.read();
+			} else if (srcPos < srcCount) {
+				nw = srcBuf[srcPos++];
+			} else {
                 srcCount = reader.read(srcBuf, 0, srcBuf.length);
-                if (srcCount <= 0)
-                    nw = -1;
-                else
-                    nw = srcBuf[0];
+                if (srcCount <= 0) {
+					nw = -1;
+				} else {
+					nw = srcBuf[0];
+				}
 
                 srcPos = 1;
             }
 
-            if (preserveText)
-            	peek[peekCount++] = nw;
-            else {
+            if (preserveText) {
+				peek[peekCount++] = nw;
+			} else {
             	if (nw == '\r') {
             		wasCR = true;
             		peek[peekCount++] = '\n';
             	}
             	else {
             		if (nw == '\n') {
-            			if (!wasCR)
-                        peek[peekCount++] = '\n';
-            		}
-            		else
-            			peek[peekCount++] = nw;
+            			if (!wasCR) {
+							peek[peekCount++] = '\n';
+						}
+            		} else {
+						peek[peekCount++] = nw;
+					}
 
             		wasCR = false;
             	}
@@ -898,15 +930,16 @@ public class KXmlParser implements XmlPullParser {
     private final String readName()
         throws IOException, XmlPullParserException {
 
-        int pos = txtPos;
+    	final int pos = txtPos;
         int c = peek(0);
         if ((c < 'a' || c > 'z')
             && (c < 'A' || c > 'Z')
             && c != '_'
             && c != ':'
             && c < 0x0c0
-            && !relaxed)
-            error("name expected");
+            && !relaxed) {
+			error("name expected");
+		}
 
         do {
             push(read());
@@ -921,7 +954,7 @@ public class KXmlParser implements XmlPullParser {
             || c == '.'
             || c >= 0x0b7);
 
-        String result = get(pos);
+        final String result = get(pos);
         txtPos = pos;
         return result;
     }
@@ -929,16 +962,17 @@ public class KXmlParser implements XmlPullParser {
     private final void skip() throws IOException {
 
         while (true) {
-            int c = peek(0);
-            if (c > ' ' || c == -1)
-                break;
+        	final int c = peek(0);
+            if (c > ' ' || c == -1) {
+				break;
+			}
             read();
         }
     }
 
     //--------------- public part starts here... ---------------
 
-    public void setInput(Reader reader) throws XmlPullParserException {
+    public void setInput(final Reader reader) throws XmlPullParserException {
         this.reader = reader;
 
         line = 1;
@@ -952,15 +986,16 @@ public class KXmlParser implements XmlPullParser {
         version = null;
         standalone = null;
 
-        if (reader == null)
-            return;
+        if (reader == null) {
+			return;
+		}
 
         srcPos = 0;
         srcCount = 0;
         peekCount = 0;
         depth = 0;
 
-        entityMap = new Hashtable();
+        entityMap = new Hashtable<String, String>();
         entityMap.put("amp", "&");
         entityMap.put("apos", "'");
         entityMap.put("gt", ">");
@@ -968,15 +1003,16 @@ public class KXmlParser implements XmlPullParser {
         entityMap.put("quot", "\"");
     }
 
-    public void setInput(InputStream is, String _enc)
+    public void setInput(final InputStream is, final String _enc)
         throws XmlPullParserException {
 
         srcPos = 0;
         srcCount = 0;
         String enc = _enc;
 
-        if (is == null)
-            throw new IllegalArgumentException();
+        if (is == null) {
+			throw new IllegalArgumentException();
+		}
 
         try {
 
@@ -986,9 +1022,10 @@ public class KXmlParser implements XmlPullParser {
                 int chk = 0;
 
                 while (srcCount < 4) {
-                    int i = is.read();
-                    if (i == -1)
-                        break;
+                	final int i = is.read();
+                    if (i == -1) {
+						break;
+					}
                     chk = (chk << 8) | i;
                     srcBuf[srcCount++] = (char) i;
                 }
@@ -1033,19 +1070,21 @@ public class KXmlParser implements XmlPullParser {
 
                         case 0x03c3f786d :
                             while (true) {
-                                int i = is.read();
-                                if (i == -1)
-                                    break;
+                            	final int i = is.read();
+                                if (i == -1) {
+									break;
+								}
                                 srcBuf[srcCount++] = (char) i;
                                 if (i == '>') {
-                                    String s = new String(srcBuf, 0, srcCount);
+                                	final String s = new String(srcBuf, 0, srcCount);
                                     int i0 = s.indexOf("encoding");
                                     if (i0 != -1) {
                                         while (s.charAt(i0) != '"'
-                                            && s.charAt(i0) != '\'')
-                                            i0++;
-                                        char deli = s.charAt(i0++);
-                                        int i1 = s.indexOf(deli, i0);
+                                            && s.charAt(i0) != '\'') {
+											i0++;
+										}
+                                        final char deli = s.charAt(i0++);
+                                        final int i1 = s.indexOf(deli, i0);
                                         enc = s.substring(i0, i1);
                                     }
                                     break;
@@ -1074,10 +1113,11 @@ public class KXmlParser implements XmlPullParser {
                 }
             }
 
-            if (enc == null)
-                enc = "UTF-8";
+            if (enc == null) {
+				enc = "UTF-8";
+			}
 
-            int sc = srcCount;
+            final int sc = srcCount;
             setInput(new InputStreamReader(is, enc));
             encoding = _enc;
             srcCount = sc;
@@ -1090,66 +1130,77 @@ public class KXmlParser implements XmlPullParser {
         }
     }
 
-    public boolean getFeature(String feature) {
-    	if (feature.equals("open-xchange.org/preserveText"))
-    		return preserveText;
-        if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature))
-            return processNsp;
-        else if (isProp(feature, false, "relaxed"))
-            return relaxed;
-        else
-            return false;
+    public boolean getFeature(final String feature) {
+    	if (feature.equals("open-xchange.org/preserveText")) {
+			return preserveText;
+		}
+        if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature)) {
+			return processNsp;
+		} else if (isProp(feature, false, "relaxed")) {
+			return relaxed;
+		} else {
+			return false;
+		}
     }
 
     public String getInputEncoding() {
         return encoding;
     }
 
-    public void defineEntityReplacementText(String entity, String value)
+    public void defineEntityReplacementText(final String entity, final String value)
         throws XmlPullParserException {
-        if (entityMap == null)
-            throw new RuntimeException("entity replacement text must be defined after setInput!");
+        if (entityMap == null) {
+			throw new RuntimeException("entity replacement text must be defined after setInput!");
+		}
         entityMap.put(entity, value);
     }
 
-    public Object getProperty(String property) {
-        if (isProp(property, true, "xmldecl-version"))
-            return version;
-        if (isProp(property, true, "xmldecl-standalone"))
-            return standalone;
-		if (isProp(property, true, "location"))            
+    public Object getProperty(final String property) {
+        if (isProp(property, true, "xmldecl-version")) {
+			return version;
+		}
+        if (isProp(property, true, "xmldecl-standalone")) {
+			return standalone;
+		}
+		if (isProp(property, true, "location")) {
 			return location != null ? location : reader.toString();
+		}
         return null;
     }
 
-    public int getNamespaceCount(int depth) {
-        if (depth > this.depth)
-            throw new IndexOutOfBoundsException();
+    public int getNamespaceCount(final int depth) {
+        if (depth > this.depth) {
+			throw new IndexOutOfBoundsException();
+		}
         return nspCounts[depth];
     }
 
-    public String getNamespacePrefix(int pos) {
+    public String getNamespacePrefix(final int pos) {
         return nspStack[pos << 1];
     }
 
-    public String getNamespaceUri(int pos) {
+    public String getNamespaceUri(final int pos) {
         return nspStack[(pos << 1) + 1];
     }
 
-    public String getNamespace(String prefix) {
+    public String getNamespace(final String prefix) {
 
-        if ("xml".equals(prefix))
-            return "http://www.w3.org/XML/1998/namespace";
-        if ("xmlns".equals(prefix))
-            return "http://www.w3.org/2000/xmlns/";
+        if ("xml".equals(prefix)) {
+			return "http://www.w3.org/XML/1998/namespace";
+		}
+        if ("xmlns".equals(prefix)) {
+			return "http://www.w3.org/2000/xmlns/";
+		}
 
         for (int i = (getNamespaceCount(depth) << 1) - 2; i >= 0; i -= 2) {
             if (prefix == null) {
-                if (nspStack[i] == null)
-                    return nspStack[i + 1];
+                if (nspStack[i] == null) {
+					return nspStack[i + 1];
+				}
             }
-            else if (prefix.equals(nspStack[i]))
-                return nspStack[i + 1];
+            else if (prefix.equals(nspStack[i])) {
+				return nspStack[i + 1];
+			}
         }
         return null;
     }
@@ -1160,46 +1211,51 @@ public class KXmlParser implements XmlPullParser {
 
     public String getPositionDescription() {
 
-        StringBuffer buf =
-            new StringBuffer(type < TYPES.length ? TYPES[type] : "unknown");
+    	final StringBuilder buf =
+            new StringBuilder(type < TYPES.length ? TYPES[type] : "unknown");
         buf.append(' ');
 
         if (type == START_TAG || type == END_TAG) {
-            if (degenerated)
-                buf.append("(empty) ");
+            if (degenerated) {
+				buf.append("(empty) ");
+			}
             buf.append('<');
-            if (type == END_TAG)
-                buf.append('/');
+            if (type == END_TAG) {
+				buf.append('/');
+			}
 
-            if (prefix != null)
-                buf.append("{" + namespace + "}" + prefix + ":");
+            if (prefix != null) {
+				buf.append('{').append(namespace).append('}').append(prefix).append(':');
+			}
             buf.append(name);
 
-            int cnt = attributeCount << 2;
+            final int cnt = attributeCount << 2;
             for (int i = 0; i < cnt; i += 4) {
                 buf.append(' ');
-                if (attributes[i + 1] != null)
-                    buf.append(
-                        "{" + attributes[i] + "}" + attributes[i + 1] + ":");
-                buf.append(attributes[i + 2] + "='" + attributes[i + 3] + "'");
+                if (attributes[i + 1] != null) {
+					buf.append(
+                        '{').append(attributes[i]).append('}').append(attributes[i + 1]).append(':');
+				}
+                buf.append(attributes[i + 2]).append("='").append(attributes[i + 3]).append('\'');
             }
 
             buf.append('>');
         }
-        else if (type == IGNORABLE_WHITESPACE)
-        	buf.append("");
-        else if (type != TEXT)
-            buf.append(getText());
-        else if (isWhitespace)
-            buf.append("(whitespace)");
-        else {
+        else if (type == IGNORABLE_WHITESPACE) {
+			buf.append("");
+		} else if (type != TEXT) {
+			buf.append(getText());
+		} else if (isWhitespace) {
+			buf.append("(whitespace)");
+		} else {
             String text = getText();
-            if (text.length() > 16)
-                text = text.substring(0, 16) + "...";
+            if (text.length() > 16) {
+				text = text.substring(0, 16) + "...";
+			}
             buf.append(text);
         }
 
-		buf.append("@"+line + ":" + column);
+		buf.append('@').append(line).append(':').append(column);
 		if(location != null){
 			buf.append(" in ");
 			buf.append(location);
@@ -1220,8 +1276,9 @@ public class KXmlParser implements XmlPullParser {
     }
 
     public boolean isWhitespace() throws XmlPullParserException {
-        if (type != TEXT && type != IGNORABLE_WHITESPACE && type != CDSECT)
-            exception(ILLEGAL_TYPE);
+        if (type != TEXT && type != IGNORABLE_WHITESPACE && type != CDSECT) {
+			exception(ILLEGAL_TYPE);
+		}
         return isWhitespace;
     }
 
@@ -1260,8 +1317,9 @@ public class KXmlParser implements XmlPullParser {
     }
 
     public boolean isEmptyElementTag() throws XmlPullParserException {
-        if (type != START_TAG)
-            exception(ILLEGAL_TYPE);
+        if (type != START_TAG) {
+			exception(ILLEGAL_TYPE);
+		}
         return degenerated;
     }
 
@@ -1269,44 +1327,49 @@ public class KXmlParser implements XmlPullParser {
         return attributeCount;
     }
 
-    public String getAttributeType(int index) {
+    public String getAttributeType(final int index) {
         return "CDATA";
     }
 
-    public boolean isAttributeDefault(int index) {
+    public boolean isAttributeDefault(final int index) {
         return false;
     }
 
-    public String getAttributeNamespace(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeNamespace(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[index << 2];
     }
 
-    public String getAttributeName(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeName(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 2];
     }
 
-    public String getAttributePrefix(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributePrefix(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 1];
     }
 
-    public String getAttributeValue(int index) {
-        if (index >= attributeCount)
-            throw new IndexOutOfBoundsException();
+    public String getAttributeValue(final int index) {
+        if (index >= attributeCount) {
+			throw new IndexOutOfBoundsException();
+		}
         return attributes[(index << 2) + 3];
     }
 
-    public String getAttributeValue(String namespace, String name) {
+    public String getAttributeValue(final String namespace, final String name) {
 
         for (int i = (attributeCount << 2) - 4; i >= 0; i -= 4) {
             if (attributes[i + 2].equals(name)
-                && (namespace == null || attributes[i].equals(namespace)))
-                return attributes[i + 3];
+                && (namespace == null || attributes[i].equals(namespace))) {
+				return attributes[i + 3];
+			}
         }
 
         return null;
@@ -1325,16 +1388,18 @@ public class KXmlParser implements XmlPullParser {
 
         do {
             nextImpl();
-            if (type < minType)
-                minType = type;
+            if (type < minType) {
+				minType = type;
             //	    if (curr <= TEXT) type = curr; 
+			}
         }
         while (minType > ENTITY_REF // ignorable
             || (minType >= TEXT && peekType() >= TEXT));
 
         type = minType;
-        if (type > TEXT)
-            type = TEXT;
+        if (type > TEXT) {
+			type = TEXT;
+		}
 
         return type;
     }
@@ -1355,28 +1420,32 @@ public class KXmlParser implements XmlPullParser {
     public int nextTag() throws XmlPullParserException, IOException {
 
         next();
-        if (type == TEXT && isWhitespace)
-            next();
+        if (type == TEXT && isWhitespace) {
+			next();
+		}
 
-        if (type != END_TAG && type != START_TAG)
-            exception("unexpected type");
+        if (type != END_TAG && type != START_TAG) {
+			exception("unexpected type");
+		}
 
         return type;
     }
 
-    public void require(int type, String namespace, String name)
+    public void require(final int type, final String namespace, final String name)
         throws XmlPullParserException, IOException {
 
         if (type != this.type
             || (namespace != null && !namespace.equals(getNamespace()))
-            || (name != null && !name.equals(getName())))
-            exception(
-                "expected: " + TYPES[type] + " {" + namespace + "}" + name);
+            || (name != null && !name.equals(getName()))) {
+			exception(
+                "expected: " + TYPES[type] + " {" + namespace + '}' + name);
+		}
     }
 
     public String nextText() throws XmlPullParserException, IOException {
-        if (type != START_TAG)
-            exception("precondition: START_TAG");
+        if (type != START_TAG) {
+			exception("precondition: START_TAG");
+		}
 
         next();
 
@@ -1385,34 +1454,37 @@ public class KXmlParser implements XmlPullParser {
         if (type == TEXT) {
             result = getText();
             next();
-        }
-        else
-            result = "";
+        } else {
+			result = "";
+		}
 
-        if (type != END_TAG)
-            exception("END_TAG expected");
+        if (type != END_TAG) {
+			exception("END_TAG expected");
+		}
 
         return result;
     }
 
-    public void setFeature(String feature, boolean value)
+    public void setFeature(final String feature, final boolean value)
         throws XmlPullParserException {
-    	if (feature.equals("open-xchange.org/preserveText"))
-    		preserveText = value;
-    	else if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature))
-            processNsp = value;
-        else if (isProp(feature, false, "relaxed"))
-            relaxed = value;
-        else
-            exception("unsupported feature: " + feature);
+    	if (feature.equals("open-xchange.org/preserveText")) {
+			preserveText = value;
+		} else if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature)) {
+			processNsp = value;
+		} else if (isProp(feature, false, "relaxed")) {
+			relaxed = value;
+		} else {
+			exception("unsupported feature: " + feature);
+		}
     }
 
-    public void setProperty(String property, Object value)
+    public void setProperty(final String property, final Object value)
         throws XmlPullParserException {
-        if(isProp(property, true, "location"))
-        	location = value;
-        else
-	        throw new XmlPullParserException("unsupported property: " + property);
+        if (isProp(property, true, "location")) {
+			location = value;
+		} else {
+			throw new XmlPullParserException("unsupported property: " + property);
+		}
     }
 
     /**
@@ -1427,7 +1499,7 @@ public class KXmlParser implements XmlPullParser {
         require(START_TAG, null, null);
         int level = 1;
         while (level > 0) {
-            int eventType = next();
+        	final int eventType = next();
             if (eventType == END_TAG) {
                 --level;
             }
