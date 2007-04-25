@@ -1,3 +1,7 @@
+* 2007-04-25 ben.pahne@open-xchange.com
+ 
+ - Fixed Bug #6743, Upload contact image: error messages incorrect
+
 * 2007-04-25 - thorben.betten@open-xchange.com
 
  - Added new methods for re-using JSON objects into JSON API: reset() and
