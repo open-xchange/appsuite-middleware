@@ -100,11 +100,9 @@ public class FileStoreProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteEntries(SortedSet<String> set, Context ctx) {
-		Iterator<String> it = set.iterator();
+	public void deleteEntries(final SortedSet<String> set, final Context ctx) {
 		try {
-			while (it.hasNext()) {
-				String identifier = it.next();
+			for (String identifier : set) {
 				if (storage.deleteFile(identifier) == true) {
 					LOG.info("Deleted identifier: " + identifier);					
 				}
@@ -122,27 +120,24 @@ public class FileStoreProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void dummyEntries(SortedSet<String> set, Context ctx) {
+	public void dummyEntries(final SortedSet<String> set, final Context ctx) {
 		try {
-			UserStorage userstor = UserStorage.getInstance(ctx);
-			User user = userstor.getUser(ctx.getMailadmin());
-			DocumentMetadata document = new DocumentMetadataImpl();
+			final UserStorage userstor = UserStorage.getInstance(ctx);
+			final User user = userstor.getUser(ctx.getMailadmin());
+			final DocumentMetadata document = new DocumentMetadataImpl();
 			document.setDescription(description);
 			document.setTitle(title);
 			document.setFileName(fileName);
 			document.setVersionComment(versioncomment);
 			document.setCategories(categories);
-
-			Iterator<String> it = set.iterator();
 			
-			while (it.hasNext()) {
-				try {
-				String identifier = it.next(); 
+			for (String identifier : set) {
+				try { 
 				document.setFileSize(storage.getFileSize(identifier));
 				document.setFileMIMEType(storage.getMimeType(identifier));
 				database.setTransactional(true);
 				database.startTransaction();
-				int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
+				final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
 				database.commit();
 				if (numbers[2] == 1) {
 					LOG.info("Dummy entry for " + identifier + " in database " +

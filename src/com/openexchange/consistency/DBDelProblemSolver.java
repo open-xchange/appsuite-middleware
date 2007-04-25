@@ -50,8 +50,6 @@
 
 package com.openexchange.consistency;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
@@ -96,15 +94,13 @@ public class DBDelProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteEntries(SortedSet<String> set, Context ctx) {
+	public void deleteEntries(final SortedSet<String> set, final Context ctx) {
 		// Now we go through the set an delete each superfluous entry:
-		Iterator<String> it = set.iterator();
-		while (it.hasNext()) {
+		for (String identifier : set) {
 			try {
-				String identifier = it.next();
 				database.setTransactional(true);
 				database.startTransaction();
-				int[] numbers = database.removeDelDocument(identifier, ctx);
+				final int[] numbers = database.removeDelDocument(identifier, ctx);
 				database.commit();
 				if (numbers[0] == 1) {
 					LOG.info("Have to change del_infostore version number " + 
@@ -136,19 +132,17 @@ public class DBDelProblemSolver extends ProblemSolver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void dummyEntries(SortedSet<String> set, Context ctx) {
+	public void dummyEntries(final SortedSet<String> set, final Context ctx) {
 		/* 
 		 * Here we operate in two stages. First we create a dummy entry in the
 		 * filestore. Second we update the Entries in the database
 		 */
-		Iterator<String> it = set.iterator();
-		while (it.hasNext()) {
+		for (String old_identifier : set) {
 			try {
-				String identifier = createDummyFile();
-				String old_identifier = it.next();
+				final String identifier = createDummyFile();
 				database.setTransactional(true);
 				database.startTransaction();
-				int changed = database.modifyDelDocument(old_identifier, 
+				final int changed = database.modifyDelDocument(old_identifier, 
 						identifier, "\nCaution! The file has changed", 
 						"text/plain", ctx);
 				database.commit();

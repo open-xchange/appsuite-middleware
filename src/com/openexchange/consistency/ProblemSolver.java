@@ -114,8 +114,8 @@ public abstract class ProblemSolver {
 	 * @throws FileStorageException 
 	 */
 	protected String createDummyFile() throws FileStorageException {
-		String filetext = "This is just a dummy file";
-		InputStream input = new ByteArrayInputStream(filetext.getBytes());
+		final String filetext = "This is just a dummy file";
+		final InputStream input = new ByteArrayInputStream(filetext.getBytes());
 		
 		return storage.saveNewFile(input);
 	}
