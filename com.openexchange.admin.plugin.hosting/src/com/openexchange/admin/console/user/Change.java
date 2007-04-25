@@ -48,7 +48,9 @@
  */
 package com.openexchange.admin.console.user;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -67,81 +69,124 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Delete extends UserAbstraction {
+public class Change extends UserAbstraction {
 
     public static void main(final String[] args) {
-        new Delete(args);
+        new Change(args);
     }
 
-    public Delete(final String[] args2) {
+    public Change(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("delete");
+        final AdminParser parser = new AdminParser("change");
+
+        // set all needed options in our parser
+        setOptions(parser);
+
+        setExtendedOptions(parser);
         
-        // set all needed options in our parser       
-        setDefaultCommandLineOptions(parser);
-        setIdOption(parser);
         try {
-              parser.ownparse(args2);
-              
-              final Context ctx = new Context(DEFAULT_CONTEXT);
-              
-              if(parser.getOptionValue(this.contextOption)!=null){
-                  ctx.setID(Integer.parseInt((String)parser.getOptionValue(this.contextOption)));
-              }
-           
-              final Credentials auth = new Credentials((String)parser.getOptionValue(this.adminUserOption),(String)parser.getOptionValue(this.adminPassOption));
-                             
-              final OXUserInterface oxres = (OXUserInterface)Naming.lookup(OXUserInterface.RMI_NAME);
-             
-              final  int id = Integer.valueOf((String)parser.getOptionValue(this.idOption));
-              
-              final User usr = new User(id);
-              
-              // WITHOUT extensions                  
-              oxres.delete(ctx, usr, auth);                  
-              System.exit(0);
-        }catch(final java.rmi.ConnectException neti){
-            printError(neti.getMessage());            
+
+            parser.ownparse(args2);
+
+            printExtendedOutputIfSet(parser);
+            
+            final Context ctx = new Context(DEFAULT_CONTEXT);
+
+            if (null != parser.getOptionValue(this.contextOption)) {
+                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+            }
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
+            // get rmi ref
+            final OXUserInterface oxres = (OXUserInterface) Naming.lookup(OXUserInterface.RMI_NAME);
+
+            // create user obj
+            final User usr = new User();
+
+            // set mandatory id
+            usr.setId(Integer.parseInt((String) parser.getOptionValue(this.idOption)));
+
+            // fill user obj with mandatory values from console
+            setMandatoryOptionsinUser(parser, usr);
+
+            // add optional values if set
+            setOptionalOptionsinUser(parser, usr);
+            
+            applyExtendedOptionsToUser(parser, usr);
+
+            /*
+             * ********************* The extensions
+             */
+
+            oxres.change(ctx, usr, auth);
+            System.exit(0);
+        } catch (final ConnectException neti) {
+            printError(neti.getMessage());
             System.exit(1);
-        }catch(final java.lang.NumberFormatException num){
+        } catch (final NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             System.exit(1);
-        } catch (final MalformedURLException e) {            
+        } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
-        } catch (final RemoteException e) {            
+        } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
         } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
-        } catch (final StorageException e) {            
+        } catch (final StorageException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
-        } catch (final NoSuchContextException e) {            
+        } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
-        } catch (final InvalidDataException e) {            
+        } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
-        } catch (final IllegalOptionValueException e) {            
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
-            parser.printUsage();
+            printrightoptions(parser);
             System.exit(1);
         } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage(); 
+            printrightoptions(parser);
             System.exit(1);
         } catch (final MissingOptionException e) {
             printError(e.getMessage());
-            parser.printUsage();
+            printrightoptions(parser);
             System.exit(1);
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
+        } catch (final IllegalArgumentException e) {
+            printError(e.getMessage());
+            System.exit(1);
+        } catch (final IllegalAccessException e) {
+            printError(e.getMessage());
+            System.exit(1);
+        } catch (final InvocationTargetException e) {
+            printError(e.getMessage());
+            System.exit(1);
         }
-    }    
+    }
+
+    private void setOptions(final AdminParser parser) {
+
+        setExtendedOption(parser);
+        setDefaultCommandLineOptions(parser);
+
+        // required
+        setIdOption(parser);
+
+        // add mandatory options
+        setMandatoryOptions(parser);
+
+        // add optional opts
+        setOptionalOptions(parser);
+    }
 }
