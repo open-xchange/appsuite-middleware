@@ -87,7 +87,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         }
         if (EQUALS.equals(method)) {
             final Object other = arguments[0];
-            return other.equals(cached);
+            return Boolean.valueOf(other.equals(cached));
         }
         method.setAccessible(true);
         return method.invoke(cached, arguments);

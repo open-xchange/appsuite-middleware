@@ -82,6 +82,8 @@ import com.openexchange.sessiond.SessionObject;
  */
 public class MessageCacheManager {
 
+	private static final String STR_UNCHECKED = "unchecked";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageCacheManager.class);
 
@@ -154,7 +156,7 @@ public class MessageCacheManager {
 	 * @return <code>MessageCacheObject</code> instance matching given folder
 	 *         and UID
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject getMessage(final int user, final long msgUID, final String folder, final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
 				user, ctx));
@@ -176,7 +178,7 @@ public class MessageCacheManager {
 	 * @return <code>MessageCacheObject</code> instances matching given folder
 	 *         and UIDs
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
 			final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
@@ -202,7 +204,7 @@ public class MessageCacheManager {
 	/**
 	 * Puts given <code>MessageCacheObject</code> instance into cache
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings(STR_UNCHECKED)
 	public final void putMessage(final int user, final long msgUID, final MessageCacheObject msg, final Context ctx)
 			throws OXException {
 		if (msg == null) {
@@ -241,7 +243,7 @@ public class MessageCacheManager {
 	 * Removes <code>MessageCacheObject</code> instance from cache which
 	 * matches given folder and UID
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings(STR_UNCHECKED)
 	protected final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
 				user, ctx));

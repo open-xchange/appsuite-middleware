@@ -78,6 +78,7 @@ public class IMAPConnectionEventHandler extends ElementEventHandlerWrapper {
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededIdletimeBackground(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
+	@Override
 	protected void onExceededIdletimeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((DefaultIMAPConnection) cacheElem.getVal());
@@ -88,6 +89,7 @@ public class IMAPConnectionEventHandler extends ElementEventHandlerWrapper {
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededMaxlifeBackground(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
+	@Override
 	protected void onExceededMaxlifeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((DefaultIMAPConnection) cacheElem.getVal());
@@ -98,6 +100,7 @@ public class IMAPConnectionEventHandler extends ElementEventHandlerWrapper {
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledDiskNotAvailable(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
+	@Override
 	protected void onSpooledDiskNotAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((DefaultIMAPConnection) cacheElem.getVal());
@@ -108,6 +111,7 @@ public class IMAPConnectionEventHandler extends ElementEventHandlerWrapper {
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledNotAllowed(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
+	@Override
 	protected void onSpooledNotAllowed(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((DefaultIMAPConnection) cacheElem.getVal());
