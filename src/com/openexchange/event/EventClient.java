@@ -49,7 +49,6 @@
 
 package com.openexchange.event;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,7 +67,7 @@ public class EventClient {
 	public static final int CHANGED = 6;
 	public static final int DELETED = 7;
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
 	public EventClient(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;

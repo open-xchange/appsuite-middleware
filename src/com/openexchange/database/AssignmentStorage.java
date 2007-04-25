@@ -124,7 +124,7 @@ public final class AssignmentStorage {
         if (null == CACHE) {
             retval = loadAssignment(contextId);
         } else {
-            final CacheKey key = new CacheKey(contextId, Server.getServerId());
+            final CacheKey key = new CacheKey(contextId, Integer.valueOf(Server.getServerId()));
             CACHE_LOCK.lock();
             try {
                 retval = (Assignment) CACHE.get(key);
@@ -164,8 +164,8 @@ public final class AssignmentStorage {
                 retval.writePoolId = result.getInt(pos++);
                 retval.schema = result.getString(pos++);
             } else {
-                throw new DBPoolingException(Code.RESOLVE_FAILED, contextId,
-                    Server.getServerId());
+                throw new DBPoolingException(Code.RESOLVE_FAILED, Integer.valueOf(contextId),
+                		Integer.valueOf(Server.getServerId()));
             }
         } catch (SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
@@ -176,7 +176,7 @@ public final class AssignmentStorage {
         return retval;
     }
 
-    public static List<Integer> listContexts(int poolid)
+    public static List<Integer> listContexts(final int poolid)
         throws DBPoolingException {
         final List<Integer> retval = new ArrayList<Integer>();
         final Connection con = Database.get(false);
@@ -191,7 +191,7 @@ public final class AssignmentStorage {
             stmt.setInt(2, poolid);
             result = stmt.executeQuery();
             while (result.next()) {
-                retval.add(result.getInt(1));
+                retval.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
@@ -211,7 +211,7 @@ public final class AssignmentStorage {
         throws DBPoolingException {
         if (null != CACHE) {
             try {
-                CACHE.remove(new CacheKey(contextId, Server.getServerId()));
+                CACHE.remove(new CacheKey(contextId, Integer.valueOf(Server.getServerId())));
             } catch (CacheException e) {
                 LOG.error(e.getMessage(), e);
             }

@@ -102,7 +102,7 @@ public final class ConnectionDataStorage {
                 retval.max = result.getInt(pos++);
                 retval.min = result.getInt(pos++);
             } else {
-                throw new DBPoolingException(Code.NO_DBPOOL, poolId);
+                throw new DBPoolingException(Code.NO_DBPOOL, Integer.valueOf(poolId));
             }
         } catch (SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());

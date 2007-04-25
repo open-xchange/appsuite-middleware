@@ -239,11 +239,11 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                 try {
                     final Method method = connectionClass.getMethod(
                         "getActiveStatementCount");
-                    final int active = (Integer) method.invoke(con,
-                        new Object[0]);
+                    final int active = ((Integer) method.invoke(con,
+                        new Object[0])).intValue();
                     if (active > 0) {
                         final DBPoolingException dbe = new DBPoolingException(
-                            DBPoolingException.Code.ACTIVE_STATEMENTS, active);
+                            DBPoolingException.Code.ACTIVE_STATEMENTS, Integer.valueOf(active));
                         addTrace(dbe, data);
                         LOG.error(dbe.getMessage(), dbe);
                         retval = false;
@@ -255,7 +255,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                 }
                 if (data.getTimeDiff() > 2000) {
                     final DBPoolingException dbe = new DBPoolingException(
-                        DBPoolingException.Code.TOO_LONG, data.getTimeDiff());
+                        DBPoolingException.Code.TOO_LONG, Long.valueOf(data.getTimeDiff()));
                     addTrace(dbe, data);
                     LOG.warn(dbe.getMessage(), dbe);
                 }

@@ -159,7 +159,7 @@ public final class Database {
         try {
             con = Pools.getPool(poolId).get();
         } catch (PoolingException e) {
-            throw new DBPoolingException(Code.NO_CONNECTION, e, poolId);
+            throw new DBPoolingException(Code.NO_CONNECTION, e, Integer.valueOf(poolId));
         }
         try {
             final String oldSchema = con.getCatalog();
@@ -231,7 +231,7 @@ public final class Database {
             Pools.getPool(poolId).back(con);
         } catch (PoolingException e) {
             final DBPoolingException exc = new DBPoolingException(
-                Code.RETURN_FAILED, e, poolId);
+                Code.RETURN_FAILED, e, Integer.valueOf(poolId));
             LOG.error(exc.getMessage(), exc);
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);

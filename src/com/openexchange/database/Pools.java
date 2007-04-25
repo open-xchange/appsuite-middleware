@@ -83,7 +83,9 @@ import com.openexchange.server.DBPoolingException.Code;
  */
 public final class Pools implements Runnable {
 
-    /**
+    private static final String ERR_CANT_UNREGISTER_POOL_MBEAN = "Can't unregister pool mbean.";
+
+	/**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(Pools.class);
@@ -144,7 +146,7 @@ public final class Pools implements Runnable {
         default:
             lock.lock();
             try {
-                retval = POOLS.get(poolId);
+                retval = POOLS.get(Integer.valueOf(poolId));
                 if (null == retval) {
                     final ConnectionDataStorage.ConnectionData data =
                         ConnectionDataStorage.loadPoolData(poolId);
@@ -158,7 +160,7 @@ public final class Pools implements Runnable {
                     retval.registerCleaner(ServerTimer.getTimer(),
                         cleanerInterval);
                     registerMBean(createMBeanName(poolId), retval);
-                    POOLS.put(poolId, retval);
+                    POOLS.put(Integer.valueOf(poolId), retval);
                 }
             } finally {
                 lock.unlock();
@@ -190,7 +192,7 @@ public final class Pools implements Runnable {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
-                    unregisterMBean(createMBeanName(entry.getKey()));
+                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
                     pool.destroy();
                     iter.remove();
                 }
@@ -224,13 +226,13 @@ public final class Pools implements Runnable {
                 server.unregisterMBean(objName);
             }
         } catch (MalformedObjectNameException e) {
-            LOG.error("Can't unregister pool mbean.", e);
+            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
         } catch (NullPointerException e) {
-            LOG.error("Can't unregister pool mbean.", e);
+            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
         } catch (InstanceNotFoundException e) {
-            LOG.error("Can't unregister pool mbean.", e);
+            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
         } catch (MBeanRegistrationException e) {
-            LOG.error("Can't unregister pool mbean.", e);
+            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
         }
     }
 
