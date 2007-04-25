@@ -97,6 +97,12 @@ import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 
+/**
+ * Attachment
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
 public class Attachment extends PermissionServlet {
 	
 	private static final long serialVersionUID = -5819944675070929520L;
