@@ -127,27 +127,27 @@ public final class ConfigDB {
     }
 
     public static int getInt(final Property property, final int def) {
-        return getUniversal(property, def, new Convert<Integer>() {
+        return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
             public Integer convert(final String toConvert) {
-                return Integer.parseInt(toConvert);
+                return Integer.valueOf(toConvert);
             }
-        });
+        }).intValue();
     }
 
     public static long getLong(final Property property, final long def) {
-        return getUniversal(property, def, new Convert<Long>() {
+        return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
             public Long convert(final String toConvert) {
-                return Long.parseLong(toConvert);
+                return Long.valueOf(toConvert);
             }
-        });
+        }).longValue();
     }
 
     public static boolean getBoolean(final Property property, final boolean def) {
-        return getUniversal(property, def, new Convert<Boolean>() {
+        return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
             public Boolean convert(final String toConvert) {
                 return Boolean.valueOf(toConvert);
             }
-        });
+        }).booleanValue();
     }
 
     public static void init() throws ConfigurationException {
@@ -179,7 +179,8 @@ public final class ConfigDB {
         writeProps = new Properties();
         final Iterator<Entry<Object, Object>> iter =
             props.entrySet().iterator();
-        while (iter.hasNext()) {
+        final int size = props.entrySet().size();
+        for (int k = 0; k < size; k++) {
             final Entry<Object, Object> entry = iter.next();
             final String key = (String) entry.getKey();
             if (key.startsWith("readProperty.")) {
