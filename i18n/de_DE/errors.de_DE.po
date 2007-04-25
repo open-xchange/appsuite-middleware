@@ -687,6 +687,14 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -694,7 +702,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-04-25 10:10+0200\n"
+"PO-Revision-Date: 2007-04-25 11:39+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -776,7 +784,7 @@ msgstr "Es trat ein Messaging-Fehler auf: %s"
 msgid ""
 "A part's content could not be read from message %s in mail folder %s of user "
 "%s"
-msgstr ""
+msgstr "Ein Teil der Nachricht %s im E-Mail-Ordner %s des Benutzers %s konnte nicht gelesen werden."
 
 msgid "A protocol exception occured during execution of an IMAP request: %s"
 msgstr "Protokoll-Abweichung beim Ausführen einer IMAP-Anfrage: %s"
@@ -991,7 +999,6 @@ msgstr "Information für Pool %d kann nicht abgerufen werden"
 msgid "Can't instanciate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
 
-#, fuzzy
 msgid "Can't instanciate updater implementation %1$s."
 msgstr "Anlegen von Instanzen für die Updater-Implementation %1$s nicht möglich."
 
@@ -1220,10 +1227,10 @@ msgstr ""
 "minimale Ordner-ID von %s in Kontext %s "
 
 msgid "Depth mismatch while computing next entry."
-msgstr ""
+msgstr "Nicht übereinstimmende Depth-Werte beim Verarbeiten des nächsten Eintrags."
 
 msgid "Depth must be >= 1 but is %1$d."
-msgstr ""
+msgstr "Depth muss >= 1 sein, ist jedoch %1$d."
 
 msgid ""
 "Dictionary (id=%1$s) does not hold a command. Please specify a command in "
@@ -1872,7 +1879,7 @@ msgid "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr "Anzahl der Suchfelder (%d) ist ungleich der Anzahl der Suchmuster (%d)"
 
 msgid "Number parsing problem."
-msgstr ""
+msgstr "Problem beim Analysieren der Zahl."
 
 msgid "Object not found. %s"
 msgstr "Objekt nicht gefunden. %s"
@@ -2464,7 +2471,6 @@ msgstr ""
 msgid "Unexpected SQL Error!"
 msgstr "Unerwarteter SQL-Fehler."
 
-#, fuzzy
 msgid ""
 "Unexpected empty body package received from web server. Total-Received: %d | "
 "Content-Length: %d"
@@ -2662,9 +2668,8 @@ msgstr "Wort enthält ungültige(s) Komma-Zeichen: %s"
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
 
-#, fuzzy
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
-msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötiger Dateispeicher: %3$d"
+msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötigter Dateispeicher: %3$d"
 
 msgid "Wrong message %sheader: %s"
 msgstr "Ungültiger Nachrichten %sheader: %s"
