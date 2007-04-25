@@ -89,7 +89,7 @@ public class UnregisterDatabase extends UtilAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
-        databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the filestore which should be deleted",true, true);
+        databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database which should be unregistered",true, true);
         
         
     }
