@@ -236,10 +236,8 @@ public abstract class BasicCommandlineOptions {
         return this.adminUserOption;
     }
     
-    protected final Option getSearchPatternOption(final AdminParser admp){
-        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, true);
-//        opt.setArgName(OPT_NAME_SEARCHPATTERN_LONG);
-        return  this.searchOption;
+    protected final void setSearchPatternOption(final AdminParser admp){
+        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, false);
     }
 
 //    protected final Option addArgName(final Option option, final String argname) {
