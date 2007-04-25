@@ -73,6 +73,7 @@ public class BasicAuthenticator {
     }
     
     /**
+     * Authenticates the master admin!
      * @param authdata
      * @throws InvalidCredentialsException
      */
@@ -83,6 +84,8 @@ public class BasicAuthenticator {
     }
     
     /**
+     * 
+     * Authenticates ONLY the context admin!
      * @param authdata
      * @param ctx
      * @throws InvalidCredentialsException
@@ -90,6 +93,19 @@ public class BasicAuthenticator {
      */
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
         if(!sqlAuth.authenticate(authdata,ctx)){
+            throw new InvalidCredentialsException("Authentication failed");
+        }
+    }
+    
+    /**
+     * Authenticates all users within a context!
+     * @param authdata
+     * @param ctx
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     */
+    public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
+        if(!sqlAuth.authenticateUser(authdata,ctx)){
             throw new InvalidCredentialsException("Authentication failed");
         }
     }
