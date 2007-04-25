@@ -1,3 +1,8 @@
+* 2007-04-25 - thorben.betten@open-xchange.com
+
+ - Added new methods for re-using JSON objects into JSON API: reset() and
+   parseJSONString(String str)
+
 * 2007-04-24 - francisco.laguna@open-xchange.com
   
   - Fixed Bug #6893 Omit X-OX-Reminder header on appointment and task delete
