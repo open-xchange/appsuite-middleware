@@ -59,6 +59,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -70,9 +72,9 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements PushConfigInterface {
 	
-	private boolean isPushEnabled = false;
+	private boolean isPushEnabled;
 	
-	private HashSet<RemoteHostObject> remoteHost = new HashSet();
+	private Set<RemoteHostObject> remoteHost = new HashSet<RemoteHostObject>();
 	
 	private int registerTimeout = 3600000;
 	
@@ -80,25 +82,25 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 	
 	private int registerPort = 44335;
 	
-	private boolean isRegisterDistributionEnabled = false;
+	private boolean isRegisterDistributionEnabled;
 	
-	private boolean isEventDistributionEnabled = false;
+	private boolean isEventDistributionEnabled;
 	
-	private InetAddress senderAddress = null;
+	private InetAddress senderAddress;
 	
-	private boolean multicastEnabled = false;
+	private boolean multicastEnabled;
 	
-	private InetAddress multicastAddress = null;
+	private InetAddress multicastAddress;
 	
-	private InetAddress hostname = null;
+	private InetAddress hostname;
 	
-	private int multicastPort = 0;
+	private int multicastPort;
 	
 	private int remoteHostTimeOut = 3600000;
 	
 	private int remoteHostRefresh = 1200000;
 	
-	private boolean isInit = false;
+	private boolean isInit;
 	
 	private static final Log LOG = LogFactory.getLog(PushConfigInterfaceImpl.class);
 	
@@ -118,7 +120,9 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		Properties prop = null;
 		
 		try {
-			LOG.debug("try to load propfile: " + propfile);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder("try to load propfile: ").append(propfile));
+			}
 			
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
@@ -129,16 +133,20 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		}
 		
 		isPushEnabled = parseProperty(prop, "com.openexchange.push.udp.pushEnabled", isPushEnabled);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled=" + isPushEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled=" + isPushEnabled);
+		}
 		
 		String[] remoteAddressAndPort = null;
 		remoteAddressAndPort = parseProperty(prop, "com.openexchange.push.udp.remoteHost", remoteAddressAndPort);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost=" + remoteAddressAndPort);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost=" + remoteAddressAndPort);
+		}
 		
 		if (remoteAddressAndPort != null) {
 			for (int a = 0; a < remoteAddressAndPort.length; a++) {
-				RemoteHostObject remoteHostObject = new RemoteHostObject();
-				String[] addressAndPort = remoteAddressAndPort[a].split(":");
+				final RemoteHostObject remoteHostObject = new RemoteHostObject();
+				final String[] addressAndPort = remoteAddressAndPort[a].split(":");
 				try {
 					if (addressAndPort.length == 1) {
 						remoteHostObject.setHost(InetAddress.getByName(addressAndPort[0]));
@@ -155,23 +163,35 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		}
 		
 		registerTimeout = parseProperty(prop, "com.openexchange.push.udp.registerTimeout", registerTimeout);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout=" + registerTimeout);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout=" + registerTimeout);
+		}
 		
 		outputQueueDelay = parseProperty(prop, "com.openexchange.push.udp.outputQueueDelay", outputQueueDelay);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay=" + outputQueueDelay);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay=" + outputQueueDelay);
+		}
 		
 		registerPort = parseProperty(prop, "com.openexchange.push.udp.registerPort", registerPort);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort=" + registerPort);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort=" + registerPort);
+		}
 		
 		isRegisterDistributionEnabled = parseProperty(prop, "com.openexchange.push.udp.registerDistributionEnabled", isRegisterDistributionEnabled);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled=" + isRegisterDistributionEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled=" + isRegisterDistributionEnabled);
+		}
 		
 		isEventDistributionEnabled = parseProperty(prop, "com.openexchange.push.udp.eventDistributionEnabled", isEventDistributionEnabled);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled=" + isEventDistributionEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled=" + isEventDistributionEnabled);
+		}
 		
 		String senderAddressString = null;
 		senderAddressString = parseProperty(prop, "com.openexchange.push.udp.senderAddress", senderAddressString);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.senderAddress=" + senderAddressString);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.senderAddress=" + senderAddressString);
+		}
 		
 		try {
 			if (senderAddressString != null) {
@@ -182,17 +202,25 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		}
 		
 		remoteHostTimeOut = parseProperty(prop, "com.openexchange.push.udp.remoteHostTimeOut", remoteHostTimeOut);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut=" + remoteHostTimeOut);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut=" + remoteHostTimeOut);
+		}
 		
 		remoteHostRefresh = parseProperty(prop, "com.openexchange.push.udp.remoteHostRefresh", remoteHostRefresh);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh=" + remoteHostRefresh);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh=" + remoteHostRefresh);
+		}
 		
 		multicastEnabled = parseProperty(prop, "com.openexchange.push.udp.multicastEnabled", multicastEnabled);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled=" + multicastEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled=" + multicastEnabled);
+		}
 		
 		String multicastAddressString = null;
 		multicastAddressString = parseProperty(prop, "com.openexchange.push.udp.multicastAddress", multicastAddressString);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.multicastAddress=" + multicastAddressString);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.multicastAddress=" + multicastAddressString);
+		}
 		
 		try {
 			multicastAddress = InetAddress.getByName(multicastAddressString);
@@ -201,11 +229,15 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		}
 		
 		multicastPort = parseProperty(prop, "com.openexchange.push.udp.multicastPort", multicastPort);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort=" + multicastPort);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort=" + multicastPort);
+		}
 		
 		String hostnameString = null;
 		hostnameString = parseProperty(prop, "com.openexchange.push.udp.hostname", hostnameString);
-		LOG.debug("PushHandler property: com.openexchange.push.udp.hostname=" + hostnameString);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PushHandler property: com.openexchange.push.udp.hostname=" + hostnameString);
+		}
 		
 		try {
 			hostname = InetAddress.getByName(hostnameString);
@@ -220,15 +252,15 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return isPushEnabled;
 	}
 	
-	public void setPushEnabled(boolean isPushEnabled) {
+	public void setPushEnabled(final boolean isPushEnabled) {
 		this.isPushEnabled = isPushEnabled;
 	}
 	
-	public HashSet<RemoteHostObject> getRemoteHost() {
+	public Set<RemoteHostObject> getRemoteHost() {
 		return remoteHost;
 	}
 	
-	public void setRemoteHost(HashSet<RemoteHostObject> remoteHost) {
+	public void setRemoteHost(final Set<RemoteHostObject> remoteHost) {
 		this.remoteHost = remoteHost;
 	}
 	
@@ -236,7 +268,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return registerTimeout;
 	}
 	
-	public void setRegisterTimeout(int registerTimeout) {
+	public void setRegisterTimeout(final int registerTimeout) {
 		this.registerTimeout = registerTimeout;
 	}
 	
@@ -244,7 +276,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return registerPort;
 	}
 	
-	public void setRegisterPort(int registerPort) {
+	public void setRegisterPort(final int registerPort) {
 		this.registerPort = registerPort;
 	}
 
@@ -252,7 +284,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return isRegisterDistributionEnabled;
 	}
 	
-	public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled) {
+	public void setRegisterDistributionEnabled(final boolean isRegisterDistributionEnabled) {
 		this.isRegisterDistributionEnabled = isRegisterDistributionEnabled;
 	}
 	
@@ -260,7 +292,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return isEventDistributionEnabled;
 	}
 	
-	public void setEventDistributionEnabled(boolean isEventDistributionEnabled) {
+	public void setEventDistributionEnabled(final boolean isEventDistributionEnabled) {
 		this.isEventDistributionEnabled = isEventDistributionEnabled;
 	}
 	
@@ -268,7 +300,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return outputQueueDelay;
 	}
 	
-	public void setOutputQueueDelay(int outputQueueDelay) {
+	public void setOutputQueueDelay(final int outputQueueDelay) {
 		this.outputQueueDelay = outputQueueDelay;
 	}
 	
@@ -276,7 +308,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return senderAddress;
 	}
 	
-	public void setSenderAddress(InetAddress senderAddress) {
+	public void setSenderAddress(final InetAddress senderAddress) {
 		this.senderAddress = senderAddress;
 	}
 	
@@ -296,7 +328,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		return multicastAddress;
 	}
 	
-	public void setMultiCastAddress(InetAddress multicastAddress) {
+	public void setMultiCastAddress(final InetAddress multicastAddress) {
 		this.multicastAddress = multicastAddress;
 	}
 	
@@ -316,7 +348,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 		this.remoteHostRefresh = remoteHostRefresh;
 	}
 
-	public void setHostName(InetAddress hostname) {
+	public void setHostName(final InetAddress hostname) {
 		this.hostname = hostname;
 	}
 

@@ -47,11 +47,10 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * RegisterHandler
@@ -59,36 +58,43 @@ import java.util.HashMap;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class RegisterHandler {
+public final class RegisterHandler {
 
-	private static HashMap register = new HashMap();
+	private static final Map<String, RegisterObject> register = new HashMap<String, RegisterObject>();
 	
-	public static void addRegisterObject(RegisterObject registerObj) {
-		String key = "U" + registerObj.getUserId() + "C" + registerObj.getContextId();
+	private RegisterHandler() {
+		super();
+	}
+
+	public static void addRegisterObject(final RegisterObject registerObj) {
+		final String key = getKey(registerObj.getUserId(), registerObj.getContextId());
 		register.put(key, registerObj);
 	}
-	
-	public static boolean isRegistered(int userId, int contextId) {
-		String key = "U" + userId + "C" + contextId;
+
+	public static boolean isRegistered(final int userId, final int contextId) {
+		final String key = getKey(userId, contextId);
 		if (register.containsKey(key)) {
-			RegisterObject registerObj = (RegisterObject)register.get(key);
-			
+			final RegisterObject registerObj = register.get(key);
+
 			if (registerObj.getTimestamp().getTime() < System.currentTimeMillis()) {
 				return true;
-			} else {
-				register.remove(key);
 			}
+			register.remove(key);
 			return false;
-		} 
+		}
 		return false;
 	}
-	
-	public static RegisterObject getRegisterObject(int userId, int contextId) {
-		String key = "U" + userId + "C" + contextId;
-		return (RegisterObject)register.get(key);
+
+	public static RegisterObject getRegisterObject(final int userId, final int contextId) {
+		final String key = getKey(userId, contextId);
+		return register.get(key);
 	}
-	
+
 	public static int getNumberOfRegistedClients() {
 		return register.size();
+	}
+
+	private static String getKey(final int userId, final int contextId) {
+		return new StringBuilder().append('U').append(userId).append('C').append(contextId).toString();
 	}
 }

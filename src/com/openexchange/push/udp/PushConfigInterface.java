@@ -52,7 +52,7 @@
 package com.openexchange.push.udp;
 
 import java.net.InetAddress;
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * PushConfigInterface
@@ -76,9 +76,9 @@ public interface PushConfigInterface {
 	
 	public void setMultiCastAddress(InetAddress inetAddress);
 
-	public HashSet<RemoteHostObject> getRemoteHost();
+	public Set<RemoteHostObject> getRemoteHost();
 	
-	public void setRemoteHost(HashSet<RemoteHostObject> remoteHost);
+	public void setRemoteHost(Set<RemoteHostObject> remoteHost);
 	
 	public int getRegisterTimeout();
 	

@@ -71,11 +71,11 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushMulticastRequestTimer extends TimerTask {
 	
-	private static PushConfigInterface pushConfigInterface = null;
+	private static PushConfigInterface pushConfigInterface;
 	
-	private static int multicastPort = 0;
+	private static int multicastPort;
 	
-	private static InetAddress multicastAddress = null;
+	private static InetAddress multicastAddress;
 	
 	private static int remoteHostFresh = 1200000;
 	
@@ -103,7 +103,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 		MULTICAST_REQUEST_DATA = new StringWriter()
 		.append(String.valueOf(PushRequest.REMOTE_HOST_REGISTER))
 		.append('\1')
-		.append(hostname.getHostName())
+		.append(hostname == null ? "localhost" : hostname.getHostName())
 		.append('\1')
 		.append(String.valueOf(pushConfigInterface.getRegisterPort())).toString();
 		
@@ -125,7 +125,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 			
 			remoteHostFresh = pushConfigInterface.getRemoteHostRefresh();
 			
-			Timer t = ServerTimer.getTimer();
+			final Timer t = ServerTimer.getTimer();
 			t.schedule(this, new Date(), remoteHostFresh);
 		} else {
 			LOG.info("MulticastRequest is disabled");
@@ -134,11 +134,18 @@ public class PushMulticastRequestTimer extends TimerTask {
 	
 	
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.util.TimerTask#run()
+	 */
+	@Override
 	public void run() {
 		try {
-			LOG.debug("sending MulticastRequestPackage: " + new String(MULTICAST_REQUEST_BYTES));
-			MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
-			DatagramPacket datagramPacket = new DatagramPacket(MULTICAST_REQUEST_BYTES, MULTICAST_REQUEST_BYTES.length, multicastAddress, multicastPort);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("sending MulticastRequestPackage: " + new String(MULTICAST_REQUEST_BYTES));
+			}
+			final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
+			final DatagramPacket datagramPacket = new DatagramPacket(MULTICAST_REQUEST_BYTES, MULTICAST_REQUEST_BYTES.length, multicastAddress, multicastPort);
 			multicastSocket.send(datagramPacket);
 		} catch (Exception exc) {
 			LOG.error("run", exc);

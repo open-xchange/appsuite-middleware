@@ -51,10 +51,9 @@
 
 package com.openexchange.push.udp;
 
-import com.openexchange.push.udp.PushOutputQueue;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -76,7 +75,7 @@ public class PushRequest {
 	
 	public static final int REMOTE_HOST_REGISTER = 4;
 	
-	private int currentLength = 0;
+	private int currentLength;
 	
 	private static final Log LOG = LogFactory.getLog(PushRequest.class);
 	
@@ -84,33 +83,35 @@ public class PushRequest {
 		
 	} 
 	
-	public void init(DatagramPacket datagramPacket) {
+	public void init(final DatagramPacket datagramPacket) {
 		try {
-			byte[] b = new byte[datagramPacket.getLength()];
+			final byte[] b = new byte[datagramPacket.getLength()];
 			System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
 			String data = new String(b);
 			
-			LOG.debug("push request data: " + data);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("push request data: " + data);
+			}
 			
 			String s[] = data.split("\1");
 			
 			int pos = 0;
-			int magic = parseInt(s, pos++);
+			final int magic = parseInt(s, pos++);
 			
 			if (magic != MAGIC) {
 				throw new Exception("missing magic int!");
 			}
 			
-			int length = parseInt(s, pos++);
+			final int length = parseInt(s, pos++);
 			
-			byte[] bData = new byte[length];
+			final byte[] bData = new byte[length];
 			System.arraycopy(b, currentLength, bData, 0, length);	
 			
 			data = new String(bData);
 			s = data.split("\1");
 			pos = 0;
 			
-			int type = parseInt(s, pos++);
+			final int type = parseInt(s, pos++);
 			
 			int userId = 0;
 			InetAddress hostAddress = null;
@@ -131,7 +132,9 @@ public class PushRequest {
 					
 					registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, false);
 					
-					LOG.debug("register package: user id=" + userId + ",host address=" + hostAddress+ ",port=" + port);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("register package: user id=" + userId + ",host address=" + hostAddress+ ",port=" + port);
+					}
 					
 					RegisterHandler.addRegisterObject(registerObj);
 					PushOutputQueue.add(registerObj, true);
@@ -144,7 +147,9 @@ public class PushRequest {
 					
 					registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, true);
 					
-					LOG.debug("register sync package: " + registerObj);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("register sync package: " + registerObj);
+					}
 					
 					RegisterHandler.addRegisterObject(registerObj);
 					break;
@@ -152,16 +157,18 @@ public class PushRequest {
 					folderId = parseInt(s, pos++);
 					module = parseInt(s, pos++);
 					contextId = parseInt(s, pos++);
-					int[] users = convertString2IntArray(parseString(s, pos++));
+					final int[] users = convertString2IntArray(parseString(s, pos++));
 					
-					PushObject pushObject = new PushObject(folderId, module, contextId, users, true);
+					final PushObject pushObject = new PushObject(folderId, module, contextId, users, true);
 					
-					LOG.debug("push sync package: " + pushObject);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("push sync package: " + pushObject);
+					}
 					
 					PushOutputQueue.add(pushObject);					
 					break;
 				case REMOTE_HOST_REGISTER:
-					RemoteHostObject remoteHostObject = new RemoteHostObject();
+					final RemoteHostObject remoteHostObject = new RemoteHostObject();
 					
 					hostAddress = InetAddress.getByName(parseString(s, pos++));
 					port = parseInt(s, pos++);
@@ -169,7 +176,9 @@ public class PushRequest {
 					remoteHostObject.setHost(hostAddress);
 					remoteHostObject.setPort(port);
 					
-					LOG.debug("remost host register request: " + remoteHostObject);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("remost host register request: " + remoteHostObject);
+					}
 					
 					PushOutputQueue.addRemoteHostObject(remoteHostObject);
 					break;
@@ -181,11 +190,11 @@ public class PushRequest {
 		}
 	}
 	
-	public int parseInt(String[] s, int pos) {
+	public int parseInt(final String[] s, final int pos) {
 		return Integer.parseInt(parseString(s, pos));
 	}
 	
-	public String parseString(String[] s, int pos) {
+	public String parseString(final String[] s, final int pos) {
 		currentLength += s[pos].length()+1;
 		if (s[pos].length() == 0) {
 			return null;
@@ -194,12 +203,12 @@ public class PushRequest {
 		return s[pos];
 	}
 	
-	public boolean parseBoolean(String[] s, int pos) {
+	public boolean parseBoolean(final String[] s, final int pos) {
 		return Boolean.parseBoolean(parseString(s, pos));
 	}
 	
-	public int[] convertString2IntArray(String s) {
-		String tmp[] = s.split(",");
+	public int[] convertString2IntArray(final String s) {
+		final String tmp[] = s.split(",");
 		int i[] = new int[tmp.length];
 		for (int a = 0; a < i.length; a++) {
 			i[a] = Integer.parseInt(tmp[a]);

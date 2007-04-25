@@ -62,9 +62,9 @@ import java.util.Date;
 
 public class RemoteHostObject {
 	
-	private InetAddress host = null;
+	private InetAddress host;
 	
-	private int port = 0;
+	private int port;
 	
 	private Date timer = new Date();
 	
@@ -76,7 +76,7 @@ public class RemoteHostObject {
 		return host;
 	}
 
-	public void setHost(InetAddress host) {
+	public void setHost(final InetAddress host) {
 		this.host = host;
 	}
 
@@ -84,7 +84,7 @@ public class RemoteHostObject {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
@@ -92,25 +92,27 @@ public class RemoteHostObject {
 		return timer;
 	}
 
-	public void setTimer(Date timer) {
+	public void setTimer(final Date timer) {
 		this.timer = timer;
 	}
 	
-	public boolean equals(Object o) {
+	@Override
+	public boolean equals(final Object o) {
 		if (o.hashCode() == hashCode()) {
 			return true;
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		if (getHost() == null) {
 			return ("HlocalhostP" + String.valueOf(getPort())).hashCode();
-		} else {
-			return ("H" + getHost().getHostAddress() + "P" + String.valueOf(getPort())).hashCode();
-		} 
+		}
+		return ("H" + getHost().getHostAddress() + "P" + String.valueOf(getPort())).hashCode();
 	}
 	
+	@Override
 	public String toString() {
 		return new StringBuilder()
 		.append("HOST=")

@@ -51,19 +51,21 @@
 
 package com.openexchange.push.udp;
 
-import com.openexchange.event.InvalidStateException;
-import com.openexchange.server.ServerTimer;
-import com.openexchange.tools.StringCollection;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.event.InvalidStateException;
+import com.openexchange.server.ServerTimer;
+import com.openexchange.tools.StringCollection;
 
 /**
  * PushOutputQueue
@@ -73,25 +75,25 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushOutputQueue extends TimerTask {
 	
-	private static PushConfigInterface pushConfigInterface = null;
+	private static PushConfigInterface pushConfigInterface;
 	
 	private static boolean isFirst = true;
 	
-	private static boolean isInit = false;
+	private static boolean isInit;
 	
-	private static ArrayList queue1 = new ArrayList();
+	private static List<Object> queue1 = new ArrayList<Object>();
 	
-	private static ArrayList queue2 = new ArrayList();
+	private static List<Object> queue2 = new ArrayList<Object>();
 	
 	private static int delay = 60000;
 	
 	private static int remoteHostTimeOut = 3600000;
 	
-	private static HashSet<RemoteHostObject> remoteHost = null;
+	private static Set<RemoteHostObject> remoteHost;
 	
 	private static InetAddress senderAddress = null;
 	
-	private static boolean isEnabled = false;
+	private static boolean isEnabled;
 	
 	private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
 	
@@ -109,7 +111,7 @@ public class PushOutputQueue extends TimerTask {
 			
 			remoteHostTimeOut = pushConfigInterface.getRemoteHostTimeOut();
 			
-			Timer t = ServerTimer.getTimer();
+			final Timer t = ServerTimer.getTimer();
 			t.schedule(this, delay, delay);
 			
 			isEnabled = true;
@@ -120,12 +122,14 @@ public class PushOutputQueue extends TimerTask {
 		isInit = true;
 	}
 	
-	public static void addRemoteHostObject(RemoteHostObject remoteHostObject) {
+	public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
 		remoteHost.add(remoteHostObject);
 	}
 	
-	public static void add(PushObject pushObject) throws InvalidStateException {
-		LOG.debug("add PushObject: " + pushObject);
+	public static void add(final PushObject pushObject) throws InvalidStateException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("add PushObject: " + pushObject);
+		}
 		
 		if (!isEnabled) {
 			return ;
@@ -142,12 +146,14 @@ public class PushOutputQueue extends TimerTask {
 		}
 	}
 	
-	public static void add(RegisterObject registerObject) throws InvalidStateException {
+	public static void add(final RegisterObject registerObject) throws InvalidStateException {
 		add(registerObject, false);
 	}
 	
-	public static void add(RegisterObject registerObject, boolean noDelay) throws InvalidStateException {
-		LOG.debug("add RegisterObject: " + registerObject);
+	public static void add(final RegisterObject registerObject, final boolean noDelay) throws InvalidStateException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("add RegisterObject: " + registerObject);
+		}
 		
 		if (!isEnabled) {
 			return ;
@@ -169,6 +175,11 @@ public class PushOutputQueue extends TimerTask {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.util.TimerTask#run()
+	 */
+	@Override
 	public void run() {
 		try {
 			if (isFirst) {
@@ -178,16 +189,18 @@ public class PushOutputQueue extends TimerTask {
 				isFirst = true;
 				action(queue2);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("run", exc);
 		}
 	}
 	
-	protected static void action(ArrayList al) {
-		LOG.debug("get push objects from queue: " + al.size());
+	protected static void action(final List<Object> al) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("get push objects from queue: " + al.size());
+		}
 		
 		for (int a = 0; a < al.size(); a++) {
-			Object o = al.get(a);
+			final Object o = al.get(a);
 			
 			if (o instanceof PushObject) {
 				createPushPackage((PushObject)o);
@@ -199,14 +212,14 @@ public class PushOutputQueue extends TimerTask {
 		al.clear();
 	}
 	
-	protected static void createPushPackage(PushObject pushObject) {
-		int users[] = pushObject.getUsers();
+	protected static void createPushPackage(final PushObject pushObject) {
+		final int users[] = pushObject.getUsers();
 		for (int a = 0; a < users.length; a++) {
-			int contextId = pushObject.getContextId();
+			final int contextId = pushObject.getContextId();
 			
 			if (RegisterHandler.isRegistered(users[a], contextId)) {
-				RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
-				StringBuffer sb = new StringBuffer();
+				final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
+				final StringBuilder sb = new StringBuilder();
 				sb.append(pushObject.getFolderId());
 				sb.append('\1');
 				try {
@@ -217,18 +230,15 @@ public class PushOutputQueue extends TimerTask {
 			}
 		}
 		
-		if (pushConfigInterface.isEventDistributionEnabled()) {
-			if (!pushObject.isSync()) {
-				Iterator<RemoteHostObject> iterator = remoteHost.iterator();
-				while (iterator.hasNext()) {
-					RemoteHostObject remoteHostObject = iterator.next();
-					
+		if (pushConfigInterface.isEventDistributionEnabled() && !pushObject.isSync()) {
+			// if (!pushObject.isSync()) {
+				for (RemoteHostObject remoteHostObject : remoteHost) {
 					try {
-						StringBuffer sb = new StringBuffer();
+						final StringBuilder sb = new StringBuilder();
 						sb.append(PushRequest.MAGIC);
 						sb.append('\1');
 						
-						StringBuffer data = new StringBuffer();
+						final StringBuilder data = new StringBuilder();
 						data.append(PushRequest.PUSH_SYNC);
 						data.append('\1');
 						data.append(pushObject.getFolderId());
@@ -243,7 +253,7 @@ public class PushOutputQueue extends TimerTask {
 						sb.append('\1');
 						sb.append(data);
 						
-						byte b[] = sb.toString().getBytes();
+						final byte b[] = sb.toString().getBytes();
 						
 						if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
 							makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
@@ -254,13 +264,13 @@ public class PushOutputQueue extends TimerTask {
 						LOG.error("createPushPackage", exc);
 					}
 				}
-			}
+			// }
 		}
 	}
 	
-	protected static void createRegisterPackage(RegisterObject registerObject) {
+	protected static void createRegisterPackage(final RegisterObject registerObject) {
 		if (!registerObject.isSync()) {
-			StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("OK\1");
 			try {
 				makePackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort());
@@ -270,15 +280,13 @@ public class PushOutputQueue extends TimerTask {
 		}
 		
 		if (pushConfigInterface.isRegisterDistributionEnabled()) {
-			Iterator<RemoteHostObject> iterator = remoteHost.iterator();
-			while (iterator.hasNext()) {
-				RemoteHostObject remoteHostObject = iterator.next();
+			for (RemoteHostObject remoteHostObject : remoteHost) {
 				try {
-					StringBuffer sb = new StringBuffer();
+					final StringBuilder sb = new StringBuilder();
 					sb.append(PushRequest.MAGIC);
 					sb.append('\1');
 					
-					StringBuffer data = new StringBuffer();
+					final StringBuilder data = new StringBuilder();
 					data.append(PushRequest.REGISTER_SYNC);
 					data.append('\1');
 					data.append(registerObject.getUserId());
@@ -296,7 +304,7 @@ public class PushOutputQueue extends TimerTask {
 					sb.append('\1');
 					sb.append(data);
 					
-					byte b[] = sb.toString().getBytes();
+					final byte b[] = sb.toString().getBytes();
 					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
 						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
 					} else {
@@ -309,21 +317,20 @@ public class PushOutputQueue extends TimerTask {
 		}
 	}
 	
-	protected static void makePackage(byte[] b, String host, int port) throws Exception {
+	protected static void makePackage(final byte[] b, final String host, final int port) throws Exception {
 		makePackage(b, InetAddress.getByName(host), port);
 	}
 	
-	protected static void makePackage(byte[] b, InetAddress host, int port) throws Exception {
-		DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
-		DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
+	protected static void makePackage(final byte[] b, final InetAddress host, final int port) throws Exception {
+		final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
+		final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
 		datagramSocket.send(datagramPackage);
 	}
 	
 	public static int getQueueSize() {
 		if (isFirst) {
 			return queue1.size();
-		} else {
-			return queue2.size();
 		}
+		return queue2.size();
 	}
 }

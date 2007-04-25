@@ -49,10 +49,11 @@
 
 package com.openexchange.push.udp;
 
-import com.openexchange.event.EventQueue;
-import com.openexchange.server.ComfireConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.event.EventQueue;
+import com.openexchange.server.ComfireConfig;
 
 /**
  * EventInit

@@ -61,15 +61,15 @@ import com.openexchange.tools.StringCollection;
 
 public class PushObject {
 	
-	private int folderId = 0;
+	private int folderId;
 	
-	private int module = 0;
+	private int module;
 	
-	private int contextId = 0;
+	private int contextId;
 	
-	private int users[] = null;
+	private int users[];
 	
-	private boolean isSync = false;
+	private boolean isSync;
 	
 	public PushObject(int folderId, int module, int contextId, int[] users, boolean isSync) throws Exception {
 		this.folderId = folderId;
@@ -99,17 +99,21 @@ public class PushObject {
 		return isSync;
 	}
 	
-	public boolean equals(Object o) {
+	@Override
+	public boolean equals(final Object o) {
 		if (o.hashCode() == hashCode()) {
 			return true;
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
-		return ("F" + String.valueOf(folderId) + "M" + String.valueOf(module) + "C" + String.valueOf(contextId)).hashCode();
+		return new StringBuilder().append('F').append(folderId).append('M').append(module).append('C')
+				.append(contextId).toString().hashCode();
 	}
 	
+	@Override
 	public String toString() {
 		return new StringBuilder()
 		.append("FOLDER_ID=")

@@ -62,19 +62,19 @@ import java.util.Date;
 
 public class RegisterObject {
 	
-	private int userId = 0;
+	private int userId;
 	
-	private int contextId = 0;
+	private int contextId;
 	
-	private String hostAddress = null;
+	private String hostAddress;
 	
-	private int port = 0;
+	private int port;
 	
-	private String userHash = null;
+	private String userHash;
 	
-	private Date timestamp = null;
+	private Date timestamp;
 	
-	private boolean isSync = false;
+	private boolean isSync;
 	
 	public RegisterObject(int userId, int contextId, String hostAddress, int port, boolean isSync) {
 		this.userId = userId;
@@ -113,11 +113,13 @@ public class RegisterObject {
 		return contextId;
 	}
 	
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (obj == null) {
 			return false;
 		}
@@ -125,6 +127,7 @@ public class RegisterObject {
 		return (hashCode() == obj.hashCode());
 	}
 	
+	@Override
 	public String toString() {
 		return new StringBuilder()
 		.append("USER_ID=")

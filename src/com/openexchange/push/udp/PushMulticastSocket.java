@@ -66,15 +66,15 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushMulticastSocket implements Runnable {
 	
-	private Thread thread = null;
+	private Thread thread;
 
-	private static MulticastSocket multicastSocket = null;
+	private static MulticastSocket multicastSocket;
  
-	private DatagramSocket datagramSocket = null;
+	private DatagramSocket datagramSocket;
 	
-	private static int multicastPort = 0;
+	private static int multicastPort;
 	
-	private static InetAddress multicastAddress = null;
+	private static InetAddress multicastAddress;
 	
 	private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
 	
@@ -101,12 +101,12 @@ public class PushMulticastSocket implements Runnable {
 	
 	public void run() {
 		while (thread != null) {
-			DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
+			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
 			try {
 				multicastSocket.receive(datagramPacket);
 				
 				if (datagramPacket.getLength() > 0) {
-					PushRequest serverRegisterRequest = new PushRequest();
+					final PushRequest serverRegisterRequest = new PushRequest();
 					serverRegisterRequest.init(datagramPacket);
 				} else {
 					LOG.warn("recieved empty multicast package: " + datagramPacket);

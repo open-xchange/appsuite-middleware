@@ -67,15 +67,15 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushSocket implements Runnable {
 	
-	private Thread thread = null;
+	private Thread thread;
 	
-	private static DatagramSocket datagramSocket = null;
+	private static DatagramSocket datagramSocket;
 	
 	private static final Log LOG = LogFactory.getLog(PushSocket.class);
 	
-	public PushSocket(PushConfigInterface config) {
-		int serverRegisterPort = config.getRegisterPort();
-		InetAddress senderAddress = config.getSenderAddress();
+	public PushSocket(final PushConfigInterface config) {
+		final int serverRegisterPort = config.getRegisterPort();
+		final InetAddress senderAddress = config.getSenderAddress();
 		
 		try {
 			if (config.isPushEnabled()) {
@@ -98,14 +98,18 @@ public class PushSocket implements Runnable {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		while (thread != null) {
-			DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
+			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
 			try {
 				datagramSocket.receive(datagramPacket);
 				
 				if (datagramPacket.getLength() > 0) {
-					PushRequest serverRegisterRequest = new PushRequest();
+					final PushRequest serverRegisterRequest = new PushRequest();
 					serverRegisterRequest.init(datagramPacket);
 				} else {
 					LOG.warn("recieved empty udp package: " + datagramSocket);
