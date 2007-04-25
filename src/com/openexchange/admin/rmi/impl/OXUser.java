@@ -554,21 +554,56 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+                
+        
         return getData(ctx, new User[]{user}, auth)[0];
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
       
-        if (ctx==null || ctx.getIdAsInt()==null || users ==null) {
+        if (ctx==null || ctx.getIdAsInt()==null || users ==null|| auth==null || auth.getLogin()==null) {
             throw new InvalidDataException(); 
         }
         
-        doAuthentication(auth,ctx);
+        
+              // ok here its possible that a user wants to get his own data
+            //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
+            // check if credentials are from oxadmin or from an user
+            final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+            int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+            // check if given user is not admin, if he is admin, the
+            if(!tools.isContextAdmin(ctx,auth_user_id)){
+                if(users.length>1){
+                    throw new InvalidCredentialsException("Authenticated User`s Id does not match!");
+                    // one user cannot edit more than his own data
+                }else{
+                    doUserAuthentication(auth,ctx);
+                    // its possible that he wants his own data                    
+                    if(users[0].getId()!=null){
+                        if(users[0].getId().intValue()!=auth_user_id){
+                            throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+                        }
+                    }else{
+                        // id not set, try to resolv id by username and then check again
+                        if(users[0].getUsername()!=null){
+                            int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
+                            if(check_user_id!=auth_user_id){
+                                throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+                            }
+                        }else{
+                            throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
+                        }
+                    }
+                    
+                }                
+            }else{
+                doAuthentication(auth,ctx);
+            }
+        
         
         log.debug(ctx.toString()+" - "+Arrays.toString(users)+" - "+auth.toString());
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+                
         
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();            
