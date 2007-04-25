@@ -113,26 +113,34 @@ public class StringHelper {
 		try {
 			return serverBundle.getString(key);
 		} catch (MissingResourceException x) {
-			System.out.println("Using default for bundle "+serverBundle);
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder("Using default for bundle ").append(serverBundle));
+			}
 			return key;
 		}
 	}
 	
+	@Override
 	public int hashCode(){
-		if(serverBundle == null)
+		if(serverBundle == null) {
 			return 0;
+		}
 		return serverBundle.getClass().hashCode();
 	}
 	
-	public boolean equals(Object o) {
+	@Override
+	public boolean equals(final Object o) {
 		if (o instanceof StringHelper) {
-			StringHelper sh = (StringHelper) o;
-			if(serverBundle == null && sh.serverBundle == null)
+			final StringHelper sh = (StringHelper) o;
+			if(serverBundle == null && sh.serverBundle == null) {
 				return true;
-			if(serverBundle == null && sh.serverBundle != null)
+			}
+			if(serverBundle == null && sh.serverBundle != null) {
 				return false;
-			if(serverBundle != null && sh.serverBundle == null)
+			}
+			if(serverBundle != null && sh.serverBundle == null) {
 				return false;
+			}
 			
 			return sh.serverBundle.hashCode() == serverBundle.hashCode();
 		}

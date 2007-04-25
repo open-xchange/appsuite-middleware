@@ -307,9 +307,8 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                                 + "Active: " + data.numActive() + ", Idle: "
                                 + data.numIdle() + ", Waiting: "
                                 + ", Time: " + getWaitTime(startTime));
-                        } else {
-                            continue;
                         }
+                        continue;
                     default:
                         throw new IllegalStateException(
                             "Unknown exhausted action: " + exhaustedAction);
@@ -356,9 +355,8 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                 if (created) {
                     throw new PoolingException(
                         "Problem while creating new object.");
-                } else {
-                    continue;
                 }
+                continue;
             }
             final Thread thread = Thread.currentThread();
             retval.setThread(thread);
@@ -543,9 +541,8 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     idleSize = data.numIdle();
                     lifecycle.destroy(metaData.getPooled());
                     continue;
-                } else {
-                    index++;
                 }
+                index++;
             }
             ensureMinIdle();
             if (testThreads) {

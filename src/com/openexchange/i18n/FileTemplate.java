@@ -80,12 +80,13 @@ public class FileTemplate extends CompiledLineParserTemplate {
 			LOG.debug(e);
 			return e.toString().toCharArray();
 		} finally {
-			if(reader != null)
+			if(reader != null) {
 				try {
 					reader.close();
 				} catch (IOException e) {
 					LOG.debug(e);
 				}
+			}
 		}
 	}
 

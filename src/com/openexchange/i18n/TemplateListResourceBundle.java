@@ -57,15 +57,20 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.tools.Collections;
 
 public abstract class TemplateListResourceBundle extends ResourceBundle{
 
@@ -77,29 +82,34 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 	
 	protected static final Map<String, Template> templates = new HashMap<String,Template>();
 	protected static final Properties properties = new Properties();
-	protected static final Vector<String> keys = new Vector<String>();
+	protected static final List<String> keys = new ArrayList<String>();
 	
-	protected static boolean initialized = false;
+	private static Lock INIT_LOCK = new ReentrantLock();
+	
+	protected static boolean initialized;
 	
 	private static final Log LOG = LogFactory.getLog(TemplateListResourceBundle.class);
 	
 	@Override
 	protected Object handleGetObject(final String arg0) {
-		if(!initialized)
+		if(!initialized) {
 			init();
+		}
 		return (templates.containsKey(arg0)) ? templates.get(arg0) : properties.getProperty(arg0);
 	}
 
 
 	@Override
 	public Enumeration<String> getKeys() {
-		return keys.elements();
+		return Collections.iter2enum(keys.iterator());
 	}
 	
 	protected void init(){
-		synchronized(getClass()) {
-			if(initialized)
+		INIT_LOCK.lock();
+		try {
+			if(initialized) {
 				return;
+			}
 			initialized = true;
 			InputStream is = null;
 			try {
@@ -115,12 +125,13 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 			} catch (IOException e) {
 				LOG.error(e);
 			} finally {
-				if(is != null)
+				if(is != null) {
 					try {
 						is.close();
 					} catch (IOException e) {
 						LOG.debug(e);
 					}
+				}
 			}
 			
 			for(Object key : properties.keySet()) {
@@ -128,9 +139,12 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 			}
 			
 			for(String key : templates.keySet()) {
-				if(!keys.contains(key))
+				if(!keys.contains(key)) {
 					keys.add(key);
+				}
 			}
+		} finally {
+			INIT_LOCK.unlock();
 		}
 	}
 
@@ -155,12 +169,13 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 		} catch (IOException x) {
 			LOG.error(x);
 		} finally {
-			if(r != null)
+			if(r != null) {
 				try {
 					r.close();
 				} catch (IOException e) {
 					LOG.debug(e);
 				}
+			}
 		}
 	}
 

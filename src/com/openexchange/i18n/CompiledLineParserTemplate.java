@@ -74,8 +74,9 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 			String substitution = chunk;
 			if(substitute) {
 				substitution = substitutions.get(chunk);
-				if(null == substitution)
+				if (null == substitution) {
 					substitution = "";
+				}
 			}
 			result.append(
 				substitution
@@ -87,17 +88,19 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 	}
 
 	private final void load() {
-			if(chunks != null)
+			if(chunks != null) {
 				return;
+			}
 			final char[] content = getContent();
-			if(null == content)
+			if(null == content) {
 				return;
+			}
 			
 			final List<String> chunkCollector = new ArrayList<String>();
 			
 			// Lexer for the poor
 			// LABSKAUSS!!!!! ;-)
-			StringBuilder currentChunk = new StringBuilder();
+			final StringBuilder currentChunk = new StringBuilder();
 			boolean escaped = false;
 			int lineCount = 1;
 			int columnCount = 1;
@@ -152,8 +155,9 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 				}
 			}
 			
-			if(currentChunk.length() > 0)
+			if(currentChunk.length() > 0) {
 				chunkCollector.add(currentChunk.toString());
+			}
 			
 			synchronized(this) {
 				
