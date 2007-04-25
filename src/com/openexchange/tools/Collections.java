@@ -55,6 +55,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -368,6 +369,35 @@ public final class Collections {
 		} catch (ClassNotFoundException cnfe) {
 			LOG.error(cnfe.getMessage(), cnfe);
 			return null;
+		}
+	}
+	
+	public static <T> Enumeration<T> iter2enum(final Iterator<T> iter) {
+		return new IteratorEnumeration<T>(iter);
+	}
+
+	private static class IteratorEnumeration<T> implements Enumeration<T> {
+
+		private final Iterator<T> iter;
+
+		public IteratorEnumeration(Iterator<T> iter) {
+			this.iter = iter;
+		}
+
+		/* (non-Javadoc)
+		 * 
+		 * @see java.util.Enumeration#hasMoreElements()
+		 */
+		public boolean hasMoreElements() {
+			return iter.hasNext();
+		}
+
+		/* (non-Javadoc)
+		 * 
+		 * @see java.util.Enumeration#nextElement()
+		 */
+		public T nextElement() {
+			return iter.next();
 		}
 	}
 
