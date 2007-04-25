@@ -64,7 +64,7 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     
     /**
      * 
-     * @return Options containing context,adminuser,adminpass Option objects.
+     * @return Options containing adminuser,adminpass Option objects.
      */
     protected void setDefaultCommandLineOptions(AdminParser parser){          
         
