@@ -61,4 +61,6 @@ public interface AuthenticationInterface {
     public boolean authenticate(Credentials authdata);
     
     public boolean authenticate(Credentials authdata,Context ctx) throws StorageException;
+    
+    public boolean authenticateUser(Credentials authdata,Context ctx) throws StorageException;
 }
