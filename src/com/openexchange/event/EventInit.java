@@ -49,6 +49,9 @@
 
 package com.openexchange.event;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.attach.AttachmentCleaner;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -59,9 +62,6 @@ import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.ComfireConfig;
-import com.openexchange.webdav.InfostorePerformer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * EventInit
@@ -101,12 +101,12 @@ public class EventInit {
 		EventQueue.addTaskEvent(attCleaner);
 		
 		LOG.info("Adding PropertiesCleaner");
-		PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
+		final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
 		
 		LOG.info("Adding LockCleaner");
-		LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
+		final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
 		EventQueue.addFolderEvent(lockCleaner);
 		EventQueue.addInfostoreEvent(lockCleaner);
 	}

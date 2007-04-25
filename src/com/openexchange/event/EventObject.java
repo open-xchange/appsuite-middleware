@@ -68,15 +68,15 @@ import java.util.Date;
 
 public class EventObject {
 	
-	private int module = 0;
+	private int module;
 	
-	private int action = 0;
+	private int action;
 	
-	private Object obj = null;
+	private Object obj;
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
-	private Date creationDate = null;
+	private Date creationDate;
 	
 	public EventObject(final AppointmentObject obj, final int action, final SessionObject sessionObj) {
 		init(obj, Types.APPOINTMENT, action, sessionObj);
@@ -126,6 +126,11 @@ public class EventObject {
 		return creationDate;
 	}
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
 		return new StringBuilder()
 		.append("MODULE=")

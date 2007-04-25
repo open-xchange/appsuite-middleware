@@ -51,6 +51,14 @@
 
 package com.openexchange.event;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -58,11 +66,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServerTimer;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * EventQueue
@@ -75,25 +78,25 @@ public class EventQueue extends TimerTask {
 	
 	private static boolean isFirst = true;
 	
-	private static boolean isInit = false;
+	private static boolean isInit;
 	
-	private static boolean noDelay = false;
+	private static boolean noDelay;
 	
-	private static ArrayList<EventObject> queue1 = null;
+	private static List<EventObject> queue1;
 	
-	private static ArrayList<EventObject> queue2 = null;
+	private static List<EventObject> queue2;
 	
 	private static int delay = 180000;
 	
-	private static boolean isEnabled = false;
+	private static boolean isEnabled;
 	
 	private static final Log LOG = LogFactory.getLog(EventQueue.class);
 	
-	private static ArrayList<AppointmentEvent> appointmentEventList = new ArrayList<AppointmentEvent>();
-	private static ArrayList<TaskEvent> taskEventList = new ArrayList<TaskEvent>();
-	private static ArrayList<ContactEvent> contactEventList = new ArrayList<ContactEvent>();
-	private static ArrayList<FolderEvent> folderEventList = new ArrayList<FolderEvent>();
-	private static ArrayList<InfostoreEvent> infostoreEventList = new ArrayList<InfostoreEvent>();
+	private static List<AppointmentEvent> appointmentEventList = new ArrayList<AppointmentEvent>();
+	private static List<TaskEvent> taskEventList = new ArrayList<TaskEvent>();
+	private static List<ContactEvent> contactEventList = new ArrayList<ContactEvent>();
+	private static List<FolderEvent> folderEventList = new ArrayList<FolderEvent>();
+	private static List<InfostoreEvent> infostoreEventList = new ArrayList<InfostoreEvent>();
 	
 	public EventQueue(EventConfig config) {
 		delay = config.getEventQueueDelay();
@@ -107,7 +110,7 @@ public class EventQueue extends TimerTask {
 			noDelay = (delay == 0);
 			
 			if (!noDelay) {
-				Timer t = ServerTimer.getTimer();
+				final Timer t = ServerTimer.getTimer();
 				t.schedule(this, delay, delay);
 			}			
 			
@@ -120,7 +123,9 @@ public class EventQueue extends TimerTask {
 	}
 	
 	public static void add(final EventObject eventObj) throws InvalidStateException {
-		LOG.debug("add EventObject: " + eventObj);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(new StringBuilder("add EventObject: ").append(eventObj));
+		}
 		
 		if (!isEnabled) {
 			return;
@@ -141,6 +146,11 @@ public class EventQueue extends TimerTask {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.util.TimerTask#run()
+	 */
+	@Override
 	public void run() {
 		try {
 			if (isFirst) {
@@ -155,7 +165,7 @@ public class EventQueue extends TimerTask {
 		}
 	}
 	
-	protected static void callEvent(final ArrayList<EventObject> al) {
+	protected static void callEvent(final List<EventObject> al) {
 		for (int a = 0; a < al.size(); a++) {
             event(al.get(a));
 		}

@@ -58,6 +58,9 @@ package com.openexchange.event;
  */
 public class InvalidStateException extends Exception
 {
+
+	private static final long serialVersionUID = -222137092481203634L;
+
 	public InvalidStateException() {
 		super();
 	}
