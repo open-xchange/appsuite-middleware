@@ -15,12 +15,16 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2007-04-25 09:40+0200\n"
+"PO-Revision-Date: 2007-04-25 10:24+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -174,7 +178,7 @@ msgid ""
 msgstr ""
 "Ein neuer Termin wurde erstellt von [created_by].\n"
 "\n"
-"Direkter Link: [Link]\n"
+"Direkte Verknüpfung: [Link]\n"
 "\n"
 "Termin\n"
 "======\n"
@@ -229,7 +233,7 @@ msgid ""
 msgstr ""
 "Eine neue Aufgabe wurde erstellt von [created_by].\n"
 "\n"
-"Direkter Link: [Link]\n"
+"Direkte Verknüpfung: [Link]\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
@@ -354,7 +358,7 @@ msgid ""
 msgstr ""
 "Dieser Termin wurde geändert von [changed_by].\n"
 "\n"
-"Direkter Link  [link]\n"
+"Direkte Verknüpfung: [link]\n"
 "\n"
 "Termin\n"
 "======\n"
@@ -409,7 +413,7 @@ msgid ""
 msgstr ""
 "Diese Aufgabe wurde geändert von [changed_by].\n"
 "\n"
-"Direkter Link: [Link]\n"
+"Direkte Verknüpfung: [Link]\n"
 "\n"
 "Aufgabe\n"
 "=======\n"
@@ -434,37 +438,30 @@ msgstr ""
 "=========================================="
 
 #: com/openexchange/groupware/i18n/Notifications.java:202
-
 msgid "A new appointment has been created"
 msgstr "Ein neuer Termin wurde erstellt"
 
 #: com/openexchange/groupware/i18n/Notifications.java:203
-
 msgid "An appointment has been changed"
 msgstr "Ein Termin wurde geändert"
 
 #: com/openexchange/groupware/i18n/Notifications.java:204
-
 msgid "An appointment has been removed"
 msgstr "Ein Termin wurde gelöscht"
 
 #: com/openexchange/groupware/i18n/Notifications.java:205
-
 msgid "A new task has been created"
 msgstr "Eine neue Aufgabe wurde erstellt"
 
 #: com/openexchange/groupware/i18n/Notifications.java:206
-
 msgid "A task has been changed"
 msgstr "Eine Aufgabe wurde geändert"
 
 #: com/openexchange/groupware/i18n/Notifications.java:207
-
 msgid "A task has been removed"
 msgstr "Eine Aufgabe wurde gelöscht"
 
 #: com/openexchange/groupware/i18n/Notifications.java:208
-
 msgid "No resources have been scheduled."
 msgstr "Es wurden keine Ressourcen zugewiesen."
 
