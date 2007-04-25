@@ -575,6 +575,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             // check if given user is not admin, if he is admin, the
             if(!tools.isContextAdmin(ctx,auth_user_id)){
                 if(users.length>1){
+                    log.debug("User sent more than >1 users to get data for!Thats not permitted for normal users!");
                     throw new InvalidCredentialsException("Authenticated User`s Id does not match!");
                     // one user cannot edit more than his own data
                 }else{
@@ -589,13 +590,14 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if(users[0].getUsername()!=null){
                             int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
                             if(check_user_id!=auth_user_id){
+                                log.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
                             }
                         }else{
+                            log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
                             throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
                         }
-                    }
-                    
+                    }                    
                 }                
             }else{
                 doAuthentication(auth,ctx);
