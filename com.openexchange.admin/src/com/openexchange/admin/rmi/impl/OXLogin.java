@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.2 2007/04/17 13:28:07 cutmasta Exp $
+ * $Id: OXLogin.java,v 1.3 2007/04/25 11:30:32 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -92,7 +92,8 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
         if(ctx==null || auth ==null){
             throw new InvalidDataException();
         }
-        doAuthentication(auth, ctx);
+        
+        doUserAuthentication(auth, ctx);
         
     }
 
@@ -104,7 +105,7 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
             throw new InvalidDataException();
         }
         
-        doAuthentication(auth);
+        
         
     }
 
@@ -113,11 +114,11 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
         if(ctx==null || auth ==null){
             throw new InvalidDataException();
         }
-        doAuthentication(auth, ctx);
+        doUserAuthentication(auth, ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
-        
+        tools.isContextAdmin(ctx, user_id);
         User retval = new User(user_id);
         retval.setUsername(auth.getLogin());
         
