@@ -11,7 +11,7 @@
 # * com.openexchange.groupware.contexts.LoginLDAPAuth authenticates the user
 #   against an LDAP server. This is a special implementation for using an OX5
 #   RHEL ldap.
-LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
+LoginInfo=com.openexchange.groupware.contexts.LoginOneAndOneImpl
 
 # Name of the class that implements how to get the link for the configuration
 # setup.
@@ -59,7 +59,7 @@ Notification=@oxgroupwaresysconfdir@/notification.properties
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
 CACHECCF:@oxgroupwaresysconfdir@/cache.ccf
-
+IMPORTEREXPORTER:@oxgroupwaresysconfdir@/importerExporter.xml
 LDAPPROPERTIES:@oxgroupwaresysconfdir@/ldap.properties
 SESSIONDPROPERTIES:@oxgroupwaresysconfdir@/sessiond.properties
 EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
@@ -67,7 +67,10 @@ PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
 IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
+JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
+
+UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
 
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
