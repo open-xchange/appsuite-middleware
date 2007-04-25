@@ -158,7 +158,7 @@ public class Contacts implements DeleteListener {
 								Category.USER_INPUT},
 			desc={"1", "2"},
 			exceptionId={1,2 },
-			msg={"Unable to scale the contact image. This is a not supported file type or it is too large! Your mime type is %1$s and your image size is %2$d The max. allowed image size is %3$d",		
+			msg={"Unable to scale the contact image. This is a not supported file type or it is too large! Your mime type is %1$s and your image size is %2$d KB. The max. allowed image size is %3$d KB.",		
 					"This gif Image is to large. It can not be scaled and will not be accepted"}
 	)
 	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
@@ -204,7 +204,11 @@ public class Contacts implements DeleteListener {
 			check = false;
 		}
 		if (!check){
-			throw EXCEPTIONS.createOXConflictException(1,mime,img.length,max_size);
+			
+			int ilkb = img.length / 1024;
+			int mskb = max_size / 1024;
+			
+			throw EXCEPTIONS.createOXConflictException(1,mime,ilkb,mskb);
 			//throw new OXException("This is a not supported file type for an Image or it is to large! MimeType ="+mime+" / Image Size = "+img.length+" / max. allowed Image size = "+max_size);
 		}
 		
