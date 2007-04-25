@@ -121,7 +121,7 @@ public class SpamUpdateTask implements UpdateTask {
 			category = { Category.CODE_ERROR },
 			desc = { "" },
 			exceptionId = { 1 },
-			msg = { "A SQL error occured while performing task SpamUpdateTask: %1$s." }
+			msg = { "An SQL error occurred while performing task SpamUpdateTask: %1$s." }
 		)
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		if (LOG.isInfoEnabled()) {

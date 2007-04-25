@@ -112,7 +112,7 @@ public class TaskException extends AbstractOXException {
      */
     public static enum Detail {
         /**
-         * Detail information stating that a permission problem occured.
+         * Detail information stating that a permission problem occurred.
          */
         PERMISSION,
         /**
@@ -124,7 +124,7 @@ public class TaskException extends AbstractOXException {
          */
         MANDATORY_FIELD,
         /**
-         * Detail information stating that a conflict occured.
+         * Detail information stating that a conflict occurred.
          */
         CONFLICT,
         /**
@@ -158,9 +158,9 @@ public class TaskException extends AbstractOXException {
         AUTO_COMMIT("Problem setting auto commit to true.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.OTHER, 2),
         /**
-         * A database connection can't be obtained.
+         * A database connection cannot be obtained.
          */
-        NO_CONNECTION("Can't get database connection.",
+        NO_CONNECTION("Cannot get database connection.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.OTHER, 3),
         /**
          * Unimplemented feature.
@@ -186,9 +186,9 @@ public class TaskException extends AbstractOXException {
             Category.CONCURRENT_MODIFICATION, Detail.CONCURRENT_MODIFICATION,
             7),
         /**
-         * Can't create private task in public/shared folder %1$d.
+         * Cannot create private task in public/shared folder %1$d.
          */
-        PRIVATE_FLAG("Can't create private task in public/shared folder %1$d.",
+        PRIVATE_FLAG("Cannot create private task in public/shared folder %1$d.",
             Category.USER_INPUT, Detail.OTHER, 8),
         /**
          * SQL problem while updating task: %s.
@@ -206,9 +206,9 @@ public class TaskException extends AbstractOXException {
         DELETE_FAILED("SQL problem while deleting task: %s.",
             Category.CODE_ERROR, Detail.OTHER, 11),
         /**
-         * Can't find folder of task participant.
+         * Cannot find folder of task participant.
          */
-        PARTICIPANT_FOLDER_INCONSISTENCY("Can't find folder of task "
+        PARTICIPANT_FOLDER_INCONSISTENCY("Cannot find folder of task "
             + "participant.", Category.CODE_ERROR, Detail.OTHER, 12),
         /**
          * SQL problem while listing tasks: %s.
@@ -242,9 +242,9 @@ public class TaskException extends AbstractOXException {
         PARTICIPANT_NOT_FOUND("Participant %d for task %d is not found.",
             Category.CODE_ERROR, Detail.NOT_FOUND, 18),
         /**
-         * Can't find task %d in context %d.
+         * Cannot find task %d in context %d.
          */
-        TASK_NOT_FOUND("Can't find task %d in context %d.",
+        TASK_NOT_FOUND("Cannot find task %d in context %d.",
             Category.CODE_ERROR, Detail.NOT_FOUND, 19),
         /**
          * Unknown task attribute %d.
@@ -288,14 +288,14 @@ public class TaskException extends AbstractOXException {
         FOLDER_IS_MISSING("Missing folder id for creating task.",
             Category.CODE_ERROR, Detail.MANDATORY_FIELD, 27),
         /**
-         * Private flagged tasks can't be delegated.
+         * Private flagged tasks cannot be delegated.
          */
-        NO_PRIVATE_DELEGATE("Private flagged tasks can't be delegated.",
+        NO_PRIVATE_DELEGATE("Private flagged tasks cannot be delegated.",
             Category.USER_INPUT, Detail.OTHER, 28),
         /**
-         * Creator can't be participant.
+         * Creator cannot be participant.
          */
-        NO_CREATOR_PARTICIPANT("Creator can't be participant.",
+        NO_CREATOR_PARTICIPANT("Creator cannot be participant.",
             Category.USER_INPUT, Detail.OTHER, 29),
         /**
          * Percent is %d but must be between 0 and 100.
@@ -310,9 +310,9 @@ public class TaskException extends AbstractOXException {
             + "done must be 0 and not %d.", Category.USER_INPUT,
             Detail.MANDATORY_FIELD, 31),
         /**
-         * Can't send event to event system.
+         * cannot send event to event system.
          */
-        EVENT("Can't send event to event system.", Category.CODE_ERROR,
+        EVENT("Cannot send event to event system.", Category.CODE_ERROR,
             Detail.OTHER, 32),
         /**
          * You are not allowed to edit tasks in folder %1$s (%2$d).
@@ -373,9 +373,9 @@ public class TaskException extends AbstractOXException {
         ONLY_CREATOR_PRIVATE("Only the task creator is allowed to set private "
             + "flag.", Category.USER_INPUT, Detail.PERMISSION, 43),
         /**
-         * Can't add external participant without email address.
+         * Cannot add external participant without email address.
          */
-        EXTERNAL_WITHOUT_MAIL("Can't add external participant without email "
+        EXTERNAL_WITHOUT_MAIL("Cannot add external participant without email "
             + "address.", Category.USER_INPUT, Detail.MANDATORY_FIELD, 44);
 
         /**

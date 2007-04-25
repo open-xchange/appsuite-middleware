@@ -87,8 +87,8 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         category = { Category.SETUP_ERROR, Category.SETUP_ERROR },
         desc = { "", "" },
         exceptionId = { 3, 4 },
-        msg = { "Can't find filestore with id %1$d.",
-            "Can't create URI from \"%1$s\"." }
+        msg = { "Cannot find filestore with id %1$d.",
+            "Cannot create URI from \"%1$s\"." }
     )
 	public Filestore getFilestore(int id) throws FilestoreException {
 		

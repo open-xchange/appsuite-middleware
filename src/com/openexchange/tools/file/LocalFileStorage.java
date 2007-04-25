@@ -237,7 +237,7 @@ public class LocalFileStorage extends FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-        	LOG.error("Can't create Lock file. Either there is a stale .lock file here "+lock.getAbsolutePath()+" or the filestore was used too long.");
+        	LOG.error("Cannot create Lock file. Either there is a stale .lock file here "+lock.getAbsolutePath()+" or the filestore was used too long.");
             throw new FileStorageException(FileStorageException.Code.LOCK);
         }
     }

@@ -66,13 +66,13 @@ public class SearchIteratorException extends AbstractOXException {
 	public static enum SearchIteratorCode {
 		
 		/**
-		 * A SQL error occured: %s
+		 * An SQL error occurred: %s
 		 */
-		SQL_ERROR("A SQL error occured: %s", Category.CODE_ERROR, 1),
+		SQL_ERROR("An SQL error occurred: %s", Category.CODE_ERROR, 1),
 		/**
-		 * A DBPool error occured: %s
+		 * A DBPool error occurred: %s
 		 */
-		DBPOOLING_ERROR("A DBPool error occured: %s", Category.CODE_ERROR, 2),
+		DBPOOLING_ERROR("A DBPool error occurred: %s", Category.CODE_ERROR, 2),
 		/**
 		 * Operation not allowed on a closed SearchIterator
 		 */

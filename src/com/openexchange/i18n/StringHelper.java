@@ -81,7 +81,7 @@ public class StringHelper {
 		try {
 			this.serverBundle = ResourceBundle.getBundle(SERVER_BUNDLE, locale);
 		} catch (MissingResourceException x) {
-			LOG.debug("Can't find bundle for Locale "+locale);
+			LOG.debug("Cannot find bundle for Locale "+locale);
 			this.serverBundle = null;
 		}
 	}
@@ -95,7 +95,7 @@ public class StringHelper {
 		try {
 			this.serverBundle = ResourceBundle.getBundle(resourceBundle, locale);
 		} catch (MissingResourceException x) {
-			LOG.debug("Can't find bundle "+resourceBundle+" for Locale "+locale);
+			LOG.debug("Cannot find bundle "+resourceBundle+" for Locale "+locale);
 			this.serverBundle = null;
 		}
 	}

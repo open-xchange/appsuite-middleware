@@ -327,7 +327,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
 //                            lock.unlock();
 //                        }
                         throw new PoolingException(
-                            "Can't create pooled object.", e);
+                            "Cannot create pooled object.", e);
                     }
                     retval = new PooledData<T>(pooled);
                     // maybe we add here more than maxActive objects. this happens
@@ -356,7 +356,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     throw new PoolingException(
                         "Problem while creating new object.");
                 }
-                continue;
+				continue;
             }
             final Thread thread = Thread.currentThread();
             retval.setThread(thread);
@@ -502,7 +502,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
         try {
             pooled = lifecycle.create();
         } catch (Exception e) {
-            throw new PoolingException("Can't create pooled object.", e);
+            throw new PoolingException("Cannot create pooled object.", e);
         }
         back(pooled, false);
     }
@@ -541,7 +541,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     idleSize = data.numIdle();
                     lifecycle.destroy(metaData.getPooled());
                     continue;
-                }
+                } 
                 index++;
             }
             ensureMinIdle();

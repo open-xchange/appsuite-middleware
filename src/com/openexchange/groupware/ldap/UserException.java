@@ -135,12 +135,12 @@ public class UserException extends AbstractOXException {
         /**
          * A property from the ldap.properties file is missing.
          */
-        PROPERTY_MISSING("Can't find property %s.", Category.SETUP_ERROR,
+        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR,
             Detail.ERROR, 1),
         /**
-         * A problem with distinguished names occured.
+         * A problem with distinguished names occurred.
          */
-        DN_PROBLEM("Can't build distinguished name from %s.",
+        DN_PROBLEM("Cannot build distinguished name from %s.",
             Category.CODE_ERROR, Detail.ERROR, 2),
         /**
          * Class can not be found.
@@ -153,14 +153,14 @@ public class UserException extends AbstractOXException {
         INSTANCIATION_PROBLEM("Cannot instanciate class %s.",
             Category.SETUP_ERROR, Detail.ERROR, 4),
         /**
-         * A database connection can't be obtained.
+         * A database connection cannot be obtained.
          */
-        NO_CONNECTION("Can't get database connection.",
+        NO_CONNECTION("Cannot get database connection.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5),
         /**
-         * Can't clone object %1$s.
+         * Cannot clone object %1$s.
          */
-        NOT_CLONEABLE("Can't clone object %1$s.", Category.CODE_ERROR,
+        NOT_CLONEABLE("Cannot clone object %1$s.", Category.CODE_ERROR,
             Detail.ERROR, 6),
         /**
          * SQL Problem: \"%s\".

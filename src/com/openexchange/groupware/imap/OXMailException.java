@@ -474,9 +474,9 @@ public class OXMailException extends OXException {
 				"Message has been successfully sent, but a copy was not placed in your sent folder due to exceeded quota.",
 				Category.EXTERNAL_RESOURCE_FULL, 83),
 		/**
-		 * A protocol exception occured during execution of an IMAP request: %s
+		 * A protocol exception occurred during execution of an IMAP request: %s
 		 */
-		PROTOCOL_ERROR("A protocol exception occured during execution of an IMAP request: %s", Category.INTERNAL_ERROR,
+		PROTOCOL_ERROR("A protocol exception occurred during execution of an IMAP request: %s", Category.INTERNAL_ERROR,
 				84),
 		/**
 		 * Folder %s does not allow subfolders.
@@ -499,21 +499,21 @@ public class OXMailException extends OXException {
 		 */
 		INVALID_FOLDER_NAME("Mail folder cannot be created. Name must not contain character '%s'", Category.USER_INPUT, 88),
 		/**
-		 * A JSON syntax error occured: %s
+		 * A JSON syntax error occurred: %s
 		 */
-		JSON_ERROR("A JSON syntax error occured: %s", Category.CODE_ERROR, 89),
+		JSON_ERROR("A JSON syntax error occurred: %s", Category.CODE_ERROR, 89),
 		/**
 		 * A part's content could not be read from message %s in mail folder %s of user %s
 		 */
 		UNREADBALE_PART_CONTENT("A part's content could not be read from message %s in mail folder %s of user %s", Category.INTERNAL_ERROR, 90),
 		/**
-		 * A IMAP error occured: %s
+		 * An IMAP error occurred: %s
 		 */
-		IMAP_ERROR("A IMAP error occured: %s", Category.CODE_ERROR, 91),
+		IMAP_ERROR("An IMAP error occurred: %s", Category.CODE_ERROR, 91),
 		/**
-		 * A socket error occured: %s
+		 * A socket error occurred: %s
 		 */
-		SOCKET_ERROR("A socket error occured: %s", Category.CODE_ERROR, 92),
+		SOCKET_ERROR("A socket error occurred: %s", Category.CODE_ERROR, 92),
 		/**
 		 * Html-2-Text conversion failed: %s
 		 */

@@ -138,7 +138,7 @@ abstract class TaskStorage {
      * @param lastRead timestamp when the task was last read.
      * @param type ACTIVE or DELETED.
      * @throws TaskException if the task has been changed in the meantime or an
-     * exception occured.
+     * exception occurred.
      */
     abstract void delete(Context ctx, Connection con, int taskId, Date lastRead,
         StorageType type) throws TaskException;

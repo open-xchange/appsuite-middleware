@@ -516,7 +516,7 @@ public class AJPv13RequestHandler {
 			}
 		}
 		if (servletKey == null) {
-			this.servletInstance = new HttpErrorServlet("Can't find class mapping for " + pathInfo);
+			this.servletInstance = new HttpErrorServlet("Cannot find class mapping for " + pathInfo);
 		} else {
 			HttpServlet servletInst = HttpServletManager.getServlet(servletKey);
 			if (servletInst == null) {

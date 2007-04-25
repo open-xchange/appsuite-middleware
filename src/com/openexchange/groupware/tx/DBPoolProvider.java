@@ -71,7 +71,7 @@ public class DBPoolProvider implements DBProvider {
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(DBPoolProvider.class);
 	private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
 	
-	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database doesn't seem to be reachable. This must be fixed by the system administration", exceptionId=0, msg="Database can't be reached.")	
+	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=0, msg="Database cannot be reached.")	
 	public Connection getReadConnection(Context ctx) throws TransactionException {
 		try {
 			Connection readCon = DBPool.pickup(ctx);
@@ -87,7 +87,7 @@ public class DBPoolProvider implements DBProvider {
 			DBPool.closeReaderSilent(ctx,con); //FIXME
 	}
 
-	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database doesn't seem to be reachable. This must be fixed by the system administration", exceptionId=1, msg="Database can't be reached.")	
+	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=1, msg="Database cannot be reached.")	
 	public Connection getWriteConnection(Context ctx) throws TransactionException {
 		try {
 			Connection writeCon = DBPool.pickupWriteable(ctx);

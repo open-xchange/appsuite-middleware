@@ -190,9 +190,9 @@ public class InfostoreIterator implements SearchIterator {
 	
 	@OXThrows(
 			category = Category.INTERNAL_ERROR,
-			desc = "Can't close database connection",
+			desc = "Cannot close database connection",
 			exceptionId = 2,
-			msg = "Can't close database connection"
+			msg = "Cannot close database connection"
 	)
 	public void close() throws SearchIteratorException {
 		if(rs == null)

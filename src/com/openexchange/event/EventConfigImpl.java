@@ -96,9 +96,9 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
 		} catch (FileNotFoundException exc) {
-			LOG.error("can't find propfile: " + propfile, exc);
+			LOG.error("Cannot find propfile: " + propfile, exc);
 		} catch (IOException exc) {
-			LOG.error("can't read propfile: " + propfile, exc);
+			LOG.error("Cannot read propfile: " + propfile, exc);
 		}
 		
 		isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", isEventQueueEnabled);

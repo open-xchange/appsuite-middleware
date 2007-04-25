@@ -450,7 +450,7 @@ public class ContactMySql implements ContactSql {
 					sb.append(OXFolderTools.getSubfolderList(cso.getFolder(), user, memberingroup, ctx, readcon));
 					sb.append(") AND ");
 				}catch (Exception e){
-					LOG.error("An Error occured during readconnection fetch: ",e);			
+					LOG.error("An Error occurred during readconnection fetch: ",e);			
 				} finally {
 					if (readcon != null) {
 						DBPool.closeReaderSilent(ctx, readcon);

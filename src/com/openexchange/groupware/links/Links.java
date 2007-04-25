@@ -266,8 +266,8 @@ public class Links {
 					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
 					"Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
 					ContactException.INIT_CONNECTION_FROM_DBPOOL,
-					"An Error occured. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-					"An Error occured. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+					"An Error occurred. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
+					"An Error occurred. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 					}
 	)
 	public static void performLinkStorage(LinkObject l, int user, int[] group, SessionObject so, Connection writecon) throws OXException{
@@ -346,7 +346,7 @@ public class Links {
 			msg={	
 					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d 2. Object %2$d Context %3$d",
 					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-					"An Error occured. Unable to load some links for this Objects. 1. Object %1$d 2. Object %2$d Context %3$d"
+					"An Error occurred. Unable to load some links for this Objects. 1. Object %1$d 2. Object %2$d Context %3$d"
 					}
 	)
 	public static LinkObject getLinkFromObject(int first_id, int first_type, int second_id, int second_type,int user, int[] group, SessionObject so, Connection readcon) throws OXException {
@@ -458,7 +458,7 @@ public class Links {
 			exceptionId={10,11},
 			msg={	
 					"Unable to create a link between these two Objects. Insufficient Rights. Object %1$d Folder %2$d Context %3$d",
-					"An Error occured. Unable to delete some links from this Objects. Object %1$d Folder %2$d Context %3$d"
+					"An Error occurred. Unable to delete some links from this Objects. Object %1$d Folder %2$d Context %3$d"
 					}
 	)
 	public static int[][] deleteLinkFromObject(int id, int type, int folder, int[][] data, int user, int[] group, SessionObject so, Connection readcon, Connection writecon) throws OXException {

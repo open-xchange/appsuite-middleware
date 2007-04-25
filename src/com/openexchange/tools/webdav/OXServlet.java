@@ -174,7 +174,7 @@ public abstract class OXServlet extends WebDavServlet {
                 return false;
             }
             if (null == session) {
-                LOG.debug("Can't authenticate user.");
+                LOG.debug("Cannot authenticate user.");
                 addUnauthorizedHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                     "Authorization Required!");

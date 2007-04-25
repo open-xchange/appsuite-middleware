@@ -114,7 +114,7 @@ public class AJAXSpellCheck {
 	@OXThrowsMultiple(category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR },
 			desc={ "", "", "" },
 			exceptionId={ 4, 5, 6 },
-			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occured: %1$s." })
+			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occurred: %1$s." })
 	public AJAXSpellCheckResult[] checkText(final String text) throws AbstractOXException {
 		try {
 			if (IMAPProperties.getSpellCheckConfig() == null) {

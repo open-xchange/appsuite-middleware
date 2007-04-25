@@ -461,7 +461,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             try {
                 reminder.deleteReminder(task.getObjectID(), userId, Types.TASK);
             } catch (OXObjectNotFoundException ce) {
-                LOG.debug("Can't delete reminder for task "
+                LOG.debug("Cannot delete reminder for task "
                     + task.getObjectID() + " in context "
                     + session.getContext().getContextId());
             }

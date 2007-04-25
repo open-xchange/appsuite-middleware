@@ -674,10 +674,10 @@ public class GlobalConfig {
 				
 				HttpServletManager.setServletConstructorMap(servletConstructorMap);
 			} else {
-				ComfireLogger.log("Can't find property file: " + file, ComfireLogger.WARN);
+				ComfireLogger.log("Cannot find property file: " + file, ComfireLogger.WARN);
 			}
 		} catch (Exception exc) {
-			ComfireLogger.log("Can't load property file: " + file + " " + exc, ComfireLogger.WARN);
+			ComfireLogger.log("Cannot load property file: " + file + " " + exc, ComfireLogger.WARN);
 			exc.printStackTrace();
 		}
 	 }

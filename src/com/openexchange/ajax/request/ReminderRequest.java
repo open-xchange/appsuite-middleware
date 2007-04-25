@@ -148,7 +148,7 @@ public class ReminderRequest {
 				reminderWriter.writeObject(reminderObj);
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (null != it) {
 				it.close();				
@@ -191,7 +191,7 @@ public class ReminderRequest {
 				
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			jsonWriter.endArray();
 			if (null != it) {

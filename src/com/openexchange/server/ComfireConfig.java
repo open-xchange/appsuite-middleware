@@ -89,7 +89,7 @@ public class ComfireConfig {
 				}
 			}
 		} catch (IOException e) {
-			ComfireLogger.log("ERROR: Can't load propfile " + propfile + "! Abort.", 0);
+			ComfireLogger.log("ERROR: Cannot load propfile " + propfile + "! Abort.", 0);
 			System.exit(4);
 		}
         try {

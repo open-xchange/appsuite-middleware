@@ -83,7 +83,7 @@ import com.openexchange.server.DBPoolingException.Code;
  */
 public final class Pools implements Runnable {
 
-    private static final String ERR_CANT_UNREGISTER_POOL_MBEAN = "Can't unregister pool mbean.";
+    private static final String ERR_CANT_UNREGISTER_POOL_MBEAN = "Cannot unregister pool mbean.";
 
 	/**
      * Logger.
@@ -254,7 +254,7 @@ public final class Pools implements Runnable {
                 server.registerMBean(pool, objName);
             }
         } catch (Exception e) {
-            LOG.error("Can't register pool mbean.", e);
+            LOG.error("Cannot register pool mbean.", e);
         }
     }
 

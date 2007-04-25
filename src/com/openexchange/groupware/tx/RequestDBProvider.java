@@ -181,7 +181,7 @@ public class RequestDBProvider implements DBProvider {
 		try {
 			if(tx.writeConnection!=null) {
 				if(tx.writeConnection.getAutoCommit())
-					throw new IllegalStateException("This request can't be rolled back because it wasn't part of a transaction");
+					throw new IllegalStateException("This request cannot be rolled back because it wasn't part of a transaction");
 				tx.writeConnection.rollback();
 			}
 		} catch (SQLException e) {
@@ -322,7 +322,7 @@ public class RequestDBProvider implements DBProvider {
 		if(tx == null)
 			throw new IllegalStateException("No Transaction Active");
 		if(tx.writeConnection != null && transactional)
-			throw new IllegalStateException("Can't switch on transaction after a write occurred");
+			throw new IllegalStateException("Cannot switch on transaction after a write occurred");
 		tx.transactional = transactional;
 	}
 }

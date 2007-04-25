@@ -102,12 +102,12 @@ public class SettingException extends AbstractOXException {
      */
     public enum Code {
         /**
-         * Can't get connection to database.
+         * Cannot get connection to database.
          */
-        NO_CONNECTION("Can't get connection to database.",
+        NO_CONNECTION("Cannot get connection to database.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
         /**
-         * A SQL problem occures while reading information from the config
+         * An SQL problem occures while reading information from the config
          * database.
          */
         SQL_ERROR(null, Category.CODE_ERROR, 2),
@@ -132,9 +132,9 @@ public class SettingException extends AbstractOXException {
         JSON_READ_ERROR("Exception while parsing JSON.",
             Category.CODE_ERROR, 6),
         /**
-         * Can't clone tree.
+         * Cannot clone tree.
          */
-        CLONE("Can't clone tree.", Category.CODE_ERROR, 7);
+        CLONE("Cannot clone tree.", Category.CODE_ERROR, 7);
 
         /**
          * Message of the exception.

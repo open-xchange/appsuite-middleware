@@ -217,9 +217,9 @@ public class CachingUserStorage extends UserStorage {
             Configuration.load();
             CACHE = JCS.getInstance("User");
         } catch (IOException e) {
-            throw new RuntimeException("Can't load cache configuration.", e);
+            throw new RuntimeException("Cannot load cache configuration.", e);
         } catch (CacheException e) {
-            throw new RuntimeException("Can't create user cache.", e);
+            throw new RuntimeException("Cannot create user cache.", e);
         }
         CACHE_LOCK = new ReentrantLock(true);
     }

@@ -191,7 +191,7 @@ public class SessionHandler extends TimerTask {
 		//try {
 			final int contextId = cs.getContextId(contextname);
 			if (ContextStorage.NOT_FOUND == contextId) {
-				throw new ContextNotFoundException("Can't find context.");
+				throw new ContextNotFoundException("Cannot find context.");
 			}
 			context = cs.getContext(contextId);
 		//} catch (ContextException e) {
@@ -199,7 +199,7 @@ public class SessionHandler extends TimerTask {
 		//}
 		
 		if (context == null) {
-			throw new ContextNotFoundException("can't find context with the given name (" + contextname + ")");
+			throw new ContextNotFoundException("Cannot find context with the given name (" + contextname + ")");
 		}
 		
 		Credentials cred = null;
@@ -278,7 +278,7 @@ public class SessionHandler extends TimerTask {
 		try {
 			sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(sessionobject));
 		} catch (IMAPException e) {
-			LOG.error("ERROR! IMAPException OCCURED " + e.getMessage());
+			LOG.error("ERROR! IMAPException OCCURRED " + e.getMessage());
 		}
 		
 		if (sessions.containsKey(sessionId)) {
@@ -358,7 +358,7 @@ public class SessionHandler extends TimerTask {
 			}
 		}
 		
-		LOG.debug("can't find session id to remove session <" + sessionid + ">");
+		LOG.debug("Cannot find session id to remove session <" + sessionid + ">");
 		
 		return false;
 	}

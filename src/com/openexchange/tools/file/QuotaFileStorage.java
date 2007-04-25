@@ -205,7 +205,7 @@ public class QuotaFileStorage extends FileStorage {
 					incUsed(length);
 					return name;
 				} catch (FileStorageException x) {
-					LOG.fatal("Can't set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
+					LOG.fatal("Cannot set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
 				}
 			}
 			super.deleteFile(name);
@@ -258,7 +258,7 @@ public class QuotaFileStorage extends FileStorage {
 					incUsed(length);
 					return name;
 				} catch (IOException x) {
-					LOG.fatal("Can't set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
+					LOG.fatal("Cannot set quota. Accepting upload anyway. You'll have to run the recovery tool! ContextId: "+ctx.getContextId());
 				}
 			}
 			delegate.unlock();

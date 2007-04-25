@@ -118,7 +118,7 @@ public final class CreateTableVersion implements UpdateTask {
 			category = { Category.CODE_ERROR },
 			desc = { "" },
 			exceptionId = { 1 },
-			msg = { "A SQL error occured while performing task CreateTableVersion: %1$s." }
+			msg = { "An SQL error occurred while performing task CreateTableVersion: %1$s." }
 	)
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
     	LOG.info("UpdateTask 'CreateTableVersion' performed!");

@@ -1578,7 +1578,7 @@ public class DatabaseImpl extends DBService {
 					deleteVersionAction.undo();
 					throw new InfostoreException(e);
 				} catch (AbstractOXException e1) {
-					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
+					LOG.fatal("Cannot roll back deleting versions. Run the consistency tool.",e1);
 				}
 			}
 						

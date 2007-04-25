@@ -86,7 +86,7 @@ public class FolderCacheProperties {
 		FOLDER_CACHE_PROPS = new Properties();
 		final String propFileName = SystemConfig.getProperty(PROPFILE);
 		if (null == propFileName) {
-			LOG.error("Can't find property \"" + PROPFILE + "\" in system.properties.");
+			LOG.error("Cannot find property \"" + PROPFILE + "\" in system.properties.");
 		}
 		try {
 			FileInputStream fis = null;

@@ -136,12 +136,12 @@ public class LdapException extends AbstractOXException {
         /**
          * A property from the ldap.properties file is missing.
          */
-        PROPERTY_MISSING("Can't find property %s.", Category.SETUP_ERROR,
+        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR,
             Detail.ERROR, 1),
         /**
-         * A problem with distinguished names occured.
+         * A problem with distinguished names occurred.
          */
-        DN_PROBLEM("Can't build distinguished name from %s.",
+        DN_PROBLEM("Cannot build distinguished name from %s.",
             Category.CODE_ERROR, Detail.ERROR, 2),
         /**
          * Class can not be found.
@@ -154,9 +154,9 @@ public class LdapException extends AbstractOXException {
         INSTANCIATION_PROBLEM("Cannot instanciate class %s.",
             Category.SETUP_ERROR, Detail.ERROR, 4),
         /**
-         * A database connection can't be obtained.
+         * A database connection Cannot be obtained.
          */
-        NO_CONNECTION("Can't get database connection.",
+        NO_CONNECTION("Cannot get database connection.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, Detail.ERROR, 5),
         /**
          * SQL Problem: "%s".
@@ -174,15 +174,15 @@ public class LdapException extends AbstractOXException {
         HASH_ALGORITHM("Hash algorithm %s isn't found.",
             Category.CODE_ERROR, Detail.ERROR, 8),
         /**
-         * Encoding %s can't be used.
+         * Encoding %s cannot be used.
          */
-        UNSUPPORTED_ENCODING("Encoding %s can't be used.",
+        UNSUPPORTED_ENCODING("Encoding %s cannot be used.",
             Category.CODE_ERROR, Detail.ERROR, 9),
         /**
-         * Can't find resource group with identifier %d.
+         * Cannot find resource group with identifier %d.
          */
         RESOURCEGROUP_NOT_FOUND(
-            "Can't find resource group with identifier %d.",
+            "Cannot find resource group with identifier %d.",
             Category.CODE_ERROR, Detail.ERROR, 10),
         /**
          * Found resource groups with same identifier %d.
@@ -190,9 +190,9 @@ public class LdapException extends AbstractOXException {
         RESOURCEGROUP_CONFLICT("Found resource groups with same identifier %d.",
             Category.CODE_ERROR, Detail.ERROR, 11),
         /**
-         * Can't find resource with identifier %d.
+         * Cannot find resource with identifier %d.
          */
-        RESOURCE_NOT_FOUND("Can't find resource with identifier %d.",
+        RESOURCE_NOT_FOUND("Cannot find resource with identifier %d.",
             Category.CODE_ERROR, Detail.ERROR, 12),
         /**
          * Found resources with same identifier %d.
@@ -200,14 +200,14 @@ public class LdapException extends AbstractOXException {
         RESOURCE_CONFLICT("Found resources with same identifier %d.",
             Category.CODE_ERROR, Detail.ERROR, 13),
         /**
-         * Can't find user with email %s.
+         * Cannot find user with email %s.
          */
-        NO_USER_BY_MAIL("Can't find user with email %s.",
+        NO_USER_BY_MAIL("Cannot find user with email %s.",
             Category.CODE_ERROR, Detail.ERROR, 14),
         /**
-         * Can't find user with identifier %1$s in context %2$d.
+         * Cannot find user with identifier %1$s in context %2$d.
          */
-        USER_NOT_FOUND("Can't find user with identifier %1$s in context %2$d.",
+        USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
             Category.CODE_ERROR, Detail.NOT_FOUND, 15),
         /**
          * Found two user with same identifier %1$s in context %2$d.
@@ -215,10 +215,10 @@ public class LdapException extends AbstractOXException {
         USER_CONFLICT("Found two user with same identifier %1$s in context "
             + "%2$d.", Category.CODE_ERROR, Detail.ERROR, 16),
         /**
-         * Can't find group with identifier %1$s in context %2$d.
+         * Cannot find group with identifier %1$s in context %2$d.
          */
         GROUP_NOT_FOUND(
-            "Can't find group with identifier %1$s in context %2$d.",
+            "Cannot find group with identifier %1$s in context %2$d.",
             Category.CODE_ERROR, Detail.ERROR, 17);
 
         /**

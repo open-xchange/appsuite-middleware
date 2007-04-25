@@ -598,7 +598,7 @@ public class Contacts implements DeleteListener {
 							"You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
 							ContactException.OBJECT_HAS_CHANGED_MSG,
 							"Unable to update Contact. Context %1$d Object %2$d",
-							"An Error Occured: Object ID is -1",
+							"An Error occurred: Object ID is -1",
 							"No Changes found. No Update requiered. Context %1$d Object %2$d",
 							"Unable to scale Image down.", 
 							"Unable to update Contact. Context %1$d Object %2$d",
@@ -2263,7 +2263,7 @@ public class Contacts implements DeleteListener {
 			desc={"42","44","45","46"},
 			exceptionId={42,44,45,46},
 			msg={	ContactException.NO_DELETE_PERMISSION_MSG,			
-							"Critical Error Occured. This folder contains a contact with no id. Context %1$d Folder %2$d",						
+							"Critical Error occurred. This folder contains a contact with no id. Context %1$d Folder %2$d",						
 							"Unable to delete Contacts from this folder. Context %1$d Folder %2$d",
 							"Unable to trigger Object Events: Context %1$d Folder %2$d"
 						}
@@ -2317,7 +2317,7 @@ public class Contacts implements DeleteListener {
 				oid = rs.getInt(1);
 				if (rs.wasNull()){
 					throw EXCEPTIONS.create(44, so.getContext().getContextId(), fid);
-					//throw new OXException("VERY BAD ERROR OCCURED, OBJECT WITHOUT ID FOUND cid="+so.getContext().getContextId()+" fid="+fid);
+					//throw new OXException("VERY BAD ERROR OCCURRED, OBJECT WITHOUT ID FOUND cid="+so.getContext().getContextId()+" fid="+fid);
 				}
 				dlist = rs.getInt(2);
 				if (!rs.wasNull() && dlist > 0){
@@ -7297,5 +7297,4 @@ public class Contacts implements DeleteListener {
 	}
 
 }
-
 

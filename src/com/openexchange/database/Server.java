@@ -98,7 +98,7 @@ public final class Server {
                 }
             }
             if (-1 == serverId) {
-                LOG.fatal("Can't resolve server id for server: "
+                LOG.fatal("Cannot resolve server id for server: "
                     + getServerName());
             } else  {
                 LOG.trace("Got server id: " + serverId);

@@ -123,9 +123,9 @@ public class SessiondConfigWrapper extends AbstractConfigWrapper implements Sess
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
 		} catch (FileNotFoundException exc) {
-			LOG.error("can't find propfile: " + propfile, exc);
+			LOG.error("cannot find propfile: " + propfile, exc);
 		} catch (IOException exc) {
-			LOG.error("can't read propfile: " + propfile, exc);
+			LOG.error("cannot read propfile: " + propfile, exc);
 		}
 		
 		isServerSocketEnabled = parseProperty(prop, "com.openexchange.sessiond.isServerSocketEnabled", isServerSocketEnabled);

@@ -350,13 +350,13 @@ public class OXFolderException extends OXException {
 		NO_EFFECTIVE_PERMISSION("Effective permission of Folder %s could not determined for user %s in context %s",
 				Category.CODE_ERROR, 37),
 		/**
-		 * A SQL error occured in context %s
+		 * A SQL error occurred in context %s
 		 */
-		SQL_ERROR("A SQL error occured in context %s", Category.CODE_ERROR, 38),
+		SQL_ERROR("An SQL error occurred in context %s", Category.CODE_ERROR, 38),
 		/**
-		 * A DBPool error occured in context %s
+		 * A DBPool error occurred in context %s
 		 */
-		DBPOOLING_ERROR("A SQL error occured in context %s", Category.CODE_ERROR, 39),
+		DBPOOLING_ERROR("An SQL error occurred in context %s", Category.CODE_ERROR, 39),
 		/**
 		 * Caller does not allow to fetch a connection from pool in context %s
 		 */
@@ -435,9 +435,9 @@ public class OXFolderException extends OXException {
 		 */
 		NO_WRITE_PERMISSION("User %s has no write permission on folder %s in context %s", Category.PERMISSION, 54),
 		/**
-		 * A JSON error occured: %s
+		 * A JSON error occurred: %s
 		 */
-		JSON_ERROR("A JSON error occured: %s", Category.CODE_ERROR, 55),
+		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 55),
 		/**
 		 * Unknown parameter container type: %d
 		 */
@@ -483,9 +483,9 @@ public class OXFolderException extends OXException {
 		 */
 		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)", Category.CODE_ERROR, 66),
 		/**
-		 * A runtime error occured in context %s
+		 * A runtime error occurred in context %s
 		 */
-		RUNTIME_ERROR("A runtime error occured in context %s", Category.INTERNAL_ERROR, 67),
+		RUNTIME_ERROR("A runtime error occurred in context %s", Category.INTERNAL_ERROR, 67),
 		/**
 		 * This method is not applicable to an IMAP permission
 		 */

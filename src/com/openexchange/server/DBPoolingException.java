@@ -129,7 +129,7 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * Connection to config DB can't be created.
          */
-        NO_CONFIG_DB("Can't get connection to config DB.",
+        NO_CONFIG_DB("Cannot get connection to config DB.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
         /**
          * Resolving the database failed.
@@ -139,12 +139,12 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * Connection to a database can't be created.
          */
-        NO_CONNECTION("Can't get connection to database %d.",
+        NO_CONNECTION("Cannot get connection to database %d.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
         /**
          * Setting the schema failed.
          */
-        SCHEMA_FAILED("Can't set schema in database connection.",
+        SCHEMA_FAILED("Cannot set schema in database connection.",
             Category.SOCKET_CONNECTION, 4),
         /**
          * Null is returned to the pool instead a connection object.
@@ -160,7 +160,7 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * A database pool entry can't be found in the config database.
          */
-        NO_DBPOOL("Can't get information for pool %d.",
+        NO_DBPOOL("Cannot get information for pool %d.",
             Category.CODE_ERROR, 7),
         /**
          * A driver class could not be found.
@@ -169,7 +169,7 @@ public class DBPoolingException extends AbstractOXException {
         /**
          * Returning a connection to the pool failed.
          */
-        RETURN_FAILED("Can't return connection to pool %d.",
+        RETURN_FAILED("Cannot return connection to pool %d.",
             Category.CODE_ERROR, 9),
         /**
          * Server name is not defined.

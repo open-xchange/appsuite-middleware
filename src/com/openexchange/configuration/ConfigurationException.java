@@ -107,18 +107,18 @@ public class ConfigurationException extends AbstractOXException {
          */
         NOT_READABLE("File \"%s\" is not readable.", Category.SETUP_ERROR, 3),
         /**
-         * Can't read file "%s".
+         * Cannot read file "%s".
          */
-        READ_ERROR("Can't read file \"%s\".", Category.SETUP_ERROR, 4),
+        READ_ERROR("Cannot read file \"%s\".", Category.SETUP_ERROR, 4),
         /**
          * System Property "%s" is not defined.
          */
         PROPERTY_MISSING("Property \"%s\" is not defined.",
             Category.SETUP_ERROR, 5),
         /**
-         * Can't load class "%s".
+         * Cannot load class "%s".
          */
-        CLASS_NOT_FOUND("Can't load class \"%s\".", Category.SETUP_ERROR, 6);
+        CLASS_NOT_FOUND("Cannot load class \"%s\".", Category.SETUP_ERROR, 6);
 
         /**
          * Message of the exception.

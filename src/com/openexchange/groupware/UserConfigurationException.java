@@ -58,13 +58,13 @@ public class UserConfigurationException extends OXException {
 	public static enum UserConfigurationCode {
 		
 		/**
-		 * A SQL error occured
+		 * An SQL error occurred
 		 */
-		SQL_ERROR("A SQL error occured", Category.CODE_ERROR, 1),
+		SQL_ERROR("An SQL error occurred", Category.CODE_ERROR, 1),
 		/**
-		 * A DBPooling error occured
+		 * A DBPooling error occurred
 		 */
-		DBPOOL_ERROR("A DBPooling error occured", Category.CODE_ERROR, 2),
+		DBPOOL_ERROR("A DBPooling error occurred", Category.CODE_ERROR, 2),
 		/**
 		 * Configuration for user %s could not found in context %d
 		 */

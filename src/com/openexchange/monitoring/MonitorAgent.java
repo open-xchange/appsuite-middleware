@@ -120,7 +120,7 @@ public class MonitorAgent extends AbstractAgent {
 			try {
 				instance.registerMBean(objName, mbean);
 			} catch (Exception e) {
-				LOG.error("Can't register pool mbean.", e);
+				LOG.error("Cannot register pool mbean.", e);
 			}
 			
 //			/*
@@ -138,7 +138,7 @@ public class MonitorAgent extends AbstractAgent {
 			try {
 				instance.registerMBean(objName, mbean);
 			} catch (Exception e) {
-				LOG.error("Can't register pool mbean.", e);
+				LOG.error("Cannot register pool mbean.", e);
 			}
 		}
 	}

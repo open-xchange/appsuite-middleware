@@ -113,7 +113,7 @@ public class FileStorageException extends AbstractOXException {
         /**
          * A property is missing.
          */
-        PROPERTY_MISSING("Can't find property %s.", Category.SETUP_ERROR, 1),
+        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR, 1),
         /**
          * Class can not be found.
          */
@@ -135,19 +135,19 @@ public class FileStorageException extends AbstractOXException {
         INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.",
             Category.CODE_ERROR, 5),
         /**
-         * Can't create directory \"%1$s\" for FileStorage.
+         * Cannot create directory \"%1$s\" for FileStorage.
          */
-        CREATE_DIR_FAILED("Can't create directory \"%1$s\" for FileStorage.",
+        CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.",
             Category.SETUP_ERROR, 6),
         /**
-         * Depth must be >= 1 but is %1$d.
+         * 'Depth' must be >= 1 but is %1$d.
          */
-        INVALID_DEPTH("Depth must be >= 1 but is %1$d.",
+        INVALID_DEPTH("'Depth' must be >= 1 but is %1$d.",
             Category.CODE_ERROR, 7),
         /**
          * Entries must be >= 1 but is %1$d.
          */
-        INVALID_ENTRIES("Entries must be >= 1 but is %1$d.",
+        INVALID_ENTRIES("'Entries' must be >= 1 but is %1$d.",
             Category.CODE_ERROR, 8),
         /**
          * Unsupported encoding.
@@ -164,21 +164,21 @@ public class FileStorageException extends AbstractOXException {
         /**
          * Depth mismatch while computing next entry.
          */
-        DEPTH_MISMATCH("Depth mismatch while computing next entry.",
+        DEPTH_MISMATCH("'Depth' mismatch while computing next entry.",
             Category.CODE_ERROR, 12),
         /**
-         * Can't remove lock file.
+         * Cannot remove lock file.
          */
-        UNLOCK("Can't remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
+        UNLOCK("Cannot remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
             13),
         /**
-         * Can't create lock file.
+         * Cannot create lock file.
          */
-        LOCK("Can't create lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
+        LOCK("Cannot create lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
         /**
-         * Can't create file %1$s.
+         * Cannot create file %1$s.
          */
-        CREATE_FAILED("Can't create file %1$s.",
+        CREATE_FAILED("Cannot create file %1$s.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
 
         /**

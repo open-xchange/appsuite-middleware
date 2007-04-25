@@ -264,8 +264,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occured during the load of Folder Objects. Context %1$d Folder %2$d User %3$d",
-							"An Error occured during the load of Folder Objects. Context %1$d Folder %2$d User %3$d"
+							"An Error occurred during the load of Folder Objects. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of Folder Objects. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getContactsInFolder(int folderId, int from, int to, int order_field, String orderMechanism, int[] cols) throws OXException {
@@ -365,8 +365,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occured during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
-							"An Error occured during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
 						}
 	)
@@ -472,8 +472,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occured during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d",
-							"An Error occured during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d"
+							"An Error occurred during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator searchContacts(String searchpattern, boolean startletter, int folderId, int order_field, String orderMechanism, int[] cols) throws OXException {
@@ -634,8 +634,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occured during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d",
-							"An Error occured during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d"
+							"An Error occurred during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
@@ -715,8 +715,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			desc={"36","37","38"},
 			exceptionId={36,37,38},
 			msg={	ContactException.INIT_CONNECTION_FROM_DBPOOL,
-							"An Error occured during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d",
-							"An Error occured during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d"
+							"An Error occurred during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d",
+							"An Error occurred during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
@@ -1111,7 +1111,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				throw EXCEPTIONS.create(57,exc,ctx.getContextId(), userId);
 		    } catch (OXException exc) {
 		    	throw exc;
-		    	//throw new SearchIteratorException("ERROR OCCURED ON NEXT (cid="+sessionobject.getContext().getContextId()+')',exc);
+		    	//throw new SearchIteratorException("ERROR OCCURRED ON NEXT (cid="+sessionobject.getContext().getContextId()+')',exc);
 		    }
 		}
 		

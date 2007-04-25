@@ -139,7 +139,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 	@OXThrowsMultiple(
 			category={Category.CODE_ERROR, Category.TRY_AGAIN}, 
 			
-			desc={"Indicates a faulty SQL Query. Only R&D can fix this", "Thrown when a result can't be prefetched. This indicates a problem with the DB Connection. Have a look at the underlying SQLException"}, 
+			desc={"Indicates a faulty SQL Query. Only R&D can fix this", "Thrown when a result cannot be prefetched. This indicates a problem with the DB Connection. Have a look at the underlying SQLException"}, 
 			
 			exceptionId={0,1}, 
 			

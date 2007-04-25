@@ -133,7 +133,7 @@ public final class AssignmentStorage {
                     try {
                         CACHE.putSafe(key, retval);
                     } catch (CacheException e) {
-                        LOG.error("Can't put database assignment into cache.",
+                        LOG.error("Cannot put database assignment into cache.",
                             e);
                     }
                 }

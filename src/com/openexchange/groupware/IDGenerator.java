@@ -121,7 +121,7 @@ public final class IDGenerator {
             con = DBPool.pickupWriteable(context);
         } catch (DBPoolingException e) {
             final SQLException sexp = new SQLException(
-                "Can't get connection from dbpool.");
+                "Cannot get connection from dbpool.");
             sexp.initCause(e);
             throw sexp;
         }

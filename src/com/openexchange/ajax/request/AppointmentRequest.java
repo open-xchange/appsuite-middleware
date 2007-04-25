@@ -390,7 +390,7 @@ public class AppointmentRequest {
 				}
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -418,7 +418,7 @@ public class AppointmentRequest {
 		try {
 			appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		}
 //		jsonWriter.value("");
 	}
@@ -616,7 +616,7 @@ public class AppointmentRequest {
 				}
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -652,7 +652,7 @@ public class AppointmentRequest {
 			
 			timestamp = appointmentobject.getLastModified();
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		}
 		
 	}
@@ -846,7 +846,7 @@ public class AppointmentRequest {
 				}
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (it != null) {
 				it.close();
@@ -920,7 +920,7 @@ public class AppointmentRequest {
 				jsonWriter.value(appointmentObj.getObjectID());
 			}
 		} catch (SQLException e) {
-			throw new OXException("SQLException occured", e);
+			throw new OXException("SQLException occurred", e);
 		} finally {
 			jsonWriter.endObject();
 		}

@@ -135,13 +135,13 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		NO_ATTRIBUTE_NAME("No attribute name could be found for code: %d", Category.CODE_ERROR, 15),
 		/**
-		 * An I/O error occured: %s
+		 * An I/O error occurred: %s
 		 */
-		IO_ERROR("An I/O error occured: %s", Category.SOCKET_CONNECTION, 16),
+		IO_ERROR("An I/O error occurred: %s", Category.SOCKET_CONNECTION, 16),
 		/**
-		 * A messaging error occured: %s
+		 * A messaging error occurred: %s
 		 */
-		MESSAGING_ERROR("A messaging error occured: %s", Category.CODE_ERROR, 17),
+		MESSAGING_ERROR("A messaging error occurred: %s", Category.CODE_ERROR, 17),
 		/**
 		 * Missing property AJP_JVM_ROUTE in file "ajp.properties"
 		 */

@@ -1,3 +1,7 @@
+* 2007-04-25 francisco.laguna@open-xchange.com
+ 
+ - Corrected some error messages
+
 * 2007-04-25 ben.pahne@open-xchange.com
  
  - Fixed Bug #6743, Upload contact image: error messages incorrect

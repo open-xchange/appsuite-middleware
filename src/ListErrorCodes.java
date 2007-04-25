@@ -256,7 +256,7 @@ public class ListErrorCodes {
             final AbstractOXException exception = (AbstractOXException) tmp;
             code.component = exception.getComponent();
         } catch (Throwable t) {
-            System.out.println("Can't get component of class "
+            System.out.println("Cannot get component of class "
                 + code.clazz.getName());
         }
     }

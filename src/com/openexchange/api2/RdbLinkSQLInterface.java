@@ -78,10 +78,10 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			readcon = DBPool.pickup(sessionobject.getContext());
 			lo = Links.getAllLinksFromObject(objectId,type,folder,user,group,sessionobject,readcon);
 		}catch (DBPoolingException e){
-			LOG.error("AN ERROR OCCURED DURING saveLink", e);
+			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
 		}catch (OXException e){
 			throw e;
-			//throw new OXException("AN ERROR OCCURED DURING getLinksOfObject", e);
+			//throw new OXException("AN ERROR OCCURRED DURING getLinksOfObject", e);
 		} finally {
 			if (readcon != null) {
 				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
@@ -96,10 +96,10 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			writecon = DBPool.pickupWriteable(so.getContext());
 			Links.performLinkStorage(l, user, group, so, writecon);
 		}catch (DBPoolingException e){
-			LOG.error("AN ERROR OCCURED DURING saveLink", e);
+			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
 		}catch (OXException e){
 			throw e;
-			//throw new OXException("AN ERROR OCCURED DURING saveLink", e);
+			//throw new OXException("AN ERROR OCCURRED DURING saveLink", e);
 		} finally {
 			if (writecon != null) {
 				DBPool.closeWriterSilent(so.getContext(), writecon);
@@ -117,10 +117,10 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			writecon = DBPool.pickupWriteable(sessionobject.getContext());
 			resp = Links.deleteLinkFromObject(id,type,folder,data,user,group,sessionobject,readcon,writecon);
 		}catch (DBPoolingException e){
-			LOG.error("AN ERROR OCCURED DURING saveLink", e);
+			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
 		}catch (OXException e){
 			throw e;
-			//throw new OXException("AN ERROR OCCURED DURING deleteLinks", e);
+			//throw new OXException("AN ERROR OCCURRED DURING deleteLinks", e);
 		} finally {
 			if (readcon != null) {
 				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);

@@ -92,7 +92,7 @@ public abstract class Updater {
         category = Category.SETUP_ERROR,
         desc = "",
         exceptionId = 1,
-        msg = "Can't instanciate updater implementation %1$s."
+        msg = "Cannot instanciate updater implementation %1$s."
     )
     public static Updater getInstance() throws UpdateException {
         try {

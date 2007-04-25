@@ -371,7 +371,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 //                            lock.unlock();
 //                        }
                         throw new PoolingException(
-                            "Can't create pooled object.", e);
+                            "Cannot create pooled object.", e);
                     }
                     retval = new PooledData<T>(pooled);
                     // maybe we add here more than maxActive objects. this happens
@@ -601,7 +601,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         try {
             pooled = lifecycle.create();
         } catch (Exception e) {
-            throw new PoolingException("Can't create pooled object.", e);
+            throw new PoolingException("Cannot create pooled object.", e);
         }
         return back(pooled, false);
     }

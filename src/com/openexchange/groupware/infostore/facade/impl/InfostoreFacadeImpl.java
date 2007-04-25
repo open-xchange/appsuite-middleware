@@ -418,7 +418,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.INTERNAL_ERROR }, desc = {
 			"The user may not create objects in the given folder. ",
 			"The file store couldn't be reached.",
-			"The IDGenerator threw a SQL Exception look at that one to find out what's wrong." }, exceptionId = {
+			"The IDGenerator threw an SQL Exception look at that one to find out what's wrong." }, exceptionId = {
 			2, 19, 20 }, msg = {
 			"You do not have sufficient permissions to create objects in this folder.",
 			"The file store could not be reached.", "Could not generate new ID." })
@@ -1392,8 +1392,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	@OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
-			"Can't reach the file store so some documents were not deleted.",
-			"Can't reach the file store so some documents were not deleted. This propably means that file store and db are inconsistent. Run the recovery tool." }, exceptionId = {
+			"Cannot reach the file store so some documents were not deleted.",
+			"Cannot reach the file store so some documents were not deleted. This propably means that file store and db are inconsistent. Run the recovery tool." }, exceptionId = {
 			35, 36 }, msg = {
 			"Cannot reach the file store so I cannot remove the documents.",
 			"Cannot remove file. Database and file store are probably inconsistent. Please contact an administrator to run the recovery tool." }

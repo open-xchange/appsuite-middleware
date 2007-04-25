@@ -135,7 +135,7 @@ public class WebdavFileStorage extends FileStorage {
 		try {
 			lock = lockInternal();
 		} catch (Exception x){
-			throw new IOException("Can't get lock: "+x);
+			throw new IOException("Cannot get lock: "+x);
 		}
 		
 		try {
@@ -212,7 +212,7 @@ public class WebdavFileStorage extends FileStorage {
     		WebdavResource res = getResource(name);
     		Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTLENGTH);
     		if(!e.hasMoreElements())
-    			throw new IOException("Can't get content length.");
+    			throw new IOException("Cannot get content length.");
     		return new Long((String)e.nextElement());
         } catch (IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
@@ -226,7 +226,7 @@ public class WebdavFileStorage extends FileStorage {
     		WebdavResource res = getResource(name);
     		Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTTYPE);
     		if(!e.hasMoreElements())
-    			throw new IOException("Can't get content type.");
+    			throw new IOException("Cannot get content type.");
     		return (String)e.nextElement();
         } catch (IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,

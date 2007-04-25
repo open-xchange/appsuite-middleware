@@ -107,21 +107,21 @@ public class ContextException extends AbstractOXException {
         /**
          * Mailadmin for a context is missing.
          */
-        NO_MAILADMIN("Can't resolve mailadmin for context %d.",
+        NO_MAILADMIN("Cannot resolve mailadmin for context %d.",
             Category.SETUP_ERROR, 1),
         /**
          * A context could not be found.
          */
-        NOT_FOUND("Can't find context %d.", Category.SETUP_ERROR, 2),
+        NOT_FOUND("Cannot find context %d.", Category.SETUP_ERROR, 2),
         /**
          * Putting an object into the cache failed.
          */
-        CACHE_PUT("Can't put object %s into cache.", Category.INTERNAL_ERROR,
+        CACHE_PUT("Cannot put object %s into cache.", Category.INTERNAL_ERROR,
             3),
         /**
          * No connection to database.
          */
-        NO_CONNECTION("Can't get connection to database.",
+        NO_CONNECTION("Cannot get connection to database.",
             Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
         /**
          * SQL problem: %1$s.
@@ -137,9 +137,9 @@ public class ContextException extends AbstractOXException {
          */
         CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8),
         /**
-         * Can't remove object %s from cache
+         * Cannot remove object %s from cache
          */
-        CACHE_REMOVE("Can't remove object %s from cache", Category.INTERNAL_ERROR, 9);
+        CACHE_REMOVE("Cannot remove object %s from cache", Category.INTERNAL_ERROR, 9);
 
         /**
          * Message of the exception.

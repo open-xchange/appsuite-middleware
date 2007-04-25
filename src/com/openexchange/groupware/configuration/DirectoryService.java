@@ -185,7 +185,7 @@ public final class DirectoryService {
                 props.load(fis);
                 fis.close();
             } catch (IOException e) {
-                LOG.error("Can't load properties for ldap!", e);
+                LOG.error("Cannot load properties for ldap!", e);
             }
         }
         return props;
@@ -299,7 +299,7 @@ public final class DirectoryService {
                 + "configuration.", e);
          }
       } else {
-         LOG.error("Can't read directory service configuration file \""
+         LOG.error("Cannot read directory service configuration file \""
             + ldapConfFile.getAbsolutePath() + "\"");
       }
    }

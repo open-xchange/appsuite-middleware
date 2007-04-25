@@ -132,8 +132,8 @@ public class SchemaStoreImpl extends SchemaStore {
 			category = { Category.CODE_ERROR, Category.CODE_ERROR },
 			desc = { "", "" },
 			exceptionId = { 14, 15 },
-			msg = { "A SQL error occured while creating table 'version': %1$s.",
-			"A database error occured while creating table 'version': %1$s." }
+			msg = { "An SQL error occurred while creating table 'version': %1$s.",
+			"A database error occurred while creating table 'version': %1$s." }
 	)
     private static final void createVersionTable(final int contextId) throws SchemaException {
     	/*
@@ -190,8 +190,8 @@ public class SchemaStoreImpl extends SchemaStore {
 			category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
 			desc = { "", "", "", "" },
 			exceptionId = { 6, 7, 8, 9 },
-			msg = { "A SQL error occured while reading schema version information: %1$s.",
-			"No result returned from SQL query, but was expected.",
+			msg = { "An SQL error occurred while reading schema version information: %1$s.",
+			"Though expected, SQL query returned no result.",
 			"Update conflict detected. Another process is currently updating schema %1$s.",
 			"Table update failed. Schema %1$s could not be locked." }
 	)
@@ -283,8 +283,8 @@ public class SchemaStoreImpl extends SchemaStore {
 			category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR },
 			desc = { "", "", "", "" },
 			exceptionId = { 10, 11, 12, 13 },
-			msg = { "A SQL error occured while reading schema version information: %1$s.",
-			"No result returned from SQL query, but was expected.",
+			msg = { "An SQL error occurred while reading schema version information: %1$s.",
+			"Though expected, SQL query returned no result.",
 			"Update conflict detected. Schema %1$s is not marked as LOCKED.",
 			"Table update failed. Schema %1$s could not be unlocked." }
 	)
@@ -381,9 +381,9 @@ public class SchemaStoreImpl extends SchemaStore {
             Category.SETUP_ERROR, Category.CODE_ERROR },
         desc = {"", "", "", "" },
         exceptionId = { 1, 2, 4, 16 },
-        msg = { "A SQL error occured while reading schema version information: "
+        msg = { "An SQL error occurred while reading schema version information: "
             + "%1$s.", "No row found in table update.", "Multiple rows found.",
-            "A database error occured while reading schema version information: %1$s." }
+            "A database error occurred while reading schema version information: %1$s." }
     )
     private Schema loadSchema(final int contextId) throws SchemaException {
         Connection con;
@@ -435,7 +435,7 @@ public class SchemaStoreImpl extends SchemaStore {
         desc = { "Checking if a table exist failed.", "Strange context "
             + "identifier or a mapping is missing." },
         exceptionId = { 3, 5 },
-        msg = { "A SQL exception occured while checking for schema version "
+        msg = { "An SQL exception occurred while checking for schema version "
             + "table: %1$s.", "Resolving schema for context %1$d failed." }
     )
     private static final boolean existsTable(final int contextId) throws SchemaException {
