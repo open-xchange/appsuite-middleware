@@ -89,4 +89,8 @@ public class FileAuthenticationImpl implements AuthenticationInterface {
         return false;
     }
 
+    public boolean authenticateUser(Credentials authdata, Context ctx) throws StorageException {        
+        return false;
+    }
+
 }
