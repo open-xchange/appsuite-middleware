@@ -281,23 +281,36 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public void change(final Context ctx, final User usrdata, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
-        if(ctx==null || usrdata==null|| usrdata.getId()==null){
+        if(ctx==null || usrdata==null|| usrdata.getId()==null
+                ||auth==null|| auth.getLogin()==null||auth.getPassword()==null){
             throw new InvalidDataException();
         }
         
-        
-        doAuthentication(auth,ctx);
-        
         log.debug(ctx.toString()+" - "+usrdata.toString()+" - "+auth.toString());
         
+        // SPECIAL USER AUTH CHECK FOR THIS METHOD!
+        // check if credentials are from oxadmin or from an user
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+        // check if given user is admin
+        if(tools.isContextAdmin(ctx,auth_user_id )){
+            doAuthentication(auth,ctx);
+        }else{
+            doUserAuthentication(auth,ctx);
+            // now check if user which authed has the same id as the user he wants to change,else fail, 
+            // cause then he/she wants to change not his own data!
+            if(usrdata.getId().intValue()!=auth_user_id){
+                throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+            }
+        }
+       
 
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
         }
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            throw new DatabaseUpdateException("Database must be updated or is currently beeing updated");
         }
         
         if (!tools.existsUser(ctx, usrdata.getId())) {
