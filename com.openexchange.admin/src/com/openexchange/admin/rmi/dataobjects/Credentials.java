@@ -65,7 +65,7 @@ public class Credentials implements Serializable{
     private String login;
 
     private String password;
-
+    
     /**
      * Creates a new instance of the object
      */
@@ -89,7 +89,7 @@ public class Credentials implements Serializable{
      * Returns the login of this credentials object
      * @return Returns the login of this credentials object
      */
-    public String getLogin () {
+    public final String getLogin () {
         return login;
     }
 
@@ -97,7 +97,7 @@ public class Credentials implements Serializable{
      * Set the login attribute of this credentials object
      * @param login Set the login attribute of this credentials object
      */
-    public void setLogin (String login) {
+    public final void setLogin (String login) {
         this.login = login;
     }
 
@@ -105,7 +105,7 @@ public class Credentials implements Serializable{
      * Returns the password in clear text
      * @return Returns the password in cleartext
      */
-    public String getPassword () {
+    public final String getPassword () {
         return password;
     }
 
@@ -113,7 +113,7 @@ public class Credentials implements Serializable{
      * Sets this password for this credentials object
      * @param passwd Sets this password for this credentials object
      */
-    public void setPassword (String passwd) {
+    public final void setPassword (String passwd) {
         this.password = passwd;
     }
 
