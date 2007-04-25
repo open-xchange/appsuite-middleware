@@ -55,7 +55,8 @@ import com.openexchange.groupware.Component;
 
 public class InfostoreException extends OXException {
 	public InfostoreException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.INFOSTORE, category, id, String.format(message, (Object[]) msgParams),cause);
+		super(Component.INFOSTORE, category, id, message,cause);
+		setMessageArgs(msgParams);
 	}
 
 	public InfostoreException(Category category, String message, int id, Object...msgParams){
