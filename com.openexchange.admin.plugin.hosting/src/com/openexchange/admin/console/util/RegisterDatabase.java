@@ -8,7 +8,6 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -23,8 +22,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  *
  */
 public class RegisterDatabase extends UtilAbstraction {
-
-    
     
     public RegisterDatabase(final String[] args2) {
 
@@ -178,52 +175,21 @@ public class RegisterDatabase extends UtilAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
-        databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"name of the database",true, true); 
-        
-        
-        hostnameOption =  setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT,OPT_NAME_HOSTNAME_LONG,"hostname of the server",true, false); 
-       
-        databaseUsernameOption = setShortLongOpt(parser, OPT_NAME_DB_USERNAME_SHORT,OPT_NAME_DB_USERNAME_LONG,"name of the user for the database",true, false);
-        
-        databaseDriverOption = setShortLongOpt(parser, OPT_NAME_DB_DRIVER_SHORT,OPT_NAME_DB_DRIVER_LONG,"the driver to be used for the database",true, false);
-        
-        
-        databasePasswdOption = setShortLongOpt(parser, OPT_NAME_DB_PASSWD_SHORT,OPT_NAME_DB_PASSWD_LONG,"password for the database",true, true);
-        
-        databaseIsMasterOption = setShortLongOpt(parser, OPT_NAME_IS_MASTER_SHORT,OPT_NAME_IS_MASTER_LONG,"set this if the registered database is the master",false,false);
-        
-        databaseMasterIDOption = setShortLongOpt(parser, OPT_NAME_MASTER_ID_SHORT,OPT_NAME_MASTER_ID_LONG,"if this database isn't the master give the id of the master here",true,false);
-        
-        
-        databaseWeightOption = setShortLongOpt(parser, OPT_NAME_WEIGHT_SHORT,OPT_NAME_WEIGHT_LONG,"the db weight for this database",true,false);
-        
-       
-        maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT,OPT_NAME_MAX_UNITS_LONG,"the maximum number of units in this database",true,false);
-        
-        //databaseParameterOption = setShortLongOpt(parser, OPT_NAME_DBPARAM_SHORT,OPT_NAME_DBPARAM_LONG,"parameter for the database",true,false);
-        
-        // FIXME: choeger Enter right description here        
-        poolHardlimitOption = setShortLongOpt(parser, OPT_NAME_POOL_HARDLIMIT_SHORT,OPT_NAME_POOL_HARDLIMIT_LONG,"db pool hardlimit",true,false);
-        
-        poolInitialOption = setShortLongOpt(parser, OPT_NAME_POOL_INITIAL_SHORT,OPT_NAME_POOL_INITIAL_LONG,"db pool initial",true,false);
-       
-        poolMaxOption = setShortLongOpt(parser, OPT_NAME_POOL_MAX_SHORT,OPT_NAME_POOL_MAX_LONG,"db pool max",true,false);
+        setDatabaseNameOption(parser,true);
+        setDatabaseHostnameOption(parser,false);
+        setDatabaseUsernameOption(parser,false);
+        setDatabaseDriverOption(parser,false);
+        setDatabasePasswdOption(parser,true);
+        setDatabaseIsMasterOption(parser,false);
+        setDatabaseMasterIDOption(parser,false);
+        setDatabaseWeightOption(parser,false);
+        setDatabaseMaxUnitsOption(parser,false);
+        setDatabasePoolHardlimitOption(parser,false);
+        setDatabasePoolInitialOption(parser,false);
+        setDatabasePoolMaxOption(parser,false);
         
     }
     
-    private Option databaseNameOption = null;
-    private Option hostnameOption = null;
-    private Option databaseUsernameOption = null;
-    private Option databaseDriverOption = null;
-    private Option databasePasswdOption = null;
-    private Option databaseIsMasterOption = null;
-    private Option databaseMasterIDOption = null;
-    private Option databaseWeightOption = null;
     
-    private Option maxUnitsOption = null;
-    //private Option databaseParameterOption = null;
-    private Option poolHardlimitOption = null;
-    private Option poolInitialOption = null;
-    private Option poolMaxOption = null;
 
 }
