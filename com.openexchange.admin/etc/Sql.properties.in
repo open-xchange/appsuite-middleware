@@ -11,6 +11,6 @@ OPTIMIZE_OX_SQL_DIR=$PWD/@oxconfdir@/mysql/optimize/
 OPTIMIZE_OX_SQL_ORDER=sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql,mail.sql,swupdate.sql
 
 CONSISTENCY_OX_SQL_DIR=$PWD/@oxconfdir@/mysql/consistency/
-CONSISTENCY_OX_SQL_ORDER=first.sql,sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql,last.sql,mail.sql,swupdate.sql
+CONSISTENCY_OX_SQL_ORDER=sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql,mail.sql,swupdate.sql
 
 LOG_PARSED_QUERIES=false
