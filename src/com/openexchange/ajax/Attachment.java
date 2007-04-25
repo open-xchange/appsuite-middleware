@@ -217,6 +217,7 @@ public class Attachment extends PermissionServlet {
 					final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 					
 					long sum = 0;
+					final JSONObject json = new JSONObject();
 					for(final Iterator<UploadFile> iter = upload.getUploadFilesIterator(); iter.hasNext();) {
 						final UploadFile uploadFile = iter.next();
 						final String fileField = uploadFile.getFieldName();
@@ -225,7 +226,8 @@ public class Attachment extends PermissionServlet {
 						if (obj == null || obj.length() == 0) {
 							continue;
 						}
-						final JSONObject json = new JSONObject(obj);
+						json.reset();
+						json.parseJSONString(obj);
 						for(AttachmentField required : REQUIRED){
 							if(!json.has(required.getName())) {
 								missingParameter(required.getName(),res, true, action);
