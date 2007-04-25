@@ -370,8 +370,8 @@ public class Attachment extends PermissionServlet {
 		PrintWriter w = null;
 		try {
 			ATTACHMENT_BASE.startTransaction();
-			Iterator<AttachmentMetadata> attIter = attachments.iterator();
-			Iterator<UploadFile> ufIter = uploadFiles.iterator();
+			final Iterator<AttachmentMetadata> attIter = attachments.iterator();
+			final Iterator<UploadFile> ufIter = uploadFiles.iterator();
 			
 			final JSONObject result = new JSONObject();
 			final JSONArray arr = new JSONArray();
@@ -379,12 +379,12 @@ public class Attachment extends PermissionServlet {
 			long timestamp = 0;
 			
 			while(attIter.hasNext()) {
-				AttachmentMetadata attachment = attIter.next();
-				UploadFile uploadFile = ufIter.next();
+				final AttachmentMetadata attachment = attIter.next();
+				final UploadFile uploadFile = ufIter.next();
 			
 				attachment.setId(AttachmentBase.NEW);
 	
-				long modified = ATTACHMENT_BASE.attachToObject(attachment,new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile())),ctx,user,userConfig);
+				final long modified = ATTACHMENT_BASE.attachToObject(attachment,new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile())),ctx,user,userConfig);
 				if(modified  >  timestamp) {
 					timestamp = modified;
 				}
@@ -431,19 +431,19 @@ public class Attachment extends PermissionServlet {
 
 
 	private void initAttachments(final List<AttachmentMetadata> attachments, final List<UploadFile> uploads) {
-		Iterator<AttachmentMetadata> attIter = new ArrayList<AttachmentMetadata>(attachments).iterator();
-		Iterator<UploadFile> ufIter = new ArrayList<UploadFile>(uploads).iterator();
+		final Iterator<AttachmentMetadata> attIter = new ArrayList<AttachmentMetadata>(attachments).iterator();
+		final Iterator<UploadFile> ufIter = new ArrayList<UploadFile>(uploads).iterator();
 		
 		int index = 0;
 		while(attIter.hasNext()) {
-			AttachmentMetadata attachment = attIter.next();
+			final AttachmentMetadata attachment = attIter.next();
 			if(attachment == null) {
 				attachments.remove(index);
 				ufIter.next();
 				uploads.remove(index);
 				continue;
 			}
-			UploadFile upload = ufIter.next();
+			final UploadFile upload = ufIter.next();
 			if(upload == null) {
 				attachments.remove(index);
 				uploads.remove(index);
@@ -469,7 +469,7 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, String fragmentOverride) {
+	private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
 		LOG.debug("",t);
 		
 		res.setContentType("text/html; charset=UTF-8");
@@ -489,30 +489,33 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	private void checkSize(final long size, UserConfiguration userConfig) throws UploadException {
-		if(maxUploadSize == -2)
+	private void checkSize(final long size, final UserConfiguration userConfig) throws UploadException {
+		if(maxUploadSize == -2) {
 			maxUploadSize = AttachmentConfig.getMaxUploadSize();
+		}
 		long maxSize = 0;
 		maxSize = userConfig.getUserSettingMail().getUploadQuota();
 		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
-		if(maxSize == 0)
+		if(maxSize == 0) {
 			return;
+		}
 		
 		if(size > maxSize) {
-			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);
+			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, Long.valueOf(size), Long.valueOf(maxSize));
 		}
 	}
 	
-	private void checkSingleSize(long size, UserConfiguration userConfig) throws UploadException {
-		long maxSize = userConfig.getUserSettingMail().getUploadQuotaPerFile();
-		if(maxSize < 1)
+	private void checkSingleSize(final long size, final UserConfiguration userConfig) throws UploadException {
+		final long maxSize = userConfig.getUserSettingMail().getUploadQuotaPerFile();
+		if(maxSize < 1) {
 			return;
+		}
 		if(size > maxSize) {
-			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);
+			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, Long.valueOf(size), Long.valueOf(maxSize));
 		}
 	}
 	
-	protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws IOException, ServletException, OXException {
+	protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws OXException {
 		for (String param : parameters) {
 			if (req.getParameter(param) == null) {
 				throw new OXException("Missing Parameter "+param);
