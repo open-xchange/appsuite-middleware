@@ -606,6 +606,87 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -613,7 +694,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-02-28 16:10+0100\n"
+"PO-Revision-Date: 2007-04-25 10:10+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -638,8 +719,14 @@ msgstr "Es trat ein DBPool-Fehler auf: %s"
 msgid "A DBPooling error occured"
 msgstr "Es trat ein DBPooling-Fehler auf"
 
+msgid "A IMAP error occured: %s"
+msgstr "Es trat ein IMAP-Fehler auf: %s"
+
 msgid "A JSON error occured: %s"
 msgstr "Es trat ein JSON-Fehler auf: %s"
+
+msgid "A JSON syntax error occured: %s"
+msgstr "Es trat ein JSON-Syntaxfehler auf: %s"
 
 msgid "A LDAP error occurred in context %s"
 msgstr "Es trat ein LDAP-Fehler im Kontext %s auf"
@@ -650,11 +737,29 @@ msgstr "Es trat ein SQL-Fehler auf"
 msgid "A SQL error occured in context %s"
 msgstr "Es trat ein SQL-Fehler im Kontext %s auf"
 
+msgid "A SQL error occured while creating table 'version': %1$s."
+msgstr "SQL-Fehler beim Erstellen der Tabelle 'version': %1$s."
+
+msgid "A SQL error occured while performing task CreateTableVersion: %1$s."
+msgstr "SQL-Fehler beim Ausführen der Aufgabe CreateTableVersion: %1$s."
+
+msgid "A SQL error occured while performing task SpamUpdateTask: %1$s."
+msgstr "SQL-Fehler beim Ausführen der Aufgabe SpamUpdateTask: %1$s."
+
 msgid "A SQL error occured while reading schema version information: %1$s."
 msgstr "Beim Lesen der Schema-Versionsinformation trat ein SQL-Fehler auf: %1$s."
 
 msgid "A SQL error occured: %s"
 msgstr "Es trat ein SQL-Fehler auf: %s"
+
+msgid "A SQL exception occured while checking for schema version table: %1$s."
+msgstr "SQL-Ausnahme beim Prüfen der Schema-Versionstabelle: %1$s."
+
+msgid "A database error occured while creating table 'version': %1$s."
+msgstr "Datenbankfehler beim Erstellen der Tabelle 'version': %1$s."
+
+msgid "A database error occured while reading schema version information: %1$s."
+msgstr "Datenbankfehler beim Lesen der Schema-Versionsinformation: %1$s."
 
 msgid "A duplicate folder exists in parent folder %s in context %s"
 msgstr "Im übergeordneten Ordner %s im Kontext %s befindet sich ein Ordnerduplikat"
@@ -668,8 +773,19 @@ msgstr "Eine Gruppe darf keine Administrationsrechte für einen privaten Ordner 
 msgid "A messaging error occured: %s"
 msgstr "Es trat ein Messaging-Fehler auf: %s"
 
+msgid ""
+"A part's content could not be read from message %s in mail folder %s of user "
+"%s"
+msgstr ""
+
 msgid "A protocol exception occured during execution of an IMAP request: %s"
 msgstr "Protokoll-Abweichung beim Ausführen einer IMAP-Anfrage: %s"
+
+msgid "A runtime error occured in context %s"
+msgstr "Es trat ein Laufzeitfehler im Kontext %s auf"
+
+msgid "A socket error occured: %s"
+msgstr "Es trat ein Socket-Fehler auf: %s"
 
 msgid ""
 "A source folder of module %s must not be moved to a target folder of module %"
@@ -753,6 +869,9 @@ msgstr ""
 "nicht gespeichert werden. 1. Objekt %1$d Ordner %2$d 2. Objekt %3$d Ordner %4"
 "$d Kontext %5$d"
 
+msgid "An I/O error occured: %1$s."
+msgstr "Es trat ein E/A-Fehler auf: %1$s."
+
 msgid "An I/O error occured: %s"
 msgstr "Es trat ein E/A-Fehler auf: %s"
 
@@ -766,6 +885,9 @@ msgstr ""
 
 msgid "An error occurred attaching to the given object."
 msgstr "Fehler beim Anhängen an das angegebene Objekt"
+
+msgid "An invalid SQL query was sent to the server."
+msgstr "Es wurde eine ungültige SQL-Anfrage an den Server geschickt."
 
 msgid "Attachments must contain a file."
 msgstr "Anlagen müssen eine Datei enthalten"
@@ -798,8 +920,23 @@ msgstr "Externer Teilnehmer ohne E-Mail-Adresse kann nicht hinzugefügt werden"
 msgid "Can't build distinguished name from %s."
 msgstr "Erstellen eines eindeutigen Namens aus %s fehlgeschlagen"
 
+msgid "Can't clone object %1$s."
+msgstr "Objekt %1$s kann nicht geklont werden."
+
 msgid "Can't close database connection"
 msgstr "Datenbankverbindung kann nicht geschlossen werden"
+
+msgid "Can't create URI from \"%1$s\"."
+msgstr "Erstellen der URI von \"%1$s\" fehlgeschlagen."
+
+msgid "Can't create directory \"%1$s\" for FileStorage."
+msgstr "Erstellen des Verzeichnisses \"%1$s\" für FileStorage fehlgeschlagen."
+
+msgid "Can't create file %1$s."
+msgstr "Anlegen der Datei %1$s fehlgeschlagen."
+
+msgid "Can't create lock file."
+msgstr "Erstellen der Lock-Datei fehlgeschlagen."
 
 msgid "Can't create private task in public/shared folder %1$d."
 msgstr ""
@@ -808,6 +945,9 @@ msgstr ""
 
 msgid "Can't find context %d."
 msgstr "Kontext %d konnte nicht gefunden werden"
+
+msgid "Can't find filestore with id %1$d."
+msgstr "Dateispeicher mit ID %1$d konnte nicht gefunden werden."
 
 msgid "Can't find folder of task participant."
 msgstr "Ordner des Aufgaben-Teilnehmers konnte nicht gefunden werden"
@@ -851,6 +991,10 @@ msgstr "Information für Pool %d kann nicht abgerufen werden"
 msgid "Can't instanciate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
 
+#, fuzzy
+msgid "Can't instanciate updater implementation %1$s."
+msgstr "Anlegen von Instanzen für die Updater-Implementation %1$s nicht möglich."
+
 msgid "Can't load class \"%s\"."
 msgstr "Klasse \"%s\" kann nicht geladen werden"
 
@@ -859,6 +1003,12 @@ msgstr "Objekt %s kann nicht in den Cache geladen werden"
 
 msgid "Can't read file \"%s\"."
 msgstr "Datei \"%s\" kann nicht gelesen werden"
+
+msgid "Can't remove lock file."
+msgstr "Lock-Datei konnte nicht entfernt werden."
+
+msgid "Can't remove object %s from cache"
+msgstr "Objekt %s kann nicht aus dem Cache gelöscht werden."
 
 msgid "Can't resolve mailadmin for context %d."
 msgstr "Mailadmin für Kontext %d kann nicht aufgelöst werden"
@@ -936,16 +1086,19 @@ msgstr "Verbindung verwendet für %1$d Millisekunden."
 
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
-"server: %s"
+"server %s for user %s"
 msgstr ""
 "Verbindung abgelehnt oder Zeitüberschreitung beim Versuch, eine Verbindung "
-"zum entfernten Server herzustellen: %s"
+"zum entfernten Server %s für Benutzer %s herzustellen."
 
 msgid "Connection was reset. Please try again."
 msgstr "Verbindung wurde zurückgesetzt. Bitte erneut versuchen."
 
 msgid "Contact not found! Context %1$d"
 msgstr "Kontakt nicht gefunden. Kontext %1$d"
+
+msgid "Context is locked."
+msgstr "Kontext ist gesperrt."
 
 msgid "Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s"
 msgstr "Cookie JSESSIONID enthält nicht passende JVM-Route: %s ist ungleich %s"
@@ -978,8 +1131,8 @@ msgstr "Objekte konnten nicht alle gelöscht werden"
 msgid "Could not delete attachment."
 msgstr "Anlage konnte nicht gelöscht werden"
 
-msgid "Could not delete file from file store."
-msgstr "Datei konnte nicht aus Dateispeicher gelöscht werden"
+msgid "Could not delete file from file store. Filestore: %s Context: %s"
+msgstr "Datei konnte nicht aus Dateispeicher gelöscht werden. Dateispeicher: %s Kontext: %s"
 
 msgid ""
 "Could not fetch result from result set. Probably the database may be busy or "
@@ -998,11 +1151,11 @@ msgstr ""
 msgid "Could not generate new ID."
 msgstr "Neue ID konnte nicht generiert werden"
 
+msgid "Could not get file store location."
+msgstr "Dateispeicher kann nicht gefunden werden"
+
 msgid "Could not iterate result"
 msgstr "Ergebnis kann nicht iteriert werden"
-
-msgid "Could not load context."
-msgstr "Kontext konnte nicht geladen werden"
 
 msgid "Could not load documents to check the permissions"
 msgstr "Dokumente konnten nicht zum Prüfen der Berechtigungen geladen werden"
@@ -1066,6 +1219,17 @@ msgstr ""
 "Von Datenbank susgegebene Sequenz-ID %s ist kleiner als die erlaubte "
 "minimale Ordner-ID von %s in Kontext %s "
 
+msgid "Depth mismatch while computing next entry."
+msgstr ""
+
+msgid "Depth must be >= 1 but is %1$d."
+msgstr ""
+
+msgid ""
+"Dictionary (id=%1$s) does not hold a command. Please specify a command in "
+"corresponding \"spellcheck.cfg\" file."
+msgstr "Wörterbuch (id=%1$s) enthält keinen Befehl. Bitte geben Sie einen Befehl in der zugehörigen Datei \"spellcheck.cfg\" an."
+
 msgid "Draft message could not be edited in read-only mail folder %s"
 msgstr "Entwurf konnte im nur lesbaren E-Mail-Ordner %s nicht bearbeitet werden"
 
@@ -1107,6 +1271,9 @@ msgstr "Die Kodierung %s kann nicht verwendet werden"
 
 msgid "End date is before start date"
 msgstr "Enddatum liegt vor Startdatum"
+
+msgid "Entries must be >= 1 but is %1$d."
+msgstr "Eintrag muss >= 1 sein, ist jedoch %1$d."
 
 msgid "Error in SQL Update"
 msgstr "Fehler im SQL-Update"
@@ -1190,7 +1357,9 @@ msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr "Fataler Fehler. (JÄHRLICH2) Fehlender oder falscher Wert für Tag : %d"
 
 msgid "Fatal error. You are trying to create a new recurring from an exception!"
-msgstr "Fataler Fehler. Sie versuchen, aus einer Ausnahme einen neuen wiederkehrenden Termin zu erstellen!"
+msgstr ""
+"Fataler Fehler. Sie versuchen, aus einer Ausnahme einen neuen "
+"wiederkehrenden Termin zu erstellen!"
 
 msgid "File \"%s\" does not exist."
 msgstr "Die Datei \"%s\" ist nicht vorhanden."
@@ -1201,6 +1370,9 @@ msgstr "Die Datei \"%s\" ist nicht lesbar."
 msgid "File upload failed: %s"
 msgstr "Datei-Upload fehlgeschlagen: %s"
 
+msgid "FileStorage is full."
+msgstr "Dateispeicher ist voll."
+
 msgid "Filename for property file is not defined."
 msgstr "Dateiname für property-Datei nicht angegeben"
 
@@ -1210,6 +1382,11 @@ msgid ""
 msgstr ""
 "An InfoStore-Einträge angehängte Dateien müssen eindeutige Namen haben. "
 "Dateiname: %s. Das andere Dokument mit diesem Dateinamen ist %s."
+
+msgid ""
+"Flag %s could not be changed in message %d in folder %s due to following "
+"reason: %s"
+msgstr "Flag %s konnte in Nachricht %d im Ordner %s nicht geändert werden. Grund: %s"
 
 msgid "Folder %1$s (%2$d) is not a task folder."
 msgstr "Der Ordner %1$s (%2$d) ist kein Aufgabenordner."
@@ -1246,8 +1423,8 @@ msgstr "Der Ordner %s lässt keine Unterordner zu."
 msgid "Folder %s does not exist in context %s"
 msgstr "Kein Ordner namens %s im Kontext %s vorhanden"
 
-msgid "Folder %s does not hold messages"
-msgstr "Der Ordner %s enthält keine Nachrichten."
+msgid "Folder %s does not hold messages and is therefore not selectable"
+msgstr "Der Ordner %s enthält keine Nachrichten und kann somit nicht ausgewählt werden."
 
 msgid "Folder %s has been modified after last sync timestamp in context %s"
 msgstr ""
@@ -1271,6 +1448,9 @@ msgstr ""
 
 msgid "Folder cache has not been enabled in config file %s"
 msgstr "Der Ordner-Cache wurde in der config-Datei %s nicht aktiviert."
+
+msgid "Folder existence cannot be checked due to unsufficient folder information)"
+msgstr "Vorhandensein des Ordners kann auf Grund unzureichender Ordnerinformationen nicht geprüft werden)"
 
 msgid "Folder is closed: %s"
 msgstr "Ordner ist geschlossen: %s"
@@ -1319,6 +1499,13 @@ msgid "Got a -1 ID from IDGenerator"
 msgstr "-1 ID von IDGenerator erhalten"
 
 msgid ""
+"Got a FileStorageException for FileStorage with id %s in Context %s . "
+"Underlying message is: %s. Check the StackTrace"
+msgstr ""
+"FileStorageException für FileStorage mit id %s in Kontext %s . "
+"Zugrundeliegende Meldung ist: %s. Prüfen Sie den StackTrace"
+
+msgid ""
 "Got the wrong folder identification. You do not have the appropriate "
 "permissions to modify this object."
 msgstr ""
@@ -1337,6 +1524,9 @@ msgstr "Hash-Algorithmus %s nicht gefunden"
 
 msgid "Header \"content-type\" does not indicate multipart content"
 msgstr "Header \"content-type\" zeigt keinen Multipart-Inhalt an"
+
+msgid "Html-2-Text conversion failed: %s"
+msgstr "Html-2-Text-Konvertierung fehlgeschlagen: %s"
 
 msgid "I/O error while writing to Writer Object: %s"
 msgstr "E/A-Fehler beim Schreiben in Writer Objekt: %s"
@@ -1418,6 +1608,9 @@ msgstr "Ungültige Anlage %s: %s"
 msgid "Invalid constructor argument. Instance of %s not supported"
 msgstr "Ungültiges Constructor-Argument. Instanz von %s nicht unterstützt."
 
+msgid "Invalid constructor parameter at %1$d with type %2$s."
+msgstr "Ungültiger Constructor-Parameter in %1$d vom Typ %2$s."
+
 msgid "Invalid content-type header value: %s"
 msgstr "Ungültiger Content-type header-Wert: %s"
 
@@ -1436,7 +1629,7 @@ msgstr "Ungültige Entity-ID %s in den Rechten des Ordners %s im Kontext %s"
 msgid "Invalid integer value %s"
 msgstr "Ungültiger Ganzzahlenwert %s"
 
-msgid "Invalid method on a expunged message: %s"
+msgid "Invalid method on an expunged message: %s"
 msgstr "Ungültige Methode für gelöschte Nachricht: %s"
 
 msgid "Invalid object ID %s"
@@ -1460,8 +1653,19 @@ msgstr "Ungültiger Aufgabenstatus %d"
 msgid "Invalid unique message identifier: %s"
 msgstr "Ungültige eindeutige Nachrichten-ID: %s"
 
+msgid "Link is not implemented."
+msgstr "Link ist nicht implementiert."
+
+msgid ""
+"Login to imap server %s failed for user %s in context %s. Please try again "
+"later"
+msgstr "Anmelden am IMAP-Server %s für Benutzer %s im Kontext %s fehlgeschlagen. Bitte später erneut versuchen."
+
 msgid "Mail folder \"%s\" could not be created"
 msgstr "Anlegen des E-Mail-Ordners \"%s\" fehlgeschlagen"
+
+msgid "Mail folder cannot be created. Name must not contain character '%s'"
+msgstr "E-Mail-Ordner kann nicht erstellt werden. Der Name darf nicht das Zeichen '%s' enthalten."
 
 msgid "Mandatory field last name is not set."
 msgstr "Pflichtfeld Nachname nicht gesetzt"
@@ -1471,9 +1675,6 @@ msgstr "Pflichtfeld Mailadresse für externe Teilnehmer"
 
 msgid "Mapping for %d not implemented"
 msgstr "Mapping für %d nicht implementiert"
-
-msgid "Message %s could not be found in folder %s"
-msgstr "Nachricht %s nicht im Ordner %s gefunden"
 
 msgid "Message could not be moved to trash folder"
 msgstr "Nachricht konnte nicht in den Mülleimer verschoben werden"
@@ -1494,11 +1695,17 @@ msgstr ""
 "Nachricht erfolgreich versendet, jedoch konnte wegen abgelaufener Quota "
 "keine Kopie in Ihren Gesendet-Ordner gelegt werden."
 
+msgid "Message(s) %s could not be found in folder %s"
+msgstr "Nachricht(en) %s nicht im Ordner %s gefunden"
+
 msgid "Method not supported: %s"
 msgstr "Methode nicht unterstützt: %s"
 
 msgid "Missing %s folder in mail move operation"
 msgstr "Fehlender %s-Ordner für Mail-Verschiebeaktion"
+
+msgid "Missing SpellCheckConfig object."
+msgstr "Fehlendes SpellCheckConfig-Objekt."
 
 msgid "Missing affiliation id"
 msgstr "Zugehörigkeits-ID fehlt"
@@ -1564,6 +1771,13 @@ msgid "Move not supported: Source:Destination %d:%d"
 msgstr "Verschieben nicht unterstützt: Quelle:Ziel %d:%d"
 
 msgid ""
+"Move partially completed for user %s. Source message(s) %s in folder %s "
+"could not be deleted due to following error: %s"
+msgstr ""
+"Verschieben für Benutzer %s teilweise abgeschlossen. Ursprungsmeldung %s im Ordner %s "
+"konnte auf Grund folgenden Fehlers nicht gelöscht werden: %s"
+
+msgid ""
 "Move/Copy failed. New message with UID %d could not be found in destination "
 "folder %s"
 msgstr ""
@@ -1580,10 +1794,19 @@ msgstr ""
 "Verschieben von Objekten von oder nach freigegebenem Ordner %1$s (%2$d) "
 "nicht erlaubt"
 
+msgid "Multiple rows found."
+msgstr "Mehrere Zeilen gefunden."
+
 msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
 msgstr ""
 "Keine Änderungen gefunden. Keine Updates erforderlich. Kontext %1$d Objekt %2"
 "$d"
+
+msgid "No IMAP account exists for user %s in context %s"
+msgstr "Für Benutzer %s ist kein IMAP-Account im Kontext %s vorhanden."
+
+msgid "No SpellCheckConfig loaded."
+msgstr "Kein SpellCheckConfig geladen."
 
 msgid "No admin permission found"
 msgstr "Kein Adminrecht gefunden"
@@ -1606,6 +1829,12 @@ msgstr ""
 
 msgid "No default folder could be found in module %s for user %s in context %s"
 msgstr "Kein Standardordner gefunden im Modul %s für Benutzer %s im Kontext %s"
+
+msgid "No dictionary could be found for language: %1$s."
+msgstr "Kein Wörterbuch gefunden für Sprache: %1$s."
+
+msgid "No result returned from SQL query, but was expected."
+msgstr " "
 
 msgid "No route to host: server (%s) cannot be reached"
 msgstr "Keine Verbindung zum Host: Kein Zugriff auf Server (%s)"
@@ -1641,6 +1870,9 @@ msgstr ""
 
 msgid "Number of search fields (%d) do not match number of search patterns (%d)"
 msgstr "Anzahl der Suchfelder (%d) ist ungleich der Anzahl der Suchmuster (%d)"
+
+msgid "Number parsing problem."
+msgstr ""
 
 msgid "Object not found. %s"
 msgstr "Objekt nicht gefunden. %s"
@@ -1711,6 +1943,9 @@ msgstr ""
 "Der private Ordner %s darf nur im Kontext %s in einen privaten Ordner "
 "verschoben werden"
 
+msgid "Problem initializing the cache."
+msgstr "Problem beim Initialisieren des Zwischenspeichers."
+
 msgid "Problem putting/removing an object into/from the cache."
 msgstr "Problem beim Legen/Verschieben eines Objekts in/aus dem Cache"
 
@@ -1720,13 +1955,18 @@ msgstr "Problem beim Setzen von Auto-Commit auf den Wert true"
 msgid "Problem while communicating with external authorization."
 msgstr "Problem beim Kommunizieren mir externer Autorisierung"
 
+msgid "Problem with URI when creating context specific filestore location."
+msgstr "Problem mit URI beim Erstellen des kontextspezifischen Dateispeicherpfads."
+
 msgid "Problem with executing SQL: %s"
 msgstr "Problem beim Ausführen von SQL: %s"
 
 msgid ""
 "Process was interrupted while waiting for a free IMAP connection. Please try "
 "again."
-msgstr "Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte erneut versuchen."
+msgstr ""
+"Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte "
+"erneut versuchen."
 
 msgid "Property \"%s\" is not defined."
 msgstr "Eigenschaft \"%s\" nicht festgelegt"
@@ -1761,6 +2001,9 @@ msgstr "Erfoderlicher Wert \"Titel\" nicht angegeben"
 msgid "Resolving database for context %1$d and server %2$d not possible!"
 msgstr "Auflösen der Datenbank nicht möglich für Kontext %1$d und Server %2$d"
 
+msgid "Resolving schema for context %1$d failed."
+msgstr "Auflösen des Schemas für Kontext %1$d fehlgeschlagen."
+
 msgid "Response package exceeds max package size value of 8192k: %s"
 msgstr "Antwortpaket übersteigt den maximalen Wert für die Paketgröße von 8192k: %s"
 
@@ -1778,6 +2021,9 @@ msgstr "SQL-Problem beim Auflisten der Aufgaben: %s."
 
 msgid "SQL problem while updating task: %s."
 msgstr "SQL-Problem beim Aktualisieren der Aufgabe: %s."
+
+msgid "SQL problem: %1$s."
+msgstr "SQL-Problem: %1$s."
 
 msgid "SearchIterator NULL"
 msgstr "SearchIterator NULL"
@@ -1814,6 +2060,9 @@ msgstr "Socket durch Webserver geschlossen"
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
 
+msgid "SpamAssassin not installed or its executable has not been found"
+msgstr "SpamAssassin ist nicht installiert oder die Executable wurde nicht gefunden."
+
 msgid "Specified folder name is too long"
 msgstr "Angegebener Ordnername ist zu lang"
 
@@ -1828,6 +2077,12 @@ msgstr "String Parse-Ausnahme: Keine Endung 0x00 gefunden"
 
 msgid "System folder %s cannot be moved in context %s"
 msgstr "Der Systemordner %s kann im Kontext %s nicht verschoben werden"
+
+msgid "Table update failed. Schema %1$s could not be locked."
+msgstr "Aktualisierung der Tabelle fehlgeschlagen. Schema %1$s konnte nicht gesperrt werden."
+
+msgid "Table update failed. Schema %1$s could not be unlocked."
+msgstr "Tabellen-Update fehlgeschlagen. Schema %1$s konnte nicht entsperrt werden."
 
 msgid "Target and source folder cannot be equal in context %s"
 msgstr "Ziel- und Quellordner dürfen im Kontext %s nicht identisch sein"
@@ -1873,6 +2128,9 @@ msgstr ""
 msgid "The attribute %1$s has been truncated."
 msgstr "Das Attribut %1$s wurde abgeschnitten"
 
+msgid "The cookie with the session identifier is missing."
+msgstr "Cookie mit Session-ID nicht vorhanden."
+
 msgid "The default element attributes could not be retrieved"
 msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
 
@@ -1897,6 +2155,9 @@ msgstr ""
 
 msgid "The document you requested doesn't exist."
 msgstr "Das von Ihnen angeforderte Objekt ist nicht vorhanden"
+
+msgid "The file can't be added to filestore. File size: %s Quota: %s Used: %s"
+msgstr "Datei kann nicht zum Dateispeicher hinzugefügt werden. Dateigröße: %s Quota: %s Belegt: %s"
 
 msgid "The file could not be retrieved."
 msgstr "Abrufen der Datei fehlgeschlagen"
@@ -1946,6 +2207,9 @@ msgstr "Erforderlicher Wert \"Tage\" fehlt oder ist ungültig"
 msgid "The required value \"interval\" is missing or wrong"
 msgstr "Erforderlicher Wert \"Intervall\" fehlt oder ist ungültig"
 
+msgid "The session parameter is missing."
+msgstr "Fehlender Session-Parameter"
+
 msgid ""
 "The task has been changed in the meantime. Task changing date: %1$d, your "
 "task changing date: %2$d."
@@ -1975,6 +2239,9 @@ msgstr ""
 "Dieses gif-Bild ist zu groß. Es kann nicht skaliert werden and wird nicht "
 "angenommen."
 
+msgid "This method is not applicable to an IMAP permission"
+msgstr "Diese Methode kann nicht auf eine IMAP-Berechtigung angewendet werden."
+
 msgid "This method is not implemented."
 msgstr "Diese Methode ist nicht implementiert."
 
@@ -2000,8 +2267,8 @@ msgstr ""
 msgid "UNKNOWN EXCEPTION"
 msgstr "UNBEKANNTE AUSNAHME"
 
-msgid "URL \"%s\" provided by OxAdapter is malformed."
-msgstr "Die vom OxAdapter gelieferte URL \"%s\" ist fehlerhaft formatiert."
+msgid "URL \"%s\" is malformed."
+msgstr "URL \"%s\" ist fehlerhaft formatiert."
 
 msgid ""
 "Unable fetch the number of elements in this Folder. Context %1$d Folder %2$d "
@@ -2120,6 +2387,9 @@ msgstr ""
 "Verknüpfungen für dieses Objekt können nicht alle geladen werden. Objekt %1"
 "$d Ordner %2$d Benutzer %3$d Kontext %4$d"
 
+msgid "Unable to map OCL permission value %s to a JSON permission value"
+msgstr "OCL-Berechtigungswert %s kann nicht auf einen JSON-Berechtigungswert abgebildet werden."
+
 msgid ""
 "Unable to perform Contact Folder check for readable content: Context %1$d "
 "Folder %2$d"
@@ -2159,7 +2429,10 @@ msgid ""
 "Unable to scale the contact image. This is a not supported file type or it "
 "is too large! Your mime type is %1$s and your image size is %2$d The max. "
 "allowed image size is %3$d"
-msgstr "Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ ist %1$s und die Bildgröße ist %2$d Die maximal erlaubte Bildgröße ist %3$d."
+msgstr ""
+"Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um "
+"einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ "
+"ist %1$s und die Bildgröße ist %2$d Die maximal erlaubte Bildgröße ist %3$d."
 
 msgid ""
 "Unable to syncronice the old contact with the new changes: Context %1$d "
@@ -2190,6 +2463,15 @@ msgstr ""
 
 msgid "Unexpected SQL Error!"
 msgstr "Unerwarteter SQL-Fehler."
+
+#, fuzzy
+msgid ""
+"Unexpected empty body package received from web server. Total-Received: %d | "
+"Content-Length: %d"
+msgstr ""
+"Unerwartetes Paket mit leerem Body vom Web-Server erhalten. "
+"Total-Received: %d | "
+"Content-Length: %d"
 
 msgid "Unexpected exception %d!"
 msgstr "Unbekannte Ausnahme %d!"
@@ -2237,8 +2519,8 @@ msgstr "Unbekannter Parameter-Container-Typ: %d"
 msgid "Unknown recurrence type %d."
 msgstr "Unbekannter Wiederholungstyp %d."
 
-msgid "Unknown setting path %1$d."
-msgstr "Unbekannter Einstellungspfad %1$d."
+msgid "Unknown setting path %1$s."
+msgstr "Unbekannter Einstellungspfad %1$s."
 
 msgid "Unknown task attribute %d."
 msgstr "Unbekanntes Aufgabenattribut %d."
@@ -2249,11 +2531,20 @@ msgstr "Nicht analysierbares Header-Feld %s im Weiterleitung-Request-Paket"
 msgid "Unsupported MIME type %s"
 msgstr "Nicht unterstützter MIME-Typ %s"
 
+msgid "Unsupported encoding."
+msgstr "Nicht unterstützte Kodierung."
+
 msgid "Unsupported encoding: %s"
 msgstr "Nicht unterstützte Kodierung: %s"
 
 msgid "Unsupported type detected : %d"
 msgstr "Nicht unterstützter Typ : %s"
+
+msgid "Update conflict detected. Another process is currently updating schema %1$s."
+msgstr "Update-Konflikt. Ein weiterer Prozess aktualisiert gerade Schema %1$s."
+
+msgid "Update conflict detected. Schema %1$s is not marked as LOCKED."
+msgstr "Update-Konflikt. Schema %1$s ist nicht als gesperrt (LOCKED) markiert."
 
 msgid "Update expected but no objectid is given. Aborting action"
 msgstr ""
@@ -2262,6 +2553,9 @@ msgstr ""
 
 msgid "Update of folder %s failed"
 msgstr "Aktualisieren des Ordners %s fehlgeschlagen"
+
+msgid "Update process initialization failed: %1$s."
+msgstr "Initialisierung des Update-Prozesses fehlgeschlagen: %1$s."
 
 msgid "Upload Quota (%d) exceeded"
 msgstr "Upload-Quota (%d) überstiegen"
@@ -2350,6 +2644,9 @@ msgstr ""
 "Der Benutzer %s darf nicht alle Unterordner des Ordners %s im Kontext %s "
 "verschieben"
 
+msgid "User dictionary could not be found."
+msgstr "Das Wörterbuch des Benutzers konnte nicht gefunden werden."
+
 msgid "User's %s dictionary could not be loaded in context %d"
 msgstr "Das Wörterbuch %s des Benutzers konnte im Kontext %d nicht geladen werden."
 
@@ -2365,11 +2662,15 @@ msgstr "Wort enthält ungültige(s) Komma-Zeichen: %s"
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
 
+#, fuzzy
+msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
+msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötiger Dateispeicher: %3$d"
+
 msgid "Wrong message %sheader: %s"
 msgstr "Ungültiger Nachrichten %sheader: %s"
 
-msgid "Wrong or missing login data to access server (%s)"
-msgstr "Ungültige oder fehlende Login-Daten für den Server-Zugriff (%s)"
+msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
+msgstr "Ungültige oder fehlende Login-Daten für den Server-Zugriff %s: Benutzer: %s | Kontext: %s"
 
 msgid "You are not allowed to create objects in the target folder."
 msgstr "Sie haben keine Berechtigung, Objekte im Zielordner anzulegen"
@@ -2466,6 +2767,9 @@ msgstr "Zum Entsperren eines Dokuments benötigen Sie Schreibrechte."
 
 msgid "Your database is currently updated."
 msgstr "Ihre Datenbank ist derzeit aktualisiert."
+
+msgid "Your session %s expired. Please start a new browser session."
+msgstr "Ihre Sitzung %s ist abgelaufen. Starten Sie eine neue Browser-Sitzung."
 
 msgid "clientLastModified IS NULL. Abort action!"
 msgstr "clientLastModified IST NULL. Aktion abbrechen!"
