@@ -96,30 +96,22 @@ msgid "All groups and users"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/MailStrings.java:62
-msgid ""
-"Reporting-UA: OPEN-XCHANGE - WebMail\n"
-"Final-Recipient: rfc822; #FROM#\n"
-"Original-Message-ID: #MSG ID#\n"
-"Disposition: manual-action/MDN-sent-manually; displayed\n"
-msgstr ""
-
-#: com/openexchange/groupware/i18n/MailStrings.java:64
 msgid "Read Acknowledgement"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/MailStrings.java:66
+#: com/openexchange/groupware/i18n/MailStrings.java:64
 msgid "Receipt Acknowledgement"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/MailStrings.java:68
+#: com/openexchange/groupware/i18n/MailStrings.java:66
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/MailStrings.java:70
+#: com/openexchange/groupware/i18n/MailStrings.java:68
 msgid "Fwd: "
 msgstr ""
 
-#: com/openexchange/groupware/i18n/MailStrings.java:72
+#: com/openexchange/groupware/i18n/MailStrings.java:70
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -128,7 +120,7 @@ msgid ""
 "Subject: #SUBJECT#"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/MailStrings.java:74
+#: com/openexchange/groupware/i18n/MailStrings.java:72
 msgid "[No Subject]"
 msgstr ""
 
@@ -198,14 +190,19 @@ msgid ""
 "===========\n"
 "Created by:  [created_by]\n"
 "Title:       [title]\n"
+"Location:    [location]\n"
 "\n"
 "Start date:  [start]\n"
 "End date:    [end]\n"
 "\n"
+"Description:\n"
+"[description]\n"
+"\n"
+"\n"
 "=========================================="
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:123
+#: com/openexchange/groupware/i18n/Notifications.java:128
 msgid ""
 "This task was deleted by [changed_by].\n"
 "\n"
@@ -218,10 +215,12 @@ msgid ""
 "Start date:  [start]\n"
 "End date:    [end]\n"
 "\n"
+"Description:\n"
+"[description]\n"
 "=========================================="
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:137
+#: com/openexchange/groupware/i18n/Notifications.java:144
 msgid ""
 "This appointment was changed by [changed_by].\n"
 "\n"
@@ -250,7 +249,7 @@ msgid ""
 "=========================================="
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:165
+#: com/openexchange/groupware/i18n/Notifications.java:172
 msgid ""
 "This task was changed by [changed_by].\n"
 "\n"
@@ -278,30 +277,30 @@ msgid ""
 "=========================================="
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:191
+#: com/openexchange/groupware/i18n/Notifications.java:198
 msgid "A new appointment was created"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:192
+#: com/openexchange/groupware/i18n/Notifications.java:199
 msgid "An appointment was changed"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:193
+#: com/openexchange/groupware/i18n/Notifications.java:200
 msgid "An appointment was removed"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:194
+#: com/openexchange/groupware/i18n/Notifications.java:201
 msgid "A new task was created"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:195
+#: com/openexchange/groupware/i18n/Notifications.java:202
 msgid "A task was changed"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:196
+#: com/openexchange/groupware/i18n/Notifications.java:203
 msgid "A task was removed"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/Notifications.java:197
+#: com/openexchange/groupware/i18n/Notifications.java:204
 msgid "No resources were scheduled."
 msgstr ""

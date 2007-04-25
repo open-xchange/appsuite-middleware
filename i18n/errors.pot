@@ -24,34 +24,35 @@ msgstr ""
 msgid "%s is not initialized."
 msgstr ""
 
-msgid "A DBPool error occured: %s"
+msgid "'Depth' mismatch while computing next entry."
 msgstr ""
 
-msgid "A DBPooling error occured"
+msgid "'Depth' must be >= 1 but is %1$d."
 msgstr ""
 
-msgid "A IMAP error occured: %s"
+msgid "'Entries' must be >= 1 but is %1$d."
 msgstr ""
 
-msgid "A JSON error occured: %s"
+msgid "A DBPool error occurred: %s"
 msgstr ""
 
-msgid "A JSON syntax error occured: %s"
+msgid "A DBPooling error occurred"
+msgstr ""
+
+msgid "A JSON error occurred: %s"
+msgstr ""
+
+msgid "A JSON syntax error occurred: %s"
 msgstr ""
 
 msgid "A LDAP error occurred in context %s"
 msgstr ""
 
-msgid "A SQL error occured"
+msgid "A database error occurred while creating table 'version': %1$s."
 msgstr ""
 
-msgid "A SQL error occured in context %s"
-msgstr ""
-
-msgid "A SQL error occured while reading schema version information: %1$s."
-msgstr ""
-
-msgid "A SQL error occured: %s"
+msgid ""
+"A database error occurred while reading schema version information: %1$s."
 msgstr ""
 
 msgid "A duplicate folder exists in parent folder %s in context %s"
@@ -63,7 +64,7 @@ msgstr ""
 msgid "A group must not hold admin permission on a private folder"
 msgstr ""
 
-msgid "A messaging error occured: %s"
+msgid "A messaging error occurred: %s"
 msgstr ""
 
 msgid ""
@@ -71,13 +72,13 @@ msgid ""
 "%s"
 msgstr ""
 
-msgid "A protocol exception occured during execution of an IMAP request: %s"
+msgid "A protocol exception occurred during execution of an IMAP request: %s"
 msgstr ""
 
-msgid "A runtime error occured in context %s"
+msgid "A runtime error occurred in context %s"
 msgstr ""
 
-msgid "A socket error occured: %s"
+msgid "A socket error occurred: %s"
 msgstr ""
 
 msgid ""
@@ -100,53 +101,84 @@ msgstr ""
 msgid "Action type not supported : %d"
 msgstr ""
 
-msgid "An Error Occured: Object ID is -1"
-msgstr ""
-
 msgid ""
-"An Error occured during the load of Folder Objects by a extended search. "
+"An Error occurred during the load of Folder Objects by a extended search. "
 "Context %1$d Folder %2$d User %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured during the load of Folder Objects by a simple search. "
+"An Error occurred during the load of Folder Objects by a simple search. "
 "Context %1$d Folder %2$d User %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured during the load of Folder Objects. Context %1$d Folder %2$d "
-"User %3$d"
+"An Error occurred during the load of Folder Objects. Context %1$d Folder %2"
+"$d User %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured during the load of deleted Objects from a Folder. Context %1"
-"$d Folder %2$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occured during the load of modified Objects from a Folder. Context %"
+"An Error occurred during the load of deleted Objects from a Folder. Context %"
 "1$d Folder %2$d User %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured. Unable to delete some links from this Objects. Object %1$d "
-"Folder %2$d Context %3$d"
+"An Error occurred during the load of modified Objects from a Folder. Context "
+"%1$d Folder %2$d User %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured. Unable to load some links for this Objects. 1. Object %1$d "
-"2. Object %2$d Context %3$d"
+"An Error occurred. Unable to delete some links from this Objects. Object %1"
+"$d Folder %2$d Context %3$d"
 msgstr ""
 
 msgid ""
-"An Error occured. Unable to save this linking between those two Objects.1. "
+"An Error occurred. Unable to load some links for this Objects. 1. Object %1"
+"$d 2. Object %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"An Error occurred. Unable to save this linking between those two Objects.1. "
 "Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 msgstr ""
 
-msgid "An I/O error occured: %s"
+msgid "An Error occurred: Object ID is -1"
+msgstr ""
+
+msgid "An I/O error occurred: %1$s."
+msgstr ""
+
+msgid "An I/O error occurred: %s"
+msgstr ""
+
+msgid "An IMAP error occurred: %s"
 msgstr ""
 
 msgid "An IOError occurred: %s"
+msgstr ""
+
+msgid "An SQL error occurred"
+msgstr ""
+
+msgid "An SQL error occurred in context %s"
+msgstr ""
+
+msgid "An SQL error occurred while creating table 'version': %1$s."
+msgstr ""
+
+msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
+msgstr ""
+
+msgid "An SQL error occurred while performing task SpamUpdateTask: %1$s."
+msgstr ""
+
+msgid "An SQL error occurred while reading schema version information: %1$s."
+msgstr ""
+
+msgid "An SQL error occurred: %s"
+msgstr ""
+
+msgid ""
+"An SQL exception occurred while checking for schema version table: %1$s."
 msgstr ""
 
 msgid "An attempt was made to open a read-only folder with read-write: %s"
@@ -179,126 +211,135 @@ msgstr ""
 msgid "Caller does not allow to fetch a connection from pool in context %s"
 msgstr ""
 
-msgid "Can't add external participant without email address."
+msgid "Cannot add external participant without email address."
 msgstr ""
 
-msgid "Can't build distinguished name from %s."
+msgid "Cannot build distinguished name from %s."
 msgstr ""
 
-msgid "Can't clone object %1$s."
+msgid "Cannot clone object %1$s."
 msgstr ""
 
-msgid "Can't close database connection"
+msgid "Cannot clone tree."
 msgstr ""
 
-msgid "Can't create URI from \"%1$s\"."
+msgid "Cannot close database connection"
 msgstr ""
 
-msgid "Can't create directory \"%1$s\" for FileStorage."
+msgid "Cannot create URI from \"%1$s\"."
 msgstr ""
 
-msgid "Can't create file %1$s."
+msgid "Cannot create directory \"%1$s\" for FileStorage."
 msgstr ""
 
-msgid "Can't create lock file."
+msgid "Cannot create file %1$s."
 msgstr ""
 
-msgid "Can't create private task in public/shared folder %1$d."
+msgid "Cannot create lock file."
 msgstr ""
 
-msgid "Can't find context %d."
-msgstr ""
-
-msgid "Can't find filestore with id %1$d."
-msgstr ""
-
-msgid "Can't find folder of task participant."
-msgstr ""
-
-msgid "Can't find group with identifier %1$s in context %2$d."
-msgstr ""
-
-msgid "Can't find property %s."
-msgstr ""
-
-msgid "Can't find resource group with identifier %d."
-msgstr ""
-
-msgid "Can't find resource with identifier %d."
-msgstr ""
-
-msgid "Can't find task %d in context %d."
-msgstr ""
-
-msgid "Can't find user with email %s."
-msgstr ""
-
-msgid "Can't find user with identifier %1$s in context %2$d."
-msgstr ""
-
-msgid "Can't get connection to config DB."
-msgstr ""
-
-msgid "Can't get connection to database %d."
-msgstr ""
-
-msgid "Can't get connection to database."
-msgstr ""
-
-msgid "Can't get database connection."
-msgstr ""
-
-msgid "Can't get information for pool %d."
-msgstr ""
-
-msgid "Can't instanciate class %1$s."
-msgstr ""
-
-msgid "Can't load class \"%s\"."
-msgstr ""
-
-msgid "Can't put object %s into cache."
-msgstr ""
-
-msgid "Can't read file \"%s\"."
-msgstr ""
-
-msgid "Can't remove lock file."
-msgstr ""
-
-msgid "Can't resolve mailadmin for context %d."
-msgstr ""
-
-msgid "Can't return connection to pool %d."
-msgstr ""
-
-msgid "Can't send event to event system."
-msgstr ""
-
-msgid "Can't set schema in database connection."
+msgid "Cannot create private task in public/shared folder %1$d."
 msgstr ""
 
 msgid "Cannot decrease number of attachments below zero."
 msgstr ""
 
+msgid "Cannot find context %d."
+msgstr ""
+
 msgid "Cannot find file store location."
+msgstr ""
+
+msgid "Cannot find filestore with id %1$d."
+msgstr ""
+
+msgid "Cannot find folder of task participant."
+msgstr ""
+
+msgid "Cannot find group with identifier %1$s in context %2$d."
+msgstr ""
+
+msgid "Cannot find property %s."
+msgstr ""
+
+msgid "Cannot find resource group with identifier %d."
+msgstr ""
+
+msgid "Cannot find resource with identifier %d."
+msgstr ""
+
+msgid "Cannot find task %d in context %d."
+msgstr ""
+
+msgid "Cannot find user with email %s."
+msgstr ""
+
+msgid "Cannot find user with identifier %1$s in context %2$d."
 msgstr ""
 
 msgid "Cannot generate ID for new attachment: %s"
 msgstr ""
 
+msgid "Cannot get connection to config DB."
+msgstr ""
+
+msgid "Cannot get connection to database %d."
+msgstr ""
+
+msgid "Cannot get connection to database."
+msgstr ""
+
+msgid "Cannot get database connection."
+msgstr ""
+
+msgid "Cannot get information for pool %d."
+msgstr ""
+
+msgid "Cannot instanciate class %1$s."
+msgstr ""
+
 msgid "Cannot instanciate class %s."
+msgstr ""
+
+msgid "Cannot instanciate updater implementation %1$s."
+msgstr ""
+
+msgid "Cannot load class \"%s\"."
 msgstr ""
 
 msgid "Cannot pre-fetch results."
 msgstr ""
 
+msgid "Cannot put object %s into cache."
+msgstr ""
+
 msgid "Cannot reach the file store so I cannot remove the documents."
+msgstr ""
+
+msgid "Cannot read file \"%s\"."
 msgstr ""
 
 msgid ""
 "Cannot remove file. Database and file store are probably inconsistent. "
 "Please contact an administrator to run the recovery tool."
+msgstr ""
+
+msgid "Cannot remove lock file."
+msgstr ""
+
+msgid "Cannot remove object %s from cache"
+msgstr ""
+
+msgid "Cannot resolve mailadmin for context %d."
+msgstr ""
+
+msgid "Cannot return connection to pool %d."
+msgstr ""
+
+msgid "Cannot send event to event system."
+msgstr ""
+
+msgid "Cannot set schema in database connection."
 msgstr ""
 
 msgid ""
@@ -338,6 +379,9 @@ msgid "Connection was reset. Please try again."
 msgstr ""
 
 msgid "Contact not found! Context %1$d"
+msgstr ""
+
+msgid "Context is locked."
 msgstr ""
 
 msgid "Cookie JSESSIONID contains non-matching JVM route: %s not equal to %s"
@@ -412,15 +456,15 @@ msgstr ""
 msgid "Counting tasks did not return a result."
 msgstr ""
 
-msgid "Creator can't be participant."
+msgid "Creator cannot be participant."
 msgstr ""
 
 msgid ""
-"Critical Error Occured. This folder contains a contact with no id. Context %1"
-"$d Folder %2$d"
+"Critical Error occurred. This folder contains a contact with no id. Context %"
+"1$d Folder %2$d"
 msgstr ""
 
-msgid "Database can't be reached."
+msgid "Database cannot be reached."
 msgstr ""
 
 msgid "Database down."
@@ -449,10 +493,9 @@ msgid ""
 "%s in context %s"
 msgstr ""
 
-msgid "Depth mismatch while computing next entry."
-msgstr ""
-
-msgid "Depth must be >= 1 but is %1$d."
+msgid ""
+"Dictionary (id=%1$s) does not hold a command. Please specify a command in "
+"corresponding \"spellcheck.cfg\" file."
 msgstr ""
 
 msgid "Draft message could not be edited in read-only mail folder %s"
@@ -487,13 +530,10 @@ msgstr ""
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 msgstr ""
 
-msgid "Encoding %s can't be used."
+msgid "Encoding %s cannot be used."
 msgstr ""
 
 msgid "End date is before start date"
-msgstr ""
-
-msgid "Entries must be >= 1 but is %1$d."
 msgstr ""
 
 msgid "Error in SQL Update"
@@ -629,7 +669,7 @@ msgstr ""
 msgid "Folder %s does not exist in context %s"
 msgstr ""
 
-msgid "Folder %s does not hold messages"
+msgid "Folder %s does not hold messages and is therefore not selectable"
 msgstr ""
 
 msgid "Folder %s has been modified after last sync timestamp in context %s"
@@ -860,9 +900,6 @@ msgstr ""
 msgid "Mapping for %d not implemented"
 msgstr ""
 
-msgid "Message %s could not be found in folder %s"
-msgstr ""
-
 msgid "Message could not be moved to trash folder"
 msgstr ""
 
@@ -880,10 +917,16 @@ msgid ""
 "folder due to exceeded quota."
 msgstr ""
 
+msgid "Message(s) %s could not be found in folder %s"
+msgstr ""
+
 msgid "Method not supported: %s"
 msgstr ""
 
 msgid "Missing %s folder in mail move operation"
+msgstr ""
+
+msgid "Missing SpellCheckConfig object."
 msgstr ""
 
 msgid "Missing affiliation id"
@@ -950,6 +993,11 @@ msgid "Move not supported: Source:Destination %d:%d"
 msgstr ""
 
 msgid ""
+"Move partially completed for user %s. Source message(s) %s in folder %s "
+"could not be deleted due to following error: %s"
+msgstr ""
+
+msgid ""
 "Move/Copy failed. New message with UID %d could not be found in destination "
 "folder %s"
 msgstr ""
@@ -960,7 +1008,16 @@ msgstr ""
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
 msgstr ""
 
+msgid "Multiple rows found."
+msgstr ""
+
 msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
+msgstr ""
+
+msgid "No IMAP account exists for user %s in context %s"
+msgstr ""
+
+msgid "No SpellCheckConfig loaded."
 msgstr ""
 
 msgid "No admin permission found"
@@ -981,6 +1038,9 @@ msgid ""
 msgstr ""
 
 msgid "No default folder could be found in module %s for user %s in context %s"
+msgstr ""
+
+msgid "No dictionary could be found for language: %1$s."
 msgstr ""
 
 msgid "No route to host: server (%s) cannot be reached"
@@ -1068,10 +1128,13 @@ msgstr ""
 msgid "Port %s was unreachable on remote server"
 msgstr ""
 
-msgid "Private flagged tasks can't be delegated."
+msgid "Private flagged tasks cannot be delegated."
 msgstr ""
 
 msgid "Private folder %s can only be moved to a private folder in context %s"
+msgstr ""
+
+msgid "Problem initializing the cache."
 msgstr ""
 
 msgid "Problem putting/removing an object into/from the cache."
@@ -1121,6 +1184,9 @@ msgid "Required value \"Title\" was not supplied."
 msgstr ""
 
 msgid "Resolving database for context %1$d and server %2$d not possible!"
+msgstr ""
+
+msgid "Resolving schema for context %1$d failed."
 msgstr ""
 
 msgid "Response package exceeds max package size value of 8192k: %s"
@@ -1177,6 +1243,9 @@ msgstr ""
 msgid "Some fields have values, that are too long"
 msgstr ""
 
+msgid "SpamAssassin not installed or its executable has not been found"
+msgstr ""
+
 msgid "Specified folder name is too long"
 msgstr ""
 
@@ -1190,6 +1259,12 @@ msgid "String Parse Exception: No ending 0x00 found"
 msgstr ""
 
 msgid "System folder %s cannot be moved in context %s"
+msgstr ""
+
+msgid "Table update failed. Schema %1$s could not be locked."
+msgstr ""
+
+msgid "Table update failed. Schema %1$s could not be unlocked."
 msgstr ""
 
 msgid "Target and source folder cannot be equal in context %s"
@@ -1251,7 +1326,7 @@ msgstr ""
 msgid "The document you requested doesn't exist."
 msgstr ""
 
-msgid "The file can't be added to filestore. File size: %s Quota: %s Used: %s"
+msgid "The file cannot be added to filestore. File size: %s Quota: %s Used: %s"
 msgstr ""
 
 msgid "The file could not be retrieved."
@@ -1322,12 +1397,18 @@ msgid ""
 "This gif Image is to large. It can not be scaled and will not be accepted"
 msgstr ""
 
+msgid "This method is not applicable to an IMAP permission"
+msgstr ""
+
 msgid "This method is not implemented."
 msgstr ""
 
 msgid ""
 "This transaction could not be fully undone. Some components are probably not "
 "consistent anymore. Run the recovery tool!"
+msgstr ""
+
+msgid "Though expected, SQL query returned no result."
 msgstr ""
 
 msgid "Too few (%d) login attributes."
@@ -1469,8 +1550,8 @@ msgstr ""
 
 msgid ""
 "Unable to scale the contact image. This is a not supported file type or it "
-"is too large! Your mime type is %1$s and your image size is %2$d The max. "
-"allowed image size is %3$d"
+"is too large! Your mime type is %1$s and your image size is %2$d KB. The "
+"max. allowed image size is %3$d KB."
 msgstr ""
 
 msgid ""
@@ -1548,7 +1629,7 @@ msgstr ""
 msgid "Unknown recurrence type %d."
 msgstr ""
 
-msgid "Unknown setting path %1$d."
+msgid "Unknown setting path %1$s."
 msgstr ""
 
 msgid "Unknown task attribute %d."
@@ -1569,10 +1650,20 @@ msgstr ""
 msgid "Unsupported type detected : %d"
 msgstr ""
 
+msgid ""
+"Update conflict detected. Another process is currently updating schema %1$s."
+msgstr ""
+
+msgid "Update conflict detected. Schema %1$s is not marked as LOCKED."
+msgstr ""
+
 msgid "Update expected but no objectid is given. Aborting action"
 msgstr ""
 
 msgid "Update of folder %s failed"
+msgstr ""
+
+msgid "Update process initialization failed: %1$s."
 msgstr ""
 
 msgid "Upload Quota (%d) exceeded"
@@ -1644,6 +1735,9 @@ msgstr ""
 
 msgid ""
 "User %s is not allowed to move all subfolders of folder %s in context %s"
+msgstr ""
+
+msgid "User dictionary could not be found."
 msgstr ""
 
 msgid "User's %s dictionary could not be loaded in context %d"
@@ -1751,7 +1845,7 @@ msgstr ""
 msgid "Your database is currently updated."
 msgstr ""
 
-msgid "Your session expired. Please start a new browser session."
+msgid "Your session %s expired. Please start a new browser session."
 msgstr ""
 
 msgid "clientLastModified IS NULL. Abort action!"
