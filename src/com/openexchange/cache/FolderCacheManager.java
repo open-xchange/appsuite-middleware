@@ -52,6 +52,8 @@ package com.openexchange.cache;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -82,7 +84,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  */
 public class FolderCacheManager {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderCacheManager.class);
 
@@ -90,7 +92,9 @@ public class FolderCacheManager {
 
 	private static final Lock LOCK_INIT = new ReentrantLock();
 
-	private final Lock LOCK_MODIFY = new ReentrantLock();
+	private static final Map<Integer, Lock> contextModLocks = new HashMap<Integer, Lock>();
+
+	private static final Lock LOCK_MOD = new ReentrantLock();
 
 	private static FolderCacheManager instance;
 
@@ -149,10 +153,38 @@ public class FolderCacheManager {
 		return instance;
 	}
 
+	private static final Lock getContextModLock(final Context ctx) {
+		return getContextModLock(ctx.getContextId());
+	}
+
+	private static final Lock getContextModLock(final int cid) {
+		final Integer key = Integer.valueOf(cid);
+		Lock l = contextModLocks.get(key);
+		if (l == null) {
+			LOCK_MOD.lock();
+			try {
+				if ((l = contextModLocks.get(key)) == null) {
+					l = new ReentrantLock();
+					contextModLocks.put(key, l);
+				}
+			} finally {
+				LOCK_MOD.unlock();
+			}
+		}
+		return l;
+	}
+
 	/**
+	 * <p>
 	 * Fetches <code>FolderObject</code> which matches given object id. If
 	 * none found or <code>fromCache</code> is not set the folder will be
 	 * loaded from underlying database store and automatically put into cache.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> This method returns a clone of cached
+	 * <code>FolderObject</code> instance. Thus any modifications made to the
+	 * reference object will not affect cached version
+	 * </p>
 	 */
 	public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx,
 			final Connection readConArg) throws OXException {
@@ -173,7 +205,14 @@ public class FolderCacheManager {
 	}
 
 	/**
+	 * <p>
 	 * Fetches <code>FolderObject</code> which matches given object id.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> This method returns a clone of cached
+	 * <code>FolderObject</code> instance. Thus any modifications made to the
+	 * reference object will not affect cached version
+	 * </p>
 	 * 
 	 * @return matching <code>FolderObject</code> instance else
 	 *         <code>null</code>
@@ -184,8 +223,15 @@ public class FolderCacheManager {
 	}
 
 	/**
+	 * <p>
 	 * Loads the folder which matches given object id from underlying database
 	 * store and puts it into cache.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> This method returns a clone of cached
+	 * <code>FolderObject</code> instance. Thus any modifications made to the
+	 * reference object will not affect cached version
+	 * </p>
 	 * 
 	 * @return matching <code>FolderObject</code> instance fetched from
 	 *         storage else <code>null</code>
@@ -196,7 +242,8 @@ public class FolderCacheManager {
 			throw new OXFolderNotFoundException(folderId, ctx.getContextId());
 		}
 		final FolderObject folderObj;
-		LOCK_MODIFY.lock();
+		final Lock modLock = getContextModLock(ctx);
+		modLock.lock();
 		try {
 			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
 			final CacheKey key = new CacheKey(ctx, folderId);
@@ -218,7 +265,7 @@ public class FolderCacheManager {
 		} catch (CacheException e) {
 			throw new OXCachingException(Code.FAILED_PUT, e, new Object[0]);
 		} finally {
-			LOCK_MODIFY.unlock();
+			modLock.unlock();
 		}
 		/*
 		 * Return a copy, NOT a reference to cached element
@@ -226,17 +273,50 @@ public class FolderCacheManager {
 		return (FolderObject) folderObj.clone();
 	}
 
+	/**
+	 * <p>
+	 * Simply puts given <code>FolderObject</code> into cache if object's id
+	 * is different to zero.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
+	 * instance into cache. Thus any modifications made to the reference object
+	 * will not affect cached version
+	 * </p>
+	 * 
+	 * @param folderObj
+	 *            the folder object
+	 * @param ctx
+	 *            the context
+	 * @throws OXException
+	 */
 	public void putFolderObject(final FolderObject folderObj, final Context ctx) throws OXException {
 		putFolderObject(folderObj, ctx, true, null);
 	}
 
 	/**
+	 * <p>
 	 * Simply puts given <code>FolderObject</code> into cache if object's id
-	 * is different to zero.
+	 * is different to zero. If flag <code>overwrite</code> is set to
+	 * <code>false</code> then this method returns immediately if cache
+	 * already holds a matching entry.
+	 * </p>
+	 * <p>
+	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
+	 * instance into cache. Thus any modifications made to the reference object
+	 * will not affect cached version
+	 * </p>
 	 * 
+	 * @param folderObj
+	 *            the folder object
+	 * @param ctx
+	 *            the context
+	 * @param overwrite
+	 *            <code>true</code> to overwrite; otherwise <code>false</code>
 	 * @param elemAttribs
 	 *            the element's attributes. Set to <code>null</code> to use
 	 *            the default attributes
+	 * @throws OXException
 	 */
 	public void putFolderObject(final FolderObject folderObj, final Context ctx, final boolean overwrite,
 			final IElementAttributes elemAttribs) throws OXException {
@@ -247,10 +327,14 @@ public class FolderCacheManager {
 			}
 			final CacheKey ck = new CacheKey(ctx, folderObj.getObjectID());
 			if (!overwrite) {
+				if (folderCache.get(ck) != null) {
+					return;
+				}
 				/*
 				 * Wait for other threads that currently own PUT lock
 				 */
-				LOCK_MODIFY.lock();
+				final Lock modLock = getContextModLock(ctx);
+				modLock.lock();
 				try {
 					if (folderCache.get(ck) != null) {
 						/*
@@ -272,14 +356,15 @@ public class FolderCacheManager {
 					}
 					folderCache.put(ck, folderObj.clone(), attribs);
 				} finally {
-					LOCK_MODIFY.unlock();
+					modLock.unlock();
 				}
 			} else {
 				/*
 				 * Put clone of new object into cache. If there is currently an
 				 * object associated with this key in the region it is replaced.
 				 */
-				LOCK_MODIFY.lock();
+				final Lock modLock = getContextModLock(ctx);
+				modLock.lock();
 				try {
 					final IElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
 					if (attribs == null) {
@@ -291,7 +376,7 @@ public class FolderCacheManager {
 						folderCache.put(ck, folderObj.clone(), attribs);
 					}
 				} finally {
-					LOCK_MODIFY.unlock();
+					modLock.unlock();
 				}
 			}
 		} catch (CacheException e) {
@@ -299,17 +384,27 @@ public class FolderCacheManager {
 		}
 	}
 
+	/**
+	 * Removes matching <code>FolderObject</code> instance from cache
+	 * 
+	 * @param key
+	 *            the key
+	 * @param ctx
+	 *            the context
+	 * @throws OXException
+	 */
 	public void removeFolderObject(final int key, final Context ctx) throws OXException {
 		try {
 			/*
 			 * Remove object in cache if exist
 			 */
 			if (key > 0) {
-				LOCK_MODIFY.lock();
+				final Lock modLock = getContextModLock(ctx);
+				modLock.lock();
 				try {
 					folderCache.remove(new CacheKey(ctx, key));
 				} finally {
-					LOCK_MODIFY.unlock();
+					modLock.unlock();
 				}
 			}
 		} catch (CacheException e) {
@@ -341,6 +436,12 @@ public class FolderCacheManager {
 		return initialAttribs;
 	}
 
+	/**
+	 * Returns default element attributes for this cache
+	 * 
+	 * @return default element attributes for this cache
+	 * @throws OXException
+	 */
 	public IElementAttributes getDefaultFolderObjectAttributes() throws OXException {
 		try {
 			/*

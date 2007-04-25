@@ -4,7 +4,6 @@
  - Fixed Bug #6842. Use setHeader to remove pragma header
  - Fixed Bug #6157. Don't format error messages in Exception class
  
- 
 * 2007-04-25 ben.pahne@open-xchange.com
  
  - Fixed Bug #6743, Upload contact image: error messages incorrect
@@ -13,6 +12,8 @@
 
  - Added new methods for re-using JSON objects into JSON API: reset() and
    parseJSONString(String str)
+ - A lot of code review
+ - Optimized folder-cache's write-lock usage on modifying action(s)
 
 * 2007-04-24 - francisco.laguna@open-xchange.com
   
