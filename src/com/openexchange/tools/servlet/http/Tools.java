@@ -146,7 +146,7 @@ public final class Tools {
 	 *            the servlet response.
 	 */
 	public static void removeHeaderPragma(final HttpServletResponse resp) {
-		resp.addHeader(PRAGMA_KEY, null);
+		resp.setHeader(PRAGMA_KEY, null);
 	}
 
     /**
