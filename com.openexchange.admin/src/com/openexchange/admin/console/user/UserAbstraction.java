@@ -591,9 +591,17 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
             } else if (optionAndMethod.getReturntype().equals(PASSWORDMECH_CLASS)) {
-                final PASSWORDMECH value = (PASSWORDMECH)parser.getOptionValue(optionAndMethod.getOption());
+                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+                PASSWORDMECH pwmech = null;
+                if (value.equalsIgnoreCase("sha")) {
+                    pwmech = PASSWORDMECH.SHA;
+                } else if (value.equalsIgnoreCase("crypt")) {
+                    pwmech = PASSWORDMECH.CRYPT;
+                } else {
+                    throw new IllegalArgumentException("Argument for passwordmech is wrong.");
+                }
                 if (null != value) {
-                    optionAndMethod.getMethod().invoke(usr, value);
+                    optionAndMethod.getMethod().invoke(usr, pwmech);
                 }
             }
     
