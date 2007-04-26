@@ -8,7 +8,6 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -20,9 +19,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class ChangeQuota extends ContextAbtraction {
     
-    private final static char OPT_QUOTA_SHORT = 'q';
-    private final static String OPT_QUOTA_LONG = "quota";
-    
+   
  public ChangeQuota(final String[] args2) {
         
      AdminParser parser = new AdminParser("changequota");
@@ -97,12 +94,11 @@ public class ChangeQuota extends ContextAbtraction {
         
         setContextIDOption(parser, true);
         
-        filestoreContextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,"How much quota the context can use for filestore",true, true);
-        
+        setContextQuotaOption(parser,true);
     }
     
     
-    protected Option filestoreContextQuotaOption = null;
+    
     
 
 }
