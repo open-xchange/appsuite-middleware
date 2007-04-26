@@ -70,52 +70,72 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends ResourceAbstraction {
 
+    AdminParser parser = null;
+    
     public static void main(final String[] args) {
-        new Create(args);
+        Create cs = new Create();
+        cs.doInternal(args);
     }
 
-    public Create(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("delete");
+    private void doAction(String[] args2) throws RemoteException,
+            StorageException, InvalidCredentialsException,
+            NoSuchContextException, InvalidDataException,
+            DatabaseUpdateException, IllegalOptionValueException,
+            UnknownOptionException, MissingOptionException,
+            MalformedURLException, NotBoundException {
 
         setOptions(parser);
 
-        try {
-            parser.ownparse(args2);
+        // try {
+        parser.ownparse(args2);
 
-            final Context ctx = new Context(DEFAULT_CONTEXT);
+        final Context ctx = new Context(DEFAULT_CONTEXT);
 
-            if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-            }
+        if (parser.getOptionValue(this.contextOption) != null) {
+            ctx.setID(Integer.parseInt((String) parser
+                    .getOptionValue(this.contextOption)));
+        }
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+        final Credentials auth = new Credentials((String) parser
+                .getOptionValue(this.adminUserOption), (String) parser
+                .getOptionValue(this.adminPassOption));
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(OXResourceInterface.RMI_NAME);
-            final Resource res = new Resource();
+        final OXResourceInterface oxres = (OXResourceInterface) Naming
+                .lookup(OXResourceInterface.RMI_NAME);
+        final Resource res = new Resource();
 
-            res.setAvailable(Boolean.parseBoolean((String) parser.getOptionValue(this.resourceAvailableOption)));
+        res.setAvailable(Boolean.parseBoolean((String) parser
+                .getOptionValue(this.resourceAvailableOption)));
 
-            if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
-                res.setDescription((String) parser.getOptionValue(this.resourceDescriptionOption));
-            }
-            if (parser.getOptionValue(this.resourceRecipientsOption) != null) {
-                final String vals = (String) parser.getOptionValue(this.resourceRecipientsOption);
-                final ArrayList<String> recs = new ArrayList<String>();
-                if (vals.contains(",")) {
-                    for (final String s : vals.split(",")) {
-                        recs.add(s.trim());
-                    }
-                } else {
-                    recs.add(vals.trim());
+        if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
+            res.setDescription((String) parser
+                    .getOptionValue(this.resourceDescriptionOption));
+        }
+        if (parser.getOptionValue(this.resourceRecipientsOption) != null) {
+            final String vals = (String) parser
+                    .getOptionValue(this.resourceRecipientsOption);
+            final ArrayList<String> recs = new ArrayList<String>();
+            if (vals.contains(",")) {
+                for (final String s : vals.split(",")) {
+                    recs.add(s.trim());
                 }
+            } else {
+                recs.add(vals.trim());
             }
-            res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
-            res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
-            res.setName((String) parser.getOptionValue(this.resourceNameOption));
-            System.out.println(oxres.create(ctx, res, auth));
-            printExtensionsError(res);
-            System.exit(0);
+        }
+        res.setDisplayname((String) parser
+                .getOptionValue(this.resourceDisplayNameOption));
+        res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
+        res.setName((String) parser.getOptionValue(this.resourceNameOption));
+        System.out.println(oxres.create(ctx, res, auth));
+        printExtensionsError(res);
+        System.exit(0);
+
+    }
+
+    private void doInternal(String[] args2) {
+        try {
+            doAction(args2);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
             System.exit(1);
@@ -148,7 +168,8 @@ public class Create extends ResourceAbstraction {
             parser.printUsage();
             System.exit(1);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError("Unrecognized options on the command line: "
+                    + e.getMessage());
             parser.printUsage();
             System.exit(1);
         } catch (final MissingOptionException e) {
@@ -159,6 +180,18 @@ public class Create extends ResourceAbstraction {
             printServerResponse(e.getMessage());
             System.exit(1);
         }
+    }
+
+    public Create(final String[] args2) throws RemoteException, IllegalOptionValueException, 
+    UnknownOptionException, MalformedURLException, StorageException, 
+    InvalidCredentialsException, NoSuchContextException, InvalidDataException, 
+    DatabaseUpdateException, MissingOptionException, NotBoundException {
+        parser = new AdminParser("delete");
+        doAction(args2);
+    }
+
+    public Create() {
+        parser = new AdminParser("delete");
     }
 
     private void setOptions(final AdminParser parser) {
