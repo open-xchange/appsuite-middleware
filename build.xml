@@ -143,7 +143,7 @@
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
-                <exclude name="*.sh"/>
+                <exclude name="oxfunctions.sh"/>
                 <exclude name="*.in"/>
             </fileset>
         </copy>
@@ -164,7 +164,7 @@
     <target name="installScripts" depends="patchConfig,patchScripts">
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
-                <include name="*.sh"/>
+                <include name="oxfunctions.sh"/>
             </fileset>
         </copy>
         <copy todir="${bin.install.copy.dir}" overwrite="true">
