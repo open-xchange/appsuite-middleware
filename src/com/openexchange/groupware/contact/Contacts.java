@@ -769,8 +769,6 @@ public class Contacts implements DeleteListener {
 					}else{
 						co.setDisplayName(co.getSurName());
 					}
-				}else{
-					co.setDisplayName("<unknown>");
 				}
 			} else if (co.getDisplayName() != null || co.getDisplayName().length() > 0) {				
 				if (co.getSurName() == null || co.getSurName().length() < 1){
