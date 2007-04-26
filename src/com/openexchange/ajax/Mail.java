@@ -813,13 +813,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
-			MailWriter mailWriter = null;
 			try {
 				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				final Message msg = mailInterface.getMessage(mailIdentifier.folder, mailIdentifier.msgUID);
 				if (msg == null) {
 					throw new OXMailException(MailCode.MESSAGE_NOT_FOUND, Long.valueOf(mailIdentifier.msgUID), mailIdentifier.folder);
@@ -833,7 +831,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				} else if (showMessageHeaders) {
 					data = formatMessageHeaders(msg.getAllHeaders());
 				} else {
-					mailWriter.writeMessageAsJSONObject(msg, !editDraft);
+					new MailWriter(jsonWriter, sessionObj).writeMessageAsJSONObject(msg, !editDraft);
 					data = new JSONObject(strWriter.toString());
 				}
 				writer.flush();

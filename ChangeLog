@@ -1,3 +1,8 @@
+* 2007-04-26 - thorben.betten@open-xchange.com
+
+ - Again fixed encoding of message's subject: Using both MimeUtitly's
+   routine and own routine
+
 * 2007-04-26 ben.pahne@open-xchange.com
 
  - Fixed Bug 6688  for this branch: Contact loses display_name information when setting flag

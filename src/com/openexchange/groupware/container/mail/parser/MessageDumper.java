@@ -458,7 +458,7 @@ public class MessageDumper {
 		/*
 		 * SUBJECT
 		 */
-		msgHandler.handleSubject(msg.getSubject());
+		msgHandler.handleSubject(MessageUtils.decodeMultiEncodedHeader(msg.getSubject()));
 		/*
 		 * SENT DATE
 		 */
