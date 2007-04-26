@@ -115,8 +115,8 @@ public class AppointmentWriter extends CalendarWriter {
 				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), timeZone);
 				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), timeZone);
 			} else {			
-				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), new Date(appointmentObject.getRecurringStart()), timeZone);
-				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), new Date(appointmentObject.getRecurringStart()), timeZone);
+				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone);
+				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone);
 			}
 		}
 		
@@ -211,7 +211,7 @@ public class AppointmentWriter extends CalendarWriter {
 					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {					
 						writeValue(appointmentObject.getStartDate(), timeZone);
 					} else {
-						writeValue(appointmentObject.getStartDate(), new Date(appointmentObject.getRecurringStart()), timeZone);
+						writeValue(appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone);
 					}
 				}
 				break;
@@ -222,7 +222,7 @@ public class AppointmentWriter extends CalendarWriter {
 					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {					
 						writeValue(appointmentObject.getEndDate(), timeZone);
 					} else {
-						writeValue(appointmentObject.getEndDate(), new Date(appointmentObject.getRecurringStart()), timeZone);
+						writeValue(appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone);
 					}
 				}
 				break;
