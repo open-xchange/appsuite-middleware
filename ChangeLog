@@ -1,6 +1,6 @@
 * 2007-04-26 - thorben.betten@open-xchange.com
 
- - Again fixed encoding of message's subject: Using both MimeUtitly's
+ - Again fixed encoding of message's subject: Using both MimeUtility's
    routine and own routine
  - Simplified class FolderWriter.java
 
