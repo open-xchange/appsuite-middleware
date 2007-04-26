@@ -4155,10 +4155,6 @@ public class MailInterfaceImpl implements MailInterface {
 					updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
 					updateMe.setSubscribed(true);
 				}
-				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
-					updateMe.setSubscribed(folderObj.isSubscribed());
-					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
-				}
 				ACLS: if (folderObj.containsACLs()) {
 					/*
 					 * Wrapper object contains rights. No simple rename but a
@@ -4198,6 +4194,10 @@ public class MailInterfaceImpl implements MailInterface {
 						updateMe.addACL(newACLs[i]);
 					}
 					newACLs = null;
+				}
+				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
+					updateMe.setSubscribed(folderObj.isSubscribed());
+					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
 				}
 				retval = updateMe.getFullName();
 			} else {
@@ -4261,6 +4261,8 @@ public class MailInterfaceImpl implements MailInterface {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
+	
+	private static final String STR_PAT = "p|P";
 
 	private static final boolean equals(final ACL[] acls1, final ACL[] acls2) {
 		if (acls1.length != acls2.length) {
@@ -4271,7 +4273,8 @@ public class MailInterfaceImpl implements MailInterface {
 			Inner: for (ACL acl2 : acls2) {
 				if (acl1.getName().equals(acl2.getName())) {
 					found = true;
-					if (!acl1.getRights().equals(acl2.getRights())) {
+					if (!acl1.getRights().toString().replaceAll(STR_PAT, STR_EMPTY).equals(
+							acl2.getRights().toString().replaceAll(STR_PAT, STR_EMPTY))) {
 						return false;
 					}
 					break Inner;

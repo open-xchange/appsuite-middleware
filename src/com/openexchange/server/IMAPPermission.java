@@ -67,20 +67,20 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IMAPPermission extends OCLPermission implements Cloneable {
+public class IMAPPermission extends OCLPermission {
 
 	private static final long serialVersionUID = -4781017654229881491L;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPPermission.class);
 
 	private String folderFullname;
 
-	private final Context ctx;
+	private final transient Context ctx;
 
-	private ACL acl;
+	private transient ACL acl;
 
-	private UserStorage userStorage;
+	private transient UserStorage userStorage;
 
 	/**
 	 * Constructor
@@ -350,21 +350,21 @@ public class IMAPPermission extends OCLPermission implements Cloneable {
 
 	private static final String STR_UNMAPPABLE = "p";
 
-	private static final Rights RIGHTS_FOLDER_ADMIN = new Rights(STR_FOLDER_ADMIN);
+	private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights(STR_FOLDER_ADMIN);
 
-	private static final Rights RIGHTS_FOLDER_VISIBLE = new Rights(STR_FOLDER_VISIBLE);
+	private static final transient Rights RIGHTS_FOLDER_VISIBLE = new Rights(STR_FOLDER_VISIBLE);
 
-	private static final Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights(STR_FOLDER_CREATE_OBJECTS);
+	private static final transient Rights RIGHTS_FOLDER_CREATE_OBJECTS = new Rights(STR_FOLDER_CREATE_OBJECTS);
 
-	private static final Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights(STR_FOLDER_CREATE_SUBFOLDERS);
+	private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights(STR_FOLDER_CREATE_SUBFOLDERS);
 
-	private static final Rights RIGHTS_READ_ALL = new Rights(STR_READ_ALL);
+	private static final transient Rights RIGHTS_READ_ALL = new Rights(STR_READ_ALL);
 
-	private static final Rights RIGHTS_WRITE_ALL = new Rights(STR_WRITE_ALL);
+	private static final transient Rights RIGHTS_WRITE_ALL = new Rights(STR_WRITE_ALL);
 
-	private static final Rights RIGHTS_DELETE_ALL = new Rights(STR_DELETE_ALL);
+	private static final transient Rights RIGHTS_DELETE_ALL = new Rights(STR_DELETE_ALL);
 
-	private static final Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
+	private static final transient Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
 
 	/**
 	 * Maps this permission to IMAP rights and fills them into an

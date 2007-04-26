@@ -7,6 +7,9 @@
  - Again fixed encoding of message's subject: Using both MimeUtility's
    routine and own routine
  - Simplified class FolderWriter.java
+ - Supporting public IMAP folders
+ - Bugfix #6957: Fixed automatic linewrapping when sending plain text
+   messages
 
 * 2007-04-26 ben.pahne@open-xchange.com
 

@@ -52,6 +52,7 @@ package com.openexchange.groupware.imap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -95,6 +96,9 @@ public class OXUser2IMAPLogin {
 	 * @throws LdapException
 	 */
 	public static String getIMAPLogin(final int userId, final UserStorage userStorage) throws LdapException {
+		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
+			return AUTH_ID_ANYONE;
+		}
 		return userStorage.getUser(userId).getLoginInfo();
 	}
 
@@ -142,6 +146,8 @@ public class OXUser2IMAPLogin {
 		final UserStorage us = UserStorage.getInstance(ctx);
 		return us.getUserId(imapLogin);
 	}
+	
+	private static final String AUTH_ID_ANYONE = "anyone";
 
 	/**
 	 * Determines the user ID whose IMAP login mtaches given
@@ -161,6 +167,8 @@ public class OXUser2IMAPLogin {
 			LdapException {
 		if (!IMAPProperties.isSupportsACLs()) {
 			return -1;
+		} else if (AUTH_ID_ANYONE.equalsIgnoreCase(imapLogin)) {
+			return OCLPermission.ALL_GROUPS_AND_USERS;
 		}
 		return userStorage.getUserId(imapLogin);
 	}

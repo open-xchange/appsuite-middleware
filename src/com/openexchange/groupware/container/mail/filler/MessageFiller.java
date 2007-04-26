@@ -816,6 +816,8 @@ public class MessageFiller {
 	private static final String DEFAULT_COLOR = "#0026ff";
 
 	private static final String STR_HTML_QUOTE = "&gt;";
+	
+	private static final String STR_SPLIT_BR = "<br/?>";
 
 	private static final String[] COLORS;
 
@@ -841,7 +843,7 @@ public class MessageFiller {
 	 */
 	private static final String insertColorQuotes(final String s) {
 		final StringBuilder sb = new StringBuilder();
-		final String[] lines = s.split("<br/?>");
+		final String[] lines = s.split(STR_SPLIT_BR);
 		int levelBefore = 0;
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
@@ -858,7 +860,7 @@ public class MessageFiller {
 					 * offset or if just one whitespace character has been
 					 * skipped
 					 */
-					next = (offset == pos || (pos - offset == 1 && s.charAt(offset) == ' '));
+					next = (offset == pos || (pos - offset == 1 && Character.isWhitespace(line.charAt(offset))));
 					if (next) {
 						currentLevel++;
 						offset = (pos + 4);
@@ -867,7 +869,7 @@ public class MessageFiller {
 			}
 			if (offset > 0) {
 				try {
-					offset = offset < line.length() && ' ' == line.charAt(offset) ? offset + 1 : offset;
+					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
 				} catch (StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace(e.getMessage(), e);

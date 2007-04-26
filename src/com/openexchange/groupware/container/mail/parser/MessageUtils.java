@@ -256,6 +256,7 @@ public class MessageUtils {
 			return line;
 		}
 		final String quote = lookUpQuote ? getQuotePrefix(line) : quoteArg;
+		final int startPos = quote == null ? 0 : quote.length();
 		final char[] chars = line.toCharArray();
 		final char c = chars[linewrap];
 		final StringBuilder sb = new StringBuilder(length + 5);
@@ -264,27 +265,41 @@ public class MessageUtils {
 			/*
 			 * Find last non-whitespace character before
 			 */
-			for (int i = linewrap - 1; i >= 0; i--) {
-				if (!Character.isWhitespace(chars[i]) && isLineBreakInsideHref(line, i) == null) {
+			int i = linewrap - 1;
+			int[] sep = null;
+			while (i >= startPos) {
+				if (!Character.isWhitespace(chars[i])) {
+					if ((sep = isLineBreakInsideHref(line, i)) != null) {
+						i = sep[0] - 1;
+						continue;
+					}
 					sb.setLength(0);
 					sub.setLength(0);
 					return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
 							wrapTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
 									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
 				}
+				i--;
 			}
 		} else {
 			/*
 			 * Find last whitespace before
 			 */
-			for (int i = linewrap - 1; i >= 0; i--) {
-				if (Character.isWhitespace(chars[i]) && isLineBreakInsideHref(line, i) == null) {
+			int i = linewrap - 1;
+			int[] sep = null;
+			while (i >= startPos) {
+				if (Character.isWhitespace(chars[i])) {
+					if ((sep = isLineBreakInsideHref(line, i)) != null) {
+						i = sep[0] - 1;
+						continue;
+					}
 					sb.setLength(0);
 					sub.setLength(0);
 					return sb.append(line.substring(0, i)).append(CHAR_BREAK).append(
 							wrapTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
 									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
 				}
+				i--;
 			}
 		}
 		final int[] sep = isLineBreakInsideHref(line, linewrap);
@@ -293,7 +308,7 @@ public class MessageUtils {
 					wrapTextLineRecursive(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote)
 							.append(line.substring(linewrap)).toString(), linewrap, quote, false)).toString();
 		} else if (sep[1] == length) {
-			if (sep[0] == 0) {
+			if (sep[0] == startPos) {
 				return line;
 			}
 			return new StringBuilder(line.length() + 1).append(line.substring(0, sep[0])).append(CHAR_BREAK).append(
@@ -451,6 +466,8 @@ public class MessageUtils {
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
 	
 	private static final String STR_HTML_QUOTE = "&gt;";
+	
+	private static final String STR_SPLIT_BR = "<br/?>";
 
 	/**
 	 * Turns all simple quotes "&amp;gt; " to colored "&lt;blockquote&gt;" tags
@@ -458,7 +475,7 @@ public class MessageUtils {
 	 */
 	private static final String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder();
-		final String[] lines = htmlText.split("<br/?>");
+		final String[] lines = htmlText.split(STR_SPLIT_BR);
 		int levelBefore = 0;
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
@@ -475,7 +492,7 @@ public class MessageUtils {
 					 * offset or if just one whitespace character has been
 					 * skipped
 					 */
-					next = (offset == pos || (pos - offset == 1 && htmlText.charAt(offset) == ' '));
+					next = (offset == pos || (pos - offset == 1 && Character.isWhitespace(line.charAt(offset))));
 					if (next) {
 						currentLevel++;
 						offset = (pos + 4);
@@ -484,7 +501,7 @@ public class MessageUtils {
 			}
 			if (offset > 0) {
 				try {
-					offset = offset < line.length() && ' ' == line.charAt(offset) ? offset + 1 : offset;
+					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
 				} catch (StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace(e.getMessage(), e);
