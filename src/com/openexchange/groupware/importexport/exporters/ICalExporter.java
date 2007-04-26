@@ -108,7 +108,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 	
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  */
 public class ICalExporter implements Exporter {
 	
@@ -174,6 +174,9 @@ public class ICalExporter implements Exporter {
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
 	
 	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+		if(! format.equals(Format.ICAL)){
+			return false;
+		}
 		int folderId = Integer.parseInt(folder);
 		FolderObject fo;
 		try {
@@ -196,9 +199,7 @@ public class ICalExporter implements Exporter {
 		}
 		
 		if (perm.canReadAllObjects()) {
-			if (format.getMimeType().equals("text/calendar")) {
-				return true;
-			}
+			return true;
 		}
 		
 		return false;
