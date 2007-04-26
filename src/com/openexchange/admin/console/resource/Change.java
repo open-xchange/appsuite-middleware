@@ -46,45 +46,39 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.group;
+package com.openexchange.admin.console.resource;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
-import com.openexchange.admin.rmi.OXGroupInterface;
+import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Delete extends GroupAbstraction {
+public class Change extends ResourceAbstraction {
 
     public static void main(final String[] args) {
-        new Delete(args);
+        new Change(args);
     }
 
-    private Delete() {
+    public Change(final String[] args2) {
 
-    }
+        final AdminParser parser = new AdminParser("change");
 
-    public Delete(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("delete");
-
-        setDefaultCommandLineOptions(parser);
-
-        // create id option for this command line tool
-        setGroupIdOption(parser, true);
+        setOptions(parser);
 
         try {
             parser.ownparse(args2);
@@ -97,23 +91,55 @@ public class Delete extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(OXGroupInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(OXResourceInterface.RMI_NAME);
+            final Resource res = new Resource();
 
-            final int groupid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
+            res.setId(Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption)));
 
-            final Group grp = new Group(groupid);
+            if (parser.getOptionValue(this.resourceAvailableOption) != null) {
 
-            oxgrp.delete(ctx, new Group[] { grp }, auth);
-            printExtensionsError(grp);
+                res.setAvailable(Boolean.parseBoolean(parser.getOptionValue(this.resourceAvailableOption).toString()));
+            }
+
+            if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
+                res.setDescription((String) parser.getOptionValue(this.resourceDescriptionOption));
+            }
+
+            if (parser.getOptionValue(this.resourceDisplayNameOption) != null) {
+                res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
+            }
+
+            if (parser.getOptionValue(this.resourceEmailOption) != null) {
+                res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
+            }
+
+            if (parser.getOptionValue(this.resourceNameOption) != null) {
+                res.setName((String) parser.getOptionValue(this.resourceNameOption));
+            }
+
+            if (parser.getOptionValue(this.resourceRecipientsOption) != null) {
+                final String vals = (String) parser.getOptionValue(this.resourceRecipientsOption);
+                final ArrayList<String> recs = new ArrayList<String>();
+                if (vals.contains(",")) {
+                    for (final String s : vals.split(",")) {
+                        recs.add(s.trim());
+                    }
+                } else {
+                    recs.add(vals.trim());
+                }
+            }
+
+            oxres.change(ctx, res, auth);
+            printExtensionsError(res);
             System.exit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
             System.exit(1);
-        } catch (final NumberFormatException e) {
-            printInvalidInputMsg("The Option for the id of the group contains no parseable integer number");
+        } catch (final java.lang.NumberFormatException num) {
+            printInvalidInputMsg("Ids must be numbers!");
             System.exit(1);
         } catch (final MalformedURLException e) {
-            printServerResponse("Error conntecting to server: " + e.getMessage());
+            printServerResponse(e.getMessage());
             System.exit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
@@ -121,13 +147,13 @@ public class Delete extends GroupAbstraction {
         } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
+        } catch (final StorageException e) {
+            printServerResponse(e.getMessage());
+            System.exit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
         } catch (final NoSuchContextException e) {
-            printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (final StorageException e) {
             printServerResponse(e.getMessage());
             System.exit(1);
         } catch (final InvalidDataException e) {
@@ -149,6 +175,22 @@ public class Delete extends GroupAbstraction {
             printServerResponse(e.getMessage());
             System.exit(1);
         }
+
+    }
+
+    private void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptions(parser);
+
+        // id is required
+        setIdOption(parser, true);
+
+        // optional
+        setNameOption(parser, false);
+        setDisplayNameOption(parser, false);
+        setAvailableOption(parser, false);
+        setDescriptionOption(parser, false);
+        setEmailOption(parser, false);
+        setRecipientsOption(parser, false);
 
     }
 
