@@ -125,26 +125,56 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public class MessageFiller {
 
+	private static final String HDR_X_MAILER = "X-Mailer";
+
+	private static final String HDR_X_PRIORITY = "X-Priority";
+
+	private static final String HDR_CONTENT_TYPE = "Content-Type";
+
+	private static final String ENC_Q = "Q";
+
+	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+	private static final String HDR_CONTENT_ID = "Content-ID";
+
+	private static final String STR_UTF8 = "UTF-8";
+	
+	private static final String STR_EMPTY = "";
+
+	private static final String MIME_TEXT = "text/";
+
+	private static final String MIME_MESSAGE_RFC822 = "message/rfc822";
+
+	private static final String MIME_TEXT_VCARD = "text/vcard";
+
+	private static final String MIME_TEXT_PLAIN = "text/plain";
+
+	private static final String MIME_TEXT_HTM = "text/htm";
+
+	private static final String MIME_TEXT_HTML = "text/html";
+
+	private static final String MP_ALTERNATIVE = "alternative";
+
+	private static final String MP_RELATED = "related";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageFiller.class);
 
 	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
 
-	private static final String DISP_TO = "Disposition-Notification-To";
+	private static final String HDR_DISP_TO = "Disposition-Notification-To";
 
-	private static final String CHARSET = "charset";
+	private static final String STR_CHARSET = "charset";
 
-	private static final String MIME_VERSION = "MIME-Version";
-
-	private static final String CONTENT_TYPE = "Content-Type";
+	private static final String HDR_MIME_VERSION = "MIME-Version";
 
 	private static final String VERSION = "1.0";
 
 	private static final String REPLACE_CS = "#CS#";
 
-	private static final String TEXT_CT = "text/plain; charset=#CS#";
+	private static final String PAT_TEXT_CT = "text/plain; charset=#CS#";
 
-	private static final String HTML_CT = "text/html; charset=#CS#";
+	private static final String PAT_HTML_CT = "text/html; charset=#CS#";
 
 	private static final String VCARD_ERROR = "Error while appending user VCard";
 
@@ -232,15 +262,15 @@ public class MessageFiller {
 		final boolean sendMultipartAlternative;
 		if (msgObj.isDraft()) {
 			sendMultipartAlternative = false;
-			mailTextMao.setContentType("text/html");
+			mailTextMao.setContentType(MIME_TEXT_HTML);
 		} else {
-			sendMultipartAlternative = ("alternative".equalsIgnoreCase(mailTextMao.getContentType()));
+			sendMultipartAlternative = (MP_ALTERNATIVE.equalsIgnoreCase(mailTextMao.getContentType()));
 		}
 		/*
 		 * Html content with embedded images
 		 */
 		final boolean embeddedImages = (sendMultipartAlternative || (mailTextMao.getContentType().regionMatches(true,
-				0, "text/htm", 0, 8)))
+				0, MIME_TEXT_HTM, 0, 8)))
 				&& hasEmbeddedImages((String) mailTextMao.getContent());
 		/*
 		 * Compose message
@@ -269,7 +299,7 @@ public class MessageFiller {
 				 * Convert html content to regular text if mail text is demanded
 				 * to be text/plain
 				 */
-				if (mailTextMao.getContentType().regionMatches(true, 0, "text/plain", 0, 10)) {
+				if (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT_PLAIN, 0, 10)) {
 					/*
 					 * Convert html content to reguar text. First: Create a body
 					 * part for text content
@@ -280,8 +310,8 @@ public class MessageFiller {
 					 */
 					text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap),
 							IMAPProperties.getDefaultMimeCharset());
-					text.setHeader(MIME_VERSION, VERSION);
-					text.setHeader(CONTENT_TYPE, TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
+					text.setHeader(HDR_MIME_VERSION, VERSION);
+					text.setHeader(HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
 							.getDefaultMimeCharset()));
 					/*
 					 * Add body part
@@ -295,10 +325,10 @@ public class MessageFiller {
 					/*
 					 * Define html content
 					 */
-					final String ct = HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
+					final String ct = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 					html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), ct);
-					html.setHeader(MIME_VERSION, VERSION);
-					html.setHeader(CONTENT_TYPE, ct);
+					html.setHeader(HDR_MIME_VERSION, VERSION);
+					html.setHeader(HDR_CONTENT_TYPE, ct);
 					/*
 					 * Add body part
 					 */
@@ -325,11 +355,11 @@ public class MessageFiller {
 					/*
 					 * Define content
 					 */
-					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, "text/vcard")));
-					vcardPart.setHeader(MIME_VERSION, VERSION);
+					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, MIME_TEXT_VCARD)));
+					vcardPart.setHeader(HDR_MIME_VERSION, VERSION);
 					vcardPart.setFileName(MimeUtility.encodeText(new StringBuilder(session.getUserObject()
-							.getDisplayName().replaceAll(" +", "")).append(".vcf").toString(), IMAPProperties
-							.getDefaultMimeCharset(), "Q"));
+							.getDisplayName().replaceAll(" +", STR_EMPTY)).append(".vcf").toString(), IMAPProperties
+							.getDefaultMimeCharset(), ENC_Q));
 					/*
 					 * Append body part
 					 */
@@ -358,7 +388,7 @@ public class MessageFiller {
 					 * Create a body part for original message
 					 */
 					final MimeBodyPart origMsgPart = new MimeBodyPart();
-					origMsgPart.setDataHandler(new DataHandler(originalMsg, "message/rfc822"));
+					origMsgPart.setDataHandler(new DataHandler(originalMsg, MIME_MESSAGE_RFC822));
 					primaryMultipart.addBodyPart(origMsgPart);
 				} catch (MessagingException e) {
 					LOG.error("Error while appending original message on forward", e);
@@ -368,10 +398,10 @@ public class MessageFiller {
 			/*
 			 * Create a non-multipart message
 			 */
-			if (mailTextMao.getContentType().regionMatches(true, 0, "text/", 0, 5) && mailTextMao.getContent() != null) {
-				final boolean isPlainText = (mailTextMao.getContentType().regionMatches(true, 0, "text/plain", 0, 10));
-				final ContentType ct = new ContentType(isPlainText ? TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
-						.getDefaultMimeCharset()) : HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties
+			if (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT, 0, 5) && mailTextMao.getContent() != null) {
+				final boolean isPlainText = (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT_PLAIN, 0, 10));
+				final ContentType ct = new ContentType(isPlainText ? PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
+						.getDefaultMimeCharset()) : PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties
 						.getDefaultMimeCharset()));
 				if (primaryMultipart == null) {
 					final String mailText;
@@ -385,13 +415,13 @@ public class MessageFiller {
 						mailText = performLineWrap(insertColorQuotes(MailTools.formatHrefLinks((String) mailTextMao.getContent())), true, linewrap);
 					}
 					newMimeMessage.setContent(mailText, ct.toString());
-					newMimeMessage.setHeader(MIME_VERSION, VERSION);
-					newMimeMessage.setHeader(CONTENT_TYPE, ct.toString());
+					newMimeMessage.setHeader(HDR_MIME_VERSION, VERSION);
+					newMimeMessage.setHeader(HDR_CONTENT_TYPE, ct.toString());
 				} else {
 					final MimeBodyPart msgBodyPart = new MimeBodyPart();
 					msgBodyPart.setContent(mailTextMao.getContent(), ct.toString());
-					msgBodyPart.setHeader(MIME_VERSION, VERSION);
-					msgBodyPart.setHeader(CONTENT_TYPE, ct.toString());
+					msgBodyPart.setHeader(HDR_MIME_VERSION, VERSION);
+					msgBodyPart.setHeader(HDR_CONTENT_TYPE, ct.toString());
 					primaryMultipart.addBodyPart(msgBodyPart);
 				}
 			} else {
@@ -411,7 +441,7 @@ public class MessageFiller {
 					mp = primaryMultipart;
 				}
 				MimeBodyPart msgBodyPart = new MimeBodyPart();
-				msgBodyPart.setText("", "UTF-8");
+				msgBodyPart.setText(STR_EMPTY, STR_UTF8);
 				mp.addBodyPart(msgBodyPart);
 				msgBodyPart = new MimeBodyPart();
 				if (mailTextMao.getContentID() == JSONMessageAttachmentObject.CONTENT_STRING) {
@@ -445,7 +475,7 @@ public class MessageFiller {
 				final MimeMessage nestedMsg = new MimeMessage(mailSession);
 				fillMessage(nestedMsgObj, nestedMsg, uploadEvent, sendType);
 				final MimeBodyPart msgBodyPart = new MimeBodyPart();
-				msgBodyPart.setContent(nestedMsg, "message/rfc822");
+				msgBodyPart.setContent(nestedMsg, MIME_MESSAGE_RFC822);
 				primaryMultipart.addBodyPart(msgBodyPart);
 			}
 		}
@@ -468,7 +498,7 @@ public class MessageFiller {
 		/*
 		 * Create an "alternative" multipart
 		 */
-		final Multipart alternativeMultipart = new MimeMultipart("alternative");
+		final Multipart alternativeMultipart = new MimeMultipart(MP_ALTERNATIVE);
 		final String mailText = (String) mailTextMao.getContent();
 		/*
 		 * Create a body part for both text and html content
@@ -483,17 +513,17 @@ public class MessageFiller {
 		} catch (IOException e) {
 			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
 		}
-		text.setHeader(MIME_VERSION, VERSION);
-		text.setHeader(CONTENT_TYPE, TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset()));
+		text.setHeader(HDR_MIME_VERSION, VERSION);
+		text.setHeader(HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset()));
 		alternativeMultipart.addBodyPart(text);
 		/*
 		 * Define html content
 		 */
-		String htmlCT = HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
+		String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
 		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), htmlCT);
-		html.setHeader(MIME_VERSION, VERSION);
-		html.setHeader(CONTENT_TYPE, htmlCT);
+		html.setHeader(HDR_MIME_VERSION, VERSION);
+		html.setHeader(HDR_CONTENT_TYPE, htmlCT);
 		htmlCT = null;
 		/*
 		 * Add to newly created "related" or existing superior multipart
@@ -502,7 +532,7 @@ public class MessageFiller {
 			/*
 			 * Create "related" multipart
 			 */
-			final Multipart relatedMultipart = new MimeMultipart("related");
+			final Multipart relatedMultipart = new MimeMultipart(MP_RELATED);
 			relatedMultipart.addBodyPart(html);
 			/*
 			 * Traverse Content-IDs
@@ -529,7 +559,7 @@ public class MessageFiller {
 				relatedImageBodyPart.setFileName(ifds.getName());
 				relatedImageBodyPart.setText(ifds.getName());
 				relatedImageBodyPart.setDataHandler(new DataHandler(ifds));
-				relatedImageBodyPart.setHeader("Content-ID", new StringBuilder().append('<').append(cid).append('>')
+				relatedImageBodyPart.setHeader(HDR_CONTENT_ID, new StringBuilder().append('<').append(cid).append('>')
 						.toString());
 				relatedImageBodyPart.setDisposition(Part.INLINE);
 				relatedMultipart.addBodyPart(relatedImageBodyPart);
@@ -548,13 +578,13 @@ public class MessageFiller {
 
 	private final void addMessageBodyPart(final Multipart mp, final JSONMessageObject msgObj,
 			final JSONMessageAttachmentObject mao) throws MessagingException, OXException, IOException {
-		if (mao.getContentType().regionMatches(true, 0, "text/", 0, 5) && mao.getContent() != null) {
+		if (mao.getContentType().regionMatches(true, 0, MIME_TEXT, 0, 5) && mao.getContent() != null) {
 			/*
 			 * Text
 			 */
 			final ContentType ct = new ContentType(mao.getContentType());
-			if (ct.getParameter(CHARSET) == null) {
-				ct.setParameter(CHARSET, IMAPProperties.getDefaultMimeCharset());
+			if (ct.getParameter(STR_CHARSET) == null) {
+				ct.setParameter(STR_CHARSET, IMAPProperties.getDefaultMimeCharset());
 			}
 			final String contentType = ct.toString();
 			final MimeBodyPart msgBodyPart = new MimeBodyPart();
@@ -562,7 +592,7 @@ public class MessageFiller {
 			mp.addBodyPart(msgBodyPart);
 		} else {
 			final ContentType contentType = new ContentType(mao.getContentType());
-			if ("application/octet-stream".equalsIgnoreCase(contentType.getBaseType()) && mao.getFileName() != null) {
+			if (MIME_APPLICATION_OCTET_STREAM.equalsIgnoreCase(contentType.getBaseType()) && mao.getFileName() != null) {
 				/*
 				 * Try to determine MIME type via JAF
 				 */
@@ -581,7 +611,7 @@ public class MessageFiller {
 							contentType.toString())));
 					try {
 						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-								.getDefaultMimeCharset(), "Q"));
+								.getDefaultMimeCharset(), ENC_Q));
 					} catch (UnsupportedEncodingException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					} catch (IMAPException e) {
@@ -593,7 +623,7 @@ public class MessageFiller {
 							.getFileName(), bytes)));
 					try {
 						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-								.getDefaultMimeCharset(), "Q"));
+								.getDefaultMimeCharset(), ENC_Q));
 					} catch (UnsupportedEncodingException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					} catch (IMAPException e) {
@@ -610,14 +640,14 @@ public class MessageFiller {
 				messageBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadedFile)));
 				try {
 					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-							.getDefaultMimeCharset(), "Q"));
+							.getDefaultMimeCharset(), ENC_Q));
 				} catch (UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				} catch (IMAPException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
-				messageBodyPart.setHeader("Content-Type", mao.getContentType());
+				messageBodyPart.setHeader(HDR_CONTENT_TYPE, mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
 			} else if (mao.getInfostoreDocumentInputStream() != null) {
 				/*
@@ -634,14 +664,14 @@ public class MessageFiller {
 				messageBodyPart.setDataHandler(new DataHandler(dataSource));
 				try {
 					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-							.getDefaultMimeCharset(), "Q"));
+							.getDefaultMimeCharset(), ENC_Q));
 				} catch (UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				} catch (IMAPException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
-				messageBodyPart.setHeader("Content-Type", mao.getContentType());
+				messageBodyPart.setHeader(HDR_CONTENT_TYPE, mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
 			} else if (msgObj.getMsgref() != null && mao.getFileName() != null && mao.getPositionInMail() != null) {
 				/*
@@ -700,7 +730,7 @@ public class MessageFiller {
 		 */
 		if (msgObj.getSubject() != null) {
 			msg.setSubject(MimeUtility.encodeText(removeHdrLineBreak(msgObj.getSubject()), IMAPProperties
-					.getDefaultMimeCharset(), "Q"));
+					.getDefaultMimeCharset(), ENC_Q));
 		}
 		/*
 		 * Set sent date
@@ -748,16 +778,16 @@ public class MessageFiller {
 		 * Set disposition notification
 		 */
 		if (msgObj.getDispositionNotification() != null && msgObj.getDispositionNotification().length() > 0) {
-			msg.setHeader(DISP_TO, msgObj.getDispositionNotification());
+			msg.setHeader(HDR_DISP_TO, msgObj.getDispositionNotification());
 		}
 		/*
 		 * Set priority
 		 */
-		msg.setHeader("X-Priority", String.valueOf(msgObj.getPriority()));
+		msg.setHeader(HDR_X_PRIORITY, String.valueOf(msgObj.getPriority()));
 		/*
 		 * Set mailer TODO: Read in mailer from file
 		 */
-		msgObj.addHeader("X-Mailer", "Open-Xchange v6.0 Mailer");
+		msgObj.addHeader(HDR_X_MAILER, "Open-Xchange v6.0 Mailer");
 		/*
 		 * Headers
 		 */
@@ -792,7 +822,7 @@ public class MessageFiller {
 			}
 			final VersitObject versitObj = converter.convertContact(contactObj, "3.0");
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
-			final VersitDefinition def = Versit.getDefinition("text/vcard");
+			final VersitDefinition def = Versit.getDefinition(MIME_TEXT_VCARD);
 			final VersitDefinition.Writer w = def.getWriter(os, IMAPProperties.getDefaultMimeCharset());
 			def.write(w, versitObj);
 			w.flush();
