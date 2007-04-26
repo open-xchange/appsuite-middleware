@@ -1,0 +1,7 @@
+
+SYSTEMPROPERTIES=@systemproperties@
+LOGGINGPROPERTIES=@loggingproperties@
+
+JAVA_XTRAOPTS="-Xms50M -Xmx50M -Dlog4j.configuration=log4j.properties -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"
+
+NRFILES="8192"
