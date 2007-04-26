@@ -206,6 +206,10 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteFolder(WebConversation webCon, int[] id, String host, String login, String password) throws Exception, OXException {
+		return deleteFolder(webCon, id, new Date(), host, login, password);
+	}
+	
+	public static int[] deleteFolder(WebConversation webCon, int[] id, Date lastModified, String host, String login, String password) throws Exception, OXException {
 		host = appendPrefix(host);
 		
 		Element rootElement = new Element("multistatus", webdav);
@@ -216,6 +220,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		for (int a = 0; a < id.length; a++) {
 			Element eProp = new Element("prop", webdav);
 			DataWriter.addElement(FolderFields.OBJECT_ID, id[a], eProp);
+			DataWriter.addElement(FolderFields.LAST_MODIFIED, lastModified, eProp);
 			DataWriter.addElement("method", "DELETE", eProp);
 			
 			rootElement.addContent(addProp2PropertyUpdate(eProp));
