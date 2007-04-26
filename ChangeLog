@@ -1,3 +1,7 @@
+* 2007-04-26 - tobias.prinz@open-xchange.com
+
+ - Fixed ICALExporter to prevent something like bugs 6823, 6825
+
 * 2007-04-26 - thorben.betten@open-xchange.com
 
  - Again fixed encoding of message's subject: Using both MimeUtility's
