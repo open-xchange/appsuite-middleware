@@ -215,18 +215,21 @@ public class List extends GroupAbstraction {
 
         grp_data.add(String.valueOf(group.getId())); // id
 
-        if (group.getName() != null && group.getName().trim().length() > 0) {
-            grp_data.add(group.getName());
+        final String name = group.getName();
+        if (name != null && name.trim().length() > 0) {
+            grp_data.add(name);
         } else {
             grp_data.add(null); // name
         }
-        if (group.getDisplayname() != null && group.getDisplayname().trim().length() > 0) {
-            grp_data.add(group.getDisplayname());
+        final String displayname = group.getDisplayname();
+        if (displayname != null && displayname.trim().length() > 0) {
+            grp_data.add(displayname);
         } else {
             grp_data.add(null); // displayname
         }
-        if (group.getEmail() != null && group.getEmail().trim().length() > 0) {
-            grp_data.add(group.getEmail());
+        final String email = group.getEmail();
+        if (email != null && email.trim().length() > 0) {
+            grp_data.add(email);
         } else {
             grp_data.add(null); // email
         }

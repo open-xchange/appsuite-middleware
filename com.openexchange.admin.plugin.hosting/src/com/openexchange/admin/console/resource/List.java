@@ -192,20 +192,23 @@ public class List extends ResourceAbstraction {
 
         res_data.add(String.valueOf(my_res.getId())); // id
 
-        if (my_res.getName() != null && my_res.getName().trim().length() > 0) {
-            res_data.add(my_res.getName()); // name
+        final String name = my_res.getName();
+        if (name != null && name.trim().length() > 0) {
+            res_data.add(name); // name
         } else {
             res_data.add(null); // name
         }
 
-        if (my_res.getDisplayname() != null && my_res.getDisplayname().trim().length() > 0) {
-            res_data.add(my_res.getDisplayname()); // displayname
+        final String displayname = my_res.getDisplayname();
+        if (displayname != null && displayname.trim().length() > 0) {
+            res_data.add(displayname); // displayname
         } else {
             res_data.add(null); // displayname
         }
 
-        if (my_res.getEmail() != null && my_res.getEmail().trim().length() > 0) {
-            res_data.add(my_res.getEmail()); // email
+        final String email = my_res.getEmail();
+        if (email != null && email.trim().length() > 0) {
+            res_data.add(email); // email
         } else {
             res_data.add(null); // email
         }
