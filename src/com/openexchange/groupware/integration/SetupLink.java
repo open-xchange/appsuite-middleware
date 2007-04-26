@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.integration;
 
 import java.net.URL;
@@ -67,8 +65,8 @@ public abstract class SetupLink {
     /**
      * Implementing sub class.
      */
-    private static Class<? extends SetupLink> implementingClass;
-    
+    private static Class< ? extends SetupLink> implementingClass;
+
     /**
      * Default constructor.
      */
@@ -79,12 +77,13 @@ public abstract class SetupLink {
     /**
      * Factory method for an instance of SetupLink.
      * @return an instance implementing the getLink() method.
-     * @throws LoginException if instanciation fails.
+     * @throws SetupLinkException if instanciation fails.
      */
     public static SetupLink getInstance() throws SetupLinkException {
         SetupLink instance = null;
         try {
             instance = implementingClass.newInstance();
+            instance.initialize();
         } catch (InstantiationException e) {
             throw new SetupLinkException(Code.INSTANCIATION_FAILED, e);
         } catch (IllegalAccessException e) {
@@ -98,9 +97,15 @@ public abstract class SetupLink {
      * @param values the implementation of this method can define a number of
      * objects to pass for generating a user specific link.
      * @return a ready to use link to redirect the user to the setup system.
-     * @throws LoginException if creating the url fails.
+     * @throws SetupLinkException if creating the url fails.
      */
     public abstract URL getLink(Object... values) throws SetupLinkException;
+
+    /**
+     * Initialization of the setup link class.
+     * @throws SetupLinkException if initialization fails.
+     */
+    protected abstract void initialize() throws SetupLinkException;
 
     /**
      * Initializes the login info implementation.
@@ -112,8 +117,8 @@ public abstract class SetupLink {
         }
         final String className = SystemConfig.getProperty(Property.SETUP_LINK);
         if (null == className) {
-            throw new SetupLinkException(Code.MISSING_SETTING,
-                Property.SETUP_LINK.getPropertyName());
+            throw new SetupLinkException(Code.MISSING_SETTING, Property
+                .SETUP_LINK.getPropertyName());
         }
         try {
             implementingClass = Class.forName(className)

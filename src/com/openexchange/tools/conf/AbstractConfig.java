@@ -142,10 +142,12 @@ public abstract class AbstractConfig {
 
     /**
      * @return the name of the property file.
+     * @throws ConfigurationException if determining the filename of the
+     * property file fails.
      */
     protected abstract String getPropertyFileName()
         throws ConfigurationException;
-    
+
     /**
      * Loads the properties file by using the JVM system property defining the
      * path to the system.properties configuration file.

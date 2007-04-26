@@ -122,9 +122,9 @@ public class SetupLinkException extends AbstractOXException {
         CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR,
             5),
         /**
-         * Missing property %1$s in server.properties.
+         * Missing property %1$s in system.properties.
          */
-        MISSING_SETTING("Missing property %1$s in server.properties.",
+        MISSING_SETTING("Missing property %1$s in system.properties.",
             Category.SETUP_ERROR, 6),
         /**
          * URL "%s" is malformed.
