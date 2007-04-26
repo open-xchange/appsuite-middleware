@@ -64,7 +64,7 @@ import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
-public class MailFolderObject {
+public final class MailFolderObject {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderObject.class);
 	
@@ -188,7 +188,7 @@ public class MailFolderObject {
 	
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 	
-	private static final Rights getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
+	private static Rights getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}
@@ -242,14 +242,14 @@ public class MailFolderObject {
 		return retval;
 	}
 	
-	public static final String prepareFullname(final String fullname, final char sep) {
+	public static String prepareFullname(final String fullname, final char sep) {
 		if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
 			return fullname;
 		}
 		return new StringBuilder().append(MailFolderObject.DEFAULT_IMAP_FOLDER_ID).append(sep).append(fullname).toString();
 	}
 
-	private static final String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
+	private static String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
 		final StringBuilder sb = new StringBuilder(50).append(MailFolderObject.DEFAULT_IMAP_FOLDER_ID);
 		if (parent instanceof DefaultFolder) {
 			return sb.toString();
