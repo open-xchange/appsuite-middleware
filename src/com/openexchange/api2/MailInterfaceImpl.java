@@ -1865,8 +1865,8 @@ public class MailInterfaceImpl implements MailInterface {
 	public Message[] getMessageList(final String folderArg, final long[] uids, final int[] fields) throws OXException {
 		try {
 			final String folder = prepareMailFolderParam(folderArg);
-			if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folder)) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER);
+			if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(folder)) {
+				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER_NAME);
 			}
 			init();
 			setAndOpenFolder(folder, Folder.READ_ONLY);
@@ -1911,8 +1911,8 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
-			if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folder)) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER);
+			if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(folder)) {
+				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolderObject.DEFAULT_IMAP_FOLDER_NAME);
 			}
 			if (imapCon.getImapFolder() == null) {
 				/*
@@ -2489,7 +2489,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * Sets and opens (only if exists) the folder in a safe manner
 	 */
 	private final void setAndOpenFolder(final String folderName, final int mode) throws MessagingException, OXException {
-		final boolean isDefaultFolder = folderName.equals(MailFolderObject.DEFAULT_IMAP_FOLDER);
+		final boolean isDefaultFolder = folderName.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID);
 		final boolean isIdenticalFolder;
 		if (isDefaultFolder) {
 			isIdenticalFolder = (imapCon.getImapFolder() == null ? false
@@ -2560,7 +2560,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 */
 	private final void setAndOpenTmpFolder(final String folderName, final int mode) throws MessagingException,
 			OXException {
-		final boolean isDefaultFolder = folderName.equals(MailFolderObject.DEFAULT_IMAP_FOLDER);
+		final boolean isDefaultFolder = folderName.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID);
 		final boolean isIdenticalFolder;
 		if (isDefaultFolder) {
 			isIdenticalFolder = (tmpFolder == null ? false : tmpFolder instanceof DefaultFolder);
@@ -3256,7 +3256,8 @@ public class MailInterfaceImpl implements MailInterface {
 		if (!newFolder.exists()) {
 			final long start = System.currentTimeMillis();
 			if (!newFolder.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
-				throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, newFolder.getFullName());
+				throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, newFolder.getFullName(),
+						parent instanceof DefaultFolder ? MailFolderObject.DEFAULT_IMAP_FOLDER_NAME : parent.getFullName());
 			}
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		}
@@ -3473,8 +3474,8 @@ public class MailInterfaceImpl implements MailInterface {
 						if (spamAction != SPAM_NOOP) {
 							for (int i = 0; i < msgUIDs.length; i++) {
 								try {
-									handleSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]), spamAction == SPAM_SPAM,
-											false);
+									handleSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]),
+											spamAction == SPAM_SPAM, false);
 								} catch (OXException e) {
 									if (LOG.isWarnEnabled()) {
 										LOG.warn(e.getMessage(), e);
@@ -3894,10 +3895,10 @@ public class MailInterfaceImpl implements MailInterface {
 			init();
 			final String parentFolder = prepareMailFolderParam(parentFolderArg);
 			final IMAPFolder p;
-			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				p = (IMAPFolder) imapStore.getDefaultFolder();
 				if (!p.exists()) {
-					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, MailFolderObject.DEFAULT_IMAP_FOLDER);
+					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, MailFolderObject.DEFAULT_IMAP_FOLDER_NAME);
 				}
 			} else {
 				p = (IMAPFolder) imapStore.getFolder(parentFolder);
@@ -3960,7 +3961,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
-			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				return new MailFolderObject((IMAPFolder) imapStore.getDefaultFolder());
 			}
 			final IMAPFolder retval = (IMAPFolder) imapStore.getFolder(folder);
@@ -3992,7 +3993,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
-			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				return SearchIteratorAdapter.createEmptyIterator();
 			}
 			final String defaultFolder = imapStore.getDefaultFolder().getFullName();
@@ -4076,7 +4077,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (isDefaultFolder(updateMe.getFullName())) {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
-					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(newParent) ? imapStore
+					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(newParent) ? imapStore
 							.getDefaultFolder()
 							: imapStore.getFolder(newParent)));
 					if (!destFolder.exists()) {
@@ -4204,7 +4205,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Insert
 				 */
 				final String parentStr = prepareMailFolderParam(folderObj.getParentFullName());
-				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER.equals(parentStr) ? (IMAPFolder) imapStore
+				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapStore
 						.getDefaultFolder()
 						: (IMAPFolder) imapStore.getFolder(parentStr);
 				if (!parent.exists()) {
@@ -4235,7 +4236,9 @@ public class MailInterfaceImpl implements MailInterface {
 				final long start = System.currentTimeMillis();
 				try {
 					if (!createMe.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
-						throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, createMe.getFullName());
+						throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, createMe.getFullName(),
+								parent instanceof DefaultFolder ? MailFolderObject.DEFAULT_IMAP_FOLDER_NAME : parent
+										.getFullName());
 					}
 					createMe.setSubscribed(true);
 					IMAPUtils.forceSetSubscribed(imapStore, createMe.getFullName(), true);
@@ -4327,7 +4330,9 @@ public class MailInterfaceImpl implements MailInterface {
 		 * anyway and therefore does not hold flag \NoSelect.
 		 */
 		if (!newFolder.create(toMoveType)) {
-			throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, newFolder.getFullName());
+			throw new OXMailException(MailCode.FOLDER_CREATION_FAILED, newFolder.getFullName(),
+					destFolder instanceof DefaultFolder ? MailFolderObject.DEFAULT_IMAP_FOLDER_NAME : destFolder
+							.getFullName());
 		}
 		try {
 			newFolder.open(Folder.READ_WRITE);
@@ -4643,9 +4648,9 @@ public class MailInterfaceImpl implements MailInterface {
 	private final static String prepareMailFolderParam(final String folderStringArg) {
 		if (folderStringArg == null) {
 			return null;
-		} else if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(folderStringArg)) {
+		} else if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(folderStringArg)) {
 			return folderStringArg;
-		} else if (folderStringArg.startsWith(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+		} else if (folderStringArg.startsWith(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 			return folderStringArg.substring(8);
 		}
 		return folderStringArg;

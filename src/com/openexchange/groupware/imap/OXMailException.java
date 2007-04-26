@@ -311,9 +311,9 @@ public class OXMailException extends OXException {
 		NO_SEND_ADDRESS_FOUND("No send address could be found for user %s in user configuration",
 				Category.CODE_ERROR, 46),
 		/**
-		 * Folder "%s" could not be created
+		 * Folder "%s" could not be created (maybe due to insufficient permission on parental folder %s)
 		 */
-		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created", Category.CODE_ERROR, 47),
+		FOLDER_CREATION_FAILED("Mail folder \"%s\" could not be created (maybe due to insufficient permission on parental folder %s)", Category.CODE_ERROR, 47),
 		/**
 		 * Message could not be moved to trash folder
 		 */

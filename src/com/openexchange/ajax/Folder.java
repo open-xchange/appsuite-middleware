@@ -158,10 +158,8 @@ public class Folder extends SessionServlet {
 	 */
 	public static final int MAX_PERMISSION = 64;
 
-	private static final String STRING_EMAIL = "E-Mail";
-
 	private static final String STRING_1 = "1";
-	
+
 	private static final String STRING_EMPTY = "";
 
 	/*
@@ -522,10 +520,9 @@ public class Folder extends SessionServlet {
 					}
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
-						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY,
-								getUserName(sessionObj),
-								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), Integer.valueOf(sessionObj.getContext()
-										.getContextId()));
+						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY, getUserName(sessionObj),
+								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), Integer
+										.valueOf(sessionObj.getContext().getContextId()));
 					}
 					/*
 					 * Append virtual folder 'Userstore'
@@ -626,8 +623,9 @@ public class Folder extends SessionServlet {
 								final int size = it.size();
 								for (int a = 0; a < size; a++) {
 									final MailFolderObject rootFolder = (MailFolderObject) it.next();
-									folderWriter.writeIMAPFolderAsArray(columns, rootFolder, STRING_EMAIL, 1,
-											MailFolderObject.DEFAULT_IMAP_FOLDER, FolderObject.SYSTEM_MODULE);
+									folderWriter.writeIMAPFolderAsArray(columns, rootFolder,
+											MailFolderObject.DEFAULT_IMAP_FOLDER_NAME, 1,
+											MailFolderObject.DEFAULT_IMAP_FOLDER_ID, FolderObject.SYSTEM_MODULE);
 								}
 							} catch (OXException e) {
 								LOG.error(e.getMessage(), e);
@@ -957,10 +955,11 @@ public class Folder extends SessionServlet {
 					 * Write virtual folder "E-Mail"
 					 */
 					final MailFolderObject defaultFolder = mailInterface.getFolder(
-							MailFolderObject.DEFAULT_IMAP_FOLDER, true);
+							MailFolderObject.DEFAULT_IMAP_FOLDER_ID, true);
 					if (defaultFolder != null) {
-						folderWriter.writeIMAPFolderAsArray(columns, defaultFolder, STRING_EMAIL, 1,
-								MailFolderObject.DEFAULT_IMAP_FOLDER, FolderObject.SYSTEM_MODULE);
+						folderWriter.writeIMAPFolderAsArray(columns, defaultFolder,
+								MailFolderObject.DEFAULT_IMAP_FOLDER_NAME, 1, MailFolderObject.DEFAULT_IMAP_FOLDER_ID,
+								FolderObject.SYSTEM_MODULE);
 					}
 					/*
 					 * Finally, write "private" folder
@@ -1144,8 +1143,9 @@ public class Folder extends SessionServlet {
 					final int size2 = it.size();
 					for (int a = 0; a < size2; a++) {
 						final MailFolderObject rootFolder = (MailFolderObject) it.next();
-						folderWriter.writeIMAPFolderAsArray(columns, rootFolder, STRING_EMAIL, 1,
-								MailFolderObject.DEFAULT_IMAP_FOLDER, FolderObject.SYSTEM_MODULE);
+						folderWriter.writeIMAPFolderAsArray(columns, rootFolder,
+								MailFolderObject.DEFAULT_IMAP_FOLDER_NAME, 1, MailFolderObject.DEFAULT_IMAP_FOLDER_ID,
+								FolderObject.SYSTEM_MODULE);
 					}
 				} catch (OXException e) {
 					LOG.error(e.getMessage(), e);

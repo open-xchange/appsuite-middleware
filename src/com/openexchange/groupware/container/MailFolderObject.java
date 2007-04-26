@@ -111,7 +111,9 @@ public class MailFolderObject {
 	
 	private boolean b_subscribed;
 
-	public static final String DEFAULT_IMAP_FOLDER = "default";
+	public static final String DEFAULT_IMAP_FOLDER_ID = "default";
+	
+	public static final String DEFAULT_IMAP_FOLDER_NAME = "E-Mail";
 	
 	public MailFolderObject() {
 		super();
@@ -239,14 +241,14 @@ public class MailFolderObject {
 	}
 	
 	public static final String prepareFullname(final String fullname, final char sep) {
-		if (MailFolderObject.DEFAULT_IMAP_FOLDER.equals(fullname)) {
+		if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
 			return fullname;
 		}
-		return new StringBuilder().append(MailFolderObject.DEFAULT_IMAP_FOLDER).append(sep).append(fullname).toString();
+		return new StringBuilder().append(MailFolderObject.DEFAULT_IMAP_FOLDER_ID).append(sep).append(fullname).toString();
 	}
 
 	private static final String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
-		final StringBuilder sb = new StringBuilder(50).append(MailFolderObject.DEFAULT_IMAP_FOLDER);
+		final StringBuilder sb = new StringBuilder(50).append(MailFolderObject.DEFAULT_IMAP_FOLDER_ID);
 		if (parent instanceof DefaultFolder) {
 			return sb.toString();
 		} else if (parent == null) {

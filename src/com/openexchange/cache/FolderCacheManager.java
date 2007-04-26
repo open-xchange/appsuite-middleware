@@ -183,7 +183,7 @@ public class FolderCacheManager {
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
-	 * reference object will not affect cached version
+	 * referenced object will not affect cached version
 	 * </p>
 	 */
 	public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx,
@@ -211,7 +211,7 @@ public class FolderCacheManager {
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
-	 * reference object will not affect cached version
+	 * referenced object will not affect cached version
 	 * </p>
 	 * 
 	 * @return matching <code>FolderObject</code> instance else
@@ -230,7 +230,7 @@ public class FolderCacheManager {
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
-	 * reference object will not affect cached version
+	 * referenced object will not affect cached version
 	 * </p>
 	 * 
 	 * @return matching <code>FolderObject</code> instance fetched from
@@ -280,7 +280,7 @@ public class FolderCacheManager {
 	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
-	 * instance into cache. Thus any modifications made to the reference object
+	 * instance into cache. Thus any modifications made to the referenced object
 	 * will not affect cached version
 	 * </p>
 	 * 
@@ -303,7 +303,7 @@ public class FolderCacheManager {
 	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
-	 * instance into cache. Thus any modifications made to the reference object
+	 * instance into cache. Thus any modifications made to the referenced object
 	 * will not affect cached version
 	 * </p>
 	 * 
