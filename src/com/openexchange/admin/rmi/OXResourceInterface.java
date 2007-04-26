@@ -76,6 +76,7 @@ public interface OXResourceInterface extends Remote {
 
     /**
      * Creates a new resource within the given context.
+     * 
      * @param ctx Create Resource in this Context
      * @param res Resource which should be created
      * @param auth Credentials for authenticating against server.
@@ -92,6 +93,7 @@ public interface OXResourceInterface extends Remote {
 
     /**
      * Change resource within the given context.
+     * 
      * @param ctx Change Resource in this Context.
      * @param res Resource containing the data.
      * @param auth Credentials for authenticating against server.
@@ -107,6 +109,7 @@ public interface OXResourceInterface extends Remote {
 
     /**
      * Get Resource from given context.
+     * 
      * @return Resource object containing data.
      * @param ctx Context object.
      * @param res Resource containing the resource id.
@@ -124,6 +127,7 @@ public interface OXResourceInterface extends Remote {
 
     /**
      * Delete resource from given context.
+     * 
      * @param ctx Context object.
      * @param res Resource which should be deleted.
      * @param auth Credentials for authenticating against server.
@@ -140,6 +144,7 @@ public interface OXResourceInterface extends Remote {
 
     /**
      * List resources matching <code>pattern</code> in given context.
+     * 
      * @return Resource[] containing result objects.
      * @param ctx Context object.
      * @param pattern Search pattern like * or mon* (e.g. for monitor)
