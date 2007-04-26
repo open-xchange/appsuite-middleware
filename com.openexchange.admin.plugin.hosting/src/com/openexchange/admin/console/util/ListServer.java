@@ -20,95 +20,95 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * 
  * @author d7
- *
+ * 
  */
 public class ListServer extends UtilAbstraction {
 
-    
     public ListServer(final String[] args2) {
 
-        AdminParser parser = new AdminParser("listServers");
+        final AdminParser parser = new AdminParser("listServers");
 
         setOptions(parser);
         setCSVOutputOption(parser);
-        
-        try {
-           parser.ownparse(args2);
 
-           final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
-           
+        try {
+            parser.ownparse(args2);
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             String searchpattern = "*";
-            if(parser.getOptionValue(searchOption)!=null){
-                searchpattern = (String)parser.getOptionValue(searchOption);
+            if (parser.getOptionValue(this.searchOption) != null) {
+                searchpattern = (String) parser.getOptionValue(this.searchOption);
             }
             // Setting the options in the dataobject
             final Server[] servers = oxutil.searchForServer(searchpattern, auth);
-            
-//          needed for csv output, KEEP AN EYE ON ORDER!!!
-            ArrayList<String> columns = new ArrayList<String>();
+
+            // needed for csv output, KEEP AN EYE ON ORDER!!!
+            final ArrayList<String> columns = new ArrayList<String>();
             columns.add("id");
             columns.add("name");
-            
-            ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-            
+
+            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+
             for (final Server server : servers) {
-                if (parser.getOptionValue(csvOutputOption) != null) {
-                    ArrayList<String> srv_data = new ArrayList<String>();
+                if (parser.getOptionValue(this.csvOutputOption) != null) {
+                    final ArrayList<String> srv_data = new ArrayList<String>();
                     srv_data.add(String.valueOf(server.getId()));
-                    if(server.getName()!=null){
+                    if (server.getName() != null) {
                         srv_data.add(server.getName());
-                    }else{
+                    } else {
                         srv_data.add(null);
                     }
                     data.add(srv_data);
-                }else{
+                } else {
                     System.out.println(server);
                 }
             }
-            
-            if (parser.getOptionValue(csvOutputOption) != null) {
+
+            if (parser.getOptionValue(this.csvOutputOption) != null) {
                 doCSVOutput(columns, data);
             }
-            
+
+            sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (UnknownOptionException e) {
+            sysexit(1);
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (MissingOptionException e) {
+            sysexit(1);
+        } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
     }
 
@@ -116,9 +116,12 @@ public class ListServer extends UtilAbstraction {
         new ListServer(args);
     }
 
-    private void setOptions(AdminParser parser) {
+    private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setSearchOption(parser);
     }
 
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
+    }
 }

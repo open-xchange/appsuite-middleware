@@ -66,62 +66,63 @@ public class UtilAbstraction extends BasicCommandlineOptions {
      * 
      * @return Options containing adminuser,adminpass Option objects.
      */
-    protected void setDefaultCommandLineOptions(AdminParser parser){          
+    @Override
+    protected void setDefaultCommandLineOptions(final AdminParser parser){          
         
         getAdminUserOption(parser);
         getAdminPassOption(parser);        
         
     }
     
-    protected void setDatabaseNameOption(AdminParser parser,boolean required){
-        databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
+    protected void setDatabaseNameOption(final AdminParser parser,final boolean required){
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
     }
     
-    protected void setSearchOption(AdminParser parser){
-        searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, false);
+    protected void setSearchOption(final AdminParser parser){
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, false);
     }
     
-    protected void setDatabaseHostnameOption(AdminParser parser,boolean required){
-        hostnameOption =  setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT,OPT_NAME_HOSTNAME_LONG,"Hostname of the server",true, required); 
+    protected void setDatabaseHostnameOption(final AdminParser parser,final boolean required){
+        this.hostnameOption =  setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT,OPT_NAME_HOSTNAME_LONG,"Hostname of the server",true, required); 
     }
     
-    protected void setDatabaseUsernameOption(AdminParser parser,boolean required){
-        databaseUsernameOption = setShortLongOpt(parser, OPT_NAME_DB_USERNAME_SHORT,OPT_NAME_DB_USERNAME_LONG,"Name of the user for the database",true, required);
+    protected void setDatabaseUsernameOption(final AdminParser parser,final boolean required){
+        this.databaseUsernameOption = setShortLongOpt(parser, OPT_NAME_DB_USERNAME_SHORT,OPT_NAME_DB_USERNAME_LONG,"Name of the user for the database",true, required);
     }
     
-    protected void setDatabaseDriverOption(AdminParser parser,boolean required){
-        databaseDriverOption = setShortLongOpt(parser, OPT_NAME_DB_DRIVER_SHORT,OPT_NAME_DB_DRIVER_LONG,"The driver to be used for the database",true, required);
+    protected void setDatabaseDriverOption(final AdminParser parser,final boolean required){
+        this.databaseDriverOption = setShortLongOpt(parser, OPT_NAME_DB_DRIVER_SHORT,OPT_NAME_DB_DRIVER_LONG,"The driver to be used for the database",true, required);
     }
     
-    protected void setDatabasePasswdOption(AdminParser parser,boolean required){
-        databasePasswdOption = setShortLongOpt(parser, OPT_NAME_DB_PASSWD_SHORT,OPT_NAME_DB_PASSWD_LONG,"Password for the database",true, required);
+    protected void setDatabasePasswdOption(final AdminParser parser,final boolean required){
+        this.databasePasswdOption = setShortLongOpt(parser, OPT_NAME_DB_PASSWD_SHORT,OPT_NAME_DB_PASSWD_LONG,"Password for the database",true, required);
     }
     
-    protected void setDatabaseIsMasterOption(AdminParser parser,boolean required){
-        databaseIsMasterOption = setShortLongOpt(parser, OPT_NAME_IS_MASTER_SHORT,OPT_NAME_IS_MASTER_LONG,"Set this if the registered database is the master",false,required);
+    protected void setDatabaseIsMasterOption(final AdminParser parser,final boolean required){
+        this.databaseIsMasterOption = setShortLongOpt(parser, OPT_NAME_IS_MASTER_SHORT,OPT_NAME_IS_MASTER_LONG,"Set this if the registered database is the master",false,required);
     }
-    protected void setDatabaseMasterIDOption(AdminParser parser,boolean required){
-        databaseMasterIDOption = setShortLongOpt(parser, OPT_NAME_MASTER_ID_SHORT,OPT_NAME_MASTER_ID_LONG,"If this database isn't the master give the id of the master here",true,required);
+    protected void setDatabaseMasterIDOption(final AdminParser parser,final boolean required){
+        this.databaseMasterIDOption = setShortLongOpt(parser, OPT_NAME_MASTER_ID_SHORT,OPT_NAME_MASTER_ID_LONG,"If this database isn't the master give the id of the master here",true,required);
     }
-    protected void setDatabaseWeightOption(AdminParser parser,boolean required){
-        databaseWeightOption = setShortLongOpt(parser, OPT_NAME_WEIGHT_SHORT,OPT_NAME_WEIGHT_LONG,"The db weight for this database",true,required);
+    protected void setDatabaseWeightOption(final AdminParser parser,final boolean required){
+        this.databaseWeightOption = setShortLongOpt(parser, OPT_NAME_WEIGHT_SHORT,OPT_NAME_WEIGHT_LONG,"The db weight for this database",true,required);
     }
-    protected void setDatabaseMaxUnitsOption(AdminParser parser,boolean required){
-        maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT,OPT_NAME_MAX_UNITS_LONG,"The maximum number of units in this database",true,required);
+    protected void setDatabaseMaxUnitsOption(final AdminParser parser,final boolean required){
+        this.maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT,OPT_NAME_MAX_UNITS_LONG,"The maximum number of units in this database",true,required);
     }
-    protected void setDatabasePoolHardlimitOption(AdminParser parser,boolean required){
+    protected void setDatabasePoolHardlimitOption(final AdminParser parser,final boolean required){
 //      FIXME: choeger Enter right description here        
-        poolHardlimitOption = setShortLongOpt(parser, OPT_NAME_POOL_HARDLIMIT_SHORT,OPT_NAME_POOL_HARDLIMIT_LONG,"Db pool hardlimit",true,required);
+        this.poolHardlimitOption = setShortLongOpt(parser, OPT_NAME_POOL_HARDLIMIT_SHORT,OPT_NAME_POOL_HARDLIMIT_LONG,"Db pool hardlimit",true,required);
     }
-    protected void setDatabasePoolInitialOption(AdminParser parser,boolean required){
-        poolInitialOption = setShortLongOpt(parser, OPT_NAME_POOL_INITIAL_SHORT,OPT_NAME_POOL_INITIAL_LONG,"Db pool initial",true,required);
+    protected void setDatabasePoolInitialOption(final AdminParser parser,final boolean required){
+        this.poolInitialOption = setShortLongOpt(parser, OPT_NAME_POOL_INITIAL_SHORT,OPT_NAME_POOL_INITIAL_LONG,"Db pool initial",true,required);
     }
-    protected void setDatabasePoolMaxOption(AdminParser parser,boolean required){
-        poolMaxOption = setShortLongOpt(parser, OPT_NAME_POOL_MAX_SHORT,OPT_NAME_POOL_MAX_LONG,"Db pool max",true,required);
+    protected void setDatabasePoolMaxOption(final AdminParser parser,final boolean required){
+        this.poolMaxOption = setShortLongOpt(parser, OPT_NAME_POOL_MAX_SHORT,OPT_NAME_POOL_MAX_LONG,"Db pool max",true,required);
     }
     
-    protected void setDatabaseParatmeterOption(AdminParser parser,boolean required){
-        poolMaxOption = setShortLongOpt(parser, OPT_NAME_DBPARAM_SHORT,OPT_NAME_DBPARAM_LONG,"Parameter for the database",true,required);
+    protected void setDatabaseParatmeterOption(final AdminParser parser,final boolean required){
+        this.poolMaxOption = setShortLongOpt(parser, OPT_NAME_DBPARAM_SHORT,OPT_NAME_DBPARAM_LONG,"Parameter for the database",true,required);
     }
     
     // for all tools
