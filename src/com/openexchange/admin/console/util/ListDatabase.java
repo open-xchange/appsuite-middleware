@@ -24,30 +24,28 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class ListDatabase extends UtilAbstraction {
 
-    
-
     public ListDatabase(final String[] args2) {
 
-        AdminParser parser = new AdminParser("listDatabases");
+        final AdminParser parser = new AdminParser("listDatabases");
 
         setOptions(parser);
         setCSVOutputOption(parser);
         try {
             parser.ownparse(args2);
 
-            final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
+            final Credentials auth = new Credentials((String)parser.getOptionValue(this.adminUserOption),(String)parser.getOptionValue(this.adminPassOption));
             
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
             
             String searchpattern = "*";
-            if(parser.getOptionValue(searchOption)!=null){
-                searchpattern = (String)parser.getOptionValue(searchOption);
+            if(parser.getOptionValue(this.searchOption)!=null){
+                searchpattern = (String)parser.getOptionValue(this.searchOption);
             }
             final Database[] databases = oxutil.searchForDatabase(searchpattern, auth);
             
             // needed for csv output, KEEP AN EYE ON ORDER!!!
-            ArrayList<String> columns = new ArrayList<String>();
+            final ArrayList<String> columns = new ArrayList<String>();
             columns.add("id");
             columns.add("url");
             columns.add("display_name");
@@ -65,56 +63,56 @@ public class ListDatabase extends UtilAbstraction {
             columns.add("read_id");
             columns.add("scheme");
             
-            ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
             
             for (final Database database : databases) {
-                if (parser.getOptionValue(csvOutputOption) != null) {                   
+                if (parser.getOptionValue(this.csvOutputOption) != null) {                   
                     data.add(makeCSVData(database));
                 }else{
                     System.out.println(database);
                 }
             }
             
-            if (parser.getOptionValue(csvOutputOption) != null) {
+            if (parser.getOptionValue(this.csvOutputOption) != null) {
                 doCSVOutput(columns, data);
             }
             
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {            
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (UnknownOptionException e) {
+            sysexit(1);
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (MissingOptionException e) {
+            sysexit(1);
+        } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
 
     }
@@ -123,7 +121,7 @@ public class ListDatabase extends UtilAbstraction {
         new ListDatabase(args);
     }
 
-    private void setOptions(AdminParser parser) {
+    private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setSearchOption(parser);       
     }
@@ -131,8 +129,8 @@ public class ListDatabase extends UtilAbstraction {
      * @param db
      * @return
      */
-    private ArrayList<String> makeCSVData(Database db){
-        ArrayList<String> rea_data = new ArrayList<String>();
+    private ArrayList<String> makeCSVData(final Database db){
+        final ArrayList<String> rea_data = new ArrayList<String>();
         
         rea_data.add(db.getId().toString());
         
@@ -228,5 +226,9 @@ public class ListDatabase extends UtilAbstraction {
         
         
         return rea_data;
+    }
+    
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
     }
 }

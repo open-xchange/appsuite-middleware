@@ -20,115 +20,110 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * 
  * @author d7,cutmasta
- *
+ * 
  */
 public class UpdateDatabase extends UtilAbstraction {
-    
-//  Setting names for options
+
+    // Setting names for options
     private final static char OPT_NAME_DATABASE_ID_SHORT = 'i';
+
     private final static String OPT_NAME_DATABASE_ID_LONG = "id";
 
+    private Option databaseIdOption = null;
 
     public UpdateDatabase(final String[] args2) {
 
-        AdminParser parser = new AdminParser("updatedatabase");
+        final AdminParser parser = new AdminParser("updatedatabase");
 
         setOptions(parser);
 
         try {
             parser.ownparse(args2);
-            
-            final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
-            
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
             final Database db = new Database();
-            
+
             String hostname = HOSTNAME_DEFAULT;
-            if(parser.getOptionValue(hostnameOption)!=null){
-                hostname = (String)parser.getOptionValue(hostnameOption);
+            if (parser.getOptionValue(this.hostnameOption) != null) {
+                hostname = (String) parser.getOptionValue(this.hostnameOption);
             }
-            
-            if(parser.getOptionValue(databaseNameOption)!=null){
-                db.setDisplayname((String)parser.getOptionValue(databaseNameOption));
+
+            if (parser.getOptionValue(this.databaseNameOption) != null) {
+                db.setDisplayname((String) parser.getOptionValue(this.databaseNameOption));
             }
-            
+
             String driver = DRIVER_DEFAULT;
-            if(parser.getOptionValue(databaseDriverOption)!=null){
-                driver = (String)parser.getOptionValue(databaseDriverOption);
-            }            
-            
-            String username =  USER_DEFAULT;
-            if(parser.getOptionValue(databaseUsernameOption)!=null){
-                username = (String)parser.getOptionValue(databaseUsernameOption);
+            if (parser.getOptionValue(this.databaseDriverOption) != null) {
+                driver = (String) parser.getOptionValue(this.databaseDriverOption);
             }
-            
-            if(parser.getOptionValue(databasePasswdOption)!=null){
-                db.setPassword((String)parser.getOptionValue(databasePasswdOption));
+
+            String username = USER_DEFAULT;
+            if (parser.getOptionValue(this.databaseUsernameOption) != null) {
+                username = (String) parser.getOptionValue(this.databaseUsernameOption);
             }
-            
-           
+
+            if (parser.getOptionValue(this.databasePasswdOption) != null) {
+                db.setPassword((String) parser.getOptionValue(this.databasePasswdOption));
+            }
+
             String maxunits = String.valueOf(MAXUNITS_DEFAULT);
-            if(parser.getOptionValue(maxUnitsOption)!=null){
-                maxunits = (String)parser.getOptionValue(maxUnitsOption);
+            if (parser.getOptionValue(this.maxUnitsOption) != null) {
+                maxunits = (String) parser.getOptionValue(this.maxUnitsOption);
             }
-            
-            
-            String pool_hard_limit  = String.valueOf(POOL_HARD_LIMIT_DEFAULT);
-            if(parser.getOptionValue(poolHardlimitOption)!=null){
-                pool_hard_limit = (String)parser.getOptionValue(poolHardlimitOption);
+
+            String pool_hard_limit = String.valueOf(POOL_HARD_LIMIT_DEFAULT);
+            if (parser.getOptionValue(this.poolHardlimitOption) != null) {
+                pool_hard_limit = (String) parser.getOptionValue(this.poolHardlimitOption);
             }
-            
+
             String pool_initial = String.valueOf(POOL_INITIAL_DEFAULT);
-            if(parser.getOptionValue(poolInitialOption)!=null){
-                pool_initial = (String)parser.getOptionValue(poolInitialOption);
+            if (parser.getOptionValue(this.poolInitialOption) != null) {
+                pool_initial = (String) parser.getOptionValue(this.poolInitialOption);
             }
-            
-            
+
             boolean ismaster = false;
             String masterid = null;
-           
+
             String pool_max = String.valueOf(POOL_MAX_DEFAULT);
-            if(parser.getOptionValue(poolMaxOption)!=null){
-                pool_max = (String)parser.getOptionValue(poolMaxOption);
+            if (parser.getOptionValue(this.poolMaxOption) != null) {
+                pool_max = (String) parser.getOptionValue(this.poolMaxOption);
             }
-            
+
             String cluster_weight = String.valueOf(CLUSTER_WEIGHT_DEFAULT);
-            if(parser.getOptionValue(databaseWeightOption)!=null){
-                cluster_weight = (String)parser.getOptionValue(databaseWeightOption);
+            if (parser.getOptionValue(this.databaseWeightOption) != null) {
+                cluster_weight = (String) parser.getOptionValue(this.databaseWeightOption);
             }
-            
-            if (parser.getOptionValue(databaseIsMasterOption)!=null) {
+
+            if (parser.getOptionValue(this.databaseIsMasterOption) != null) {
                 ismaster = true;
             }
             if (false == ismaster) {
-                if (parser.getOptionValue(databaseMasterIDOption)!=null) {
-                    masterid = (String)parser.getOptionValue(databaseMasterIDOption);
+                if (parser.getOptionValue(this.databaseMasterIDOption) != null) {
+                    masterid = (String) parser.getOptionValue(this.databaseMasterIDOption);
                 } else {
                     printError(" master id must be set if this database isn't the master");
-                    parser.printUsage(); 
+                    parser.printUsage();
                     System.exit(1);
                 }
             }
 
             // Setting the options in the dataobject
-            
+
             db.setDriver(testStringAndGetStringOrDefault(driver, DRIVER_DEFAULT));
             if (null != hostname) {
-                db.setUrl("jdbc:mysql://"+hostname+"/?useUnicode=true&characterEncoding=UTF-8&" +
-                        "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
-                        "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+                db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
             } else {
-                db.setUrl("jdbc:mysql://"+HOSTNAME_DEFAULT+"/?useUnicode=true&characterEncoding=UTF-8&" +
-                        "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" +
-                        "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+                db.setUrl("jdbc:mysql://" + HOSTNAME_DEFAULT + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
             }
-            db.setLogin(testStringAndGetStringOrDefault(username, USER_DEFAULT));            
-            
+            db.setLogin(testStringAndGetStringOrDefault(username, USER_DEFAULT));
+
             db.setMaster(ismaster);
             if (null != masterid) {
-                db.setMasterId(Integer.parseInt(masterid));                
+                db.setMasterId(Integer.parseInt(masterid));
             }
             db.setClusterWeight(testStringAndGetIntOrDefault(cluster_weight, CLUSTER_WEIGHT_DEFAULT));
             db.setMaxUnits(testStringAndGetIntOrDefault(maxunits, MAXUNITS_DEFAULT));
@@ -136,44 +131,45 @@ public class UpdateDatabase extends UtilAbstraction {
             db.setPoolInitial(testStringAndGetIntOrDefault(pool_initial, POOL_INITIAL_DEFAULT));
             db.setPoolMax(testStringAndGetIntOrDefault(pool_max, POOL_MAX_DEFAULT));
             // NEEDED ID
-            db.setId(Integer.parseInt((String)parser.getOptionValue(databaseIdOption)));
+            db.setId(Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption)));
             oxutil.changeDatabase(db, auth);
+            sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (UnknownOptionException e) {
+            sysexit(1);
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (MissingOptionException e) {
-            printError(e.getMessage());            
+            sysexit(1);
+        } catch (final MissingOptionException e) {
+            printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
 
     }
@@ -182,10 +178,10 @@ public class UpdateDatabase extends UtilAbstraction {
         new UpdateDatabase(args);
     }
 
-    private void setOptions(AdminParser parser) {
+    private void setOptions(final AdminParser parser) {
         // oxadmin,oxadmin passwd
         setDefaultCommandLineOptions(parser);
-        
+
         setDatabaseNameOption(parser, false);
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
@@ -193,16 +189,17 @@ public class UpdateDatabase extends UtilAbstraction {
         setDatabasePasswdOption(parser, false);
         setDatabaseIsMasterOption(parser, false);
         setDatabaseMasterIDOption(parser, false);
-       
-        setDatabaseWeightOption(parser,false); 
-        setDatabaseMaxUnitsOption(parser, false);        
+
+        setDatabaseWeightOption(parser, false);
+        setDatabaseMaxUnitsOption(parser, false);
         setDatabasePoolHardlimitOption(parser, false);
-        setDatabasePoolInitialOption(parser, false); 
-        setDatabasePoolMaxOption(parser, false); 
-        
-        databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database which should be changed",true, true);
-        
+        setDatabasePoolInitialOption(parser, false);
+        setDatabasePoolMaxOption(parser, false);
+
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, "The id of the database which should be changed", true, true);
     }
     
-    private Option databaseIdOption = null;
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
+    }
 }

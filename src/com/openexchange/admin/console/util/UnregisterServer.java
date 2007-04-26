@@ -19,13 +19,16 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * 
  * @author d7,cutmasta
- *
+ * 
  */
 public class UnregisterServer extends UtilAbstraction {
-    
+
     // Setting names for options
     private final static char OPT_NAME_SERVER_ID_SHORT = 'i';
+
     private final static String OPT_NAME_SERVER_ID_LONG = "id";
+
+    private Option serverIdOption = null;
 
     public UnregisterServer(final String[] args2) {
 
@@ -34,50 +37,52 @@ public class UnregisterServer extends UtilAbstraction {
         setOptions(parser);
 
         try {
-           parser.ownparse(args2);
+            parser.ownparse(args2);
 
-           final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
-           
+            final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
 
-            oxutil.unregisterServer(Integer.parseInt((String)parser.getOptionValue(serverIdOption)), auth);
+            oxutil.unregisterServer(Integer.parseInt((String) parser.getOptionValue(serverIdOption)), auth);
+            
+            sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         } catch (UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         } catch (MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
 
     }
@@ -88,11 +93,11 @@ public class UnregisterServer extends UtilAbstraction {
 
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        
-        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT,OPT_NAME_SERVER_ID_LONG,"The id of the server which should be deleted",true, true);
-                
-    }
-    
-    private Option serverIdOption = null;
 
+        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, true);
+    }
+
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
+    }
 }
