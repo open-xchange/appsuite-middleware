@@ -74,4 +74,10 @@ public class EmptyImpl extends SetupLink {
         throw new SetupLinkException(Code.NOT_IMPLEMENTED);
     }
 
+	@Override
+	protected void initialize() throws SetupLinkException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

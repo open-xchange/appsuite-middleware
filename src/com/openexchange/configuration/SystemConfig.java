@@ -203,7 +203,9 @@ public final class SystemConfig extends AbstractConfig {
         /**
          * notification.properties
          */
-        NOTIFICATION("Notification");
+        NOTIFICATION("Notification"), 
+        //FIXME
+        ConfigJumpConf("ConfigJumpConf");
         
         /**
          * Name of the property in the server.properties file.
