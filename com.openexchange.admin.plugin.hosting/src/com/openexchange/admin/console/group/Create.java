@@ -102,46 +102,46 @@ public class Create extends GroupAbstraction {
             System.out.println(oxgrp.create(ctx, grp, auth));
 
             printExtensionsError(grp);
-            System.exit(0);
+            sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         }
 
     }
@@ -152,6 +152,9 @@ public class Create extends GroupAbstraction {
         // create options for this command line tool
         setGroupNameOption(parser, true);
         setGroupDisplayNameOption(parser, true);
-
+    }
+    
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
     }
 }

@@ -122,58 +122,58 @@ public class Create extends UserAbstraction {
              */
 
             System.out.println(oxres.create(ctx, usr, access, auth));
-            System.exit(0);
+            sysexit(0);
         } catch (final ConnectException neti) {
             printError(neti.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
+            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             printrightoptions(parser);
-            System.exit(1);
+            sysexit(1);
         } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             printrightoptions(parser);
-            System.exit(1);
+            sysexit(1);
         } catch (final MissingOptionException e) {
             printError(e.getMessage());
             printrightoptions(parser);
-            System.exit(1);
+            sysexit(1);
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final IllegalArgumentException e) {
             printError(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final IllegalAccessException e) {
             printError(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvocationTargetException e) {
             printError(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         }
 
     }
@@ -188,6 +188,9 @@ public class Create extends UserAbstraction {
 
         // add optional opts
         setOptionalOptions(parser);
-
+    }
+    
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
     }
 }
