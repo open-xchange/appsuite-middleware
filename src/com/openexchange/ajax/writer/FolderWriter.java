@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
-
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.TimeZone;
@@ -90,7 +88,7 @@ import com.sun.mail.imap.ACL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class FolderWriter extends DataWriter {
+public final class FolderWriter extends DataWriter {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
 
@@ -197,7 +195,7 @@ public class FolderWriter extends DataWriter {
 		}
 	}
 
-	public final IMAPFolderFieldWriter[] getIMAPFolderFieldWriter(final int[] fields) {
+	public IMAPFolderFieldWriter[] getIMAPFolderFieldWriter(final int[] fields) {
 		IMAPFolderFieldWriter[] retval = new IMAPFolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
@@ -547,197 +545,11 @@ public class FolderWriter extends DataWriter {
 	public void writeIMAPFolderField(final int field, final MailFolderObject folder, final boolean withKey,
 			final String name, final int hasSubfolders, final String fullName, final int module) throws OXException,
 			JSONException {
-		switch (field) {
-		case FolderObject.OBJECT_ID:
-			if (withKey) {
-				jsonwriter.key(FolderFields.ID);
-			}
-			jsonwriter.value(fullName == null ? folder.getFullName() : fullName);
-			break;
-		case FolderObject.CREATED_BY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CREATED_BY);
-			}
-			jsonwriter.value(-1);
-			break;
-		case FolderObject.MODIFIED_BY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.MODIFIED_BY);
-			}
-			jsonwriter.value(-1);
-			break;
-		case FolderObject.CREATION_DATE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CREATION_DATE);
-			}
-			jsonwriter.value(0);
-			break;
-		case FolderObject.LAST_MODIFIED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.LAST_MODIFIED);
-			}
-			jsonwriter.value(0);
-			break;
-		case FolderObject.FOLDER_ID:
-			if (withKey) {
-				jsonwriter.key(FolderFields.FOLDER_ID);
-			}
-			jsonwriter.value(folder.getParentFullName());
-			break;
-		case FolderObject.FOLDER_NAME:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TITLE);
-			}
-			jsonwriter.value(name == null ? folder.getName() : name);
-			break;
-		case FolderObject.MODULE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.MODULE);
-			}
-			jsonwriter.value(getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
-			break;
-		case FolderObject.TYPE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TYPE);
-			}
-			jsonwriter.value(FolderObject.MAIL);
-			break;
-		case FolderObject.SUBFOLDERS:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUBFOLDERS);
-			}
-			if (hasSubfolders == -1) {
-				jsonwriter.value(folder.hasSubfolders());
-				break;
-			}
-			jsonwriter.value(hasSubfolders > 0);
-			break;
-		case FolderObject.OWN_RIGHTS:
-			if (withKey) {
-				jsonwriter.key(FolderFields.OWN_RIGHTS);
-			}
-			int permissionBits = 0;
-			if (folder.isRootFolder()) {
-				permissionBits = createPermissionBits(OCLPermission.CREATE_SUB_FOLDERS,
-						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-						OCLPermission.NO_PERMISSIONS, false);
-			} else {
-				final IMAPPermission imapPerm = new IMAPPermission(ctx);
-				imapPerm.setEntity(userObj.getId());
-				imapPerm.parseRights(folder.getOwnRights());
-				permissionBits = createPermissionBits(imapPerm);
-				try {
-					if (IMAPProperties.isUserFlagsEnabled()
-							&& (IMAPUtils.supportsUserDefinedFlags(folder.getImapFolder()))) {
-						permissionBits |= BIT_USER_FLAG;
-					}
-				} catch (MessagingException e) {
-					throw MailInterfaceImpl.handleMessagingException(e);
-				}
-			}
-			jsonwriter.value(permissionBits);
-			break;
-		case FolderObject.PERMISSIONS_BITS:
-			if (withKey) {
-				jsonwriter.key(FolderFields.PERMISSIONS);
-			}
-			if (!folder.containsACLs()) {
-				jsonwriter.value(JSONObject.NULL);
-				break;
-			}
-			final JSONArray ja = new JSONArray();
-			final ACL[] acls = folder.getACL();
-			for (int j = 0; j < acls.length; j++) {
-				final IMAPPermission imapPerm = new IMAPPermission(ctx);
-				boolean error = false;
-				try {
-					imapPerm.parseACL(acls[j]);
-				} catch (IMAPException e) {
-					LOG.error(e.getMessage(), e);
-					error = true;
-				} catch (LdapException e) {
-					LOG.error(e.getMessage(), e);
-					error = true;
-				}
-				if (!error) {
-					final JSONObject jo = new JSONObject();
-					jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
-					jo.put(FolderFields.ENTITY, imapPerm.getEntity());
-					jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
-					ja.put(jo);
-				}
-			}
-			jsonwriter.value(ja);
-			break;
-		case FolderObject.SUMMARY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUMMARY);
-			}
-			if (folder.isRootFolder()) {
-				jsonwriter.value("");
-				break;
-			}
-			jsonwriter.value(folder.getSummary());
-			break;
-		case FolderObject.STANDARD_FOLDER:
-			if (withKey) {
-				jsonwriter.key(FolderFields.STANDARD_FOLDER);
-			}
-			jsonwriter.value(false);
-			break;
-		case FolderObject.TOTAL:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TOTAL);
-			}
-			jsonwriter.value(folder.getTotal());
-			break;
-		case FolderObject.NEW:
-			if (withKey) {
-				jsonwriter.key(FolderFields.NEW);
-			}
-			jsonwriter.value(folder.getNew());
-			break;
-		case FolderObject.UNREAD:
-			if (withKey) {
-				jsonwriter.key(FolderFields.UNREAD);
-			}
-			jsonwriter.value(folder.getUnread());
-			break;
-		case FolderObject.DELETED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.DELETED);
-			}
-			jsonwriter.value(folder.getDeleted());
-			break;
-		case FolderObject.CAPABILITIES:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CAPABILITIES);
-			}
-			if (IMAPProperties.isCapabilitiesLoaded()) {
-				jsonwriter.value(IMAPProperties.getImapCapabilities().getCapabilities());
-				break;
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.SUBSCRIBED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUBSCRIBED);
-			}
-			if (IMAPProperties.isIgnoreSubscription()) {
-				jsonwriter.value(true);
-				break;
-			}
-			final String fn = folder.getImapFolder().getFullName();
-			if (FULLNAME_INBOX.equals(fn)) {
-				jsonwriter.value(true);
-			} else {
-				jsonwriter.value(folder.containsSubscribe() ? Boolean.valueOf(folder.isSubscribed()) : JSONObject.NULL);
-			}
-			break;
-		default:
-			break;
+		try {
+			getIMAPFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, folder, withKey, name, hasSubfolders, fullName, module);
+		} catch (MessagingException e1) {
+			throw MailInterfaceImpl.handleMessagingException(e1);
 		}
-
 	}
 
 	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo) throws Exception {
@@ -784,7 +596,7 @@ public class FolderWriter extends DataWriter {
 				FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED };
 	}
 
-	public final FolderFieldWriter[] getFolderFieldWriter(final int[] fields) {
+	public FolderFieldWriter[] getFolderFieldWriter(final int[] fields) {
 		final FolderFieldWriter[] retval = new FolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
@@ -1106,178 +918,7 @@ public class FolderWriter extends DataWriter {
 
 	public void writeOXFolderField(final int field, final FolderObject fo, final boolean withKey, final String name,
 			final int hasSubfolders) throws Exception {
-		switch (field) {
-		case FolderObject.OBJECT_ID:
-			if (!fo.containsObjectID()) {
-				if (withKey) {
-					jsonwriter.key(FolderFields.ID);
-				}
-				jsonwriter.value(fo.containsFullName() ? fo.getFullName() : JSONObject.NULL);
-				break;
-			}
-			if (withKey) {
-				jsonwriter.key(FolderFields.ID);
-			}
-			jsonwriter.value(fo.getObjectID());
-			break;
-		case FolderObject.CREATED_BY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CREATED_BY);
-			}
-			jsonwriter.value(fo.containsCreatedBy() ? Integer.valueOf(fo.getCreatedBy()) : JSONObject.NULL);
-			break;
-		case FolderObject.MODIFIED_BY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.MODIFIED_BY);
-			}
-			jsonwriter.value(fo.containsModifiedBy() ? Integer.valueOf(fo.getModifiedBy()) : JSONObject.NULL);
-			break;
-		case FolderObject.CREATION_DATE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CREATION_DATE);
-			}
-			jsonwriter.value(fo.containsCreationDate() ? Long.valueOf(addTimeZoneOffset(fo.getCreationDate().getTime()))
-					: JSONObject.NULL);
-			break;
-		case FolderObject.LAST_MODIFIED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.LAST_MODIFIED);
-			}
-			jsonwriter.value(fo.containsLastModified() ? Long.valueOf(addTimeZoneOffset(fo.getLastModified().getTime()))
-					: JSONObject.NULL);
-			break;
-		case FolderObject.FOLDER_ID:
-			if (withKey) {
-				jsonwriter.key(FolderFields.FOLDER_ID);
-			}
-			jsonwriter.value(fo.containsParentFolderID() ? Integer.valueOf(fo.getParentFolderID()) : JSONObject.NULL);
-			break;
-		case FolderObject.FOLDER_NAME:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TITLE);
-			}
-			jsonwriter.value(name == null ? (fo.containsFolderName() ? fo.getFolderName() : JSONObject.NULL) : name);
-			break;
-		case FolderObject.MODULE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.MODULE);
-			}
-			jsonwriter.value(fo.containsModule() ? getModuleString(fo.getModule(), fo.getObjectID()) : JSONObject.NULL);
-			break;
-		case FolderObject.TYPE:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TYPE);
-			}
-			jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(userObj.getId())) : JSONObject.NULL);
-			break;
-		case FolderObject.SUBFOLDERS:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUBFOLDERS);
-			}
-			jsonwriter.value(hasSubfolders == -1 ? (fo.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(userObj,
-					userConfig, ctx)) : JSONObject.NULL) : Boolean.valueOf(hasSubfolders > 0));
-			break;
-		case FolderObject.OWN_RIGHTS:
-			if (!fo.containsPermissions()) {
-				try {
-					fo.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx, null));
-					if (FolderCacheManager.isEnabled()) {
-						FolderCacheManager.getInstance().putFolderObject(fo, ctx);
-					}
-				} catch (SQLException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY, "own_rights",
-							getFolderName(fo), Integer.valueOf(ctx.getContextId()));
-				} catch (DBPoolingException e) {
-					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY, "own_rights",
-							getFolderName(fo), Integer.valueOf(ctx.getContextId()));
-				}
-			}
-			if (withKey) {
-				jsonwriter.key(FolderFields.OWN_RIGHTS);
-			}
-			final OCLPermission effectivePerm = fo.getEffectiveUserPermission(userObj.getId(), userConfig);
-			jsonwriter.value(createPermissionBits(effectivePerm.getFolderPermission(), effectivePerm
-					.getReadPermission(), effectivePerm.getWritePermission(), effectivePerm.getDeletePermission(),
-					effectivePerm.isFolderAdmin()));
-			break;
-		case FolderObject.PERMISSIONS_BITS:
-			if (!fo.containsPermissions()) {
-				try {
-					fo.setPermissionsAsArray(FolderObject.getFolderPermissions(fo.getObjectID(), ctx, null));
-					if (FolderCacheManager.isEnabled()) {
-						FolderCacheManager.getInstance().putFolderObject(fo, ctx);
-					}
-				} catch (SQLException e) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.PERMISSIONS);
-				} catch (DBPoolingException e) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.PERMISSIONS);
-				}
-			}
-			if (withKey) {
-				jsonwriter.key(FolderFields.PERMISSIONS);
-			}
-			final JSONArray ja = new JSONArray();
-			final OCLPermission[] perms = fo.getPermissionsAsArray();
-			for (int i = 0; i < perms.length; i++) {
-				final JSONObject jo = new JSONObject();
-				jo.put(FolderFields.BITS, createPermissionBits(perms[i]));
-				jo.put(FolderFields.ENTITY, perms[i].getEntity());
-				jo.put(FolderFields.GROUP, perms[i].isGroupPermission());
-				ja.put(jo);
-			}
-			jsonwriter.value(ja);
-			break;
-		case FolderObject.SUMMARY:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUMMARY);
-			}
-			jsonwriter.value("");
-			break;
-		case FolderObject.STANDARD_FOLDER:
-			if (withKey) {
-				jsonwriter.key(FolderFields.STANDARD_FOLDER);
-			}
-			jsonwriter.value(fo.isDefaultFolder());
-			break;
-		case FolderObject.TOTAL:
-			if (withKey) {
-				jsonwriter.key(FolderFields.TOTAL);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.NEW:
-			if (withKey) {
-				jsonwriter.key(FolderFields.NEW);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.UNREAD:
-			if (withKey) {
-				jsonwriter.key(FolderFields.UNREAD);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.DELETED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.DELETED);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.CAPABILITIES:
-			if (withKey) {
-				jsonwriter.key(FolderFields.CAPABILITIES);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		case FolderObject.SUBSCRIBED:
-			if (withKey) {
-				jsonwriter.key(FolderFields.SUBSCRIBED);
-			}
-			jsonwriter.value(JSONObject.NULL);
-			break;
-		default:
-			break;
-		}
+		getFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, fo, withKey, name, hasSubfolders);
 	}
 	
 	private static int createPermissionBits(final OCLPermission perm) throws OXException {
