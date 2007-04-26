@@ -206,7 +206,7 @@ public class AlwaysTest extends AbstractAJAXTest {
         FolderObject defaultIMAPFolder = null;
         for (FolderObject fo : list) {
             if (fo.containsFullName() && fo.getFullName().equals(
-                MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+                MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
                 defaultIMAPFolder = fo;
                 break;
             }

@@ -1017,7 +1017,7 @@ public class FolderTest extends AbstractAJAXTest {
 			FolderObject defaultIMAPFolder = null;
 			for (int i = 0; i < l.size(); i++) {
 				FolderObject fo = l.get(i);
-				if (fo.containsFullName() && fo.getFullName().equals(MailFolderObject.DEFAULT_IMAP_FOLDER)) {
+				if (fo.containsFullName() && fo.getFullName().equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 					defaultIMAPFolder = fo;
 					break;
 				}
