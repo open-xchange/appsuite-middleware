@@ -53,6 +53,7 @@
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchFileLoggingProperties"/>
+        <antcall target="patchScriptConf"/>
         <antcall target="patchSessiondProperties"/>
         <antcall target="patchSystemProperties"/>
     </target>
@@ -62,6 +63,14 @@
             file="${patch.conf.dir}/file-logging.properties.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/file-logging.properties">
             <replacefilter token="@serverlogfile@" value="${log.install.dir}/open-xchange.log"/>
+        </replace>
+    </target>
+
+    <target name="patchScriptConf">
+        <move tofile="${patch.conf.dir}/ox-scriptconf.sh" file="${patch.conf.dir}/ox-scriptconf.sh.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/ox-scriptconf.sh">
+            <replacefilter token="@systemproperties@" value="${conf.subst.patch}/system.properties"/>
+            <replacefilter token="@loggingproperties@" value= "${conf.subst.patch}/file-logging.properties"/>
         </replace>
     </target>
 
