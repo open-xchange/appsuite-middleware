@@ -28,7 +28,7 @@ ALLCLASSES=$(for jar in @libdirpath@/*.jar; do
     echo -n "${jar}:"
     done)
 
-if [ -d /opt/open-xchange/etc/groupware/log4j ]; then
+if [ -d @oxgroupwaresysconfdir@/log4j ]; then
     ALLCLASSES="${ALLCLASSES}@oxgroupwaresysconfdir@/log4j:"
 fi
 
