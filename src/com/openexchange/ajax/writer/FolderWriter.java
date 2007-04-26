@@ -89,12 +89,14 @@ import com.sun.mail.imap.ACL;
  * 
  */
 public final class FolderWriter extends DataWriter {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 	
 	private static final String STR_EMPTY = "";
+	
+	private static final String STR_UNKNOWN_COLUMN = "Unknown column";
 	
 	private static final String FULLNAME_INBOX = "INBOX";
 	
@@ -163,7 +165,7 @@ public final class FolderWriter extends DataWriter {
 		try {
 			jsonwriter.object();
 			if (fields == null) {
-				fields = getAllFolderFields();
+				fields = ALL_FLD_FIELDS;
 			}
 			for (int i = 0; i < fields.length; i++) {
 				writeIMAPFolderField(fields[i], folder, true, name, hasSubfolders, fullName, -1);
@@ -532,7 +534,7 @@ public final class FolderWriter extends DataWriter {
 							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
 							final int module) throws JSONException {
 						if (withKey) {
-							jsonwriter.key("Unknown column");
+							jsonwriter.key(STR_UNKNOWN_COLUMN);
 						}
 						jsonwriter.value(JSONObject.NULL);
 					}
@@ -561,7 +563,7 @@ public final class FolderWriter extends DataWriter {
 		try {
 			jsonwriter.object();
 			if (fields == null) {
-				fields = getAllFolderFields();
+				fields = ALL_FLD_FIELDS;
 			}
 			for (int i = 0; i < fields.length; i++) {
 				writeOXFolderField(fields[i], fo, true, name, hasSubfolders);
@@ -586,14 +588,18 @@ public final class FolderWriter extends DataWriter {
 			jsonwriter.endArray();
 		}
 	}
+	
+	private static final int[] ALL_FLD_FIELDS = { FolderObject.OBJECT_ID, FolderObject.CREATED_BY,
+			FolderObject.MODIFIED_BY, FolderObject.CREATION_DATE, FolderObject.LAST_MODIFIED, FolderObject.FOLDER_ID,
+			FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS,
+			FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER,
+			FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES,
+			FolderObject.SUBSCRIBED };
 
 	public static int[] getAllFolderFields() {
-		return new int[] { FolderObject.OBJECT_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY,
-				FolderObject.CREATION_DATE, FolderObject.LAST_MODIFIED, FolderObject.FOLDER_ID,
-				FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS,
-				FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY,
-				FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD,
-				FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED };
+		final int[] retval = new int[ALL_FLD_FIELDS.length];
+		System.arraycopy(ALL_FLD_FIELDS, 0, retval, 0, retval.length);
+		return retval;
 	}
 
 	public FolderFieldWriter[] getFolderFieldWriter(final int[] fields) {
@@ -906,7 +912,7 @@ public final class FolderWriter extends DataWriter {
 					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
 							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
-							jsonwriter.key("Unknown column");
+							jsonwriter.key(STR_UNKNOWN_COLUMN);
 						}
 						jsonwriter.value(JSONObject.NULL);
 					}
