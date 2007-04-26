@@ -72,7 +72,6 @@ import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1268,10 +1267,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             newSchemaCreated = true;
                             fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                         } else {
-                            OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-                            if( oxt.schemaBeingLockedOrNeedsUpdate(db.getId(), schema_name) ) {
-                                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-                            }
                             db.setScheme(schema_name);
                             fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
                         }
@@ -1713,18 +1708,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private String getNextUnfilledSchemaFromDB(final int pool_id, final Connection con) throws SQLException {
+    private String getNextUnfilledSchemaFromDB(final int pool_id, final Connection con) throws SQLException, StorageException {
         PreparedStatement pstm = null;
         try {
             pstm = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id = ? GROUP BY db_schema");
             pstm.setInt(1, pool_id);
             final ResultSet rs = pstm.executeQuery();
             String ret = null;
+            OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
 
             while (rs.next()) {
                 final String schema = rs.getString("db_schema");
                 final int count = rs.getInt("COUNT(db_schema)");
                 if (count < CONTEXTS_PER_SCHEMA) {
+                    if( oxt.schemaBeingLockedOrNeedsUpdate(pool_id, schema) ) {
+                        log.debug("schema " + schema + "is locked or updated, trying next one");
+                        continue;
+                    }
                     log.debug("count =" + count + " of schema " + schema + ", using it for next context");
                     ret = schema;
                     break;
