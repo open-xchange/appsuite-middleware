@@ -331,7 +331,7 @@ public class ContactTest extends AbstractAJAXTest {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("Meier");
 		contactObj.setGivenName("Herbert");
-		contactObj.setDisplayName(displayname);
+		//contactObj.setDisplayName(displayname);
 		contactObj.setStreetBusiness("Franz-Meier Weg 17");
 		contactObj.setCityBusiness("Test Stadt");
 		contactObj.setStateBusiness("NRW");
