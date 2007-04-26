@@ -99,6 +99,10 @@ public enum Format {
 			return VCARD;
 		if(mimeType.equals("text/directory"))
 			return VCARD;
+		if(mimeType.equals("text/calendar"))
+			return VCARD;
+		if(mimeType.equals("text/x-vcalendar"))
+			return VCARD;
 		return null;
 	}
 	
