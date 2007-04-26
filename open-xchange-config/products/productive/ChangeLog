@@ -1,3 +1,7 @@
+* 2007-04-26 - marcus.klein@open-xchange.com
+
+  - Added direct link URL.
+
 * 2007-04-23 - marcus.klein@open-xchange.com
 
   - Changed log level from FINE to WARNING of database pooling component.
