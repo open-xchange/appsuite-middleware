@@ -225,6 +225,47 @@ public class NewTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
+	public void testDailyFullTimeRecurrenceWithOccurrences() throws Exception {
+		Date modified = new Date();
+		
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone("UTC"));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		int occurrences = 2;
+		
+		Date startDate = c.getTime();
+		Date endDate = new Date(c.getTimeInMillis() + dayInMillis);
+		
+		Date until = new Date(c.getTimeInMillis() + ((occurrences-1)*dayInMillis));
+		
+		AppointmentObject appointmentObj = new AppointmentObject();
+		appointmentObj.setTitle("testDailyFullTimeRecurrenceWithOccurrences");
+		appointmentObj.setStartDate(startDate);
+		appointmentObj.setEndDate(endDate);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setParentFolderID(appointmentFolderId);
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setFullTime(true);
+		appointmentObj.setOccurrence(occurrences);
+		
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		appointmentObj.setObjectID(objectId);
+		appointmentObj.setUntil(until);
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		compareObject(appointmentObj, loadAppointment);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}
+	
 	public void testAppointmentInPrivateFlagInPublicFolder() throws Exception {
 		Date modified = new Date();
 		

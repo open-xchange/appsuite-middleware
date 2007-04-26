@@ -9,6 +9,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.groupware.ldap.Group;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
@@ -27,6 +28,12 @@ public class GroupTest extends AbstractAJAXTest {
 		assertTrue("group array size > 0", groups.length > 0);
 	}
 
+	public void testRealSearch() throws Throwable {
+		Group[] groups = searchGroup(getWebConversation(), "*l*", PROTOCOL
+				+ getHostName(), getSessionId());
+		assertNotNull(groups);
+	}
+	
 	public void testList() throws Exception {
 		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
