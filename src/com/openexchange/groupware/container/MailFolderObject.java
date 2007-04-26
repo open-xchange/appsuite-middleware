@@ -97,6 +97,8 @@ public class MailFolderObject {
 	
 	private ACL[] acls;
 	
+	private IMAPPermission[] imapPermissions;
+	
 	private boolean b_acls;
 	
 	private boolean exists;
@@ -295,6 +297,7 @@ public class MailFolderObject {
 		this.acls = new ACL[acls.length];
 		System.arraycopy(acls, 0, this.acls, 0, acls.length);
 		b_acls = true;
+		imapPermissions = null;
 	}
 	
 	public void addACL(final ACL acl) {
@@ -307,26 +310,30 @@ public class MailFolderObject {
 		this.acls = new ACL[tmp.length + 1];
 		System.arraycopy(tmp, 0, acls, 0, tmp.length);
 		acls[acls.length - 1] = acl;
+		imapPermissions = null;
 	}
 	
 	public void removeACL() {
 		this.acls = null;
 		b_acls = false;
+		imapPermissions = null;
 	}
 	
 	public IMAPPermission[] getIMAPPermissions(final Context ctx) throws IMAPException, LdapException {
 		if (!b_acls) {
 			return null;
 		}
-		final IMAPPermission[] retval = new IMAPPermission[acls.length];
-		final String fn = imapFolder == null ? null : imapFolder.getFullName();
-		for (int i = 0; i < retval.length; i++) {
-			final IMAPPermission ip = new IMAPPermission(ctx);
-			ip.setFolderFullname(fn);
-			ip.parseACL(acls[i]);
-			retval[i] = ip;
+		if (imapPermissions == null) {
+			imapPermissions = new IMAPPermission[acls.length];
+			final String fn = imapFolder == null ? null : imapFolder.getFullName();
+			for (int i = 0; i < imapPermissions.length; i++) {
+				final IMAPPermission ip = new IMAPPermission(ctx);
+				ip.setFolderFullname(fn);
+				ip.parseACL(acls[i]);
+				imapPermissions[i] = ip;
+			}
 		}
-		return retval;
+		return imapPermissions;
 	}
 	
 	public boolean exists() {
