@@ -14,65 +14,67 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class EnableAll extends ContextAbtraction {    
-      
-    
- public EnableAll(final String[] args2) {
-        
-        AdminParser parser = new AdminParser("enableall");
+public class EnableAll extends ContextAbtraction {
+
+    public EnableAll(final String[] args2) {
+
+        final AdminParser parser = new AdminParser("enableall");
 
         setDefaultCommandLineOptions(parser);
         try {
-            
-            parser.ownparse(args2);            
-                        
-            final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
-                  
+
+            parser.ownparse(args2);
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);            
-            
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(OXContextInterface.RMI_NAME);
+
             oxres.enableAll(auth);
-            
-        }catch(final java.rmi.ConnectException neti){
-            printError(neti.getMessage());            
-            System.exit(1);
-        }catch(final java.lang.NumberFormatException num){
+
+            sysexit(0);
+        } catch (final java.rmi.ConnectException neti) {
+            printError(neti.getMessage());
+            sysexit(1);
+        } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
-        } catch (final MalformedURLException e) {            
+            sysexit(1);
+        } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (final RemoteException e) {            
+            sysexit(1);
+        } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
-        } catch (final StorageException e) {            
+            sysexit(1);
+        } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (UnknownOptionException e) {
+            sysexit(1);
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (MissingOptionException e) {
+            sysexit(1);
+        } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
 
     }
 
-    public static void main(final String args[]){
+    public static void main(final String args[]) {
         new EnableAll(args);
     }
-    
 
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
+    }
 }

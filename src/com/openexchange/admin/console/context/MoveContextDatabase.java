@@ -21,96 +21,98 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class MoveContextDatabase extends ContextAbtraction {    
-   
-    private final static char OPT_DATABASE_SHORT = 'd';
-    private final static String OPT_DATABASE_LONG= "database";  
-  
-    
- public MoveContextDatabase(final String[] args2) {
-        
-     AdminParser parser = new AdminParser("movecontext");
-     setOptions(parser);
+public class MoveContextDatabase extends ContextAbtraction {
 
-     try {
-         
-           parser.ownparse(args2);
-            final Context ctx = new Context();            
-            
-            ctx.setID(Integer.parseInt((String)parser.getOptionValue(contextIDOption)));            
-            
-            final Credentials auth = new Credentials((String)parser.getOptionValue(adminUserOption),(String)parser.getOptionValue(adminPassOption));
-                     
+    private final static char OPT_DATABASE_SHORT = 'd';
+
+    private final static String OPT_DATABASE_LONG = "database";
+
+    protected Option targetDatabaseIDOption = null;
+
+    public MoveContextDatabase(final String[] args2) {
+
+        final AdminParser parser = new AdminParser("movecontext");
+        setOptions(parser);
+
+        try {
+
+            parser.ownparse(args2);
+            final Context ctx = new Context();
+
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextIDOption)));
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface)Naming.lookup(OXContextInterface.RMI_NAME);
-            
-            final Database db = new Database(Integer.parseInt((String)parser.getOptionValue(targetDatabaseIDOption)));
-            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String)parser.getOptionValue(maintenanceReasonIDOption))); 
-            
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(OXContextInterface.RMI_NAME);
+
+            final Database db = new Database(Integer.parseInt((String) parser.getOptionValue(this.targetDatabaseIDOption)));
+            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+
             oxres.moveContextDatabase(ctx, db, mr, auth);
-            
-        }catch(final java.rmi.ConnectException neti){
-            printError(neti.getMessage());      
-            System.exit(1);
-        }catch(final java.lang.NumberFormatException num){
+
+            sysexit(0);
+        } catch (final java.rmi.ConnectException neti) {
+            printError(neti.getMessage());
+            sysexit(1);
+        } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
-            System.exit(1);
-        } catch (final MalformedURLException e) {            
+            sysexit(1);
+        } catch (final MalformedURLException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (final RemoteException e) {            
+            sysexit(1);
+        } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
-            System.exit(1);
-        } catch (final StorageException e) {            
+            sysexit(1);
+        } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (final InvalidDataException e) {            
+            sysexit(1);
+        } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
+            sysexit(1);
         } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (DatabaseUpdateException e) {
+            sysexit(1);
+        } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
-            System.exit(1);
-        } catch (IllegalOptionValueException e) {            
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (UnknownOptionException e) {
+            sysexit(1);
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            System.exit(1);
-        } catch (MissingOptionException e) {
+            sysexit(1);
+        } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            System.exit(1);
+            sysexit(1);
         }
 
     }
 
-    public static void main(final String args[]){
+    public static void main(final String args[]) {
         new MoveContextDatabase(args);
     }
-    
-    private void setOptions(AdminParser parser) {
-        
+
+    private void setOptions(final AdminParser parser) {
+
         setDefaultCommandLineOptions(parser);
         setContextIDOption(parser, true);
         setMaintenanceReasodIDOption(parser, true);
-        
-        targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT,OPT_DATABASE_LONG,"Target database id",true, true);
-         
-    }
-    
-    protected Option targetDatabaseIDOption = null;
-    
-    
 
+        this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, true);
+
+    }
+
+    protected void sysexit(final int exitcode) {
+        System.exit(exitcode);
+    }
 }

@@ -19,38 +19,37 @@ public abstract class ContextAbtraction extends UserAbstraction {
     private final static char OPT_QUOTA_SHORT = 'q';
     private final static String OPT_QUOTA_LONG = "quota";
     
-    
-    protected void setSearchOption(AdminParser parser,boolean required){
-        searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, required);
+    protected Option searchOption = null;
+    protected Option commonIDOption = null;
+    protected Option contextIDOption = null;
+    protected Option maintenanceReasonIDOption = null;
+    protected Option filestoreContextQuotaOption = null;
+
+    protected void setSearchOption(final AdminParser parser,final boolean required){
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, required);
     }
     
-    protected void setCommonIDOption(AdminParser parser,boolean required ){
-        commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, required);
+    protected void setCommonIDOption(final AdminParser parser,final boolean required ){
+        this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, required);
     }
     
-    protected void setContextIDOption(AdminParser parser,boolean required ){
-        contextIDOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_SHORT,OPT_NAME_CONTEXT_LONG,OPT_NAME_CONTEXT_DESCRIPTION,true, required);
+    protected void setContextIDOption(final AdminParser parser,final boolean required ){
+        this.contextIDOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_SHORT,OPT_NAME_CONTEXT_LONG,OPT_NAME_CONTEXT_DESCRIPTION,true, required);
     }
     
-    protected void setDefaultCommandLineOptions(AdminParser parser){          
+    @Override
+    protected void setDefaultCommandLineOptions(final AdminParser parser){          
         
         getAdminUserOption(parser);
         getAdminPassOption(parser);        
         
     }
     
-    protected void setMaintenanceReasodIDOption(AdminParser parser,boolean required){
-        maintenanceReasonIDOption = setShortLongOpt(parser, OPT_REASON_SHORT,OPT_REASON_LONG,"Maintenance reason id",true, required);
+    protected void setMaintenanceReasodIDOption(final AdminParser parser,final boolean required){
+        this.maintenanceReasonIDOption = setShortLongOpt(parser, OPT_REASON_SHORT,OPT_REASON_LONG,"Maintenance reason id",true, required);
     }
     
-    protected void setContextQuotaOption(AdminParser parser,boolean required ){
-        filestoreContextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,"How much quota the context can use for filestore",true, required);
+    protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
+        this.filestoreContextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,"How much quota the context can use for filestore",true, required);
     }
-    
-    protected Option searchOption = null;
-    protected Option commonIDOption = null;
-    protected Option contextIDOption = null;
-    protected Option maintenanceReasonIDOption = null;
-    protected Option filestoreContextQuotaOption = null;
-    
 }
