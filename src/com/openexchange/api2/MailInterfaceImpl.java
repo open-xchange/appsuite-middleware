@@ -3466,7 +3466,7 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					final long[] res = IMAPUtils.copyUID(imapCon.getImapFolder(), msgUIDs, destFolder, false);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					if (IMAPProperties.isSpamEnabled()) {
+					if (usm.isSpamEnabled()) {
 						/*
 						 * Spam related action
 						 */
