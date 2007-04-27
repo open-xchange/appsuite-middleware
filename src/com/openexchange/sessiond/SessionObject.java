@@ -127,6 +127,24 @@ public class SessionObject {
 			modLock.unlock();
 		}
 	}
+	
+	/**
+	 * Determines if a mail folder opened in read-write mode is already marked
+	 * as locked
+	 * 
+	 * @param fullname -
+	 *            folder's full name
+	 * @return <code>true</code> if already locked; otherwise
+	 *         <code>false</code>
+	 */
+	public final boolean isFolderLocked(final String fullname) {
+		modLock.lock();
+		try {
+			return mailFolderLocks.contains(fullname);
+		} finally {
+			modLock.unlock();
+		}
+	}
 
 	/**
 	 * Remove a mail folder opened in read-write mode from locked set
