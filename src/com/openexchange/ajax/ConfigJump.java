@@ -95,9 +95,18 @@ public class ConfigJump extends SessionServlet {
         final Response response = new Response();
         try {
             final SetupLink setupLink = SetupLink.getInstance();
+            //protocol, host, port, userId, password
+            String protocol = "http";
+            if( req.isSecure() ) {
+                protocol = "https";
+            }
             final URL url = setupLink.getLink(
-                sessionObj.getContext().getContextId(),
-                sessionObj.getUserlogin(), sessionObj.getPassword());
+                    sessionObj.getContext().getContextId(),
+                    sessionObj.getUserlogin(),
+                    sessionObj.getPassword(),
+                    protocol,
+                    req.getServerName(),
+                    req.getServerPort());
             response.setData(url);
         } catch (SetupLinkException e) {
             LOG.error(e.getMessage(), e);

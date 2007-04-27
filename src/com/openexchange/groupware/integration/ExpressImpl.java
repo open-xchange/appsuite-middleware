@@ -54,11 +54,13 @@ import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -101,15 +103,27 @@ public class ExpressImpl extends SetupLink {
         }
         final String userId = (String) values[1];
         final String password = (String) values[2];
-        final PostMethod post = new PostMethod(url);
-        final NameValuePair[] postValues = new NameValuePair[] {
-            new NameValuePair("loginUsername", userId),
-            new NameValuePair("loginPassword", password)
-        };
-        post.setRequestBody(postValues);
+        final String protocol = (String) values[3];
+        final String host = (String) values[4];
+        final int port = (Integer) values[5];
+        URL newUrlInst;
         try {
+            final URL urlInst = new URL(url);
+            newUrlInst = new URL(protocol, host, port, urlInst.getPath());
+        } catch (MalformedURLException e1) {
+            throw new SetupLinkException(SetupLinkException.Code.MALFORMED_URL,
+                    e1);
+        } 
+        HttpClient httpClient = new HttpClient();
+        final PostMethod post = new PostMethod(url);
+        post.addParameter(new NameValuePair("loginUsername", 
+                userId));
+        post.addParameter(new NameValuePair("loginPassword", 
+                password));
+        try {
+            httpClient.executeMethod(post);
             final String session = post.getResponseBodyAsString();
-            return new URL(url + "?JSESSIONID=" + session);
+            return new URL(newUrlInst.toExternalForm() + "?JSESSIONID=" + session);
         } catch (IOException e) {
             throw new SetupLinkException(SetupLinkException.Code.COMMUNICATION,
                 e);
