@@ -578,7 +578,7 @@ public class MailInterfaceImpl implements MailInterface {
 				final String[] stdFolderNames = new String[IMAPProperties.isSpamEnabled() ? 6 : 4];
 				if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
-						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Drafts");
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_DRAFTS);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
 					}
 					stdFolderNames[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
@@ -587,7 +587,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				if (usm.getStdSentName() == null || usm.getStdSentName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
-						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Sent");
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SENT);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
 					}
 					stdFolderNames[INDEX_SENT] = UserSettingMail.STD_SENT;
@@ -596,7 +596,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				if (usm.getStdSpamName() == null || usm.getStdSpamName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
-						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Spam");
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_SPAM);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
 					}
 					stdFolderNames[INDEX_SPAM] = UserSettingMail.STD_SPAM;
@@ -605,7 +605,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				if (usm.getStdTrashName() == null || usm.getStdTrashName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
-						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "Trash");
+						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, UserSettingMail.STD_TRASH);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
 					}
 					stdFolderNames[INDEX_TRASH] = UserSettingMail.STD_TRASH;
@@ -616,7 +616,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
 						if (LOG.isWarnEnabled()) {
 							final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME,
-									"Confirmed Spam");
+									UserSettingMail.STD_CONFIRMED_SPAM);
 							LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
 						}
 						stdFolderNames[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
@@ -626,7 +626,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (usm.getConfirmedHam() == null || usm.getConfirmedHam().length() == 0) {
 						if (LOG.isWarnEnabled()) {
 							final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME,
-									"Confirmed Ham");
+									UserSettingMail.STD_CONFIRMED_HAM);
 							LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
 						}
 						stdFolderNames[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
