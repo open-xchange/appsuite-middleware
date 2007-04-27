@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.configuration;
 
 import com.openexchange.configuration.ConfigurationException.Code;
@@ -193,20 +191,22 @@ public final class SystemConfig extends AbstractConfig {
          */
         CONTACT("Contact"),
         /**
-         * infostore.properties
+         * infostore.properties.
          */
-        INFOSTORE("Infostore"), 
+        INFOSTORE("Infostore"),
         /**
-         * attachment.properties
+         * attachment.properties.
          */
         ATTACHMENT("Attachment"),
         /**
-         * notification.properties
+         * notification.properties.
          */
-        NOTIFICATION("Notification"), 
-        //FIXME
+        NOTIFICATION("Notification"),
+        /**
+         * configjump.properties.
+         */
         ConfigJumpConf("ConfigJumpConf");
-        
+
         /**
          * Name of the property in the server.properties file.
          */

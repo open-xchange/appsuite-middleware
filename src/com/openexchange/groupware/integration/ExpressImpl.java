@@ -103,13 +103,13 @@ public class ExpressImpl extends SetupLink {
         final String password = (String) values[2];
         final PostMethod post = new PostMethod(url);
         final NameValuePair[] postValues = new NameValuePair[] {
-            new NameValuePair("user", userId),
-            new NameValuePair("password", password)
+            new NameValuePair("loginUsername", userId),
+            new NameValuePair("loginPassword", password)
         };
         post.setRequestBody(postValues);
         try {
             final String session = post.getResponseBodyAsString();
-            return new URL(url + "?session=" + session);
+            return new URL(url + "?JSESSIONID=" + session);
         } catch (IOException e) {
             throw new SetupLinkException(SetupLinkException.Code.COMMUNICATION,
                 e);
