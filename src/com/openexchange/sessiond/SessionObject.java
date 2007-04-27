@@ -261,11 +261,11 @@ public class SessionObject {
 	}
 	
 	public Date getTimestamp() {
-		return ((Date) timestamp);
+		return timestamp;
 	}
 	
 	public Date getCreationtime() {
-		return ((Date) creationtime);
+		return creationtime;
 	}
 	
 	public Context getContext() {
