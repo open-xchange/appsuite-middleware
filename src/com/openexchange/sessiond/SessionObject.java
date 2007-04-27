@@ -116,11 +116,13 @@ public class SessionObject {
 	 * 
 	 * @param fullname -
 	 *            folder's full name
+	 * @return <code>true</code> if set does not already contain given
+	 *         fullname; otherwise <code>false</code>
 	 */
-	public final void addFolderLock(final String fullname) {
+	public final boolean addFolderLock(final String fullname) {
 		modLock.lock();
 		try {
-			mailFolderLocks.add(fullname);
+			return mailFolderLocks.add(fullname);
 		} finally {
 			modLock.unlock();
 		}
