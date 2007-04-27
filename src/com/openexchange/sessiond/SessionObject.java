@@ -56,6 +56,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Session;
 
@@ -104,6 +106,42 @@ public class SessionObject {
 	private UserConfiguration userConfig;
 	
 	private Session mailSession;
+	
+	private final Set<String> mailFolderLocks = new HashSet<String>();
+
+	private final Lock modLock = new ReentrantLock();
+
+	/**
+	 * Add a mail folder opened in read-write mode to locked set
+	 * 
+	 * @param fullname -
+	 *            folder's full name
+	 */
+	public final void addFolderLock(final String fullname) {
+		modLock.lock();
+		try {
+			mailFolderLocks.add(fullname);
+		} finally {
+			modLock.unlock();
+		}
+	}
+
+	/**
+	 * Remove a mail folder opened in read-write mode from locked set
+	 * 
+	 * @param fullname -
+	 *            folder's full name
+	 * @return <code>true</code> if removes succeeds; otherwise
+	 *         <code>false</code>
+	 */
+	public final boolean removeFolderLock(final String fullname) {
+		modLock.lock();
+		try {
+			return mailFolderLocks.remove(fullname);
+		} finally {
+			modLock.unlock();
+		}
+	}
 	
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
