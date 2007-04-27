@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -84,7 +85,7 @@ public class ServletRequestWrapper implements ServletRequest {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ServletRequestWrapper.class);
 
-	private static final HashSet<String> singleValueHeaders = new HashSet<String>();
+	private static final Set<String> singleValueHeaders = new HashSet<String>();
 
 	public static final String CONTENT_TYPE = "content-type";
 

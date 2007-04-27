@@ -3,6 +3,8 @@
  - Cope/move of messages made much more performant
  - Adding a warning if UploadQuoteChecker falls back to global server
    property 'MAX_UPLOAD_SIZE'
+ - Error if source folder is equal to destination folder on message move
+   operation
 
 * 2007-04-26 - marcus.klein@open-xchange.com
 

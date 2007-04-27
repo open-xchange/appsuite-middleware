@@ -533,7 +533,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s
 		 */
-		MOVE_PARTIALLY_COMPLETED("Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s", Category.INTERNAL_ERROR, 97);
+		MOVE_PARTIALLY_COMPLETED("Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s", Category.INTERNAL_ERROR, 97),
+		/**
+		 * Message move aborted for user %s. Source and destination folder are equal: %s
+		 */
+		NO_EQUAL_MOVE("Message move aborted for user %s. Source and destination folder are equal: %s", Category.USER_INPUT, 98);
 
 		/**
 		 * Message of the exception.

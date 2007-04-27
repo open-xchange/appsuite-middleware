@@ -3422,6 +3422,8 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "source");
 			} else if (destFolderArg == null || destFolderArg.length() == 0) {
 				throw new OXMailException(MailCode.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "target");
+			} else if (sourceFolderArg.equals(destFolderArg) && move) {
+				throw new OXMailException(MailCode.NO_EQUAL_MOVE, getUserName(), prepareMailFolderParam(sourceFolderArg));
 			}
 			init();
 			final String sourceFolder = prepareMailFolderParam(sourceFolderArg);

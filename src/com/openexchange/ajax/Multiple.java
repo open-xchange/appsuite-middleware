@@ -439,7 +439,7 @@ public class Multiple extends SessionServlet {
 				retval = taskRequest.action(action, jsonObj);
 				response.setTimestamp(taskRequest.getTimestamp());
 				if (retval != -1) {
-					response.setData(retval);
+					response.setData(Integer.valueOf(retval));
 				} else if (sw.toString().equals(STR_EMPTY)) {
 					response.setData(STR_EMPTY);
 				} else {
