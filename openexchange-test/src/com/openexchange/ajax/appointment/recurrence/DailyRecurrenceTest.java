@@ -16,7 +16,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
 	}
 	
-	public void dummyTest() {
+	public void testDummy() {
 		
 	}
 	
