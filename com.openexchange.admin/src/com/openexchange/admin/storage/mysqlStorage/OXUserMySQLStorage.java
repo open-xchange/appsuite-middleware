@@ -1376,6 +1376,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                     int bits = rs3.getInt("bits");
                     if( (bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED ) {
                         newuser.setSpam_filter_enabled(true);
+                    } else {
+                        newuser.setSpam_filter_enabled(false);
                     }
                 }
                 rs3.close();
