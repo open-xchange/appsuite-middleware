@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.rmi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.auth.AuthenticationFactory;
 import com.openexchange.admin.auth.AuthenticationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -61,6 +64,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author cutmasta
  */
 public class BasicAuthenticator {
+    
+    private final static Log log = LogFactory.getLog (BasicAuthenticator.class);
     
     private AuthenticationInterface sqlAuth = null;
     private AuthenticationInterface fileAuth = null;
@@ -79,7 +84,9 @@ public class BasicAuthenticator {
      */
     public void doAuthentication(Credentials authdata) throws InvalidCredentialsException{
         if(!fileAuth.authenticate(authdata)){
-            throw new InvalidCredentialsException("Authentication failed");
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
+            log.error("Master authentication: ", invalidCredentialsException);
+            throw invalidCredentialsException;
         }
     }
     
@@ -93,7 +100,9 @@ public class BasicAuthenticator {
      */
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
         if(!sqlAuth.authenticate(authdata,ctx)){
-            throw new InvalidCredentialsException("Authentication failed");
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
+            log.error("Admin authentication: ", invalidCredentialsException);
+            throw invalidCredentialsException;
         }
     }
     
@@ -106,7 +115,9 @@ public class BasicAuthenticator {
      */
     public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
         if(!sqlAuth.authenticateUser(authdata,ctx)){
-            throw new InvalidCredentialsException("Authentication failed");
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
+            log.error("User authentication: ", invalidCredentialsException);
+            throw invalidCredentialsException;
         }
     }
     
