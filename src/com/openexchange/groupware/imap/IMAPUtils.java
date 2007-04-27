@@ -104,6 +104,7 @@ import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -1912,6 +1913,8 @@ public class IMAPUtils {
 		return fetchMessages(imapFolder, msgs, getFetchProfile(fields, sortField), isSequential);
 	}
 
+	private static final String ERR_01 = "No matching messages";
+
 	private static final String TEMPL_FETCH = "FETCH %s (%s)";
 
 	/**
@@ -2014,7 +2017,17 @@ public class IMAPUtils {
 				}
 			} finally {
 				p.notifyResponseHandlers(r);
-				p.handleResult(response);
+				try {
+					p.handleResult(response);
+				} catch (CommandFailedException cfe) {
+					if (cfe.getMessage().indexOf(ERR_01) != -1) {
+						/*
+						 * Obviously this folder is empty
+						 */
+						return new MessageCacheObject[0];
+					}
+					throw cfe;
+				}
 			}
 		}
 		return retval.toArray(new MessageCacheObject[retval.size()]);

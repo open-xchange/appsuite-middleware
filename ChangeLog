@@ -5,6 +5,8 @@
    property 'MAX_UPLOAD_SIZE'
  - Error if source folder is equal to destination folder on message move
    operation
+ - Fixed bug when moving all messages of a mail folder to another not yet
+   selected mail folder and number of messages to move is low (< 10)
 
 * 2007-04-26 - marcus.klein@open-xchange.com
 

@@ -518,12 +518,15 @@ public class Multiple extends SessionServlet {
 				/*
 				 * Fetch or create mail request object
 				 */
+				final boolean storeMailRequest;
 				final MailRequest mailrequest;
 				Object tmp = req.getAttribute(ATTRIBUTE_MAIL_REQUEST);
 				if (tmp == null) {
 					mailrequest = new MailRequest(sessionObj, sw);
+					storeMailRequest = true;
 				} else {
 					mailrequest = (MailRequest) tmp;
+					storeMailRequest = false;
 				}
 				/*
 				 * Fetch or create mail interface object
@@ -543,7 +546,9 @@ public class Multiple extends SessionServlet {
 					 * and return a null reference to avoid writing response
 					 * object
 					 */
-					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, mailrequest);
+					if (storeMailRequest) {
+						req.setAttribute(ATTRIBUTE_MAIL_REQUEST, mailrequest);
+					}
 					return null;
 				}
 				if (mailrequest.getContent().equals(STR_EMPTY)) {
