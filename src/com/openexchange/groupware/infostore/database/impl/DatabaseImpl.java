@@ -1512,13 +1512,114 @@ public class DatabaseImpl extends DBService {
 	private static final List<String> tables = Arrays.asList("infostore",
 			"infostore_document");
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
-	
-	public void removeUser(int id, Context ctx, SessionObject session, EntityLockManager locks) throws OXException {
-		removePrivate(id,ctx,session);
-		assignToAdmin(id,ctx,session);
+public void removeUser(int id, Context ctx, SessionObject session, EntityLockManager locks) throws OXException {
+		if(id != ctx.getMailadmin()) {
+			removePrivate(id,ctx,session);
+			assignToAdmin(id,ctx,session);
+		} else {
+			removeAll(ctx, session);
+			removeFromDel(id,ctx);
+		}
+			
 		locks.transferLocks(ctx, id, ctx.getMailadmin());
 	}
+	
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 35, msg = "Invalid SQL Query: %s")
+	private void removeFromDel(int id, Context ctx) throws OXException{
+		Connection writeCon = null;
+		Statement stmt = null;
+		StringBuilder query = new StringBuilder("NO QUERY");
+		try {
+			writeCon = getWriteConnection(ctx);
+			stmt = writeCon.createStatement();
+			for (String table : new String[]{"del_infostore", "del_infostore_document"}) {
+				query = new StringBuilder("DELETE FROM ").append(table).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND created_by = ").append(id);
+				stmt.executeUpdate(query.toString());
+			}
+		} catch (SQLException x) {
+			throw EXCEPTIONS.create(35, query.toString());
+		} finally {
+			if(stmt != null)
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+					LOG.error(e);
+				}
+			if(writeCon != null)
+				releaseWriteConnection(ctx, writeCon);
+		}
+	}
+	
+	private void removeAll(Context ctx, SessionObject session) throws OXException {
+		try {
+			
+			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+			
+			SearchIterator iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(" infostore.cid = "+ctx.getContextId(), Metadata.VALUES_ARRAY, getProvider(), ctx);
+			while(iter.hasNext()) {
+				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				documents.add(metadata);
+			}
+			
+			List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
+			
+			iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allVersionsWhere(" infostore.cid = "+ctx.getContextId(), Metadata.VALUES_ARRAY, getProvider(), ctx);
+			while(iter.hasNext()) {
+				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				versions.add(metadata);
+			}
+			
+			InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
+			
+			DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
+			deleteDocumentAction.setProvider(getProvider());
+			deleteDocumentAction.setContext(ctx);
+			deleteDocumentAction.setDocuments(documents);
+			deleteDocumentAction.setQueryCatalog(catalog);
+			
+			DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
+			deleteVersionAction.setProvider(getProvider());
+			deleteVersionAction.setContext(ctx);
+			deleteVersionAction.setDocuments(versions);
+			deleteVersionAction.setQueryCatalog(catalog);
+			
+			deleteVersionAction.perform();
+			try {
+				deleteDocumentAction.perform();
+			} catch (AbstractOXException e) {
+				try {
+					deleteVersionAction.undo();
+					throw new InfostoreException(e);
+				} catch (AbstractOXException e1) {
+					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
+				}
+			}
+						
+			FileStorage fs = getFileStorage(ctx);
+
+//			Remove the files. No rolling back from this point onward
+			
+			for(DocumentMetadata version : versions) {
+				if(null != version.getFilestoreLocation())
+					fs.deleteFile(version.getFilestoreLocation());
+			}
+			
+			EventClient ec = new EventClient(session);
+
+			for (DocumentMetadata m : documents) {
+				try {
+					ec.delete(m);
+				} catch (Exception e) {
+					LOG.error("", e);
+				}
+			}
+			
+		} catch (AbstractOXException x) {
+			throw new InfostoreException(x);
+		}
+		
+	}
+
 
 	private void removePrivate(int id, Context ctx, SessionObject session) throws OXException {
 		try {
@@ -1527,7 +1628,7 @@ public class DatabaseImpl extends DBService {
 				return;
 			StringBuffer where = new StringBuffer("infostore.folder_id in (");
 			for(FolderObject folder : foldersWithPrivateItems){
-				where.append(folder.getObjectID()).append(',');
+				where.append(folder.getObjectID()).append(",");
 			}
 			where.setCharAt(where.length()-1, ')');
 			where.append(" and infostore.cid = ").append(ctx.getContextId());
@@ -1539,7 +1640,7 @@ public class DatabaseImpl extends DBService {
 			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
 			while(iter.hasNext()) {
 				DocumentMetadata metadata = (DocumentMetadata)iter.next();
-				where.append(metadata.getId()).append(',');
+				where.append(metadata.getId()).append(",");
 				documents.add(metadata);
 			}
 			if(documents.size() == 0)
@@ -1578,7 +1679,7 @@ public class DatabaseImpl extends DBService {
 					deleteVersionAction.undo();
 					throw new InfostoreException(e);
 				} catch (AbstractOXException e1) {
-					LOG.fatal("Cannot roll back deleting versions. Run the consistency tool.",e1);
+					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
 				}
 			}
 						
@@ -1606,9 +1707,10 @@ public class DatabaseImpl extends DBService {
 		}
 		
 	}
+	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
+	
 
-	private void assignToAdmin(int id, Context ctx, SessionObject session) throws OXException {
-		Connection writeCon = null;
+	private void assignToAdmin(int id, Context ctx, SessionObject session) throws OXException {		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = null;
 		try {

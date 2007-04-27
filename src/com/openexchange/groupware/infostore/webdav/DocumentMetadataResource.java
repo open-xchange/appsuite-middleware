@@ -215,6 +215,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} catch (InfostoreException x) {
 				if(InfostoreExceptionFactory.isPermissionException(x)) {
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);				
+				} else {
+					LOG.debug(x.getMessage(),x);
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			} catch (Exception x) {
 				LOG.debug(x.getMessage(),x);
@@ -334,6 +337,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		} catch (InfostoreException x) {
 			if(InfostoreExceptionFactory.isPermissionException(x)){
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+			} else {
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception x) {
 			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -528,6 +533,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} catch (InfostoreException x) {
 				if(InfostoreExceptionFactory.isPermissionException(x)){
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				} else {
+					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);		
 				}
 			} catch (Exception x) {
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
