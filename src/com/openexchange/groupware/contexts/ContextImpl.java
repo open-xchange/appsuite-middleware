@@ -191,9 +191,8 @@ public class ContextImpl implements ContextExtended, Serializable {
         this.fileStorageQuota = fileStorageQuota;
     }
 
-    /* (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.contexts.ContextExtended#setEnabled(boolean)
+    /**
+     * {@inheritDoc}
      */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
