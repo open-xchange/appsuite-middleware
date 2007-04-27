@@ -1866,6 +1866,85 @@ public class Mail extends PermissionServlet implements UploadListener {
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
+	
+	public final void actionPutMoveMailMultiple(final SessionObject sessionObj, final Writer writer,
+			final String[] mailIDs, final String sourceFolder, final String destFolder, final MailInterface mailInteface)
+			throws JSONException {
+		actionPutMailMultiple(sessionObj, writer, mailIDs, sourceFolder, destFolder, true, mailInteface);
+	}
+	
+	public final void actionPutCopyMailMultiple(final SessionObject sessionObj, final Writer writer,
+			final String[] mailIDs, final String srcFolder, final String destFolder,
+			final MailInterface mailInterface) throws JSONException {
+		actionPutMailMultiple(sessionObj, writer, mailIDs, srcFolder, destFolder, false, mailInterface);
+	}
+	
+	public final void actionPutMailMultiple(final SessionObject sessionObj, final Writer writer,
+			final String[] mailIDs, final String srcFolder, final String destFolder, final boolean move,
+			final MailInterface mailInterfaceArg) throws JSONException {
+		try {
+			MailInterface mailInterface = mailInterfaceArg;
+			boolean closeMailInterface = false;
+			try {
+				if (mailInterface == null) {
+					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
+				}
+				final long[] msgUIDs = mailInterface.copyMessages(srcFolder, destFolder, MailIdentifier
+						.getUIDs(mailIDs), move);
+				if (msgUIDs.length > 0) {
+					final StringBuilder sb = new StringBuilder();
+					final Response response = new Response();
+					final JSONArray jsonArr = new JSONArray();
+					for (int k = 0; k < msgUIDs.length; k++) {
+						if (k > 0) {
+							writer.write(',');
+						}
+						response.reset();
+						jsonArr.reset();
+						sb.setLength(0);
+						jsonArr.put(sb.append(destFolder).append(SEPERATOR).append(msgUIDs[k]).toString());
+						response.setData(jsonArr);
+						response.setTimestamp(null);
+						Response.write(response, writer);
+					} 
+				} else {
+					final Response response = new Response();
+					response.setData(JSONObject.NULL);
+					response.setTimestamp(null);
+					Response.write(response, writer);
+				}
+			} finally {
+				if (closeMailInterface && mailInterface != null) {
+					mailInterface.close(true);
+					mailInterface = null;
+				}
+			}
+		} catch (OXMailException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+				response.setException(e);
+			}
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (Exception e) {
+			LOG.error("actionPutCopyMail", e);
+			final Response response = new Response();
+			response.setException(getWrappingOXException(e));
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		}
+	}
 
 	public void actionPutAttachment(final SessionObject sessionObj, final Writer writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
@@ -2214,17 +2293,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Append UploadListener instances
 					 */
-					final UserSettingMail usm = sessionObj.getUserConfiguration().getUserSettingMail();
 					((UploadListener) this).getRegistry().addUploadListener(
-							new UploadQuotaChecker(usm.getUploadQuota() < 0 ? ServerConfig
-									.getInteger(Property.MAX_UPLOAD_SIZE) : usm.getUploadQuota(), usm
-									.getUploadQuotaPerFile(), resp, actionStr));
+							new UploadQuotaChecker(sessionObj.getUserConfiguration().getUserSettingMail(), resp,
+									actionStr));
 					((UploadListener) this).getRegistry().addUploadListener(new Mail());
 					/*
 					 * Create and fire upload event
 					 */
 					final UploadEvent uploadEvent = ((UploadListener) this).getRegistry().processUpload(req);
-					uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface); // MailInterfaceImpl.getInstance(sessionObj));
+					uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
 					uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
 					uploadEvent.setParameter(UPLOAD_PARAM_SESSION, sessionObj);
 					uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
@@ -2451,6 +2528,22 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(15).append("(.+)(").append(
 				Mail.SEPERATOR).append(")([0-9]+)").toString());
+		
+		public static final MailIdentifier[] getMailIdentifiers(final String[] mailIDs) throws OXException {
+			final MailIdentifier[] retval = new MailIdentifier[mailIDs.length];
+			for (int i = 0; i < mailIDs.length; i++) {
+				retval[i] = new MailIdentifier(mailIDs[i]);
+			}
+			return retval;
+		}
+		
+		public static final long[] getUIDs(final String[] mailIDs) throws OXException {
+			final long[] retval = new long[mailIDs.length];
+			for (int i = 0; i < mailIDs.length; i++) {
+				retval[i] = new MailIdentifier(mailIDs[i]).msgUID;
+			}
+			return retval;
+		}
 
 		private String folder;
 
@@ -2626,13 +2719,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				return clone;
 			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-				throw new IllegalStateException("SmartLongArray.clone() failed", e);
+				throw new InternalError(e.getMessage());
 			}
 		}
 	}
 
 	private class UploadQuotaChecker implements UploadListener {
+
+		private static final String WARN01 = "Upload Quota is less than zero."
+				+ " Using global server property \"MAX_UPLOAD_SIZE\" instead.";
 
 		private final long uploadQuota;
 
@@ -2644,10 +2739,25 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 		private final boolean doAction;
 
-		public UploadQuotaChecker(long uploadQuota, long uploadQuotaPerFile, final HttpServletResponse resp,
-				final String actionStr) {
+		public UploadQuotaChecker(final long uploadQuota, final long uploadQuotaPerFile,
+				final HttpServletResponse resp, final String actionStr) {
 			this.uploadQuota = uploadQuota;
 			this.uploadQuotaPerFile = uploadQuotaPerFile;
+			this.resp = resp;
+			this.actionStr = actionStr;
+			doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
+		}
+
+		public UploadQuotaChecker(final UserSettingMail usm, final HttpServletResponse resp, final String actionStr) {
+			if (usm.getUploadQuota() >= 0) {
+				this.uploadQuota = usm.getUploadQuota();
+			} else {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(WARN01);
+				}
+				this.uploadQuota = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
+			}
+			this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
 			this.resp = resp;
 			this.actionStr = actionStr;
 			doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
@@ -2664,14 +2774,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} else if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
 				return false;
 			}
-			long size = 0;
+			long totalSize = 0;
 			final int numOfUploadFiles = uploadEvent.getNumberOfUploadFiles();
 			final Iterator<UploadFile> iter = uploadEvent.getUploadFilesIterator();
 			for (int i = 0; i < numOfUploadFiles; i++) {
 				final UploadFile uploadFile = iter.next();
 				if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
-					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
-							Long.valueOf(uploadQuotaPerFile), uploadFile.getFileName(), Long.valueOf(uploadFile.getSize()));
+					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE, Long
+							.valueOf(uploadQuotaPerFile), uploadFile.getFileName(), Long.valueOf(uploadFile.getSize()));
 					JSONObject responseObj = null;
 					try {
 						final Response response = new Response();
@@ -2684,9 +2794,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 							responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString()))
 							.replaceFirst(JS_FRAGMENT_ACTION, actionStr), oxme.getMessage(), oxme);
 				}
-				size += uploadFile.getSize();
-				if (uploadQuota > 0 && size > uploadQuota) {
-					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
+				/*
+				 * Add current file size
+				 */
+				totalSize += uploadFile.getSize();
+				if (uploadQuota > 0 && totalSize > uploadQuota) {
+					final OXMailException oxme = new OXMailException(MailCode.UPLOAD_QUOTA_EXCEEDED, Long
+							.valueOf(uploadQuota));
 					JSONObject responseObj = null;
 					try {
 						final Response response = new Response();

@@ -186,12 +186,23 @@ public class Response {
         }
         return json;
     }
+    
+    /**
+	 * Resets the response object for re-use
+	 */
+	public void reset() {
+		json = null;
+		data = null;
+		timestamp = null;
+		exception = null;
+	}
 
     /**
-     * @return the data JSON object of the response.
-     * @throws JSONException if an error occurs reading the data attribute of
-     * the response JSON object.
-     */
+	 * @return the data JSON object of the response.
+	 * @throws JSONException
+	 *             if an error occurs reading the data attribute of the response
+	 *             JSON object.
+	 */
     public JSONObject getResponseData() throws JSONException {
         final Object tmp = getJSON().get(DATA);
         if (tmp instanceof JSONObject) {

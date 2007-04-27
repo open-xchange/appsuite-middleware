@@ -49,70 +49,183 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.Writer;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
-public class MailRequest {
+public final class MailRequest {
 
-	private final SessionObject sessionObj;
+	private final SessionObject session;
 
-	private final Writer pw;
+	private final StringWriter writer;
+
+	private CollectObject collectObj;
+
+	private static final String STR_DATA = "data";
 
 	private static final Mail MAIL_SERVLET = new Mail();
 
-	public MailRequest(final SessionObject sessionObj, final Writer pw) {
+	public MailRequest(final SessionObject session, final StringWriter writer) {
 		super();
-		this.sessionObj = sessionObj;
-		this.pw = pw;
+		this.session = session;
+		this.writer = writer;
 	}
 
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
 			throws SearchIteratorException, JSONException, OXMailException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-			MAIL_SERVLET.actionGetAllMails(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COUNT)) {
-			MAIL_SERVLET.actionGetMailCount(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionGetMailCount(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			//throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
-			MAIL_SERVLET.actionGetUpdates(sessionObj, pw, jsonObject, mailInterface);
+			// throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
+			MAIL_SERVLET.actionGetUpdates(session, writer, jsonObject, mailInterface);
 		} else if (action.regionMatches(true, 0, AJAXServlet.ACTION_REPLY, 0, 5)) {
-			MAIL_SERVLET.actionGetReply(sessionObj, pw, jsonObject, (action
+			MAIL_SERVLET.actionGetReply(session, writer, jsonObject, (action
 					.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)), mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FORWARD)) {
-			MAIL_SERVLET.actionGetForward(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			MAIL_SERVLET.actionGetMessage(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
 			MAIL_SERVLET.actionGetAttachment();
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
-			MAIL_SERVLET.actionGetNew(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionGetNew(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			MAIL_SERVLET.actionPutMailList(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionPutMailList(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			MAIL_SERVLET.actionPutDeleteMails(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionPutDeleteMails(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			MAIL_SERVLET.actionPutUpdateMail(sessionObj, pw, jsonObject, mailInterface);
+			if (isMove(jsonObject)) {
+				if (collectObj != null) {
+					if (collectObj.collectable(jsonObject, true)) {
+						collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+					} else {
+						MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(), collectObj
+								.getSrcFld(), collectObj.getDestFld(), collectObj.isMove(), mailInterface);
+						collectObj = null;
+					}
+				} else {
+					/*
+					 * Collect
+					 */
+					collectObj = new CollectObject(jsonObject, true);
+					collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				}
+			} else {
+				MAIL_SERVLET.actionPutUpdateMail(session, writer, jsonObject, mailInterface);
+			}
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
-			MAIL_SERVLET.actionPutCopyMail(sessionObj, pw, jsonObject, mailInterface);
+			if (collectObj != null) {
+				if (collectObj.collectable(jsonObject, false)) {
+					collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				} else {
+					MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(),
+							collectObj.getSrcFld(), collectObj.getDestFld(), collectObj.isMove(), mailInterface);
+					collectObj = null;
+				}
+			} else {
+				/*
+				 * Collect
+				 */
+				collectObj = new CollectObject(jsonObject, false);
+				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+			}
+			// MAIL_SERVLET.actionPutCopyMail(session, writer, jsonObject,
+			// mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
-			MAIL_SERVLET.actionPutAttachment(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionPutAttachment(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MAIL_RECEIPT_ACK)) {
-			MAIL_SERVLET.actionPutReceiptAck(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionPutReceiptAck(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-			MAIL_SERVLET.actionPutMailSearch(sessionObj, pw, jsonObject, mailInterface);
+			MAIL_SERVLET.actionPutMailSearch(session, writer, jsonObject, mailInterface);
 		} else {
 			throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
 		}
+	}
+	
+	public boolean hasMultiple() {
+		return (collectObj != null);
+	}
+
+	public void performMultiple(final MailInterface mailInterface) throws JSONException {
+		if (collectObj != null) {
+			MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(), collectObj.getSrcFld(),
+					collectObj.getDestFld(), collectObj.isMove(), mailInterface);
+		}
+	}
+	
+	public String getContent() {
+		return writer == null ? null : writer.toString();
+	}
+
+	private static boolean isMove(final JSONObject jsonObject) throws JSONException {
+		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(FolderFields.FOLDER_ID);
+	}
+
+	private static final class CollectObject {
+
+		private final String srcFld;
+
+		private final String destFld;
+
+		private final List<String> mailIDs;
+
+		private final boolean move;
+
+		public CollectObject(final JSONObject jsonObject, final boolean move) throws JSONException {
+			this(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject.getJSONObject(STR_DATA).getString(
+					FolderFields.FOLDER_ID), move);
+		}
+
+		public CollectObject(final String srcFld, final String destFld, final boolean move) {
+			this.srcFld = srcFld;
+			this.destFld = destFld;
+			this.mailIDs = new ArrayList<String>();
+			this.move = move;
+		}
+
+		public boolean collectable(final JSONObject jsonObject, final boolean move) throws JSONException {
+			return collectable(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject.getJSONObject(STR_DATA)
+					.getString(FolderFields.FOLDER_ID), move);
+		}
+
+		public boolean collectable(final String srcFld, final String destFld, final boolean move) {
+			return (this.srcFld.equals(srcFld) && this.destFld.equals(destFld) && this.move == move);
+		}
+
+		public String getDestFld() {
+			return destFld;
+		}
+
+		public void addMailID(final String mailID) {
+			mailIDs.add(mailID);
+		}
+
+		public String[] getMailIDs() {
+			return mailIDs.toArray(new String[mailIDs.size()]);
+		}
+
+		public String getSrcFld() {
+			return srcFld;
+		}
+
+		public boolean isMove() {
+			return move;
+		}
+
 	}
 
 }

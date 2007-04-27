@@ -138,7 +138,7 @@ public class MessageFiller {
 	private static final String HDR_CONTENT_ID = "Content-ID";
 
 	private static final String STR_UTF8 = "UTF-8";
-	
+
 	private static final String STR_EMPTY = "";
 
 	private static final String MIME_TEXT = "text/";
@@ -326,7 +326,8 @@ public class MessageFiller {
 					 * Define html content
 					 */
 					final String ct = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
-					html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), ct);
+					html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true,
+							linewrap), ct);
 					html.setHeader(HDR_MIME_VERSION, VERSION);
 					html.setHeader(HDR_CONTENT_TYPE, ct);
 					/*
@@ -398,10 +399,12 @@ public class MessageFiller {
 			/*
 			 * Create a non-multipart message
 			 */
-			if (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT, 0, 5) && mailTextMao.getContent() != null) {
-				final boolean isPlainText = (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT_PLAIN, 0, 10));
-				final ContentType ct = new ContentType(isPlainText ? PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
-						.getDefaultMimeCharset()) : PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties
+			if (mailTextMao.getContentType().regionMatches(true, 0, MIME_TEXT, 0, 5)
+					&& mailTextMao.getContent() != null) {
+				final boolean isPlainText = (mailTextMao.getContentType()
+						.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, 10));
+				final ContentType ct = new ContentType(isPlainText ? PAT_TEXT_CT.replaceFirst(REPLACE_CS,
+						IMAPProperties.getDefaultMimeCharset()) : PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties
 						.getDefaultMimeCharset()));
 				if (primaryMultipart == null) {
 					final String mailText;
@@ -412,7 +415,8 @@ public class MessageFiller {
 						mailText = performLineWrap(CONVERTER.convertWithQuotes((String) mailTextMao.getContent()),
 								false, linewrap);
 					} else {
-						mailText = performLineWrap(insertColorQuotes(MailTools.formatHrefLinks((String) mailTextMao.getContent())), true, linewrap);
+						mailText = performLineWrap(insertColorQuotes(MailTools.formatHrefLinks((String) mailTextMao
+								.getContent())), true, linewrap);
 					}
 					newMimeMessage.setContent(mailText, ct.toString());
 					newMimeMessage.setHeader(HDR_MIME_VERSION, VERSION);
@@ -521,7 +525,9 @@ public class MessageFiller {
 		 */
 		String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
-		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap), htmlCT);
+		html
+				.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap),
+						htmlCT);
 		html.setHeader(HDR_MIME_VERSION, VERSION);
 		html.setHeader(HDR_CONTENT_TYPE, htmlCT);
 		htmlCT = null;
@@ -846,7 +852,7 @@ public class MessageFiller {
 	private static final String DEFAULT_COLOR = "#0026ff";
 
 	private static final String STR_HTML_QUOTE = "&gt;";
-	
+
 	private static final String STR_SPLIT_BR = "<br/?>";
 
 	private static final String[] COLORS;
@@ -899,7 +905,8 @@ public class MessageFiller {
 			}
 			if (offset > 0) {
 				try {
-					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
+					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1
+							: offset;
 				} catch (StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace(e.getMessage(), e);

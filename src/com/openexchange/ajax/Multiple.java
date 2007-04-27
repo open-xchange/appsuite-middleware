@@ -92,37 +92,41 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 public class Multiple extends SessionServlet {
-	
+
+	private static final String STR_EMPTY = "";
+
 	private static final long serialVersionUID = 3029074251138469122L;
-	
+
 	protected static final String MODULE = "module";
-	
+
 	protected static final String MODULE_CALENDAR = "calendar";
-	
+
 	protected static final String MODULE_TASK = "tasks";
-	
+
 	protected static final String MODULE_CONTACT = "contacts";
-	
+
 	protected static final String MODULE_GROUP = "group";
-	
+
 	protected static final String MODULE_REMINDER = "reminder";
-	
+
 	protected static final String MODULE_RESOURCE = "resource";
-	
+
 	protected static final String MODULE_INFOSTORE = "infostore";
-	
+
 	protected static final String MODULE_FOLDER = "folder";
-	
-	private static final String ATTRIBUTE_MAILINTERFACE = "mi";
-	
+
+	private static final String ATTRIBUTE_MAIL_INTERFACE = "mi";
+
+	private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
+
 	private static final transient Log LOG = LogFactory.getLog(Multiple.class);
-	
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
-	throws IOException {
+
+	@Override
+	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		final Response response = new Response();
 		JSONArray jsonArray = null;
-		final String data = getBody(httpServletRequest);
-		
+		final String data = getBody(req);
+
 		try {
 			jsonArray = new JSONArray(data);
 		} catch (JSONException e) {
@@ -131,15 +135,31 @@ public class Multiple extends SessionServlet {
 					.getMessage()));
 			jsonArray = new JSONArray();
 		}
-		
+
 		final StringWriter sw = new StringWriter();
-		
+
 		try {
 			sw.write('[');
-			
+
 			for (int a = 0; a < jsonArray.length(); a++) {
-				parseActionElement(sw, jsonArray, a, getSessionObject(httpServletRequest), httpServletRequest);
+				parseActionElement(sw, jsonArray, a, getSessionObject(req), req);
 			}
+
+			if (req.getAttribute(ATTRIBUTE_MAIL_REQUEST) != null) {
+				/*
+				 * Write withheld mail request
+				 */
+				try {
+					writeMailRequest((MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST), (MailInterface) req
+							.getAttribute(ATTRIBUTE_MAIL_INTERFACE), sw);
+				} finally {
+					/*
+					 * Remove mail request object
+					 */
+					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, null);
+				}
+			}
+
 			sw.write(']');
 			try {
 				response.setData(new JSONArray(sw.toString()));
@@ -148,16 +168,16 @@ public class Multiple extends SessionServlet {
 			}
 		} catch (JSONException e) {
 			log(RESPONSE_ERROR, e);
-			sendError(httpServletResponse);
+			sendError(resp);
 		} catch (AjaxException e) {
 			log(RESPONSE_ERROR, e);
-			sendError(httpServletResponse);
+			sendError(resp);
 		} catch (OXException e) {
 			log(RESPONSE_ERROR, e);
-			sendError(httpServletResponse);
+			sendError(resp);
 		} finally {
-			if (httpServletRequest.getAttribute(ATTRIBUTE_MAILINTERFACE) != null) {
-				final MailInterface mi = (MailInterface) httpServletRequest.getAttribute(ATTRIBUTE_MAILINTERFACE);
+			if (req.getAttribute(ATTRIBUTE_MAIL_INTERFACE) != null) {
+				final MailInterface mi = (MailInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 				try {
 					mi.close(true);
 				} catch (OXException e) {
@@ -165,45 +185,84 @@ public class Multiple extends SessionServlet {
 				}
 			}
 		}
-		
-		httpServletResponse.getWriter().write(sw.toString());
-		httpServletResponse.getWriter().flush();
+
+		resp.getWriter().write(sw.toString());
+		resp.getWriter().flush();
 	}
-	
-	protected void parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
+
+	protected static final void parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
 			final SessionObject sessionObj, final HttpServletRequest req) throws JSONException, AjaxException,
 			OXException {
-		if (pos > 0) {
+//		if (pos > 0) {
+//			try {
+//				w.write(',');
+//			} catch (IOException e) {
+//				throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
+//			}
+//		}
+
+		final JSONObject jsonObj = jsonArray.getJSONObject(pos);
+
+		final String module;
+		final String action;
+
+		if (jsonObj.has(MODULE)) {
+			module = DataParser.checkString(jsonObj, MODULE);
+		} else {
+			throw new AjaxException(AjaxException.Code.NoField, MODULE);
+		}
+
+		if (jsonObj.has(PARAMETER_ACTION)) {
+			action = DataParser.checkString(jsonObj, PARAMETER_ACTION);
+		} else {
+			throw new AjaxException(AjaxException.Code.NoField, PARAMETER_ACTION);
+		}
+
+		final Response response = doAction(module, action, jsonObj, sessionObj, req);
+		if (response != null) {
+			if (req.getAttribute(ATTRIBUTE_MAIL_REQUEST) != null) {
+				/*
+				 * Write withheld mail request
+				 */
+				try {
+					writeMailRequest((MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST), (MailInterface) req
+							.getAttribute(ATTRIBUTE_MAIL_INTERFACE), w);
+				} finally {
+					/*
+					 * Remove mail request object
+					 */
+					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, null);
+				}
+			}
+			Response.write(response, w);
 			try {
 				w.write(',');
 			} catch (IOException e) {
 				throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
 			}
 		}
-		
-		final JSONObject jsonObj = jsonArray.getJSONObject(pos);
-		
-		final String module;
-		final String action;
-		
-		if (jsonObj.has(MODULE)) {
-			module = DataParser.checkString(jsonObj, MODULE);
-		} else {
-			throw new AjaxException(AjaxException.Code.NoField, MODULE);
-		}
-		
-		if (jsonObj.has(PARAMETER_ACTION)) {
-			action = DataParser.checkString(jsonObj, PARAMETER_ACTION);
-		} else {
-			throw new AjaxException(AjaxException.Code.NoField, PARAMETER_ACTION);
-		}
-		
-		final Response response = doAction(module, action, jsonObj, sessionObj, req);
-		Response.write(response, w);
-		
 	}
-	
-	protected Response doAction(final String module, final String action, final JSONObject jsonObj,
+
+	private static final void writeMailRequest(final MailRequest mailReq, final MailInterface mailInterface,
+			final Writer w) throws JSONException {
+		/*
+		 * Write withheld mail response first
+		 */
+		mailReq.performMultiple(mailInterface);
+		if (mailReq.getContent().equals(STR_EMPTY)) {
+			final Response mailResp = new Response();
+			mailResp.setData(STR_EMPTY);
+			Response.write(mailResp, w);
+		} else {
+			try {
+				w.write(mailReq.getContent());
+			} catch (IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	protected static final Response doAction(final String module, final String action, final JSONObject jsonObj,
 			final SessionObject sessionObj, final HttpServletRequest req) throws AjaxException {
 		Response response = new Response();
 		final StringWriter sw = new StringWriter();
@@ -212,8 +271,8 @@ public class Multiple extends SessionServlet {
 			try {
 				appointmentRequest.action(action, jsonObj);
 				response.setTimestamp(appointmentRequest.getTimestamp());
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -233,7 +292,7 @@ public class Multiple extends SessionServlet {
 				} else {
 					LOG.error(e.getMessage(), e);
 				}
-				
+
 				response.setException(e);
 			} catch (SearchIteratorException e) {
 				LOG.error(e.getMessage(), e);
@@ -242,8 +301,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException.Code
-						.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -252,8 +310,8 @@ public class Multiple extends SessionServlet {
 			try {
 				contactRequest.action(action, jsonObj);
 				response.setTimestamp(contactRequest.getTimestamp());
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -277,8 +335,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -287,8 +344,8 @@ public class Multiple extends SessionServlet {
 			try {
 				groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -309,8 +366,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -319,8 +375,8 @@ public class Multiple extends SessionServlet {
 			try {
 				reminderRequest.action(action, jsonObj);
 				response.setTimestamp(reminderRequest.getTimestamp());
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -341,8 +397,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -351,8 +406,8 @@ public class Multiple extends SessionServlet {
 			try {
 				resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -373,8 +428,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -386,8 +440,8 @@ public class Multiple extends SessionServlet {
 				response.setTimestamp(taskRequest.getTimestamp());
 				if (retval != -1) {
 					response.setData(retval);
-				} else if (sw.toString().equals("")) {
-					response.setData("");
+				} else if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -420,8 +474,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -429,14 +482,13 @@ public class Multiple extends SessionServlet {
 			final InfostoreRequest infoRequest = new InfostoreRequest(sessionObj, sw);
 			try {
 				infoRequest.action(action, new JSONSimpleRequest(jsonObj));
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					response = Response.parse(sw.toString());
 				}
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
@@ -444,8 +496,8 @@ public class Multiple extends SessionServlet {
 			final FolderRequest folderequest = new FolderRequest(sessionObj, sw);
 			try {
 				folderequest.action(action, jsonObj);
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (sw.toString().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
 					try {
 						response.setData(new JSONArray(sw.toString()));
@@ -457,27 +509,47 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
 		} else if (module.equals(MODULE_MAIL)) {
-			final MailRequest mailrequest = new MailRequest(sessionObj, sw);
 			try {
+				/*
+				 * Fetch or create mail request object
+				 */
+				final MailRequest mailrequest;
+				Object tmp = req.getAttribute(ATTRIBUTE_MAIL_REQUEST);
+				if (tmp == null) {
+					mailrequest = new MailRequest(sessionObj, sw);
+				} else {
+					mailrequest = (MailRequest) tmp;
+				}
+				/*
+				 * Fetch or create mail interface object
+				 */
 				final MailInterface mi;
-				final Object tmp = req.getAttribute(ATTRIBUTE_MAILINTERFACE);
+				tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 				if (tmp == null) {
 					mi = MailInterfaceImpl.getInstance(sessionObj);
-					req.setAttribute(ATTRIBUTE_MAILINTERFACE, mi);
+					req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
 				} else {
 					mi = ((MailInterface) tmp);
 				}
 				mailrequest.action(action, jsonObj, mi);
-				if (sw.toString().equals("")) {
-					response.setData("");
+				if (mailrequest.hasMultiple()) {
+					/*
+					 * Put into attributes to further collect move/copy requests
+					 * and return a null reference to avoid writing response
+					 * object
+					 */
+					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, mailrequest);
+					return null;
+				}
+				if (mailrequest.getContent().equals(STR_EMPTY)) {
+					response.setData(STR_EMPTY);
 				} else {
-					response = Response.parse(sw.toString());
+					response = Response.parse(mailrequest.getContent());
 				}
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
@@ -486,8 +558,7 @@ public class Multiple extends SessionServlet {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
 			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(OXJSONException
-						.Code.JSON_WRITE_ERROR, e);
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
 			}
