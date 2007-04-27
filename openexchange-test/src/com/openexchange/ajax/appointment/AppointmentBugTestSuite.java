@@ -1,6 +1,7 @@
 package com.openexchange.ajax.appointment;
 
 
+import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -12,6 +13,7 @@ public class AppointmentBugTestSuite extends TestSuite{
 		tests.addTestSuite( Bug4344Test.class );
 		tests.addTestSuite( Bug4541Test.class );
 		tests.addTestSuite( Bug6055Test.class );
+		tests.addTest( RecurrenceTestSuite.suite());
 		return tests;
 	}
 }
