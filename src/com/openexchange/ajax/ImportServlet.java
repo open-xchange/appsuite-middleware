@@ -139,11 +139,6 @@ public class ImportServlet extends ImportExport {
 				}
 				final UploadFile uf = iter.next();
 				
-				//checking content type of file for additional security
-				if(! isKnownContentType( uf.getContentType() ) ){
-					sendResponse(EXCEPTIONS.create(2, uf.getContentType()), resp);
-				}
-				
 				//actual import
 				importResult = importerExporter.importData(
 					getSessionObject(req), format, new FileInputStream(uf.getTmpFile()), folders, req.getParameterMap());

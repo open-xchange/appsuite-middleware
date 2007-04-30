@@ -1,3 +1,9 @@
+* 2007-04-30 - tobias.prinz@open-xchange.com
+
+ - Fixed bug #6962 by adding a tokenizer for VCard files, so every entry
+   may have different versions and the file may come with any MIME type
+   possible.
+
 * 2007-04-27 - thorben.betten@open-xchange.com
 
  - Copy/move of messages made much more performant

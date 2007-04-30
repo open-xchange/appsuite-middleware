@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -77,12 +79,13 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
+import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.VCARDIMPORTER,
@@ -178,22 +181,18 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			final VersitDefinition def = Versit.getDefinition(format.getMimeType());
-			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
-			
-			boolean hasMoreObjects = true;
-			
-			while (hasMoreObjects) {
-				ImportResult importResult = new ImportResult();
+			VCardTokenizer tokenizer = new VCardTokenizer(new InputStreamReader(is));
+			List<VCardFileToken> chunks = tokenizer.split();
+			for(VCardFileToken chunk: chunks){
+				VersitDefinition def = chunk.getVersitDefinition();
+				final VersitDefinition.Reader versitReader = def.getReader(
+						new ByteArrayInputStream(chunk.getContent().getBytes("UTF-8")), "UTF-8");
 				
+				ImportResult importResult = new ImportResult();
+					
 				try {
 					VersitObject versitObject = def.parse(versitReader);
 					
-					if (versitObject == null) {
-						hasMoreObjects = false;
-						break;
-					}
-
 					importResult.setFolder(String.valueOf(contactFolderId));
 					
 					final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
