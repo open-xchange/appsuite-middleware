@@ -89,6 +89,8 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 	public String IMPORTED_CSV = CSVContactImportTest.IMPORT_MULTIPLE;
 	public String EXPORT_SERVLET = "export";
 	public String IMPORT_SERVLET = "import";
+	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
+	public String[] IMPORT_VCARD_AWAITED_ELEMENTS = "PRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com".split("\n");
 	
 	public ImportExportServletTest(String name){
 		super(name);
@@ -118,7 +120,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 		WebConversation webconv = getWebConversation();
 		WebRequest req = new PostMethodWebRequest(
-				getUrl(IMPORT_SERVLET, folderId, format)
+				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
 				);
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
@@ -128,7 +130,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		
 		//test: export
 		webconv =  getWebConversation();
-		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
+		req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
 		webRes = webconv.sendRequest(req);
 		is = webRes.getInputStream();
 		String resultingCSV = AbstractCSVContactTest.readStreamAsString(is);
@@ -140,7 +142,41 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		//clean up
 		removeFolder(folderId);
 	}
-	
+
+	public void testVCardRoundtrip() throws Exception{
+		//preparations
+		final String insertedCSV = IMPORT_VCARD;
+		final Format format = Format.VCARD;
+		final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
+		
+		
+		//test: import
+		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+		WebConversation webconv = getWebConversation();
+		WebRequest req = new PostMethodWebRequest(
+				getUrl(IMPORT_SERVLET, folderId, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "contact.vcf", is, format.getMimeType());
+		WebResponse webRes = webconv.getResource(req);
+		
+		JSONObject response = extractFromCallback( webRes.getText() );
+		
+		//test: export
+		webconv =  getWebConversation();
+		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
+		webRes = webconv.sendRequest(req);
+		is = webRes.getInputStream();
+		String resultingVCard = AbstractCSVContactTest.readStreamAsString(is);
+		//finally: checking
+		for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
+			assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
+		}
+		
+		//clean up
+		removeFolder(folderId);
+	}
+
 	public void testCSVBrokenFile() throws Exception{
 		//preparations
 		final String insertedCSV = "bla\nbla,bla";
@@ -151,7 +187,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 		WebConversation webconv = getWebConversation();
 		WebRequest req = new PostMethodWebRequest(
-				getUrl(IMPORT_SERVLET, folderId, format)
+				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
 				);
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
@@ -170,7 +206,7 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
 		WebConversation webconv = getWebConversation();
 		WebRequest req = new PostMethodWebRequest(
-				getUrl(IMPORT_SERVLET, folderId, format)
+				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
 				);
 		((PostMethodWebRequest)req).setMimeEncoded(true);
 		req.selectFile("file", "contacts.csv", is, format.getMimeType());
@@ -196,9 +232,14 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		bob.append(getSessionId());
 		addParam(bob, ImportExport.PARAMETER_FOLDERID, folderId ) ;
 		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
+		return bob.toString();
+	}
+	
+	public String getCSVColumnUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
+		StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
-		return bob.toString();
+		return bob.toString();		
 	}
 	
 	private void addParam(StringBuilder bob, String param, String value){
