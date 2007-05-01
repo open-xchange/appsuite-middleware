@@ -56,29 +56,37 @@ public class LoginTest extends TestCase {
     private static final Log LOG = LogFactory.getLog(LoginTest.class);
 
     /**
+     * How much logins?
+     */
+    private static final int TRIES = 1;
+
+    /**
      * {@inheritDoc}
      */
     protected void setUp() throws Exception {
         super.setUp();
         Init.loadSystemProperties();
+        ContextInit.init();
     }
 
     public void testLogin() throws Throwable {
         final LoginInfo login = LoginInfo.getInstance();
         final String user = Init.getAJAXProperty("login");
         final String password = Init.getAJAXProperty("password");
-        final long start = System.currentTimeMillis();
-        final String[] result = login.handleLoginInfo(user, password);
-        LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
-            + "s");
-        assertNotNull("Can't get context identifier.", result[0]);
-        assertNotNull("Can't get user identifier.", result[1]);
-        assertNotSame("Can't get context identifier.", result[0].length(), 0);
-        assertNotSame("Can't get user identifier.", result[1].length(), 0);
-        LOG.info("Context identifier: " + result[0]);
-        LOG.info("User identifier: " + result[1]);
-        if (result.length > 2) {
-            LOG.info("1and1 Token: " + result[2]);
+        for (int i = 0; i < TRIES; i++) {
+            final long start = System.currentTimeMillis();
+            final String[] result = login.handleLoginInfo(user, password);
+            LOG.info("Login time: " + ((System.currentTimeMillis() - start) / 1000f)
+                + "s");
+            assertNotNull("Can't get context identifier.", result[0]);
+            assertNotNull("Can't get user identifier.", result[1]);
+            assertNotSame("Can't get context identifier.", result[0].length(), 0);
+            assertNotSame("Can't get user identifier.", result[1].length(), 0);
+            LOG.info("Context identifier: " + result[0]);
+            LOG.info("User identifier: " + result[1]);
+            if (result.length > 2) {
+                LOG.info("1and1 Token: " + result[2]);
+            }
         }
     }
 }

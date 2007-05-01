@@ -60,6 +60,7 @@ public class CalendarTest extends TestCase {
     
     private static boolean init = false;
     
+    private static boolean do_not_delete = false;
     
     int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
     
@@ -87,6 +88,10 @@ public class CalendarTest extends TestCase {
     private static int resolveUser(String user) throws Exception {
         UserStorage uStorage = UserStorage.getInstance(getContext());
         return uStorage.getUserId(user);
+    }
+    
+    public static void dontDelete() {
+        do_not_delete = true;
     }
     
     public static int getUserId() throws Exception {
@@ -154,6 +159,10 @@ public class CalendarTest extends TestCase {
     }    
 
     void deleteAllAppointments() throws Exception  {
+        if (do_not_delete) {
+            return;
+        }
+        
         Connection readcon = DBPool.pickup(getContext());
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "deleteAllApps");
@@ -1596,7 +1605,28 @@ public class CalendarTest extends TestCase {
         
     }    
   
-    
-    
+    public void testGroupZero() throws Exception  {
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(getContext());
+        Participants participants = new Participants();
+        Participant p = new GroupParticipant();
+        p.setIdentifier(0);
+        participants.add(p);
+        cdao.setParticipants(participants.getList());
+        cdao.setTitle("testGroupZero");
+        CalendarTest.fillDatesInDao(cdao);
+        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
+        cdao.setContext(so.getContext());
+        cdao.setIgnoreConflicts(true);        
+        
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, getContext());
+        cdao.setGlobalFolderID(fid);
+        
+        CalendarSql csql = new CalendarSql(so);        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();
+        
+    }
     
 }

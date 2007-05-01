@@ -1101,5 +1101,90 @@ public class CalendarRecurringTests extends TestCase {
         
     }    
     
+    public void testFlagSingleException() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+    
+        RecurringResults m = null;
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(context);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testFlagSingleException");
+        cdao.setParentFolderID(folder_id);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);        
+        cdao.setOccurrence(7);
+
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();        
+        Date last = cdao.getLastModified();          
+        
+        CalendarDataObject flag_exception = new CalendarDataObject();
+        flag_exception.setContext(context);
+        flag_exception.setObjectID(object_id);
+        flag_exception.setRecurrencePosition(2);
+        flag_exception.setLabel(2);
+        flag_exception.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(flag_exception, folder_id, last);
+        int object_exception_id = flag_exception.getObjectID();
+        Date last_exception = flag_exception.getLastModified();
+        
+        assertTrue("Exception created (object_id:object_exception_id) ("+object_id+":"+object_exception_id+")", object_id != object_exception_id);
+        //assertEquals("Return value is recurrence position", 2, flag_exception.getRecurrencePosition());
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        CalendarDataObject testobject_exception = csql.getObjectById(object_exception_id, folder_id);
+        assertEquals("Check recurrence id", testobject.getRecurrenceID(), testobject_exception.getRecurrenceID());        
+        
+        
+}
+    public void testWholeDayRecurringWithOccurence() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(context);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        long s = CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime());
+        cdao.setStartDate(new Date(s));
+        long e = s+CalendarRecurringCollection.MILLI_DAY;
+        cdao.setEndDate(new Date(e));
+        cdao.setFullTime(true);
+        long start_time = cdao.getStartDate().getTime();
+        start_time = CalendarRecurringCollection.normalizeLong(start_time);
+        cdao.setTitle("testWholeDayRecurringWithOccurence");
+        cdao.setParentFolderID(folder_id);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);        
+        
+        int occurrence = 2;
+        
+        cdao.setOccurrence(occurrence);
+
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();        
+        Date last = cdao.getLastModified();                  
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        
+        Date check_time = new Date(start_time + (CalendarRecurringCollection.MILLI_DAY*occurrence));
+        
+        assertEquals("Check correct until", check_time, testobject.getUntil());
+    }
+    
+    
     
 }

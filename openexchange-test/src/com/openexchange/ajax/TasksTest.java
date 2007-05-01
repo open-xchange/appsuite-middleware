@@ -67,6 +67,7 @@ import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.task.AbstractTaskTest;
+import com.openexchange.ajax.task.Create;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -136,40 +137,17 @@ public class TasksTest extends AbstractTaskTest {
      * @throws Throwable if an error occurs.
      */
     public void testInsertPrivateTask() throws Throwable {
-        final Task task = new Task();
-        task.setTitle("Private task");
-        task.setPrivateFlag(false);
-        Date lastModified = new Date();
-        task.setCreationDate(new Date());
-        task.setLastModified(lastModified);
-        task.setStartDate(new Date(1133964000000l));
-        task.setEndDate(new Date(1133967600000l));
-        task.setAfterComplete(new Date(1133971200000l));
-        task.setNote("Description");
-        task.setStatus(Task.NOT_STARTED); //FIXME!
-        task.setPriority(Task.NORMAL);
-        task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
-        task.setCurrency("\u20ac");
-        task.setTripMeter("trip meter");
-        task.setBillingInformation("billing information");
-        task.setCompanies("companies");
-
         final int folderId = TaskTools.getPrivateTaskFolder(
             getWebConversation(), getHostName(), getSessionId());
-
-        task.setParentFolderID(folderId);
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
+        final Task task = Create.createTask();
+        final int taskId = Create.createPrivateTask(getWebConversation(),
+            getHostName(), getSessionId(), folderId, task);
 
         final Response response = getTask(getWebConversation(), getHostName(),
             getSessionId(), folderId, taskId);
         final Task reload = (Task) response.getData();
         compareAttributes(task, reload);
-        lastModified = response.getTimestamp();
+        Date lastModified = response.getTimestamp();
 
         deleteTask(getWebConversation(), getHostName(), getSessionId(),
             lastModified, folderId, taskId);

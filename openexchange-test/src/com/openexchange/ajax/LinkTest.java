@@ -208,6 +208,43 @@ public class LinkTest extends AbstractAJAXTest {
 		return repo;
 	}
 	
+	public static void insertLink(LinkObject lo, WebConversation webCon, String host, String session) throws Exception {
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter pw = new PrintWriter(baos);
+
+		JSONWriter jsonwriter = new JSONWriter(pw);
+		jsonwriter.object();
+		jsonwriter.key("id1").value(lo.getFirstId());
+		jsonwriter.key("module1").value(lo.getFirstType());
+		jsonwriter.key("folder1").value(lo.getFirstFolder());
+		jsonwriter.key("id2").value(lo.getSecondId());
+		jsonwriter.key("module2").value(lo.getSecondType());
+		jsonwriter.key("folder2").value(lo.getSecondFolder());
+		jsonwriter.endObject();
+		
+		pw.flush();
+		
+		JSONObject jResponse = null;
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		WebRequest req = new PutMethodWebRequest(PROTOCOL + host+ LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		jResponse = new JSONObject(resp.getText());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(jResponse.toString());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+	}
 	
 	public void testAll() throws Exception {
 		
