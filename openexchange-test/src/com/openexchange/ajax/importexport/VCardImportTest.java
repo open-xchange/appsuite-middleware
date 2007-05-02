@@ -1,5 +1,7 @@
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.test.TestException;
@@ -115,6 +117,20 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertTrue("Only one import" , importResult.length == 1);
 		assertFalse("No error?", importResult[0].hasError());
 		
+		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
+	}
+	
+	public void test6962followup() throws TestException, IOException, SAXException, JSONException, Exception{
+		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nEND:VCARD\nBEGIN:VCARD\nVERSION:666\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nEND:VCARD";
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		
+		assertTrue("Two import attempts" , importResult.length == 2);
+		assertFalse("No error on first attempt?", importResult[0].hasError());
+		assertTrue("Error on second attempt?", importResult[1].hasError());
+		OXException ex = importResult[1].getException();
+
+		//following line was removed since test environment does not relay correct error messages from server
+		//assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());
 		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 }
