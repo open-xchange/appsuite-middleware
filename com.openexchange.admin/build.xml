@@ -305,8 +305,10 @@
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
 		<chmod perm="700" dir="${destdir}/var/log/open-xchange"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
-            <fileset dir="etc" excludes="**/*.in,ResourceGroup.properties"/>
+            <fileset dir="etc" excludes="**/*.in,ResourceGroup.properties,**/database-changes/**"/>
         </copy>
+	    <!-- grrr, unable to exclude a directory, so remove it manually -->
+    	<delete dir="${destdir}/${prefix}/${oxconfdir}/etc/mysql/database-changes"/>
 		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
             <fileset dir="sbin" excludes="*.in,config.ini.helper" followsymlinks="true"/>
