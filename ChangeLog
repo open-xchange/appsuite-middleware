@@ -15,7 +15,7 @@
 
 * 2007-05-02 - thorben.betten@open-xchange.com
 
- - Fixed comma-separation in multiple request
+ - Bugfix #7008: Fixed comma-separation in multiple request
  - Bugfix #6994: Proper decoding a original message's subject on creating
    reply's display version
  - Bugfix #7007: Using java.text.Collator to sort strings locale-specific 
