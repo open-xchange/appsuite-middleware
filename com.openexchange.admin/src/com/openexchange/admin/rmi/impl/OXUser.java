@@ -566,6 +566,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException(); 
         }
         
+        if ( users.length <= 0 ) {
+            throw new InvalidDataException();
+        }
         
               // ok here its possible that a user wants to get his own data
             //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
