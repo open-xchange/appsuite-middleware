@@ -53,7 +53,10 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -110,6 +113,10 @@ public class SpamUpdateTask implements UpdateTask {
 	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET confirmed_spam = ?, confirmed_ham = ?";
 	
 	private static final String STR_INFO = "Performing update task 'SpamUpdateTask'";
+	
+	private static final String CONFIRMED_SPAM = "confirmed_spam";
+	
+	private static final String CONFIRMED_HAM = "confirmed_ham";
 
 	/*
 	 * (non-Javadoc)
@@ -126,6 +133,9 @@ public class SpamUpdateTask implements UpdateTask {
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
+		}
+		if (checkExistence(CONFIRMED_SPAM, contextId) && checkExistence(CONFIRMED_HAM, contextId)) {
+			return;
 		}
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
@@ -146,6 +156,41 @@ public class SpamUpdateTask implements UpdateTask {
 			closeSQLStuff(null, stmt);
 			if (writeCon != null) {
 				Database.back(contextId, true, writeCon);
+			}
+		}
+	}
+	
+	private static final String SQL_SELECT_ALL = "SELECT * FROM user_setting_mail";
+	
+	@OXThrowsMultiple(
+			category = { Category.CODE_ERROR },
+			desc = { "" },
+			exceptionId = { 2 },
+			msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." }
+	)
+	private static final boolean checkExistence(final String colName, final int contextId) throws AbstractOXException {
+		Connection readCon = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			readCon = Database.get(contextId, false);
+			try {
+				stmt = readCon.createStatement();
+				rs = stmt.executeQuery(SQL_SELECT_ALL);
+				final ResultSetMetaData meta = rs.getMetaData();
+				final int length = meta.getColumnCount();
+				boolean found = false;
+				for (int i = 1; i <= length && !found; i++) {
+					found = colName.equals(meta.getColumnName(i));
+				}
+				return found;
+			} catch (SQLException e) {
+				throw EXCEPTION.create(2, e, e.getMessage());
+			}
+		} finally {
+			closeSQLStuff(rs, stmt);
+			if (readCon != null) {
+				Database.back(contextId, false, readCon);
 			}
 		}
 	}

@@ -79,12 +79,25 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
 public class PasswordMechUpdateTask implements UpdateTask {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(PasswordMechUpdateTask.class);
+
 	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(PasswordMechUpdateTask.class);
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
+	 */
 	public int addedWithVersion() {
 		return 1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
+	 */
 	public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
@@ -93,18 +106,24 @@ public class PasswordMechUpdateTask implements UpdateTask {
 	}
 
 	private static final String SQL_MODIFY = "ALTER TABLE user ADD COLUMN passwordMech VARCHAR(32) NOT NULL";
-	
+
 	private static final String SQL_UPDATE = "UPDATE TABLE user SET passwordMech = ?";
-	
+
 	private static final String SHA = "{SHA}";
 
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 2 },
-			msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." }
-		)
+	private static final String STR_INFO = "Performing update task 'PasswordMechUpdateTask'";
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
+	 *      int)
+	 */
+	@OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." })
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+		if (LOG.isInfoEnabled()) {
+			LOG.info(STR_INFO);
+		}
 		if (checkColumn(contextId)) {
 			/*
 			 * Column already exists
@@ -146,12 +165,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 	 *         otherwise <code>false</code>
 	 * @throws AbstractOXException
 	 */
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 1 },
-			msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." }
-	)
+	@OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s." })
 	private static final boolean checkColumn(final int contextId) throws AbstractOXException {
 		Connection readCon = null;
 		Statement stmt = null;
