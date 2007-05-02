@@ -129,12 +129,17 @@ public class Starter {
 		}
 
         try {
-            LOG.info("Server name: " + Server.getServerName());
+        	if (LOG.isInfoEnabled()) {
+        		LOG.info("Server name: " + Server.getServerName());
+        	}
             DatabaseInit.init();
         } catch (DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
             System.exit(1);
         }
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Database system successfully initialized");
+		}
 
         // DBPool dbpool = new DBPool(ComfireConfig.getDBPool(),
 		// ComfireConfig.getWriteDBPool());
@@ -146,6 +151,9 @@ public class Starter {
             LOG.error("Initializing the groupware server failed.", e);
             System.exit(1);
         }
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Groupware server successfully initialized.");
+		}
         
         try {
         	BackendServicesInit.init();
@@ -153,6 +161,9 @@ public class Starter {
             LOG.error("Initializing the backend services failed.", e);
             System.exit(1);
         }
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Backend services successfully initialized.");
+		}
         
         /*
          * TODO: Check property ENABLE_INTERNAL_USER_EDIT
