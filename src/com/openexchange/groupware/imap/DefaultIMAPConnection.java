@@ -181,10 +181,12 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		 */
 		imapStore = (IMAPStore) imapSession.getStore(PROTOCOL_IMAP);
 		String tmpPass = imapPassword;
-		try {
-			tmpPass = new String(imapPassword.getBytes(CHARENC_UTF8), CHARENC_ISO8859);
-		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
+		if (imapPassword != null) {
+			try {
+				tmpPass = new String(imapPassword.getBytes(CHARENC_UTF8), CHARENC_ISO8859);
+			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 		imapStore.connect(imapServer, imapPort, imapUsername, tmpPass);
 		MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
