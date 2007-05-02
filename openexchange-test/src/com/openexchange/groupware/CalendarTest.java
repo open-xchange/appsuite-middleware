@@ -63,7 +63,7 @@ public class CalendarTest extends TestCase {
     
     private static boolean do_not_delete = false;
     
-    int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+    static int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
     
     protected void setUp() throws Exception {        
         super.setUp();
@@ -1486,10 +1486,10 @@ public class CalendarTest extends TestCase {
         
         
         Participants participants = new Participants();
-        Participant p = new ExternalUserParticipant();
-        p.setEmailAddress(mail_address);
-        p.setDisplayName(display_name);
-        participants.add(p);
+        Participant p1 = new ExternalUserParticipant();
+        p1.setEmailAddress(mail_address);
+        p1.setDisplayName(display_name);
+        participants.add(p1);
         
         Participant p2 = new ExternalUserParticipant();
         p2.setEmailAddress(mail_address2);
@@ -1527,9 +1527,9 @@ public class CalendarTest extends TestCase {
         
         String display_name_2_fail = "Externer test user without mail address";
         participants = new Participants();
-        p = new ExternalUserParticipant();
-        p.setDisplayName(display_name_2_fail);
-        participants.add(p);
+        Participant p_fail = new ExternalUserParticipant();
+        p_fail.setDisplayName(display_name_2_fail);
+        participants.add(p_fail);
         
         update.setContext(so.getContext());
         update.setObjectID(object_id);
@@ -1556,25 +1556,28 @@ public class CalendarTest extends TestCase {
         String update_new_mail_2 = "abc2@de";        
         
         Participants participants_update = new Participants();
-        p = new ExternalUserParticipant();
-        p.setDisplayName(update_new_display_1);
-        p.setEmailAddress(update_new_mail_1);
-        participants_update.add(p);
+        Participant p3 = new ExternalUserParticipant();
+        p3.setDisplayName(update_new_display_1);
+        p3.setEmailAddress(update_new_mail_1);
+        participants_update.add(p3);
         
-        p2 = new ExternalUserParticipant();
-        p2.setDisplayName(update_new_display_2);
-        p2.setEmailAddress(update_new_mail_2);
+        Participant p4 = new ExternalUserParticipant();
+        p4.setDisplayName(update_new_display_2);
+        p4.setEmailAddress(update_new_mail_2);
+        participants_update.add(p4);
+        
+        participants_update.add(p1);
         participants_update.add(p2);
         
         update_participants.setContext(so.getContext());
         update_participants.setObjectID(object_id);
         update_participants.setParticipants(participants_update.getList());
-        update_participants.setIgnoreConflicts(true);        
+        update_participants.setIgnoreConflicts(true);
         
         csql.updateAppointmentObject(update_participants, fid, cdao.getLastModified());
 
         
-        CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);    
+        CalendarDataObject testobject_update = csql.getObjectById(object_id, fid);
         
         Participant test_participants_update[] = testobject_update.getParticipants();
         
@@ -1603,6 +1606,53 @@ public class CalendarTest extends TestCase {
         
         assertEquals("Found all 4 external participants after update", 4, found_external);
         
+        CalendarDataObject update_participants2 = new CalendarDataObject();
+      
+        
+        Participants participants_update2 = new Participants();
+
+        participants_update2.add(p1);
+
+        participants_update2.add(p2);
+        
+
+        
+        update_participants2.setContext(so.getContext());
+        update_participants2.setObjectID(object_id);
+        update_participants2.setParticipants(participants_update2.getList());
+        update_participants2.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update_participants2, fid, update_participants.getLastModified());
+
+        
+        CalendarDataObject testobject_update2 = csql.getObjectById(object_id, fid);
+        
+        Participant test_participants_update2[] = testobject_update2.getParticipants();
+        
+        found_external = 0;
+        for (int a = 0; a < test_participants_update2.length; a++) {
+            if (test_participants_update2[a].getType() == Participant.EXTERNAL_USER) {
+                if (test_participants_update2[a].getEmailAddress().equals(mail_address)) {
+                    assertEquals("Check display name", display_name, test_participants_update2[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address, test_participants_update2[a].getEmailAddress());
+                    found_external++;
+                } else if (test_participants_update2[a].getEmailAddress().equals(mail_address2)) {
+                    assertEquals("Check display name", display_name2, test_participants_update2[a].getDisplayName());
+                    assertEquals("Check mail address", mail_address2, test_participants_update2[a].getEmailAddress());                        
+                    found_external++;
+                } else if (test_participants_update2[a].getEmailAddress().equals(update_new_mail_1)) {
+                    assertEquals("Check display name", update_new_display_1, test_participants_update2[a].getDisplayName());
+                    assertEquals("Check mail address", update_new_mail_1, test_participants_update2[a].getEmailAddress());                        
+                    found_external++;
+                } else if (test_participants_update2[a].getEmailAddress().equals(update_new_mail_2)) {
+                    assertEquals("Check display name", update_new_display_2, test_participants_update2[a].getDisplayName());
+                    assertEquals("Check mail address", update_new_mail_2, test_participants_update2[a].getEmailAddress());                        
+                    found_external++;
+                }
+            }
+        }          
+        
+        assertEquals("Found last 2 external participants after second update", 2, found_external);
         
     }    
   
@@ -1627,6 +1677,7 @@ public class CalendarTest extends TestCase {
         CalendarSql csql = new CalendarSql(so);        
         csql.insertAppointmentObject(cdao);        
         int object_id = cdao.getObjectID();
+   
         
     }
     

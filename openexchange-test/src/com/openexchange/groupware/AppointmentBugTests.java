@@ -1,5 +1,6 @@
 package com.openexchange.groupware;
 
+import com.openexchange.groupware.calendar.OXCalendarException;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -1056,6 +1057,8 @@ public class AppointmentBugTests extends TestCase {
             ignore.printStackTrace();
         }                
     }    
+    
+    
     /*
      Whole day apps should be visible in all views
     */
@@ -1250,6 +1253,209 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Calculated results is correct", OCCURRENCE_TEST, sub_value+rest_value);
         
     }
+    
+    /*
+     As User A:
+     1. Create a new appointment in your default private calendar
+     2. Edit the appointment, and change the folder to the shared folder of user B
+     3. Verify the shared folder of user B
+     4. Verify the private calendar folder of user A
+     */    
+     public void testBug6910() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS);
+        fo.setFolderName("testSharedFolder6910");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarSql csql = new CalendarSql(so);
+            CalendarSql csql2 = new CalendarSql(so2);
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(shared_folder_id);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug6910 - Step 1");
+            cdao.setIgnoreConflicts(true);
+            csql.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject testobject = csql.getObjectById(object_id, shared_folder_id);
+            
+            UserParticipant up[] = testobject.getUsers();
+            assertTrue("up > 0", up.length > 0);
+            
+            CalendarDataObject update = new CalendarDataObject();
+            update.setContext(so.getContext());
+            update.setObjectID(object_id);
+            update.setParentFolderID(shared_folder_id);
+            update.setIgnoreConflicts(true);
+            update.setTitle("testBug6910 - Step 2");
+            
+            csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+            
+            CalendarDataObject testobject2 = csql.getObjectById(object_id, shared_folder_id);
+            
+            UserParticipant up2[] = testobject2.getUsers();
+            assertTrue("up2 > 0", up2.length > 0);
+            
+            assertEquals("Check if user is still the same", up[0].getIdentifier(), up2[0].getIdentifier());
+            assertEquals("Check that the fid is still the same", testobject.getParentFolderID(), testobject2.getParentFolderID());
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }
+     }
+     /*
+
+      Precondition:
+       - A main-calendar, the users personal calendar folder
+       - A sub-calendar, a subfolder of the users calendar
+
+      1. Create a new appointment series in a sub-calendar of the personal calendar
+
+      2. Select one occurrence of the series and click "Edit" in the panel
+
+      3. Select "Single Appointment" in the dialog popup
+
+      4. Select another calendar folder in the edit contact window (e.g. the main
+      personal calendar)
+
+      5. Save the changes
+
+      6. Verify the appointment sequence in the sub-calendar and the main-calendar    
+
+      -> The selected occurrence has been kept in the sub-calendar while the other
+      part of the occurrence has been moved to the main-calendar. This is exactly the
+      opposite of which is expected.
+      */
+     public void testBug6400() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+
+        
+        fo.setFolderName("testBug6400");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1 });       
+        
+        int subfolder_id = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            subfolder_id = fo.getObjectID();       
+            
+            CalendarSql csql = new CalendarSql(so);
+
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(subfolder_id);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug6400 - Step 1");
+            cdao.setIgnoreConflicts(true);
+            cdao.setRecurrenceType(CalendarObject.DAILY);
+            cdao.setInterval(1);              
+
+            csql.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject testobject = csql.getObjectById(object_id, subfolder_id);
+            
+        
+            Date save_start = testobject.getStartDate();
+            Date save_end = testobject.getEndDate();
+            
+        
+            CalendarDataObject update = new CalendarDataObject();
+            update.setContext(so.getContext());
+            update.setTitle("testBug6400 - Step 2");
+            update.setObjectID(object_id);
+            update.setRecurrencePosition(1);
+            update.setIgnoreConflicts(true);
+            update.setParentFolderID(fid);        
+
+            try {
+                csql.updateAppointmentObject(update, subfolder_id, new Date(SUPER_END));
+                int object_id_exception = update.getObjectID();
+                fail("Test failed. An exception can not be moved into a different folder.");
+            } catch(OXCalendarException e) {
+                // Must fail
+                assertEquals("Check correct error message", 65, e.getDetailNumber());
+            }
+            
+                        
+        } finally {
+            int x = 0;
+            try {
+                if (subfolder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(subfolder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }         
+     }
+     
     
     
 }

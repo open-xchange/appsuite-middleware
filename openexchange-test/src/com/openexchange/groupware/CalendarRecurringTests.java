@@ -33,7 +33,7 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 
 
 public class CalendarRecurringTests extends TestCase {
-     
+    
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
     public static final String TIMEZONE = "Europe/Berlin";
     private static int userid = 11; // bishoph
@@ -41,7 +41,7 @@ public class CalendarRecurringTests extends TestCase {
     
     private static boolean init = false;
     
-    protected void setUp() throws Exception {        
+    protected void setUp() throws Exception {
         super.setUp();
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
@@ -59,7 +59,7 @@ public class CalendarRecurringTests extends TestCase {
     private static Properties getAJAXProperties() {
         Properties properties = Init.getAJAXProperties();
         return properties;
-    }        
+    }
     
     private static int resolveUser(String u) throws Exception {
         UserStorage uStorage = UserStorage.getInstance(getContext());
@@ -71,7 +71,7 @@ public class CalendarRecurringTests extends TestCase {
             Init.initDB();
             init = true;
         }
-        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        
+        String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
         return resolveUser(user);
     }
     
@@ -85,34 +85,34 @@ public class CalendarRecurringTests extends TestCase {
         Connection readcon = DBPool.pickup(context);
         privatefolder = new Integer(OXFolderTools.getCalendarDefaultFolder(userid, context, readcon)).intValue();
         DBPool.push(context, readcon);
-        return privatefolder;        
+        return privatefolder;
     }
     
-   public void testBasicRecurring() throws Throwable {
-        CalendarDataObject cdao = new CalendarDataObject();     
+    public void testBasicRecurring() throws Throwable {
+        CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         assertFalse(cdao.calculateRecurrence());
         cdao.setStartDate(new Date(0));
         cdao.setEndDate(new Date(0));
-        cdao.setUntil(new Date(0));        
+        cdao.setUntil(new Date(0));
         cdao.setTitle("testBasicRecurring");
         cdao.setRecurrenceID(1);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceType(CalendarObject.DAILY);        
+        cdao.setRecurrenceType(CalendarObject.DAILY);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceCalculator(1);        
+        cdao.setRecurrenceCalculator(1);
         assertFalse(cdao.calculateRecurrence());
         cdao.setInterval(1);
         assertTrue(cdao.calculateRecurrence());
     }
-
-   public void testBasicRecurringWithOccurence() throws Throwable {
-       
+    
+    public void testBasicRecurringWithOccurrence() throws Throwable {
+        
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);       
-       
-        CalendarDataObject cdao = new CalendarDataObject();     
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
         cdao.setTimezone(TIMEZONE);
         
@@ -122,13 +122,13 @@ public class CalendarRecurringTests extends TestCase {
         assertFalse("test if no until is set", cdao.containsUntil());
         long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_DAY * 5);
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
-   
-        cdao.setTitle("testBasicRecurringWithOccurence");
+        
+        cdao.setTitle("testBasicRecurringWithOccurrence");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         
         CalendarRecurringCollection.fillDAO(cdao);
-        assertEquals("Check correct until for tis occurence", test_until, cdao.getUntil().getTime());
+        assertEquals("Check correct until for tis Occurrence", test_until, cdao.getUntil().getTime());
         
         cdao.setParentFolderID(fid);
         cdao.setIgnoreConflicts(true);
@@ -136,46 +136,46 @@ public class CalendarRecurringTests extends TestCase {
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();
         
-        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);
         
-        assertEquals("Check correct occurence value", 5, test_dao.getOccurrence());
+        assertEquals("Check correct Occurrence value", 5, test_dao.getOccurrence());
         
         CalendarRecurringCollection.fillDAO(cdao);
         
-        //RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);        
+        //RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         //for (int a = 0; a < m.size(); a++) {
         //    RecurringResult rs = m.getRecurringResult(a);
         //    System.out.println(">>> "+new Date(rs.getStart()));
-        //}        
+        //}
         
         //assertFalse("Test that until is not set", test_dao.containsUntil());
-    }   
-
-   public void testBasicRecurringWithoutUntilAndWithoutOccurence() throws Throwable {
-       
+    }
+    
+    public void testBasicRecurringWithoutUntilAndWithoutOccurrence() throws Throwable {
+        
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);       
-       
-        CalendarDataObject cdao = new CalendarDataObject();     
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
         cdao.setTimezone(TIMEZONE);
         
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
         assertFalse("test if no until is set", cdao.containsUntil());
-        assertFalse("test if no occurence is set", cdao.containsOccurrence());
+        assertFalse("test if no Occurrence is set", cdao.containsOccurrence());
         
         long test_until = cdao.getEndDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS());
         test_until = CalendarRecurringCollection.normalizeLong(test_until);
         
-        cdao.setTitle("testBasicRecurringWithoutUntilAndWithoutOccurence");
+        cdao.setTitle("testBasicRecurringWithoutUntilAndWithoutOccurrence");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         
         CalendarRecurringCollection.fillDAO(cdao);
         
-        assertEquals("Check correct until for tis occurence", test_until, cdao.getUntil().getTime());
+        assertEquals("Check correct until for tis Occurrence", test_until, cdao.getUntil().getTime());
         
         cdao.setParentFolderID(fid);
         cdao.setIgnoreConflicts(true);
@@ -183,28 +183,28 @@ public class CalendarRecurringTests extends TestCase {
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();
         
-        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);
         
-        assertFalse("test if no occurence is set", test_dao.containsOccurrence());        
+        assertFalse("test if no Occurrence is set", test_dao.containsOccurrence());
         //assertFalse("Test that until is not set", test_dao.containsUntil()); // Check this
-    }       
+    }
     
     public void testBasicRecurringWithoutUntil() throws Throwable {
-        CalendarDataObject cdao = new CalendarDataObject();     
+        CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         assertFalse(cdao.calculateRecurrence());
         cdao.setStartDate(new Date(0));
-        cdao.setEndDate(new Date(0));        
+        cdao.setEndDate(new Date(0));
         cdao.setTitle("Basic Recurring Test");
         cdao.setRecurrenceID(1);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceType(CalendarObject.DAILY);        
+        cdao.setRecurrenceType(CalendarObject.DAILY);
         assertFalse(cdao.calculateRecurrence());
-        cdao.setRecurrenceCalculator(1);        
+        cdao.setRecurrenceCalculator(1);
         assertFalse(cdao.calculateRecurrence());
         cdao.setInterval(1);
         assertTrue(cdao.calculateRecurrence());
-    }    
+    }
     
     
     public void testDailyRecurring() throws Throwable {
@@ -222,23 +222,23 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrence(testrecurrence);
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
-                
-                
+        
+        
         long pass_one_start = System.currentTimeMillis();
-
+        
         CalendarRecurringCollection.fillDAO(cdao);
         
         long pass_one_end = System.currentTimeMillis();
         long pass_one_time = pass_one_end - pass_one_start;
         
         long pass_two_start = System.currentTimeMillis();
-
+        
         CalendarRecurringCollection.fillDAO(cdao);
         
         long pass_two_end = System.currentTimeMillis();
         long pass_two_time = pass_two_end - pass_two_start;
         
-        String check = CalendarRecurringCollection.createDSString(cdao);        
+        String check = CalendarRecurringCollection.createDSString(cdao);
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
         RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 6, m.size());
@@ -248,25 +248,25 @@ public class CalendarRecurringTests extends TestCase {
         double percent = pass_two_time/10;
         percent = pass_one_time * 100 / percent;
         
-    }    
+    }
     
     public void testDailyByPosition() throws Throwable {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setTitle("Daily Appointment By Position Test");
-        CalendarTest.fillDatesInDao(cdao);        
+        CalendarTest.fillDatesInDao(cdao);
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         for (int a = 0; a < rrs.size(); a++) {
             RecurringResults rrs_check = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, rrs.getRecurringResult(a).getPosition());
             RecurringResult rr = rrs_check.getRecurringResult(0);
             assertEquals("Check correct recurrence position", rrs.getRecurringResult(a).getPosition(), rr.getPosition());
             assertEquals("Check correct start time", rrs.getRecurringResult(a).getStart(), rr.getStart());
-            assertTrue("Check correct position calculation", a+1 == rr.getPosition());            
+            assertTrue("Check correct position calculation", a+1 == rr.getPosition());
         }
-    }        
+    }
     
     
     public void testDailyRecurringWithDAO() throws Throwable {
@@ -286,27 +286,27 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
         CalendarRecurringCollection.fillDAO(cdao);
-        String check = CalendarRecurringCollection.createDSString(cdao);        
+        String check = CalendarRecurringCollection.createDSString(cdao);
         assertTrue("Checking daily sequence", check.equals(testrecurrence));
         RecurringResults m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Check calculation", 6, m.size()); 
+        assertEquals("Check calculation", 6, m.size());
         
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         assertEquals("Check calculation", 1, m.size());
-    }       
+    }
     
     
     public void testWeeklyRecurrence() throws Throwable {
         
 //
 //      Juni 2006
-//So Mo Di Mi Do Fr Sa 
+//So Mo Di Mi Do Fr Sa
 //             1  2  3
 // 4  5  6  7  8  9 10
 //11 12 13 14 15 16 17
 //18 19 20 21 22 23 24
-//25 26 27 28 29 30 
-       
+//25 26 27 28 29 30
+        
         long s = 1149768000000L; // 08.06.2006 12:00 (GMT)
         long e = 1149771600000L; // 08.06.2006 13:00 (GMT)
         long u = 1151100000000L; // 24.06.2006 00:00 (GMT)
@@ -324,9 +324,9 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.MONDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
@@ -342,12 +342,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.SUNDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);        
+        assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);
         
         // TUESDAY
         cdao = new CalendarDataObject();
@@ -359,12 +359,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.TUESDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (TUESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.TUESDAY);          
+        assertEquals("First day check (TUESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.TUESDAY);
         
         
         // WEDNESDAY
@@ -377,12 +377,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.WEDNESDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);         
+        assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);
         
         // THURSDAY
         cdao = new CalendarDataObject();
@@ -394,12 +394,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.THURSDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.THURSDAY);         
+        assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.THURSDAY);
         
         // FRIDAY
         cdao = new CalendarDataObject();
@@ -411,12 +411,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.FRIDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);         
+        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);
         
         // SATURDAY
         cdao = new CalendarDataObject();
@@ -428,12 +428,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.SATURDAY);
-        CalendarRecurringCollection.fillDAO(cdao);        
+        CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 1);
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
-        assertEquals("First day check (SATURDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SATURDAY);           
+        assertEquals("First day check (SATURDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SATURDAY);
         
         // MONDAY + THURSDAY
         cdao = new CalendarDataObject();
@@ -445,11 +445,11 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.THURSDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Check calculation", 5, m.size()); 
+        assertEquals("Check calculation", 5, m.size());
         
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (THURSDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.THURSDAY);
@@ -467,23 +467,23 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.SUNDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-        assertEquals("Check calculation", 5, m.size()); 
+        assertEquals("Check calculation", 5, m.size());
         
         c.setTimeInMillis(new Date(m.getRecurringResult(0).getStart()).getTime());
         assertEquals("First day check (SUNDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.SUNDAY);
         c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
-        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);        
+        assertEquals("First day check (MONDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.MONDAY);
         
         
-    }       
- 
+    }
+    
     public void testSaveRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
-
+        
         CalendarDataObject cdao = new CalendarDataObject();
         
         long s = System.currentTimeMillis();
@@ -507,7 +507,7 @@ public class CalendarRecurringTests extends TestCase {
         
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));        
+        cdao.setUntil(new Date(u));
         cdao.setTitle("testSaveRecurring");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
@@ -532,8 +532,8 @@ public class CalendarRecurringTests extends TestCase {
             start.add(Calendar.DAY_OF_MONTH, 1);
             ende.add(Calendar.DAY_OF_MONTH, 1);
         }
-    }        
-
+    }
+    
     public void testDeleteSingleRecurringAppointment() throws Throwable {
         Context context = new ContextImpl(contextid);
         CalendarDataObject cdao = new CalendarDataObject();
@@ -556,17 +556,17 @@ public class CalendarRecurringTests extends TestCase {
         Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
         start.setTimeInMillis(saves);
         Calendar ende = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
-        ende.setTimeInMillis(savee);        
+        ende.setTimeInMillis(savee);
         
-        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
-        int uid2 = resolveUser(user2);        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+        int uid2 = resolveUser(user2);
         
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
-        int folder_id2 = OXFolderTools.getDefaultFolder(uid2, FolderObject.CALENDAR, context);        
+        int folder_id2 = OXFolderTools.getDefaultFolder(uid2, FolderObject.CALENDAR, context);
         
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
-        cdao.setUntil(new Date(u));        
+        cdao.setUntil(new Date(u));
         cdao.setTitle("testDeleteSingleRecurringAppointment - step 1 - insert ");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
@@ -575,14 +575,14 @@ public class CalendarRecurringTests extends TestCase {
         
         cdao.setParentFolderID(folder_id);
         
-        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");        
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
         
-        Participants p = new Participants();        
+        Participants p = new Participants();
         Participant pa = new UserParticipant();
         pa.setIdentifier(userid);
         p.add(pa);
-
+        
         Participant pa2 = new UserParticipant();
         pa2.setIdentifier(uid2);
         p.add(pa2);
@@ -608,7 +608,7 @@ public class CalendarRecurringTests extends TestCase {
         }
         
         // Delete (virtually) a single app in the sequence
-        CalendarDataObject test_delete = csql.getObjectById(object_id, folder_id);        
+        CalendarDataObject test_delete = csql.getObjectById(object_id, folder_id);
         rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Testing size ", rss.size(), 11);
         
@@ -618,14 +618,14 @@ public class CalendarRecurringTests extends TestCase {
         delete_owner.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
         
-        CalendarDataObject test_object = csql.getObjectById(object_id, folder_id);        
+        CalendarDataObject test_object = csql.getObjectById(object_id, folder_id);
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 0);
         assertEquals("Testing size after deleteing single app from sequence", rss.size(), 10);
         
         rss = CalendarRecurringCollection.calculateRecurring(test_object, 0, 0, 3);
         assertEquals("Testing size after requesting single deleted app from sequence", rss.size(), 0);
         
-        // Now we delete a virtual exception and we are not the owner 
+        // Now we delete a virtual exception and we are not the owner
         
         CalendarSql csql2 = new CalendarSql(so2);
         CalendarDataObject test_delete_not_owner = new CalendarDataObject();
@@ -653,7 +653,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null);
                 assertTrue("Test changed exception is NULL" , test_changed_exceptions == null);
                 assertEquals("Check correct recurrence position", 5, tcdao.getRecurrencePosition());
-            } else {                
+            } else {
                 Date test_deleted_exceptions[] = tcdao.getDeleteException();
                 Date test_changed_exceptions[] = tcdao.getChangeException();
                 assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null);
@@ -667,7 +667,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // delete whole sequence incl. all exceptions
         CalendarDataObject delete_all = new CalendarDataObject();
-        delete_all.setContext(so.getContext());        
+        delete_all.setContext(so.getContext());
         delete_all.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_all, folder_id, new Date(SUPER_END));
         
@@ -677,10 +677,10 @@ public class CalendarRecurringTests extends TestCase {
             assertFalse("Object should not exists anymore ", tcdao.getRecurrenceID() == object_id);
         }
         
-    }          
-
+    }
     
-   public void testRecurringSimpleUpdate() throws Throwable {
+    
+    public void testRecurringSimpleUpdate() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
@@ -703,7 +703,7 @@ public class CalendarRecurringTests extends TestCase {
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();
         
-
+        
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         Date save_start = testobject.getStartDate();
         Date save_end = testobject.getEndDate();
@@ -721,7 +721,7 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check start date", save_start, testobject_update.getStartDate());
         assertEquals("Check end date", save_end, testobject_update.getEndDate());
         assertTrue("Check rec string", rec_string.equals(CalendarRecurringCollection.createDSString(testobject_update)));
-
+        
         
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject_update, 0, 0, 1);
         assertTrue("Got results ", rss.size() == 1);
@@ -737,7 +737,7 @@ public class CalendarRecurringTests extends TestCase {
         update_with_times.setIgnoreConflicts(true);
         
         csql.updateAppointmentObject(update_with_times, folder_id, new Date(SUPER_END));
-
+        
         testobject_update = csql.getObjectById(object_id, folder_id);
         assertEquals("Check start date", save_start, testobject_update.getStartDate());
         assertEquals("Check end date", save_end, testobject_update.getEndDate());
@@ -754,16 +754,16 @@ public class CalendarRecurringTests extends TestCase {
         update_with_changed_times.setIgnoreConflicts(true);
         
         csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date(SUPER_END));
- 
+        
         testobject_update = csql.getObjectById(object_id, folder_id);
         assertEquals("Check start date", new Date(save_start.getTime()+3600000), testobject_update.getStartDate());
         assertEquals("Check end date", new Date(save_end.getTime()+3600000), testobject_update.getEndDate());
         
         assertTrue("Check rec string", !rec_string.equals(CalendarRecurringCollection.createDSString(testobject_update)));
         
-   }
+    }
     
-    public void testUpdateSimpleAppointmentToRecurring() throws Throwable {   
+    public void testUpdateSimpleAppointmentToRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
@@ -774,12 +774,12 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarTest.fillDatesInDao(cdao);
         
-        cdao.setTitle("testUpdateSimpleAppointmentToRecurring - Step 1 - Insert");        
+        cdao.setTitle("testUpdateSimpleAppointmentToRecurring - Step 1 - Insert");
         cdao.setIgnoreConflicts(true);
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        int object_id = cdao.getObjectID();        
+        int object_id = cdao.getObjectID();
         
         CalendarDataObject update = new CalendarDataObject();
         update.setContext(so.getContext());
@@ -788,16 +788,16 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrenceType(CalendarObject.DAILY);
         update.setRecurrenceCalculator(1);
         update.setInterval(1);
-        update.setDays(1);                
+        update.setDays(1);
         update.setUntil(cdao.getUntil());
         update.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
         
-        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         
         RecurringResults rss = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 0);
-        assertTrue("Test object is not null", rss != null);          
+        assertTrue("Test object is not null", rss != null);
         assertEquals("Testing size ", rss.size(), 11);
         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         c.setTimeInMillis(cdao.getStartDate().getTime());
@@ -805,26 +805,26 @@ public class CalendarRecurringTests extends TestCase {
             RecurringResult rs = rss.getRecurringResult(a);
             assertEquals("Check correct start time ", c.getTimeInMillis(), rs.getStart());
             c.add(Calendar.DAY_OF_MONTH, 1);
-        }        
+        }
         
         CalendarDataObject update_normal = new CalendarDataObject();
         update_normal.setContext(so.getContext());
         update_normal.setTitle("testUpdateSimpleAppointmentToRecurring - Step 3 - Update - Normal");
         update_normal.setObjectID(object_id);
-        update_normal.setRecurrenceType(CalendarObject.NO_RECURRENCE);        
+        update_normal.setRecurrenceType(CalendarObject.NO_RECURRENCE);
         update_normal.setIgnoreConflicts(true);
         
-        csql.updateAppointmentObject(update_normal, folder_id, new Date(SUPER_END));                    
+        csql.updateAppointmentObject(update_normal, folder_id, new Date(SUPER_END));
         
-        CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);                
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
         assertEquals("Check if appointment is no sequence", CalendarDataObject.NO_RECURRENCE, testobject2.getRecurrenceType());
         String null_check = "\""+testobject2.getRecurrence()+"\"";
         assertEquals("Check that the recurrence is null ", "\"null\"", null_check);
         //assertNull("Check that the recurrence is null", testobject2.getRecurrence()); // This seems to be a bug, but i cant check null!!
         
     }
-
-    public void testCreateExceptionFromRecurring() throws Throwable {   
+    
+    public void testCreateExceptionFromRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
@@ -845,8 +845,8 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        int object_id = cdao.getObjectID();        
-        Date last = cdao.getLastModified();        
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
         update.setContext(so.getContext());
@@ -871,7 +871,7 @@ public class CalendarRecurringTests extends TestCase {
         
         csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
         assertTrue("Got a new object_id" , object_id != update.getObjectID());
-                
+        
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
         RecurringResult rs_test = rss.getRecurringResult(0);
@@ -902,7 +902,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
                 assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
-        }        
+        }
         si.close();
         assertTrue("Found exception",  found_exception);
         
@@ -913,22 +913,22 @@ public class CalendarRecurringTests extends TestCase {
             if (tcdao.getRecurrenceID() == object_id) {
                 counter ++;
             }
-        }          
+        }
         si.close();
         assertEquals("Check correct number of results" , 2 , counter);
         
     }
-        
-    public void testWeeklyMonday()  throws Throwable {         
+    
+    public void testWeeklyMonday()  throws Throwable {
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         CalendarTest.fillDatesInDao(cdao);
-        cdao.removeUntil();        
+        cdao.removeUntil();
         cdao.setTitle("testWeeklyMonday");
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.MONDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
@@ -937,11 +937,11 @@ public class CalendarRecurringTests extends TestCase {
             c.setTimeInMillis(m.getRecurringResult(a).getStart());
             assertEquals("First day check (MONDAY)", Calendar.MONDAY, c.get(Calendar.DAY_OF_WEEK));
         }
-    }    
+    }
     
-
     
-    public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {   
+    
+    public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
@@ -962,8 +962,8 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        int object_id = cdao.getObjectID();        
-        Date last = cdao.getLastModified();        
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
         update.setContext(so.getContext());
@@ -987,7 +987,7 @@ public class CalendarRecurringTests extends TestCase {
         
         
         csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
-                
+        
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         RecurringResults rss_test = CalendarRecurringCollection.calculateRecurring(testobject, 0, 0, 3, 999, true);
         RecurringResult rs_test = rss.getRecurringResult(0);
@@ -1018,7 +1018,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertEquals("Test exception start date" , test_new_start_date.getTime(), tcdao.getStartDate().getTime());
                 assertEquals("Test exception end date" , test_new_end_date.getTime(), tcdao.getEndDate().getTime());
             }
-        }        
+        }
         si.close();
         assertTrue("Found exception",  found_exception);
         
@@ -1029,13 +1029,13 @@ public class CalendarRecurringTests extends TestCase {
             if (tcdao.getRecurrenceID() == object_id) {
                 counter ++;
             }
-        }          
+        }
         si.close();
         assertEquals("Check correct number of results" , 2 , counter);
         
-    }        
-
-    public void testWeeklyDifferentInterval()  throws Throwable { 
+    }
+    
+    public void testWeeklyDifferentInterval()  throws Throwable {
         
         long s = 1149501600000L; // 05.06.2006 12:00 (GMT)
         long e = 1149505200000L; // 05.06.2006 13:00 (GMT)
@@ -1054,7 +1054,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setTitle("Weekly Appointment Test");
         cdao.setRecurrenceID(1);
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(2);        
+        cdao.setInterval(2);
         cdao.setDays(AppointmentObject.MONDAY + AppointmentObject.WEDNESDAY + AppointmentObject.FRIDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         m = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
@@ -1064,10 +1064,10 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(1).getStart()).getTime());
         assertEquals("First day check (WEDNESDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.WEDNESDAY);
         c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
-        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);        
-    }           
+        assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);
+    }
     
-    public void testCorrectUntitCalculation()  throws Throwable { 
+    public void testCorrectUntitCalculation()  throws Throwable {
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -1075,7 +1075,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.removeUntil();
         cdao.setTitle("testCorrectUntitCalculation");
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setDays(AppointmentObject.WEDNESDAY);
         CalendarRecurringCollection.fillDAO(cdao);
         
@@ -1089,23 +1089,23 @@ public class CalendarRecurringTests extends TestCase {
         cdao2.removeUntil();
         cdao2.setTitle("testCorrectUntitCalculation yearly");
         cdao2.setRecurrenceType(CalendarObject.YEARLY);
-        cdao2.setInterval(1);        
+        cdao2.setInterval(1);
         cdao2.setMonth(Calendar.AUGUST);
         cdao2.setDayInMonth(20);
         CalendarRecurringCollection.fillDAO(cdao);
         
         long check_until2 = CalendarRecurringCollection.normalizeLong( (cdao.getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR *  99)) );
         
-        assertEquals("Check correct until for yearly " , check_until2 , cdao2.getUntil().getTime());        
+        assertEquals("Check correct until for yearly " , check_until2 , cdao2.getUntil().getTime());
         
         
-    }    
+    }
     
     public void testFlagSingleException() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
-    
+        
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -1115,15 +1115,15 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setTitle("testFlagSingleException");
         cdao.setParentFolderID(folder_id);
         cdao.setRecurrenceType(CalendarObject.DAILY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         cdao.setOccurrence(7);
-
+        
         cdao.setIgnoreConflicts(true);
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        int object_id = cdao.getObjectID();        
-        Date last = cdao.getLastModified();          
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
         
         CalendarDataObject flag_exception = new CalendarDataObject();
         flag_exception.setContext(context);
@@ -1141,11 +1141,11 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         CalendarDataObject testobject_exception = csql.getObjectById(object_exception_id, folder_id);
-        assertEquals("Check recurrence id", testobject.getRecurrenceID(), testobject_exception.getRecurrenceID());        
+        assertEquals("Check recurrence id", testobject.getRecurrenceID(), testobject_exception.getRecurrenceID());
         
         
-}
-    public void testWholeDayRecurringWithOccurence() throws Throwable {
+    }
+    public void testWholeDayRecurringWithOccurrence() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
@@ -1162,21 +1162,21 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setFullTime(true);
         long start_time = cdao.getStartDate().getTime();
         start_time = CalendarRecurringCollection.normalizeLong(start_time);
-        cdao.setTitle("testWholeDayRecurringWithOccurence");
+        cdao.setTitle("testWholeDayRecurringWithOccurrence");
         cdao.setParentFolderID(folder_id);
         cdao.setRecurrenceType(CalendarObject.DAILY);
-        cdao.setInterval(1);        
+        cdao.setInterval(1);
         
         int occurrence = 2;
         
         cdao.setOccurrence(occurrence);
-
+        
         cdao.setIgnoreConflicts(true);
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
-        int object_id = cdao.getObjectID();        
-        Date last = cdao.getLastModified();                  
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
         
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         
@@ -1185,6 +1185,45 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct until", check_time, testobject.getUntil());
     }
     
+    public void testComplexOccurrence() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(context);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testComplexOccurrence - Step 1");
+        cdao.setParentFolderID(folder_id);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        cdao.setOccurrence(3);
+        cdao.setIgnoreConflicts(true);
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setIgnoreConflicts(true);
+        update.setTitle("testComplexOccurrence - Step 2");
+        update.setOccurrence(5);
+        update.setObjectID(object_id);
+        /*
+        update.setStartDate(cdao.getStartDate());
+        update.setEndDate(cdao.getEndDate());
+        */
+        
+        csql.updateAppointmentObject(update, folder_id, cdao.getLastModified());
+        
+        CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
+        
+        assertTrue("Check that end date is different", testobject.getUntil().getTime() != testobject2.getUntil().getTime());
+        
+    }
     
     
 }
