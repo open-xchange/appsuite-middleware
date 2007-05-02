@@ -642,6 +642,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
         // TODO: this must be defined somewhere else
         final int NOBODY  = 65534;
         final int NOGROUP = 65534;
+        final String LOGINSHELL = "/bin/bash";
         
         try {
             ps = write_ox_con
@@ -664,7 +665,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             try {
 
                 stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -736,6 +737,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 } else {
                     stmt.setInt(15,NOGROUP);
                 }
+
+                stmt.setString(16,LOGINSHELL);
 
                 stmt.executeUpdate();
                 stmt.close();
