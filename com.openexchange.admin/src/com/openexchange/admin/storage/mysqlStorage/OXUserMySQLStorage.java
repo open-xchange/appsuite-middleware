@@ -639,7 +639,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         PreparedStatement return_db_id = null;
-
+        // TODO: this must be defined somewhere else
+        final int NOBODY  = 65534;
+        final int NOGROUP = 65534;
+        
         try {
             ps = write_ox_con
                     .prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
@@ -661,7 +664,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             try {
 
                 stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -711,25 +714,35 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 homedir += "/" + usrdata.getUsername();
                 stmt.setString(13, homedir);
 
+                if( Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0 ) {
+                    stmt.setInt(14,uid_number);
+                } else {
+                    stmt.setInt(14,NOBODY);
+                }
+
+                final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+
+                int def_group_id = tool.getDefaultGroupForContext(ctx, write_ox_con);
+                if (usrdata.getDefault_group() != null) {
+                    def_group_id = usrdata.getDefault_group().getId();
+                }
+
+                // now check if gidnumber feature is enabled
+                // if yes, update user table to correct gidnumber of users
+                // default group
+                if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
+                    int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
+                    stmt.setInt(15,gid_number);
+                } else {
+                    stmt.setInt(15,NOGROUP);
+                }
+
                 stmt.executeUpdate();
                 stmt.close();
 
-                // check if uidnumber must be set
-                int startnum = Integer.parseInt(prop.getUserProp(
-                        AdminProperties.User.UID_NUMBER_START, "-1"));
-                if (startnum > 0 && uid_number != -1) {
-                    // we should update correct uidnumbers if start number is
-                    // set to higher then 0
-                    stmt = write_ox_con.prepareStatement("UPDATE " + "user "
-                            + "SET " + "uidNumber = ? " + "WHERE " + "cid = ? "
-                            + "AND " + "id = ?");
-                    stmt.setInt(1, uid_number);
-                    stmt.setInt(2, ctx.getIdAsInt().intValue());
-                    stmt.setInt(3, internal_user_id);
-                    stmt.executeUpdate();
-                    stmt.close();
-                }
 
+
+                
                 // fill up statement for prg_contacts update
 
                 final Class c = usrdata.getClass();
@@ -929,15 +942,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.executeUpdate();
                 stmt.close();
 
-                // add user to group members table of his group
-                final OXToolStorageInterface tool = OXToolStorageInterface
-                        .getInstance();
-
-                int def_group_id = tool.getDefaultGroupForContext(ctx,
-                        write_ox_con);
-                if (usrdata.getDefault_group() != null) {
-                    def_group_id = usrdata.getDefault_group().getId();
-                }
                 stmt = write_ox_con
                         .prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt());
@@ -945,23 +949,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
                 stmt.setInt(3, internal_user_id);
                 stmt.executeUpdate();
                 stmt.close();
-
-                // now check if gidnumber feature is enabled
-                // if yes, update user table to correct gidnumber of users
-                // default group
-                if (Integer.parseInt(prop.getGroupProp(
-                        AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                    int gid_number = tool.getGidNumberOfGroup(ctx,
-                            def_group_id, write_ox_con);
-                    stmt = write_ox_con.prepareStatement("UPDATE " + "user "
-                            + "SET " + "gidNumber = ? " + "WHERE " + "cid = ? "
-                            + "AND " + "id = ?");
-                    stmt.setInt(1, gid_number);
-                    stmt.setInt(2, ctx.getIdAsInt().intValue());
-                    stmt.setInt(3, internal_user_id);
-                    stmt.executeUpdate();
-                    stmt.close();
-                }
 
                 if (mustMapAdmin) {
                     stmt = write_ox_con
