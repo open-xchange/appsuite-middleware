@@ -1118,7 +1118,20 @@ public class CalendarOperation implements SearchIterator {
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             int ret = CalendarRecurringCollection.getRecurringAppoiontmentUpdateAction(cdao, edao);
             if (ret == CalendarRecurringCollection.RECURRING_NO_ACTION) {                
-                // We have to check if something has been changed in the meantime!                                
+                // We have to check if something has been changed in the meantime!
+                if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
+                    CalendarDataObject temp = (CalendarDataObject) edao.clone();
+                    RecurringResults rss = CalendarRecurringCollection.calculateFirstRecurring(temp);
+                    if (rss != null) {
+                        RecurringResult rs = rss.getRecurringResult(0);
+                        if (rss != null) {
+                            cdao.setStartDate(new Date(rs.getStart()));
+                            cdao.setEndDate(new Date(rs.getEnd()));
+                        }
+                    }
+                }
+                
+                
                 if (cdao.containsStartDate() && cdao.containsEndDate()) {
                         cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));                    
 
@@ -1159,7 +1172,9 @@ public class CalendarOperation implements SearchIterator {
                         if (cdao.getOccurrence() != edao.getOccurrence()) {
                             clone.setOccurrence(cdao.getOccurrence());
                             clone.removeUntil();
-                            cdao.removeUntil(); // TODO: Test if this is correct
+                            cdao.removeUntil(); 
+                            edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(clone).getTime())));
+                            
                             pattern_change = true;
                             time_change = true;
                         }

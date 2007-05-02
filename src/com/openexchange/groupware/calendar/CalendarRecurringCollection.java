@@ -483,7 +483,7 @@ public final class CalendarRecurringCollection {
         }
     }
     
-    private static final Date getOccurenceDate(CalendarDataObject cdao) throws OXException {
+    static final Date getOccurenceDate(CalendarDataObject cdao) throws OXException {
         RecurringResults rss = calculateRecurring(cdao, 0, 0, cdao.getOccurrence(), 1, true, true);
         RecurringResult rs = rss.getRecurringResult(0);
         if (rs != null) {
