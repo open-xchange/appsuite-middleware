@@ -95,6 +95,11 @@ public abstract class BasicCommandlineOptions {
     * Used when a remote server problem was encountered !
     */
    protected static final int SYSEXIT_REMOTE_ERROR =107;
+   
+   /**
+    * Used when an user does not exists
+    */
+   protected static final int SYSEXIT_NO_SUCH_USER =108;
     
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
