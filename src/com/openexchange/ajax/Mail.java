@@ -1124,7 +1124,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * write into servlet's output stream and then some browsers do
 				 * not allow header "Pragma"
 				 */
-				Tools.removeHeaderPragma(resp);
+				Tools.removeCachingHeader(resp);
 				final OutputStream out = resp.getOutputStream();
 				/*
 				 * Write to response

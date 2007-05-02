@@ -529,7 +529,7 @@ public class Infostore extends PermissionServlet {
 			// Browsers doesn't like the Pragma header the way we usually set
             // this. Especially if files are sent to the browser. So removing
             // pragma header
-			Tools.removeHeaderPragma(res);
+			Tools.removeCachingHeader(res);
 			
 			final byte[] buffer = new byte[200];
 			int bytesRead = 0;

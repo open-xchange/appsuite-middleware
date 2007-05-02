@@ -129,7 +129,7 @@ public class Contact extends DataServlet {
 					 * write into servlet's output stream and then some browsers do
 					 * not allow header "Pragma"
 					 */
-					Tools.removeHeaderPragma(httpServletResponse);
+					Tools.removeCachingHeader(httpServletResponse);
 					os = httpServletResponse.getOutputStream();
 					if (contactObj.getImage1() != null) {
 						os.write(contactObj.getImage1());

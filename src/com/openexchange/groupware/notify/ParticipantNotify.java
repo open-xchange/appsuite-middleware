@@ -181,7 +181,6 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 
 	public void appointmentDeleted(AppointmentObject appointmentObj,
 			SessionObject sessionObj) {
-
 		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_DELETE_MAIL,Notifications.APPOINTMENT_DELETE_TITLE, new AppointmentState(), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
@@ -199,10 +198,12 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	}
 	
 	private void sendNotification(CalendarObject obj, SessionObject sessionObj, String msgKey, String titleKey, State state, boolean forceNotifyOthers, boolean suppressOXReminderHeader) {
-		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserObject().getId() && !forceNotifyOthers)
+		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserObject().getId() && !forceNotifyOthers) {
 			return;
-		if(obj.getParticipants() == null)
+		}
+		if(obj.getParticipants() == null) {
 			return;
+		}
 		SortedSet<String> participantSet = new TreeSet<String>();
 		SortedSet<String> resourceSet = new TreeSet<String>();
 		

@@ -1,3 +1,7 @@
+* 2007-05-02 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7001 Remove all caching headers for downloads. 
+
 * 2007-05-02 - thorben.betten@open-xchange.com
 
  - Fixed comma-separation in multiple request
@@ -61,7 +65,7 @@
  - Optimized folder-cache's write-lock usage on modifying action(s)
 
 * 2007-04-24 - francisco.laguna@open-xchange.com
-  
+ 
   - Fixed Bug #6893 Omit X-OX-Reminder header on appointment and task delete
   - Fixed Bug #6618 Change server.pot strings.
   - Partially fixed Bug #5659 : Added timezone to dates.

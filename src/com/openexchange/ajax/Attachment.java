@@ -313,7 +313,7 @@ public class Attachment extends PermissionServlet {
             // Browsers doesn't like the Pragma header the way we usually set
             // this. Especially if files are sent to the browser. So removing
             // pragma header
-			Tools.removeHeaderPragma(res);
+			Tools.removeCachingHeader(res);
 
 			os = res.getOutputStream();
 			
