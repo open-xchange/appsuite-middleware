@@ -137,12 +137,13 @@ public class Multiple extends SessionServlet {
 		}
 
 		final StringWriter sw = new StringWriter();
+		boolean respWritten = false;
 
 		try {
 			sw.write('[');
 
 			for (int a = 0; a < jsonArray.length(); a++) {
-				parseActionElement(sw, jsonArray, a, getSessionObject(req), req);
+				respWritten |= parseActionElement(sw, jsonArray, a, getSessionObject(req), req, respWritten);
 			}
 
 			if (req.getAttribute(ATTRIBUTE_MAIL_REQUEST) != null) {
@@ -150,6 +151,9 @@ public class Multiple extends SessionServlet {
 				 * Write withheld mail request
 				 */
 				try {
+					if (respWritten) {
+						sw.write(',');
+					}
 					writeMailRequest((MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST), (MailInterface) req
 							.getAttribute(ATTRIBUTE_MAIL_INTERFACE), sw);
 				} finally {
@@ -190,16 +194,10 @@ public class Multiple extends SessionServlet {
 		resp.getWriter().flush();
 	}
 
-	protected static final void parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
-			final SessionObject sessionObj, final HttpServletRequest req) throws JSONException, AjaxException,
-			OXException {
-//		if (pos > 0) {
-//			try {
-//				w.write(',');
-//			} catch (IOException e) {
-//				throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
-//			}
-//		}
+	protected static final boolean parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
+			final SessionObject sessionObj, final HttpServletRequest req, final boolean respWrittenArg)
+			throws JSONException, AjaxException, OXException {
+		boolean respWritten = respWrittenArg;
 
 		final JSONObject jsonObj = jsonArray.getJSONObject(pos);
 
@@ -222,11 +220,17 @@ public class Multiple extends SessionServlet {
 		if (response != null) {
 			if (req.getAttribute(ATTRIBUTE_MAIL_REQUEST) != null) {
 				/*
-				 * Write withheld mail request
+				 * Write withheld mail request first
 				 */
 				try {
+					if (respWritten) {
+						w.write(',');
+					}
 					writeMailRequest((MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST), (MailInterface) req
 							.getAttribute(ATTRIBUTE_MAIL_INTERFACE), w);
+					respWritten = true;
+				} catch (IOException e) {
+					throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
 				} finally {
 					/*
 					 * Remove mail request object
@@ -234,13 +238,17 @@ public class Multiple extends SessionServlet {
 					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, null);
 				}
 			}
-			Response.write(response, w);
-			try {
-				w.write(',');
-			} catch (IOException e) {
-				throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
+			if (respWritten) {
+				try {
+					w.write(',');
+				} catch (IOException e) {
+					throw new AjaxException(AjaxException.Code.IOError, e, e.getMessage());
+				}
 			}
+			Response.write(response, w);
+			return true;
 		}
+		return false;
 	}
 
 	private static final void writeMailRequest(final MailRequest mailReq, final MailInterface mailInterface,

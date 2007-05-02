@@ -109,42 +109,12 @@ public final class MailRequest {
 			MAIL_SERVLET.actionPutDeleteMails(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
 			if (isMove(jsonObject)) {
-				if (collectObj != null) {
-					if (collectObj.collectable(jsonObject, true)) {
-						collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
-					} else {
-						MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(), collectObj
-								.getSrcFld(), collectObj.getDestFld(), collectObj.isMove(), mailInterface);
-						collectObj = null;
-					}
-				} else {
-					/*
-					 * Collect
-					 */
-					collectObj = new CollectObject(jsonObject, true);
-					collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
-				}
+				handleMultiple(jsonObject, mailInterface, true);
 			} else {
 				MAIL_SERVLET.actionPutUpdateMail(session, writer, jsonObject, mailInterface);
 			}
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
-			if (collectObj != null) {
-				if (collectObj.collectable(jsonObject, false)) {
-					collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
-				} else {
-					MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(),
-							collectObj.getSrcFld(), collectObj.getDestFld(), collectObj.isMove(), mailInterface);
-					collectObj = null;
-				}
-			} else {
-				/*
-				 * Collect
-				 */
-				collectObj = new CollectObject(jsonObject, false);
-				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
-			}
-			// MAIL_SERVLET.actionPutCopyMail(session, writer, jsonObject,
-			// mailInterface);
+			handleMultiple(jsonObject, mailInterface, false);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
 			MAIL_SERVLET.actionPutAttachment(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MAIL_RECEIPT_ACK)) {
@@ -155,7 +125,26 @@ public final class MailRequest {
 			throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
 		}
 	}
-	
+
+	private void handleMultiple(final JSONObject jsonObject, final MailInterface mailInterface, final boolean isMove)
+			throws JSONException {
+		if (collectObj != null) {
+			if (collectObj.collectable(jsonObject, isMove)) {
+				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+			} else {
+				MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(), collectObj.getSrcFld(),
+						collectObj.getDestFld(), collectObj.isMove(), mailInterface);
+				collectObj = null;
+			}
+		} else {
+			/*
+			 * Collect
+			 */
+			collectObj = new CollectObject(jsonObject, isMove);
+			collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+		}
+	}
+
 	public boolean hasMultiple() {
 		return (collectObj != null);
 	}
@@ -166,7 +155,7 @@ public final class MailRequest {
 					collectObj.getDestFld(), collectObj.isMove(), mailInterface);
 		}
 	}
-	
+
 	public String getContent() {
 		return writer == null ? null : writer.toString();
 	}
