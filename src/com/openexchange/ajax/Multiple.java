@@ -136,10 +136,10 @@ public class Multiple extends SessionServlet {
 			jsonArray = new JSONArray();
 		}
 
-		final StringWriter sw = new StringWriter();
-		boolean respWritten = false;
-
+		
 		try {
+			final StringWriter sw = new StringWriter();
+			boolean respWritten = false;
 			sw.write('[');
 
 			for (int a = 0; a < jsonArray.length(); a++) {
@@ -165,6 +165,7 @@ public class Multiple extends SessionServlet {
 			}
 
 			sw.write(']');
+			
 			try {
 				response.setData(new JSONArray(sw.toString()));
 			} catch (JSONException e) {
@@ -190,7 +191,7 @@ public class Multiple extends SessionServlet {
 			}
 		}
 
-		resp.getWriter().write(sw.toString());
+		resp.getWriter().write(response.getData().toString());
 		resp.getWriter().flush();
 	}
 

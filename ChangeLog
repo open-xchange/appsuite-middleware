@@ -5,7 +5,8 @@
 
 * 2007-05-02 - francisco.laguna@open-xchange.com
 
- - Bugfix #7001 Remove all caching headers for downloads. 
+ - Bugfix #7001 Remove all caching headers for downloads.
+ - More robust JSONArray handling for multiple servlet (KUDOS to thorben)
 
 * 2007-05-02 - thorben.betten@open-xchange.com
 
