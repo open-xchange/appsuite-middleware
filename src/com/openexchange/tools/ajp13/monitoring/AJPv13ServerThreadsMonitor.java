@@ -52,6 +52,7 @@ package com.openexchange.tools.ajp13.monitoring;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.tools.ajp13.AJPv13Exception;
 import com.openexchange.tools.ajp13.AJPv13Server;
 
 
@@ -178,7 +179,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
 		return 0;
 	}
 
-	public void stopAndRestartAJPServer() {
+	public void stopAndRestartAJPServer() throws AJPv13Exception {
 		AJPv13Server.stopAJPServer();
 		AJPv13Server.startAJPServer();
 	}

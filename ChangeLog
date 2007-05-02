@@ -4,6 +4,7 @@
  - Bugfix #6994: Proper decoding a original message's subject on creating
    reply's display version
  - Bugfix #7007: Using java.text.Collator to sort strings locale-specific 
+ - Bugfix #6971: Server crashes if backend services cannot be initialized
 
 * 2007-04-30 - tobias.prinz@open-xchange.com
 

@@ -181,7 +181,11 @@ public class AJPv13Watcher {
 					/*
 					 * Restart AJP Server
 					 */
-					AJPv13Server.restartAJPServer();
+					try {
+						AJPv13Server.restartAJPServer();
+					} catch (AJPv13Exception e) {
+						LOG.error(e.getMessage(), e);
+					}
 				} else {
 					if (LOG.isInfoEnabled()) {
 						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";

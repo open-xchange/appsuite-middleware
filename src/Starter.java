@@ -147,7 +147,12 @@ public class Starter {
             System.exit(1);
         }
         
-        BackendServicesInit.init();
+        try {
+        	BackendServicesInit.init();
+        } catch (AbstractOXException e) {
+            LOG.error("Initializing the backend services failed.", e);
+            System.exit(1);
+        }
         
         /*
          * TODO: Check property ENABLE_INTERNAL_USER_EDIT

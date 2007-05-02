@@ -50,9 +50,10 @@
 package com.openexchange.tools.ajp13.monitoring;
 
 import com.openexchange.monitoring.MonitorMBean;
+import com.openexchange.tools.ajp13.AJPv13Exception;
 
 public interface AJPv13ServerThreadsMonitorMBean extends MonitorMBean {
 	
-	void stopAndRestartAJPServer();
+	void stopAndRestartAJPServer() throws AJPv13Exception;
 
 }

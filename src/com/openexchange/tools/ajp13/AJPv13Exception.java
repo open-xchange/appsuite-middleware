@@ -157,7 +157,14 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		UNEXPECTED_EMPTY_DATA_PACKAGE(
 				"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d",
-				Category.SOCKET_CONNECTION, 20);
+				Category.SOCKET_CONNECTION, 20),
+		/**
+		 * AJP Server socket could not be bind to port %d. Probably another
+		 * process is already listening on this port.
+		 */
+		STARTUP_ERROR(
+				"AJP Server socket could not be bind to port %d. Probably another process is already listening on this port.",
+				Category.SOCKET_CONNECTION, 21);
 
 		private final String message;
 

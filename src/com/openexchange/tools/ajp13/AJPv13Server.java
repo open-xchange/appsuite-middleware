@@ -62,6 +62,7 @@ import javax.management.ObjectName;
 
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor;
 import com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.tools.servlet.ServletConfigLoader;
@@ -92,7 +93,7 @@ public class AJPv13Server implements Runnable {
 
 	private static AJPv13Server instance;
 
-	private static DecimalFormat DF = new DecimalFormat("0000");
+	private static final DecimalFormat DF = new DecimalFormat("0000");
 
 	public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor;
 
@@ -119,7 +120,7 @@ public class AJPv13Server implements Runnable {
 		}
 	}
 
-	public static void startAJPServer() {
+	public static void startAJPServer() throws AJPv13Exception {
 		/*
 		 * Create Servlet Config and servlet-specific Servlet Context
 		 */
@@ -137,7 +138,7 @@ public class AJPv13Server implements Runnable {
 		instance.startServer();
 	}
 
-	public static void restartAJPServer() {
+	public static void restartAJPServer() throws AJPv13Exception {
 		stopAJPServer();
 		startAJPServer();
 	}
@@ -149,12 +150,12 @@ public class AJPv13Server implements Runnable {
 		instance.stopServer();
 	}
 
-	private AJPv13Server() {
+	private AJPv13Server() throws AJPv13Exception {
 		super();
 		try {
 			serverSocket = new ServerSocket(AJP13_PORT);
 		} catch (IOException ex) {
-			LOG.error(ex.getMessage(), ex);
+			throw new AJPv13Exception(AJPCode.STARTUP_ERROR, ex, Integer.valueOf(AJP13_PORT));
 		}
 	}
 
@@ -241,6 +242,10 @@ public class AJPv13Server implements Runnable {
 			}
 		}
 	}
+	
+	public final boolean isRunning() {
+		return running;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -276,7 +281,11 @@ public class AJPv13Server implements Runnable {
 	}
 
 	public static void main(final String args[]) {
-		new AJPv13Server().startServer();
+		try {
+			new AJPv13Server().startServer();
+		} catch (AJPv13Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	public static int getNumberOfOpenAJPSockets() {
