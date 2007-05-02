@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -96,15 +97,17 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
 	Category.USER_INPUT,
 	Category.CODE_ERROR,
-	Category.CODE_ERROR},
-		desc={"","","","",""},
-		exceptionId={0,1,2,3,4},
+	Category.CODE_ERROR,
+	Category.USER_INPUT},
+		desc={"","","","","",""},
+		exceptionId={0,1,2,3,4,5},
 		msg={
 	"Could not import into the folder %s.",
 	"Subsystem down",
 	"User input Error %s",
 	"Programming Error - Folder %s",
-	"Could not load folder %s"})
+	"Could not load folder %s",
+	"Could not recognize format of the following data: %s"})
 	
 	/**
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -185,33 +188,38 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			List<VCardFileToken> chunks = tokenizer.split();
 			for(VCardFileToken chunk: chunks){
 				VersitDefinition def = chunk.getVersitDefinition();
-				final VersitDefinition.Reader versitReader = def.getReader(
-						new ByteArrayInputStream(chunk.getContent().getBytes("UTF-8")), "UTF-8");
-				
 				ImportResult importResult = new ImportResult();
-					
-				try {
-					VersitObject versitObject = def.parse(versitReader);
-					
-					importResult.setFolder(String.valueOf(contactFolderId));
-					
-					final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
-					contactObj.setParentFolderID(contactFolderId);
-					contactInterface.insertContactObject(contactObj);
-					
-					importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
-					importResult.setDate(contactObj.getLastModified());
-				} catch (OXException exc) {
-					LOG.debug("cannot import contact object", exc);
-					importResult.setException(exc);
-				} catch (ConverterException exc) {
-					LOG.error("cannot convert contact object", exc);
-					importResult.setException(new OXException("cannot parse vcard object", exc));
-				} catch (VersitException exc) {
-					LOG.error("cannot parse contact object", exc);
-					importResult.setException(new OXException("cannot parse vcard object", exc));
-				}
 				
+				if(def != null){
+					final VersitDefinition.Reader versitReader = def.getReader(
+							new ByteArrayInputStream(chunk.getContent().getBytes("UTF-8")), "UTF-8");
+					try {
+						VersitObject versitObject = def.parse(versitReader);
+						
+						importResult.setFolder(String.valueOf(contactFolderId));
+						
+						final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
+						contactObj.setParentFolderID(contactFolderId);
+						contactInterface.insertContactObject(contactObj);
+						
+						importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
+						importResult.setDate(contactObj.getLastModified());
+					} catch (OXException exc) {
+						LOG.debug("cannot import contact object", exc);
+						importResult.setException(exc);
+					} catch (ConverterException exc) {
+						LOG.error("cannot convert contact object", exc);
+						importResult.setException(new OXException("cannot parse vcard object", exc));
+					} catch (VersitException exc) {
+						LOG.error("cannot parse contact object", exc);
+						importResult.setException(new OXException("cannot parse vcard object", exc));
+					} 
+				} else {
+					//could not find appropriate parser for this part of the vcard file
+					LOG.error("Could not recognize format of the following VCard data: " + chunk.getContent());
+					importResult.setDate(new Date(System.currentTimeMillis()));
+					importResult.setException(importExportExceptionFactory.create(5, chunk.getContent()));
+				}
 				list.add(importResult);
 			}
 		} catch (Exception exc) {

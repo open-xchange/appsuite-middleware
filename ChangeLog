@@ -1,3 +1,8 @@
+* 2007-04-30 - tobias.prinz@open-xchange.com
+
+ - Fixed potential follow up to #6962 by adding another check for
+   unknown VCard format.
+
 * 2007-05-02 - francisco.laguna@open-xchange.com
 
  - Bugfix #7001 Remove all caching headers for downloads. 
