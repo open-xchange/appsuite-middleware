@@ -55,6 +55,7 @@ import static com.openexchange.api2.MailInterfaceImpl.handleMessagingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.Collator;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2616,6 +2617,8 @@ public class IMAPUtils {
 	} // end of class TreeNodeComparator
 
 	private static class MailComparator implements Comparator<Message> {
+		
+		private static final String STR_EMPTY = "";
 
 		private final boolean descendingDir;
 
@@ -2626,9 +2629,19 @@ public class IMAPUtils {
 		private static abstract class FieldComparer {
 
 			public final Locale locale;
+			
+			public Collator collator;
 
 			public FieldComparer(final Locale locale) {
 				this.locale = locale;
+			}
+			
+			public Collator getCollator() {
+				if (collator == null) {
+					collator = Collator.getInstance(locale);
+					collator.setStrength(Collator.SECONDARY);
+				}
+				return collator;
 			}
 
 			public abstract int compareFields(final Message msg1, final Message msg2) throws MessagingException;
@@ -2647,7 +2660,8 @@ public class IMAPUtils {
 			fieldComparer = createFieldComparer(this.sortCol, this.locale);
 		}
 
-		private static final int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale) {
+		private static final int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale,
+				final Collator collator) {
 			if (isEmptyAddrArray(addrs1) && !isEmptyAddrArray(addrs2)) {
 				return -1;
 			} else if (!isEmptyAddrArray(addrs1) && isEmptyAddrArray(addrs2)) {
@@ -2655,8 +2669,8 @@ public class IMAPUtils {
 			} else if (isEmptyAddrArray(addrs1) && isEmptyAddrArray(addrs2)) {
 				return 0;
 			}
-			return getCompareStringFromAddress(addrs1[0], locale).compareTo(
-					getCompareStringFromAddress(addrs2[0], locale));
+			return collator.compare(getCompareStringFromAddress(addrs1[0], locale), getCompareStringFromAddress(
+					addrs2[0], locale));
 		}
 
 		private static final boolean isEmptyAddrArray(final Address[] addrs) {
@@ -2672,7 +2686,7 @@ public class IMAPUtils {
 				final DummyAddress da1 = (DummyAddress) addr;
 				return da1.getAddress().toLowerCase(Locale.ENGLISH);
 			} else {
-				return "";
+				return STR_EMPTY;
 			}
 		}
 
@@ -2716,7 +2730,7 @@ public class IMAPUtils {
 				return new FieldComparer(locale) {
 					@Override
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
-						return compareAddrs(msg1.getFrom(), msg2.getFrom(), this.locale);
+						return compareAddrs(msg1.getFrom(), msg2.getFrom(), this.locale, getCollator());
 					}
 				};
 			case JSONMessageObject.FIELD_TO:
@@ -2724,16 +2738,16 @@ public class IMAPUtils {
 					@Override
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
 						return compareAddrs(msg1.getRecipients(Message.RecipientType.TO), msg2
-								.getRecipients(Message.RecipientType.TO), this.locale);
+								.getRecipients(Message.RecipientType.TO), this.locale, getCollator());
 					}
 				};
 			case JSONMessageObject.FIELD_SUBJECT:
 				return new FieldComparer(locale) {
 					@Override
 					public int compareFields(Message msg1, Message msg2) throws MessagingException {
-						final String sub1 = msg1.getSubject().toLowerCase(this.locale);
-						final String sub2 = msg2.getSubject().toLowerCase(this.locale);
-						return (sub1 == null ? "" : sub1).compareTo((sub2 == null ? "" : sub2));
+						final String sub1 = msg1.getSubject() == null ? STR_EMPTY : msg1.getSubject();
+						final String sub2 = msg2.getSubject() == null ? STR_EMPTY : msg2.getSubject();
+						return getCollator().compare(sub1, sub2);
 					}
 				};
 			case JSONMessageObject.FIELD_FLAG_SEEN:
