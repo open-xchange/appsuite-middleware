@@ -81,6 +81,7 @@ public abstract class BasicCommandlineOptions {
      */
     protected static final int SYSEXIT_UNKNOWN_OPTION=104;
     
+  
     /**
      * Used when a communication problem was encountered
      */
@@ -100,6 +101,12 @@ public abstract class BasicCommandlineOptions {
     * Used when an user does not exists
     */
    protected static final int SYSEXIT_NO_SUCH_USER =108;
+   
+   /**
+    * Used when an unknown option was passed to the cmd tool!
+    */
+   protected static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
+   
     
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
