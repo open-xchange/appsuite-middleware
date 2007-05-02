@@ -79,6 +79,18 @@ import com.openexchange.sessiond.SessionObject;
  */
 public class IMAPPropertiesFactory {
 
+	private static final String LOGINTYPE_GLOBAL = "global";
+
+	private static final String LOGINTYPE_ANONYMOUS = "anonymous";
+
+	private static final String LOGINTYPE_USER = "user";
+
+	private static final String CREDSRC_USER_IMAP_LOGIN = "user.imapLogin";
+
+	private static final String CREDSRC_OTHER = "other";
+
+	private static final String CREDSRC_SESSION = "session";
+
 	private static Properties props;
 	
 	private static Properties javaMailProps;
@@ -248,7 +260,7 @@ public class IMAPPropertiesFactory {
 		}
 		final User userObj = sessionObj.getUserObject();
 		final IMAPProperties imapProps = new IMAPProperties(sessionObj.getUserObject().getId(), sessionObj.getContext());
-		if (loginType.equalsIgnoreCase("global")) {
+		if (loginType.equalsIgnoreCase(LOGINTYPE_GLOBAL)) {
 			String imapServer = props.getProperty(PROP_IMAPSERVER);
 			if (imapServer == null) {
 				throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_IMAPSERVER).append(
@@ -285,7 +297,7 @@ public class IMAPPropertiesFactory {
 			 * Set login to user's email address
 			 */
 			imapProps.setImapLogin(userObj.getMail());
-		} else if (loginType.equalsIgnoreCase("user")) {
+		} else if (loginType.equalsIgnoreCase(LOGINTYPE_USER)) {
 			final String credSrc = props.getProperty(PROP_CREDSRC);
 			String imapServer = userObj.getImapServer();
 			int imapPort = 143;
@@ -305,17 +317,17 @@ public class IMAPPropertiesFactory {
 			imapProps.setImapPort(imapPort);
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
-			if (credSrc == null || credSrc.equalsIgnoreCase("session")) {
+			if (credSrc == null || credSrc.equalsIgnoreCase(CREDSRC_SESSION)) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
-			} else if (credSrc.equalsIgnoreCase("other")) {
+			} else if (credSrc.equalsIgnoreCase(CREDSRC_OTHER)) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
-			} else if (credSrc.equalsIgnoreCase("user.imapLogin")) {
+			} else if (credSrc.equalsIgnoreCase(CREDSRC_USER_IMAP_LOGIN)) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
 			}
-		} else if (loginType.equalsIgnoreCase("anonymous")) {
+		} else if (loginType.equalsIgnoreCase(LOGINTYPE_ANONYMOUS)) {
 			String imapServer = userObj.getImapServer();
 			int imapPort = 143;
 			int pos = imapServer.indexOf(':');
@@ -330,7 +342,7 @@ public class IMAPPropertiesFactory {
 				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
 				smtpServer = smtpServer.substring(0, pos);
 			}
-			imapProps.setImapLogin("anonymous");
+			imapProps.setImapLogin(LOGINTYPE_ANONYMOUS);
 			imapProps.setImapPassword("");
 			imapProps.setImapServer(imapServer);
 			imapProps.setImapPort(imapPort);
