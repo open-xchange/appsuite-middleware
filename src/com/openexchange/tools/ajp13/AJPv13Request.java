@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.ajp13;
 
 import java.io.IOException;

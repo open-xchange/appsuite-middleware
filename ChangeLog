@@ -26,6 +26,7 @@
  - Bugfix #6971: Server crashes if backend services cannot be initialized
  - Added update task to add column 'passwordMech' to tabe 'user' if not
    present
+ - Support of AJPv13 CPing request (reply quickly with a CPong)
 
 * 2007-04-30 - tobias.prinz@open-xchange.com
 

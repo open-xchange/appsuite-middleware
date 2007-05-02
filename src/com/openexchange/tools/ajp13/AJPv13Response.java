@@ -89,6 +89,8 @@ public class AJPv13Response {
 	public static final int CPONG_REPLY_PREFIX_CODE = 9;
 
 	public static final Map<String, Integer> headerMap = new HashMap<String, Integer>();
+	
+	private static final byte[] cpongReplyBytes;
 
 	static {
 		headerMap.put("Content-Type", Integer.valueOf(0x01));
@@ -102,6 +104,15 @@ public class AJPv13Response {
 		headerMap.put("Servlet-Engine", Integer.valueOf(0x09));
 		headerMap.put("Status", Integer.valueOf(0x0A));
 		headerMap.put("WWW-Authenticate", Integer.valueOf(0x0B));
+		/*
+		 * CPong reply
+		 */
+		cpongReplyBytes = new byte[5];
+		cpongReplyBytes[0] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[0];
+		cpongReplyBytes[1] = (byte) PACKAGE_FROM_CONTAINER_TO_SERVER[1];
+		cpongReplyBytes[2] = 0;
+		cpongReplyBytes[3] = 1;
+		cpongReplyBytes[4] = CPONG_REPLY_PREFIX_CODE;
 	}
 
 	private final int prefixCode;
@@ -120,31 +131,31 @@ public class AJPv13Response {
 
 	private boolean closeConnection;
 
-	public AJPv13Response(int prefixCode) {
+	public AJPv13Response(final int prefixCode) {
 		super();
 		this.prefixCode = prefixCode;
 	}
 
-	public AJPv13Response(int prefixCode, boolean closeConnection) {
+	public AJPv13Response(final int prefixCode, final boolean closeConnection) {
 		super();
 		this.prefixCode = prefixCode;
 		this.closeConnection = closeConnection;
 	}
 
-	public AJPv13Response(int prefixCode, byte[] responseDataChunk) {
+	public AJPv13Response(final int prefixCode, final byte[] responseDataChunk) {
 		super();
 		this.prefixCode = prefixCode;
 		this.responseDataChunk = new byte[responseDataChunk.length];
 		System.arraycopy(responseDataChunk, 0, this.responseDataChunk, 0, responseDataChunk.length);
 	}
 
-	public AJPv13Response(int prefixCode, HttpServletResponseWrapper resp) {
+	public AJPv13Response(final int prefixCode, final HttpServletResponseWrapper resp) {
 		super();
 		this.prefixCode = prefixCode;
 		this.servletResponse = resp;
 	}
 
-	public AJPv13Response(int prefixCode, int requestedLength) {
+	public AJPv13Response(final int prefixCode, final int requestedLength) {
 		super();
 		this.prefixCode = prefixCode;
 		this.contentLength = requestedLength;
@@ -230,11 +241,20 @@ public class AJPv13Response {
 			writeInt(contentLength);
 			break;
 		case CPONG_REPLY_PREFIX_CODE:
+			dataLength = 1; // just the single CPong prefix byte
+			byteArray = new ByteArrayOutputStream(dataLength + 4);
+			fillStartBytes();
 			break;
 		default:
 			throw new AJPv13Exception(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(prefixCode));
 		}
 		return byteArray.toByteArray();
+	}
+	
+	public static final byte[] getCPongReply() {
+		final byte[] retval = new byte[cpongReplyBytes.length];
+		System.arraycopy(cpongReplyBytes, 0, retval, 0, retval.length);
+		return retval;
 	}
 
 	private static final int getHeaderSizeInBytes(final HttpServletResponseWrapper servletResponse) {

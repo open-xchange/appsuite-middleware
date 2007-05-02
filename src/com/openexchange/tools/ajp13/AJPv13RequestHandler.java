@@ -275,8 +275,8 @@ public class AJPv13RequestHandler {
 					LOG.error("AJPv13 Ping command NOT supported");
 					return;
 				case CPING_PREFIX_CODE:
-					LOG.error("AJPv13 CPing command NOT supported");
-					return;
+					ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
+					break;
 				default:
 					throw new AJPv13UnknownPrefixCodeException(prefixCode);
 				}
