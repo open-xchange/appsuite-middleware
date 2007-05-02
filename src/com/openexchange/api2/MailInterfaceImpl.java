@@ -1516,7 +1516,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throws OXException {
 		return getMessages(folder, null, sortCol, order, null, null, true, fields);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1637,7 +1637,7 @@ public class MailInterfaceImpl implements MailInterface {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 				}
-				if (retval.length == 0) {
+				if (retval == null || retval.length == 0) {
 					/*
 					 * No messages found
 					 */
@@ -2380,19 +2380,15 @@ public class MailInterfaceImpl implements MailInterface {
 			final String subjectPrefix = PREFIX_RE;
 			final String rawSubject = removeHdrLineBreak(originalMsg.getHeader(subjectHeader, null));
 			try {
-				final String decodedSubject = decodeMultiEncodedHeader(rawSubject);
-				final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? rawSubject
-						: MimeUtility.encodeText(new StringBuilder().append(subjectPrefix).append(decodedSubject)
-								.toString(), IMAPProperties.getDefaultMimeCharset(), ENC_Q);
-				retval.setSubject(MimeUtility.decodeText(newSubject));
+				final String decodedSubject = decodeMultiEncodedHeader(MimeUtility.decodeText(rawSubject));
+				final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject
+						: new StringBuilder().append(subjectPrefix).append(decodedSubject).toString();
+				retval.setSubject(newSubject);
 			} catch (UnsupportedEncodingException e) {
 				/*
 				 * Handle raw value: setting prefix to raw subject value still
 				 * leaves a valid and correct encoded header
 				 */
-				originalMsg.setHeader(subjectHeader, new StringBuilder().append(subjectPrefix).append(rawSubject)
-						.toString());
-			} catch (IMAPException e) {
 				originalMsg.setHeader(subjectHeader, new StringBuilder().append(subjectPrefix).append(rawSubject)
 						.toString());
 			}

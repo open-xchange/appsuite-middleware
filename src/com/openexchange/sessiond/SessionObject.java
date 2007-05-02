@@ -52,12 +52,8 @@
 package com.openexchange.sessiond;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Session;
 
@@ -106,62 +102,6 @@ public class SessionObject {
 	private UserConfiguration userConfig;
 	
 	private Session mailSession;
-	
-	private final Set<String> mailFolderLocks = new HashSet<String>();
-
-	private final Lock modLock = new ReentrantLock();
-
-	/**
-	 * Add a mail folder opened in read-write mode to locked set
-	 * 
-	 * @param fullname -
-	 *            folder's full name
-	 * @return <code>true</code> if set does not already contain given
-	 *         fullname; otherwise <code>false</code>
-	 */
-	public final boolean addFolderLock(final String fullname) {
-		modLock.lock();
-		try {
-			return mailFolderLocks.add(fullname);
-		} finally {
-			modLock.unlock();
-		}
-	}
-	
-	/**
-	 * Determines if a mail folder opened in read-write mode is already marked
-	 * as locked
-	 * 
-	 * @param fullname -
-	 *            folder's full name
-	 * @return <code>true</code> if already locked; otherwise
-	 *         <code>false</code>
-	 */
-	public final boolean isFolderLocked(final String fullname) {
-		modLock.lock();
-		try {
-			return mailFolderLocks.contains(fullname);
-		} finally {
-			modLock.unlock();
-		}
-	}
-
-	/**
-	 * Remove a mail folder opened in read-write mode from locked set
-	 * 
-	 * @param fullname -
-	 *            folder's full name
-	 * @return <code>true</code> if removes succeeds; otherwise
-	 *         <code>false</code>
-	 */
-	public final boolean removeFolderLock(final String fullname) {
-		modLock.lock();
-		try {
-			return mailFolderLocks.remove(fullname);
-		} finally {
-			modLock.unlock();
-		}
-	}
 	
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;

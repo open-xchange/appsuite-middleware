@@ -1,6 +1,8 @@
 * 2007-05-02 - thorben.betten@open-xchange.com
 
  - Fixed comma-separation in multiple request
+ - Bugfix #6994: Proper decoding a original message's subject on creating
+   reply's display version
 
 * 2007-04-30 - tobias.prinz@open-xchange.com
 
