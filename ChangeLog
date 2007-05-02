@@ -1,3 +1,8 @@
+* 2007-05-02 - martin.kauss@open-xchange.com
+ 
+ - Fixed bug #6400. An error message is thrown if a user moves an
+   recurring exception into a different folder.
+
 * 2007-04-30 - tobias.prinz@open-xchange.com
 
  - Fixed potential follow up to #6962 by adding another check for
