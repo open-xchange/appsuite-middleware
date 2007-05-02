@@ -107,6 +107,11 @@ public abstract class BasicCommandlineOptions {
     */
    protected static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
    
+   /**
+    * Used when a context aklready exists
+    */
+   protected static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
+   
     
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
