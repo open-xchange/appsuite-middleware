@@ -76,7 +76,15 @@ public abstract class ContextStorage {
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
-        return impl;
+        if (impl != null) { 
+           return impl;    
+        }
+        try {
+            init();
+        } catch (ContextException ex) {
+            ex.printStackTrace();
+        }
+        return impl;    
     }
 
     /**

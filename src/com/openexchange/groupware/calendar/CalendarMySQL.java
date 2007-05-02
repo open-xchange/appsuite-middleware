@@ -1367,8 +1367,10 @@ class CalendarMySQL implements CalendarSqlImp {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR);
             } catch(LdapException ldape) {
                 throw new OXException(ldape);
+            } catch(OXCalendarException oxce) {
+                throw oxce;                
             } catch(OXException oxe) {
-                throw oxe;
+                throw oxe;              
             } catch(Exception ex) {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, 2);
             }

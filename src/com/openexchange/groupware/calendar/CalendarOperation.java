@@ -1197,6 +1197,10 @@ public class CalendarOperation implements SearchIterator {
                         cdao.setRecurrence(edao.getRecurrence());
                     }
                 } 
+            } else {
+                if (cdao.getFolderMove()) {
+                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
+                }
             }
             return ret;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
