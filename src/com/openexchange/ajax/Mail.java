@@ -1749,14 +1749,30 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Update color label
 					 */
-					mailInterface.updateMessageColorLabel(sourceFolder, mailIdentifier.msgUID, colorLabel.intValue());
+					final Message msg = mailInterface.updateMessageColorLabel(sourceFolder, mailIdentifier.msgUID,
+							colorLabel.intValue());
+					if (msg != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
+						/*
+						 * Update cache entry
+						 */
+						MessageCacheManager.getInstance().putMessage(sessionObj, mailIdentifier.msgUID,
+								new MessageCacheObject(msg, mailIdentifier.msgUID));
+					}
 				}
 				if (flagBits != null) {
 					/*
 					 * Update system flags which are allowed to be altered by
 					 * client
 					 */
-					mailInterface.updateMessageFlags(sourceFolder, mailIdentifier.msgUID, flagBits.intValue(), flagVal);
+					final Message msg = mailInterface.updateMessageFlags(sourceFolder, mailIdentifier.msgUID, flagBits
+							.intValue(), flagVal);
+					if (msg != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
+						/*
+						 * Update cache entry
+						 */
+						MessageCacheManager.getInstance().putMessage(sessionObj, mailIdentifier.msgUID,
+								new MessageCacheObject(msg, mailIdentifier.msgUID));
+					}
 				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {

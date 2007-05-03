@@ -289,14 +289,14 @@ public interface MailInterface {
 	/**
 	 * Updates the color label stored in message's user flags
 	 */
-	public boolean updateMessageColorLabel(String folder, long msgUID, int newColorLabel) throws OXException;
+	public Message updateMessageColorLabel(String folder, long msgUID, int newColorLabel) throws OXException;
 	
 	/**
 	 * Updates message's client-alterable system flags (e.g. //SEEN or
 	 * //ANSWERED). <code>flagVal</code> determines whether the affected flags are
 	 * set (<code>true</code>) or unset (<code>false</code>).
 	 */
-	public boolean updateMessageFlags(String folder, long msgUID, int flagBits, boolean flagVal) throws OXException;
+	public Message updateMessageFlags(String folder, long msgUID, int flagBits, boolean flagVal) throws OXException;
 
 	/**
 	 * Checks if user-defines default folder exist

@@ -254,8 +254,6 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String REGEX_CRLF = "(\\r)?\\n";
 
-	private static final String ENC_Q = "Q";
-
 	private static final String PREFIX_RE = "Re: ";
 
 	private static final String STR_ALL = "ALL";
@@ -3657,7 +3655,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	public boolean updateMessageColorLabel(final String folderArg, final long msgUID, final int newColorLabel)
+	public Message updateMessageColorLabel(final String folderArg, final long msgUID, final int newColorLabel)
 			throws OXException {
 		if (!IMAPProperties.isUserFlagsEnabled()) {
 			/*
@@ -3666,7 +3664,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("User flags are disabled or not supported. Update of color flag ignored.");
 			}
-			return true;
+			return null;
 		}
 		try {
 			init();
@@ -3686,7 +3684,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (!IMAPUtils.supportsUserDefinedFlags(imapCon.getImapFolder())) {
 				LOG.error(new StringBuilder().append("Folder \"").append(imapCon.getImapFolder().getFullName()).append(
 						"\" does not support user-defined flags. Update of color flag ignored."));
-				return true;
+				return null;
 			}
 			final String colorLabel = JSONMessageObject.getColorLabelStringValue(newColorLabel);
 			final Message msg;
@@ -3714,7 +3712,7 @@ public class MailInterfaceImpl implements MailInterface {
 			newMsgFlags = new Flags();
 			newMsgFlags.add(colorLabel);
 			msg.setFlags(newMsgFlags, true);
-			return true;
+			return msg;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -3726,7 +3724,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#updateMessageFlags(java.lang.String,
 	 *      long, int, boolean)
 	 */
-	public boolean updateMessageFlags(final String folderArg, final long msgUID, final int flagBitsArg,
+	public Message updateMessageFlags(final String folderArg, final long msgUID, final int flagBitsArg,
 			final boolean flagsVal) throws OXException {
 		try {
 			init();
@@ -3814,7 +3812,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.isSpamEnabled() && ((flagBits & JSONMessageObject.BIT_SPAM) > 0)) {
 				handleSpam(msg, flagsVal, true);
 			}
-			return true;
+			return msg;
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}

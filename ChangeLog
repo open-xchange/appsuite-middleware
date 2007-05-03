@@ -1,11 +1,13 @@
 * 2007-05-03 - thorben.betten@open-xchange.com
 
  - Slightly fastened AJP processing
+ - Bugfix #7002: Color flags were sent back from cache entry on update.
+   This is fixed.
 
 * 2007-05-03 - martin.kauss@open-xchange.com
 
  - Fixed bug #6214. After moving an appointment into a subfolder a reminder
-   was stored even if no reminder is rrequested. This has been fixed.
+   was stored even if no reminder is requested. This has been fixed.
 
 * 2007-05-02 - martin.kauss@open-xchange.com
  
