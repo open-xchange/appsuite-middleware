@@ -59,7 +59,7 @@ public class TaskManager {
 
     public int addJob(final Callable jobcall, final String typeofjob, final String furtherinformation) {
         final Extended job = new Extended(jobcall, typeofjob, furtherinformation);
-        this.jobs.put(this.lastID++, job);
+        this.jobs.put(++this.lastID, job);
         log.debug("Adding job number " + lastID);
         runningjobs++;
         this.executor.execute(job);
