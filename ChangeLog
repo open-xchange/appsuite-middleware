@@ -1,8 +1,13 @@
 * 2007-05-04 - martin.kauss@open-xchange.com
 
+ - Fixed bug #7016. Reminders for recurring appointments were not
+   saved if the reminder was in the past. Now we check the end date
+   and not the reminder date. If the end date is not in the past the
+   reminder is created.
+
  - Fixed bug #6408. Reminders were not saved if the reminder was in the
    past even if the appointment starts in the future. Now the appointment
-   start date is checked and not the reminder date. If the start date is in
+   end date is checked and not the reminder date. If the end date is in
    the past no reminder is stored.
 
 * 2007-05-03 - thorben.betten@open-xchange.com
