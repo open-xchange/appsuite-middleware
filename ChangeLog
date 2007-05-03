@@ -3,6 +3,7 @@
  - Slightly fastened AJP processing
  - Bugfix #7002: Color flags were sent back from cache entry on update.
    This is fixed.
+ - Some changes to approach the fix for bug #6673
 
 * 2007-05-03 - martin.kauss@open-xchange.com
 

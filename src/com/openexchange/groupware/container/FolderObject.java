@@ -182,6 +182,11 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "projects";
 
 	public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "infostore";
+	
+	/**
+	 * The UID prefix of a virtual shared folder
+	 */
+	public static final String SHARED_PREFIX = "u:";
 
 	// Constants for folder fields
 	public static final int FOLDER_NAME = 300;
@@ -1236,6 +1241,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		virtualFolder.setType(type);
 		virtualFolder.setPermissionsAsArray(new OCLPermission[] { p });
 		return virtualFolder;
+	}
+
+	public static final FolderObject createVirtualSharedFolderObject(final int createdBy,
+			final String creatorDisplayName) {
+		return createVirtualFolderObject(new StringBuilder(20).append(SHARED_PREFIX).append(createdBy).toString(),
+				creatorDisplayName, FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 	}
 
 }

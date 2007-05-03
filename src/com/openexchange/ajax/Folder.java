@@ -100,6 +100,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -120,11 +121,6 @@ public class Folder extends SessionServlet {
 
 	private static final String STR_INBOX = "INBOX";
 
-	private static final String SHARED_PREFIX = "u:";
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -889739420660750770L;
 
 	private static transient final Log LOG = LogFactory.getLog(Folder.class);
@@ -572,7 +568,6 @@ public class Folder extends SessionServlet {
 							FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
 					final int size = q.size();
 					final Iterator<FolderObject> iter = q.iterator();
-					final StringBuilder fnBuilder = new StringBuilder(20);
 					for (int i = 0; i < size; i++) {
 						final FolderObject sharedFolder = iter.next();
 						if (us == null) {
@@ -591,10 +586,8 @@ public class Folder extends SessionServlet {
 							continue;
 						}
 						displayNames.add(creatorDisplayName);
-						fnBuilder.setLength(0);
-						final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(fnBuilder
-								.append(SHARED_PREFIX).append(sharedFolder.getCreatedBy()).toString(),
-								creatorDisplayName, FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+						final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(
+								sharedFolder.getCreatedBy(), creatorDisplayName);
 						jsonWriter.array();
 						try {
 							for (int j = 0; j < writers.length; j++) {
@@ -751,7 +744,7 @@ public class Folder extends SessionServlet {
 					}
 				}
 				lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
-			} else if (parentIdentifier.startsWith(SHARED_PREFIX)) {
+			} else if (parentIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
 				/*
 				 * Client requests shared folders
 				 */
@@ -1068,30 +1061,29 @@ public class Folder extends SessionServlet {
 					.asQueue();
 			final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
 			final Queue<FolderObject> deletedQueue = new LinkedList<FolderObject>();
-			boolean updateSystemSharedFolder = false;
+			boolean add2Update = false;
 			int size = q.size();
 			Iterator<FolderObject> iter = q.iterator();
 			for (int i = 0; i < size; i++) {
 				final FolderObject fo = iter.next();
 				if (fo.isVisible(sessionObj.getUserObject().getId(), sessionObj.getUserConfiguration())) {
 					if (fo.isShared(sessionObj.getUserObject().getId())) {
-						updateSystemSharedFolder = true;
+						add2Update = true;
 					}
 					updatedQueue.add(fo);
 				} else {
 					deletedQueue.add(fo);
 				}
 			}
-			if (updateSystemSharedFolder) {
-				final FolderObject sharedFld;
-				if (FolderCacheManager.isEnabled()) {
-					sharedFld = FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID,
-							true, sessionObj.getContext(), null);
-				} else {
-					sharedFld = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_SHARED_FOLDER_ID, sessionObj
-							.getContext());
-				}
-				updatedQueue.add(sharedFld);
+			/*
+			 * Check if shared folder must be updated, too
+			 */
+			if (add2Update) {
+				final FolderObject sharedFolder = new OXFolderAccess(sessionObj.getContext())
+						.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+				sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID,
+						sessionObj.getLocale()));
+				updatedQueue.add(sharedFolder);
 			}
 			/*
 			 * Output updated folders
@@ -1113,12 +1105,12 @@ public class Folder extends SessionServlet {
 			/*
 			 * Get deleted OX folders
 			 */
-			final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
 			q = ((FolderObjectIterator) foldersqlinterface.getDeletedFolders(timestamp)).asQueue();
 			/*
 			 * Add deleted OX folders from above
 			 */
 			q.addAll(deletedQueue);
+			final FolderFieldWriter idWriter = folderWriter.getFolderFieldWriter(new int[] { FolderObject.OBJECT_ID })[0];
 			size = q.size();
 			iter = q.iterator();
 			for (int i = 0; i < size; i++) {
