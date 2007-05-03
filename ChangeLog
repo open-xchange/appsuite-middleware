@@ -1,3 +1,10 @@
+* 2007-05-04 - martin.kauss@open-xchange.com
+
+ - Fixed bug #6408. Reminders were not saved if the reminder was in the
+   past even if the appointment starts in the future. Now the appointment
+   start date is checked and not the reminder date. If the start date is in
+   the past no reminder is stored.
+
 * 2007-05-03 - thorben.betten@open-xchange.com
 
  - Slightly fastened AJP processing
