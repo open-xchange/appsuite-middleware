@@ -1260,6 +1260,9 @@ public class AppointmentBugTests extends TestCase {
      2. Edit the appointment, and change the folder to the shared folder of user B
      3. Verify the shared folder of user B
      4. Verify the private calendar folder of user A
+     
+     Note: The server should not move sucn an appointment because the current user would be removed
+     and the shared folder owner must be added as participant.
      */    
      public void testBug6910() throws Throwable {
         Context context = new ContextImpl(contextid);
@@ -1345,6 +1348,7 @@ public class AppointmentBugTests extends TestCase {
             ignore.printStackTrace();
         }
      }
+  
      /*
 
       Precondition:
@@ -1455,7 +1459,113 @@ public class AppointmentBugTests extends TestCase {
             ignore.printStackTrace();
         }         
      }
-     
-    
+
+     /*
+
+     Steps:
+     1. In your private calendar "Kalendar" create a new appointment:
+     Beschreibung: please don't remind me
+     Beginnt am: 9:00 (assuming it's 9:30 currently)
+     Endet am: 10:00
+     Ort: testort
+     Anmerkung: testanmerkung
+     Don't set a reminder
+
+     2. LMB-click to select the appointment "please don't remind me"
+     3. LMB-click on Panel --> Kalender --> Verschieben
+     4. In the popup-window select your calendar "subFol" to move it to your other
+     calendar
+
+
+     Result:
+     After some time you see a reminder popup for the appointment "please don't
+     remind me"
+     */
+     public void testBug6214() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+
+        
+        fo.setFolderName("testBug6214");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1 });       
+        
+        int subfolder_id = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            subfolder_id = fo.getObjectID();       
+            
+            CalendarSql csql = new CalendarSql(so);
+
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(fid);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug6214 - Step 1");
+            cdao.setIgnoreConflicts(true);
+            
+
+            csql.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject update = csql.getObjectById(object_id, fid);
+        
+            UserParticipant up_insert[] = update.getUsers();
+
+            assertTrue("Got a participant", up_insert != null);
+        
+            assertEquals("Check alarm after inserting", up_insert[0].getAlarmMinutes(), 0);
+            assertEquals("Check that no alarm is set (insert)", false, up_insert[0].containsAlarm());
+            
+            update.setTitle("testBug6214 - Step 2");
+            update.setIgnoreConflicts(true);
+            update.setParentFolderID(subfolder_id);
+      
+            csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+
+            CalendarDataObject testobject = csql.getObjectById(object_id, subfolder_id);
+            
+            UserParticipant up_update[] = testobject.getUsers();
+            
+            assertTrue("Got a participant", up_update != null);
+            
+            
+            assertEquals("Check alarm after updating", up_update[0].getAlarmMinutes(), 0);
+            assertEquals("Check that no alarm is set (update)", false, up_update[0].containsAlarm());
+                        
+        } finally {
+            int x = 0;
+            try {
+                if (subfolder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(subfolder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }         
+     }    
     
 }
