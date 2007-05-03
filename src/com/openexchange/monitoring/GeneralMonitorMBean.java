@@ -78,5 +78,7 @@ public interface GeneralMonitorMBean {
 	
 	public int getNumberOfWorkingServlets();
 	
+	public int getManuallyCountedIMAPConnections();
+	
 	public Integer getNbObjects();
 }

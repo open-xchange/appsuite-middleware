@@ -62,6 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 
 import com.openexchange.api2.MailInterfaceImpl;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
@@ -113,6 +114,8 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	private transient Rights myRights;
 	
 	private int holdsMessages = -1;
+	
+	private boolean connected;
 
 	public DefaultIMAPConnection() {
 		super();
@@ -151,10 +154,11 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	 * 
 	 * @return connected <code>com.sun.mail.imap.IMAPStore</code> instance
 	 */
-	public IMAPStore connect() throws javax.mail.NoSuchProviderException,
+	public void connect() throws javax.mail.NoSuchProviderException,
 			javax.mail.MessagingException {
 		if (imapStore != null && imapStore.isConnected()) {
-			return imapStore;
+			connected = true;
+			return;
 		}
 		try {
 			if (IMAPProperties.isImapsEnabled() || IMAPProperties.isSmtpsEnabled()) {
@@ -190,13 +194,21 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		}
 		imapStore.connect(imapServer, imapPort, imapUsername, tmpPass);
 		MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+		connected = true;
 		COUNTER_LOCK.lock();
 		try {
 			counter++;
 		} finally {
 			COUNTER_LOCK.unlock();
 		}
-		return imapStore;
+	}
+	
+	public IMAPStore getIMAPStore() {
+		if (connected) {
+			return imapStore;
+		}
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -207,6 +219,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		if (imapStore != null) {
 			imapStore.close();
 			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
 			COUNTER_LOCK.lock();
 			try {
 				counter--;
@@ -237,7 +250,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		this.imapFolder = imapFolder;
 	}
 	
-	public void removeImapFolder() {
+	public void resetImapFolder() {
 		this.imapFolder = null;
 	}
 
@@ -264,7 +277,10 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	}
 
 	public boolean isConnected() {
-		return (imapStore != null && imapStore.isConnected());
+		if (!connected) {
+			return false;
+		}
+		return (connected = (imapStore != null && imapStore.isConnected()));
 	}
 
 	public static int getCounter() {

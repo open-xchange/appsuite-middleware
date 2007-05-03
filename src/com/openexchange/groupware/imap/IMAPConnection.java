@@ -53,7 +53,7 @@ package com.openexchange.groupware.imap;
 
 import java.util.Properties;
 
-import javax.mail.Store;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * IMAPConnection
@@ -74,7 +74,9 @@ public interface IMAPConnection {
 
     public void setProperties(Properties imapProperties);
     
-    public Store connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException;
+    public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException;
+    
+    public IMAPStore getIMAPStore();
   
     public void close() throws javax.mail.MessagingException;
     

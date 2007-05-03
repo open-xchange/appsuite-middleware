@@ -55,6 +55,8 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import com.openexchange.groupware.imap.DefaultIMAPConnection;
+
 /**
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -96,6 +98,10 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
 	public int getNumberOfIMAPConnections() {
 		return MonitoringInfo.getNumberOfConnections(MonitoringInfo.IMAP);
+	}
+	
+	public int getManuallyCountedIMAPConnections() {
+		return DefaultIMAPConnection.getCounter();
 	}
 
 	public int getNumberOfActiveSessions() {

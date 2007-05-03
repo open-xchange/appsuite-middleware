@@ -324,7 +324,8 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 				dic.setUsername(login);
 				dic.setPassword(password);
 				try {
-					store = dic.connect();
+					dic.connect();
+					store = dic.getIMAPStore();
 				} catch (AuthenticationFailedException e) {
 					return "Wrong credentials";
 				}
@@ -336,7 +337,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 				if (f != null && f.isOpen()) {
 					f.close(false);
 				}
-				if (dic != null && store != null) {
+				if (dic != null) {
 					dic.close();
 				}
 			}

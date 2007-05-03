@@ -303,8 +303,6 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private DefaultIMAPConnection imapCon;
 
-	private IMAPStore imapStore;
-
 	private boolean init;
 
 	private IMAPFolder tmpFolder;
@@ -505,19 +503,19 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		DefaultIMAPConnection imapCon = fetchCachedCon ? getCachedConnection(sessionObj) : null;
 		if (imapCon != null) {
-			final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 			try {
+				final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 				/*
 				 * Apply cached connection
 				 */
 				retval.imapCon = imapCon;
-				retval.imapStore = imapCon.connect();
+				imapCon.connect();
+				return retval;
 			} catch (NoSuchProviderException e) {
 				throw handleMessagingException(e);
 			} catch (MessagingException e) {
 				throw handleMessagingException(e);
 			}
-			return retval;
 		}
 		/*
 		 * No cached connection available, check if a new one may be established
@@ -555,19 +553,19 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			return new MailInterfaceImpl(sessionObj);
 		}
-		final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 		try {
+			final MailInterfaceImpl retval = new MailInterfaceImpl(sessionObj);
 			/*
 			 * Apply cached connection
 			 */
 			retval.imapCon = imapCon;
-			retval.imapStore = imapCon.connect();
+			imapCon.connect();
+			return retval;
 		} catch (NoSuchProviderException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
-		return retval;
 	}
 
 	private static final DefaultIMAPConnection getCachedConnection(final SessionObject sessionObj) throws OXException {
@@ -595,7 +593,11 @@ public class MailInterfaceImpl implements MailInterface {
 		imapProps = getDefaultIMAPProperties();
 		imapProps.put(PROP_SMTPHOST, sessionObj.getIMAPProperties().getSmtpServer());
 		imapProps.put(PROP_SMTPPORT, String.valueOf(sessionObj.getIMAPProperties().getSmtpPort()));
-		if (imapStore == null || !imapStore.isConnected()) {
+		if (imapCon == null || !imapCon.isConnected()) {
+			if (imapCon != null) {
+				imapCon.close();
+				imapCon = null;
+			}
 			imapCon = new DefaultIMAPConnection();
 			imapCon.setProperties(imapProps);
 			imapCon.setImapServer(sessionObj.getIMAPProperties().getImapServer(), sessionObj.getIMAPProperties()
@@ -604,18 +606,17 @@ public class MailInterfaceImpl implements MailInterface {
 			imapCon.setPassword(sessionObj.getIMAPProperties().getImapPassword());
 			final long start = System.currentTimeMillis();
 			try {
-				imapStore = imapCon.connect();
+				imapCon.connect();
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (AuthenticationFailedException e) {
 				mailInterfaceMonitor.changeNumFailedLogins(true);
 				throw e;
 			}
-			MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
 			/*
 			 * Check if IMAP server capabilities were already loaded
 			 */
-			initializeCapabilities(imapStore);
+			initializeCapabilities(imapCon.getIMAPStore());
 		}
 		/*
 		 * Apply mail session
@@ -724,7 +725,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Get INBOX folder
 				 */
-				final Folder inboxFolder = imapStore.getFolder(STR_INBOX);
+				final Folder inboxFolder = imapCon.getIMAPStore().getFolder(STR_INBOX);
 				if (!inboxFolder.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, STR_INBOX);
 				}
@@ -735,7 +736,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 * prefix for folder fullname
 				 */
 				if (!noInferiors
-						&& (!isAltNamespaceEnabled(imapStore) || IMAPProperties
+						&& (!isAltNamespaceEnabled(imapCon.getIMAPStore()) || IMAPProperties
 								.isAllowNestedDefaultFolderOnAltNamespace())) {
 					/*
 					 * Only allow default folder below INBOX if inferiors are
@@ -751,8 +752,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Check draft folder
 				 */
 				boolean checkSubscribed = true;
-				Folder f = imapStore.getFolder(tmp.append(prefix).append(
-						prepareMailFolderParam(defaultFolderNames[INDEX_DRAFTS])).toString());
+				Folder f = imapCon.getIMAPStore().getFolder(
+						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_DRAFTS])).toString());
 				tmp.setLength(0);
 				long start = System.currentTimeMillis();
 				if (!f.exists() && !f.create(type)) {
@@ -778,8 +779,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Check sent folder
 				 */
 				checkSubscribed = true;
-				f = imapStore.getFolder(tmp.append(prefix).append(
-						prepareMailFolderParam(defaultFolderNames[INDEX_SENT])).toString());
+				f = imapCon.getIMAPStore().getFolder(
+						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_SENT])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists() && !f.create(type)) {
@@ -803,8 +804,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Check spam folder
 				 */
 				checkSubscribed = true;
-				f = imapStore.getFolder(tmp.append(prefix).append(
-						prepareMailFolderParam(defaultFolderNames[INDEX_SPAM])).toString());
+				f = imapCon.getIMAPStore().getFolder(
+						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_SPAM])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists() && !f.create(type)) {
@@ -828,8 +829,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Check trash folder
 				 */
 				checkSubscribed = true;
-				f = imapStore.getFolder(tmp.append(prefix).append(
-						prepareMailFolderParam(defaultFolderNames[INDEX_TRASH])).toString());
+				f = imapCon.getIMAPStore().getFolder(
+						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_TRASH])).toString());
 				tmp.setLength(0);
 				start = System.currentTimeMillis();
 				if (!f.exists() && !f.create(type)) {
@@ -854,8 +855,9 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Check confirmed spam folder
 					 */
 					checkSubscribed = true;
-					f = imapStore.getFolder(tmp.append(prefix).append(
-							prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_SPAM])).toString());
+					f = imapCon.getIMAPStore().getFolder(
+							tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_SPAM]))
+									.toString());
 					tmp.setLength(0);
 					start = System.currentTimeMillis();
 					if (!f.exists() && !f.create(type)) {
@@ -881,8 +883,9 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Check confirmed ham folder
 					 */
 					checkSubscribed = true;
-					f = imapStore.getFolder(tmp.append(prefix).append(
-							prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_HAM])).toString());
+					f = imapCon.getIMAPStore().getFolder(
+							tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_HAM]))
+									.toString());
 					tmp.setLength(0);
 					start = System.currentTimeMillis();
 					if (!f.exists() && !f.create(type)) {
@@ -928,7 +931,7 @@ public class MailInterfaceImpl implements MailInterface {
 	public Store getStore() throws OXException {
 		try {
 			init();
-			return imapStore;
+			return imapCon.getIMAPStore();
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -958,7 +961,6 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			closeIMAPConnection(putIntoCache, sessionObj, imapCon);
-			this.imapStore = null;
 			this.imapCon = null;
 			init = false;
 		} catch (MessagingException e) {
@@ -999,20 +1001,6 @@ public class MailInterfaceImpl implements MailInterface {
 										com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj))
 								.toString(), e);
 			}
-			boolean cached = false;
-			try {
-				cached = putIntoCache
-						&& IMAPConnectionCacheManager.getInstance().putIMAPConnection(sessionObj, imapCon);
-			} catch (OXException e) {
-				LOG.error(e.getMessage(), e);
-				cached = false;
-			}
-			/*
-			 * Return immediately if connection could be put into cache
-			 */
-			if (cached) {
-				return false;
-			}
 			/*
 			 * Reset
 			 */
@@ -1031,14 +1019,30 @@ public class MailInterfaceImpl implements MailInterface {
 					LOG.error(e.getMessage(), e);
 				} finally {
 					mailInterfaceMonitor.changeNumActive(false);
-					imapCon.removeImapFolder();
+					imapCon.resetImapFolder();
 				}
+			}
+			/*
+			 * Close connection or put into cache
+			 */
+			boolean cached = false;
+			try {
+				cached = putIntoCache
+						&& IMAPConnectionCacheManager.getInstance().putIMAPConnection(sessionObj, imapCon);
+			} catch (OXException e) {
+				LOG.error(e.getMessage(), e);
+				cached = false;
+			}
+			/*
+			 * Return if connection could be put into cache
+			 */
+			if (cached) {
+				return false;
 			}
 			/*
 			 * Close connection
 			 */
 			imapCon.close();
-			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
 			try {
 				if (IMAPProperties.getMaxNumOfIMAPConnections() > 0) {
 					LOCK_CON.lock();
@@ -1182,7 +1186,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
 				return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
 			}
-			final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
+			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final Quota[] folderQuota;
 			final long start = System.currentTimeMillis();
 			try {
@@ -1214,7 +1218,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
 				return MailInterface.UNLIMITED_QUOTA;
 			}
-			final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
+			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final long start = System.currentTimeMillis();
 			final Quota[] folderQuota;
 			try {
@@ -1246,7 +1250,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
 				return MailInterface.UNLIMITED_QUOTA;
 			}
-			final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
+			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final long start = System.currentTimeMillis();
 			final Quota[] folderQuota;
 			try {
@@ -1514,7 +1518,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throws OXException {
 		return getMessages(folder, null, sortCol, order, null, null, true, fields);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1989,8 +1993,8 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Not initialized
 				 */
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(STR_INBOX) : imapStore
-						.getFolder(folder)));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
+						: imapCon.getIMAPStore().getFolder(folder)));
 			} else if (!imapCon.getImapFolder().getFullName().equals(folder)) {
 				/*
 				 * Another folder than previous one
@@ -2005,8 +2009,8 @@ public class MailInterfaceImpl implements MailInterface {
 					imapCon.getImapFolder().close(false);
 					mailInterfaceMonitor.changeNumActive(false);
 				}
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(STR_INBOX) : imapStore
-						.getFolder(folder)));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
+						: imapCon.getIMAPStore().getFolder(folder)));
 			}
 			/*
 			 * Open
@@ -2083,8 +2087,8 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Not initialized
 				 */
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(STR_INBOX) : imapStore
-						.getFolder(folder)));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
+						: imapCon.getIMAPStore().getFolder(folder)));
 			} else if (!imapCon.getImapFolder().getFullName().equals(folder)) {
 				/*
 				 * Another folder than previous one
@@ -2093,8 +2097,8 @@ public class MailInterfaceImpl implements MailInterface {
 					imapCon.getImapFolder().close(false);
 					mailInterfaceMonitor.changeNumActive(false);
 				}
-				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapStore.getFolder(STR_INBOX) : imapStore
-						.getFolder(folder)));
+				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
+						: imapCon.getIMAPStore().getFolder(folder)));
 			}
 			/*
 			 * Open
@@ -2604,8 +2608,8 @@ public class MailInterfaceImpl implements MailInterface {
 				return;
 			}
 		}
-		imapCon.setImapFolder(isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore
-				.getFolder(folderName));
+		imapCon.setImapFolder(isDefaultFolder ? (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder()
+				: (IMAPFolder) imapCon.getIMAPStore().getFolder(folderName));
 		if (!isDefaultFolder && !imapCon.getImapFolder().exists()) {
 			imapCon.setImapFolder(null);
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, imapCon.getImapFolder().getFullName());
@@ -2670,8 +2674,8 @@ public class MailInterfaceImpl implements MailInterface {
 				return;
 			}
 		}
-		tmpFolder = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore
-				.getFolder(folderName));
+		tmpFolder = (isDefaultFolder ? (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder() : (IMAPFolder) imapCon
+				.getIMAPStore().getFolder(folderName));
 		if (!isDefaultFolder && !tmpFolder.exists()) {
 			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, tmpFolder.getFullName());
 		}
@@ -2998,7 +3002,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 * or draft-edit message.
 					 */
 					mailId = new Mail.MailIdentifier(msgObj.getMsgref());
-					originalMsgFolder = (IMAPFolder) imapStore.getFolder(mailId.getFolder());
+					originalMsgFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(mailId.getFolder());
 					/*
 					 * Check folder existence
 					 */
@@ -3081,9 +3085,9 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Append message to folder "DRAFT"
 					 */
-					final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
-					final IMAPFolder draftFolder = (IMAPFolder) imapStore
-							.getFolder(prepareMailFolderParam(getDraftsFolder()));
+					final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
+					final IMAPFolder draftFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
+							prepareMailFolderParam(getDraftsFolder()));
 					/*
 					 * Fill message
 					 */
@@ -3160,8 +3164,9 @@ public class MailInterfaceImpl implements MailInterface {
 					return new StringBuilder(draftFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();
 				}
-				final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
-				final IMAPFolder sentFolder = (IMAPFolder) imapStore.getFolder(prepareMailFolderParam(getSentFolder()));
+				final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
+				final IMAPFolder sentFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
+						prepareMailFolderParam(getSentFolder()));
 				/*
 				 * Fill message
 				 */
@@ -3337,10 +3342,11 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS, null, parent.getFullName());
 		}
 		if (parent instanceof DefaultFolder) {
-			return imapStore.getFolder(folderName);
+			return imapCon.getIMAPStore().getFolder(folderName);
 		}
-		return imapStore.getFolder(new StringBuilder(100).append(parent.getFullName()).append(parent.getSeparator())
-				.append(folderName).toString());
+		return imapCon.getIMAPStore().getFolder(
+				new StringBuilder(100).append(parent.getFullName()).append(parent.getSeparator()).append(folderName)
+						.toString());
 	}
 
 	/*
@@ -3422,9 +3428,9 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Append message to folder "TRASH"
 				 */
-				final IMAPFolder inboxFolder = (IMAPFolder) imapStore.getFolder(STR_INBOX);
-				final IMAPFolder trashFolder = (IMAPFolder) imapStore
-						.getFolder(prepareMailFolderParam(getTrashFolder()));
+				final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
+				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
+						prepareMailFolderParam(getTrashFolder()));
 				checkAndCreateFolder(trashFolder, inboxFolder);
 				start = System.currentTimeMillis();
 				try {
@@ -3842,7 +3848,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				Folder confirmedSpamFld = null;
 				try {
-					confirmedSpamFld = imapStore.getFolder(prepareMailFolderParam(getConfirmedSpamFolder()));
+					confirmedSpamFld = imapCon.getIMAPStore().getFolder(
+							prepareMailFolderParam(getConfirmedSpamFolder()));
 					confirmedSpamFld.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 					msgArr[0] = msg;
@@ -3874,7 +3881,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				Folder confirmedHamFld = null;
 				try {
-					confirmedHamFld = imapStore.getFolder(prepareMailFolderParam(getConfirmedHamFolder()));
+					confirmedHamFld = imapCon.getIMAPStore().getFolder(prepareMailFolderParam(getConfirmedHamFolder()));
 					confirmedHamFld.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 					msgArr[0] = getInlinedSpamMessage(msg);
@@ -3902,7 +3909,7 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Append to destination folder
 					 */
-					destFld = imapStore.getFolder(destFullname);
+					destFld = imapCon.getIMAPStore().getFolder(destFullname);
 					destFld.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 					destFld.appendMessages(msgArr);
@@ -3946,7 +3953,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(1);
-			final IMAPFolder defaultFolder = (IMAPFolder) imapStore.getDefaultFolder();
+			final IMAPFolder defaultFolder = (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder();
 			list.add(new MailFolderObject(defaultFolder));
 			return new SearchIteratorAdapter(list.iterator(), 1);
 		} catch (MessagingException e) {
@@ -3967,12 +3974,12 @@ public class MailInterfaceImpl implements MailInterface {
 			final String parentFolder = prepareMailFolderParam(parentFolderArg);
 			final IMAPFolder p;
 			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
-				p = (IMAPFolder) imapStore.getDefaultFolder();
+				p = (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder();
 				if (!p.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, MailFolderObject.DEFAULT_IMAP_FOLDER_NAME);
 				}
 			} else {
-				p = (IMAPFolder) imapStore.getFolder(parentFolder);
+				p = (IMAPFolder) imapCon.getIMAPStore().getFolder(parentFolder);
 				canLookUpFolder(p);
 			}
 			final Folder[] childFolders;
@@ -4004,7 +4011,7 @@ public class MailInterfaceImpl implements MailInterface {
 	public SearchIterator getAllFolders() throws OXException {
 		try {
 			init();
-			final IMAPFolder defaultFolder = (IMAPFolder) imapStore.getDefaultFolder();
+			final IMAPFolder defaultFolder = (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder();
 			final Folder[] allFolders;
 			final long start = System.currentTimeMillis();
 			try {
@@ -4033,9 +4040,9 @@ public class MailInterfaceImpl implements MailInterface {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
 			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
-				return new MailFolderObject((IMAPFolder) imapStore.getDefaultFolder());
+				return new MailFolderObject((IMAPFolder) imapCon.getIMAPStore().getDefaultFolder());
 			}
-			final IMAPFolder retval = (IMAPFolder) imapStore.getFolder(folder);
+			final IMAPFolder retval = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
 			if (checkFolder) {
 				if (!retval.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
@@ -4067,8 +4074,8 @@ public class MailInterfaceImpl implements MailInterface {
 			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				return SearchIteratorAdapter.createEmptyIterator();
 			}
-			final String defaultFolder = imapStore.getDefaultFolder().getFullName();
-			IMAPFolder f = (IMAPFolder) imapStore.getFolder(folder);
+			final String defaultFolder = imapCon.getIMAPStore().getDefaultFolder().getFullName();
+			IMAPFolder f = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
 			if (!f.exists()) {
 				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
 			} else if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
@@ -4149,7 +4156,8 @@ public class MailInterfaceImpl implements MailInterface {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
 					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID
-							.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
+							.equals(newParent) ? imapCon.getIMAPStore().getDefaultFolder() : imapCon.getIMAPStore()
+							.getFolder(newParent)));
 					if (!destFolder.exists()) {
 						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, newParent);
 					}
@@ -4198,7 +4206,7 @@ public class MailInterfaceImpl implements MailInterface {
 						tmp.append(parentFullName).append(folderObj.getSeparator());
 					}
 					tmp.append(folderObj.getName());
-					final IMAPFolder renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
+					final IMAPFolder renameFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(tmp.toString());
 					tmp = null;
 					if (renameFolder.exists()) {
 						throw new OXMailException(MailCode.DUPLICATE_FOLDER, renameFolder.getFullName());
@@ -4218,11 +4226,11 @@ public class MailInterfaceImpl implements MailInterface {
 					if (!success) {
 						throw new OXMailException(MailCode.UPDATE_FAILED, updateMe.getFullName());
 					}
-					updateMe = (IMAPFolder) imapStore.getFolder(oldFullName);
+					updateMe = (IMAPFolder) imapCon.getIMAPStore().getFolder(oldFullName);
 					if (updateMe.exists()) {
 						deleteFolder(updateMe);
 					}
-					updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
+					updateMe = (IMAPFolder) imapCon.getIMAPStore().getFolder(newFullName);
 					updateMe.setSubscribed(true);
 				}
 				ACLS: if (folderObj.containsACLs()) {
@@ -4267,7 +4275,8 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
-					IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), folderObj.isSubscribed());
+					IMAPUtils.forceSetSubscribed(imapCon.getIMAPStore(), updateMe.getFullName(), folderObj
+							.isSubscribed());
 				}
 				retval = updateMe.getFullName();
 			} else {
@@ -4275,9 +4284,9 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Insert
 				 */
 				final String parentStr = prepareMailFolderParam(folderObj.getParentFullName());
-				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapStore
-						.getDefaultFolder()
-						: (IMAPFolder) imapStore.getFolder(parentStr);
+				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapCon
+						.getIMAPStore().getDefaultFolder()
+						: (IMAPFolder) imapCon.getIMAPStore().getFolder(parentStr);
 				if (!parent.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, parentStr);
 				} else if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
@@ -4311,7 +4320,7 @@ public class MailInterfaceImpl implements MailInterface {
 										.getFullName());
 					}
 					createMe.setSubscribed(true);
-					IMAPUtils.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+					IMAPUtils.forceSetSubscribed(imapCon.getIMAPStore(), createMe.getFullName(), true);
 				} finally {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				}
@@ -4392,7 +4401,7 @@ public class MailInterfaceImpl implements MailInterface {
 			sb.append(destFolder.getFullName()).append(destFolder.getSeparator());
 		}
 		sb.append(folderName);
-		final IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
+		final IMAPFolder newFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(sb.toString());
 		sb = null;
 		if (checkForDuplicate && newFolder.exists()) {
 			throw new OXMailException(MailCode.DUPLICATE_FOLDER, folderName);
@@ -4501,7 +4510,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
-			final IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(folder);
+			final IMAPFolder deleteMe = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
 			final String retval = deleteMe.getFullName();
 			deleteFolder(deleteMe);
 			return retval;
@@ -4572,7 +4581,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			if (INDEX_INBOX == index) {
-				final Folder inbox = imapStore.getFolder(STR_INBOX);
+				final Folder inbox = imapCon.getIMAPStore().getFolder(STR_INBOX);
 				return MailFolderObject.prepareFullname(inbox.getFullName(), inbox.getSeparator());
 			}
 			return usm.getStandardFolder(index);
