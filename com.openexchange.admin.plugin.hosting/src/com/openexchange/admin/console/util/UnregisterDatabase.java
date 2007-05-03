@@ -47,7 +47,7 @@ public class UnregisterDatabase extends UtilAbstraction {
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
@@ -56,31 +56,31 @@ public class UnregisterDatabase extends UtilAbstraction {
             sysexit(1);
         } catch (final RemoteException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
             sysexit(1);
         } catch (final StorageException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {            
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
-            sysexit(1);
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
-            sysexit(1);
+            sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
-            sysexit(1);
+            sysexit(SYSEXIT_MISSING_OPTION);
         }
 
     }
