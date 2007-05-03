@@ -55,6 +55,7 @@ import com.openexchange.event.EventClient;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -1018,6 +1019,10 @@ public class CalendarCommonCollection {
                 clone.setParticipants(edao.getParticipants());
             }
         }
+        if (edao.getRecurrenceType() != CalendarObject.NONE) {
+            clone.setRecurrenceType(edao.getRecurrenceType());
+        }
+        
         return clone;
     }
     
