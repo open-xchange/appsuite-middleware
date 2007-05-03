@@ -1,3 +1,7 @@
+* 2007-05-03 - thorben.betten@open-xchange.com
+
+ - Slightly fastened AJP processing
+
 * 2007-05-03 - martin.kauss@open-xchange.com
 
  - Fixed bug #6214. After moving an appointment into a subfolder a reminder

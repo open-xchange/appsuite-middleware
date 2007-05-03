@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.ajp13;
 
 import java.io.IOException;
@@ -72,7 +70,8 @@ public class AJPv13RequestBody extends AJPv13Request {
 		super(payloadData);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
 	 */
@@ -99,7 +98,8 @@ public class AJPv13RequestBody extends AJPv13Request {
 					 */
 					if (LOG.isWarnEnabled()) {
 						final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
-								Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer.valueOf(ajpRequestHandler.getContentLength()));
+								Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
+										.valueOf(ajpRequestHandler.getContentLength()));
 						ajpExc.fillInStackTrace();
 						LOG.warn(ajpExc.getMessage(), ajpExc);
 					}
@@ -113,11 +113,8 @@ public class AJPv13RequestBody extends AJPv13Request {
 					/*
 					 * Request expected data one more time
 					 */
-					final AJPv13Response response = new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE,
-							ajpRequestHandler.getNumOfBytesToRequestFor());
-					final byte[] ajpBytes = response.getResponseBytes();
 					final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
-					out.write(ajpBytes);
+					out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
 					out.flush();
 					ajpRequestHandler.setEmptyDataPackageReceived(true);
 					ajpRequestHandler.processPackage();
@@ -157,11 +154,8 @@ public class AJPv13RequestBody extends AJPv13Request {
 				/*
 				 * Request next body chunk package from web sever
 				 */
-				final AJPv13Response response = new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE,
-						ajpRequestHandler.getNumOfBytesToRequestFor());
-				final byte[] ajpBytes = response.getResponseBytes();
 				final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
-				out.write(ajpBytes);
+				out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
 				out.flush();
 				ajpRequestHandler.processPackage();
 				return;
@@ -189,10 +183,10 @@ public class AJPv13RequestBody extends AJPv13Request {
 		return "";
 	}
 
-//	private final byte[] getData() {
-//		final byte[] retval = new byte[payloadData.length - 2];
-//		System.arraycopy(payloadData, 2, retval, 0, retval.length);
-//		return retval;
-//	}
+	// private final byte[] getData() {
+	// final byte[] retval = new byte[payloadData.length - 2];
+	// System.arraycopy(payloadData, 2, retval, 0, retval.length);
+	// return retval;
+	// }
 
 }

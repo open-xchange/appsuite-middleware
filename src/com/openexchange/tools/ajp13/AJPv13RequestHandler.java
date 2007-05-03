@@ -328,8 +328,7 @@ public class AJPv13RequestHandler {
 				 * We received an unsupported prefix code before thus ajpRequest
 				 * is null. Terminate ajp cycle
 				 */
-				ajpCon.getOutputStream().write(
-						new AJPv13Response(AJPv13Response.END_RESPONSE_PREFIX_CODE).getResponseBytes());
+				ajpCon.getOutputStream().write(AJPv13Response.getEndResponseBytes());
 				ajpCon.getOutputStream().flush();
 				return;
 			}

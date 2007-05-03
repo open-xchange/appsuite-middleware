@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import java.io.IOException;
@@ -148,7 +146,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 	 * 
 	 * @see java.io.OutputStream#write(byte[], int, int)
 	 */
-	 @Override
+	@Override
 	public void write(final byte[] b, final int off, final int len) throws IOException {
 		if (isClosed) {
 			throw new IOException(ERR_OUTPUT_CLOSED);
@@ -202,7 +200,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 		 */
 		byteBuffer.write(withheldBytes, 0, withheldBytes.length);
 	}
-	
+
 	private static final String ERR_BROKEN_PIPE = "Broken pipe";
 
 	/**
@@ -215,8 +213,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 		try {
 			if (!ajpCon.getAjpRequestHandler().isHeadersSent()) {
 				ajpCon.getOutputStream().write(
-						new AJPv13Response(AJPv13Response.SEND_HEADERS_PREFIX_CODE, ajpCon.getAjpRequestHandler()
-								.getServletResponseObj()).getResponseBytes());
+						AJPv13Response.getSendHeadersBytes(ajpCon.getAjpRequestHandler().getServletResponseObj()));
 				ajpCon.getOutputStream().flush();
 				ajpCon.getAjpRequestHandler().setHeadersSent(true);
 				ajpCon.getAjpRequestHandler().getServletResponseObj().setCommitted(true);
@@ -230,16 +227,13 @@ public class OXServletOutputStream extends ServletOutputStream {
 				final byte[] bufferedBytes = byteBuffer.toByteArray();
 				System.arraycopy(bufferedBytes, 0, currentData, 0, currentData.length);
 				System.arraycopy(bufferedBytes, currentData.length, tmp, 0, tmp.length);
-				ajpCon.getOutputStream().write(
-						new AJPv13Response(AJPv13Response.SEND_BODY_CHUNK_PREFIX_CODE, currentData).getResponseBytes());
+				ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(currentData));
 				ajpCon.getOutputStream().flush();
 				byteBuffer.reset();
 				byteBuffer.write(tmp, 0, tmp.length);
 			}
 			if (byteBuffer.size() > 0) {
-				ajpCon.getOutputStream().write(
-						new AJPv13Response(AJPv13Response.SEND_BODY_CHUNK_PREFIX_CODE, byteBuffer.toByteArray())
-								.getResponseBytes());
+				ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray()));
 				ajpCon.getOutputStream().flush();
 			}
 			/*
@@ -249,9 +243,8 @@ public class OXServletOutputStream extends ServletOutputStream {
 			byteBuffer.reset();
 		} catch (SocketException e) {
 			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) != -1) {
-				LOG.warn(new StringBuilder(
-						"Underlying (TCP) protocol communication aborted:")
-						.append(e.getMessage()).toString(), e);
+				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted:").append(e.getMessage())
+						.toString(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
@@ -285,7 +278,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 		}
 		responseToWebServer();
 	}
-	
+
 	/**
 	 * @throws IOException
 	 */

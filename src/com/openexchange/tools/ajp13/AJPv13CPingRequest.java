@@ -62,6 +62,8 @@ import javax.servlet.ServletException;
  */
 public class AJPv13CPingRequest extends AJPv13Request {
 
+	private static final String STR_RECEIVED_CPING = "Received CPing";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13CPingRequest.class);
 
@@ -77,7 +79,7 @@ public class AJPv13CPingRequest extends AJPv13Request {
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Processing CPing request");
+			LOG.info(STR_RECEIVED_CPING);
 		}
 	}
 
@@ -90,8 +92,7 @@ public class AJPv13CPingRequest extends AJPv13Request {
 	@Override
 	public void response(final OutputStream out, final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
 			ServletException, IOException {
-		out.write(AJPv13Response.getCPongReply());
-		out.flush();
+		writeResponse(AJPv13Response.getCPongBytes(), out, true);
 	}
 
 }

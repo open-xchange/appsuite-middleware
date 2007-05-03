@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet.http;
 
 import java.io.IOException;
@@ -66,6 +64,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
@@ -184,10 +183,10 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		headerDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
-	private final HashSet<Cookie> cookies = new HashSet<Cookie>();
+	private final Set<Cookie> cookies = new HashSet<Cookie>();
 
 	private String statusMsg;
-	
+
 	private final HttpServletRequestWrapper request;
 
 	byte errormessage[];
@@ -212,7 +211,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		this.cookies.clear();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#encodeURL(java.lang.String)
 	 */
@@ -256,55 +256,57 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return encodeURL(url);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletResponse#encodeUrl(java.lang.String)
 	 */
 	public String encodeUrl(final String url) {
 		return encodeURL(url);
 	}
-    
-    private static final String appendSessionID(final String url, final String groupwareSessionId, final String httpSessionId) {
-    	if (url == null) {
+
+	private static final String appendSessionID(final String url, final String groupwareSessionId,
+			final String httpSessionId) {
+		if (url == null) {
 			return null;
 		} else if (groupwareSessionId == null && httpSessionId == null) {
 			return url.indexOf('?') == -1 ? new StringBuilder(url).append("?jvm=").append(AJPv13Config.getJvmRoute())
 					.toString() : url;
 		}
-        String path = url;
-        String query = "";
-        String anchor = "";
-        final int question = url.indexOf('?');
-        if (question >= 0) {
-            path = url.substring(0, question);
-            query = url.substring(question + 1);
-        }
-        final int pound = path.indexOf('#');
-        if (pound >= 0) {
-            anchor = path.substring(pound);
-            path = path.substring(0, pound);
-        }
-        final StringBuilder sb = new StringBuilder(path);
-        if (httpSessionId != null && sb.length() > 0) {
-        	sb.append(AJPv13RequestHandler.JSESSIONID_URI);
-        	sb.append(httpSessionId);
-        }
-        sb.append(anchor);
-        boolean first = true;
-        if (groupwareSessionId != null) {
+		String path = url;
+		String query = "";
+		String anchor = "";
+		final int question = url.indexOf('?');
+		if (question >= 0) {
+			path = url.substring(0, question);
+			query = url.substring(question + 1);
+		}
+		final int pound = path.indexOf('#');
+		if (pound >= 0) {
+			anchor = path.substring(pound);
+			path = path.substring(0, pound);
+		}
+		final StringBuilder sb = new StringBuilder(path);
+		if (httpSessionId != null && sb.length() > 0) {
+			sb.append(AJPv13RequestHandler.JSESSIONID_URI);
+			sb.append(httpSessionId);
+		}
+		sb.append(anchor);
+		boolean first = true;
+		if (groupwareSessionId != null) {
 			sb.append('?').append(AJAXServlet.PARAMETER_SESSION).append('=');
 			sb.append(groupwareSessionId);
 			first = false;
 		}
 		if (query.length() > 0) {
-        	sb.append(first ? '?' : '&').append(query);
-        	first = false;
-        }
+			sb.append(first ? '?' : '&').append(query);
+			first = false;
+		}
 		if (first) {
-        	sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
-        }
-        return (sb.toString());
-    }
+			sb.append("?jvm=").append(AJPv13Config.getJvmRoute());
+		}
+		return (sb.toString());
+	}
 
 	public void addDateHeader(final String name, final long l) {
 		synchronized (headerDateFormat) {
@@ -319,7 +321,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	public void addCookie(final Cookie cookie) {
 		cookies.add(cookie);
 	}
-	
+
 	private static final String SET_COOKIE = "Set-Cookie";
 
 	public Map<String, List<String>> getFormatedCookies() {
@@ -335,7 +337,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		retval.put(SET_COOKIE, list);
 		return retval;
 	}
-	
+
 	private static final String[] COOKIE_PARAMS = { "; expires=", "; version=", "; path=", "; domain=", "; secure" };
 
 	private static final String getFormattedCookie(final Cookie cookie) {
@@ -375,7 +377,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	public void addHeader(final String name, final String value) {
 		if (!headers.containsKey(name)) {
 			headers.put(name, new String[] { value });
-            return;
+			return;
 		}
 		final String[] tmp = headers.get(name);
 		final String[] val = new String[tmp.length + 1];
@@ -412,7 +414,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		setHeader(name, String.valueOf(i));
 	}
 
-	public void setHeader(final String name, final String value) {
+	public final void setHeader(final String name, final String value) {
 		if (value == null) {
 			/*
 			 * Treat as a remove
@@ -423,19 +425,23 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		headers.put(name, new String[] { value });
 	}
 
-	public int getHeadersSize() {
+	public final int getHeadersSize() {
 		return headers.size();
 	}
 
-	public Iterator<String> getHeaderNames() {
+	public final Iterator<String> getHeaderNames() {
 		return headers.keySet().iterator();
+	}
+
+	public final Set<Map.Entry<String, String[]>> getHeaderEntrySet() {
+		return headers.entrySet();
 	}
 
 	public Enumeration getHeaders(final String name) {
 		return makeEnumeration(headers.get(name));
 	}
 
-	public String getHeader(final String name) {
+	public final String getHeader(final String name) {
 		if (!containsHeader(name)) {
 			return null;
 		}
@@ -449,13 +455,13 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return retval.toString();
 	}
 
-	public void sendRedirect(final String location) {
+	public final void sendRedirect(final String location) {
 		status = HttpServletResponse.SC_MOVED_TEMPORARILY;
 		statusMsg = statusMsgs.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
 		addHeader("Location", location);
 	}
 
-	public void sendError(final int status, final String statusMsg) throws IOException {
+	public final void sendError(final int status, final String statusMsg) throws IOException {
 		this.status = status;
 		this.statusMsg = statusMsg != null ? statusMsg : statusMsgs.get(Integer.valueOf(status));
 		if (errormessage == null) {

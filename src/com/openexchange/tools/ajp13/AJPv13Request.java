@@ -103,8 +103,7 @@ public abstract class AJPv13Request {
 			 * first.
 			 */
 			if (!ajpRequestHandler.isHeadersSent()) {
-				writeResponse(new AJPv13Response(AJPv13Response.SEND_HEADERS_PREFIX_CODE, ajpRequestHandler
-						.getServletResponseObj()), out, true);
+				writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponseObj()), out, true);
 				ajpRequestHandler.setHeadersSent(true);
 				ajpRequestHandler.getServletResponseObj().setCommitted(true);
 			}
@@ -124,30 +123,38 @@ public abstract class AJPv13Request {
 					final byte[] tmp = new byte[remainingData.length - currentData.length];
 					System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
 					System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
-					writeResponse(new AJPv13Response(AJPv13Response.SEND_BODY_CHUNK_PREFIX_CODE, currentData), out,
-							true);
+					writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
 					remainingData = tmp;
 				}
 				if (remainingData.length > 0) {
 					/*
 					 * Send final SEND_BODY_CHUNK package
 					 */
-					writeResponse(new AJPv13Response(AJPv13Response.SEND_BODY_CHUNK_PREFIX_CODE, remainingData), out,
-							false);
+					writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData), out, false);
 				}
 			}
 			/*
 			 * Write END_RESPONSE package
 			 */
-			writeResponse(new AJPv13Response(AJPv13Response.END_RESPONSE_PREFIX_CODE), out, true);
+			writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
 			ajpRequestHandler.setEndResponseSent(true);
 			return;
 		}
 		/*
 		 * Request next body chunk package from web sever
 		 */
-		writeResponse(new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE, ajpRequestHandler
-				.getNumOfBytesToRequestFor()), out, true);
+		writeResponse(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()), out, true);
+	}
+
+	/**
+	 * Writes array of <code>byte</code> into <code>out</code>
+	 */
+	protected final void writeResponse(final byte[] responseBytes, final OutputStream out, final boolean flushStream)
+			throws IOException {
+		out.write(responseBytes);
+		if (flushStream) {
+			out.flush();
+		}
 	}
 
 	/**
@@ -155,10 +162,7 @@ public abstract class AJPv13Request {
 	 */
 	protected final void writeResponse(final AJPv13Response response, final OutputStream out, final boolean flushStream)
 			throws IOException, AJPv13Exception {
-		out.write(response.getResponseBytes());
-		if (flushStream) {
-			out.flush();
-		}
+		writeResponse(response.getResponseBytes(), out, flushStream);
 	}
 
 	protected int parseInt() {

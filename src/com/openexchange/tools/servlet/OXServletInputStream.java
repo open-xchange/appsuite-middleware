@@ -361,11 +361,8 @@ public class OXServletInputStream extends ServletInputStream {
 				 */
 				return false;
 			}
-			final AJPv13Response response = new AJPv13Response(AJPv13Response.GET_BODY_CHUNK_PREFIX_CODE, ajpCon
-					.getAjpRequestHandler().getNumOfBytesToRequestFor());
-			byte[] ajpBytes = null;
-			ajpBytes = response.getResponseBytes();
-			ajpCon.getOutputStream().write(ajpBytes);
+			ajpCon.getOutputStream().write(
+					AJPv13Response.getGetBodyChunkBytes(ajpCon.getAjpRequestHandler().getNumOfBytesToRequestFor()));
 			ajpCon.getOutputStream().flush();
 			/*
 			 * Trigger request handler to process expected incoming data package

@@ -383,21 +383,18 @@ public class AJPv13Listener implements Runnable {
 	
 	private final static void writeEndResponse(final Socket client, final boolean closeConnection)
 			throws AJPv13Exception, IOException {
-		client.getOutputStream().write(
-				new AJPv13Response(AJPv13Response.END_RESPONSE_PREFIX_CODE, closeConnection).getResponseBytes());
+		client.getOutputStream().write(AJPv13Response.getEndResponseBytes(closeConnection));
 		client.getOutputStream().flush();
 	}
 
 	private final static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp)
 			throws AJPv13Exception, IOException {
-		client.getOutputStream().write(
-				new AJPv13Response(AJPv13Response.SEND_HEADERS_PREFIX_CODE, resp).getResponseBytes());
+		client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(resp));
 		client.getOutputStream().flush();
 	}
 
 	private final static void writeSendBody(final Socket client, final byte[] data) throws AJPv13Exception, IOException {
-		client.getOutputStream().write(
-				new AJPv13Response(AJPv13Response.SEND_BODY_CHUNK_PREFIX_CODE, data).getResponseBytes());
+		client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(data));
 		client.getOutputStream().flush();
 	}
 	
