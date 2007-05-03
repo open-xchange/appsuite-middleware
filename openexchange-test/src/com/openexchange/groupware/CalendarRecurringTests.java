@@ -1225,5 +1225,48 @@ public class CalendarRecurringTests extends TestCase {
         
     }
     
+    public void testRecurringConflictHandling() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTimezone(TIMEZONE);
+        cdao.setContext(context);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setTitle("ConflictAppointment");
+        cdao.setIgnoreConflicts(true);
+        cdao.setParentFolderID(fid);
+        CalendarDataObject cdao2 = (CalendarDataObject) cdao.clone();
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        cdao2.setTitle("testRecurringConflictHandling");
+        cdao2.setRecurrenceType(CalendarObject.DAILY);
+        cdao2.setInterval(7);
+        cdao2.setParentFolderID(fid);
+        cdao2.setIgnoreConflicts(false);
+        cdao2.removeUntil();
+        
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao2);
+        
+        assertTrue("Recurring Appointments should not conflict!", conflicts == null);
+        
+        int object_id2 = cdao2.getObjectID();
+        
+        CalendarDataObject flag_exception = new CalendarDataObject();
+        flag_exception.setContext(context);
+        flag_exception.setObjectID(object_id2);
+        flag_exception.setRecurrencePosition(1);
+        flag_exception.setLabel(2);
+        flag_exception.setIgnoreConflicts(true);
+        
+        conflicts = csql.updateAppointmentObject(flag_exception, fid, cdao2.getLastModified());
+        
+        assertTrue("Recurring Appointments should not conflict!", conflicts == null);
+    }
+    
+    
     
 }
