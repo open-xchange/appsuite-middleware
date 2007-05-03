@@ -248,11 +248,16 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         //+ loop through extensions and check for errors       
         if(usr!=null && usr.getExtensions()!=null){
             final ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
+//            boolean has_error = false;
             for (final OXUserExtensionInterface usr_extension : usr_exts) {
                 if(usr_extension.getExtensionError()!=null){
                     printServerResponse(usr_extension.getExtensionError());
+//                    has_error = true;
                 }
             }
+//            if(has_error){
+//                System.exit(SYSEXIT_SERVERSTORAGE_ERROR);
+//            }
         }
     }
     
