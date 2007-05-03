@@ -905,8 +905,11 @@ public class CalendarCommonCollection {
     
     public static final boolean isInThePast(final java.sql.Date check) {
         return checkMillisInThePast(check.getTime());
-        
     }
+    
+    public static final boolean isInThePast(final java.util.Date check) {
+        return checkMillisInThePast(check.getTime());
+    }    
     
     static final boolean checkMillisInThePast(long check) {
         long today = CalendarRecurringCollection.normalizeLong(System.currentTimeMillis());
