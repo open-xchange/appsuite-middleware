@@ -11,6 +11,9 @@
  - Fixed bug #6214. After moving an appointment into a subfolder a reminder
    was stored even if no reminder is requested. This has been fixed.
 
+ - Fixed bug #6107. It was not possible to set flags to single appointment
+   from recurrin appointments. This has been fixed.
+
 * 2007-05-02 - martin.kauss@open-xchange.com
  
  - Fixed bug #6400. An error message is thrown if a user moves an
