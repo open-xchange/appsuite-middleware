@@ -943,7 +943,7 @@ public class CalendarOperation implements SearchIterator {
         return p.getList();
     }
     
-    static final Participants[] getModifiedUserParticipants(UserParticipant np[], UserParticipant op[], int owner, int uid, int move_action, boolean time_change) throws OXPermissionException {
+    static final Participants[] getModifiedUserParticipants(UserParticipant np[], UserParticipant op[], int owner, int uid, int move_action, boolean time_change, Context c, int oid) throws OXPermissionException {
         Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
             int bs = Arrays.binarySearch(op, np[a]);
@@ -963,7 +963,7 @@ public class CalendarOperation implements SearchIterator {
                                         p[1] = new Participants(); // modified
                                     }
                                    np[a].setIsModified(false);
-                                   if (!np[a].containsAlarm()) {
+                                   if (!np[a].containsAlarm() && CalendarCommonCollection.existsReminder(c, oid, uid)) {
                                         np[a].setIsModified(true);
                                         np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
                                     }

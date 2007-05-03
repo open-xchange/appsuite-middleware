@@ -50,7 +50,9 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.event.EventClient;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -58,6 +60,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
@@ -411,6 +414,16 @@ public class CalendarCommonCollection {
         } else {
             return null;
         }
+    }
+    
+    public static final boolean existsReminder(Context c, int oid, int uid) {
+        ReminderSQLInterface rsql = new ReminderHandler(c);
+        try {
+            return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
+        } catch (OXException ex) {
+            LOG.error(ex);
+        }
+        return false;
     }
     
     public static final void debugActiveDates(long start, long end, boolean activeDates[]) {

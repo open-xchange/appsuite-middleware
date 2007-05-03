@@ -1562,7 +1562,7 @@ class CalendarMySQL implements CalendarSqlImp {
             Arrays.sort(users);
             Arrays.sort(old_users);
             boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
-            Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getFolderMoveAction(), time_change);
+            Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getFolderMoveAction(), time_change, cdao.getContext(), cdao.getObjectID());
             if (p[0] != null) {
                 new_userparticipants = p[0].getUsers();
                 if (new_userparticipants != null) {
@@ -1848,12 +1848,12 @@ class CalendarMySQL implements CalendarSqlImp {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                     }
-                    if (modified_userparticipants[a].getAlarmMinutes() >= 0) {
+                    if (modified_userparticipants[a].getAlarmMinutes() >= 0 && modified_userparticipants[a].containsAlarm()) {
                         pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
                     } else {
                         pu.setNull(4, java.sql.Types.INTEGER);
                     }
-                    if (modified_userparticipants[a].isModified() && modified_userparticipants[a].getIdentifier() == uid && modified_userparticipants[a].getAlarmMinutes() >= 0) {
+                    if (modified_userparticipants[a].isModified() && modified_userparticipants[a].getIdentifier() == uid && modified_userparticipants[a].containsAlarm() && modified_userparticipants[a].getAlarmMinutes() >= 0) {
                         java.util.Date calc_date = null;
                         if (cdao.containsStartDate()) {
                             calc_date = cdao.getStartDate();
