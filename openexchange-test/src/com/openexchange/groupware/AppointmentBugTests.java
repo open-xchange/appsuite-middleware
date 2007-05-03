@@ -1568,4 +1568,54 @@ public class AppointmentBugTests extends TestCase {
         }         
      }    
     
+
+     public void testBug6535() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testBug6535 - Step 1");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+       
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        UserParticipant up1[] = testobject.getUsers();
+        assertTrue("Check for null object", up1 != null);
+        assertEquals("Check confirm status", CalendarObject.ACCEPT, up1[0].getConfirm());
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setParentFolderID(fid);
+        update.setRecurrencePosition(1);
+        update.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+        
+        CalendarDataObject testobject_exception = csql.getObjectById(update.getObjectID(), fid);
+        UserParticipant up2[] = testobject_exception.getUsers();
+        assertTrue("Check for null object", up2 != null);
+        assertEquals("Check confirm status", CalendarObject.ACCEPT, up2[0].getConfirm());
+        
+        CalendarDataObject testobject_after_update = csql.getObjectById(object_id, fid);
+        UserParticipant up3[] = testobject_after_update.getUsers();
+        assertTrue("Check for null object", up3 != null);
+        assertEquals("Check confirm status", CalendarObject.ACCEPT, up3[0].getConfirm());
+        
+        
+     }
+     
 }
