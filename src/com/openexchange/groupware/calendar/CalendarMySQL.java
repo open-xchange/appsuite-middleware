@@ -1127,7 +1127,7 @@ class CalendarMySQL implements CalendarSqlImp {
                             pi.setNull(6, java.sql.Types.INTEGER);
                         }
                         if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
-                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getStartDate(), new Date(cdao.getStartDate().getTime()-(up[a].getAlarmMinutes() * 60000)), CalendarOperation.INSERT);
+                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new Date(cdao.getStartDate().getTime()-(up[a].getAlarmMinutes() * 60000)), CalendarOperation.INSERT);
                         }
                         pi.setInt(7, cdao.getContextID());
                         CalendarCommonCollection.checkUserParticipantObject(up[a], cdao.getFolderType());
@@ -1855,12 +1855,18 @@ class CalendarMySQL implements CalendarSqlImp {
                     }
                     if (modified_userparticipants[a].isModified() && modified_userparticipants[a].getIdentifier() == uid && modified_userparticipants[a].containsAlarm() && modified_userparticipants[a].getAlarmMinutes() >= 0) {
                         java.util.Date calc_date = null;
+                        java.util.Date end_date = null;
                         if (cdao.containsStartDate()) {
                             calc_date = cdao.getStartDate();
                         } else {
                             calc_date = edao.getStartDate();
                         }
-                        changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), calc_date, new Date(calc_date.getTime()-(modified_userparticipants[a].getAlarmMinutes() * 60000 )), CalendarOperation.UPDATE);
+                        if (cdao.containsEndDate()) {
+                            end_date = cdao.getEndDate();
+                        } else {
+                            end_date = edao.getEndDate();
+                        }                        
+                        changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()-(modified_userparticipants[a].getAlarmMinutes() * 60000 )), CalendarOperation.UPDATE);
                     } else {
                         changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE);
                     }
@@ -1885,7 +1891,7 @@ class CalendarMySQL implements CalendarSqlImp {
                     pd.setInt(2, cid);
                     pd.setInt(3, deleted_userparticipants[a].getIdentifier());
                     pd.addBatch();
-                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), cdao.getStartDate(), new Date(cdao.getStartDate().getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
+                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new Date(cdao.getStartDate().getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
                     new_deleted.add(deleted_userparticipants[a]);
                 }
                 pd.executeBatch();
@@ -2328,10 +2334,10 @@ class CalendarMySQL implements CalendarSqlImp {
     
     
     
-    private final void changeReminder(int oid, int uid, int fid, Context c, boolean sequence, java.util.Date start_date, Date reminder_date, int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+    private final void changeReminder(int oid, int uid, int fid, Context c, boolean sequence, java.util.Date end_date, Date reminder_date, int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
         ReminderSQLInterface rsql = new ReminderHandler(c);
         if (action != CalendarOperation.DELETE) {
-            if (!CalendarCommonCollection.isInThePast(start_date)) {
+            if (!CalendarCommonCollection.isInThePast(end_date)) {
                 ReminderObject ro = new ReminderObject();
                 ro.setUser(uid);
                 ro.setTargetId(oid);
