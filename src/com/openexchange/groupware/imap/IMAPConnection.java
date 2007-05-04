@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.util.Properties;
@@ -56,30 +54,92 @@ import java.util.Properties;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * IMAPConnection
- * Interface for handling imap connections.
- * NOTE: The APIs unique to this class should be considered EXPERIMENTAL. 
- * They may be changed in the future in ways that are incompatible with applications using the current APIs.
+ * <p>
+ * IMAPConnection Interface for handling imap connections.
+ * <p>
+ * <b>NOTE:</b> The APIs unique to this class should be considered
+ * EXPERIMENTAL. They may be changed in the future in ways that are incompatible
+ * with applications using the current APIs.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
 public interface IMAPConnection {
-   
-    public void setImapServer(String imapServer, int imapPort);
 
-    public void setUsername(String imapUsername);
+	/**
+	 * Sets IMAP server and port
+	 * 
+	 * @param imapServer -
+	 *            the IMAP server
+	 * @param imapPort -
+	 *            the IMAP port
+	 */
+	public void setImapServer(String imapServer, int imapPort);
 
-    public void setPassword(String imapPassword);
+	/**
+	 * Sets the user name
+	 * 
+	 * @param imapUsername -
+	 *            the user name
+	 */
+	public void setUsername(String imapUsername);
 
-    public void setProperties(Properties imapProperties);
-    
-    public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException;
-    
-    public IMAPStore getIMAPStore();
-  
-    public void close() throws javax.mail.MessagingException;
-    
-    public boolean isConnected() throws javax.mail.MessagingException;
-   
+	/**
+	 * Sets the password
+	 * 
+	 * @param imapPassword -
+	 *            the password
+	 */
+	public void setPassword(String imapPassword);
+
+	/**
+	 * Sets mail properties
+	 * 
+	 * @param imapProperties
+	 */
+	public void setProperties(Properties imapProperties);
+
+	/**
+	 * Establishes this connection
+	 * 
+	 * @throws javax.mail.NoSuchProviderException
+	 * @throws javax.mail.MessagingException
+	 */
+	public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException;
+
+	/**
+	 * Getter
+	 * 
+	 * @return an instance of <code>IMAPStore</code> if conencted; otherwise
+	 *         <code>null</code>
+	 */
+	public IMAPStore getIMAPStore();
+
+	/**
+	 * Closes the connection
+	 * 
+	 * @throws javax.mail.MessagingException
+	 */
+	public void close() throws javax.mail.MessagingException;
+
+	/**
+	 * Performs a safe check if it is connected
+	 * 
+	 * @return <code>true</code> if connected; otherwise <code>false</code>
+	 * @throws javax.mail.MessagingException
+	 */
+	public boolean isConnected() throws javax.mail.MessagingException;
+
+	/**
+	 * Performs an <b>unsafe</b> safe check if it is connected. This is usually
+	 * usefull if you want to check for inconnectivity and do not want the
+	 * in-deep check of corresponding {@link #isConnected()} method
+	 * 
+	 * @see #isConnected() to check in a safe manner
+	 * 
+	 * @return <code>true</code> if connected; otherwise <code>false</code>
+	 */
+	public boolean isConnectedUnsafe();
+
 }

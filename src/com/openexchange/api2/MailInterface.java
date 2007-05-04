@@ -140,14 +140,12 @@ public interface MailInterface {
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all new
 	 * (unseen) messages located in given folder.
-	 * @param fields TODO
 	 */
 	public SearchIterator getNewMessages(String folder, int sortCol, int order, int[] fields) throws OXException;
 
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all
 	 * messages located in given folder.
-	 * @param fields TODO
 	 */
 	public SearchIterator getAllMessages(String folder, int sortCol, int order, int[] fields) throws OXException;
 
@@ -157,7 +155,6 @@ public interface MailInterface {
 	 * can define a range of messages that should be returned. Moreover
 	 * <code>searchCols</code> and <code>searchPatterns</code> defines a
 	 * search pattern to further confine returned messages.
-	 * @param fields TODO
 	 */
 	public SearchIterator getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols,
 			String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
@@ -165,7 +162,6 @@ public interface MailInterface {
 	/**
 	 * Returns a thread-view-sorted instance of <code>SearchIterator</code>
 	 * containing all messages located in given folder.
-	 * @param fields TODO
 	 */
 	public SearchIterator getAllThreadedMessages(String folder, int[] fields) throws OXException;
 
@@ -176,7 +172,6 @@ public interface MailInterface {
 	 * be returned. Moreover <code>searchCols</code> and
 	 * <code>searchPatterns</code> defines a search pattern to further confine
 	 * returned messages.
-	 * @param fields TODO
 	 */
 	public SearchIterator getThreadedMessages(String folder, int[] fromToIndices, int[] searchCols,
 			String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields) throws OXException;
@@ -184,7 +179,6 @@ public interface MailInterface {
 	/**
 	 * Resturn an instance of <code>SearchIterator</code> containing all
 	 * messages located in given folder which match the given search pattern(s).
-	 * @param fields TODO
 	 */
 	public SearchIterator searchMessages(final String folder, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkWithOR, int[] fields) throws OXException;
@@ -193,7 +187,6 @@ public interface MailInterface {
 	 * Returns the an array of messages located in given folder. If
 	 * <code>fromToUID</code> is not <code>null</code> only messages fitting
 	 * into uid range will be returned.
-	 * @param fields TODO
 	 */
 	public Message[] getMessageList(String folder, long[] uids, int[] fields) throws OXException;
 
@@ -336,7 +329,7 @@ public interface MailInterface {
 
 	/**
 	 * Closes the interface and releases all resources
-	 * @param putIntoCache TODO
+	 * @param putIntoCache - whether or not to put associated conenction into pool
 	 */
 	public void close(boolean putIntoCache) throws OXException;
 

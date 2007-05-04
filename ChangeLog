@@ -3,6 +3,7 @@
  - Reviewed class AJPv13ForwardRequest.java
  - Ignore-case-lookup of JSESSIONID in URL
  - Partial code review
+ - Changes to approach fix of bug #7078
 
 * 2007-05-04 - martin.kauss@open-xchange.com
 

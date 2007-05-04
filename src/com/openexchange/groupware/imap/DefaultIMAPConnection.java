@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.io.Serializable;
@@ -82,15 +80,15 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DefaultIMAPConnection.class);
-	
+
 	private static final String PROTOCOL_IMAP = "imap";
-	
+
 	private static final String CHARENC_UTF8 = "UTF-8";
-	
+
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
-	
+
 	private static int counter;
-	
+
 	private final transient static Lock COUNTER_LOCK = new ReentrantLock();
 
 	private String imapServer = "localhost";
@@ -104,17 +102,17 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	private Properties imapProperties = (Properties) System.getProperties().clone();
 
 	private transient Session imapSession;
-	
+
 	private transient IMAPStore imapStore;
-	
+
 	private boolean expunge;
-	
+
 	private transient IMAPFolder imapFolder;
-	
+
 	private transient Rights myRights;
-	
+
 	private int holdsMessages = -1;
-	
+
 	private boolean connected;
 
 	public DefaultIMAPConnection() {
@@ -141,11 +139,11 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void setProperties(final Properties imapProperties) {
 		this.imapProperties = imapProperties;
 	}
-	
+
 	private static final String STR_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
 
 	private static final String STR_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
-	
+
 	private static final String PROP_MAIL_DEBUG = "mail.debug";
 
 	/**
@@ -154,8 +152,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	 * 
 	 * @return connected <code>com.sun.mail.imap.IMAPStore</code> instance
 	 */
-	public void connect() throws javax.mail.NoSuchProviderException,
-			javax.mail.MessagingException {
+	public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException {
 		if (imapStore != null && imapStore.isConnected()) {
 			connected = true;
 			return;
@@ -203,7 +200,12 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 			COUNTER_LOCK.unlock();
 		}
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#getIMAPStore()
+	 */
 	public IMAPStore getIMAPStore() {
 		if (connected) {
 			return imapStore;
@@ -211,7 +213,8 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.imap.IMAPConnection#close()
 	 */
@@ -233,7 +236,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public Session getSession() {
 		return imapSession;
 	}
-	
+
 	public boolean isExpunge() {
 		return expunge;
 	}
@@ -249,7 +252,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void setImapFolder(final IMAPFolder imapFolder) {
 		this.imapFolder = imapFolder;
 	}
-	
+
 	public void resetImapFolder() {
 		this.imapFolder = null;
 	}
@@ -276,11 +279,25 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		this.holdsMessages = -1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#isConnected()
+	 */
 	public boolean isConnected() {
 		if (!connected) {
 			return false;
 		}
 		return (connected = (imapStore != null && imapStore.isConnected()));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#isConnectedUnsafe()
+	 */
+	public boolean isConnectedUnsafe() {
+		return connected;
 	}
 
 	public static int getCounter() {
@@ -291,5 +308,5 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 			COUNTER_LOCK.unlock();
 		}
 	}
-	
+
 }

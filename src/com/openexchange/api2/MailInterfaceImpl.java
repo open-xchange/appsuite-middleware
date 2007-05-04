@@ -977,28 +977,41 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#close()
 	 */
 	public void close(final boolean putIntoCache) throws OXException {
-		if (!init) {
-			return;
-		}
+		boolean close = true;
 		try {
-			keepSeen();
-			tmpRights = null;
-			sessionObj.setMailSession(null);
-			if (tmpFolder != null && tmpFolder.isOpen()) {
+			if (init) {
 				try {
-					tmpFolder.close(true); // expunge
+					keepSeen();
+					tmpRights = null;
+					sessionObj.setMailSession(null);
+					if (tmpFolder != null && tmpFolder.isOpen()) {
+						try {
+							tmpFolder.close(true); // expunge
+						} catch (MessagingException e) {
+							LOG.error(e.getMessage(), e);
+						} finally {
+							mailInterfaceMonitor.changeNumActive(false);
+							tmpFolder = null;
+						}
+					}
+					closeIMAPConnection(putIntoCache, sessionObj, imapCon);
+					this.imapCon = null;
+					this.imapProps = null;
+					init = false;
+					close = false;
 				} catch (MessagingException e) {
-					LOG.error(e.getMessage(), e);
-				} finally {
-					mailInterfaceMonitor.changeNumActive(false);
-					tmpFolder = null;
+					throw handleMessagingException(e, sessionObj.getIMAPProperties());
 				}
 			}
-			closeIMAPConnection(putIntoCache, sessionObj, imapCon);
-			this.imapCon = null;
-			init = false;
-		} catch (MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+		} finally {
+			if (close) {
+				try {
+					closeIMAPConnection(putIntoCache, sessionObj, imapCon);
+				} catch (MessagingException e) {
+					LOG.error(e.getMessage(), e);
+				}
+				this.imapCon = null;
+			}
 		}
 	}
 
@@ -1061,7 +1074,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			boolean cached = false;
 			try {
-				cached = putIntoCache
+				cached = putIntoCache && imapCon.isConnected()
 						&& IMAPConnectionCacheManager.getInstance().putIMAPConnection(sessionObj, imapCon);
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
@@ -1130,7 +1143,9 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String ERROR_KEEP_SEEN = "/SEEN flag cannot be set: ";
 
 	private final void keepSeen() throws OXException {
-		if (markAsSeen == null) {
+		if (imapCon == null || !imapCon.isConnectedUnsafe()) {
+			return;
+		} else if (markAsSeen == null) {
 			return;
 		}
 		final IMAPFolder imapFolder = imapCon.getImapFolder();
@@ -4697,6 +4712,10 @@ public class MailInterfaceImpl implements MailInterface {
 			if (e.getNextException() instanceof BindException) {
 				oxme = new OXMailException(MailCode.BIND_ERROR, e, imapProps == null ? STR_EMPTY : Integer
 						.valueOf(imapProps.getImapPort()));
+			} else if (e.getNextException() instanceof com.sun.mail.iap.ConnectionException) {
+				mailInterfaceMonitor.changeNumBrokenConnections(true);
+				oxme = new OXMailException(MailCode.CONNECT_ERROR, e, imapProps == null ? STR_EMPTY : imapProps
+						.getImapServer(), imapProps == null ? STR_EMPTY : imapProps.getImapLogin());
 			} else if (e.getNextException() instanceof ConnectException) {
 				OXMailException tmp = null;
 				try {
