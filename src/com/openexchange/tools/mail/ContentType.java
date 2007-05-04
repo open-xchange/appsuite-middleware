@@ -95,7 +95,7 @@ public class ContentType implements Serializable {
 
 	private String baseType;
 
-	private final HashMap<String, String> parameters;
+	private final Map<String, String> parameters;
 
 	public ContentType() {
 		super();

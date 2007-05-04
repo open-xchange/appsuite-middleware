@@ -126,7 +126,7 @@ public class UUEncodedMultiPart {
 		while (beginIndex != -1) {
 			beginIndex = sBodyPart.indexOf("begin ", endIndex);
 			if (beginIndex != -1) {
-				final int eolIndex = sBodyPart.indexOf("\n", beginIndex);
+				final int eolIndex = sBodyPart.indexOf('\n', beginIndex);
 				final String possibleHeader = sBodyPart.substring(beginIndex, eolIndex);
 				final StringTokenizer st = new StringTokenizer(possibleHeader);
 				// String possibleFileSize;
