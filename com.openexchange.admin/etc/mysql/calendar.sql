@@ -98,13 +98,6 @@ CREATE TABLE del_dates (
 	field15 text
 );
 
-CREATE TABLE prg_date_resources (
-	object_id integer,
-	group_right integer,
-	user_right integer,
-        cid integer
-);
-
 CREATE TABLE del_dates_members (
 	object_id int,
 	member_uid integer,	
@@ -112,24 +105,6 @@ CREATE TABLE del_dates_members (
 	reason text,
 	pfid integer,
         reminder integer,
-        cid integer
-);
-
-CREATE TABLE sys_holiday (
-	uniqueid int,
-	lang text,
-	hdate date,
-	userid integer,
-	titel text,
-	type integer,
-        cid integer
-);
-
-CREATE TABLE usr_holiday (
-	uniqueid integer,
-	object_id integer,
-	userid integer,
-	clevel integer,
         cid integer
 );
 
@@ -143,9 +118,3 @@ CREATE TABLE prg_dates_members (
         cid integer
 );
 
-CREATE TABLE prg_date_notification (
-	object_id integer,
-	member_uid integer,
-	notification text,
-        cid integer
-);
