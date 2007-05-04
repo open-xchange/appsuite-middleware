@@ -1583,9 +1583,13 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug6535 - Step 1");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
-        cdao.setDays(1);
        
         cdao.setIgnoreConflicts(true);
+        
+        UserParticipant userparticipants = new UserParticipant();
+        userparticipants.setIdentifier(userid);
+        userparticipants.setConfirm(AppointmentObject.ACCEPT);
+        cdao.setUsers(new UserParticipant[] { userparticipants });
         
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -1601,7 +1605,11 @@ public class AppointmentBugTests extends TestCase {
         update.setObjectID(object_id);
         update.setParentFolderID(fid);
         update.setRecurrencePosition(1);
+        update.setStartDate(new Date(testobject.getStartDate().getTime() + 3600000));
+        update.setEndDate(new Date(testobject.getEndDate().getTime() + 3600000));
         update.setIgnoreConflicts(true);
+        update.setUsers(up1);
+        update.setTitle("testBug6535 - Exception");
         
         csql.updateAppointmentObject(update, fid, cdao.getLastModified());
         
