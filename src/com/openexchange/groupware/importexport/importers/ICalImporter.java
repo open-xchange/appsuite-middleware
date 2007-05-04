@@ -50,9 +50,12 @@
 package com.openexchange.groupware.importexport.importers;
 
 import com.openexchange.tools.versit.converter.ConverterException;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +84,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -96,15 +100,17 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.USER_INPUT,
 		Category.CODE_ERROR,
-		Category.CODE_ERROR}, 
-	desc={"","","","",""}, 
-	exceptionId={0,1,2,3,4}, 
+		Category.CODE_ERROR,
+		Category.USER_INPUT}, 
+	desc={"","","","","",""}, 
+	exceptionId={0,1,2,3,4,5}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
 		"User input Error %s",
 		"Programming Error",
-		"Could not load folder %s"})
+		"Could not load folder %s",
+		"Broken file uploaded"})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -199,7 +205,7 @@ public class ICalImporter implements Importer {
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			final VersitDefinition def = Versit.getDefinition(format.getMimeType());
+			final VersitDefinition def = ICalendar.definition;
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
 			VersitObject rootVersitObject = def.parseBegin(versitReader);
 			
@@ -208,7 +214,15 @@ public class ICalImporter implements Importer {
 			while (hasMoreObjects) {
 				ImportResult importResult = new ImportResult();
 				try {
-					VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+					VersitObject versitObject = null;
+					try {
+						versitObject=  def.parseChild(versitReader, rootVersitObject);
+					} catch (VersitException ve){
+						importResult.setException(importExportExceptionFactory.create(5));
+						importResult.setDate(new Date(System.currentTimeMillis()));
+						hasMoreObjects = false;
+						break;
+					}
 					
 					if (versitObject == null) {
 						hasMoreObjects = false;

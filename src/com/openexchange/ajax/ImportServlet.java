@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -85,13 +86,15 @@ import com.openexchange.groupware.upload.UploadFile;
 	category = { 
 		Category.USER_INPUT, 
 		Category.USER_INPUT,
+		Category.USER_INPUT,
 		Category.USER_INPUT}, 
-	desc = { "" , "" , ""}, 
-	exceptionId = { 0,1,2 }, 
+	desc = { "" , "" , "", ""}, 
+	exceptionId = { 0,1,2,3 }, 
 	msg = { 
 		"Can only handle one file, not %s",
 		"Unknown format: %s",
-		"Uploaded file is of type %s, cannot handle that"})
+		"Uploaded file is of type %s, cannot handle that",
+		"Empty file uploaded."})
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.IMPORTSERVLET, 
 		component=Component.IMPORT_EXPORT)
@@ -138,10 +141,15 @@ public class ImportServlet extends ImportExport {
 					return;
 				}
 				final UploadFile uf = iter.next();
+				final File upload = uf.getTmpFile();
+				if(upload.length() == 0){
+					sendResponse(EXCEPTIONS.create(3), resp);
+					return;
+				}
 				
 				//actual import
 				importResult = importerExporter.importData(
-					getSessionObject(req), format, new FileInputStream(uf.getTmpFile()), folders, req.getParameterMap());
+					getSessionObject(req), format, new FileInputStream(upload), folders, req.getParameterMap());
 
 			} finally {
 				if (ue != null) {

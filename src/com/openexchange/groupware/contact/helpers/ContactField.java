@@ -186,14 +186,16 @@ public enum ContactField{
 
 
   private int columnNumber;
-  private String dbName, readableName, fieldName, outlookName;
+  private String dbName, readableName, fieldName, outlookENName, outlookDEName, outlookFRName;
 
-  private ContactField(int columnNumber, String fieldName, String dbName, String readableName, String outlookName){
+  private ContactField(int columnNumber, String fieldName, String dbName, String readableName, String outlookENName){
 	this.fieldName = fieldName;
     this.columnNumber = columnNumber;
     this.dbName = dbName ;
     this.readableName = readableName;
-    this.outlookName = outlookName;
+    this.outlookENName = outlookENName;
+//    this.outlookDEName = outlookFRName;
+//    this.outlookFRName = outlookFRName;
   }
   
   public int getNumber(){
@@ -212,8 +214,8 @@ public enum ContactField{
 	  return fieldName;
   }
   
-  public String getOutlookName(){
-	  return outlookName;
+  public String getOutlookENName(){
+	  return outlookENName;
   }
   
   public static ContactField getByDBFieldName(final String dbFieldName){
@@ -245,7 +247,7 @@ public static ContactField getByValue(final int value){
 
 public static ContactField getByOutlookName(final String outlook){
 	for(ContactField field: values()){
-		if(outlook.equals( field.getOutlookName() ) ){
+		if(outlook.equals( field.getOutlookENName() ) ){
 			return field;
 		}
 	}
