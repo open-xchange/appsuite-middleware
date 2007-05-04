@@ -55,6 +55,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.mail.MessagingException;
@@ -195,7 +196,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		String jsessionID = null;
 		try {
 			requestURI = parseString();
-			final int pos = requestURI.indexOf(AJPv13RequestHandler.JSESSIONID_URI);
+			final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(AJPv13RequestHandler.JSESSIONID_URI);
 			if (pos > -1) {
 				jsessionID = requestURI.substring(pos + 12);
 				requestURI = requestURI.substring(0, pos);

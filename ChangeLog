@@ -1,6 +1,7 @@
 * 2007-05-04 - thorben.betten@open-xchange.com
 
  - Reviewed class AJPv13ForwardRequest.java
+ - Ignore-case-lookup of JSESSIONID in URL
 
 * 2007-05-04 - martin.kauss@open-xchange.com
 
