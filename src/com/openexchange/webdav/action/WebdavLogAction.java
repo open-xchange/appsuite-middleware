@@ -78,7 +78,9 @@ public class WebdavLogAction extends AbstractAction {
 		b.append("exists: "); b.append(resource.exists()); b.append('\n');
 		b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
 		
-		LOG.debug(b.toString());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(b.toString());
+		}
 		
 		if(LOG.isTraceEnabled()) {
 			if(logBody) {
@@ -94,7 +96,9 @@ public class WebdavLogAction extends AbstractAction {
 			b = new StringBuilder();
 			b.append("DONE URL: "); b.append(req.getUrl()); b.append(" "); b.append(res.getStatus()); b.append('\n');
 				
-			LOG.debug(b.toString());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(b.toString());
+			}
 			
 			if(LOG.isTraceEnabled() && logResponse) {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
@@ -104,10 +108,14 @@ public class WebdavLogAction extends AbstractAction {
 			b = new StringBuilder();
 			b.append("Status: "); b.append(x.getMessage()); b.append(" "); b.append(x.getStatus()); b.append('\n');
 			b.append("WebdavException: ");
-			LOG.debug(b.toString(),x);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(b.toString(),x);
+			}
 			throw x;
 		} catch (RuntimeException x) {
-			LOG.debug("RuntimeException: ",x);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("RuntimeException: ",x);
+			}
 			throw x;
 		}
 	}

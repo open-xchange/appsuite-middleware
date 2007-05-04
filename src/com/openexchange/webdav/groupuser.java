@@ -91,13 +91,21 @@ import org.apache.commons.logging.LogFactory;
 
 public final class groupuser extends PermissionServlet {
     
-    private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE cid=? AND lastmodified > ?";
-    private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
+	private static final long serialVersionUID = -2041907156379627530L;
+
+	private static final String STR_OBJECTSTATUS = "objectstatus";
+
+	private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE cid=? AND lastmodified > ?";
+
+	private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
     
-    private static final Log LOG = LogFactory.getLog(groupuser.class);
+    private static transient final Log LOG = LogFactory.getLog(groupuser.class);
     
-    public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        LOG.debug("PROPFIND");
+    @Override
+	public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    	if (LOG.isDebugEnabled()) {
+    		LOG.debug("PROPFIND");
+    	}
         
         String s_user = null;
         String s_group = null;
@@ -231,7 +239,7 @@ public final class groupuser extends PermissionServlet {
                 final ResultSet rs = ps.executeQuery();
                 
                 while (rs.next()) {
-                    Group g = new Group();
+                    final Group g = new Group();
                     g.setIdentifier(rs.getInt(1));
                     g.setLastModified(new Date(rs.getLong(2)));
                     
@@ -258,9 +266,9 @@ public final class groupuser extends PermissionServlet {
         final Element e_group = new Element("group", XmlServlet.NS);
         
         if (delete) {
-            DataWriter.addElement("objectstatus", "DELETE", e_group);
+            DataWriter.addElement(STR_OBJECTSTATUS, "DELETE", e_group);
         } else {
-            DataWriter.addElement("objectstatus", "CREATE", e_group);
+            DataWriter.addElement(STR_OBJECTSTATUS, "CREATE", e_group);
         }
         
         DataWriter.addElement("uid", group.getIdentifier(), e_group);
@@ -310,7 +318,7 @@ public final class groupuser extends PermissionServlet {
                 final ResultSet rs = ps.executeQuery();
                 
                 while (rs.next()) {
-                    Resource r = new Resource();
+                    final Resource r = new Resource();
                     r.setIdentifier(rs.getInt(1));
                     r.setLastModified(new Date(rs.getLong(2)));
                     
@@ -337,9 +345,9 @@ public final class groupuser extends PermissionServlet {
         final Element eResource = new Element("resource", XmlServlet.NS);
         
         if (delete) {
-            DataWriter.addElement("objectstatus", "DELETE", eResource);
+            DataWriter.addElement(STR_OBJECTSTATUS, "DELETE", eResource);
         } else {
-            DataWriter.addElement("objectstatus", "CREATE", eResource);
+            DataWriter.addElement(STR_OBJECTSTATUS, "CREATE", eResource);
         }
         
         DataWriter.addElement("uid", resource.getIdentifier(), eResource);
@@ -364,7 +372,9 @@ public final class groupuser extends PermissionServlet {
     
     public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg) throws ServletException {
         try {
-            LOG.debug("status: " + code + " message: " + msg);
+        	if (LOG.isDebugEnabled()) {
+        		LOG.debug("status: " + code + " message: " + msg);
+        	}
             
             resp.setStatus(code);
             resp.setContentType("text/html");
@@ -373,7 +383,8 @@ public final class groupuser extends PermissionServlet {
         }
     }
     
-    protected boolean hasModulePermission(final SessionObject sessionObj) {
+    @Override
+	protected boolean hasModulePermission(final SessionObject sessionObj) {
         return sessionObj.getUserConfiguration().hasWebDAVXML();
     }
 }

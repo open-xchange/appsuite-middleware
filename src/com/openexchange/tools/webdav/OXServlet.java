@@ -149,7 +149,9 @@ public abstract class OXServlet extends WebDavServlet {
             LOG.trace("No sessionId cookie found.");
             final String auth = req.getHeader(AUTH_HEADER);
             if (!checkForBasicAuthorization(auth)) {
-                LOG.debug("Authentication header missing.");
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug("Authentication header missing.");
+            	}
                 addUnauthorizedHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                     "Authorization Required!");
@@ -174,7 +176,9 @@ public abstract class OXServlet extends WebDavServlet {
                 return false;
             }
             if (null == session) {
-                LOG.debug("Cannot authenticate user.");
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug("Cannot authenticate user.");
+            	}
                 addUnauthorizedHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                     "Authorization Required!");

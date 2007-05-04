@@ -68,11 +68,11 @@ import org.apache.commons.logging.LogFactory;
 
 public class SessiondConfigWrapper extends AbstractConfigWrapper implements SessiondConfig{
 	
-	private boolean isServerSocketEnabled = false;
+	private boolean isServerSocketEnabled;
 
-	private boolean isServerObjectStreamSocketEnabled = false;
+	private boolean isServerObjectStreamSocketEnabled;
 	
-	private boolean isTcpClientSocketEnabled = false;
+	private boolean isTcpClientSocketEnabled;
 	
 	private int sessionContainerTimeout = 4200000;
 	
@@ -90,19 +90,19 @@ public class SessiondConfigWrapper extends AbstractConfigWrapper implements Sess
 	
 	private String sessionAuthUser = "mailadmin";
 	
-	private boolean isSecureConnectionEnabled = false;
+	private boolean isSecureConnectionEnabled;
 	
 	private int sessionDefaultLifeTime = 3600000;
 	
 	private int randomTokenTimeout = 60000;
 	
-	private String caFile = null;
+	private String caFile;
 	
-	private String certFile = null;
+	private String certFile;
 	
-	private String keyFile = null;
+	private String keyFile;
 	
-	private static boolean isInit = false;
+	private static boolean isInit;
 	
 	private static final Log LOG = LogFactory.getLog(SessiondConfigWrapper.class);
 	
@@ -118,7 +118,9 @@ public class SessiondConfigWrapper extends AbstractConfigWrapper implements Sess
 		Properties prop = null;
 		
 		try {
-			LOG.debug("try to load propfile: " + propfile);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("try to load propfile: " + propfile);
+			}
 			
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
@@ -129,55 +131,89 @@ public class SessiondConfigWrapper extends AbstractConfigWrapper implements Sess
 		}
 		
 		isServerSocketEnabled = parseProperty(prop, "com.openexchange.sessiond.isServerSocketEnabled", isServerSocketEnabled);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.isServerSocketEnabled=" + isServerSocketEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.isServerSocketEnabled=" + isServerSocketEnabled);
+		}
 		
 		isServerObjectStreamSocketEnabled = parseProperty(prop, "com.openexchange.sessiond.isServerObjectStreamSocketEnabled", isServerObjectStreamSocketEnabled);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.isServerObjectStreamSocketEnabled=" + isServerObjectStreamSocketEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.isServerObjectStreamSocketEnabled=" + isServerObjectStreamSocketEnabled);
+		}
 		
 		isTcpClientSocketEnabled = parseProperty(prop, "com.openexchange.sessiond.isTcpClientSocketEnabled", isTcpClientSocketEnabled);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.isTcpClientSocketEnabled=" + isTcpClientSocketEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.isTcpClientSocketEnabled=" + isTcpClientSocketEnabled);
+		}
 
 		sessionContainerTimeout = parseProperty(prop, "com.openexchange.sessiond.sessionContainerTimeout", sessionContainerTimeout);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.sessionContainerTimeout=" + sessionContainerTimeout);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.sessionContainerTimeout=" + sessionContainerTimeout);
+		}
 
 		numberOfSessionContainers = parseProperty(prop, "com.openexchange.sessiond.numberOfSessionContainers", numberOfSessionContainers);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.numberOfSessionContainers=" + numberOfSessionContainers);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.numberOfSessionContainers=" + numberOfSessionContainers);
+		}
 		
 		serverPort = parseProperty(prop, "com.openexchange.sessiond.serverPort", serverPort);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.serverPort=" + serverPort);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.serverPort=" + serverPort);
+		}
 		
 		serverObjectStreamPort = parseProperty(prop, "com.openexchange.sessiond.serverObjectStreamPort", serverObjectStreamPort);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.serverObjectStreamPort=" + serverObjectStreamPort);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.serverObjectStreamPort=" + serverObjectStreamPort);
+		}
 		
 		maxSession = parseProperty(prop, "com.openexchange.sessiond.maxSession", maxSession);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
+		}
 		
 		serverBindAddress = parseProperty(prop, "com.openexchange.sessiond.serverBindAddress", serverBindAddress);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.serverBindAddress=" + serverBindAddress);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.serverBindAddress=" + serverBindAddress);
+		}
 		
 		isDoubleLoginPermitted = parseProperty(prop, "com.openexchange.sessiond.isDoubleLoginPermitted", isDoubleLoginPermitted);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.isDoubleLoginPermitted=" + isDoubleLoginPermitted);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.isDoubleLoginPermitted=" + isDoubleLoginPermitted);
+		}
 		
 		sessionAuthUser = parseProperty(prop, "com.openexchange.sessiond.sessionAuthUser", sessionAuthUser);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.sessionAuthUser=" + sessionAuthUser);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.sessionAuthUser=" + sessionAuthUser);
+		}
 		
 		isSecureConnectionEnabled = parseProperty(prop, "com.openexchange.sessiond.isSecureConnection", isSecureConnectionEnabled);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.isSecureConnection=" + isSecureConnectionEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.isSecureConnection=" + isSecureConnectionEnabled);
+		}
 		
 		sessionDefaultLifeTime = parseProperty(prop, "com.openexchange.sessiond.sessionDefaultLifeTime", sessionDefaultLifeTime);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionDefaultLifeTime);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionDefaultLifeTime);
+		}
 
 		randomTokenTimeout = parseProperty(prop, "com.openexchange.sessiond.randomTokenTimeout", randomTokenTimeout);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
+		}
 		
 		caFile = parseProperty(prop, "com.openexchange.sessiond.caFile", caFile);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.caFile=" + caFile);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.caFile=" + caFile);
+		}
 		
 		certFile = parseProperty(prop, "com.openexchange.sessiond.certFile", certFile);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.certFile=" + certFile);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.certFile=" + certFile);
+		}
 		
 		keyFile = parseProperty(prop, "com.openexchange.sessiond.keyFile", keyFile);
-		LOG.debug("Sessiond property: com.openexchange.sessiond.keyFile=" + keyFile);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Sessiond property: com.openexchange.sessiond.keyFile=" + keyFile);
+		}
 		
 	}
 	

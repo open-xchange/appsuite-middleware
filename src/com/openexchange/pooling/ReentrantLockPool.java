@@ -311,8 +311,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         if (null != other.getTrace()) {
 	                        e.setStackTrace(other.getTrace());
 	                    }
-                        LOG.debug("Found thread using two objects. First get.");
-                        LOG.debug(e.getMessage(), e);
+                        if (LOG.isDebugEnabled()) {
+	                        LOG.debug("Found thread using two objects. First get.");
+	                        LOG.debug(e.getMessage(), e);
+                        }
                         e = new PoolingException(
                             "Found thread using two objects. Second get.");
                         e.setStackTrace(thread.getStackTrace());
@@ -359,7 +361,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
                 // create
                 if (null == retval) {
-                    LOG.debug("Creating object.");
+                	if (LOG.isDebugEnabled()) {
+						LOG.debug("Creating object.");
+					}
                     final T pooled;
                     try {
                         pooled = lifecycle.create();

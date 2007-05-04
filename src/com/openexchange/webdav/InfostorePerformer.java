@@ -95,7 +95,6 @@ import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
 
 public class InfostorePerformer implements SessionHolder {
 	
@@ -123,7 +122,7 @@ public class InfostorePerformer implements SessionHolder {
 	
 	private static  final Log LOG = LogFactory.getLog(Infostore.class);
 	
-	private  InfostoreWebdavFactory factory = null;
+	private  InfostoreWebdavFactory factory;
 	private  Protocol protocol = new Protocol();
 	
 	private Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
@@ -146,7 +145,7 @@ public class InfostorePerformer implements SessionHolder {
 		WebdavAction put;
 		WebdavAction trace;
 		
-		InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
+		final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
 		infoFactory.setDatabase(new InfostoreFacadeImpl());
 		infoFactory.setFolderLockManager(new FolderLockManagerImpl());
 		infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
@@ -190,15 +189,15 @@ public class InfostorePerformer implements SessionHolder {
 	
 	}
 	
-	private final WebdavAction prepare(AbstractAction action, boolean logBody, boolean logResponse, AbstractAction...additionals) {
-		WebdavLogAction logAction = new WebdavLogAction();
+	private final WebdavAction prepare(final AbstractAction action, final boolean logBody, final boolean logResponse, final AbstractAction...additionals) {
+		final WebdavLogAction logAction = new WebdavLogAction();
 		logAction.setLogRequestBody(logBody);
 		logAction.setLogResponseBody(logResponse);
 		
 		
-		AbstractAction lifeCycle = new WebdavRequestCycleAction();
-		AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
-		AbstractAction ifMatch = new WebdavIfMatchAction();
+		final AbstractAction lifeCycle = new WebdavRequestCycleAction();
+		final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
+		final AbstractAction ifMatch = new WebdavIfMatchAction();
 		
 		if(logAction.isEnabled()) {
 			lifeCycle.setNext(logAction);
@@ -227,7 +226,9 @@ public class InfostorePerformer implements SessionHolder {
 	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, SessionObject sess) throws ServletException, IOException {
 		try {
 			session.set(sess);
-			LOG.debug("Executing "+action);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Executing "+action);
+			}
 			actions.get(action).perform(new ServletWebdavRequest(factory, req), new ServletWebdavResponse(resp));
 		} catch (WebdavException x) {
 			resp.setStatus(x.getStatus());

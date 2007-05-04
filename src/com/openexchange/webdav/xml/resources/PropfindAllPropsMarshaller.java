@@ -69,10 +69,10 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 	}
 
 	@Override
-	protected Multistatus<Iterable<WebdavProperty>> getProps(WebdavResource resource) {
-		Multistatus<Iterable<WebdavProperty>> multistatus = new Multistatus<Iterable<WebdavProperty>>();
+	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
+		final Multistatus<Iterable<WebdavProperty>> multistatus = new Multistatus<Iterable<WebdavProperty>>();
 		try {
-			Iterable<WebdavProperty> iterable =  resource.getAllProps();
+			final Iterable<WebdavProperty> iterable =  resource.getAllProps();
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), iterable));
 		} catch (WebdavException e) {
 			LOG.debug(e);

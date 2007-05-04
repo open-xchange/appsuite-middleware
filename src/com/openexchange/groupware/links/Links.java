@@ -112,65 +112,59 @@ public class Links {
 		module = new modules[138];
 		
 		module[Types.APPOINTMENT] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
 				if (!so.getUserConfiguration().hasCalendar()){
 					return false;
-				}else{
-					try{
-						return CalendarCommonCollection.getReadPermission(oid,fid,so);
-					}catch (OXException ox){
-						return false;
-					}
+				}
+				try{
+					return CalendarCommonCollection.getReadPermission(oid,fid,so);
+				}catch (OXException ox){
+					return false;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(final SessionObject so){
 				if (!so.getUserConfiguration().hasCalendar()){
 					return false;
-				}else{
-					return true;
 				}
+				return true;
 			}
 		};
 		module[Types.TASK] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
 				if (!so.getUserConfiguration().hasTask()){
 					return false;
-				}else{
-					return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
 				}
+				return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(final SessionObject so){
 				if (!so.getUserConfiguration().hasTask()){
 					return false;
-				}else{
-					return true;
 				}
+				return true;
 			}
 		};
 		module[Types.CONTACT] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
 				if (!so.getUserConfiguration().hasContact()){
 					return false;
-				}else{
-					try{
-						return Contacts.performContactReadCheckByID(oid, user, group, so.getContext(), so.getUserConfiguration());
-					} catch (Exception e) {
-						//System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");
-						LOG.error("UNABLE TO CHECK CONTACT READRIGHT FOR LINK",e);
-						return false;
-					}
+				}
+				try{
+					return Contacts.performContactReadCheckByID(oid, user, group, so.getContext(), so.getUserConfiguration());
+				} catch (Exception e) {
+					//System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");
+					LOG.error("UNABLE TO CHECK CONTACT READRIGHT FOR LINK",e);
+					return false;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(final SessionObject so){
 				if (!so.getUserConfiguration().hasContact()){
 					return false;
-				}else{
-					return true;
 				}
+				return true;
 			}
 		};
 		module[Types.INFOSTORE] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {				
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {				
 				final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
 				try {
 					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), so.getUserObject(), so.getUserConfiguration());
@@ -178,12 +172,11 @@ public class Links {
 					return false;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(final SessionObject so){
 				if (!so.getUserConfiguration().hasInfostore()){
 					return false;
-				}else{
-					return true;
 				}
+				return true;
 			}
 		};
 		/*
@@ -270,7 +263,7 @@ public class Links {
 					"An Error occurred. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 					}
 	)
-	public static void performLinkStorage(LinkObject l, int user, int[] group, SessionObject so, Connection writecon) throws OXException{
+	public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final SessionObject so, final Connection writecon) throws OXException{
 		
 		if (!module[l.getFirstType()].isReadable(l.getFirstId(),l.getFirstFolder(),user,group,so) || !module[l.getSecondType()].isReadable(l.getSecondId(),l.getSecondFolder(), user, group, so)){
 			throw EXCEPTIONS.create(0,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContext().getContextId());
@@ -280,7 +273,7 @@ public class Links {
 		Statement stmt = null;
 		ResultSet rs = null;
 		Connection readCon = null;
-		LinksSql lms = new LinksMySql();
+		final LinksSql lms = new LinksMySql();
 		try {
 			readCon = DBPool.pickup(so.getContext());
 			stmt = readCon.createStatement();	
@@ -299,10 +292,12 @@ public class Links {
 			//throw new OXException("UNABLE TO SAVE LINK",se);
 		} finally {
 			try{
-				if (rs != null)
+				if (rs != null) {
 					rs.close();
-				if (stmt != null)
+				}
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
@@ -327,8 +322,9 @@ public class Links {
 			//throw new OXException("UNABLE TO SAVE LINK",se);
 		} finally {
 			try{
-				if (ps != null)
+				if (ps != null) {
 					ps.close();
+				}
 			} catch (SQLException se) {
 				LOG.error("Unable to close Statement",se);
 			}
@@ -349,7 +345,7 @@ public class Links {
 					"An Error occurred. Unable to load some links for this Objects. 1. Object %1$d 2. Object %2$d Context %3$d"
 					}
 	)
-	public static LinkObject getLinkFromObject(int first_id, int first_type, int second_id, int second_type,int user, int[] group, SessionObject so, Connection readcon) throws OXException {
+	public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
 
 		if (!module[first_type].hasModuleRights(so) || !module[second_type].hasModuleRights(so)){
 			throw EXCEPTIONS.create(5,first_id,second_id,so.getContext().getContextId());
@@ -359,7 +355,7 @@ public class Links {
 		LinkObject lo = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		LinksSql lms = new LinksMySql();
+		final LinksSql lms = new LinksMySql();
 		try{
 			stmt = readcon.createStatement();
 			rs = stmt.executeQuery(lms.iFgetLinkFromObject(first_id,first_type,second_id,second_type,so.getContext().getContextId()));
@@ -382,10 +378,12 @@ public class Links {
 			//throw new OXException("UNABLE TO LOAD LINKOBJECT ",sql);
 		} finally {
 			try{
-				if (rs != null)
+				if (rs != null) {
 					rs.close();
-				if (stmt != null)
+				}
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
@@ -399,25 +397,25 @@ public class Links {
 			exceptionId=9,
 			msg="Unable to load all links from this Objects. Object %1$d Folder %2$d User %3$d Context %4$d"
 	)
-	public static LinkObject[] getAllLinksFromObject(int id, int type, int folder, int user, int[] group, SessionObject so, Connection readcon) throws OXException {
+	public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folder, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
 		LinkObject[] los = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		LinksSql lms = new LinksMySql();
+		final LinksSql lms = new LinksMySql();
 		try{
 			stmt = readcon.createStatement();
 			rs = stmt.executeQuery(lms.iFgetAllLinksFromObject(id,type,folder,so.getContext().getContextId()));
 			
 			if (rs.next()){				
 				rs.last();
-			    int size = rs.getRow();
+				final int size = rs.getRow();
 			    rs.beforeFirst();
 
 			    int cnt = 0;
 			    los = new LinkObject[size];
 			    
 			    while(rs.next()){
-					LinkObject	lo = new LinkObject(rs.getInt(1),
+			    	LinkObject	lo = new LinkObject(rs.getInt(1),
 							rs.getInt(2),
 							rs.getInt(3),
 							rs.getInt(4),
@@ -438,10 +436,12 @@ public class Links {
 			//throw new OXException("UNABLE TO LOAD LINKOBJECT ",sql);
 		} finally {
 			try{
-				if (rs != null)
+				if (rs != null) {
 					rs.close();
-				if (stmt != null)
+				}
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
@@ -461,14 +461,16 @@ public class Links {
 					"An Error occurred. Unable to delete some links from this Objects. Object %1$d Folder %2$d Context %3$d"
 					}
 	)
-	public static int[][] deleteLinkFromObject(int id, int type, int folder, int[][] data, int user, int[] group, SessionObject so, Connection readcon, Connection writecon) throws OXException {
+	public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
 		Statement smt = null;
 		Statement del = null;
 		ResultSet rs = null;
-		LinksSql lms = new LinksMySql();
-        List<int[]> resp = new ArrayList<int[]>();
+		final LinksSql lms = new LinksMySql();
+		final List<int[]> resp = new ArrayList<int[]>();
 		
-		LOG.debug(new StringBuilder("Fetching rights for Module: "+type+" id:"+id+" folder:"+folder+" user:"+user+" group:"+group));
+        if (LOG.isDebugEnabled()) {
+        	LOG.debug(new StringBuilder("Fetching rights for Module: "+type+" id:"+id+" folder:"+folder+" user:"+user+" group:"+group));
+        }
 		
 		if (!module[type].isReadable(id,folder,user,group,so)){		
 			//System.out.println("Unable to delete Link");
@@ -521,16 +523,19 @@ public class Links {
 			//throw new OXException("UNABLE TO DELETE LINKS",se);
 		} finally {
 			try{
-				if (rs != null)
+				if (rs != null) {
 					rs.close();
-				if (smt != null)
+				}
+				if (smt != null) {
 					smt.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement or ResultSet",sqle);
 			}
 			try{
-				if (del != null)
+				if (del != null) {
 					del.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement",sqle);
 			}
@@ -545,13 +550,13 @@ public class Links {
 			exceptionId=12,
 			msg="Unable to delete all links from this Objects. Object %1$d Context %2$d"
 	)
-	public static void deleteAllObjectLinks(int id, int type, int cid, Connection writecon) throws OXException {
+	public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon) throws OXException {
 		//TODO RIGHTS CHECK on onject id and fid!
 		/*
 		 *  this right check is realy not requiered because this method only comes up when we delete an object and all its links. 
 		 *  and at this point, all rights are already checked
 		 */
-		LinksSql lms = new LinksMySql();
+		final LinksSql lms = new LinksMySql();
 		PreparedStatement ps = null;
 		try {
 			ps = writecon.prepareStatement(lms.iFdeleteAllObjectLinks());
@@ -566,8 +571,9 @@ public class Links {
 			//throw new OXException("UNABLE TO DELETE LINKS FROM OBJECT "+id, se);
 		} finally {
 			try{
-				if (ps != null)
+				if (ps != null) {
 					ps.close();
+				}
 			} catch (SQLException sqle){
 				LOG.error("Unable to close Statement",sqle);
 			}

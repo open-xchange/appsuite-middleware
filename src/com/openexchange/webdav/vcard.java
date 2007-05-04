@@ -51,15 +51,14 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.IDGenerator;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,10 +68,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -88,10 +92,7 @@ import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
-import java.io.PrintWriter;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  *
@@ -199,14 +200,16 @@ public final class vcard extends PermissionServlet {
 	private static String SQL_ENTRY_INSERT = "INSERT INTO vcard_ids (object_id, cid, principal_id, client_id, target_object_id) VALUES (?, ?, ?, ? ,?)";
 	private static String SQL_ENTRY_DELETE = "DELETE FROM vcard_ids WHERE target_object_id = ? AND principal_id = ?";
 	
-	private static final Log LOG = LogFactory.getLog(vcard.class);
+	private static transient final Log LOG = LogFactory.getLog(vcard.class);
 	
 	public void oxinit() throws ServletException {
 		
 	}
 	
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		LOG.debug("GET");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("GET");
+		}
 		
 		final OutputStream os = resp.getOutputStream();
 		
@@ -223,7 +226,7 @@ public final class vcard extends PermissionServlet {
 			// get user-agent
 			user_agent = getUserAgent(req);
 			
-			principal = user_agent + "_" + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserObject().getId();
 			
 			int contactfolder_id = getContactFolderID(req);
 			
@@ -372,7 +375,9 @@ public final class vcard extends PermissionServlet {
 	}
 	
 	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		LOG.debug("PUT");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PUT");
+		}
 		
 		String content_type = null;
 		
@@ -403,7 +408,7 @@ public final class vcard extends PermissionServlet {
 				throw new OXConflictException("missing header field: user-agent");
 			}
 			
-			principal = user_agent + "_" + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserObject().getId();
 			
 			int contactfolder_id = getContactFolderID(req);
 			
@@ -508,7 +513,9 @@ public final class vcard extends PermissionServlet {
 							try {
 								object_id = Integer.parseInt(entries_db.get(client_id).toString());
 							} catch (NumberFormatException exc) {
-								LOG.debug("object id is not an integer");
+								if (LOG.isDebugEnabled()) {
+									LOG.debug("object id is not an integer");
+								}
 							}
 							
 							if (object_id > 0) {
@@ -538,8 +545,9 @@ public final class vcard extends PermissionServlet {
 								addEntry(context, principal_id, contactObj.getObjectID(), client_id);
 							}
 						}
-						
-						LOG.debug("STATUS: OK");
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("STATUS: OK");
+						}
 					} catch (OXObjectNotFoundException exc) {
 						LOG.debug("object was already deleted on server: " + object_id, exc);
 					}
@@ -592,7 +600,7 @@ public final class vcard extends PermissionServlet {
 		while (e.hasMoreElements()) {
 			final String tmp = e.nextElement().toString().toLowerCase();
 			if ("user-agent".equals(tmp)) {
-				return req.getHeader("user-agent").toString();
+				return req.getHeader("user-agent");
 			}
 		}
 		
@@ -666,7 +674,7 @@ public final class vcard extends PermissionServlet {
 		try {
 			writeCon = DBPool.pickupWriteable(context);
 			writeCon.setAutoCommit(false);
-			int objectId = IDGenerator.getId(context, Types.ICAL, writeCon);
+			final int objectId = IDGenerator.getId(context, Types.ICAL, writeCon);
 			writeCon.commit();
 			
 			ps = writeCon.prepareStatement(SQL_ENTRY_INSERT);

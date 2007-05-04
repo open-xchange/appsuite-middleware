@@ -111,25 +111,25 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	public static final int OK_STATUS = 1200;
 	
-	public static final String MODIFICATION_EXCEPTION = "[" + MODIFICATION_STATUS + "] This object was modified on the server";
+	public static final String MODIFICATION_EXCEPTION = '[' + MODIFICATION_STATUS + "] This object was modified on the server";
 	
-	public static final String OBJECT_NOT_FOUND_EXCEPTION = "[" + OBJECT_NOT_FOUND_STATUS + "] Object not found";
+	public static final String OBJECT_NOT_FOUND_EXCEPTION = '[' + OBJECT_NOT_FOUND_STATUS + "] Object not found";
 	
-	public static final String PERMISSION_EXCEPTION = "[" + PERMISSION_STATUS + "] No permission";
+	public static final String PERMISSION_EXCEPTION = '[' + PERMISSION_STATUS + "] No permission";
 	
-	public static final String CONFLICT_EXCEPTION = "[" + CONFLICT_STATUS + "] Conflict";
+	public static final String CONFLICT_EXCEPTION = '[' + CONFLICT_STATUS + "] Conflict";
 	
-	public static final String USER_INPUT_EXCEPTION = "[" + USER_INPUT_STATUS + "] invalid user input";
+	public static final String USER_INPUT_EXCEPTION = '[' + USER_INPUT_STATUS + "] invalid user input";
 	
-	public static final String APPOINTMENT_CONFLICT_EXCEPTION = "[" + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
+	public static final String APPOINTMENT_CONFLICT_EXCEPTION = '[' + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
 	
-	public static final String MANDATORY_FIELD_EXCEPTION = "[" + MANDATORY_FIELD_STATUS + "] Missing field";
+	public static final String MANDATORY_FIELD_EXCEPTION = '[' + MANDATORY_FIELD_STATUS + "] Missing field";
 	
-	public static final String BAD_REQUEST_EXCEPTION = "[" + BAD_REQUEST_STATUS + "] bad xml request";
+	public static final String BAD_REQUEST_EXCEPTION = '[' + BAD_REQUEST_STATUS + "] bad xml request";
 	
-	public static final String SERVER_ERROR_EXCEPTION = "[" + SERVER_ERROR_STATUS + "] Server Error - ";
+	public static final String SERVER_ERROR_EXCEPTION = '[' + SERVER_ERROR_STATUS + "] Server Error - ";
 	
-	public static final String OK = "[" + OK_STATUS + "] OK";
+	public static final String OK = '[' + OK_STATUS + "] OK";
 	
 	public static final String _contentType = "text/xml; charset=UTF-8";
 	
@@ -147,18 +147,22 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	private static final Namespace dav = Namespace.getNamespace("D", davUri);
 	
-	private static final Log LOG = LogFactory.getLog(XmlServlet.class);
+	private static transient final Log LOG = LogFactory.getLog(XmlServlet.class);
 	
 	public void oxinit() throws ServletException {
 		
 	}
 	
-	public void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	@Override
+	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doPropPatch(req, resp);
 	}
 	
-	public void doPropPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		LOG.debug("PROPPATCH");
+	@Override
+	public void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PROPPATCH");
+		}
 		
 		XmlPullParser parser = null;
 		
@@ -193,8 +197,11 @@ public abstract class XmlServlet extends PermissionServlet {
 		}
 	}
 	
-	public void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		LOG.debug("PROPFIND");
+	@Override
+	public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PROPFIND");
+		}
 		
 		Document input_doc = null;
 		
@@ -208,7 +215,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		boolean bDeleted = true;
 		
 		try {
-			SessionObject sessionObj = getSession(req);
+			final SessionObject sessionObj = getSession(req);
 			
 			input_doc = getJDOMDocument(req);
 			os = resp.getOutputStream();
@@ -220,20 +227,20 @@ public abstract class XmlServlet extends PermissionServlet {
 			boolean hasObjectId = false;
 			
 			if (input_doc != null) {
-				Element el = input_doc.getRootElement();
-				Element eProp = el.getChild(prop, dav);
+				final Element el = input_doc.getRootElement();
+				final Element eProp = el.getChild(prop, dav);
 				
 				if (eProp == null) {
 					doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "expected element: prop");
 					return;
 				}
 				
-				Element eLastSync = eProp.getChild("lastsync", Namespace.getNamespace(PREFIX, NAMESPACE));
+				final Element eLastSync = eProp.getChild("lastsync", Namespace.getNamespace(PREFIX, NAMESPACE));
 				if (eLastSync != null) {
 					hasLastSync = true;
 				}
 				
-				Element eObjectId = eProp.getChild(DataFields.OBJECT_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
+				final Element eObjectId = eProp.getChild(DataFields.OBJECT_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
 				if (eObjectId != null) {
 					hasObjectId = true;
 				}
@@ -245,7 +252,7 @@ public abstract class XmlServlet extends PermissionServlet {
 						System.out.println("invalid value in element lastsync");
 					}
 					
-					Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
+					final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
 					if (eFolderId != null) {
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
@@ -254,9 +261,9 @@ public abstract class XmlServlet extends PermissionServlet {
 						}
 					}
 					
-					Element eObjectMode = eProp.getChild("objectmode", Namespace.getNamespace(PREFIX, NAMESPACE));
+					final Element eObjectMode = eProp.getChild("objectmode", Namespace.getNamespace(PREFIX, NAMESPACE));
 					if (eObjectMode != null) {
-						String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
+						final String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
 						
 						for (int a = 0; a < value.length; a++) {
 							if (value[a].trim().equals("MODIFIED") || value[a].trim().equals("NEW_AND_MODIFIED")) {
@@ -277,7 +284,7 @@ public abstract class XmlServlet extends PermissionServlet {
 						throw new OXConflictException("invalid value in element object_id: " + eObjectId.getText());
 					}
 					
-					Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
+					final Element eFolderId = eProp.getChild(CommonFields.FOLDER_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
 					if (eFolderId != null) {
 						try {
 							folder_id = Integer.parseInt(eFolderId.getText());
@@ -309,7 +316,9 @@ public abstract class XmlServlet extends PermissionServlet {
 		} catch (OXPermissionException opexc) {
 			doError(req, resp, HttpServletResponse.SC_FORBIDDEN, opexc.getMessage());
 		} catch (OXConflictException ocexc) {
-			ocexc.printStackTrace();
+			if (LOG.isErrorEnabled()) {
+				LOG.error(ocexc.getMessage(), ocexc);
+			}
 			doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + ocexc.getMessage());
 		} catch (org.jdom.JDOMException exc) {
 			LOG.error("doPropFind", exc);
@@ -320,13 +329,15 @@ public abstract class XmlServlet extends PermissionServlet {
 		}
 	}
 	
-	public void doError(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+	public void doError(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
 		doError(req, resp,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
 	}
 	
-	public void doError(HttpServletRequest req, HttpServletResponse resp, int code, String msg) throws ServletException {
+	public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg) throws ServletException {
 		try {
-			LOG.debug("STATUS: " + msg + ": (" + code + ")");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("STATUS: " + msg + ": (" + code + ')');
+			}
 			
 			resp.sendError(code, msg);
 			resp.setContentType("text/html");
@@ -335,8 +346,8 @@ public abstract class XmlServlet extends PermissionServlet {
 		}
 	}
 	
-	protected void parsePropertyUpdate(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception {
-		OutputStream os = resp.getOutputStream();
+	protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
+		final OutputStream os = resp.getOutputStream();
 		
 		os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
 		os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\"" + Version.NAME + "\">").getBytes());
@@ -352,11 +363,11 @@ public abstract class XmlServlet extends PermissionServlet {
 		os.write(("</D:multistatus>").getBytes());
 	}
 	
-	protected void openSet(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception {
+	protected void openSet(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		openProp(req, resp, parser);
 	}
 	
-	protected void openProp(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception {
+	protected void openProp(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		parser.nextTag();
 		parser.require(XmlPullParser.START_TAG, davUri, prop);
 		
@@ -365,7 +376,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		closeProp(parser);
 	}
 	
-	protected void closeProp(XmlPullParser parser) throws Exception {
+	protected void closeProp(final XmlPullParser parser) throws Exception {
 		// parser.nextTag();
 		if (!isTag(parser, prop, davUri)) {
 			boolean isProp = true;
@@ -383,56 +394,58 @@ public abstract class XmlServlet extends PermissionServlet {
 		closeSet(parser);
 	}
 	
-	protected void closeSet(XmlPullParser parser) throws Exception {
+	protected void closeSet(final XmlPullParser parser) throws Exception {
 		parser.nextTag();
 		parser.require(XmlPullParser.END_TAG, davUri, "set");
 	}
 	
-	public boolean isTag(XmlPullParser parser, String name, String namespace) throws XmlPullParserException {
+	public boolean isTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
 		return parser.getEventType() == XmlPullParser.START_TAG	&& (name == null || name.equals(parser.getName()));
 	}
 	
-	public boolean endTag(XmlPullParser parser, String name, String namespace) throws XmlPullParserException {
+	public boolean endTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
 		return parser.getEventType() == XmlPullParser.END_TAG && (name == null || name.equals(parser.getName()));
 	}
 	
-	protected void writeResponse(DataObject dataobject, int status, String message, String client_id, OutputStream os, XMLOutputter xo) throws Exception {
+	protected void writeResponse(final DataObject dataobject, final int status, final String message, final String client_id, final OutputStream os, final XMLOutputter xo) throws Exception {
 		writeResponse(dataobject, status, message, client_id, os, xo, null);
 	}
 	
-	protected void writeResponse(DataObject dataobject, int status, String message, String client_id, OutputStream os, XMLOutputter xo, AppointmentObject[] conflicts) throws Exception {
-		LOG.debug(message + ":" + status);
+	protected void writeResponse(final DataObject dataobject, final int status, final String message, final String client_id, final OutputStream os, final XMLOutputter xo, final AppointmentObject[] conflicts) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(message + ':' + status);
+		}
 		
-		Element e_response = new Element("response", dav);
+		final Element e_response = new Element("response", dav);
 		e_response.addNamespaceDeclaration(NS);
 		
-		Element e_href = new Element("href", dav);
+		final Element e_href = new Element("href", dav);
 		e_href.addContent(String.valueOf(dataobject.getObjectID()));
 		
 		e_response.addContent(e_href);
 		
-		Element e_propstat = new Element("propstat", dav);
-		Element e_prop = new Element(prop, dav);
+		final Element e_propstat = new Element("propstat", dav);
+		final Element e_prop = new Element(prop, dav);
 		
-		Element e_object_id = new Element(DataFields.OBJECT_ID, NS);
+		final Element e_object_id = new Element(DataFields.OBJECT_ID, NS);
 		e_object_id.addContent(String.valueOf(dataobject.getObjectID()));
 		e_prop.addContent(e_object_id);
 		
-		Date lastModified = dataobject.getLastModified();
+		final Date lastModified = dataobject.getLastModified();
 		if (lastModified != null) {
-			Element eLastModified = new Element(DataFields.LAST_MODIFIED, NS);
+			final Element eLastModified = new Element(DataFields.LAST_MODIFIED, NS);
 			eLastModified.addContent(String.valueOf(lastModified.getTime()));
 			e_prop.addContent(eLastModified);
 		}
 		
 		if (dataobject instanceof CalendarObject) {
-			Element e_recurrence_id = new Element(CalendarFields.RECURRENCE_ID, NS);
+			final Element e_recurrence_id = new Element(CalendarFields.RECURRENCE_ID, NS);
 			e_recurrence_id.addContent(String.valueOf(((CalendarObject)dataobject).getRecurrenceID()));
 			e_prop.addContent(e_recurrence_id);
 		}
 		
 		if (client_id != null && client_id.length() > 0) {
-			Element e_client_id = new Element("client_id", NS);
+			final Element e_client_id = new Element("client_id", NS);
 			e_client_id.addContent(client_id);
 			
 			e_prop.addContent(e_client_id);
@@ -440,26 +453,29 @@ public abstract class XmlServlet extends PermissionServlet {
 		
 		e_propstat.addContent(e_prop);
 		
-		Element e_status = new Element("status", "D", "DAV:");
+		final Element e_status = new Element("status", "D", davUri);
 		e_status.addContent(String.valueOf(status));
 		
 		e_propstat.addContent(e_status);
 		
-		Element e_descr = new Element("responsedescription", "D", "DAV:");
+		final Element e_descr = new Element("responsedescription", "D", davUri);
 		e_descr.addContent(message);
 		
 		e_propstat.addContent(e_descr);
 		
 		if (conflicts != null) {
-			Element eConflictItems = new Element("conflictitems", Namespace.getNamespace("D", "DAV:"));
+			final Element eConflictItems = new Element("conflictitems", Namespace.getNamespace("D", davUri));
+			final StringBuilder textBuilder = new StringBuilder(50);
 			for (int a = 0; a < conflicts.length; a++) {
-				Element eConflictItem = new Element("conflictitem", Namespace.getNamespace("D", "DAV:"));
+				final Element eConflictItem = new Element("conflictitem", Namespace.getNamespace("D", davUri));
 				if (conflicts[a].getTitle() == null) {
 					eConflictItem.setAttribute("subject", "", NS);
 				} else {
 					eConflictItem.setAttribute("subject", conflicts[a].getTitle(), NS);
 				}
-				eConflictItem.setText(conflicts[a].getStartDate().getTime() + "," + conflicts[a].getEndDate().getTime() + "," + conflicts[a].getFullTime());
+
+				eConflictItem.setText(textBuilder.append(conflicts[a].getStartDate().getTime()).append(',').append(conflicts[a].getEndDate().getTime()).append(',').append(conflicts[a].getFullTime()).toString());
+				textBuilder.setLength(0);
 				
 				eConflictItems.addContent(eConflictItem);
 			}

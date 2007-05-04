@@ -109,7 +109,7 @@ public class RequestDBProvider implements DBProvider {
 		return this.provider;
 	}
 	
-	public void setProvider(DBProvider provider){
+	public void setProvider(final DBProvider provider){
 		this.provider = provider;
 	}
 
@@ -117,7 +117,7 @@ public class RequestDBProvider implements DBProvider {
 	// Service
 	
 	public void startTransaction() throws TransactionException {
-		DBTransaction tx = createTransaction();
+		final DBTransaction tx = createTransaction();
 		tx.transactional = transactional;
 		txIds.set(tx);
 	}
@@ -128,9 +128,9 @@ public class RequestDBProvider implements DBProvider {
 	}
 	
 	private void checkThreadDeath() {
-		Thread current = Thread.currentThread();
+		final Thread current = Thread.currentThread();
 		if (current instanceof AJPv13ListenerThread) {
-			AJPv13ListenerThread ajpv13Thread = (AJPv13ListenerThread) current;
+			final AJPv13ListenerThread ajpv13Thread = (AJPv13ListenerThread) current;
 			if(ajpv13Thread.isDead()) {
 				try {
 					rollback();
@@ -161,11 +161,11 @@ public class RequestDBProvider implements DBProvider {
 	
 	
 	protected DBTransaction createTransaction() {
-		DBTransaction tx = new DBTransaction();
+		final DBTransaction tx = new DBTransaction();
 		return tx;
 	}
 
-	protected void commit(DBTransaction tx) throws TransactionException {
+	protected void commit(final DBTransaction tx) throws TransactionException {
 		try {
 			if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
 				tx.writeConnection.commit();
@@ -175,13 +175,15 @@ public class RequestDBProvider implements DBProvider {
 		}
 	}
 
-	protected void rollback(DBTransaction tx) throws TransactionException {
-		if(tx == null)
+	protected void rollback(final DBTransaction tx) throws TransactionException {
+		if(tx == null) {
 			return;
+		}
 		try {
 			if(tx.writeConnection!=null) {
-				if(tx.writeConnection.getAutoCommit())
+				if(tx.writeConnection.getAutoCommit()) {
 					throw new IllegalStateException("This request cannot be rolled back because it wasn't part of a transaction");
+				}
 				tx.writeConnection.rollback();
 			}
 		} catch (SQLException e) {
@@ -189,16 +191,18 @@ public class RequestDBProvider implements DBProvider {
 		}
 	}
 	
-	public Connection getReadConnection(Context ctx) throws TransactionException{
+	public Connection getReadConnection(final Context ctx) throws TransactionException{
 		checkThreadDeath();
-		DBTransaction tx = getActiveTransaction();
+		final DBTransaction tx = getActiveTransaction();
 		int rc = readCount.get();
-		if(tx != null && tx.ctx == null)
+		if(tx != null && tx.ctx == null) {
 			tx.ctx = ctx;
-		if(tx != null && tx.writeConnection != null)
+		}
+		if(tx != null && tx.writeConnection != null) {
 			return tx.writeConnection;
+		}
 		if(tx != null && tx.readConnection != null) {
-			Throwable t = new Throwable();
+			final Throwable t = new Throwable();
 			rc++;
 			t.fillInStackTrace();
 			tx.readConnectionStacks.set(rc, t);
@@ -206,12 +210,14 @@ public class RequestDBProvider implements DBProvider {
 			return tx.readConnection;
 		}
 		
-		Connection readCon = getProvider().getReadConnection(ctx);
-		LOG.debug("---> "+readCon);
+		final Connection readCon = getProvider().getReadConnection(ctx);
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("---> "+readCon);
+		}
 		if(tx != null) {
 			tx.readConnection = readCon;
 			rc++;
-			Throwable t = new Throwable();
+			final Throwable t = new Throwable();
 			t.fillInStackTrace();
 			tx.readConnectionStacks.set(rc, t);
 			readCount.set(rc);
@@ -219,23 +225,25 @@ public class RequestDBProvider implements DBProvider {
 		return readCon;
 	}
 	
-	public Connection getWriteConnection(Context ctx) throws TransactionException{
+	public Connection getWriteConnection(final Context ctx) throws TransactionException{
 		checkThreadDeath();
-		DBTransaction tx = getActiveTransaction();
+		final DBTransaction tx = getActiveTransaction();
 		if(tx == null) {
 			return getProvider().getWriteConnection(ctx);
 		}
-		int rc = readCount.get();
+		final int rc = readCount.get();
 		if(rc>0) {
 			throw new IllegalStateException("Don't use a read and write connection in parallel. Read Connections in use: "+rc, tx.readConnectionStacks.get(rc));
 		}
-		if(tx.writeConnection != null)
+		if(tx.writeConnection != null) {
 			return tx.writeConnection;
+		}
 		tx.writeConnection = getProvider().getWriteConnection(ctx);
 		try {
 			tx.autoCommit = tx.writeConnection.getAutoCommit();
-			if(tx.writeConnection.getAutoCommit() == tx.transactional)
+			if(tx.writeConnection.getAutoCommit() == tx.transactional) {
 				tx.writeConnection.setAutoCommit(!tx.transactional);
+			}
 		} catch (SQLException e) {
 			return null;
 		}
@@ -244,18 +252,21 @@ public class RequestDBProvider implements DBProvider {
 		return tx.writeConnection;
 	}
 	
-	public void releaseReadConnection(Context ctx,Connection con){
-		DBTransaction tx = getActiveTransaction();
+	public void releaseReadConnection(final Context ctx, final Connection con){
+		final DBTransaction tx = getActiveTransaction();
 		//if(tx == null) {
 		//	throw new IllegalStateException("There is no transaction active at the moment.");
 		//}
-		if(tx != null && tx.writeConnection != null && tx.writeConnection.equals(con))
+		if(tx != null && tx.writeConnection != null && tx.writeConnection.equals(con)) {
 			return;
+		}
 		if(tx != null && tx.readConnection != null && tx.readConnection.equals(con)) {
 			int rc = readCount.get();
 			rc--;
 			if(rc==0) {
-				LOG.debug("<--- "+con);
+				if(LOG.isDebugEnabled()) {
+					LOG.debug("<--- "+con);
+				}
 				getProvider().releaseReadConnection(ctx,con);
 				tx.readConnection=null;
 			}
@@ -265,25 +276,30 @@ public class RequestDBProvider implements DBProvider {
 		if(tx != null) {
 			return;
 		}
-		LOG.debug("<--- "+con);
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("<--- "+con);
+		}
 		getProvider().releaseReadConnection(ctx,con);
 		
 	}
 	
-	public void releaseWriteConnection(Context ctx, Connection con){
+	public void releaseWriteConnection(final Context ctx, final Connection con){
 		DBTransaction tx = (DBTransaction) getActiveTransaction();
-		if(tx == null)
+		if(tx == null) {
 			getProvider().releaseWriteConnection(ctx, con);
+		}
 	}
 	
 	public void finish() throws TransactionException {
-		DBTransaction tx = (DBTransaction) getActiveTransaction();
-		if(tx == null)
+		final DBTransaction tx = (DBTransaction) getActiveTransaction();
+		if(tx == null) {
 			return;
+		}
 		try {
 			if (tx.writeConnection != null) {
-				if(tx.writeConnection.getAutoCommit() != tx.autoCommit)
+				if(tx.writeConnection.getAutoCommit() != tx.autoCommit) {
 					tx.writeConnection.setAutoCommit(tx.autoCommit);
+				}
 				getProvider().releaseWriteConnection(tx.ctx,tx.writeConnection);
                 tx.writeConnection = null;
 			}
@@ -296,7 +312,7 @@ public class RequestDBProvider implements DBProvider {
 			throw new TransactionException(new OXException(e)); //FIXME
 		}
 		txIds.set(null);
-		DBProvider prov = getProvider();
+		final DBProvider prov = getProvider();
 		if(prov instanceof Closeable) {
 			try {
 				((Closeable)prov).close();
@@ -306,23 +322,26 @@ public class RequestDBProvider implements DBProvider {
 		}
 	}
 	
-	public void setTransactional(boolean transactional) {
+	public void setTransactional(final boolean transactional) {
 		this.transactional = transactional;
 	}
 	
 	public boolean isTransactional(){
-		DBTransaction tx = getActiveTransaction();
-		if(tx != null && tx.transactional)
+		final DBTransaction tx = getActiveTransaction();
+		if(tx != null && tx.transactional) {
 			return true;
+		}
 		return this.transactional;
 	}
 	
-	public void setRequestTransactional(boolean transactional) {
-		DBTransaction tx = getActiveTransaction();
-		if(tx == null)
+	public void setRequestTransactional(final boolean transactional) {
+		final DBTransaction tx = getActiveTransaction();
+		if(tx == null) {
 			throw new IllegalStateException("No Transaction Active");
-		if(tx.writeConnection != null && transactional)
+		}
+		if(tx.writeConnection != null && transactional) {
 			throw new IllegalStateException("Cannot switch on transaction after a write occurred");
+		}
 		tx.transactional = transactional;
 	}
 }

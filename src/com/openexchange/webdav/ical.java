@@ -51,29 +51,35 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -81,6 +87,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,11 +98,6 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashSet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * ical
@@ -173,14 +175,17 @@ public final class ical extends PermissionServlet {
 	private static String SQL_ENTRY_INSERT = "INSERT INTO ical_ids (object_id, cid, principal_id, client_id, target_object_id, module) VALUES (?, ?, ?, ? ,?, ?)";
 	private static String SQL_ENTRY_DELETE = "DELETE FROM ical_ids WHERE target_object_id = ? AND principal_id = ?";
 	
-	private static final Log LOG = LogFactory.getLog(ical.class);
+	private static transient final Log LOG = LogFactory.getLog(ical.class);
 	
 	public void oxinit() throws ServletException {
 		
 	}
 	
+	@Override
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		LOG.debug("GET");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("GET");
+		}
 		
 		OutputStream os = null;
 		
@@ -199,7 +204,7 @@ public final class ical extends PermissionServlet {
 		try {
 			user_agent = getUserAgent(req);
 			
-			principal = user_agent + "_" + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserObject().getId();
 			
 			calendarfolder_id = getCalendarFolderID(req);
 			taskfolder_id = getTaskFolderID(req);
@@ -430,8 +435,11 @@ public final class ical extends PermissionServlet {
 		}
 	}
 	
+	@Override
 	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-		LOG.debug("PUT");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("PUT");
+		}
 		
 		int calendarfolder_id = 0;
 		int taskfolder_id = 0;
@@ -449,7 +457,9 @@ public final class ical extends PermissionServlet {
 			user_agent = getUserAgent(req);
 			content_type = req.getContentType();
 			
-			LOG.debug("read ical content_type: " + content_type);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("read ical content_type: " + content_type);
+			}
 			
 			calendarfolder_id = getCalendarFolderID(req);
 			taskfolder_id = getTaskFolderID(req);
@@ -467,7 +477,7 @@ public final class ical extends PermissionServlet {
 				throw new OXConflictException("missing header field: user-agent");
 			}
 			
-			principal = user_agent + "_" + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserObject().getId();
 			
 			calendarfolder_id = getCalendarFolderID(req);
 			taskfolder_id = getTaskFolderID(req);
@@ -563,7 +573,9 @@ public final class ical extends PermissionServlet {
 								try {
 									object_id = Integer.parseInt(entries_db.get(client_id).toString());
 								} catch (NumberFormatException exc) {
-									LOG.debug("object id is not an int");
+									if (LOG.isDebugEnabled()) {
+										LOG.debug("object id is not an int");
+									}
 								}
 								
 								if (object_id > 0) {

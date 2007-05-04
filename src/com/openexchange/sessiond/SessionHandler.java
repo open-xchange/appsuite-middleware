@@ -96,9 +96,9 @@ public class SessionHandler extends TimerTask {
 	
 	protected static LinkedList<Map<String, String>> randomList = new LinkedList<Map<String, String>>();
 	
-	protected static SessionIdGenerator sessionIdGenerator = null;
+	protected static SessionIdGenerator sessionIdGenerator;
 	
-	private static SessiondConfig config = null;
+	private static SessiondConfig config;
 	
 	private static int lifeTime = 360000;
 	
@@ -106,11 +106,11 @@ public class SessionHandler extends TimerTask {
 	
 	private static int containerTimeout = 420000;
 	
-	private static boolean noLimit = false;
+	private static boolean noLimit;
 	
-	private static boolean isInit = false;
+	private static boolean isInit;
 	
-	private static int[] numberOfSessionsInContainer = null;
+	private static int[] numberOfSessionsInContainer;
 	
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 	
@@ -139,7 +139,7 @@ public class SessionHandler extends TimerTask {
 			
 			noLimit = (maxSessions == 0);
 			
-			Timer t = ServerTimer.getTimer();
+			final Timer t = ServerTimer.getTimer();
 			t.schedule(this, containerTimeout, containerTimeout);
 			
 			isInit = true;
@@ -199,7 +199,7 @@ public class SessionHandler extends TimerTask {
 		//}
 		
 		if (context == null) {
-			throw new ContextNotFoundException("Cannot find context with the given name (" + contextname + ")");
+			throw new ContextNotFoundException("Cannot find context with the given name (" + contextname + ')');
 		}
 		
 		Credentials cred = null;
@@ -282,7 +282,9 @@ public class SessionHandler extends TimerTask {
 		}
 		
 		if (sessions.containsKey(sessionId)) {
-			LOG.debug("session REBORN sessionid=" + sessionId);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("session REBORN sessionid=" + sessionId);
+			}
 		}
 		
 		// Load user's configuration from db!
@@ -303,7 +305,7 @@ public class SessionHandler extends TimerTask {
 	
 	protected static boolean refreshSession(final String sessionid) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("refreshSession <" + sessionid + ">");
+			LOG.debug("refreshSession <" + sessionid + '>');
 		}
 		
 		Map<String, SessionObject> sessions = null;
@@ -326,8 +328,9 @@ public class SessionHandler extends TimerTask {
 					
 					return true;
 				}
-				
-				LOG.debug("session TIMEOUT sessionid=" + sessionid);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("session TIMEOUT sessionid=" + sessionid);
+				}
 				sessions.remove(sessionid);
 				MonitoringInfo.decrementNumberOfActiveSessions();
 				
@@ -338,7 +341,9 @@ public class SessionHandler extends TimerTask {
 	}
 	
 	protected static boolean clearSession(final String sessionid) {
-		LOG.debug("clearSession <" + sessionid + ">");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("clearSession <" + sessionid + '>');
+		}
 		
 		Map<String, SessionObject> sessions = null;
 		
@@ -358,7 +363,9 @@ public class SessionHandler extends TimerTask {
 			}
 		}
 		
-		LOG.debug("Cannot find session id to remove session <" + sessionid + ">");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
+		}
 		
 		return false;
 	}
@@ -366,7 +373,9 @@ public class SessionHandler extends TimerTask {
 	protected static boolean setSession(final SessionObject sessionobject) {
 		final String sessionid = sessionobject.getSessionID();
 		
-		LOG.debug("setSession <" + sessionid + ">");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("setSession <" + sessionid + '>');
+		}
 		
 		Map<String, SessionObject> sessions = null;
 		
@@ -440,9 +449,8 @@ public class SessionHandler extends TimerTask {
 					}
 					
 					return sessionobject;
-				} else {
-					return null;
 				}
+				return null;
 			}
 		}
 		return null;
@@ -475,7 +483,7 @@ public class SessionHandler extends TimerTask {
 	}
 	
 	protected static boolean isValid(final SessionObject sessionobject) {
-		Context context = sessionobject.getContext();
+		final Context context = sessionobject.getContext();
 		
 		if (context == null) {
 			LOG.error("context object is null!");
@@ -493,13 +501,13 @@ public class SessionHandler extends TimerTask {
 	}
 	
 	protected static class SessionIterator implements Iterator {
-		Map sessions = null;
+		Map sessions;
 		
-		boolean hasnext = false;
+		boolean hasnext;
 		
-		Iterator it = null;
+		Iterator it;
 		
-		int pos = 0;
+		int pos;
 		
 		public SessionIterator() {
 			it = ((Map) sessionList.get(pos)).keySet().iterator();
@@ -509,10 +517,9 @@ public class SessionHandler extends TimerTask {
 		public Object next() {
 			if (it != null) {
 				return it.next();
-			} else {
-				if (!hasnext && pos < numberOfSessionContainers) {
-					it = ((Map) sessionList.get(pos)).keySet().iterator();
-				}
+			}
+			if (!hasnext && pos < numberOfSessionContainers) {
+				it = ((Map) sessionList.get(pos)).keySet().iterator();
 			}
 			
 			return null;

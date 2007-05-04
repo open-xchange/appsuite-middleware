@@ -84,15 +84,15 @@ public class SessionRequest implements Runnable {
 	private static final String GETAUTH = "getauth:";
 	private static final String GETSESSIONS = "getsessions:";
 	
-	private Socket socket = null;
+	private Socket socket;
 	
-	private SSLSocket sslSocket = null;
+	private SSLSocket sslSocket;
 	
-	private Thread th = null;
+	private Thread th;
 	
-	private boolean isSecureConnection = false;
+	private boolean isSecureConnection;
 	
-	private SessiondConfig config = null;
+	private SessiondConfig config;
 	
 	private static final Log LOG = LogFactory.getLog(SessionRequest.class);
 	
@@ -211,7 +211,9 @@ public class SessionRequest implements Runnable {
 			if (SessionHandler.refreshSession(sessionid)) {
 				sendResponse(os, OK.getBytes());
 			} else {
-				LOG.debug("session id not found: " + sessionid);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("session id not found: " + sessionid);
+				}
 				sendResponse(os, ("ERROR: No Session found: " + sessionid).getBytes());
 			}
 		} catch (Exception exc) {
@@ -278,7 +280,7 @@ public class SessionRequest implements Runnable {
 					} else {
 						final String response = encoder.encode((sessionobject.getUsername() + "\1" + sessionobject.getLanguage() + "\1" + sessionobject.getLocalIp() + "\1" + l_cr + "\1" + l_lt).getBytes("UTF-8"));
 						
-						os.write((tmp_sessionid + " " + response + "\n\1\n").getBytes());
+						os.write((tmp_sessionid + ' ' + response + "\n\1\n").getBytes());
 						os.flush();
 					}
 				}

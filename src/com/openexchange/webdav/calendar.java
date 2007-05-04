@@ -149,7 +149,9 @@ public final class calendar extends XmlServlet {
 						}
 						break;
 					case DataParser.DELETE:
-						LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+						}
 						
 						if (lastModified == null) {
 							throw new OXMandatoryFieldException("missing field last_modified");

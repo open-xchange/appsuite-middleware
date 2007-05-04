@@ -56,6 +56,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.mail.internet.MimeUtility;
 
@@ -76,19 +78,19 @@ public class OldPropertyDefinition {
     private static final Log LOG = LogFactory.getLog(
         OldPropertyDefinition.class);
     
-	private final HashMap<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
+	private final Map<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
 
-	private final HashMap<Object, String> ParamValues = new HashMap<Object, String>();
+	private final Map<Object, String> ParamValues = new HashMap<Object, String>();
 
 	public OldPropertyDefinition(final String[] paramNames,
 			final OldParamDefinition[] params) {
-		HashSet<Object> duplicates = new HashSet<Object>();
+		final Set<Object> duplicates = new HashSet<Object>();
 		for (int i = 0; i < paramNames.length; i++) {
 			Params.put(paramNames[i], params[i]);
 			final int size = params[i].size();
 			final Iterator<String> j = params[i].getValues();
 			for (int k = 0; k < size; k++) {
-				Object value = j.next();
+				final Object value = j.next();
 				if (ParamValues.containsKey(value)) {
 					ParamValues.remove(value);
 					duplicates.add(value);
@@ -111,7 +113,7 @@ public class OldPropertyDefinition {
 		while (s.peek == ';') {
 			s.read();
 			s.skipWS();
-			String param = s.parseWord().toUpperCase();
+			final String param = s.parseWord().toUpperCase();
 			s.skipWS();
 			if (s.peek == '=') {
 				s.read();
@@ -130,7 +132,9 @@ public class OldPropertyDefinition {
 					parameter.addValue(new ParameterValue(param));
 					property.addParameter(parameter);
 				} else {
-					LOG.debug("Unknown property parameter: " + paramname);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Unknown property parameter: " + paramname);
+					}
 				}
 			}
 			s.skipWS();

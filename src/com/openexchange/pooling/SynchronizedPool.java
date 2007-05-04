@@ -277,7 +277,9 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                         createStackTrace(sb, other.getTrace());
                         sb.append('\n');
                         createStackTrace(sb, thread.getStackTrace());
-                        LOG.debug(sb.toString());
+                        if (LOG.isDebugEnabled()) {
+							LOG.debug(sb.toString());
+						}
                     }
                 }
                 retval = data.popIdle();
