@@ -424,7 +424,7 @@ public class MessageUtils {
 
 	private static final String DEFAULT_COLOR = "#0026ff";
 
-	private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"color:%s; border-color:%s;\">";
+	private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 	
 	private static final String STR_BLOCKQUOTE = "blockquote";
 
@@ -594,8 +594,8 @@ public class MessageUtils {
 					if (quotelevel > quotelevel_before) {
 						for (int u = 0; u < (quotelevel - quotelevel_before); u++) {
 							colorBuilder.setLength(0);
-							final String styleStart = " style=\"color:";
-							final String borderColor = "; border-color:";
+							final String styleStart = " style=\"margin-left: 0px; padding-left: 10px; color:";
+							final String borderColor = "; border-left: solid 1px ";
 							final String styleEnd = ";\"";
 							if ((u + quotelevel_before) >= IMAPProperties.getQuoteLineColors().length) {
 								colorBuilder

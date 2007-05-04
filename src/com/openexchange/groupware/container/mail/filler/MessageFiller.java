@@ -843,7 +843,7 @@ public class MessageFiller {
 		}
 	}
 
-	private static final String BLOCKQUOTE_START_TMPL = "<blockquote type=\"cite\" style=\"color:%s; border-color:%s;\">\n";
+	private static final String BLOCKQUOTE_START_TMPL = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">\n";
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
 
