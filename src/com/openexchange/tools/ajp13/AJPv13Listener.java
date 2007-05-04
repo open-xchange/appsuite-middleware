@@ -243,6 +243,7 @@ public class AJPv13Listener implements Runnable {
 							writeEndResponse(client, false);
 						}
 					} catch (UploadServletException e) {
+						LOG.error(e.getMessage(), e);
 						try {
 							/*
 							 * Send call back
@@ -252,9 +253,9 @@ public class AJPv13Listener implements Runnable {
 							writeEndResponse(client, false);
 							ajpCon.getAjpRequestHandler().setEndResponseSent(true);
 						} catch (AJPv13Exception e1) {
-							LOG.error(e.getMessage(), e);
+							LOG.error(e1.getMessage(), e1);
 						} catch (IOException e1) {
-							LOG.error(e.getMessage(), e);
+							LOG.error(e1.getMessage(), e1);
 						}
 					}
 					ajpCon.resetConnection(false);
