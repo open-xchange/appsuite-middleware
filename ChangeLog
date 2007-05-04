@@ -21,6 +21,9 @@
    end date is checked and not the reminder date. If the end date is in
    the past no reminder is stored.
 
+ - Fixed bug #6535. Changing a recurring exception changed the confirm status
+   of the user as well. This has been fixed.
+
 * 2007-05-03 - thorben.betten@open-xchange.com
 
  - Slightly fastened AJP processing
