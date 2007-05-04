@@ -66,7 +66,7 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CommandExecutor {
+public final class CommandExecutor {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CommandExecutor.class);
@@ -99,7 +99,7 @@ public class CommandExecutor {
 	 * 
 	 * @throws IOException
 	 */
-	public final void send(final String in) throws IOException {
+	public void send(final String in) throws IOException {
 		inputStream.write(in.getBytes());
 		inputStream.flush();
 		inputStream.close();
@@ -110,7 +110,7 @@ public class CommandExecutor {
 	 * 
 	 * @throws IOException
 	 */
-	public final void send(final InputStream in) throws IOException {
+	public void send(final InputStream in) throws IOException {
 		streamCopy(in, inputStream);
 		inputStream.flush();
 		inputStream.close();
@@ -122,7 +122,7 @@ public class CommandExecutor {
 	 * 
 	 * @return process' exit code
 	 */
-	public final int waitFor() throws InterruptedException {
+	public int waitFor() throws InterruptedException {
 		final int exitCode = process.waitFor();
 		waitForThreads();
 		return exitCode;
@@ -131,21 +131,21 @@ public class CommandExecutor {
 	/**
 	 * @return error
 	 */
-	public final String getErrorString() {
+	public String getErrorString() {
 		return errSucker.getBuffer();
 	}
 
 	/**
 	 * @return output
 	 */
-	public final String getOutputString() {
+	public String getOutputString() {
 		return outSucker.getBuffer();
 	}
 
 	/**
 	 * Wait until all output and/or error data have been read
 	 */
-	private final void waitForThreads() throws InterruptedException {
+	private void waitForThreads() throws InterruptedException {
 		if (outSucker.isAlive()) {
 			outSucker.join();
 		}
@@ -217,7 +217,7 @@ public class CommandExecutor {
 
 	private static final int BUFFERSIZE = 8192;
 
-	private static final long streamCopy(final InputStream in, final OutputStream out) throws IOException {
+	private static long streamCopy(final InputStream in, final OutputStream out) throws IOException {
 		final byte[] buffer = new byte[BUFFERSIZE];
 		int read;
 		long copied = 0;

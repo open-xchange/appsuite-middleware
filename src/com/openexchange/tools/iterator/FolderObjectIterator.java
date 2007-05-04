@@ -92,7 +92,7 @@ public class FolderObjectIterator implements SearchIterator {
 	private final Queue<FolderObject> prefetchQueue;
 
 	private boolean isClosed;
-	
+
 	private final boolean closeCon;
 
 	private final Set<Integer> folderIds;
@@ -262,6 +262,9 @@ public class FolderObjectIterator implements SearchIterator {
 				LOG.error(e.getMessage(), e);
 			}
 		}
+		/*
+		 * Not in cache; create from read data
+		 */
 		final String folderName = rs.getString(3);
 		final int module = rs.getInt(4);
 		final int type = rs.getInt(5);
@@ -467,10 +470,10 @@ public class FolderObjectIterator implements SearchIterator {
 	 * @see com.openexchange.tools.iterator.SearchIterator#hasSize()
 	 */
 	public boolean hasSize() {
-		if (prefetchQueue != null) {
-			return true;
-		}
-		return false;
+		/*
+		 * Size can be predicted if prefetch queue is not null
+		 */
+		return (prefetchQueue != null);
 	}
 
 	/**
