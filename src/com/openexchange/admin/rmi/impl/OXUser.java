@@ -94,11 +94,11 @@ import org.osgi.framework.ServiceReference;
 
 public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
-    private AdminCache cache = null;
+    private final AdminCache cache;
 
     private final static Log log = LogFactory.getLog(OXUser.class);
 
-    private PropertyHandler prop = null;
+    private final PropertyHandler prop;
     private BundleContext context = null;
     
     private static final String FALLBACK_LANGUAGE_CREATE = "en";   
@@ -109,7 +109,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
      *
      */
     private OXUser() {
-        
+        super();
+        this.cache = ClientAdminThread.cache;
+        this.prop = this.cache.getProperties();
     }
 
     public OXUser(final BundleContext context) throws RemoteException {
@@ -165,9 +167,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
-        String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+        String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
         homedir += "/" + usr.getUsername();
-        if( prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) &&
+        if( this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) &&
                 ! tools.isContextAdmin(ctx, usr.getId()) ) {
             if( ! new File(homedir).mkdir() ) {
                 log.error("unable to create directory: " + homedir);
@@ -190,10 +192,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     }
                     log.error("Unable to chown homedirectory: " + homedir);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 log.error("Unable to chown homedirectory: " + homedir);
                 log.error(e);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 log.error("Unable to chown homedirectory: " + homedir);
                 log.error(e);
             }
@@ -291,7 +293,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+        final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
         // check if given user is admin
         if(tools.isContextAdmin(ctx,auth_user_id )){
             doAuthentication(auth,ctx);
@@ -419,15 +421,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
-        if( prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) ) {
-            for(User usr : users) {
+        if( this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) ) {
+            for(final User usr : users) {
                 // homedirectory
-                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
+                String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usr.getUsername();
                 // FIXME: if(! tools.isContextAdmin(ctx, usr.getId()) ) {} ??
                 try {
                     FileUtils.deleteDirectory(new File(homedir));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     log.error("Could not delete homedir for user: " + usr);
                 }
             }
@@ -437,7 +439,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         oxu.delete(ctx, user_ids);
     }
 
-    private int[] getUserIdArrayFromUsers(User[] users) {
+    private int[] getUserIdArrayFromUsers(final User[] users) {
         final int[] retval = new int[users.length];
         for (int i = 0; i < users.length; i++) {
             retval[i] = users[i].getId();
@@ -534,7 +536,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    public User getData(Context ctx, int user_id, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+    public User getData(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new int[]{user_id}, auth)[0];
     }
 
@@ -553,7 +555,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return getData(ctx, users, auth);
     }
 
-    public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+    public User getData(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
                 
         
         return getData(ctx, new User[]{user}, auth)[0];
@@ -574,7 +576,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
             // check if credentials are from oxadmin or from an user
             final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-            int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+            final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
             // check if given user is not admin, if he is admin, the
             if(!tools.isContextAdmin(ctx,auth_user_id)){
                 if(users.length>1){
@@ -591,7 +593,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     }else{
                         // id not set, try to resolv id by username and then check again
                         if(users[0].getUsername()!=null){
-                            int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
+                            final int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
                             if(check_user_id!=auth_user_id){
                                 log.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
@@ -669,7 +671,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     private void validateUserName( final String userName ) throws OXUserException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        String usr_uid_regexp = prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
         final String illegal = userName.replaceAll(usr_uid_regexp,"");
         if( illegal.length() > 0 ) {
             throw new OXUserException( OXUserException.ILLEGAL_CHARS + ": \""+illegal+"\"");
