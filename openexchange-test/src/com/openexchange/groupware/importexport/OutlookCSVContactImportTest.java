@@ -72,7 +72,7 @@ public class OutlookCSVContactImportTest extends CSVContactImportTest{
 		super();
 		doDebugging = false;
 		imp = new OutlookCSVContactImporter();
-		IMPORT_ONE = ContactField.GIVEN_NAME.getOutlookName()+","+ContactField.EMAIL1.getOutlookName()+","+ContactField.BIRTHDAY.getOutlookName()+"\n"+NAME1+", "+EMAIL1+", "+DATE1;
+		IMPORT_ONE = ContactField.GIVEN_NAME.getOutlookENName()+","+ContactField.EMAIL1.getOutlookENName()+","+ContactField.BIRTHDAY.getOutlookENName()+"\n"+NAME1+", "+EMAIL1+", "+DATE1;
 		IMPORT_MULTIPLE = IMPORT_ONE + "\nLaguna, francisco.laguna@open-xchange.com, 3/3/1981\n";
 		IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, 3/3/1981\n";
 	}

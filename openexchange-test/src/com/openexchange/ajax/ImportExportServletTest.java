@@ -215,6 +215,44 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
 	}
 	
+	public void testEmptyFileUploaded() throws Exception{
+		InputStream is = new ByteArrayInputStream("".getBytes());
+		WebConversation webconv = getWebConversation();
+		final Format format = Format.CSV;
+		final int folderId = createFolder("csv-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
+		
+		WebRequest req = new PostMethodWebRequest(
+				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "empty.vcs", is, format.getMimeType());
+		WebResponse webRes = webconv.getResource(req);
+		JSONObject response = extractFromCallback( webRes.getText() );
+		assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+	}
+	
+	public void testIcalMessage() throws Exception{
+		InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
+		WebConversation webconv = getWebConversation();
+		final Format format = Format.ICAL;
+		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
+		
+		WebRequest req = new PostMethodWebRequest(
+				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+				);
+		((PostMethodWebRequest)req).setMimeEncoded(true);
+		req.selectFile("file", "empty.ics", is, format.getMimeType());
+		WebResponse webRes = webconv.getResource(req);
+		JSONObject response = extractFromCallback( webRes.getText() );
+		assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+	}
+	
+	
+	
+	
+	
+	
+	
 	private int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {
 		final FolderObject folderObj = com.openexchange.ajax.FolderTest
 		.getStandardCalendarFolder(getWebConversation(),

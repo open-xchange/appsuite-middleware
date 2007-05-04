@@ -129,7 +129,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertTrue("Error on second attempt?", importResult[1].hasError());
 		OXException ex = importResult[1].getException();
 
-		//following line was removed since test environment does not relay correct error messages from server
+		//following line was removed since test environment cannot relay correct error messages from server
 		//assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());
 		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
