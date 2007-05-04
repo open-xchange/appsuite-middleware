@@ -1,3 +1,7 @@
+* 2007-05-04 - stefan.preuss@open-xchange.org
+
+  - Bugfix #7112. Setting "Color quoted lines" has no effect.
+
 * 2007-05-04 - thorben.betten@open-xchange.com
 
  - Reviewed class AJPv13ForwardRequest.java
