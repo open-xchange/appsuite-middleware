@@ -55,6 +55,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
@@ -71,28 +72,39 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.HttpSessionManagement;
 
 /**
+ * AJPv13ForwardRequest - this class' purpose is mainly to fill the http servlet
+ * request from AJP's forward request, to identify servlet instance through
+ * request path and to apply the load-balancing and http-session-identifiying
+ * <tt>JSESSIONID</tt> cookie or URL parameter to the http serlvet response
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class AJPv13ForwardRequest extends AJPv13Request {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ForwardRequest.class);
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13ForwardRequest.class);
 
 	private static final String methods[] = { "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PROPFIND",
 			"PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN",
 			"CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE", "BASELINE_CONTROL",
 			"MKACTIVITY" };
 
-	private static final HashMap<Integer, String> httpHeaderMapping = new HashMap<Integer, String>();
+	private static final Map<Integer, String> httpHeaderMapping = new HashMap<Integer, String>();
 
-	private static final HashMap<Integer, String> attributeMapping = new HashMap<Integer, String>();
-	
+	private static final Map<Integer, String> attributeMapping = new HashMap<Integer, String>();
+
 	private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
-	
-	private static final String CONTENT_TYPE = "content-type";
-	
-	private static final String CONTENT_LENGTH = "content-length";
+
+	private static final String MIME_FORM_DATA = "application/x-www-form-urlencoded";
+
+	private static final String HDR_CONTENT_TYPE = "content-type";
+
+	private static final String HDR_CONTENT_LENGTH = "content-length";
+
+	private static final String ATTR_STORED_METHOD = "stored_method";
+
+	private static final String ATTR_QUERY_STRING = "query_string";
 
 	/**
 	 * This byte value indicates termination of request.
@@ -106,8 +118,8 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		httpHeaderMapping.put(Integer.valueOf(0x04), "accept-language");
 		httpHeaderMapping.put(Integer.valueOf(0x05), "authorization");
 		httpHeaderMapping.put(Integer.valueOf(0x06), "connection");
-		httpHeaderMapping.put(Integer.valueOf(0x07), CONTENT_TYPE);
-		httpHeaderMapping.put(Integer.valueOf(0x08), CONTENT_LENGTH);
+		httpHeaderMapping.put(Integer.valueOf(0x07), HDR_CONTENT_TYPE);
+		httpHeaderMapping.put(Integer.valueOf(0x08), HDR_CONTENT_LENGTH);
 		httpHeaderMapping.put(Integer.valueOf(0x09), "cookie");
 		httpHeaderMapping.put(Integer.valueOf(0x0a), "cookie2");
 		httpHeaderMapping.put(Integer.valueOf(0x0b), "host");
@@ -118,7 +130,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		attributeMapping.put(Integer.valueOf(0x02), "servlet_path");
 		attributeMapping.put(Integer.valueOf(0x03), "remote_user");
 		attributeMapping.put(Integer.valueOf(0x04), "auth_type");
-		attributeMapping.put(Integer.valueOf(0x05), "query_string");
+		attributeMapping.put(Integer.valueOf(0x05), ATTR_QUERY_STRING);
 		attributeMapping.put(Integer.valueOf(0x06), "jvm_route");
 		attributeMapping.put(Integer.valueOf(0x07), "ssl_cert");
 		attributeMapping.put(Integer.valueOf(0x08), "ssl_cipher");
@@ -126,7 +138,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		attributeMapping.put(Integer.valueOf(0x0a), "req_attribute");
 		attributeMapping.put(Integer.valueOf(0x0b), "ssl_key_size");
 		attributeMapping.put(Integer.valueOf(0x0c), "secret_attribute");
-		attributeMapping.put(Integer.valueOf(0x0d), "stored_method");
+		attributeMapping.put(Integer.valueOf(0x0d), ATTR_STORED_METHOD);
 		attributeMapping.put(Integer.valueOf(REQUEST_TERMINATOR), "are_done");
 	}
 
@@ -143,14 +155,13 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		processForwardRequest(ajpRequestHandler);
 	}
-	
-	private static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";
 
 	/**
 	 * Processes an incoming AJP Forward Package which contains all header data
 	 * that are written into servlet's request object.
 	 */
-	private void processForwardRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
+	private void processForwardRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
+			IOException {
 		/*
 		 * Create Servlet Request with its InputStream
 		 */
@@ -239,34 +250,34 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 * process an upcoming body request from web server or to terminate
 		 * communication after this forward request.
 		 */
-		if (servletRequest.containsHeader(CONTENT_LENGTH)) {
+		if (servletRequest.containsHeader(HDR_CONTENT_LENGTH)) {
 			ajpRequestHandler.setContentLength(getContentLength(servletRequest));
 		}
 		/*
 		 * Determine if content type inidicates form data
 		 */
-		if (servletRequest.containsHeader(CONTENT_TYPE)
-				&& CONTENT_TYPE_FORM.regionMatches(0, servletRequest.getHeader(CONTENT_TYPE), 0, 33)) {
+		if (servletRequest.containsHeader(HDR_CONTENT_TYPE)
+				&& MIME_FORM_DATA.regionMatches(0, servletRequest.getHeader(HDR_CONTENT_TYPE), 0, 33)) {
 			ajpRequestHandler.setFormData(true);
 		}
 		/*
 		 * End of payload data NOT reached
 		 */
-		if (!compareNextByte(0xFF)) {
+		if (!compareNextByte(REQUEST_TERMINATOR)) {
 			/*
 			 * Determine Attributes
 			 */
 			parseAttributes(servletRequest);
-			if (encodedMethod == -1 && servletRequest.containsAttribute("stored_method")) {
-				servletRequest.setMethod((String) servletRequest.getAttribute("stored_method"));
+			if (encodedMethod == -1 && servletRequest.containsAttribute(ATTR_STORED_METHOD)) {
+				servletRequest.setMethod((String) servletRequest.getAttribute(ATTR_STORED_METHOD));
 			}
-			if (servletRequest.containsAttribute("query_string")) {
-				final String queryStr = (String) servletRequest.getAttribute("query_string");
+			if (servletRequest.containsAttribute(ATTR_QUERY_STRING)) {
+				final String queryStr = (String) servletRequest.getAttribute(ATTR_QUERY_STRING);
 				servletRequest.setQueryString(queryStr);
 				final String[] paramsNVPs = queryStr.split("&");
-                for (int i = 0; i < paramsNVPs.length; i++) {
-                    paramsNVPs[i] = paramsNVPs[i].trim();
-                }
+				for (int i = 0; i < paramsNVPs.length; i++) {
+					paramsNVPs[i] = paramsNVPs[i].trim();
+				}
 				for (int i = 0; i < paramsNVPs.length; i++) {
 					if (paramsNVPs[i].indexOf('=') > -1) {
 						final String[] paramNVP = new String[] {
@@ -284,7 +295,8 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		if (jsessionID == null) {
 			/*
-			 * Look for JSESSIONID cookie, if request URI does not contain session id
+			 * Look for JSESSIONID cookie, if request URI does not contain
+			 * session id
 			 */
 			checkJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
 		} else {
@@ -336,7 +348,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 				isCookie = (secondByte == 0x09);
 			} else {
 				headerName = parseString(firstByte, secondByte);
-				if (!contentTypeSet && CONTENT_TYPE.equalsIgnoreCase(headerName)) {
+				if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {
 					servletRequest.setHeader(headerName, parseString(), true);
 					contentTypeSet = true;
 					continue NextHeader;
@@ -409,7 +421,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 			servletRequest.setAttribute(attributeName, attributeValue);
 		}
 	}
-	
+
 	private static final void checkJSessionIDCookie(final HttpServletRequestWrapper servletRequest,
 			final HttpServletResponse resp, final AJPv13RequestHandler ajpRequestHandler) {
 		final Cookie[] cookies = servletRequest.getCookies();
@@ -524,14 +536,14 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		return (nextByte() > 0);
 	}
 
-	private final String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
+	private final static String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
 			final String queryStringValue) throws UnsupportedEncodingException {
 		return URLDecoder.decode(queryStringValue, servletRequest.getCharacterEncoding());
 	}
 
-	private final int getContentLength(final HttpServletRequestWrapper servletRequest) {
-		if (servletRequest.containsHeader(CONTENT_LENGTH)) {
-			return servletRequest.getIntHeader(CONTENT_LENGTH);
+	private final static int getContentLength(final HttpServletRequestWrapper servletRequest) {
+		if (servletRequest.containsHeader(HDR_CONTENT_LENGTH)) {
+			return servletRequest.getIntHeader(HDR_CONTENT_LENGTH);
 		}
 		return -1;
 	}

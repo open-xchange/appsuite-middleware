@@ -1,3 +1,7 @@
+* 2007-05-04 - thorben.betten@open-xchange.com
+
+ - Reviewed class AJPv13ForwardRequest.java
+
 * 2007-05-04 - martin.kauss@open-xchange.com
 
  - Fixed bug #7016. Reminders for recurring appointments were not
