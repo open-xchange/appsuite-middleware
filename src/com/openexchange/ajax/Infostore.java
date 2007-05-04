@@ -103,6 +103,14 @@ import com.openexchange.tools.servlet.http.Tools;
 
 public class Infostore extends PermissionServlet {
 	
+	private static final String STR_JSON = "json";
+
+	private static final String STR_ERROR = "error";
+
+	private static final String STR_ACTION = "action";
+
+	private static final String MIME_TEXT_HTML = "text/html";
+
 	private static final long serialVersionUID = 2674990072903834660L;
 
 	private static  final InfostoreParser PARSER = new InfostoreParser();
@@ -135,6 +143,7 @@ public class Infostore extends PermissionServlet {
 		return sessionObj.getUserConfiguration().hasInfostore();
 	}
 
+	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
 		throws ServletException, IOException {
 		
@@ -152,23 +161,23 @@ public class Infostore extends PermissionServlet {
 
 		if(action.equals(ACTION_DOCUMENT)){
 			if(req.getParameter(PARAMETER_ID) == null) {
-				Response resp = new Response();
+				final Response resp = new Response();
 				resp.setException(new AbstractOXException("You must provide a value for "+PARAMETER_ID));
-				StringWriter w = new StringWriter();
+				final StringWriter w = new StringWriter();
 				try {
 					Response.write(resp, w);
 				} catch (JSONException e) {
 					//shouldn't happen
 					throw new ServletException(e);
 				}
-				res.setContentType("text/html");
-				res.getWriter().write(substitute(JS_FRAGMENT, "action", "error", "json", w.toString()));
+				res.setContentType(MIME_TEXT_HTML);
+				res.getWriter().write(substitute(JS_FRAGMENT, STR_ACTION, STR_ERROR, STR_JSON, w.toString()));
 			}
 			int id;
 			try {
 				id = Integer.valueOf(req.getParameter(PARAMETER_ID));
 			} catch (NumberFormatException x) {
-				handleOXException(res, new AbstractOXException("Invalid number"), "error", true, JS_FRAGMENT);
+				handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true, JS_FRAGMENT);
 				return;
 			}
 			
@@ -180,19 +189,18 @@ public class Infostore extends PermissionServlet {
 			document(res, isIE(req),isIE7(req), id, version, contentType, ctx, user, userConfig);
 			
 			return;
-		} else {
-			final InfostoreRequest request = new InfostoreRequest(sessionObj,res.getWriter());
-			if(!request.action(action,new ServletRequestAdapter(req,res))) {
-				unknownAction("GET", action, res, false);
-				return;
-			}
 		}
-	
+		final InfostoreRequest request = new InfostoreRequest(sessionObj,res.getWriter());
+		if(!request.action(action,new ServletRequestAdapter(req,res))) {
+			unknownAction("GET", action, res, false);
+			return;
+		}
 		
 	}
 
 	
 
+	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
 			throws ServletException, IOException {
 		final SessionObject sessionObj = getSessionObject(req);
@@ -209,6 +217,7 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 	
+	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		
@@ -231,11 +240,12 @@ public class Infostore extends PermissionServlet {
 				try {
 					upload = processUpload(req);
 					final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
-					if(null != uploadFile)
+					if(null != uploadFile) {
 						checkSize(uploadFile.getSize(), sessionObj.getUserConfiguration());
-					final String obj = upload.getFormField("json");
+					}
+					final String obj = upload.getFormField(STR_JSON);
 					if(obj == null) {
-						missingParameter("json",res, true, action);
+						missingParameter(STR_JSON,res, true, action);
 						return;
 					}
 					
@@ -247,8 +257,8 @@ public class Infostore extends PermissionServlet {
 						if(!checkRequired(req,res,true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)){
 							return;
 						}
-						final int id = Integer.valueOf(req.getParameter(PARAMETER_ID));
-						final long timestamp = new Long(req.getParameter(PARAMETER_TIMESTAMP));
+						final int id = Integer.parseInt(req.getParameter(PARAMETER_ID));
+						final long timestamp = Long.parseLong(req.getParameter(PARAMETER_TIMESTAMP));
 						
 						metadata.setId(id);
 						Metadata[] presentFields = null;
@@ -260,10 +270,11 @@ public class Infostore extends PermissionServlet {
 							return;
 						}
 						
-						if(action.equals(ACTION_UPDATE))
+						if(action.equals(ACTION_UPDATE)) {
 							update(res, id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
-						else
+						} else {
 							copy(res,id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+						}
 					}
 				} finally {
 					if (upload != null) {
@@ -274,12 +285,12 @@ public class Infostore extends PermissionServlet {
 		} catch (OXException x) {
 			handleOXException(res, x, action, true, null);
 		} catch (UploadException x) {
-			Response resp = new Response();
+			final Response resp = new Response();
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
 				res.setContentType("text/html; charset=UTF-8");
 				
-				throw new UploadServletException(res, substitute(JS_FRAGMENT, "json", resp.getJSON().toString(), "action",action),x.getMessage(),x);
+				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, resp.getJSON().toString(), STR_ACTION,action),x.getMessage(),x);
 			} catch (JSONException e) {
 				LOG.error("Giving up",e);
 			}
@@ -288,16 +299,18 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 
-	private void checkSize(final long size, UserConfiguration userConfig) throws UploadException {
-		if(maxUploadSize == -1)
+	private void checkSize(final long size, final UserConfiguration userConfig) throws UploadException {
+		if(maxUploadSize == -1) {
 			maxUploadSize = InfostoreConfig.getMaxUploadSize();
+		}
 		
 		long maxSize = 0;
 		maxSize = userConfig.getUserSettingMail().getUploadQuota();
 		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
 		
-		if(maxSize == 0)
+		if(maxSize == 0) {
 			return;
+		}
 		
 		if(size > maxSize) {
 			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);
@@ -314,7 +327,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
 		//System.out.println("------> "+newDocument.getFolderId());
-		res.setContentType("text/html");
+		res.setContentType(MIME_TEXT_HTML);
 		
 		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
@@ -349,12 +362,13 @@ public class Infostore extends PermissionServlet {
 			} catch (TransactionException e) {
 				LOG.debug("",e);
 			}
-			if(in != null)
+			if(in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
 					LOG.debug("",e);
 				}
+			}
 			
 		}
 		PrintWriter w = null;
@@ -362,7 +376,7 @@ public class Infostore extends PermissionServlet {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
 			obj.put("data",newDocument.getId());
-			w.print(substitute(JS_FRAGMENT, "json", obj.toString(),"action",ACTION_NEW));
+			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
 			
 			w.flush();
 		} catch (IOException e) {
@@ -387,7 +401,7 @@ public class Infostore extends PermissionServlet {
 			updated.setVersion(InfostoreFacade.CURRENT_VERSION);
 		}
 		
-		res.setContentType("text/html");
+		res.setContentType(MIME_TEXT_HTML);
 		
 		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
@@ -429,7 +443,7 @@ public class Infostore extends PermissionServlet {
 		PrintWriter w = null;
 		try {
 			w = res.getWriter();
-			w.write(substitute(JS_FRAGMENT,"json","{}","action",ACTION_UPDATE));
+			w.write(substitute(JS_FRAGMENT,STR_JSON,"{}",STR_ACTION,ACTION_UPDATE));
 			close(w);
 		} catch (IOException e) {
 			LOG.warn(e);
@@ -438,7 +452,7 @@ public class Infostore extends PermissionServlet {
 	
 	protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
 
-		res.setContentType("text/html");
+		res.setContentType(MIME_TEXT_HTML);
 		
 		
 		final InfostoreFacade infostore = getInfostore();
@@ -499,7 +513,7 @@ public class Infostore extends PermissionServlet {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
 			obj.put("data",metadata.getId());
-			w.print(substitute(JS_FRAGMENT, "json", obj.toString(),"action",ACTION_NEW));
+			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
 			w.flush();
 		} catch (IOException e) {
 			LOG.debug("", e);
@@ -542,7 +556,7 @@ public class Infostore extends PermissionServlet {
 			
 		} catch (OXException x) {
 			LOG.debug(x.getMessage(),x);
-			handleOXException(res, x, "error", true, JS_FRAGMENT);
+			handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
 			return;
 		} finally {
 			
@@ -568,10 +582,10 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 	
-	private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, boolean post, String fragmentOverride) {
+	private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post, final String fragmentOverride) {
 		res.setContentType("text/html; charset=UTF-8");
 		if(t instanceof AbstractOXException ) {
-			Response resp = new Response();
+			final Response resp = new Response();
 			resp.setException((AbstractOXException) t);
 			Writer writer = null;
 			
@@ -582,27 +596,27 @@ public class Infostore extends PermissionServlet {
 					writer = res.getWriter();
 				}
 				Response.write(resp, writer);
-				if(post)
-					res.getWriter().write(substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,"json",writer.toString(),"action",action));
+				if(post) {
+					res.getWriter().write(substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,STR_JSON,writer.toString(),STR_ACTION,action));
+				}
 			} catch (JSONException e) {
 				LOG.error("",t);
 			} catch (IOException e) {
 				LOG.error("",e);
 			}
 			return true;
-		} else {
-			return false;		
 		}
+		return false;
 	}
 
 	
 	protected void sendErrorAsJS(final PrintWriter w, final String error, final String...errorParams) {
 		final StringBuilder commaSeperatedErrorParams = new StringBuilder();
 		for(String param : errorParams) {
-			commaSeperatedErrorParams.append("\"");
+			commaSeperatedErrorParams.append('"');
 			commaSeperatedErrorParams.append(param);
-			commaSeperatedErrorParams.append("\"");
-			commaSeperatedErrorParams.append(",");
+			commaSeperatedErrorParams.append('"');
+			commaSeperatedErrorParams.append(',');
 		}
 		commaSeperatedErrorParams.setLength(commaSeperatedErrorParams.length()-1);
 		w.print("{ \"error\" : \"");
@@ -623,7 +637,7 @@ public class Infostore extends PermissionServlet {
 			try {
 				ids[i] = tuple.getInt(PARAMETER_ID);
 			} catch (JSONException x) {
-				ids[i] = Integer.valueOf(tuple.getString(PARAMETER_ID));
+				ids[i] = Integer.parseInt(tuple.getString(PARAMETER_ID));
 			}
 		}
 		return ids;
@@ -635,9 +649,9 @@ public class Infostore extends PermissionServlet {
 			String s = upload.getFileName();
 			// Try guessing the filename separator
 			if(s.contains("\\")){
-				s = s.substring(s.lastIndexOf("\\")+1);
+				s = s.substring(s.lastIndexOf('\\')+1);
 			} else if (s.contains("/")){
-				s = s.substring(s.lastIndexOf("/")+1);
+				s = s.substring(s.lastIndexOf('/')+1);
 			}
 			metadata.setFileName(s);
 		}
@@ -649,8 +663,10 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 	
-	protected void rollback(InfostoreFacade infostore, SearchEngine searchEngine, HttpServletResponse res, Throwable t, String action, boolean post){
-		LOG.debug(t);
+	protected void rollback(final InfostoreFacade infostore, final SearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post){
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(t);
+		}
 		if(infostore != null) {
 			try {
 				infostore.rollback();
@@ -681,9 +697,10 @@ public class Infostore extends PermissionServlet {
 		return FACADE;
 	}
 	
-	protected InfostoreFacade getInfostore(long folderId){
-		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID)
+	protected InfostoreFacade getInfostore(final long folderId){
+		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
 			return VIRTUAL_FACADE;
+		}
 		return FACADE;
 	}
 	

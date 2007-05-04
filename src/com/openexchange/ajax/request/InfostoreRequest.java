@@ -693,7 +693,9 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.commit();
 				searchEngine.commit();
 			} catch (Throwable t){
-				LOG.debug(t);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(t);
+				}
 				try {
 					infostore.rollback();
 					searchEngine.rollback();
@@ -740,7 +742,9 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.index(newDocument,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			searchEngine.commit();
 		} catch (Throwable t){
-			LOG.debug(t);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(t);
+			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
@@ -806,7 +810,9 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.commit();
 			attachmentBase.commit();
 		} catch (Throwable t){
-			LOG.debug(t);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(t);
+			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
@@ -867,7 +873,9 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			searchEngine.commit();
 		} catch (Throwable t){
-			LOG.debug(t);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(t);
+			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
@@ -925,7 +933,9 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			searchEngine.commit();
 		} catch (Throwable t){
-			LOG.debug(t);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(t);
+			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();

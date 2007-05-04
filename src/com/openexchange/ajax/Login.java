@@ -115,7 +115,7 @@ public class Login extends AJAXServlet {
 	
 	public static final String cookiePrefix = "open-xchange-session-";
 	
-	private static final Log LOG = LogFactory.getLog(Login.class);
+	private static transient final Log LOG = LogFactory.getLog(Login.class);
 	
 	/* (non-Javadoc)
 	 * 
@@ -246,7 +246,7 @@ public class Login extends AJAXServlet {
 			if (session != null) {			
 				final SessiondConnector sd = SessiondConnector.getInstance();
 				sd.removeSession(session);
-			} else {
+			} else if (LOG.isDebugEnabled()) {
 				LOG.debug("no session cookie found in request!");
 			}
 		} else if (action.equals(ACTION_REDIRECT)) {

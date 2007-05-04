@@ -2,6 +2,7 @@
 
  - Reviewed class AJPv13ForwardRequest.java
  - Ignore-case-lookup of JSESSIONID in URL
+ - Partial code review
 
 * 2007-05-04 - martin.kauss@open-xchange.com
 

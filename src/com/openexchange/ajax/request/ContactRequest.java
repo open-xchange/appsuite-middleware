@@ -104,8 +104,10 @@ public class ContactRequest {
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
-		LOG.debug("use timezone string: " + sTimeZone);
-		LOG.debug("use user timezone: " + timeZone);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("use timezone string: " + sTimeZone);
+			LOG.debug("use user timezone: " + timeZone);
+		}
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException {

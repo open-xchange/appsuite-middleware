@@ -91,7 +91,9 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 		Properties prop = null;
 		
 		try {
-			LOG.debug("try to load propfile: " + propfile);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("try to load propfile: " + propfile);
+			}
 			
 			prop = new Properties();
 			prop.load(new FileInputStream(propfile));
@@ -102,10 +104,14 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 		}
 		
 		isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", isEventQueueEnabled);
-		LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled=" + isEventQueueEnabled);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled=" + isEventQueueEnabled);
+		}
 
 		eventQueueDelay = parseProperty(prop, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-		LOG.debug("Event property: com.openexchange.event.eventQueueDelay=" + eventQueueDelay);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Event property: com.openexchange.event.eventQueueDelay=" + eventQueueDelay);
+		}
 
 		isInit = true;
 	}

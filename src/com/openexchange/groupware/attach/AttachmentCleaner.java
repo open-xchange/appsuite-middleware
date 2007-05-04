@@ -77,67 +77,68 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 
 	private static final Log LOG = LogFactory.getLog(AttachmentCleaner.class);
 	
-	public final void appointmentDeleted(AppointmentObject appointmentObj,
-			SessionObject sessionObj) {
+	public final void appointmentDeleted(final AppointmentObject appointmentObj,
+			final SessionObject sessionObj) {
 		deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
 	}
 	
-	public final void taskDeleted(Task taskObj, SessionObject sessionObj) {
+	public final void taskDeleted(final Task taskObj, final SessionObject sessionObj) {
 	
 		deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
 	}
 	
-	public final void contactDeleted(ContactObject contactObj,
-			SessionObject sessionObj) {
+	public final void contactDeleted(final ContactObject contactObj,
+			final SessionObject sessionObj) {
 		deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
 		
 	}
 
-	public final void appointmentCreated(AppointmentObject appointmentObj,
-			SessionObject sessionObj) {
+	public final void appointmentCreated(final AppointmentObject appointmentObj,
+			final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void appointmentModified(AppointmentObject appointmentObj,
-			SessionObject sessionObj) {
+	public final void appointmentModified(final AppointmentObject appointmentObj,
+			final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}	
 
-	public final void taskCreated(Task taskObj, SessionObject sessionObj) {
+	public final void taskCreated(final Task taskObj, final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void taskModified(Task taskObj, SessionObject sessionObj) {
+	public final void taskModified(final Task taskObj, final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void contactCreated(ContactObject contactObj,
-			SessionObject sessionObj) {
+	public final void contactCreated(final ContactObject contactObj,
+			final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void contactModified(ContactObject contactObj,
-			SessionObject sessionObj) {
+	public final void contactModified(final ContactObject contactObj,
+			final SessionObject sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 	
-	private final void deleteAttachments(int parentFolderID, int objectID, int type, SessionObject sessionObj) {
+	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final SessionObject sessionObj) {
 		SearchIterator iter = null;
 		try {
 			ATTACHMENT_BASE.startTransaction();
-			TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			List<Integer> ids = new ArrayList<Integer>();
+			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final List<Integer> ids = new ArrayList<Integer>();
 			iter = rs.results();
-			if(!iter.hasNext())
+			if(!iter.hasNext()) {
 				return; // Shortcut
+			}
 			while(iter.hasNext()){
-				ids.add(((AttachmentMetadata)iter.next()).getId());
+				ids.add(Integer.valueOf(((AttachmentMetadata)iter.next()).getId()));
 			}
 			int[] idA = new int[ids.size()];
 			
@@ -154,7 +155,9 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 			} catch (TransactionException e) {
 				LOG.debug("",e);
 			}
-			LOG.debug(x);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(x);
+			}
 		} finally {
 			if(iter != null) {
 				try {

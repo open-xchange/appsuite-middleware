@@ -131,13 +131,13 @@ public class AppointmentRequest {
 		CalendarDataObject.TIMEZONE
 	};
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
-	private JSONWriter jsonWriter = null;
+	private JSONWriter jsonWriter;
 	
-	private Date timestamp = null;
+	private Date timestamp;
 	
-	private TimeZone timeZone = null;
+	private TimeZone timeZone;
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
@@ -148,8 +148,10 @@ public class AppointmentRequest {
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
-		LOG.debug("use timezone string: " + sTimeZone);
-		LOG.debug("use user timezone: " + timeZone);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("use timezone string: " + sTimeZone);
+			LOG.debug("use user timezone: " + timeZone);
+		}
 	}
 	
 	public Date getTimestamp() {

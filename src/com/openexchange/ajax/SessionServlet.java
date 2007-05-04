@@ -90,12 +90,12 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(SessionServlet.class);
+    private static transient final Log LOG = LogFactory.getLog(SessionServlet.class);
 
     /**
      * Factory for creating exceptions.
      */
-    private static final SessionExceptionFactory EXCEPTION =
+    private static transient final SessionExceptionFactory EXCEPTION =
         new SessionExceptionFactory(SessionServlet.class);
 
     /**
@@ -205,7 +205,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         if (null == retval) {
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled() && cookies != null) {
                 final StringBuilder debug = new StringBuilder();
                 debug.append("No cookie for ID: ");
                 debug.append(cookieId);

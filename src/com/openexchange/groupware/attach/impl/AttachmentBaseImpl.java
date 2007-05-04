@@ -884,7 +884,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			else
 				return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
 		} catch (FilestoreException e) {
-            LOG.debug(e);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(e);
+			}
         }
 		return null;
 	}

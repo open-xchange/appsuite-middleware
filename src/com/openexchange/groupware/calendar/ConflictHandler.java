@@ -75,8 +75,8 @@ public class ConflictHandler {
     private boolean action = true;
     private int current_results;
     
-    private Date rs = null;
-    private Date re = null;
+    private Date rs;
+    private Date re;
     
     public static final int MAX_CONFLICT_RESULTS = 999;
     
@@ -94,7 +94,9 @@ public class ConflictHandler {
         if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267    
         } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
-            LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
+        	if (LOG.isDebugEnabled()) {
+        		LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
+        	}
             return NO_CONFLICTS;
         } else if (cdao.containsEndDate() && CalendarCommonCollection.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past apps should never conflict
@@ -107,23 +109,19 @@ public class ConflictHandler {
             if (!cdao.getIgnoreConflicts()) {
                 if (cdao.getRecurrenceType() == 0) {
                     return prepareResolving(true); 
-                } else {
-                    return NO_CONFLICTS;
                 }
-            } else {
                 return NO_CONFLICTS;
             }
-        } else {
-            rs = cdao.getStartDate();
-            re = cdao.getEndDate();
-            CalendarDataObject[] resources = prepareResolving(false);
-            if (resources.length > 0) {
-                return resources;
-            } else {
-                if (!cdao.getIgnoreConflicts()) {
-                    return prepareResolving(true);
-                }
-            }
+            return NO_CONFLICTS;
+        }
+        rs = cdao.getStartDate();
+        re = cdao.getEndDate();
+        final CalendarDataObject[] resources = prepareResolving(false);
+        if (resources.length > 0) {
+            return resources;
+        }
+        if (!cdao.getIgnoreConflicts()) {
+            return prepareResolving(true);
         }
         return NO_CONFLICTS;
     }
@@ -142,35 +140,33 @@ public class ConflictHandler {
             } else {
                 return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
             }
-        } else {
-            if (request_participants) {
-                return NO_CONFLICTS;
-            } else {
-                CalendarRecurringCollection.fillDAO(cdao);
-                RecurringResults rrs;
-                if (rs == null || re == null) {
-                    rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
-                } else {
-                    rrs = CalendarRecurringCollection.calculateRecurring(cdao, rs.getTime(), re.getTime(), 0);
-                }
-                CalendarDataObject multi[] = new CalendarDataObject[0];
-                for (int a = 0; a < rrs.size(); a++) {
-                    RecurringResult rs = rrs.getRecurringResult(a);
-                    CalendarDataObject temp[] = resolveResourceConflicts(new Date(rs.getStart()), new Date(rs.getEnd()));
-                    multi = CalendarCommonCollection.copyAndExpandCalendarDataObjectArray(temp, multi);
-                    
-                }
-                return multi;
-            }
         }
+        if (request_participants) {
+            return NO_CONFLICTS;
+        }
+        CalendarRecurringCollection.fillDAO(cdao);
+        RecurringResults rrs;
+        if (rs == null || re == null) {
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        } else {
+            rrs = CalendarRecurringCollection.calculateRecurring(cdao, rs.getTime(), re.getTime(), 0);
+        }
+        CalendarDataObject multi[] = new CalendarDataObject[0];
+        for (int a = 0; a < rrs.size(); a++) {
+            final RecurringResult rs = rrs.getRecurringResult(a);
+            final CalendarDataObject temp[] = resolveResourceConflicts(new Date(rs.getStart()), new Date(rs.getEnd()));
+            multi = CalendarCommonCollection.copyAndExpandCalendarDataObjectArray(temp, multi);
+            
+        }
+        return multi;
     }
     
-    private CalendarDataObject[] resolveParticipantConflicts(Date start, Date end) throws OXException {
-        String sql_in = CalendarCommonCollection.getSQLInStringForParticipants(cdao.getUsers());
+    private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
+    	final String sql_in = CalendarCommonCollection.getSQLInStringForParticipants(cdao.getUsers());
         if (sql_in == null) {
             return NO_CONFLICTS;
         }
-        CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         Connection readcon = null;
         SearchIterator si = null;
         ResultSet rs = null;
@@ -185,7 +181,7 @@ public class ConflictHandler {
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
-                CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
+            	final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
                 if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
                     if (li == null) {
                         li = new ArrayList<CalendarDataObject>();
@@ -215,9 +211,8 @@ public class ConflictHandler {
                 CalendarDataObject[] ret = new CalendarDataObject[li.size()];
                 li.toArray(ret);
                 return ret;
-            } else {
-                return NO_CONFLICTS;
             }
+            return NO_CONFLICTS;
         } catch (SearchIteratorException sie) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 12);
         } catch (SQLException sqle) {
@@ -245,12 +240,12 @@ public class ConflictHandler {
         }
     }
     
-    private CalendarDataObject[] resolveResourceConflicts(Date start, Date end) throws OXException {
-        String sql_in = CalendarCommonCollection.getSQLInStringForResources(cdao.getParticipants());
+    private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end) throws OXException {
+    	final String sql_in = CalendarCommonCollection.getSQLInStringForResources(cdao.getParticipants());
         if (sql_in == null) {
             return NO_CONFLICTS;
         }
-        CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
+        final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         Connection readcon = null;
         SearchIterator si = null;
         ResultSet rs = null;
@@ -265,7 +260,7 @@ public class ConflictHandler {
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getParticipants(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
-                CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
+            	final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
                 if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
                     if (li == null) {
                         li = new ArrayList<CalendarDataObject>();
@@ -305,9 +300,8 @@ public class ConflictHandler {
                 CalendarDataObject[] ret = new CalendarDataObject[li.size()];
                 li.toArray(ret);
                 return ret;
-            } else {
-                return NO_CONFLICTS;
             }
+            return NO_CONFLICTS;
         } catch (SearchIteratorException sie) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 13);
         } catch (SQLException sqle) {
