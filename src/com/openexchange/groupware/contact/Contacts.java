@@ -135,15 +135,15 @@ public class Contacts implements DeleteListener {
 			if (ContactConfig.getProperty("validate_contact_email") != null && ContactConfig.getProperty("validate_contact_email").equals("true")){
 				if (co.containsEmail1() && co.getEmail1() != null){
 					email = co.getEmail1();
-					InternetAddress ia = new InternetAddress(email);
+					final InternetAddress ia = new InternetAddress(email);
 					ia.validate();
 				}else if (co.containsEmail2() && co.getEmail2() != null){
 					email = co.getEmail2();
-					InternetAddress ia = new InternetAddress(email); 
+					final InternetAddress ia = new InternetAddress(email); 
 					ia.validate();
 				}else if (co.containsEmail3() && co.getEmail3() != null){
 					email = co.getEmail3();
-					InternetAddress ia = new InternetAddress(email);
+					final InternetAddress ia = new InternetAddress(email);
 					ia.validate();
 				}
 			}
@@ -170,12 +170,12 @@ public class Contacts implements DeleteListener {
 		int scaledHeight = 76;
 		int max_size = 33750;	
 		*/
-		final int scaledWidth = Integer.valueOf(ContactConfig.getProperty("scale_image_width")).intValue();
-		final int scaledHeight = Integer.valueOf(ContactConfig.getProperty("scale_image_height")).intValue();
-		final int max_size = Integer.valueOf(ContactConfig.getProperty("max_image_size")).intValue();		
+		final int scaledWidth = Integer.parseInt(ContactConfig.getProperty("scale_image_width"));
+		final int scaledHeight = Integer.parseInt(ContactConfig.getProperty("scale_image_height"));
+		final int max_size = Integer.parseInt(ContactConfig.getProperty("max_image_size"));		
 		
-		String fileType = "";
-		String[] allowed_mime = ImageIO.getReaderFormatNames();
+		final String fileType = "";
+		final String[] allowed_mime = ImageIO.getReaderFormatNames();
 		/*
 		for (int i=0;i<allowed_mime.length;i++){
 			System.out.println(new StringBuiler("--> "+allowed_mime[i]+" vs "+mime));
@@ -205,22 +205,22 @@ public class Contacts implements DeleteListener {
 		}
 		if (!check){
 			
-			int ilkb = img.length / 1024;
-			int mskb = max_size / 1024;
+			final int ilkb = img.length / 1024;
+			final int mskb = max_size / 1024;
 			
-			throw EXCEPTIONS.createOXConflictException(1,mime,ilkb,mskb);
+			throw EXCEPTIONS.createOXConflictException(1,mime,Integer.valueOf(ilkb),Integer.valueOf(mskb));
 			//throw new OXException("This is a not supported file type for an Image or it is to large! MimeType ="+mime+" / Image Size = "+img.length+" / max. allowed Image size = "+max_size);
 		}
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(img);
-		BufferedImage bi = ImageIO.read(bais);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(img);
+		final BufferedImage bi = ImageIO.read(bais);
 
-		int origHeigh = bi.getHeight();
-		int origWidth = bi.getWidth();
-		int origType = bi.getType();
+		final int origHeigh = bi.getHeight();
+		final int origWidth = bi.getWidth();
+		final int origType = bi.getType();
 
-		StringBuilder logi = new StringBuilder("OUR IMAGE -> mime="+mime+" / type="+origType+" / width="+origWidth+" / height="+origHeigh+" / byte[] size="+img.length);
 		if (LOG.isDebugEnabled()) {
+			final StringBuilder logi = new StringBuilder(100).append("OUR IMAGE -> mime=").append(mime).append(" / type=").append(origType).append(" / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
 			LOG.debug(logi.toString());
 		}
 		/*
@@ -252,8 +252,8 @@ public class Contacts implements DeleteListener {
 				}
 				
 			} else if (origWidth > origHeigh){
-				float w1 = origWidth;
-				float h1 = origHeigh;
+				final float w1 = origWidth;
+				final float h1 = origHeigh;
 				ratio = w1 / h1;
 				
 				float widthFloat = scaledWidth;
@@ -271,8 +271,8 @@ public class Contacts implements DeleteListener {
 				}
 				
 			} else if (origWidth < origHeigh){
-				float w1 = origWidth;
-				float h1 = origHeigh;
+				final float w1 = origWidth;
+				final float h1 = origHeigh;
 				ratio = h1 / w1;
 				
 				float heighFloat = scaledHeight;
@@ -290,12 +290,12 @@ public class Contacts implements DeleteListener {
 				}
 			}
 		
-			BufferedImage scaledBufferedImage = new BufferedImage(sWd, sHd, origType);
-			Graphics2D g2d = scaledBufferedImage.createGraphics();
+			final BufferedImage scaledBufferedImage = new BufferedImage(sWd, sHd, origType);
+			final Graphics2D g2d = scaledBufferedImage.createGraphics();
 			g2d.drawImage(bi, 0, 0, sWd, sHd, null);
 			g2d.dispose();
 			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try{
 			ImageIO.write(scaledBufferedImage,fileType,baos);
 			} catch (Exception fallback){
@@ -310,12 +310,11 @@ public class Contacts implements DeleteListener {
 				}
 			}
 			
-			byte[] back =  baos.toByteArray();
+			final byte[] back =  baos.toByteArray();
 			
 			return back;
-		} else {
-			return img;
 		}
+		return img;
 	}
 	
 	@OXThrowsMultiple(
@@ -348,17 +347,17 @@ public class Contacts implements DeleteListener {
 	)
 	public static void performContactStorageInsert(final ContactObject co, final int user,final int[] group, final SessionObject so) throws OXConflictException, OXException {
 		
-		StringBuilder insert_fields = new StringBuilder();
-		StringBuilder insert_values = new StringBuilder();
+		final StringBuilder insert_fields = new StringBuilder();
+		final StringBuilder insert_values = new StringBuilder();
 		
-		ContactSql cs = new ContactMySql(so);
+		final ContactSql cs = new ContactMySql(so);
 		Connection writecon = null;
 		Connection readcon = null;
 		try{
 			readcon = DBPool.pickup(so.getContext());
 			validateEmailAddress(co);
 			
-			int fid = co.getParentFolderID();
+			final int fid = co.getParentFolderID();
 			 
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
@@ -371,7 +370,7 @@ public class Contacts implements DeleteListener {
 				//throw new OXException("saveContactObject() called with a non-Contact-Folder! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
 
-			OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
+			final OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
 			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, so.getUserConfiguration());
 			
 				//OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
@@ -464,7 +463,7 @@ public class Contacts implements DeleteListener {
 			writecon = DBPool.pickupWriteable(so.getContext());
 			writecon.setAutoCommit(false);	
 			
-			int id = IDGenerator.getId(so.getContext(), Types.CONTACT, writecon);
+			final int id = IDGenerator.getId(so.getContext(), Types.CONTACT, writecon);
 			LOG.trace("Got ID from Generator -> "+id);
 			if (id == -1){
 				throw EXCEPTIONS.create(7);
@@ -472,9 +471,9 @@ public class Contacts implements DeleteListener {
 			}
 			co.setObjectID(id);
 			
-			long lmd = System.currentTimeMillis();
+			final long lmd = System.currentTimeMillis();
 			
-			StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields,insert_values,user,lmd,so.getContext().getContextId(),id);
+			final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields,insert_values,user,lmd,so.getContext().getContextId(),id);
 			
 			ps = writecon.prepareStatement(insert.toString());
 			int counter = 1;
@@ -484,7 +483,7 @@ public class Contacts implements DeleteListener {
 					counter++;
 				}
 			}
-			Date ddd = new Date(lmd);
+			final Date ddd = new Date(lmd);
 			co.setLastModified(ddd);
 			
 			if (LOG.isDebugEnabled()) {
@@ -608,7 +607,7 @@ public class Contacts implements DeleteListener {
 							"Mandatory field last name is not set."
 					}
 	)
-	public static void performContactStorageUpdate(ContactObject co, int fid, java.util.Date client_date, int user, int[] group, Context ctx, UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
+	public static void performContactStorageUpdate(final ContactObject co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
 		
 		//TODO
 		/*
@@ -624,7 +623,7 @@ public class Contacts implements DeleteListener {
 			co.setParentFolderID(fid);
 		}
 		
-		ContactSql cs = new ContactMySql(ctx, user);
+		final ContactSql cs = new ContactMySql(ctx, user);
 		
 		ContactObject original = null;
 		Connection writecon = null;
@@ -645,8 +644,8 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXConflictException(10, co.getParentFolderID(), ctx.getContextId(), user);
 				//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
-			OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
-			EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, uc);
+			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, uc);
 
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(11, co.getParentFolderID(), ctx.getContextId(), user);
@@ -723,7 +722,7 @@ public class Contacts implements DeleteListener {
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+" oid="+co.getObjectID());
 			}
 						
-			java.util.Date server_date = original.getLastModified();
+			final java.util.Date server_date = original.getLastModified();
 			
 			try{
 				if (LOG.isDebugEnabled()) {
@@ -808,7 +807,7 @@ public class Contacts implements DeleteListener {
 		}
 		
 		PreparedStatement ps = null;
-		StringBuilder update = new StringBuilder();
+		final StringBuilder update = new StringBuilder();
 		
 		try{
 			int[] mod = new int[650];
@@ -824,7 +823,7 @@ public class Contacts implements DeleteListener {
 					cnt ++;
 				}
 			}
-			int[] modtrim = new int[cnt];
+			final int[] modtrim = new int[cnt];
 			System.arraycopy(mod, 0, modtrim, 0, cnt);  
 			
 			if (modtrim.length > 0){
@@ -835,14 +834,14 @@ public class Contacts implements DeleteListener {
 						update.append(sb);				
 					}	
 				}
-				int id = co.getObjectID();
+				final int id = co.getObjectID();
 				if (id == -1){
 					throw EXCEPTIONS.createOXConflictException(21);
 					//throw new OXConflictException("New ID is -1!");
 				}
-				long lmd = System.currentTimeMillis();
+				final long lmd = System.currentTimeMillis();
 				
-				StringBuilder updater  = cs.iFperformContactStorageUpdate(update, lmd,id,ctx.getContextId());
+				final StringBuilder updater  = cs.iFperformContactStorageUpdate(update, lmd,id,ctx.getContextId());
 				
 				writecon = DBPool.pickupWriteable(ctx);
 				ps = writecon.prepareStatement(updater.toString());
@@ -854,7 +853,7 @@ public class Contacts implements DeleteListener {
 					}
 				}
 				
-				Date ddd = new Date(lmd);
+				final Date ddd = new Date(lmd);
 				co.setLastModified(ddd);
 			} else {
 				throw EXCEPTIONS.create(22, ctx.getContextId(), co.getObjectID());
@@ -970,10 +969,10 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static ContactObject getContactById(int objectId, int userId, int[] memberInGroups, Context ctx, UserConfiguration uc, Connection readCon) throws OXException {
+	public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 		
 		ContactObject co = null;
-		ContactSql contactSQL = new ContactMySql(ctx, userId);
+		final ContactSql contactSQL = new ContactMySql(ctx, userId);
 		
 		StringBuilder sb = new StringBuilder();
 		for (int i=0;i<650;i++){				
@@ -1002,9 +1001,9 @@ public class Contacts implements DeleteListener {
 							"Unable to load Contact: Context %1$d"
 						}
 	)
-	public static ContactObject fillContactObject(String sql_string, int user, int[] group, Context ctx, UserConfiguration uc, Connection readCon) throws OXException {
+	public static ContactObject fillContactObject(final String sql_string, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
-		ContactObject co = new ContactObject();
+		final ContactObject co = new ContactObject();
 		Statement stmt = null;
 		ResultSet rs = null;
 		
@@ -1051,7 +1050,7 @@ public class Contacts implements DeleteListener {
 			msg="Unable to delete Contact: Context %1$d Contact %2$d"
 	)
 	
-	public static void deleteContact(int id, int cid, Connection writecon) throws OXException {
+	public static void deleteContact(final int id, final int cid, final Connection writecon) throws OXException {
 		Statement del = null;
 		try{
 			del = writecon.createStatement();
@@ -1059,7 +1058,7 @@ public class Contacts implements DeleteListener {
 			trashLinks(id, cid, writecon, false);
 			trashImage(id, cid, writecon, false);
 			
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			cs.iFdeleteContact(id,cid,del);
 			
 		} catch (SQLException se) {
@@ -1082,19 +1081,19 @@ public class Contacts implements DeleteListener {
 			exceptionId=28,
 			msg="Unable to load Dristributionlist : Context %1$d Contact %2$d"
 	)
-	public static DistributionListEntryObject[] fillDistributionListArray(int id, int user, int[] group, Context ctx, UserConfiguration uc, Connection readcon) throws OXException {		
+	public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {		
 
 		Statement smt = null;
 		ResultSet rs = null;
 		DistributionListEntryObject[] r = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		
 		try{
 			smt = readcon.createStatement();
 			rs = smt.executeQuery(cs.iFfillDistributionListArray(id, ctx.getContextId()));
 
 			rs.last();
-		    int size = rs.getRow();
+			final int size = rs.getRow();
 		    rs.beforeFirst();
 
 		    DistributionListEntryObject[] dleos = new DistributionListEntryObject[size];		    
@@ -1177,11 +1176,11 @@ public class Contacts implements DeleteListener {
 							"This Contact has no FolderID: Entry %1$d Context %2$d"
 						}
 	)
-	public static void writeDistributionListArrayInsert(DistributionListEntryObject[] dleos, int id, int cid, Connection writecon) throws OXException {
+	public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
 
 		DistributionListEntryObject dleo = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		
 		try {	
 			for (int i=0;i<dleos.length;i++){
@@ -1249,7 +1248,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void writeDistributionListArrayUpdate(DistributionListEntryObject[] dleos, DistributionListEntryObject[] old_dleos, int id, int cid, Connection writecon) throws OXException {
+	public static void writeDistributionListArrayUpdate(final DistributionListEntryObject[] dleos, final DistributionListEntryObject[] old_dleos, final int id, final int cid, final Connection writecon) throws OXException {
 
 		DistributionListEntryObject new_one = null;
 		DistributionListEntryObject old_one = null;
@@ -1297,10 +1296,9 @@ public class Contacts implements DeleteListener {
 								// no we must remove him from the old list cuz maybe he needs get deleted
 								old_dleos[u] = null;							
 								break; // when is the entry is found we can leave the old list for the nex new entry
-							}else{
-								// this old entry does not match the new one
-								actions = false;
 							}
+							// this old entry does not match the new one
+							actions = false;
 						}
 					}
 				}
@@ -1329,13 +1327,13 @@ public class Contacts implements DeleteListener {
 		}
 		// all is checked, we have 3 arrays now INSERT, UPDATE and DELETE. just make the stuff now
 		
-		DistributionListEntryObject[] insertcut = new DistributionListEntryObject[insert_count];
+		final DistributionListEntryObject[] insertcut = new DistributionListEntryObject[insert_count];
 		System.arraycopy(inserts, 0, insertcut, 0, insert_count);
 		
-		DistributionListEntryObject[] updatecut = new DistributionListEntryObject[update_count];
+		final DistributionListEntryObject[] updatecut = new DistributionListEntryObject[update_count];
 		System.arraycopy(updates, 0, updatecut, 0, update_count);
 		
-		DistributionListEntryObject[] deletecut = new DistributionListEntryObject[delete_count];
+		final DistributionListEntryObject[] deletecut = new DistributionListEntryObject[delete_count];
 		System.arraycopy(deletes, 0, deletecut, 0, delete_count);
 		
 		try{
@@ -1359,11 +1357,11 @@ public class Contacts implements DeleteListener {
 							"This Contact has no FolderID: Entry %1$d Context %2$d"
 						}
 	)
-	public static void updateDistributionListEntriesByIds(int id, DistributionListEntryObject[] dleos, int cid, Connection writecon) throws OXException {
+	public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
 		if (dleos.length > 0) {
 
 			DistributionListEntryObject dleo = null;
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			try{
 				for (int i=0;i<dleos.length;i++){
 					 dleo = dleos[i];
@@ -1449,11 +1447,11 @@ public class Contacts implements DeleteListener {
 							"Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d"
 						}
 	)
-	public static void deleteDistributionListEntriesByIds(int id, DistributionListEntryObject[] dleos, int cid, Connection writecon) throws OXException {
+	public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
 
 		PreparedStatement ps = null;
 		DistributionListEntryObject dleo = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		try {
 			ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
 			ps.setInt(1, id);
@@ -1515,20 +1513,20 @@ public class Contacts implements DeleteListener {
 			exceptionId=32,
 			msg="Unable to Load Linked Contacts : Context %1$d Contact %2$d"
 	)
-	public static LinkEntryObject[] fillLinkArray(ContactObject co, int user, int[] group, Context ctx, UserConfiguration uc, Connection readcon) throws OXException {		
+	public static LinkEntryObject[] fillLinkArray(final ContactObject co, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {		
 		
 		Statement smt = null;
 		ResultSet rs = null;
 		LinkEntryObject[] r = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		try{
-			int id = co.getObjectID();
+			final int id = co.getObjectID();
 			
 			smt = readcon.createStatement();		
 			rs = smt.executeQuery(cs.iFgetFillLinkArrayString(id, ctx.getContextId()));
 
 			rs.last();
-			int size = rs.getRow();
+			final int size = rs.getRow();
 			rs.beforeFirst();
 
 			LinkEntryObject[] leos = new LinkEntryObject[size];
@@ -1594,9 +1592,9 @@ public class Contacts implements DeleteListener {
 			exceptionId=33,
 			msg="Unable to save Linking between Contacts : Context %1$d Contact %2$d"
 	)
-	public static void writeContactLinkArrayInsert(LinkEntryObject[] leos, int id, int cid, Connection writecon) throws OXException {
+	public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
 		LinkEntryObject leo = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		try{
 			for (int i=0;i<leos.length;i++){
 				PreparedStatement ps = null;
@@ -1628,7 +1626,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void writeContactLinkArrayUpdate(LinkEntryObject[] leos, LinkEntryObject[] original, int id, int cid, Connection writecon) throws OXException {
+	public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
 
 		int sizey = 0;
 		if (leos != null && original != null){
@@ -1646,12 +1644,12 @@ public class Contacts implements DeleteListener {
 		int insert_count = 0;
 		
 		for (int i=0;i<leos.length;i++){
-			LinkEntryObject new_leo = leos[i];
+			final LinkEntryObject new_leo = leos[i];
 			boolean action = false;
 			
 			if (original != null){
 				for(int u=0;u<original.length;u++){
-					LinkEntryObject old_leo = original[u];
+					final LinkEntryObject old_leo = original[u];
 					
 					if (new_leo.compare(old_leo)){
 						// found this link in the old ones
@@ -1672,17 +1670,17 @@ public class Contacts implements DeleteListener {
 		}
 		if (original != null){
 			for (int i=0;i<original.length;i++){
-				LinkEntryObject del_leo = original[i];
+				final LinkEntryObject del_leo = original[i];
 				if (del_leo != null){
 					deletes[delete_count] = del_leo;
 					delete_count++;
 				}
 			}
 		}
-		LinkEntryObject[] deletecut = new LinkEntryObject[delete_count];
+		final LinkEntryObject[] deletecut = new LinkEntryObject[delete_count];
 		System.arraycopy(deletes, 0, deletecut, 0, delete_count);
 		
-		LinkEntryObject[] insertcut = new LinkEntryObject[insert_count];
+		final LinkEntryObject[] insertcut = new LinkEntryObject[insert_count];
 		System.arraycopy(inserts, 0, insertcut, 0, insert_count);
 
 		
@@ -1701,7 +1699,7 @@ public class Contacts implements DeleteListener {
 			exceptionId=34,
 			msg="Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
 	)
-	public static void deleteLinkEntriesByIds(int id, LinkEntryObject[] leos, int cid, Connection writecon) throws OXException {
+	public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
 		if (leos.length > 0) {
 			LinkEntryObject leo = null;
 			try{
@@ -1709,7 +1707,7 @@ public class Contacts implements DeleteListener {
 					leo = leos[i];
 					PreparedStatement ps = null;
 					try {
-						ContactSql cs = new ContactMySql(null);
+						final ContactSql cs = new ContactMySql(null);
 						ps = writecon.prepareStatement(cs.iFgetdeleteLinkEntriesByIdsString());
 						ps.setInt(1, id);
 						ps.setInt(2, leo.getLinkID());
@@ -1735,12 +1733,12 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static Date getContactImageLastModified(int id, int cid, Connection readcon) throws SQLException {
+	public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException {
 		Date last_mod = null;
 		Statement smt = null;
 		ResultSet rs = null;
 		try{
-			ContactSql cs = new ContactMySql(null);	
+			final ContactSql cs = new ContactMySql(null);	
 			smt = readcon.createStatement();
 			rs = smt.executeQuery(cs.iFgetContactImageLastModified(id,cid));
 		    if (rs.next()){
@@ -1770,17 +1768,17 @@ public class Contacts implements DeleteListener {
 			exceptionId=35,
 			msg="Unable to load Contact Image : Context %1$d Contact %2$d"
 	)
-	public static void getContactImage(int contact_id, ContactObject co, int cid, Connection readcon) throws OXException {
+	public static void getContactImage(final int contact_id, final ContactObject co, final int cid, final Connection readcon) throws OXException {
 		Date last_mod = null;
 		
 		Statement smt = null;
 		ResultSet rs = null;
 		try {
-			ContactSql cs = new ContactMySql(null);	
+			final ContactSql cs = new ContactMySql(null);	
 			smt = readcon.createStatement();
 		    rs = smt.executeQuery(cs.iFgetContactImage(contact_id,cid));
 		    if (rs.next()){
-		    	byte[] bb = rs.getBytes(1);
+		    	final byte[] bb = rs.getBytes(1);
 		    	if (! rs.wasNull()){
 			    	last_mod = new Date(rs.getLong(2));
 				    co.setImageLastModified(last_mod);
@@ -1815,7 +1813,7 @@ public class Contacts implements DeleteListener {
 						"Unable to save Contact Image: Context %1$d Contact %2$d"
 						}
 	)
-	public static void writeContactImage(int contact_id, byte[] img, int cid, String mime, Connection writecon) throws OXException {
+	public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
 		//System.out.println("contact_id -> "+contact_id+" img -> "+img+" cid -> "+cid+" mime -> "+mime+" img.length -> "+img.length+" mime.length -> "+mime.length());
 		if (contact_id < 1 || img == null || img.length < 1 || cid < 1 || mime == null || mime.length() < 1){
 			throw EXCEPTIONS.createOXConflictException(36);
@@ -1824,7 +1822,7 @@ public class Contacts implements DeleteListener {
 		
 		PreparedStatement ps = null;
 		try {
-			ContactSql cs = new ContactMySql(null);	
+			final ContactSql cs = new ContactMySql(null);	
 			ps = writecon.prepareStatement(cs.iFwriteContactImage());
 			ps.setInt(1, contact_id);
 			ps.setBytes(2, img);
@@ -1858,7 +1856,7 @@ public class Contacts implements DeleteListener {
 						"Unable to update Contact Image: Context %1$d Contact %2$d"
 						}
 	)
-	public static void updateContactImage(int contact_id, byte[] img, int cid, String mime, Connection writecon) throws OXException {
+	public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
 		if (contact_id < 1 || img == null || img.length < 1 || cid < 1 || mime == null || mime.length() < 1) {
 			throw EXCEPTIONS.createOXConflictException(38);
 			//throw new OXConflictException("Wrong Data in Image Save");
@@ -1866,7 +1864,7 @@ public class Contacts implements DeleteListener {
 		
 		PreparedStatement ps = null;
 		try {
-			ContactSql cs = new ContactMySql(null);	
+			final ContactSql cs = new ContactMySql(null);	
 			ps = writecon.prepareStatement(cs.iFupdateContactImageString());
 			ps.setInt(1, contact_id);
 			ps.setBytes(2, img);
@@ -1892,14 +1890,14 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static boolean performContactReadCheckByID(int objectId, int user, int[] group, Context ctx, UserConfiguration uc) throws DBPoolingException {
+	public static boolean performContactReadCheckByID(final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws DBPoolingException {
 		
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
 		try{
 			
-			ContactSql cs = new ContactMySql(ctx,user);		
+			final ContactSql cs = new ContactMySql(ctx,user);		
 			cs.setSelect(cs.iFgetRightsSelectString()); 	    		
 			cs.setObjectID(objectId);	
 			
@@ -1914,7 +1912,7 @@ public class Contacts implements DeleteListener {
 			if (rs.next()) {
 				fid = rs.getInt(5);
 				created_from = rs.getInt(6);
-				int xx = rs.getInt(7);
+				final int xx = rs.getInt(7);
 				if (!rs.wasNull() && xx == 1){
 						pflag = true;
 				}
@@ -1926,9 +1924,8 @@ public class Contacts implements DeleteListener {
 			}
 			if (fid != -1 && created_from != -1){
 				return performContactReadCheck(fid,created_from,user,group,ctx,uc,readCon);
-			}else{
-				return false;
 			}
+			return false;
 		} catch (SQLException e){
 			LOG.error("UNABLE TO performContactReadCheckByID cid="+ctx.getContextId()+" oid="+objectId, e);
 			return false;
@@ -1959,14 +1956,14 @@ public class Contacts implements DeleteListener {
 			exceptionId=50,
 			msg=ContactException.INIT_CONNECTION_FROM_DBPOOL
 	)
-	public static boolean performContactReadCheckByID(int folderId, int objectId, int user, int[] group, Context ctx, UserConfiguration uc) throws OXException {
+	public static boolean performContactReadCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
 				
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
 		try{
 			
-			ContactSql cs = new ContactMySql(ctx,user);	
+			final ContactSql cs = new ContactMySql(ctx,user);	
 			cs.setSelect(cs.iFgetRightsSelectString());   		
 			cs.setObjectID(objectId);	
 
@@ -1981,7 +1978,7 @@ public class Contacts implements DeleteListener {
 			if (rs.next()) {
 				fid = rs.getInt(5);
 				created_from = rs.getInt(6);
-				int xx = rs.getInt(7);
+				final int xx = rs.getInt(7);
 				if (!rs.wasNull() && xx == 1){
 						pflag = true;
 				}
@@ -2025,7 +2022,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 
-	public static boolean performContactReadCheck(int folderId,int created_from, int user, int[] group, Context ctx, UserConfiguration uc, Connection readCon){
+	public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon){
 		try{
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
@@ -2036,8 +2033,8 @@ public class Contacts implements DeleteListener {
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
 			}
-			OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
-			EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
+			final OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
 
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				return false;
@@ -2045,12 +2042,10 @@ public class Contacts implements DeleteListener {
 			if (!oclPerm.canReadAllObjects()) {
 				if (oclPerm.canReadOwnObjects() && created_from == user) {
 					return true;
-				} else {
-					return false;
 				}
-			}else{
-				return true;
+				return false;
 			}
+			return true;
 		} catch (OXException e){
 			LOG.error("UNABLE TO PERFORM performContactReadCheck cid="+ctx.getContextId()+" fid="+folderId, e);
 			return false;
@@ -2063,14 +2058,14 @@ public class Contacts implements DeleteListener {
 			exceptionId=49,
 			msg=ContactException.INIT_CONNECTION_FROM_DBPOOL
 	)
-	public static boolean performContactWriteCheckByID(int folderId, int objectId, int user, int[] group, Context ctx, UserConfiguration uc) throws OXException {
+	public static boolean performContactWriteCheckByID(final int folderId, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws OXException {
 		
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
 		try{
 			
-			ContactSql cs = new ContactMySql(ctx,user);		
+			final ContactSql cs = new ContactMySql(ctx,user);		
 			cs.setSelect(cs.iFgetRightsSelectString());	    		
 			cs.setObjectID(objectId);	
 			
@@ -2101,9 +2096,8 @@ public class Contacts implements DeleteListener {
 			
 			if (fid != -1 && created_from != -1){
 				return performContactWriteCheck(fid,created_from,user,group,ctx,uc,readCon);
-			}else{
-				return false;
 			}
+			return false;
 		} catch (DBPoolingException e){
 			throw EXCEPTIONS.create(49,e);
 		} catch (SQLException e){
@@ -2130,7 +2124,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static boolean performContactWriteCheck(int folderId,int created_from, int user, int[] group, Context ctx, UserConfiguration uc, Connection readCon){
+	public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon){
 		try{
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
@@ -2141,20 +2135,18 @@ public class Contacts implements DeleteListener {
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
 			}
-			OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
-			EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
+			final OXFolderAccess oxfs = new OXFolderAccess(readCon, ctx);
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(folderId, user, uc);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				return false;
 			}	    		
 			if (!oclPerm.canWriteAllObjects()) {
 				if (oclPerm.canWriteOwnObjects() && created_from == user) {
 					return true;
-				} else {
-					return false;
 				}
-			}else{
-				return true;
+				return false;
 			}
+			return true;
 		} catch (OXException e){
 			LOG.error("UNABLE TO PERFORM performContactWriteCheck cid="+ctx.getContextId()+" fid="+folderId, e);
 			return false;
@@ -2167,20 +2159,19 @@ public class Contacts implements DeleteListener {
 			exceptionId=40,
 			msg="Unable to perform Contact Folder check for readable content: Context %1$d Folder %2$d"
 	)
-	public static boolean containsForeignObjectInFolder(int fid, int uid, SessionObject so) throws OXException, DBPoolingException {
+	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final SessionObject so) throws OXException, DBPoolingException {
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
 		try{
 			readCon = DBPool.pickup(so.getContext());
 			st = readCon.createStatement();
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid,uid,so.getContext().getContextId()));
 			if (rs.next()){
 				return true;
-			}else{
-				return false;
 			}
+			return false;
 		} catch (SQLException se){
 			throw EXCEPTIONS.create(40, se, so.getContext().getContextId(), fid);
 			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
@@ -2205,20 +2196,19 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static boolean containsAnyObjectInFolder(int fid, Context cx) throws OXException {
+	public static boolean containsAnyObjectInFolder(final int fid, final Context cx) throws OXException {
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
 		try{
 			readCon = DBPool.pickup(cx);
 			st = readCon.createStatement(); 
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
 			if (rs.next()){
 				return true;
-			}else{
-				return false;
 			}
+			return false;
 		} catch (DBPoolingException se){
 			LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: "+cx.getContextId()+" Fid: "+fid+" Cause:"+se);
 			return false;
@@ -2248,7 +2238,7 @@ public class Contacts implements DeleteListener {
 		}
 	} 
 	
-	public static void deleteContactsFromFolder(int fid, int user, int[] group, SessionObject so, Connection readcon, Connection writecon) throws OXException {
+	public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
 		trashContactsFromFolder(fid, so, readcon, writecon, true);
 	}	
 	
@@ -2266,7 +2256,7 @@ public class Contacts implements DeleteListener {
 							"Unable to trigger Object Events: Context %1$d Folder %2$d"
 						}
 	)
-	public static void trashContactsFromFolder(int fid,  SessionObject so, Connection readcon, Connection writecon, boolean delit) throws OXException {
+	public static void trashContactsFromFolder(final int fid, final SessionObject so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
 
 		Statement read = null; 
 		Statement del = null;
@@ -2296,13 +2286,13 @@ public class Contacts implements DeleteListener {
 				//throw new OXException("NO PERMISSIONS TO DELETE IN THIS FOLDER cid="+so.getContext().getContextId()+" fid="+fid,e);
 			}			
 			
-			ContactSql cs = new ContactMySql(so);
+			final ContactSql cs = new ContactMySql(so);
 			cs.setFolder(fid);
 			cs.setSelect(cs.iFgetRightsSelectString());
 			
 			rs =read.executeQuery(cs.getSqlCommand());
 			
-			EventClient ec = new EventClient(so);
+			final EventClient ec = new EventClient(so);
 			
 			int oid = 0;
 			int dlist = 0;
@@ -2333,7 +2323,7 @@ public class Contacts implements DeleteListener {
 
 				cs.iFtrashContactsFromFolder(delit,del,oid,so.getContext().getContextId());
 				
-				ContactObject co = new ContactObject();
+				final ContactObject co = new ContactObject();
 				co.setCreatedBy(created_from);
 				co.setParentFolderID(fid);
 				co.setObjectID(oid);
@@ -2373,13 +2363,13 @@ public class Contacts implements DeleteListener {
 		}
 	}	
 	
-	public static void deleteDistributionList(int id, int cid, Connection writecon) throws SQLException {
+	public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException {
 		trashDistributionList(id, cid, writecon, true);
 	}
-	public static void trashDistributionList(int id, int cid, Connection writecon, boolean delete) throws SQLException {
-		Statement smt = writecon.createStatement();
+	public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+		final Statement smt = writecon.createStatement();
 		try{
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashDistributionList(delete,id,cid,smt);
 		} catch (SQLException sxe){
 			throw sxe;
@@ -2394,13 +2384,13 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void deleteLinks(int id, int cid, Connection writecon) throws SQLException {
+	public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException {
 		trashLinks(id, cid, writecon, true);
 	}
-	public static void trashLinks(int id, int cid, Connection writecon, boolean delete) throws SQLException {
-		Statement smt = writecon.createStatement();
+	public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+		final Statement smt = writecon.createStatement();
 		try {
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashLinks(delete,smt,id,cid);
 		} catch (SQLException sxe){
 			throw sxe;
@@ -2415,13 +2405,13 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void deleteImage(int id, int cid, Connection writecon) throws SQLException {
+	public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException {
 		trashImage(id,cid,writecon,true);
 	}
-	public static void trashImage(int id, int cid, Connection writecon, boolean delete) throws SQLException {
-		Statement smt = writecon.createStatement();
+	public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+		final Statement smt = writecon.createStatement();
 		try{ 
-			ContactSql cs = new ContactMySql(null);
+			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashImage(delete,smt,id,cid);
 		} catch (SQLException sxe){
 			throw sxe;
@@ -2436,7 +2426,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws DeleteFailedException,LdapException, SQLException, DBPoolingException {
+	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException,LdapException, SQLException, DBPoolingException {
 	
 		try{
 			if (sqlDelEvent.getType() == DeleteEvent.TYPE_USER){
@@ -2463,11 +2453,11 @@ public class Contacts implements DeleteListener {
 							"Unable to trigger Object Events: Context %1$d User %2$d"
 						}
 	)
-	public static void trashAllUserContacts(int uid, SessionObject so, Connection readcon, Connection writecon) throws OXException {
+	public static void trashAllUserContacts(final int uid, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
 		Statement read = null; 
 		Statement del = null;
 		ResultSet rs = null;
-		ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(null);
 		
 		try {	
 			read = readcon.createStatement();
@@ -2484,7 +2474,7 @@ public class Contacts implements DeleteListener {
 
 			//writecon.setAutoCommit(false);	
 			
-			EventClient ec = new EventClient(so);
+			final EventClient ec = new EventClient(so);
 			
 			while (rs.next()){
 				delete = false;
@@ -2506,7 +2496,7 @@ public class Contacts implements DeleteListener {
 				}
 				cs.iFtrashAllUserContacts(delete,del,so.getContext().getContextId(),oid,uid,rs,so);
 				
-				ContactObject co = new ContactObject();
+				final ContactObject co = new ContactObject();
 				co.setCreatedBy(created_from);
 				co.setParentFolderID(fid);
 				co.setObjectID(oid);
@@ -2618,21 +2608,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field01";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setDisplayName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsDisplayName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getDisplayName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getDisplayName();
-				String y = original.getDisplayName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getDisplayName();
+				final String y = original.getDisplayName();
 				
 				if (x == null && y == null){
 					return true;
@@ -2642,14 +2632,14 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}				
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs,final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
 			
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getDisplayName();
 			}
 			public String getReadableTitle() {
@@ -2661,21 +2651,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field02";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setSurName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsSurName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getSurName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getSurName();
-				String y = original.getSurName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getSurName();
+				final String y = original.getSurName();
 				
 				if (x == null && y == null){
 					return true;
@@ -2685,13 +2675,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}		
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getSurName();
 			}
 			public String getReadableTitle() {
@@ -2703,21 +2693,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field03";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setGivenName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsGivenName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getGivenName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getGivenName();
-				String y = original.getGivenName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getGivenName();
+				final String y = original.getGivenName();
 				
 				if (x == null && y == null){
 					return true;
@@ -2727,13 +2717,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getGivenName();
 			}
 			public String getReadableTitle() {
@@ -2745,21 +2735,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field04";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setMiddleName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsMiddleName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getMiddleName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getMiddleName();
-				String y = original.getMiddleName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getMiddleName();
+				final String y = original.getMiddleName();
 				
 				if (x == null && y == null){
 					return true;
@@ -2769,13 +2759,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				
 				return co.getMiddleName();
 			}
@@ -2789,21 +2779,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field05";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setSuffix(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsSuffix();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getSuffix());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getSuffix();
-				String y = original.getSuffix();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getSuffix();
+				final String y = original.getSuffix();
 				
 				if (x == null && y == null){
 					return true;
@@ -2813,13 +2803,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {	
+			public String getValueAsString(final ContactObject co) {	
 				return co.getSuffix();
 			}
 			public String getReadableTitle() {
@@ -2832,21 +2822,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field06";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTitle(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTitle();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTitle());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTitle();
-				String y = original.getTitle();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTitle();
+				final String y = original.getTitle();
 				
 				if (x == null && y == null){
 					return true;
@@ -2856,13 +2846,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTitle();
 			}
 			public String getReadableTitle() {	
@@ -2874,21 +2864,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field07";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStreetHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStreetHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStreetHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStreetHome();
-				String y = original.getStreetHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStreetHome();
+				final String y = original.getStreetHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -2898,13 +2888,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getStreetHome();
 			}
 			public String getReadableTitle() {
@@ -2916,21 +2906,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field08";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setPostalCodeHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsPostalCodeHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getPostalCodeHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getPostalCodeHome();
-				String y = original.getPostalCodeHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getPostalCodeHome();
+				final String y = original.getPostalCodeHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -2940,13 +2930,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getPostalCodeHome();
 			}
 			public String getReadableTitle() {
@@ -2958,21 +2948,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field09";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCityHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCityHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCityHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCityHome();
-				String y = original.getCityHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCityHome();
+				final String y = original.getCityHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -2982,13 +2972,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}			
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCityHome();
 			}
 			public String getReadableTitle() {
@@ -3000,21 +2990,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field10";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStateHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStateHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStateHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStateHome();
-				String y = original.getStateHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStateHome();
+				final String y = original.getStateHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -3024,13 +3014,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}			
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getStateHome();
 			}
 			public String getReadableTitle() {
@@ -3042,21 +3032,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field11";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCountryHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCountryHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCountryHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCountryHome();
-				String y = original.getCountryHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCountryHome();
+				final String y = original.getCountryHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -3066,13 +3056,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}			
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCountryHome();
 			}
 			public String getReadableTitle() {
@@ -3085,21 +3075,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field12";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setMaritalStatus(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsMaritalStatus();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getMaritalStatus());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getMaritalStatus();
-				String y = original.getMaritalStatus();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getMaritalStatus();
+				final String y = original.getMaritalStatus();
 				
 				if (x == null && y == null){
 					return true;
@@ -3109,13 +3099,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 					return co.getMaritalStatus();
 			}
 			public String getReadableTitle() {
@@ -3127,21 +3117,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field13";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setNumberOfChildren(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNumberOfChildren();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getNumberOfChildren());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getNumberOfChildren();
-				String y = original.getNumberOfChildren();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getNumberOfChildren();
+				final String y = original.getNumberOfChildren();
 				
 				if (x == null && y == null){
 					return true;
@@ -3151,13 +3141,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNumberOfChildren();
 			}
 			public String getReadableTitle() {
@@ -3169,21 +3159,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field14";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setProfession(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsProfession();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getProfession());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getProfession();
-				String y = original.getProfession();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getProfession();
+				final String y = original.getProfession();
 				
 				if (x == null && y == null){
 					return true;
@@ -3193,13 +3183,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getProfession();
 			}
 			public String getReadableTitle() {
@@ -3211,21 +3201,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field15";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setNickname(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNickname();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getNickname());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getNickname();
-				String y = original.getNickname();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getNickname();
+				final String y = original.getNickname();
 				
 				if (x == null && y == null){
 					return true;
@@ -3235,13 +3225,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNickname();
 			}
 			public String getReadableTitle() {
@@ -3253,21 +3243,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field16";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setSpouseName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsSpouseName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getSpouseName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getSpouseName();
-				String y = original.getSpouseName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getSpouseName();
+				final String y = original.getSpouseName();
 				
 				if (x == null && y == null){
 					return true;
@@ -3277,13 +3267,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getSpouseName();
 			}
 			public String getReadableTitle() {
@@ -3295,21 +3285,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field17";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setNote(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNote();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getNote());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getNote();
-				String y = original.getNote();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getNote();
+				final String y = original.getNote();
 				
 				if (x == null && y == null){
 					return true;
@@ -3319,13 +3309,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNote();
 			}
 			public String getReadableTitle() {
@@ -3337,21 +3327,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field18";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCompany(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCompany();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCompany());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCompany();
-				String y = original.getCompany();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCompany();
+				final String y = original.getCompany();
 				
 				if (x == null && y == null){
 					return true;
@@ -3361,13 +3351,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCompany();
 			}
 			public String getReadableTitle() {
@@ -3379,21 +3369,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field19";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setDepartment(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsDepartment();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getDepartment());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getDepartment();
-				String y = original.getDepartment();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getDepartment();
+				final String y = original.getDepartment();
 				
 				if (x == null && y == null){
 					return true;
@@ -3403,13 +3393,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getDepartment();
 			}
 			public String getReadableTitle() {
@@ -3421,21 +3411,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field20";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setPosition(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsPosition();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getPosition());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getPosition();
-				String y = original.getPosition();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getPosition();
+				final String y = original.getPosition();
 				
 				if (x == null && y == null){
 					return true;
@@ -3445,13 +3435,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getPosition();
 			}
 			public String getReadableTitle() {
@@ -3463,21 +3453,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field21";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setEmployeeType(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsEmployeeType();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getEmployeeType());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getEmployeeType();
-				String y = original.getEmployeeType();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getEmployeeType();
+				final String y = original.getEmployeeType();
 				
 				if (x == null && y == null){
 					return true;
@@ -3487,13 +3477,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getEmployeeType();
 			}
 			public String getReadableTitle() {
@@ -3505,21 +3495,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field22";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setRoomNumber(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsRoomNumber();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getRoomNumber());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getRoomNumber();
-				String y = original.getRoomNumber();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getRoomNumber();
+				final String y = original.getRoomNumber();
 				
 				if (x == null && y == null){
 					return true;
@@ -3529,13 +3519,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getRoomNumber();
 			}
 			public String getReadableTitle() {
@@ -3547,21 +3537,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field23";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStreetBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStreetBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStreetBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStreetBusiness();
-				String y = original.getStreetBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStreetBusiness();
+				final String y = original.getStreetBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -3571,13 +3561,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 					return co.getStreetBusiness();
 			}
 			public String getReadableTitle() {
@@ -3589,21 +3579,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field24";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setPostalCodeBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsPostalCodeBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getPostalCodeBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getPostalCodeBusiness();
-				String y = original.getPostalCodeBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getPostalCodeBusiness();
+				final String y = original.getPostalCodeBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -3613,13 +3603,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getPostalCodeBusiness();
 			}
 			public String getReadableTitle() {
@@ -3631,21 +3621,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field25";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCityBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCityBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCityBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCityBusiness();
-				String y = original.getCityBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCityBusiness();
+				final String y = original.getCityBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -3655,13 +3645,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCityBusiness();
 			}
 			public String getReadableTitle() {
@@ -3673,21 +3663,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field26";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStateBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStateBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStateBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStateBusiness();
-				String y = original.getStateBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStateBusiness();
+				final String y = original.getStateBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -3697,13 +3687,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getStateBusiness();
 			}
 			public String getReadableTitle() {
@@ -3715,21 +3705,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field27";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCountryBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCountryBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCountryBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCountryBusiness();
-				String y = original.getCountryBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCountryBusiness();
+				final String y = original.getCountryBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -3739,13 +3729,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 					return co.getCountryBusiness();
 			}
 			public String getReadableTitle() {
@@ -3757,21 +3747,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field28";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setNumberOfEmployee(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNumberOfEmployee();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getNumberOfEmployee());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getNumberOfEmployee();
-				String y = original.getNumberOfEmployee();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getNumberOfEmployee();
+				final String y = original.getNumberOfEmployee();
 				
 				if (x == null && y == null){
 					return true;
@@ -3781,13 +3771,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNumberOfEmployee();
 			}
 			public String getReadableTitle() {
@@ -3799,21 +3789,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field29";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setSalesVolume(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsSalesVolume();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getSalesVolume());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getSalesVolume();
-				String y = original.getSalesVolume();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getSalesVolume();
+				final String y = original.getSalesVolume();
 				
 				if (x == null && y == null){
 					return true;
@@ -3823,13 +3813,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs,final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getSalesVolume();
 			}
 			public String getReadableTitle() {
@@ -3841,21 +3831,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field30";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTaxID(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTaxID();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTaxID());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTaxID();
-				String y = original.getTaxID();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTaxID();
+				final String y = original.getTaxID();
 				
 				if (x == null && y == null){
 					return true;
@@ -3865,13 +3855,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTaxID();
 			}
 			public String getReadableTitle() {
@@ -3883,21 +3873,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field31";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCommercialRegister(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCommercialRegister();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCommercialRegister());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCommercialRegister();
-				String y = original.getCommercialRegister();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCommercialRegister();
+				final String y = original.getCommercialRegister();
 				
 				if (x == null && y == null){
 					return true;
@@ -3907,13 +3897,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCommercialRegister();
 			}
 			public String getReadableTitle() {
@@ -3925,21 +3915,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field32";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setBranches(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsBranches();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getBranches());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getBranches();
-				String y = original.getBranches();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getBranches();
+				final String y = original.getBranches();
 				
 				if (x == null && y == null){
 					return true;
@@ -3949,13 +3939,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getBranches();
 			}
 			public String getReadableTitle() {
@@ -3967,21 +3957,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field33";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setBusinessCategory(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsBusinessCategory();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getBusinessCategory());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getBusinessCategory();
-				String y = original.getBusinessCategory();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getBusinessCategory();
+				final String y = original.getBusinessCategory();
 				
 				if (x == null && y == null){
 					return true;
@@ -3991,13 +3981,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getBusinessCategory();
 			}
 			public String getReadableTitle() {
@@ -4009,21 +3999,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field34";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setInfo(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsInfo();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getInfo());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getInfo();
-				String y = original.getInfo();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getInfo();
+				final String y = original.getInfo();
 				
 				if (x == null && y == null){
 					return true;
@@ -4033,13 +4023,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getInfo();
 			}
 			public String getReadableTitle() {
@@ -4051,21 +4041,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field35";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setManagerName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsManagerName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getManagerName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getManagerName();
-				String y = original.getManagerName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getManagerName();
+				final String y = original.getManagerName();
 				
 				if (x == null && y == null){
 					return true;
@@ -4075,13 +4065,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getManagerName();
 			}
 			public String getReadableTitle() {
@@ -4093,21 +4083,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field36";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setAssistantName(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsAssistantName();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getAssistantName());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getAssistantName();
-				String y = original.getAssistantName();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getAssistantName();
+				final String y = original.getAssistantName();
 				
 				if (x == null && y == null){
 					return true;
@@ -4117,13 +4107,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getAssistantName();
 			}
 			public String getReadableTitle() {
@@ -4135,21 +4125,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field37";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStreetOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStreetOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStreetOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStreetOther();
-				String y = original.getStreetOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStreetOther();
+				final String y = original.getStreetOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4159,13 +4149,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getStreetOther();
 			}
 			public String getReadableTitle() {
@@ -4177,21 +4167,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field38";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setPostalCodeOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsPostalCodeOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getPostalCodeOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getPostalCodeOther();
-				String y = original.getPostalCodeOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getPostalCodeOther();
+				final String y = original.getPostalCodeOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4201,13 +4191,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getPostalCodeOther();
 			}
 			public String getReadableTitle() {
@@ -4219,21 +4209,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field39";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCityOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCityOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCityOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCityOther();
-				String y = original.getCityOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCityOther();
+				final String y = original.getCityOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4243,13 +4233,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCityOther();
 			}
 			public String getReadableTitle() {
@@ -4261,21 +4251,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field40";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setStateOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsStateOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getStateOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getStateOther();
-				String y = original.getStateOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getStateOther();
+				final String y = original.getStateOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4285,13 +4275,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getStateOther();
 			}
 			public String getReadableTitle() {
@@ -4303,21 +4293,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field41";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCountryOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCountryOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCountryOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCountryOther();
-				String y = original.getCountryOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCountryOther();
+				final String y = original.getCountryOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4327,13 +4317,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos)throws SQLException  {
+			public Object getData(final ResultSet rs, final int pos)throws SQLException  {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCountryOther();
 			}
 			public String getReadableTitle() {
@@ -4345,21 +4335,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field42";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneAssistant(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneAssistant();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneAssistant());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneAssistant();
-				String y = original.getTelephoneAssistant();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneAssistant();
+				final String y = original.getTelephoneAssistant();
 				
 				if (x == null && y == null){
 					return true;
@@ -4369,13 +4359,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneAssistant();
 			}
 			public String getReadableTitle() {
@@ -4387,21 +4377,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field43";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneBusiness1(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneBusiness1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneBusiness1());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneBusiness1();
-				String y = original.getTelephoneBusiness1();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneBusiness1();
+				final String y = original.getTelephoneBusiness1();
 				
 				if (x == null && y == null){
 					return true;
@@ -4411,13 +4401,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneBusiness1();
 			}
 			public String getReadableTitle() {
@@ -4429,21 +4419,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field44";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneBusiness2(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneBusiness2();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneBusiness2());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneBusiness2();
-				String y = original.getTelephoneBusiness2();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneBusiness2();
+				final String y = original.getTelephoneBusiness2();
 				
 				if (x == null && y == null){
 					return true;
@@ -4453,13 +4443,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneBusiness2();
 			}
 			public String getReadableTitle() {
@@ -4471,21 +4461,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field45";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setFaxBusiness(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsFaxBusiness();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getFaxBusiness());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getFaxBusiness();
-				String y = original.getFaxBusiness();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getFaxBusiness();
+				final String y = original.getFaxBusiness();
 				
 				if (x == null && y == null){
 					return true;
@@ -4495,13 +4485,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getFaxBusiness();
 			}
 			public String getReadableTitle() {
@@ -4513,21 +4503,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field46";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneCallback(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneCallback();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneCallback());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneCallback();
-				String y = original.getTelephoneCallback();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneCallback();
+				final String y = original.getTelephoneCallback();
 				
 				if (x == null && y == null){
 					return true;
@@ -4537,13 +4527,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneCallback();
 			}
 			public String getReadableTitle() {
@@ -4555,21 +4545,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field47";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneCar(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneCar();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneCar());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneCar();
-				String y = original.getTelephoneCar();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneCar();
+				final String y = original.getTelephoneCar();
 				
 				if (x == null && y == null){
 					return true;
@@ -4579,13 +4569,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneCar();
 			}
 			public String getReadableTitle() {
@@ -4597,21 +4587,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field48";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneCompany(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneCompany();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneCompany());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneCompany();
-				String y = original.getTelephoneCompany();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneCompany();
+				final String y = original.getTelephoneCompany();
 				
 				if (x == null && y == null){
 					return true;
@@ -4621,13 +4611,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneCompany();
 			}
 			public String getReadableTitle() {
@@ -4639,21 +4629,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field49";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneHome1(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneHome1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneHome1());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneHome1();
-				String y = original.getTelephoneHome1();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneHome1();
+				final String y = original.getTelephoneHome1();
 				
 				if (x == null && y == null){
 					return true;
@@ -4663,13 +4653,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneHome1();
 			}
 			public String getReadableTitle() {
@@ -4681,21 +4671,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field50";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneHome2(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneHome2();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneHome2());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneHome2();
-				String y = original.getTelephoneHome2();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneHome2();
+				final String y = original.getTelephoneHome2();
 				
 				if (x == null && y == null){
 					return true;
@@ -4705,13 +4695,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneHome2();
 			}
 			public String getReadableTitle() {
@@ -4723,21 +4713,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field51";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setFaxHome(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsFaxHome();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getFaxHome());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getFaxHome();
-				String y = original.getFaxHome();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getFaxHome();
+				final String y = original.getFaxHome();
 				
 				if (x == null && y == null){
 					return true;
@@ -4747,13 +4737,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getFaxHome();
 			}
 			public String getReadableTitle() {
@@ -4765,21 +4755,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field52";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneISDN(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneISDN();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneISDN());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneISDN();
-				String y = original.getTelephoneISDN();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneISDN();
+				final String y = original.getTelephoneISDN();
 				
 				if (x == null && y == null){
 					return true;
@@ -4789,13 +4779,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneISDN();
 			}
 			public String getReadableTitle() {
@@ -4807,21 +4797,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field53";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCellularTelephone1(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCellularTelephone1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCellularTelephone1());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCellularTelephone1();
-				String y = original.getCellularTelephone1();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCellularTelephone1();
+				final String y = original.getCellularTelephone1();
 				
 				if (x == null && y == null){
 					return true;
@@ -4831,13 +4821,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCellularTelephone1();
 			}
 			public String getReadableTitle() {
@@ -4849,21 +4839,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field54";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCellularTelephone2(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCellularTelephone2();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCellularTelephone2());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCellularTelephone2();
-				String y = original.getCellularTelephone2();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCellularTelephone2();
+				final String y = original.getCellularTelephone2();
 				
 				if (x == null && y == null){
 					return true;
@@ -4873,13 +4863,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCellularTelephone2();
 			}
 			public String getReadableTitle() {
@@ -4891,21 +4881,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field55";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneOther();
-				String y = original.getTelephoneOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneOther();
+				final String y = original.getTelephoneOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4915,13 +4905,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneOther();
 			}
 			public String getReadableTitle() {
@@ -4933,21 +4923,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field56";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setFaxOther(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsFaxOther();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getFaxOther());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getFaxOther();
-				String y = original.getFaxOther();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getFaxOther();
+				final String y = original.getFaxOther();
 				
 				if (x == null && y == null){
 					return true;
@@ -4957,13 +4947,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getFaxOther();
 			}
 			public String getReadableTitle() {
@@ -4975,21 +4965,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field57";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephonePager(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephonePager();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephonePager());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephonePager();
-				String y = original.getTelephonePager();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephonePager();
+				final String y = original.getTelephonePager();
 				
 				if (x == null && y == null){
 					return true;
@@ -4999,13 +4989,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephonePager();
 			}
 			public String getReadableTitle() {
@@ -5017,21 +5007,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field58";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephonePrimary(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephonePrimary();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephonePrimary());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephonePrimary();
-				String y = original.getTelephonePrimary();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephonePrimary();
+				final String y = original.getTelephonePrimary();
 				
 				if (x == null && y == null){
 					return true;
@@ -5041,13 +5031,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephonePrimary();
 			}
 			public String getReadableTitle() {
@@ -5059,21 +5049,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field59";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneRadio(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneRadio();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneRadio());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneRadio();
-				String y = original.getTelephoneRadio();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneRadio();
+				final String y = original.getTelephoneRadio();
 				
 				if (x == null && y == null){
 					return true;
@@ -5083,13 +5073,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneRadio();
 			}
 			public String getReadableTitle() {
@@ -5101,21 +5091,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field60";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneTelex(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneTelex();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneTelex());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneTelex();
-				String y = original.getTelephoneTelex();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneTelex();
+				final String y = original.getTelephoneTelex();
 				
 				if (x == null && y == null){
 					return true;
@@ -5125,13 +5115,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneTelex();
 			}
 			public String getReadableTitle() {
@@ -5143,21 +5133,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field61";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneTTYTTD(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneTTYTTD();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneTTYTTD());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneTTYTTD();
-				String y = original.getTelephoneTTYTTD();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneTTYTTD();
+				final String y = original.getTelephoneTTYTTD();
 				
 				if (x == null && y == null){
 					return true;
@@ -5167,13 +5157,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneTTYTTD();
 			}
 			public String getReadableTitle() {
@@ -5185,21 +5175,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field62";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setInstantMessenger1(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsInstantMessenger1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getInstantMessenger1());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getInstantMessenger1();
-				String y = original.getInstantMessenger1();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getInstantMessenger1();
+				final String y = original.getInstantMessenger1();
 				
 				if (x == null && y == null){
 					return true;
@@ -5209,13 +5199,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getInstantMessenger1();
 			}
 			public String getReadableTitle() {
@@ -5228,21 +5218,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field63";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setInstantMessenger2(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsInstantMessenger2();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getInstantMessenger2());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getInstantMessenger2();
-				String y = original.getInstantMessenger2();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getInstantMessenger2();
+				final String y = original.getInstantMessenger2();
 				
 				if (x == null && y == null){
 					return true;
@@ -5252,13 +5242,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getInstantMessenger2();
 			}
 			public String getReadableTitle() {
@@ -5271,21 +5261,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field64";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setTelephoneIP(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsTelephoneIP();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getTelephoneIP());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getTelephoneIP();
-				String y = original.getTelephoneIP();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getTelephoneIP();
+				final String y = original.getTelephoneIP();
 				
 				if (x == null && y == null){
 					return true;
@@ -5295,13 +5285,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getTelephoneIP();
 			}
 			public String getReadableTitle() {
@@ -5313,21 +5303,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field65";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setEmail1(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsEmail1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getEmail1());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getEmail1();
-				String y = original.getEmail1();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getEmail1();
+				final String y = original.getEmail1();
 				
 				if (x == null && y == null){
 					return true;
@@ -5337,13 +5327,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getEmail1();
 			}
 			public String getReadableTitle() {
@@ -5355,21 +5345,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field66";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setEmail2(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsEmail2();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getEmail2());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getEmail2();
-				String y = original.getEmail2();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getEmail2();
+				final String y = original.getEmail2();
 				
 				if (x == null && y == null){
 					return true;
@@ -5379,13 +5369,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getEmail2();
 			}
 			public String getReadableTitle() {
@@ -5397,21 +5387,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field67";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setEmail3(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsEmail3();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getEmail3());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getEmail3();
-				String y = original.getEmail3();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getEmail3();
+				final String y = original.getEmail3();
 				
 				if (x == null && y == null){
 					return true;
@@ -5421,13 +5411,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getEmail3();
 			}
 			public String getReadableTitle() {
@@ -5439,21 +5429,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field68";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setURL(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsURL();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getURL());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getURL();
-				String y = original.getURL();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getURL();
+				final String y = original.getURL();
 				
 				if (x == null && y == null){
 					return true;
@@ -5463,13 +5453,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getURL();
 			}
 			public String getReadableTitle() {
@@ -5481,21 +5471,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field69";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setCategories(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCategories();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getCategories());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getCategories();
-				String y = original.getCategories();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getCategories();
+				final String y = original.getCategories();
 				
 				if (x == null && y == null){
 					return true;
@@ -5505,13 +5495,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCategories();
 			}
 			public String getReadableTitle() {
@@ -5523,21 +5513,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field70";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField01(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField01();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField01());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField01();
-				String y = original.getUserField01();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField01();
+				final String y = original.getUserField01();
 				
 				if (x == null && y == null){
 					return true;
@@ -5547,13 +5537,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField01();
 			}
 			public String getReadableTitle() {
@@ -5565,21 +5555,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field71";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField02(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField02();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField02());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField02();
-				String y = original.getUserField02();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField02();
+				final String y = original.getUserField02();
 				
 				if (x == null && y == null){
 					return true;
@@ -5589,13 +5579,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField02();
 			}
 			public String getReadableTitle() {
@@ -5607,21 +5597,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field72";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField03(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField03();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField03());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField03();
-				String y = original.getUserField03();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField03();
+				final String y = original.getUserField03();
 				
 				if (x == null && y == null){
 					return true;
@@ -5631,13 +5621,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField03();
 			}
 			public String getReadableTitle() {
@@ -5649,21 +5639,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field73";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField04(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField04();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField04());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField04();
-				String y = original.getUserField04();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField04();
+				final String y = original.getUserField04();
 				
 				if (x == null && y == null){
 					return true;
@@ -5673,13 +5663,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField04();
 			}
 			public String getReadableTitle() {
@@ -5691,21 +5681,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field74";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField05(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField05();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField05());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField05();
-				String y = original.getUserField05();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField05();
+				final String y = original.getUserField05();
 				
 				if (x == null && y == null){
 					return true;
@@ -5715,13 +5705,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField05();
 			}
 			public String getReadableTitle() {
@@ -5733,21 +5723,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field75";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField06(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField06();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField06());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField06();
-				String y = original.getUserField06();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField06();
+				final String y = original.getUserField06();
 				
 				if (x == null && y == null){
 					return true;
@@ -5757,13 +5747,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField06();
 			}
 			public String getReadableTitle() {
@@ -5775,21 +5765,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field76";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField07(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField07();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField07());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField07();
-				String y = original.getUserField07();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField07();
+				final String y = original.getUserField07();
 				
 				if (x == null && y == null){
 					return true;
@@ -5799,13 +5789,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField07();
 			}
 			public String getReadableTitle() {
@@ -5817,21 +5807,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field77";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField08(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField08();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField08());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField08();
-				String y = original.getUserField08();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField08();
+				final String y = original.getUserField08();
 				
 				if (x == null && y == null){
 					return true;
@@ -5841,13 +5831,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField08();
 			}
 			public String getReadableTitle() {
@@ -5859,21 +5849,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field78";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField09(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField09();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField09());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField09();
-				String y = original.getUserField09();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField09();
+				final String y = original.getUserField09();
 				
 				if (x == null && y == null){
 					return true;
@@ -5883,13 +5873,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField09();
 			}
 			public String getReadableTitle() {
@@ -5901,21 +5891,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field79";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField10(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField10();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField10());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField10();
-				String y = original.getUserField10();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField10();
+				final String y = original.getUserField10();
 				
 				if (x == null && y == null){
 					return true;
@@ -5925,13 +5915,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField10();
 			}
 			public String getReadableTitle() {
@@ -5943,21 +5933,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field80";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField11(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField11();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField11());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField11();
-				String y = original.getUserField11();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField11();
+				final String y = original.getUserField11();
 				
 				if (x == null && y == null){
 					return true;
@@ -5967,13 +5957,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField11();
 			}
 			public String getReadableTitle() {
@@ -5985,21 +5975,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field81";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField12(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField12();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField12());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField12();
-				String y = original.getUserField12();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField12();
+				final String y = original.getUserField12();
 				
 				if (x == null && y == null){
 					return true;
@@ -6009,13 +5999,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField12();
 			}
 			public String getReadableTitle() {
@@ -6027,21 +6017,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field82";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField13(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField13();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField13());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField13();
-				String y = original.getUserField13();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField13();
+				final String y = original.getUserField13();
 				
 				if (x == null && y == null){
 					return true;
@@ -6051,13 +6041,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField13();
 			}
 			public String getReadableTitle() {
@@ -6069,21 +6059,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field83";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField14(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField14();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField14());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField14();
-				String y = original.getUserField14();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField14();
+				final String y = original.getUserField14();
 				
 				if (x == null && y == null){
 					return true;
@@ -6093,13 +6083,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField14();
 			}
 			public String getReadableTitle() {
@@ -6111,21 +6101,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field84";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField15(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField15();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField15());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField15();
-				String y = original.getUserField15();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField15();
+				final String y = original.getUserField15();
 				
 				if (x == null && y == null){
 					return true;
@@ -6135,13 +6125,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField15();
 			}
 			public String getReadableTitle() {
@@ -6153,21 +6143,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field85";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField16(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField16();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField16());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField16();
-				String y = original.getUserField16();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField16();
+				final String y = original.getUserField16();
 				
 				if (x == null && y == null){
 					return true;
@@ -6177,13 +6167,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField16();
 			}
 			public String getReadableTitle() {
@@ -6195,21 +6185,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field86";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField17(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField17();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField17());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField17();
-				String y = original.getUserField17();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField17();
+				final String y = original.getUserField17();
 				
 				if (x == null && y == null){
 					return true;
@@ -6219,13 +6209,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField17();
 			}
 			public String getReadableTitle() {
@@ -6237,21 +6227,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field87";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField18(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField18();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField18());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField18();
-				String y = original.getUserField18();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField18();
+				final String y = original.getUserField18();
 				
 				if (x == null && y == null){
 					return true;
@@ -6261,13 +6251,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField18();
 			}
 			public String getReadableTitle() {
@@ -6279,21 +6269,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field88";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField19(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField19();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField19());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField19();
-				String y = original.getUserField19();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField19();
+				final String y = original.getUserField19();
 				
 				if (x == null && y == null){
 					return true;
@@ -6303,13 +6293,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField19();
 			}
 			public String getReadableTitle() {
@@ -6321,21 +6311,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field89";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setUserField20(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsUserField20();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getUserField20());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getUserField20();
-				String y = original.getUserField20();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getUserField20();
+				final String y = original.getUserField20();
 				
 				if (x == null && y == null){
 					return true;
@@ -6345,13 +6335,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getUserField20();
 			}
 			public String getReadableTitle() {
@@ -6363,28 +6353,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield01";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					co.setObjectID(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsObjectID();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getObjectID());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (original.getObjectID() == co.getObjectID());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getObjectID()+"";
 			}
 			public String getReadableTitle() {
@@ -6396,28 +6386,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield02";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull() && t > 0){
 					co.setNumberOfDistributionLists(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNumberOfDistributionLists();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getNumberOfDistributionLists());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (original.getNumberOfDistributionLists() == co.getNumberOfDistributionLists());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNumberOfDistributionLists()+"";
 			}
 			public String getReadableTitle() {
@@ -6429,28 +6419,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield03";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull() && t > 0){
 					co.setNumberOfLinks(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNumberOfLinks();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getNumberOfLinks());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (original.getNumberOfLinks() == co.getNumberOfLinks());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getNumberOfLinks()+"";
 			}
 			public String getReadableTitle() {
@@ -6462,9 +6452,9 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield02";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
 				try{
-					int t = rs.getInt(pos);
+					final int t = rs.getInt(pos);
 					if (!rs.wasNull() && t > 0){
 						co.setDistributionList(fillDistributionListArray(co.getObjectID(),user,group,ctx,uc,readcon));
 					}
@@ -6472,22 +6462,22 @@ public class Contacts implements DeleteListener {
 					LOG.error("Unable to load Distributionlist",e);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsDistributionLists();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				// nix
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				// nix
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -6499,9 +6489,9 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield03";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
 				try{
-					int t = rs.getInt(pos);					
+					final int t = rs.getInt(pos);					
 					if (!rs.wasNull() && t > 0){
 						co.setLinks(fillLinkArray(co, user, group, ctx, uc, readcon));
 					}
@@ -6510,22 +6500,22 @@ public class Contacts implements DeleteListener {
 				}
 			}
 
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsLinks();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				// nix
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				// nix
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -6537,28 +6527,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "fid";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					co.setParentFolderID(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsParentFolderID();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getParentFolderID());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getParentFolderID()+"";
 			}
 			public String getReadableTitle() {
@@ -6570,28 +6560,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "cid";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					co.setContextId(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsContextId();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getContextId());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (original.getContextId() == co.getContextId());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getContextId()+"";
 			}
 			public String getReadableTitle() {
@@ -6603,8 +6593,8 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "pflag";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					if (t == 1){
 						co.setPrivateFlag(true);
@@ -6613,30 +6603,30 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsPrivateFlag();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.getPrivateFlag()){
 					ps.setInt(pos, 1);
 				}else{
 					ps.setNull(pos,java.sql.Types.INTEGER);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (co.getPrivateFlag() == original.getPrivateFlag());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (ob == null){
 					ps.setNull(position,java.sql.Types.INTEGER);
 				} else {
 					ps.setInt(position,Integer.parseInt((String)ob));						
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -6648,28 +6638,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "created_from";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					co.setCreatedBy(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCreatedBy();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getCreatedBy());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCreatedBy()+"";
 			}
 			public String getReadableTitle() {
@@ -6681,28 +6671,28 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "changed_from";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int t = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int t = rs.getInt(pos);
 				if (!rs.wasNull()){
 					co.setModifiedBy(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsModifiedBy();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setInt(pos, co.getModifiedBy());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (co.getModifiedBy() == original.getModifiedBy());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setInt(position,Integer.parseInt((String)ob));
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getModifiedBy()+"";
 			}
 			public String getReadableTitle() {
@@ -6714,36 +6704,36 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "creating_date";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				long dong = rs.getLong(pos);				
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final long dong = rs.getLong(pos);				
 				if (!rs.wasNull()){
-					java.util.Date d = new java.util.Date(dong);
+					final java.util.Date d = new java.util.Date(dong);
 					co.setCreationDate(d);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsCreationDate();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
-				java.util.Date d = co.getCreationDate();
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
+				final java.util.Date d = co.getCreationDate();
 				ps.setLong(pos, d.getTime());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
-				java.util.Date d = (Date)ob;
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+				final java.util.Date d = (Date)ob;
 				ps.setLong(position, d.getTime());
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
-				long x = rs.getLong(pos);
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
+				final long x = rs.getLong(pos);
 				Date d = null;
 				if (!rs.wasNull()){
 					d = new Date(x);
 				}
 				return d;
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getCreationDate().toString();
 			}
 			public String getReadableTitle() {
@@ -6755,36 +6745,36 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "changing_date";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				long dong = rs.getLong(pos);	
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final long dong = rs.getLong(pos);	
 				if (!rs.wasNull()){
-					java.util.Date d = new java.util.Date(dong);
+					final java.util.Date d = new java.util.Date(dong);
 					co.setLastModified(d);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsLastModified();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
-				java.util.Date d = co.getLastModified();
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
+				final java.util.Date d = co.getLastModified();
 				ps.setLong(pos, d.getTime());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
-				java.util.Date d = (Date)ob;
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+				final java.util.Date d = (Date)ob;
 				ps.setLong(position, d.getTime());	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
-				long x = rs.getLong(pos);
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
+				final long x = rs.getLong(pos);
 				Date d  = null;
 				if (!rs.wasNull()){
 					d = new Date(x);
 				}
 				return d;
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getLastModified().toString();
 			}
 			public String getReadableTitle() {
@@ -6796,25 +6786,25 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "timestampfield01";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				Timestamp t = rs.getTimestamp(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final Timestamp t = rs.getTimestamp(pos);
 				if (!rs.wasNull()){
 					co.setBirthday(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsBirthday();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.getBirthday() != null){
 					ps.setTimestamp(pos, new java.sql.Timestamp(co.getBirthday().getTime()));
 				}else{
 					ps.setTimestamp(pos, null);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				java.util.Date x = co.getBirthday();
-				java.util.Date y = original.getBirthday(); 
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final java.util.Date x = co.getBirthday();
+				final java.util.Date y = original.getBirthday(); 
 				
 				if (x == null && y == null){
 					return true;
@@ -6824,23 +6814,23 @@ public class Contacts implements DeleteListener {
 					return (x.getTime() == y.getTime());
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
-				java.util.Date d = (Date)ob;
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+				final java.util.Date d = (Date)ob;
 				if (d != null){
 					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
 				}else{
 					ps.setTimestamp(position, null);
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
-				Timestamp x = rs.getTimestamp(pos);
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
+				final Timestamp x = rs.getTimestamp(pos);
 				java.util.Date d = null;
 				if (!rs.wasNull()){
 					d = new java.util.Date(x.getTime());
 				}
 				return d;
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getBirthday().toString();
 			}
 			public String getReadableTitle() {
@@ -6852,25 +6842,25 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "timestampfield02";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				Timestamp t = rs.getTimestamp(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final Timestamp t = rs.getTimestamp(pos);
 				if (!rs.wasNull()){
 					co.setAnniversary(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsAnniversary();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.getAnniversary() != null){
 					ps.setTimestamp(pos, new java.sql.Timestamp(co.getAnniversary().getTime()));
 				}else{
 					ps.setTimestamp(pos, null);	
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				java.util.Date x = co.getAnniversary();
-				java.util.Date y = original.getAnniversary(); 
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final java.util.Date x = co.getAnniversary();
+				final java.util.Date y = original.getAnniversary(); 
 				
 				if (x == null && y == null){
 					return true;
@@ -6880,23 +6870,23 @@ public class Contacts implements DeleteListener {
 					return (x.getTime() == y.getTime());
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
-				java.util.Date d = (Date)ob;
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+				final java.util.Date d = (Date)ob;
 				if (d != null){
 					ps.setTimestamp(position, new java.sql.Timestamp(d.getTime()));
 				}else{
 					ps.setTimestamp(position, null);
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
-				Timestamp x = rs.getTimestamp(pos);
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
+				final Timestamp x = rs.getTimestamp(pos);
 				java.util.Date d = null;
 				if (!rs.wasNull()){
 					d = new java.util.Date(x.getTime());
 				}
 				return d;
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getAnniversary().toString();
 			}
 			public String getReadableTitle() {
@@ -6909,9 +6899,9 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield04";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
 				try{
-					int t = rs.getInt(pos);
+					final int t = rs.getInt(pos);
 					if (!rs.wasNull() && t > 0){
 						getContactImage(co.getObjectID(),co, ctx.getContextId(), readcon);
 					}
@@ -6919,21 +6909,21 @@ public class Contacts implements DeleteListener {
 					LOG.error("Image not found", e);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsImage1();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsImage1()){
 					ps.setInt(pos,1);
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){		
+			public boolean compare(final ContactObject co, final ContactObject original){		
 				
 				if (co.getImage1() != null && original.getImage1() != null){
-					String x = new String(co.getImage1());
-					String y = new String(original.getImage1());
+					final String x = new String(co.getImage1());
+					final String y = new String(original.getImage1());
 					
 					return (x.equals(y));
 				} else if ( (co.getImage1() == null && original.getImage1() != null) || (co.getImage1() != null && original.getImage1() == null) ){
@@ -6942,17 +6932,17 @@ public class Contacts implements DeleteListener {
 					return true;
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0")){
 					ps.setInt(position,0);
 				}else{
 					ps.setInt(position,1);
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -6964,11 +6954,11 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield04";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
 				try{
-					int t = rs.getInt(pos);
+					final int t = rs.getInt(pos);
 					if (!rs.wasNull() && t > 0){
-						Date dd = getContactImageLastModified(co.getObjectID(), ctx.getContextId(), readcon);
+						final Date dd = getContactImageLastModified(co.getObjectID(), ctx.getContextId(), readcon);
 						if (dd != null){
 							co.setImageLastModified(dd);
 						}
@@ -6977,30 +6967,30 @@ public class Contacts implements DeleteListener {
 					LOG.error("Unable to load Image",e);
 				}	
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsImageLastModified();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsImage1()){
 					ps.setInt(pos,1);
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){		
+			public boolean compare(final ContactObject co, final ContactObject original){		
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0")){
 					ps.setInt(position,0);
 				}else{
 					ps.setInt(position,1);
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7012,25 +7002,25 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield04";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
 				//
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				// false
 			}
-			public boolean compare(ContactObject co, ContactObject original){		
+			public boolean compare(final ContactObject co, final ContactObject original){		
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				// nix	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7042,32 +7032,32 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "userid";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int i = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int i = rs.getInt(pos);
 				if (!rs.wasNull() && i > 0){
 					co.setInternalUserId(i);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsInternalUserId();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsInternalUserId()){
 					ps.setInt(pos,co.getInternalUserId());
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return false;
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7079,36 +7069,36 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield05";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int i = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int i = rs.getInt(pos);
 				if (!rs.wasNull() && i > 0){
 					co.setLabel(i);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsLabel();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsLabel()){
 					ps.setInt(pos,co.getLabel());
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (co.getLabel() == original.getLabel());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0") || ((String)ob).equals("null")) {
 					ps.setInt(position, 0);
 				}else{
 					ps.setInt(position,Integer.parseInt((String)ob));
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7120,21 +7110,21 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "field90";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				String t = rs.getString(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final String t = rs.getString(pos);
 				if (!rs.wasNull()){
 					co.setFileAs(t);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsFileAs();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				ps.setString(pos, co.getFileAs());
 			}
-			public boolean compare(ContactObject co, ContactObject original){
-				String x = co.getFileAs();
-				String y = original.getFileAs();
+			public boolean compare(final ContactObject co, final ContactObject original){
+				final String x = co.getFileAs();
+				final String y = original.getFileAs();
 				
 				if (x == null && y == null){
 					return true;
@@ -7144,13 +7134,13 @@ public class Contacts implements DeleteListener {
 					return (x.equals(y));
 				}	
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				ps.setString(position,(String)ob);	
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return rs.getString(pos);
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7162,36 +7152,36 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield06";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int i = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int i = rs.getInt(pos);
 				if (!rs.wasNull() && i > 0){
 					co.setDefaultAddress(i);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsDefaultAddress();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsDefaultAddress()){
 					ps.setInt(pos,co.getDefaultAddress());
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (co.getDefaultAddress() == original.getDefaultAddress());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0")){
 					ps.setInt(position,0);
 				}else{
 					ps.setInt(position, Integer.parseInt((String)ob));
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return co.getDefaultAddress()+"";
 			}
 			public String getReadableTitle() {
@@ -7203,16 +7193,16 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield07";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int i = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int i = rs.getInt(pos);
 				if (!rs.wasNull() && i > 0){
 					co.markAsDistributionlist();
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsMarkAsDistributionlist();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsMarkAsDistributionlist()){
 					if (co.getMarkAsDistribtuionlist()){
 						ps.setInt(pos,1);
@@ -7223,7 +7213,7 @@ public class Contacts implements DeleteListener {
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				if (co.getMarkAsDistribtuionlist() == true && original.getMarkAsDistribtuionlist() == false){
 					return false;
 				}else if (co.getMarkAsDistribtuionlist() == false && original.getMarkAsDistribtuionlist() == true){
@@ -7234,17 +7224,17 @@ public class Contacts implements DeleteListener {
 					return false;
 				}
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0")){
 					ps.setInt(position,0);
 				}else{
 					ps.setInt(position,1);
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
@@ -7256,36 +7246,36 @@ public class Contacts implements DeleteListener {
 			public String getDBFieldName() {
 				return "intfield08";
 			}
-			public void addToContactObject(ResultSet rs, int pos, ContactObject co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
-				int i = rs.getInt(pos);
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				final int i = rs.getInt(pos);
 				if (!rs.wasNull() && i > 0){
 					co.setNumberOfAttachments(i);
 				}
 			}
-			public boolean containsElement(ContactObject co) {
+			public boolean containsElement(final ContactObject co) {
 				return co.containsNumberOfAttachments();
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int pos, ContactObject co) throws SQLException{
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
 				if (co.containsNumberOfAttachments()){
 					ps.setInt(pos,co.getNumberOfAttachments());
 				}else{
 					ps.setInt(pos,0);
 				}
 			}
-			public boolean compare(ContactObject co, ContactObject original){
+			public boolean compare(final ContactObject co, final ContactObject original){
 				return (co.getNumberOfAttachments() == original.getNumberOfAttachments());
 			}
-			public void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException {
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
 				if (((String)ob).equals("0")){
 					ps.setInt(position,0);
 				}else{
 					ps.setInt(position,  Integer.parseInt((String)ob));
 				}
 			}
-			public Object getData(ResultSet rs,int pos) throws SQLException {
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
 				return String.valueOf(rs.getInt(pos));
 			}
-			public String getValueAsString(ContactObject co) {
+			public String getValueAsString(final ContactObject co) {
 				return null;
 			}
 			public String getReadableTitle() {
