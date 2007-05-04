@@ -155,7 +155,6 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.monitoring.MonitorAgent;
-import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -243,9 +242,43 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String PROP_SMTPPORT = "mail.smtp.port";
 
+	private static final String PROP_MAIL_SMTP_AUTH = "mail.smtp.auth";
+
+	private static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.imap.connectiontimeout";
+
+	private static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
+
+	private static final String PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK = "mail.smtp.socketFactory.fallback";
+
+	private static final String PROP_MAIL_SMTP_SOCKET_FACTORY_PORT = "mail.smtp.socketFactory.port";
+
+	private static final String PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS = "mail.smtp.socketFactory.class";
+
+	private static final String PROP_MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+
+	private static final String PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK = "mail.imap.socketFactory.fallback";
+
+	private static final String PROP_MAIL_IMAP_SOCKET_FACTORY_PORT = "mail.imap.socketFactory.port";
+
+	private static final String PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS = "mail.imap.socketFactory.class";
+
+	private static final String PROP_MAIL_MIME_CHARSET = "mail.mime.charset";
+
+	private static final String PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT = "mail.imap.connectionpooltimeout";
+
+	private static final String PROP_MAIL_IMAP_CONNECTIONPOOLSIZE = "mail.imap.connectionpoolsize";
+
+	private static final String PROP_MAIL_MIME_DECODETEXT_STRICT = "mail.mime.decodetext.strict";
+
+	private static final String PROP_MAIL_MIME_ENCODEEOL_STRICT = "mail.mime.encodeeol.strict";
+
+	private static final String PROP_MAIL_MIME_BASE64_IGNOREERRORS = "mail.mime.base64.ignoreerrors";
+
 	/*
 	 * Other string constants
 	 */
+	private static final String CLASS_TRUSTALLSSLSOCKETFACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+
 	private static final String PROTOCOL_SMTP = "smtp";
 
 	private static final String MP_MIXED = "mixed";
@@ -331,10 +364,10 @@ public class MailInterfaceImpl implements MailInterface {
 		/*
 		 * Set some global JavaMail properties
 		 */
-		IMAP_PROPS.put("mail.mime.base64.ignoreerrors", STR_TRUE);
+		IMAP_PROPS.put(PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
 		IMAP_PROPS.put(PROP_ALLOWREADONLYSELECT, STR_TRUE);
-		IMAP_PROPS.put("mail.mime.encodeeol.strict", STR_TRUE);
-		IMAP_PROPS.put("mail.mime.decodetext.strict", STR_FALSE);
+		IMAP_PROPS.put(PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+		IMAP_PROPS.put(PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
 		/*
 		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
 		 * use in communicating with the IMAP server. The IMAPStore will create
@@ -345,15 +378,15 @@ public class MailInterfaceImpl implements MailInterface {
 		 * protocol object is returned to the connection pool if the pool is not
 		 * over capacity.
 		 */
-		IMAP_PROPS.put("mail.imap.connectionpoolsize", "1");
+		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
 		/*
 		 * A mechanism is provided for timing out idle connection pool IMAP
 		 * protocol objects. Timed out connections are closed and removed
 		 * (pruned) from the connection pool.
 		 */
-		IMAP_PROPS.put("mail.imap.connectionpooltimeout", "1000"); // 1 sec
+		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1 sec
 		try {
-			IMAP_PROPS.put("mail.mime.charset", IMAPProperties.getDefaultMimeCharset());
+			IMAP_PROPS.put(PROP_MAIL_MIME_CHARSET, IMAPProperties.getDefaultMimeCharset());
 		} catch (IMAPException e1) {
 			LOG.error(e1.getMessage(), e1);
 		}
@@ -362,20 +395,20 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		try {
 			if (IMAPProperties.isImapsEnabled()) {
-				IMAP_PROPS.put("mail.imap.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-				IMAP_PROPS.put("mail.imap.socketFactory.port", String.valueOf(IMAPProperties.getImapsPort()));
-				IMAP_PROPS.put("mail.imap.socketFactory.fallback", STR_FALSE);
-				IMAP_PROPS.put("mail.smtp.starttls.enable", STR_TRUE);
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getImapsPort()));
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
 			}
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		try {
 			if (IMAPProperties.isSmtpsEnabled()) {
-				IMAP_PROPS.put("mail.smtp.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-				IMAP_PROPS.put("mail.smtp.socketFactory.port", String.valueOf(IMAPProperties.getSmtpsPort()));
-				IMAP_PROPS.put("mail.smtp.socketFactory.fallback", STR_FALSE);
-				IMAP_PROPS.put("mail.smtp.starttls.enable", STR_TRUE);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getSmtpsPort()));
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
 			}
 		} catch (IMAPException e) {
 			LOG.error(e.getMessage(), e);
@@ -430,12 +463,13 @@ public class MailInterfaceImpl implements MailInterface {
 			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getImapTimeout() > 0) {
-			IMAP_PROPS.put("mail.imap.timeout", Integer.valueOf(IMAPProperties.getImapTimeout()));
+			IMAP_PROPS.put(PROP_MAIL_IMAP_TIMEOUT, Integer.valueOf(IMAPProperties.getImapTimeout()));
 		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
-			IMAP_PROPS.put("mail.imap.connectiontimeout", Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
+			IMAP_PROPS
+					.put(PROP_MAIL_IMAP_CONNECTIONTIMEOUT, Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
-		IMAP_PROPS.put("mail.smtp.auth", IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
+		IMAP_PROPS.put(PROP_MAIL_SMTP_AUTH, IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
 
 	/**
