@@ -323,7 +323,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid) {
+    static final UserParticipant[] checkAndModifyAlarm(CalendarDataObject cdao, UserParticipant check[], int uid,  UserParticipant orig[]) {
         if (cdao.containsAlarm()) {
         	final UserParticipant up = new UserParticipant();
             up.setIdentifier(uid);
@@ -333,10 +333,21 @@ public class CalendarCommonCollection {
             } else {
                 Arrays.sort(check);
             }
-            final int f = Arrays.binarySearch(check, up);
+
+            int o = Arrays.binarySearch(orig, up);            
+            int f = Arrays.binarySearch(check, up);
             if (f >= 0 && f < check.length) {
                 check[f].setAlarmMinutes(cdao.getAlarm());
                 check[f].setIsModified(true);
+                if (o >= 0 && o < orig.length) {
+                    if (!check[f].containsConfirm()) {
+                        check[f].setConfirm(orig[0].getConfirm());
+                    }
+                    if (!check[f].containsConfirmMessage()) {
+                        check[f].setConfirmMessage(orig[0].getConfirmMessage());
+                    }                    
+                }
+                
                 return check;
             }
         }

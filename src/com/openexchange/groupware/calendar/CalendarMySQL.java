@@ -1578,7 +1578,7 @@ class CalendarMySQL implements CalendarSqlImp {
             }
         }
         
-        modified_userparticipants = CalendarCommonCollection.checkAndModifyAlarm(cdao, modified_userparticipants, uid);
+        modified_userparticipants = CalendarCommonCollection.checkAndModifyAlarm(cdao, modified_userparticipants, uid, edao.getUsers());
         
         
         if (check_up < 1) {
