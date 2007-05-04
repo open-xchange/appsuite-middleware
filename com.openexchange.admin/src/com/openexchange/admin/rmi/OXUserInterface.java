@@ -97,7 +97,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public int create(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Manipulate user data within the given context.
@@ -117,7 +117,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public void change(Context ctx, User usrdata, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Delete user from given context.
@@ -137,7 +137,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Delete user from given context.
@@ -157,7 +157,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public void delete(final Context ctx, final User user, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve the ModuleAccess for an user.
@@ -178,7 +178,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public UserModuleAccess getModuleAccess(Context ctx, int user_id, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Manipulate user module access within the given context.
