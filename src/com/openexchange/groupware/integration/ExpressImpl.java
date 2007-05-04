@@ -67,6 +67,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 
 /**
  * Implements the config jump to the user admin interface for OXExpress.
@@ -101,6 +102,7 @@ public class ExpressImpl extends SetupLink {
             throw new SetupLinkException(new ConfigurationException(
                 ConfigurationException.Code.PROPERTY_MISSING, "URL"));
         }
+        
         final String userId = (String) values[1];
         final String password = (String) values[2];
         final String protocol = (String) values[3];
@@ -122,8 +124,8 @@ public class ExpressImpl extends SetupLink {
                 password));
         try {
             httpClient.executeMethod(post);
-            final String session = post.getResponseBodyAsString();
-            return new URL(newUrlInst.toExternalForm() + "?JSESSIONID=" + session);
+            final String session = post.getResponseBodyAsString();            
+            return new URL(newUrlInst.toExternalForm() +AJPv13RequestHandler.JSESSIONID_URI + session);
         } catch (IOException e) {
             throw new SetupLinkException(SetupLinkException.Code.COMMUNICATION,
                 e);
