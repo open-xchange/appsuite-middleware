@@ -221,13 +221,16 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void close() throws javax.mail.MessagingException {
 		if (imapStore != null) {
 			imapStore.close();
-			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-			MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-			COUNTER_LOCK.lock();
-			try {
-				counter--;
-			} finally {
-				COUNTER_LOCK.unlock();
+			if (connected) {
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+				connected = false;
+				COUNTER_LOCK.lock();
+				try {
+					counter--;
+				} finally {
+					COUNTER_LOCK.unlock();
+				}
 			}
 			imapStore = null;
 		}
