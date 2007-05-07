@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 /**
  * This object must be send with every method call in ox rmi interface!
@@ -79,7 +78,7 @@ public class Credentials implements Serializable{
      * @param login
      * @param password
      */
-    public Credentials(String login, String password) {
+    public Credentials(final String login, final String password) {
         super();
         this.login = login;
         this.password = password;
@@ -90,14 +89,14 @@ public class Credentials implements Serializable{
      * @return Returns the login of this credentials object
      */
     public final String getLogin () {
-        return login;
+        return this.login;
     }
 
     /**
      * Set the login attribute of this credentials object
      * @param login Set the login attribute of this credentials object
      */
-    public final void setLogin (String login) {
+    public final void setLogin (final String login) {
         this.login = login;
     }
 
@@ -106,14 +105,14 @@ public class Credentials implements Serializable{
      * @return Returns the password in cleartext
      */
     public final String getPassword () {
-        return password;
+        return this.password;
     }
 
     /**
      * Sets this password for this credentials object
      * @param passwd Sets this password for this credentials object
      */
-    public final void setPassword (String passwd) {
+    public final void setPassword (final String passwd) {
         this.password = passwd;
     }
 
@@ -126,29 +125,6 @@ public class Credentials implements Serializable{
         
     }
     
-    public String toString() {
-        StringBuilder ret = new StringBuilder();
-        ret.append("[ \n");
-        for (final Field f : this.getClass().getDeclaredFields()) {
-            try {
-                Object ob = f.get(this);
-                String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID")) {
-                    ret.append("  ");
-                    ret.append(tname);
-                    ret.append(": ");
-                    ret.append(ob);
-                    ret.append("\n");
-                }
-            } catch (IllegalArgumentException e) {
-                ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
-                ret.append("IllegalAccessException\n");
-            }
-        }
-        ret.append("]");
-        return ret.toString();
-    }
 
     @Override
     public boolean equals(final Object obj) {
@@ -163,6 +139,28 @@ public class Credentials implements Serializable{
         } else {
             return false;
         }
+    }
+
+    /**
+     * Constructs a <code>String</code> with all attributes
+     * in name = value format.
+     *
+     * @return a <code>String</code> representation 
+     * of this object.
+     */
+    @Override
+    public String toString()
+    {
+        final String TAB = "\n  ";
+    
+        final StringBuilder retValue = new StringBuilder();
+        
+        retValue.append("Credentials ( ")
+            .append(super.toString()).append(TAB)
+            .append("login = ").append(this.login).append(TAB)
+            .append(" )");
+        
+        return retValue.toString();
     }
     
     
