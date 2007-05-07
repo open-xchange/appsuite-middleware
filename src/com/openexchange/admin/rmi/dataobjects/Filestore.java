@@ -50,11 +50,10 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 public class Filestore implements Serializable {
     /**
-     * 
+     * For serialization
      */
     private static final long serialVersionUID = -6970026864761440793L;
 
@@ -63,61 +62,61 @@ public class Filestore implements Serializable {
     private String url;
 
     private Long size;
-    
+
     private Long quota_used;
-    
+
     private Long quota_max;
 
     private Integer maxContexts;
 
     private Integer currentContexts;
-    
+
     private String login;
-    
+
     private String password;
-    
-    private String name;  
-    
+
+    private String name;
+
     public Filestore() {
         super();
         init();
     }
-    
-    public Filestore(Integer id) {
+
+    public Filestore(final Integer id) {
         super();
         init();
         this.id = id;
     }
 
     public Integer getId() {
-        return id;
+        return this.id;
     }
 
-    public void setId(Integer val) {
+    public void setId(final Integer val) {
         this.id = val;
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
-    public void setUrl(String val) {
+    public void setUrl(final String val) {
         this.url = val;
     }
 
     public Long getSize() {
-        return size;
+        return this.size;
     }
 
-    public void setSize(Long val) {
+    public void setSize(final Long val) {
         this.size = val;
     }
 
     public Integer getMaxContexts() {
-        return maxContexts;
+        return this.maxContexts;
     }
 
-    public void setMaxContexts(Integer val) {
+    public void setMaxContexts(final Integer val) {
         this.maxContexts = val;
     }
 
@@ -125,48 +124,47 @@ public class Filestore implements Serializable {
         return this.currentContexts;
     }
 
-    public void setCurrentContexts(Integer val) {
+    public void setCurrentContexts(final Integer val) {
         this.currentContexts = val;
     }
 
     public String getLogin() {
-        return login;
+        return this.login;
     }
 
-    public void setLogin(String login) {
+    public void setLogin(final String login) {
         this.login = login;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    
     public Long getQuota_max() {
-        return quota_max;
+        return this.quota_max;
     }
 
-    public void setQuota_max(Long quota_max) {
+    public void setQuota_max(final Long quota_max) {
         this.quota_max = quota_max;
     }
 
     public Long getQuota_used() {
-        return quota_used;
+        return this.quota_used;
     }
 
-    public void setQuota_used(Long quota_used) {
+    public void setQuota_used(final Long quota_used) {
         this.quota_used = quota_used;
     }
 
@@ -181,30 +179,52 @@ public class Filestore implements Serializable {
         this.name = null;
         this.login = null;
         this.password = null;
-        
     }
-    
+
+    /**
+     * Constructs a <code>String</code> with all attributes in name = value
+     * format.
+     * 
+     * @return a <code>String</code> representation of this object.
+     */
+    @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder();
-        ret.append("[ \n");
-        for (final Field f : this.getClass().getDeclaredFields()) {
-            try {
-                Object ob = f.get(this);
-                String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID")) {
-                    ret.append("  ");
-                    ret.append(tname);
-                    ret.append(": ");
-                    ret.append(ob);
-                    ret.append("\n");
-                }
-            } catch (IllegalArgumentException e) {
-                ret.append("IllegalArgument\n");
-            } catch (IllegalAccessException e) {
-                ret.append("IllegalAccessException\n");
-            }
-        }
-        ret.append("]");
-        return ret.toString();
+        final String TAB = "\n  ";
+
+        final StringBuilder retValue = new StringBuilder();
+
+        retValue.append("Filestore ( ");
+        retValue.append(super.toString()).append(TAB);
+        if (null != this.id) {
+            retValue.append("id = ").append(this.id).append(TAB);
+        }        
+        if (null != this.url) {
+            retValue.append("url = ").append(this.url).append(TAB);
+        }        
+        if (null != this.size) {
+            retValue.append("size = ").append(this.size).append(TAB);
+        }        
+        if (null != this.quota_used) {
+            retValue.append("quota_used = ").append(this.quota_used).append(TAB);
+        }        
+        if (null != this.quota_max) {
+            retValue.append("quota_max = ").append(this.quota_max).append(TAB);
+        }        
+        if (null != this.maxContexts) {
+            retValue.append("maxContexts = ").append(this.maxContexts).append(TAB);
+        }        
+        if (null != this.currentContexts) {
+            retValue.append("currentContexts = ").append(this.currentContexts).append(TAB);
+        }        
+        if (null != this.login) {
+            retValue.append("login = ").append(this.login).append(TAB);
+        }        
+        if (null != this.name) {
+            retValue.append("name = ").append(this.name).append(TAB);
+        }        
+        retValue.append(" )");
+
+        return retValue.toString();
     }
+
 }
