@@ -58,6 +58,8 @@ import com.openexchange.groupware.contexts.Context;
  * to authenticate them against the directory service. This class is implemented
  * according the DAO design pattern.
  * @author <a href="mailto:marcus@open-xchange.de">Marcus Klein </a>
+ * @deprecated Authentication should be done through {@link LoginInfo} interface
+ * and other methods should be moved to {@link UserStorage} interface.
  */
 public abstract class Authentication {
 
