@@ -84,7 +84,7 @@ public class ConflictHandler {
     
     private static final Log LOG = LogFactory.getLog(ConflictHandler.class);
     
-    public ConflictHandler(CalendarDataObject cdao, SessionObject so, boolean action) {
+    public ConflictHandler(final CalendarDataObject cdao, final SessionObject so, final boolean action) {
         this.cdao = cdao;
         this.so = so;
         this.action = action;
@@ -100,10 +100,10 @@ public class ConflictHandler {
             return NO_CONFLICTS;
         } else if (cdao.containsEndDate() && CalendarCommonCollection.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past apps should never conflict
-        } else if (!action && !cdao.containsShownAs()) {
-            if (cdao.getShownAs() == CalendarDataObject.FREE) {
+        } else if (!action && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
+            //if (cdao.getShownAs() == CalendarDataObject.FREE) {
                 return NO_CONFLICTS; // According to bug #5267                
-            }
+            //}
         }
         if (!containsResources()) {
             if (!cdao.getIgnoreConflicts()) {
@@ -126,20 +126,18 @@ public class ConflictHandler {
         return NO_CONFLICTS;
     }
     
-    private CalendarDataObject[] prepareResolving(boolean request_participants) throws OXException {
+    private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {
         if (cdao.getRecurrenceType() == 0) {
             if (action) {
                 if (request_participants) {
                     return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
-                } else {
-                    return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
                 }
+                return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
             } 
             if (request_participants) {
                 return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
-            } else {
-                return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
             }
+            return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
         }
         if (request_participants) {
             return NO_CONFLICTS;
@@ -208,22 +206,22 @@ public class ConflictHandler {
             si.close();
             close_connection = false;
             if (li != null) {
-                CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
                 li.toArray(ret);
                 return ret;
             }
             return NO_CONFLICTS;
-        } catch (SearchIteratorException sie) {
+        } catch (final SearchIteratorException sie) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 12);
-        } catch (SQLException sqle) {
+        } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-        } catch (DBPoolingException dbpe) {
+        } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
             if (close_connection && si != null) {
                 try {
                     si.close();
-                } catch (SearchIteratorException sie) {
+                } catch (final SearchIteratorException sie) {
                     LOG.error("Error closing SearchIterator" ,sie);
                 }
                 CalendarCommonCollection.closeResultSet(rs);
@@ -233,7 +231,7 @@ public class ConflictHandler {
             if (close_connection && readcon != null) {
                 try {
                     DBPool.push(so.getContext(), readcon);
-                } catch (DBPoolingException dbpe) {
+                } catch (final DBPoolingException dbpe) {
                     LOG.error("error pushing readable connection" ,dbpe);
                 }
             }
@@ -297,25 +295,23 @@ public class ConflictHandler {
             si.close();
             close_connection = false;
             if (li != null) {
-                CalendarDataObject[] ret = new CalendarDataObject[li.size()];
+                final CalendarDataObject[] ret = new CalendarDataObject[li.size()];
                 li.toArray(ret);
                 return ret;
             }
             return NO_CONFLICTS;
-        } catch (SearchIteratorException sie) {
+        } catch (final SearchIteratorException sie) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 13);
-        } catch (SQLException sqle) {
+        } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-        } catch (DBPoolingException dbpe) {
+        } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
             if (close_connection && si != null) {
-                if (si != null) {
-                    try {
-                        si.close();
-                    } catch (SearchIteratorException sie) {
-                        LOG.error("Error closing SearchIterator" ,sie);
-                    }
+                try {
+                    si.close();
+                } catch (final SearchIteratorException sie) {
+                    LOG.error("Error closing SearchIterator" ,sie);
                 }
                 CalendarCommonCollection.closeResultSet(rs);
                 CalendarCommonCollection.closePreparedStatement(prep);
@@ -324,7 +320,7 @@ public class ConflictHandler {
             if (close_connection && readcon != null) {
                 try {
                     DBPool.push(so.getContext(), readcon);
-                } catch (DBPoolingException dbpe) {
+                } catch (final DBPoolingException dbpe) {
                     LOG.error("error pushing readable connection" ,dbpe);
                 }
             }

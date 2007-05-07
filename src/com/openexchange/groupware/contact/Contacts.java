@@ -147,7 +147,7 @@ public class Contacts implements DeleteListener {
 					ia.validate();
 				}
 			}
-		}catch (AddressException ae){
+		}catch (final AddressException ae){
 			LOG.error("Email Validation Failed", ae);
 			throw EXCEPTIONS.create(0,ae,email);
 		}
@@ -298,7 +298,7 @@ public class Contacts implements DeleteListener {
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try{
 			ImageIO.write(scaledBufferedImage,fileType,baos);
-			} catch (Exception fallback){
+			} catch (final Exception fallback){
 				/**
 				 * This is just a basic fallback i try when he is not able to scale the image 
 				 * with the given mimetype. then we try the common jpg.
@@ -438,18 +438,18 @@ public class Contacts implements DeleteListener {
 					insert_values.append("?,");			
 				}			
 			}
-		} catch (DBPoolingException d){
+		} catch (final DBPoolingException d){
 			throw EXCEPTIONS.create(51, d);
-		} catch (OXConflictException oe){
+		} catch (final OXConflictException oe){
 			throw oe;
-		} catch (OXException oe){
+		} catch (final OXException oe){
 			throw oe;
 			//throw EXCEPTIONS.create(6, oe, so.getContext().getContextId());
 			//throw new OXException("ERROR: Unable to Insert Contacts! cid="+so.getContext().getContextId(),oe);
 		} finally {
 			try{
 				DBPool.closeReaderSilent(so.getContext(), readcon);
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOG.error("Unable to close READ Connection");
 			}
 		}
@@ -504,62 +504,62 @@ public class Contacts implements DeleteListener {
 				if (ContactConfig.getProperty("scale_images").equals("true")){
 					try{
 						co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-					} catch (OXConflictException ex){
+					} catch (final OXConflictException ex){
 						throw ex;
-					} catch (OXException ex){
+					} catch (final OXException ex){
 						throw ex;
-					} catch (IOException ex){
+					} catch (final IOException ex){
 						throw EXCEPTIONS.create(8, ex);
-					} catch (Exception ex){
+					} catch (final Exception ex){
 						throw EXCEPTIONS.create(58,ex);
 					}
 				}
 				writeContactImage(co.getObjectID(), co.getImage1(), so.getContext().getContextId(), co.getImageContentType(), writecon);
 			}
 			writecon.commit();
-		} catch (OXException ox){
+		} catch (final OXException ox){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
 			}
 			throw ox;
-		} catch (DBPoolingException oe){
+		} catch (final DBPoolingException oe){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
 			}
 			throw EXCEPTIONS.create(53, oe);
-		} catch (DataTruncation se){
+		} catch (final DataTruncation se){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Update", see);
 			}
 			throw Contacts.getTruncation(se);
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
-			}			throw EXCEPTIONS.create(9,se, so.getContext().getContextId());
+			}			throw EXCEPTIONS.create(9,se, Integer.valueOf(so.getContext().getContextId()));
 		} finally {
 			try{
 				ps.close();
-			}catch (SQLException sq){
+			}catch (final SQLException sq){
 				LOG.error("UNABLE TO CLOSE STATEMENT ",sq);
 			}
 			try{
 				writecon.setAutoCommit(true);
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOG.error("Unable to set setAutoCommit = true");
 			}
 			try{
 				if (writecon != null) {
 					DBPool.closeWriterSilent(so.getContext(), writecon);
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOG.error("Unable to set setAutoCommit = true");
 			}
 		}
@@ -643,14 +643,14 @@ public class Contacts implements DeleteListener {
 				contactFolder = FolderObject.loadFolderObjectFromDB(co.getParentFolderID(), ctx, readcon);
 			}
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
-				throw EXCEPTIONS.createOXConflictException(10, co.getParentFolderID(), ctx.getContextId(), user);
+				throw EXCEPTIONS.createOXConflictException(10, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
 			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
 			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, uc);
 
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-				throw EXCEPTIONS.createOXPermissionException(11, co.getParentFolderID(), ctx.getContextId(), user);
+				throw EXCEPTIONS.createOXPermissionException(11, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
 
@@ -658,7 +658,7 @@ public class Contacts implements DeleteListener {
 				if (oclPerm.canWriteOwnObjects()){
 					can_edit_only_own = true;
 				}else{
-					throw EXCEPTIONS.createOXPermissionException(12, co.getParentFolderID(), ctx.getContextId(), user);
+					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+co.getParentFolderID());	
 				}
 			}
@@ -670,7 +670,7 @@ public class Contacts implements DeleteListener {
 			 */
 			if(co.getParentFolderID() != fid){
 				if (!oclPerm.canCreateObjects()){
-					throw EXCEPTIONS.createOXPermissionException(12, co.getParentFolderID(), ctx.getContextId(), user);
+					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				}
 				
 				FolderObject source;
@@ -680,21 +680,21 @@ public class Contacts implements DeleteListener {
 					source = FolderObject.loadFolderObjectFromDB(fid, ctx, readcon);
 				}
 				if (source.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(13,fid, ctx.getContextId(), user);
+					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid"+fid);
 				}
 
 				final EffectivePermission op = oxfs.getFolderPermission(fid, user, uc);
 				
 				if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-					throw EXCEPTIONS.createOXPermissionException(14, fid, ctx.getContextId(), user);
+					throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid"+fid);
 				}
 				if (!op.canWriteAllObjects()) {
 					if (oclPerm.canWriteOwnObjects()){
 						can_edit_only_own = true;
 					}else{
-						throw EXCEPTIONS.createOXPermissionException(15, fid, ctx.getContextId(), user);
+						throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 						//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+fid);
 					}
 				}
@@ -708,19 +708,19 @@ public class Contacts implements DeleteListener {
 			
 			try{
 				original = getContactById(co.getObjectID(),user,group,ctx,uc,readcon);
-			} catch (Exception e){
-				throw EXCEPTIONS.createOXObjectNotFoundException(16,e,ctx.getContextId(), co.getObjectID());
+			} catch (final Exception e){
+				throw EXCEPTIONS.createOXObjectNotFoundException(16,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 				//throw new OXObjectNotFoundException("UNABLE TO LOAD CONTACT FOR UPDATE cid="+ctx.getContextId()+" oid"+co.getObjectID(), e);
 			}
 			if (can_edit_only_own && original.getCreatedBy() != user){
-				throw EXCEPTIONS.createOXConflictException(17, fid, ctx.getContextId(), user);
+				throw EXCEPTIONS.createOXConflictException(17, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" oid"+co.getObjectID());
 			}
 				
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()){
 				co.setPrivateFlag(false);
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && original.getCreatedBy() != user){
-				throw EXCEPTIONS.createOXConflictException(18, ctx.getContextId(), co.getObjectID());
+				throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+" oid="+co.getObjectID());
 			}
 						
@@ -735,7 +735,7 @@ public class Contacts implements DeleteListener {
 					throw EXCEPTIONS.createOXConcurrentModificationException(19);
 					//throw new OXConcurrentModificationException("CONTACT HAS CHANGED ON SERVER SIDE SINCE THE LAST VISIT");
 				}
-			} catch (OXConcurrentModificationException xoxo){
+			} catch (final OXConcurrentModificationException xoxo){
 				throw xoxo;
 			}
 			
@@ -791,19 +791,19 @@ public class Contacts implements DeleteListener {
 			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
 				co.setFileAs(co.getDisplayName());
 			}
-		} catch (OXConcurrentModificationException cme){
+		} catch (final OXConcurrentModificationException cme){
 			throw cme;
-		} catch (OXObjectNotFoundException oe2){
+		} catch (final OXObjectNotFoundException oe2){
 			throw oe2;
-		} catch (OXException oe3){
+		} catch (final OXException oe3){
 			throw oe3;
-		} catch (DBPoolingException oe){
+		} catch (final DBPoolingException oe){
 			throw EXCEPTIONS.create(20, oe);
 			//throw new OXException("UNABLE TO UPDATE CONTACT OBJECT cid="+ctx.getContextId()+" oid="+co.getObjectID(), oe);
 		} finally {
 			try{
 				DBPool.closeReaderSilent(ctx, readcon);
-			} catch (Exception ex) { 
+			} catch (final Exception ex) { 
 				LOG.error("Unable to close READ Connection", ex);
 			}
 		}
@@ -812,7 +812,7 @@ public class Contacts implements DeleteListener {
 		final StringBuilder update = new StringBuilder();
 		
 		try{
-			int[] mod = new int[650];
+			final int[] mod = new int[650];
 			int cnt = 0;
 			for (int i=0;i<650;i++){
 				if (mapping[i] != null && !mapping[i].compare(co, original)){
@@ -858,7 +858,7 @@ public class Contacts implements DeleteListener {
 				final Date ddd = new Date(lmd);
 				co.setLastModified(ddd);
 			} else {
-				throw EXCEPTIONS.create(22, ctx.getContextId(), co.getObjectID());
+				throw EXCEPTIONS.create(22, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 				//throw new OXException("NOTHING TO UPDATE - NOTHING CHANGED cid="+ctx.getContextId()+" oid"+co.getObjectID());
 			}
 			
@@ -870,15 +870,15 @@ public class Contacts implements DeleteListener {
 			//System.out.println(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
 			ps.execute();	
 
-			if(co.containsNumberOfDistributionLists()){
-				if (co.getSizeOfDistributionListArray() > 0){
+			if(co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)){
+				//if (co.getSizeOfDistributionListArray() > 0){
 					writeDistributionListArrayUpdate(co.getDistributionList(),original.getDistributionList(), co.getObjectID(),ctx.getContextId(),writecon);							
-				}
+				//}
 			}				
-			if(co.containsNumberOfLinks()){
-				if (co.getSizeOfLinks() > 0){
+			if(co.containsNumberOfLinks() && (co.getSizeOfLinks() > 0)){
+				//if (co.getSizeOfLinks() > 0){
 					writeContactLinkArrayUpdate(co.getLinks(), original.getLinks(),co.getObjectID(), ctx.getContextId(),writecon);						
-				}
+				//}
 			}
 			
 			/*
@@ -893,14 +893,14 @@ public class Contacts implements DeleteListener {
 					if (ContactConfig.getProperty("scale_images").equals("true")){
 						try{
 							co.setImage1(scaleContactImage(co.getImage1(), co.getImageContentType()));
-						} catch (OXConflictException ex){
+						} catch (final OXConflictException ex){
 							throw ex;
-						} catch (OXException ex){
+						} catch (final OXException ex){
 							throw ex;
-						} catch (IOException ex){
+						} catch (final IOException ex){
 							throw EXCEPTIONS.create(23,ex);
 							//throw new OXException("Unable to scale contact Image down.", ex);
-						} catch (Exception ex){
+						} catch (final Exception ex){
 							throw EXCEPTIONS.create(59,ex);
 						}
 					}
@@ -914,38 +914,38 @@ public class Contacts implements DeleteListener {
 				} else if (original.containsImage1()){
 					try{
 						deleteImage(co.getObjectID(),ctx.getContextId(), writecon);
-					}catch (SQLException oxee){
+					}catch (final SQLException oxee){
 						LOG.error("Unable to delete Contact Image", oxee);
 					}
 				}
 			} 
 			writecon.commit();
-		} catch (OXException ox){
+		} catch (final OXException ox){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
 			}
 			throw ox;
-		} catch (DBPoolingException oe){
+		} catch (final DBPoolingException oe){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
 			}
 			throw EXCEPTIONS.create(55, oe);
-		} catch (DataTruncation se){
+		} catch (final DataTruncation se){
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Update", see);
 			}
 			throw Contacts.getTruncation(se);
 			//throw EXCEPTIONS.create(56, se,se.getIndex(),se.getDataSize(), se.getTransferSize());
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			try {
 				writecon.rollback();
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Update", see);
 			}
 			throw EXCEPTIONS.create(24, ctx.getContextId(), co.getObjectID());
@@ -953,19 +953,19 @@ public class Contacts implements DeleteListener {
 		} finally {
 			try{
 				ps.close();
-			}catch (Exception sq){
+			}catch (final Exception sq){
 				LOG.error("UNABLE TO CLOSE STATEMENR ",sq);
 			}
 			try{
 				writecon.setAutoCommit(true);
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOG.error("Unable to set setAutoCommit = true");
 			}
 			try{
 				if (writecon != null) {
 					DBPool.closeWriterSilent(ctx, writecon);
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOG.error("Unable to set return writeconnection");
 			}
 		}
@@ -1022,13 +1022,13 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			} else {
-				throw EXCEPTIONS.createOXObjectNotFoundException(25, ctx.getContextId());
+				throw EXCEPTIONS.createOXObjectNotFoundException(25, Integer.valueOf(ctx.getContextId()));
 				//throw new OXObjectNotFoundException("No Contact Found!");
 			}		
-		} catch (OXException ex) {
+		} catch (final OXException ex) {
 			throw ex;
-		}catch (SQLException sq){
-			throw EXCEPTIONS.create(26,sq, ctx.getContextId());
+		}catch (final SQLException sq){
+			throw EXCEPTIONS.create(26,sq, Integer.valueOf(ctx.getContextId()));
 		} finally {
 			try{ 
 				if (rs != null){
@@ -1037,7 +1037,7 @@ public class Contacts implements DeleteListener {
 				if (stmt != null){
 					stmt.close();
 				}
-			}catch (SQLException sxe){
+			}catch (final SQLException sxe){
 				LOG.error("Unable to close Statement or ResultSet", sxe);
 			}
 		}
@@ -1063,15 +1063,15 @@ public class Contacts implements DeleteListener {
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFdeleteContact(id,cid,del);
 			
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(27,se,cid,id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(27,se,Integer.valueOf(cid),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING CONTACT DELETE cid="+cid+" oid="+id, se);
 		} finally {
 			try{
 				if (del != null){
 					del.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Connection", see);
 			}
 		}
@@ -1098,7 +1098,7 @@ public class Contacts implements DeleteListener {
 			final int size = rs.getRow();
 		    rs.beforeFirst();
 
-		    DistributionListEntryObject[] dleos = new DistributionListEntryObject[size];		    
+		    final DistributionListEntryObject[] dleos = new DistributionListEntryObject[size];		    
 		    DistributionListEntryObject dleo = null;
 
 		    String displayname = null;
@@ -1149,8 +1149,8 @@ public class Contacts implements DeleteListener {
 		    }
 			r = new DistributionListEntryObject[cnt];
 			System.arraycopy(dleos, 0, r, 0, cnt);   
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(28,se,ctx.getContextId(),id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(28,se,Integer.valueOf(ctx.getContextId()),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST LOAD cid="+ctx.getContextId()+" oid="+id, se);
 		} finally {
 			try{
@@ -1160,7 +1160,7 @@ public class Contacts implements DeleteListener {
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Statement or ResultSet", see);
 			}
 		}
@@ -1239,13 +1239,13 @@ public class Contacts implements DeleteListener {
 						if (ps != null){
 							ps.close();
 						}
-					} catch (SQLException see){
+					} catch (final SQLException see){
 						LOG.warn("Unable to close Connection", see);
 					}
 				}
 			}
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(29,se,cid,id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(29,se,Integer.valueOf(cid),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST SAVE, DLIST NOT SAVED cid="+cid+" oid="+id, se);
 		}
 	}
@@ -1265,9 +1265,9 @@ public class Contacts implements DeleteListener {
 		}else{
 			sizey = 1;
 		}
-		DistributionListEntryObject[] inserts = new DistributionListEntryObject[sizey];
-		DistributionListEntryObject[] updates = new DistributionListEntryObject[sizey];
-		DistributionListEntryObject[] deletes = new DistributionListEntryObject[sizey];
+		final DistributionListEntryObject[] inserts = new DistributionListEntryObject[sizey];
+		final DistributionListEntryObject[] updates = new DistributionListEntryObject[sizey];
+		final DistributionListEntryObject[] deletes = new DistributionListEntryObject[sizey];
 		
 		int insert_count = 0;
 		int update_count = 0;		
@@ -1342,7 +1342,7 @@ public class Contacts implements DeleteListener {
 			deleteDistributionListEntriesByIds(id,deletecut,cid,writecon);
 			updateDistributionListEntriesByIds(id, updatecut ,cid,writecon);
 			writeDistributionListArrayInsert(insertcut,id,cid,writecon);
-		} catch (OXException x){
+		} catch (final OXException x){
 			throw x;
 			//throw new OXException("UNABLE TO UPDATE DISTRIBUTION LIST cid="+cid+" oid="+id,x);
 		}
@@ -1426,13 +1426,13 @@ public class Contacts implements DeleteListener {
 								if (ps != null){
 									ps.close();
 								}
-							} catch (SQLException see){
+							} catch (final SQLException see){
 								LOG.warn("Unable to close Connection", see);
 							}
 					 }
 				}				
-			} catch (SQLException se) {
-				throw EXCEPTIONS.create(30,se,cid,id);
+			} catch (final SQLException se) {
+				throw EXCEPTIONS.create(30,se,Integer.valueOf(cid),Integer.valueOf(id));
 				//throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
 			}
 		}
@@ -1461,7 +1461,7 @@ public class Contacts implements DeleteListener {
 				LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
 			}
 			ps.execute();
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(48,se,cid,id);
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST deleteDistributionListEntriesByIds, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
 		} finally {
@@ -1469,7 +1469,7 @@ public class Contacts implements DeleteListener {
 				if (ps != null){
 					ps.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Connection", see);
 			}
 		}
@@ -1497,13 +1497,13 @@ public class Contacts implements DeleteListener {
 							if (ps != null){
 								ps.close();
 							}
-						} catch (SQLException see){
+						} catch (final SQLException see){
 							LOG.warn("Unable to close Connection", see);
 						}
 					}
 				}
-			} catch (SQLException se) {
-				throw EXCEPTIONS.create(31,se,cid,id);
+			} catch (final SQLException se) {
+				throw EXCEPTIONS.create(31,se,Integer.valueOf(cid),Integer.valueOf(id));
 				//throw new OXException("ERROR DURING DISTRIBUTION LIST deleteDistributionListEntriesByIds, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
 			}
 		}
@@ -1531,7 +1531,7 @@ public class Contacts implements DeleteListener {
 			final int size = rs.getRow();
 			rs.beforeFirst();
 
-			LinkEntryObject[] leos = new LinkEntryObject[size];
+			final LinkEntryObject[] leos = new LinkEntryObject[size];
 			LinkEntryObject leo = null;
 
 			String contact_displayname = null;
@@ -1569,7 +1569,7 @@ public class Contacts implements DeleteListener {
 			
 			r = new LinkEntryObject[cnt];
 			System.arraycopy(leos, 0, r, 0, cnt);     
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(32,se,ctx.getContextId(),co.getObjectID());
 			//throw new OXException("ERROR DURING fillLinkArray cid="+ctx.getContextId()+" oid="+co.getObjectID(), se);
 		} finally {
@@ -1580,7 +1580,7 @@ public class Contacts implements DeleteListener {
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){	
+			} catch (final SQLException see){	
 				LOG.warn("Unable to close Connection", see);
 			}
 		}
@@ -1617,12 +1617,12 @@ public class Contacts implements DeleteListener {
 						if (ps != null){
 							ps.close();
 						}
-					} catch (SQLException see){
+					} catch (final SQLException see){
 						LOG.warn("Unable to close Connection", see);
 					}
 				}
 			}
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(33,se,cid,id);
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
 		}
@@ -1640,8 +1640,8 @@ public class Contacts implements DeleteListener {
 		}else{
 			sizey = 1;
 		}
-		LinkEntryObject[] inserts = new LinkEntryObject[sizey];
-		LinkEntryObject[] deletes = new LinkEntryObject[sizey];
+		final LinkEntryObject[] inserts = new LinkEntryObject[sizey];
+		final LinkEntryObject[] deletes = new LinkEntryObject[sizey];
 		int delete_count = 0;
 		int insert_count = 0;
 		
@@ -1658,10 +1658,9 @@ public class Contacts implements DeleteListener {
 						original[u] = null;
 						action = true;
 						break;
-					}else{
-						// this one don't equal
-						action = false;
 					}
+					// this one don't equal
+					action = false;
 				}
 			}
 			if (!action){
@@ -1689,7 +1688,7 @@ public class Contacts implements DeleteListener {
 		try{
 			deleteLinkEntriesByIds(id, deletecut ,cid, writecon);
 			writeContactLinkArrayInsert(insertcut, id, cid, writecon);
-		} catch (OXException x){
+		} catch (final OXException x){
 			throw x;
 			//throw new OXException("UNABLE TO UPDATE CONTACT LIST cid="+cid+" oid="+id,x);
 		}
@@ -1723,13 +1722,13 @@ public class Contacts implements DeleteListener {
 							if (ps != null){
 								ps.close();
 							}
-						} catch (SQLException see){		
+						} catch (final SQLException see){		
 							LOG.warn("Unable to close Connection", see);
 						}
 					}
 				}
-			} catch (SQLException se) {
-				throw EXCEPTIONS.create(34,se,cid,id);
+			} catch (final SQLException se) {
+				throw EXCEPTIONS.create(34,se,Integer.valueOf(cid),Integer.valueOf(id));
 				//throw new OXException("ERROR DURING LINK LIST UPDATE, LINK NOT UPDATED cid="+cid+" oid="+id, se);
 			}
 		}
@@ -1746,7 +1745,7 @@ public class Contacts implements DeleteListener {
 		    if (rs.next()){
 		    	last_mod = new Date(rs.getLong(1));
 		    }
-		} catch (SQLException sxe){
+		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
 			try{
@@ -1756,7 +1755,7 @@ public class Contacts implements DeleteListener {
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement or ResultSet",see);
 			}
 		}
@@ -1788,8 +1787,8 @@ public class Contacts implements DeleteListener {
 				    co.setImageContentType(rs.getString(3));
 		    	}
 		    }
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(35,se,cid,contact_id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(35,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE LOAD cid="+cid+" oid="+contact_id, se);
 		} finally {
 			try{
@@ -1799,7 +1798,7 @@ public class Contacts implements DeleteListener {
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Statement or ResultSet", see);
 			}
 		}
@@ -1834,15 +1833,15 @@ public class Contacts implements DeleteListener {
 				LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
 			}
 			ps.execute();
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(37,se,cid,contact_id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(37,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE SAVE cid="+cid+" oid="+contact_id, se);
 		} finally {
 			try{
 				if (ps != null){
 					ps.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement",see);
 			}
 		}
@@ -1878,15 +1877,15 @@ public class Contacts implements DeleteListener {
 				LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
 			}
 			ps.execute();
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(39,se,cid,contact_id);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(39,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE UPDATE cid="+cid+" oid="+contact_id, se);
 		} finally {
 			try{ 
 				if (ps != null){
 					ps.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement",see);
 			}
 		}
@@ -1928,7 +1927,7 @@ public class Contacts implements DeleteListener {
 				return performContactReadCheck(fid,created_from,user,group,ctx,uc,readCon);
 			}
 			return false;
-		} catch (SQLException e){
+		} catch (final SQLException e){
 			LOG.error("UNABLE TO performContactReadCheckByID cid="+ctx.getContextId()+" oid="+objectId, e);
 			return false;
 		} finally {
@@ -1939,14 +1938,14 @@ public class Contacts implements DeleteListener {
 				if (st != null){
 					st.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unablel to close Statement or ResultSet",see);
 			}
 			try{
 				if (readCon != null){
 					DBPool.closeReaderSilent(ctx, readCon);
 				}
-			} catch (Exception see){
+			} catch (final Exception see){
 				LOG.error("Unable to return Connection",see);
 			}
 		}
@@ -1995,12 +1994,11 @@ public class Contacts implements DeleteListener {
 			}
 			if (fid != -1 && created_from != -1){
 				return performContactReadCheck(fid,created_from,user,group,ctx,uc,readCon);
-			}else{
-				return false;
 			}
-		} catch (DBPoolingException e){
+			return false;
+		} catch (final DBPoolingException e){
 			throw EXCEPTIONS.create(50,e);
-		} catch (SQLException e){
+		} catch (final SQLException e){
 			LOG.error("UNABLE TO performContactReadCheckByID cid="+ctx.getContextId()+" oid="+objectId, e);
 			return false;
 		} finally {
@@ -2011,14 +2009,14 @@ public class Contacts implements DeleteListener {
 				if (st != null){
 					st.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unablel to close Statement or ResultSet",see);
 			}
 			try{
 				if (readCon != null){
 					DBPool.closeReaderSilent(ctx, readCon);
 				}
-			} catch (Exception see){
+			} catch (final Exception see){
 				LOG.error("Unable to return Connection",see);
 			}
 		}
@@ -2048,7 +2046,7 @@ public class Contacts implements DeleteListener {
 				return false;
 			}
 			return true;
-		} catch (OXException e){
+		} catch (final OXException e){
 			LOG.error("UNABLE TO PERFORM performContactReadCheck cid="+ctx.getContextId()+" fid="+folderId, e);
 			return false;
 		}
@@ -2082,7 +2080,7 @@ public class Contacts implements DeleteListener {
 			if (rs.next()) {
 				fid = rs.getInt(5);
 				created_from = rs.getInt(6);
-				int xx = rs.getInt(7);
+				final int xx = rs.getInt(7);
 				if (!rs.wasNull() && xx == 1){
 						pflag = true;
 				}
@@ -2100,9 +2098,9 @@ public class Contacts implements DeleteListener {
 				return performContactWriteCheck(fid,created_from,user,group,ctx,uc,readCon);
 			}
 			return false;
-		} catch (DBPoolingException e){
+		} catch (final DBPoolingException e){
 			throw EXCEPTIONS.create(49,e);
-		} catch (SQLException e){
+		} catch (final SQLException e){
 			LOG.error("UNABLE TO performContactWriteCheckByID cid="+ctx.getContextId()+" oid="+objectId, e);
 			return false;
 		} finally {
@@ -2113,14 +2111,14 @@ public class Contacts implements DeleteListener {
 				if (st != null){
 					st.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unablel to close Statement or ResultSet",see);
 			}
 			try{
 				if (readCon != null){
 					DBPool.closeReaderSilent(ctx, readCon);
 				}
-			} catch (Exception see){
+			} catch (final Exception see){
 				LOG.error("Unable to return Connection",see);
 			}
 		}
@@ -2149,7 +2147,7 @@ public class Contacts implements DeleteListener {
 				return false;
 			}
 			return true;
-		} catch (OXException e){
+		} catch (final OXException e){
 			LOG.error("UNABLE TO PERFORM performContactWriteCheck cid="+ctx.getContextId()+" fid="+folderId, e);
 			return false;
 		}
@@ -2174,8 +2172,8 @@ public class Contacts implements DeleteListener {
 				return true;
 			}
 			return false;
-		} catch (SQLException se){
-			throw EXCEPTIONS.create(40, se, so.getContext().getContextId(), fid);
+		} catch (final SQLException se){
+			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
 		} finally {
 			try{
@@ -2185,14 +2183,14 @@ public class Contacts implements DeleteListener {
 				if (st != null){
 					st.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close ResultSet or Statement",see);
 			}
 			try{
 				if (readCon != null){
 					DBPool.closeReaderSilent(so.getContext(), readCon);
 				}
-			} catch (Exception e){
+			} catch (final Exception e){
 				LOG.error("Unable to return Connection");
 			}
 		}
@@ -2211,10 +2209,10 @@ public class Contacts implements DeleteListener {
 				return true;
 			}
 			return false;
-		} catch (DBPoolingException se){
+		} catch (final DBPoolingException se){
 			LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: "+cx.getContextId()+" Fid: "+fid+" Cause:"+se);
 			return false;
-		} catch (SQLException se){
+		} catch (final SQLException se){
 			LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: "+cx.getContextId()+" Fid: "+fid+" Cause:"+se);
 			return false;
 			//throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
@@ -2227,14 +2225,14 @@ public class Contacts implements DeleteListener {
 				if (st != null){
 					st.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close ResultSet or Statement",see);
 			}
 			try{
 				if (readCon != null){
 					DBPool.closeReaderSilent(cx, readCon);
 				}
-			} catch (Exception e){
+			} catch (final Exception e){
 				LOG.error("Unable to return Connection");
 			}
 		}
@@ -2276,13 +2274,13 @@ public class Contacts implements DeleteListener {
 					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
 				}
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(42, fid, so.getContext().getContextId(), so.getUserObject().getId());
+					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(so.getUserObject().getId()));
 					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" fid="+fid);
 				}
 				if (contactFolder.getType() == FolderObject.PRIVATE){
 					delit = true;
 				}
-			} catch (OXException e){
+			} catch (final OXException e){
 				throw e;
 				//throw EXCEPTIONS.create(43, fid, so.getContext().getContextId(), user);
 				//throw new OXException("NO PERMISSIONS TO DELETE IN THIS FOLDER cid="+so.getContext().getContextId()+" fid="+fid,e);
@@ -2306,7 +2304,7 @@ public class Contacts implements DeleteListener {
 
 				oid = rs.getInt(1);
 				if (rs.wasNull()){
-					throw EXCEPTIONS.create(44, so.getContext().getContextId(), fid);
+					throw EXCEPTIONS.create(44, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
 					//throw new OXException("VERY BAD ERROR OCCURRED, OBJECT WITHOUT ID FOUND cid="+so.getContext().getContextId()+" fid="+fid);
 				}
 				dlist = rs.getInt(2);
@@ -2338,11 +2336,11 @@ public class Contacts implements DeleteListener {
 			}
 			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
 
-		} catch (InvalidStateException is){
-			throw EXCEPTIONS.create(46,is, so.getContext().getContextId(), fid);
+		} catch (final InvalidStateException is){
+			throw EXCEPTIONS.create(46,is, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContext().getContextId()+" fid="+fid,se);
-		} catch (SQLException se) {
-			throw EXCEPTIONS.create(45,se, so.getContext().getContextId(), fid);
+		} catch (final SQLException se) {
+			throw EXCEPTIONS.create(45,se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContext().getContextId()+" fid="+fid,se);
 		} finally {
 			try{
@@ -2352,14 +2350,14 @@ public class Contacts implements DeleteListener {
 				if (read != null){
 					read.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Statement or ResultSet", see);
 			}
 			try{
 				if (del != null){
 					del.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.warn("Unable to close Statement", see);
 			}
 		}
@@ -2373,14 +2371,14 @@ public class Contacts implements DeleteListener {
 		try{
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashDistributionList(delete,id,cid,smt);
-		} catch (SQLException sxe){
+		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
 			try{
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement");
 			}
 		}
@@ -2394,14 +2392,14 @@ public class Contacts implements DeleteListener {
 		try {
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashLinks(delete,smt,id,cid);
-		} catch (SQLException sxe){
+		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
 			try{
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement");
 			}
 		}
@@ -2415,14 +2413,14 @@ public class Contacts implements DeleteListener {
 		try{ 
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashImage(delete,smt,id,cid);
-		} catch (SQLException sxe){
+		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
 			try{
 				if (smt != null){
 					smt.close();
 				}
-			} catch (SQLException see){
+			} catch (final SQLException see){
 				LOG.error("Unable to close Statement");
 			}
 		}
@@ -2434,11 +2432,11 @@ public class Contacts implements DeleteListener {
 			if (sqlDelEvent.getType() == DeleteEvent.TYPE_USER){
 				trashAllUserContacts(sqlDelEvent.getId(),sqlDelEvent.getSession(),readCon,writeCon);
 			}
-		}catch (OXException ox){
+		}catch (final OXException ox){
 			throw new DeleteFailedException(ox);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			throw e;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw e;
 		}
 	}
@@ -2490,7 +2488,7 @@ public class Contacts implements DeleteListener {
 					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
 				}
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.create(52, so.getContext().getContextId(), fid, uid);
+					throw EXCEPTIONS.create(52, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
 					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" uid="+uid);
 				}
 				if (contactFolder.getType() == FolderObject.PRIVATE){
@@ -2507,11 +2505,11 @@ public class Contacts implements DeleteListener {
 			}
 			cs.iFtrashAllUserContactsDeletedEntries(del,so.getContext().getContextId(),uid,so);
 			//writecon.commit();
-		} catch (InvalidStateException ox) {
-			throw EXCEPTIONS.create(57, so.getContext().getContextId(),uid);
-		} catch (OXException ox) {
+		} catch (final InvalidStateException ox) {
+			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContext().getContextId()),Integer.valueOf(uid));
+		} catch (final OXException ox) {
 			throw ox;
-		} catch (SQLException se) {
+		} catch (final SQLException se) {
 			/*
 			try {
 				writecon.rollback();
@@ -2519,7 +2517,7 @@ public class Contacts implements DeleteListener {
 				LOG.error("Uable to rollback SQL DELETE", see);
 			}
 			*/
-			throw EXCEPTIONS.create(47,se, so.getContext().getContextId(), uid);
+			throw EXCEPTIONS.create(47,se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(uid));
 		} finally {
 			try{
 				if (rs != null){
@@ -2528,14 +2526,14 @@ public class Contacts implements DeleteListener {
 				if (read != null){
 					read.close();
 				}
-			} catch (SQLException sxe){
+			} catch (final SQLException sxe){
 				LOG.error("Unable to close Statement or ResultSet",sxe);
 			}
 			try{
 				if (del != null){
 					del.close();
 				}
-			} catch (SQLException sxe){
+			} catch (final SQLException sxe){
 				LOG.error("Unable to close Statement or ResultSet",sxe);
 			}
 			/*
@@ -2561,18 +2559,18 @@ public class Contacts implements DeleteListener {
 	        final String[] fields = DBUtils.parseTruncatedFields(se);
 	        final StringBuilder sFields = new StringBuilder();
 	        
-	        for (String field : fields) {
+	        for (final String field : fields) {
 	            sFields.append(field);
 	            sFields.append(", ");
 	        }
 	        sFields.setLength(sFields.length() - 1);
 	        
 	        
-			final OXException oxx = EXCEPTIONS.create(54,se,sFields,se.getDataSize(), se.getTransferSize());
+			final OXException oxx = EXCEPTIONS.create(54,se,sFields,Integer.valueOf(se.getDataSize()), Integer.valueOf(se.getTransferSize()));
 			
 
 	        if (fields.length > 0){
-		        for (String field : fields) {
+		        for (final String field : fields) {
 		        	for (int i =0;i<650;i++){
 		        		if (mapping[i] != null && mapping[i].getDBFieldName().equals(field)){
 		        			oxx.addTruncatedId(i);
@@ -6460,7 +6458,7 @@ public class Contacts implements DeleteListener {
 					if (!rs.wasNull() && t > 0){
 						co.setDistributionList(fillDistributionListArray(co.getObjectID(),user,group,ctx,uc,readcon));
 					}
-				}catch (Exception e){
+				}catch (final Exception e){
 					LOG.error("Unable to load Distributionlist",e);
 				}
 			}
@@ -6497,7 +6495,7 @@ public class Contacts implements DeleteListener {
 					if (!rs.wasNull() && t > 0){
 						co.setLinks(fillLinkArray(co, user, group, ctx, uc, readcon));
 					}
-				}catch (Exception e){
+				}catch (final Exception e){
 					LOG.error("Unable to load Links",e);
 				}
 			}
@@ -6907,7 +6905,7 @@ public class Contacts implements DeleteListener {
 					if (!rs.wasNull() && t > 0){
 						getContactImage(co.getObjectID(),co, ctx.getContextId(), readcon);
 					}
-				}catch (Exception e){ 
+				}catch (final Exception e){ 
 					LOG.error("Image not found", e);
 				}
 			}
@@ -6965,7 +6963,7 @@ public class Contacts implements DeleteListener {
 							co.setImageLastModified(dd);
 						}
 					}
-				}catch (Exception e){
+				}catch (final Exception e){
 					LOG.error("Unable to load Image",e);
 				}	
 			}
