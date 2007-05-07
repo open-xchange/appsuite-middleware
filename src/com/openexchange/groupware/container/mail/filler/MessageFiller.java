@@ -125,22 +125,24 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public class MessageFiller {
 
+	/*
+	 * Constants for rfc822 message headers
+	 */
 	private static final String HDR_X_MAILER = "X-Mailer";
 
 	private static final String HDR_X_PRIORITY = "X-Priority";
 
 	private static final String HDR_CONTENT_TYPE = "Content-Type";
 
-	private static final String ENC_Q = "Q";
-
-	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
-
 	private static final String HDR_CONTENT_ID = "Content-ID";
 
-	private static final String STR_UTF8 = "UTF-8";
+	private static final String HDR_DISP_TO = "Disposition-Notification-To";
 
-	private static final String STR_EMPTY = "";
+	private static final String HDR_MIME_VERSION = "MIME-Version";
 
+	/*
+	 * Constants for MIME types
+	 */
 	private static final String MIME_TEXT = "text/";
 
 	private static final String MIME_MESSAGE_RFC822 = "message/rfc822";
@@ -153,20 +155,25 @@ public class MessageFiller {
 
 	private static final String MIME_TEXT_HTML = "text/html";
 
+	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+	/*
+	 * Constants for Multipart types
+	 */
 	private static final String MP_ALTERNATIVE = "alternative";
 
 	private static final String MP_RELATED = "related";
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MessageFiller.class);
+	/*
+	 * Other string constants
+	 */
+	private static final String ENC_Q = "Q";
 
-	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
+	private static final String STR_UTF8 = "UTF-8";
 
-	private static final String HDR_DISP_TO = "Disposition-Notification-To";
+	private static final String STR_EMPTY = "";
 
 	private static final String STR_CHARSET = "charset";
-
-	private static final String HDR_MIME_VERSION = "MIME-Version";
 
 	private static final String VERSION = "1.0";
 
@@ -177,6 +184,11 @@ public class MessageFiller {
 	private static final String PAT_HTML_CT = "text/html; charset=#CS#";
 
 	private static final String VCARD_ERROR = "Error while appending user VCard";
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MessageFiller.class);
+
+	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
 
 	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img *src=\"cid:)(.+?)(\" */?>)",
 			Pattern.CASE_INSENSITIVE);
@@ -546,6 +558,7 @@ public class MessageFiller {
 			final List<String> cidList = getContentIDs(mailText);
 			final int size = cidList.size();
 			final Iterator<String> cidIter = cidList.iterator();
+			final StringBuilder cidBuilder = new StringBuilder();
 			NextImg: for (int a = 0; a < size; a++) {
 				final String cid = cidIter.next();
 				/*
@@ -565,8 +578,9 @@ public class MessageFiller {
 				relatedImageBodyPart.setFileName(ifds.getName());
 				relatedImageBodyPart.setText(ifds.getName());
 				relatedImageBodyPart.setDataHandler(new DataHandler(ifds));
-				relatedImageBodyPart.setHeader(HDR_CONTENT_ID, new StringBuilder().append('<').append(cid).append('>')
+				relatedImageBodyPart.setHeader(HDR_CONTENT_ID, cidBuilder.append('<').append(cid).append('>')
 						.toString());
+				cidBuilder.setLength(0);
 				relatedImageBodyPart.setDisposition(Part.INLINE);
 				relatedMultipart.addBodyPart(relatedImageBodyPart);
 				final BodyPart altBodyPart = new MimeBodyPart();

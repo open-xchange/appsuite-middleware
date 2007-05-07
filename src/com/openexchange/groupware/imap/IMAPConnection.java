@@ -132,7 +132,7 @@ public interface IMAPConnection {
 	public boolean isConnected() throws javax.mail.MessagingException;
 
 	/**
-	 * Performs an <b>unsafe</b> safe check if it is connected. This is usually
+	 * Performs an <b>unsafe</b> check if it is connected. This is usually
 	 * usefull if you want to check for inconnectivity and do not want the
 	 * in-deep check of corresponding {@link #isConnected()} method
 	 * 
