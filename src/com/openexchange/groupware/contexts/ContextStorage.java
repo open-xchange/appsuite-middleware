@@ -76,15 +76,7 @@ public abstract class ContextStorage {
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
-        if (impl != null) { 
-           return impl;    
-        }
-        try {
-            init();
-        } catch (ContextException ex) {
-            ex.printStackTrace();
-        }
-        return impl;    
+        return impl;
     }
 
     /**
@@ -132,13 +124,14 @@ public abstract class ContextStorage {
      */
     protected abstract ContextExtended loadContext(int contextId)
         throws ContextException;
-    
+
     /**
-     * Invalidates the context object in cache(s)
+     * Invalidates the context object in cache(s).
      * @param contextId unique identifier of the context to invalidate
      * @throws ContextException if invalidating the context fails
      */
-    public abstract void invalidateContext(int contextId) throws ContextException;
+    public abstract void invalidateContext(int contextId)
+        throws ContextException;
 
     /**
      * Gives a list of all context ids which are stored in the config database.
