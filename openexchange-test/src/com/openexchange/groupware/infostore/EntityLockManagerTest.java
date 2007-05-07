@@ -76,6 +76,15 @@ public class EntityLockManagerTest extends TestCase {
 		assertEquals(LockManager.Type.WRITE, lock.getType());
 	}
 	
+	public void testIsLocked() throws Exception {
+		assertFalse("Should not be locked", lockManager.isLocked(entity, ctx, user, userConfig));
+		
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		clean.add(lockId);
+		
+		assertTrue("Should be locked", lockManager.isLocked(entity, ctx, user, userConfig));
+	}
+	
 	public void testUnlock() throws Exception {
 		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
 		clean.add(lockId);

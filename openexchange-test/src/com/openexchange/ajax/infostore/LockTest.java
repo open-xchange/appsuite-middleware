@@ -106,6 +106,14 @@ public class LockTest extends InfostoreAJAXTest {
 		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
 		assertTrue(res.hasError());
 		
+		// Bug #????
+		// Object may not be moved
+		
+		int userId2 = FolderTest.getUserId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
+		int folderId2 = FolderTest.getMyInfostoreFolder(getSecondWebConversation(),getHostName(),sessionId2,userId2).getObjectID();
+		
+		res = update(getSecondWebConversation(),getHostName(),sessionId2, clean.get(0), System.currentTimeMillis(), m("folder_id" , ""+folderId2));
+		assertTrue(res.hasError());
 		
 		// Object may not be removed
 		int[] notDeleted = delete(getSecondWebConversation(),getHostName(),sessionId2, System.currentTimeMillis(), new int[][]{{folderId, clean.get(0)}});
@@ -172,6 +180,10 @@ public class LockTest extends InfostoreAJAXTest {
 		
 		res = lock(getSecondWebConversation(),getHostName(), sessionId2, clean.get(0));
 		assertNoError(res);
+		
+		// Owner may not edit
+		res = update(getWebConversation(),getHostName(),sessionId, clean.get(0), System.currentTimeMillis(), m("title" , "Hallo"));
+		assertTrue(res.hasError());
 		
 		// Owner may unlock
 		res = unlock(getWebConversation(),getHostName(), sessionId, clean.get(0));
