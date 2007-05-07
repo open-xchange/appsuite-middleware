@@ -75,7 +75,7 @@ import com.openexchange.groupware.update.exception.UpdateException;
  * @author d7
  * @author cutmasta
  */
-public class OXToolMySQLStorage extends OXToolSQLStorage {
+public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
     private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
 
