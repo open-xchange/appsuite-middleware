@@ -89,6 +89,11 @@ msgstr ""
 msgid "AJP Connection is not set to status \"ASSIGNED\""
 msgstr ""
 
+msgid ""
+"AJP Server socket could not be bind to port %d. Probably another process is "
+"already listening on this port."
+msgstr ""
+
 msgid "Account \"%s\" is locked."
 msgstr ""
 
@@ -166,6 +171,10 @@ msgid "An SQL error occurred while creating table 'version': %1$s."
 msgstr ""
 
 msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
+msgstr ""
+
+msgid ""
+"An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr ""
 
 msgid "An SQL error occurred while performing task SpamUpdateTask: %1$s."
@@ -885,7 +894,9 @@ msgid ""
 "later"
 msgstr ""
 
-msgid "Mail folder \"%s\" could not be created"
+msgid ""
+"Mail folder \"%s\" could not be created (maybe due to insufficient "
+"permission on parental folder %s)"
 msgstr ""
 
 msgid "Mail folder cannot be created. Name must not contain character '%s'"
@@ -915,6 +926,10 @@ msgstr ""
 msgid ""
 "Message has been successfully sent, but a copy was not placed in your sent "
 "folder due to exceeded quota."
+msgstr ""
+
+msgid ""
+"Message move aborted for user %s. Source and destination folder are equal: %s"
 msgstr ""
 
 msgid "Message(s) %s could not be found in folder %s"
@@ -963,6 +978,9 @@ msgid "Missing payload data in client's body chunk package"
 msgstr ""
 
 msgid "Missing property %1$s in server.properties."
+msgstr ""
+
+msgid "Missing property %1$s in system.properties."
 msgstr ""
 
 msgid "Missing property AJP_JVM_ROUTE in file \"ajp.properties\""
@@ -1388,9 +1406,7 @@ msgstr ""
 msgid "This document is locked."
 msgstr ""
 
-msgid ""
-"This folder is a virtual folder used for displaying folders other users "
-"share with you. It cannot contain documents."
+msgid "This folder is a virtual folder. It cannot contain documents."
 msgstr ""
 
 msgid ""
@@ -1798,6 +1814,10 @@ msgstr ""
 msgid "You are not allowed to update this item."
 msgstr ""
 
+msgid ""
+"You can not move one element of a recurring appointment into another folder."
+msgstr ""
+
 msgid "You cannot unlock this document."
 msgstr ""
 
@@ -1816,6 +1836,9 @@ msgstr ""
 
 msgid ""
 "You do not have sufficient permissions to create objects in this folder."
+msgstr ""
+
+msgid "You do not have sufficient permissions to read objects in this folder."
 msgstr ""
 
 msgid "You do not have sufficient read permissions."
