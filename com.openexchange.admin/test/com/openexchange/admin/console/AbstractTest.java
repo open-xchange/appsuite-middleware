@@ -62,6 +62,8 @@ public abstract class AbstractTest {
     
     protected static String OPTION_CONTEXT_ADMIN_USER = "--adminuser=oxadmin";
     protected static String OPTION_CONTEXT_ADMIN_PWD = "--adminpass=secret";
+    protected static String OPTION_SUPER_ADMIN_USER = "--adminuser=oxadminmaster";
+    protected static String OPTION_SUPER_ADMIN_PWD = "--adminpass=secret";
     protected static String OPTION_USER_PASSWORD = "--password=foo-user-pass";
     
     protected static String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
