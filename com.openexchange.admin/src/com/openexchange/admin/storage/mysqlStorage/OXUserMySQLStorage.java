@@ -73,7 +73,6 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.UserDataHandler;
 
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -97,7 +96,7 @@ import java.util.Iterator;
  * @author cutmasta
  * @author d7
  */
-public class OXUserMySQLStorage extends OXUserSQLStorage {
+public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefaultValues {
 
     private class MethodAndNames {
         private Method method;
@@ -639,9 +638,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage {
             final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         PreparedStatement return_db_id = null;
-        // TODO: this must be defined somewhere else
-        final int NOBODY  = 65534;
-        final int NOGROUP = 65534;
         final String LOGINSHELL = "/bin/bash";
         
         try {

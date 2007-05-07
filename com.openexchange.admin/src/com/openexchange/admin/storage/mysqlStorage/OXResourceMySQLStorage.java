@@ -74,7 +74,7 @@ import com.openexchange.server.DBPoolingException;
  * @author d7
  * @author cutmasta
  */
-public class OXResourceMySQLStorage extends OXResourceSQLStorage {
+public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMySQLDefaultValues {
 
     private final static Log log = LogFactory.getLog(OXResourceMySQLStorage.class);
 
