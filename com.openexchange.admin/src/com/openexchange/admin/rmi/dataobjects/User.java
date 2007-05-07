@@ -2253,7 +2253,7 @@ public class User implements Serializable, Cloneable {
             try {
                 final Object ob = f.get(this);
                 final String tname = f.getName();
-                if (ob != null && !tname.equals("serialVersionUID") && !tname.equals("extensions") && !tname.endsWith("set")) {
+                if (ob != null && !tname.equals("serialVersionUID") && !tname.equals("extensions") && !tname.endsWith("set") && !tname.equalsIgnoreCase("password")) {
                     ret.append("  ");
                     ret.append(tname);
                     ret.append(": ");
