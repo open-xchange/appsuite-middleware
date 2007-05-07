@@ -64,7 +64,9 @@ public class WebdavHeadAction extends AbstractAction {
 			return;
 		}
 		res.setHeader("Content-Type", resource.getContentType());
-		res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : String.valueOf(overrideLength));
+		if(!resource.isCollection()) {
+			res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : String.valueOf(overrideLength));
+		}
 		res.setHeader("ETag", resource.getETag());
 		res.setHeader("Accept-Ranges", "bytes");
 
