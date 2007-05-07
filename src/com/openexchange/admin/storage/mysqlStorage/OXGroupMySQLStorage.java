@@ -77,7 +77,7 @@ import org.apache.commons.logging.LogFactory;
  * @author d7
  * 
  */
-public class OXGroupMySQLStorage extends OXGroupSQLStorage {
+public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
     private final static Log log = LogFactory.getLog(OXGroupMySQLStorage.class);
 
@@ -325,31 +325,20 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage {
             }
             
             
-            prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified) VALUES (?,?,?,?,?);");
+            prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified,gidnumber) VALUES (?,?,?,?,?,?);");
             prep_insert.setInt(1, context_ID);
             prep_insert.setInt(2, groupID);
             prep_insert.setString(3, identifier);
             prep_insert.setString(4, displayName);
             prep_insert.setLong(5, System.currentTimeMillis());
+            if (-1 != gid_number) {
+                prep_insert.setInt(6, gid_number);
+            } else {
+                prep_insert.setInt(6, NOGROUP);
+            }
             prep_insert.executeUpdate();
             prep_insert.close();
             
-            if(gid_number!=-1){
-                prep_insert = con.prepareStatement("UPDATE " +
-                                "groups " +
-                                "SET " +
-                                "gidnumber = ? " +
-                                "WHERE " +
-                                "cid = ? " +
-                                "AND " +
-                                "id = ?");
-                prep_insert.setInt(1, gid_number );
-                prep_insert.setInt(2, context_ID);
-                prep_insert.setInt(3, groupID);
-                prep_insert.executeUpdate();
-                prep_insert.close();
-            }
-                
             con.commit();
             
             retval = groupID;
