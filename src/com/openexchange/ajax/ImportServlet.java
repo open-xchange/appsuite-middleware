@@ -87,14 +87,16 @@ import com.openexchange.groupware.upload.UploadFile;
 		Category.USER_INPUT, 
 		Category.USER_INPUT,
 		Category.USER_INPUT,
-		Category.USER_INPUT}, 
-	desc = { "" , "" , "", ""}, 
-	exceptionId = { 0,1,2,3 }, 
+		Category.USER_INPUT,
+		Category.CODE_ERROR}, 
+	desc = { "" , "" , "", "" , ""}, 
+	exceptionId = { 0,1,2,3,4 }, 
 	msg = { 
 		"Can only handle one file, not %s",
 		"Unknown format: %s",
 		"Uploaded file is of type %s, cannot handle that",
-		"Empty file uploaded."})
+		"Empty file uploaded.",
+		"Could not send results of importing process."})
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.IMPORTSERVLET, 
 		component=Component.IMPORT_EXPORT)
@@ -119,6 +121,7 @@ public class ImportServlet extends ImportExport {
 	@Override
 	@SuppressWarnings({ "unchecked" })
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+		final Response resObj = new Response();
 		try {
 			//checking format
 			final String formatStr = DataServlet.parseMandatoryStringParameter(req, PARAMETER_ACTION);
@@ -162,21 +165,23 @@ public class ImportServlet extends ImportExport {
 			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
 			
 			final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
-			
-			jsonWriter.array();
-			for (int a = 0; a < importResult.size(); a++) {
-				importExportWriter.writeObject(importResult.get(a));
+			try {
+				jsonWriter.array();
+				for (int a = 0; a < importResult.size(); a++) {
+					importExportWriter.writeObject(importResult.get(a));
+				}
+				jsonWriter.endArray();
+				
+				//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
+				final String content = stringWriter.toString();
+				
+				resObj.setData(new JSONArray(content) );
+				
+				sendResponse(resObj.getJSON(), resp);
+			} catch (JSONException e){
+				LOG.warn(e);
+				throw EXCEPTIONS.create(4);
 			}
-			jsonWriter.endArray();
-			
-			//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
-			final String content = stringWriter.toString();
-			final Response resObj = new Response();
-			resObj.setData(new JSONArray(content) );
-			
-			sendResponse(resObj.getJSON(), resp);
-		} catch (JSONException e) {
-			LOG.error("Could not get JSON code of following exception: " , e);
 		} catch (AbstractOXException e){
 			LOG.error("unknown exception: " , e);
 			sendResponse(e, resp);
@@ -201,6 +206,11 @@ public class ImportServlet extends ImportExport {
 			close(w);
 		} catch (IOException e) {
 			LOG.warn(e);
+			try {
+				sendError(resp);
+			} catch (IOException e1) {
+				LOG.error("Could not even send a HTTP error:", e1);
+			}
 		}
 	}
 	
@@ -215,7 +225,12 @@ public class ImportServlet extends ImportExport {
 		try {
 			sendResponse(error.getJSON(), resp);
 		} catch (JSONException e) {
-			LOG.error("Could not get JSON code of following exception" , exception);
+			LOG.warn(e);
+			try {
+				sendError(resp);
+			} catch (IOException e1) {
+				LOG.error("Could not even send a HTTP error:", e1);
+			}
 		}
 	}
 

@@ -1,3 +1,10 @@
+* 2007-05-07 - tobias.prinz@open-xchange.com
+
+  - Bugfix #7105: Parser has become more tolerant to different amounts of 
+    cells per line. Fixes the reported exception but not the basic problem 
+    of Outlook imports.
+  - Worked on response handling of ImportServlet. Should work now in any case.
+  
 * 2007-05-07 - marcus.klein@open-xchange.com
 
   - Bugfix #6127: Fixed a small coding error causing the complete request to

@@ -118,6 +118,7 @@ public class CSVContactImporter implements Importer {
 			throw EXCEPTIONS.create(0);
 		}
 		folder = folders.get(0);
+
 		if(! format.equals(Format.CSV) ){
 			return false;
 		}
@@ -158,12 +159,12 @@ public class CSVContactImporter implements Importer {
 		}
 		final String folder = folders.get(0);
 		final String csvStr = transformInputStreamToString(is);
-		final CSVParser csvParser = new CSVParser();
+		final CSVParser csvParser = getCSVParser();
 		final List <List <String> >csv = csvParser.parse(csvStr);
 		
 		final Iterator< List<String> > iter = csv.iterator();
 		//get header fields
-		final List<String> fields = iter.next();
+		final List<String> fields = (List<String>) iter.next();
 		if ( ! _atLeastOneCorrectField(fields) ){
 			throw EXCEPTIONS.create(4);
 		}
@@ -181,7 +182,12 @@ public class CSVContactImporter implements Importer {
 		return results;
 	}
 	
-	protected boolean _atLeastOneCorrectField(final List<String> fields) {
+	protected CSVParser getCSVParser() {
+		return new CSVParser();
+	}
+
+
+	protected boolean _atLeastOneCorrectField(List<String> fields) {
 		for(final String fieldname : fields){
 			if(getRelevantField(fieldname) != null){
 				return true;

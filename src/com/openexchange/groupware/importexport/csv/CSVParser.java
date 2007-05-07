@@ -87,12 +87,20 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 		"Illegal state: Found data after presumed last line."})
 public class CSVParser {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVParser.class);
-	private static boolean isEscaping;
+	private boolean isEscaping;
+	protected boolean isTolerant;
 	public static final char LINE_DELIMITER = '\n';
 	public static final char CELL_DELIMITER = ',';
 	public static final char ESCAPER = '"';
+	public static final int STARTING_LENGTH = -1;
 	private List<Integer> unparsableLines;
 	private String file;
+	private int numberOfCells, currentLineNumber;
+	private StringBuilder currentCell = new StringBuilder();
+	private List<String> currentLine = new LinkedList<String>();
+	private List< List<String> > structure = new LinkedList<List <String> >();
+	private int pointer;
+	private char[] fileAsArray;
 	
 	public CSVParser(String file){
 		this();
@@ -100,7 +108,26 @@ public class CSVParser {
 	}
 	
 	public CSVParser(){
-		this.unparsableLines = new LinkedList<Integer>();
+		unparsableLines = new LinkedList<Integer>();
+		isTolerant = false;
+		numberOfCells = STARTING_LENGTH;
+		currentLineNumber = 0;
+		currentCell = new StringBuilder();
+		currentLine = new LinkedList<String>();
+		structure = new LinkedList<List <String> >();
+		
+	}
+	
+	public boolean isTolerant() {
+		return isTolerant;
+	}
+
+	/**
+	 * Sets the parser to behave tolerant to broken CSV formats
+	 * @param isTolerant
+	 */
+	public void setTolerant(boolean isTolerant) {
+		this.isTolerant = isTolerant;
 	}
 
 	public List< List<String> > parse(String str) throws ImportExportException{
@@ -115,60 +142,27 @@ public class CSVParser {
 		}
 		file = wellform(file);
 		//converting to char array to make it iterable
-		char[] arr = file.toCharArray();
+		fileAsArray = file.toCharArray();
 		//preparations
-		int numberOfCells = -1, currentLineNumber = 0;
-		StringBuilder currentCell = new StringBuilder();
-		List<String> currentLine = new LinkedList<String>();
-		List< List<String> > structure = new LinkedList<List <String> >();
 		
 		
-		for(int i = 0; i < arr.length; i++){
-			switch(arr[i]){
+		pointer = 0;
+		for(; pointer < fileAsArray.length; pointer++){
+			switch(fileAsArray[pointer]){
 				case LINE_DELIMITER: 
-					if(isEscaping){
-						currentCell.append(LINE_DELIMITER);
-					} else {
-						currentLineNumber++;
-						currentLine.add( currentCell.toString().trim() );
-						currentCell = new StringBuilder();
-						if(numberOfCells == -1 ){
-							numberOfCells = currentLine.size();
-							structure.add(currentLine);
-						} else if(numberOfCells != currentLine.size() ){
-							throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
-							//unparsableLines.add(currentLineNumber-1);
-						} else {
-							structure.add(currentLine);
-						}
-						currentLine = new LinkedList<String>();
-					}
+					handleLineDelimiter();
 				break;
 				
 				case ESCAPER: 
-					if(isEscaping){
-						if( (i+1) < arr.length && arr[i+1] == ESCAPER){
-							currentCell.append(ESCAPER);
-							i++;
-						} else {
-							isEscaping = false;
-						}
-					} else {
-						isEscaping = true;
-					}
+					handleEscaping();
 				break;
 				
 				case CELL_DELIMITER:
-					if(isEscaping){
-						currentCell.append(CELL_DELIMITER);
-					} else {
-						currentLine.add( currentCell.toString().trim() );
-						currentCell = new StringBuilder();
-					}
+					handleCellDelimiter();
 				break;
 				
 				default:
-					currentCell.append(arr[i]);
+					handleDefault();
 				break;
 			}
 		}
@@ -180,6 +174,67 @@ public class CSVParser {
 		return structure;
 	}
 	
+	protected void handleDefault()  throws ImportExportException {
+		currentCell.append(fileAsArray[pointer]);
+	}
+
+	protected void handleCellDelimiter() throws ImportExportException {
+		if(isEscaping){
+			currentCell.append(CELL_DELIMITER);
+		} else {
+			if( (numberOfCells == STARTING_LENGTH) ||
+				(numberOfCells != STARTING_LENGTH && currentLine.size() < numberOfCells)){
+				currentLine.add( currentCell.toString().trim() );
+				currentCell = new StringBuilder();
+			} else {
+				if(! isTolerant()){
+					throw EXCEPTIONS.create(0);
+				}
+			}
+		}
+	}
+
+	protected void handleEscaping() throws ImportExportException {
+		if(isEscaping){
+			if( (pointer+1) < fileAsArray.length && fileAsArray[pointer+1] == ESCAPER){
+				currentCell.append(ESCAPER);
+				pointer++;
+			} else {
+				isEscaping = false;
+			}
+		} else {
+			isEscaping = true;
+		}
+	}
+
+	protected void handleLineDelimiter() throws ImportExportException {
+		if(isEscaping){
+			currentCell.append(LINE_DELIMITER);
+		} else {
+			currentLineNumber++;
+			if(currentLine.size() < numberOfCells || numberOfCells == STARTING_LENGTH){
+				currentLine.add( currentCell.toString().trim() );
+			} else {
+				if(! isTolerant() )
+					throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+			}
+			currentCell = new StringBuilder();
+			if(numberOfCells == STARTING_LENGTH ){
+				numberOfCells = currentLine.size();
+				structure.add(currentLine);
+			} else if(numberOfCells != currentLine.size() && !isTolerant() ){
+				throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+				//unparsableLines.add(currentLineNumber-1);
+			} else {
+				for(int j = currentLine.size(); j < numberOfCells; j++){
+					currentLine.add("");
+				}
+				structure.add(currentLine);
+			}
+			currentLine = new LinkedList<String>();
+		}
+	}
+
 	public List<Integer> getUnparsableLineNumbers(){
 		return this.unparsableLines;
 	}
@@ -202,4 +257,5 @@ public class CSVParser {
 		}
 		return str;
 	}
+	
 }
