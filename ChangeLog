@@ -7,7 +7,7 @@
 
  - Nearly every log statement which uses a level less than 'error'
    surrounded with an if-statement checking log level
- - Bugfix #7132: Added a flag a monitor connection state and check it's
+ - Bugfix #7132: Added a flag to monitor connection state and check it's
    value on closure for proper counting
  - Mighty code review
 
