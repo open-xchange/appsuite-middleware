@@ -114,33 +114,34 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		final String insertedCSV = IMPORTED_CSV;
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
+		try {
 		
-		
-		//test: import
-		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-		WebConversation webconv = getWebConversation();
-		WebRequest req = new PostMethodWebRequest(
-				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "contacts.csv", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		
-		JSONObject response = extractFromCallback( webRes.getText() );
-		
-		//test: export
-		webconv =  getWebConversation();
-		req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
-		webRes = webconv.sendRequest(req);
-		is = webRes.getInputStream();
-		String resultingCSV = AbstractCSVContactTest.readStreamAsString(is);
-		//finally: checking
-		CSVParser parser1 = new CSVParser(insertedCSV);
-		CSVParser parser2 = new CSVParser(resultingCSV);
-		assertEquals("input == output ?" , parser1.parse() , parser2.parse());
-		
-		//clean up
-		removeFolder(folderId);
+			//test: import
+			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+			WebConversation webconv = getWebConversation();
+			WebRequest req = new PostMethodWebRequest(
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+					);
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "contacts.csv", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			
+			JSONObject response = extractFromCallback( webRes.getText() );
+			
+			//test: export
+			webconv =  getWebConversation();
+			req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
+			webRes = webconv.sendRequest(req);
+			is = webRes.getInputStream();
+			String resultingCSV = AbstractCSVContactTest.readStreamAsString(is);
+			//finally: checking
+			CSVParser parser1 = new CSVParser(insertedCSV);
+			CSVParser parser2 = new CSVParser(resultingCSV);
+			assertEquals("input == output ?" , parser1.parse() , parser2.parse());
+		} finally {
+			//clean up
+			removeFolder(folderId);
+		}
 	}
 
 	public void testVCardRoundtrip() throws Exception{
@@ -149,51 +150,55 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		final Format format = Format.VCARD;
 		final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		
-		
-		//test: import
-		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-		WebConversation webconv = getWebConversation();
-		WebRequest req = new PostMethodWebRequest(
-				getUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "contact.vcf", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		
-		JSONObject response = extractFromCallback( webRes.getText() );
-		
-		//test: export
-		webconv =  getWebConversation();
-		req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
-		webRes = webconv.sendRequest(req);
-		is = webRes.getInputStream();
-		String resultingVCard = AbstractCSVContactTest.readStreamAsString(is);
-		//finally: checking
-		for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
-			assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
+		try {
+			//test: import
+			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+			WebConversation webconv = getWebConversation();
+			WebRequest req = new PostMethodWebRequest(
+					getUrl(IMPORT_SERVLET, folderId, format)
+					);
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "contact.vcf", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			
+			JSONObject response = extractFromCallback( webRes.getText() );
+			
+			//test: export
+			webconv =  getWebConversation();
+			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
+			webRes = webconv.sendRequest(req);
+			is = webRes.getInputStream();
+			String resultingVCard = AbstractCSVContactTest.readStreamAsString(is);
+			//finally: checking
+			for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
+				assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
+			}
+		} finally {
+			//clean up
+			removeFolder(folderId);
 		}
-		
-		//clean up
-		removeFolder(folderId);
 	}
 
 	public void testCSVBrokenFile() throws Exception{
 		//preparations
-		final String insertedCSV = "bla\nbla,bla";
+		final String insertedCSV = "bla1\nbla2,bla3";
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
-		//test: import
-		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-		WebConversation webconv = getWebConversation();
-		WebRequest req = new PostMethodWebRequest(
-				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "contacts.csv", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		JSONObject response = extractFromCallback( webRes.getText() );
-		assertEquals("Must contain error ", "I_E-1000", response.optString("code"));
+		try {
+			//test: import
+			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+			WebConversation webconv = getWebConversation();
+			WebRequest req = new PostMethodWebRequest(
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+					);
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "contacts.csv", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			JSONObject response = extractFromCallback( webRes.getText() );
+			assertEquals("Must contain error.", "I_E-1000", response.optString("code"));
+		} finally {
+			removeFolder(folderId);
+		}
 	}
 	
 	public void testUnknownCSVFormat() throws Exception{
@@ -202,17 +207,21 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
 		
-		//test: import
-		InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-		WebConversation webconv = getWebConversation();
-		WebRequest req = new PostMethodWebRequest(
-				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "contacts.csv", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		JSONObject response = extractFromCallback( webRes.getText() );
-		assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
+		try {
+			//test: import
+			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+			WebConversation webconv = getWebConversation();
+			WebRequest req = new PostMethodWebRequest(
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+					);
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "contacts.csv", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			JSONObject response = extractFromCallback( webRes.getText() );
+			assertEquals("Must contain error ", "I_E-0804", response.optString("code"));
+		} finally {
+			removeFolder(folderId);
+		}
 	}
 	
 	public void testEmptyFileUploaded() throws Exception{
@@ -220,15 +229,18 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		WebConversation webconv = getWebConversation();
 		final Format format = Format.CSV;
 		final int folderId = createFolder("csv-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
-		WebRequest req = new PostMethodWebRequest(
-				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "empty.vcs", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		JSONObject response = extractFromCallback( webRes.getText() );
-		assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+		try {
+			WebRequest req = new PostMethodWebRequest(
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
+					);
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "empty.vcs", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			JSONObject response = extractFromCallback( webRes.getText() );
+			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+		} finally {
+			removeFolder(folderId);
+		}
 	}
 	
 	public void testIcalMessage() throws Exception{
@@ -236,15 +248,17 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 		WebConversation webconv = getWebConversation();
 		final Format format = Format.ICAL;
 		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
-		WebRequest req = new PostMethodWebRequest(
-				getCSVColumnUrl(IMPORT_SERVLET, folderId, format)
-				);
-		((PostMethodWebRequest)req).setMimeEncoded(true);
-		req.selectFile("file", "empty.ics", is, format.getMimeType());
-		WebResponse webRes = webconv.getResource(req);
-		JSONObject response = extractFromCallback( webRes.getText() );
-		assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+		try {
+			WebRequest req = new PostMethodWebRequest(
+					getCSVColumnUrl(IMPORT_SERVLET, folderId, format));
+			((PostMethodWebRequest)req).setMimeEncoded(true);
+			req.selectFile("file", "empty.ics", is, format.getMimeType());
+			WebResponse webRes = webconv.getResource(req);
+			JSONObject response = extractFromCallback( webRes.getText() );
+			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
+		} finally {
+			removeFolder(folderId);
+		}
 	}
 	
 	

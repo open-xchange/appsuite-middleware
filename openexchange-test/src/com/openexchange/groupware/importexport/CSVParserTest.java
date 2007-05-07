@@ -72,7 +72,7 @@ public class CSVParserTest {
 	
 	private static final String UNESCAPED_TEST = "title 1, title 2, title3\ncontent 1, content2, content3";
 	private static final String ESCAPED_TEST = "\"title 1\", \"title 2\", \"title3\"\r\n\"content \"\"1\"\"\", \"content,2\", \"content\n3\"";
-	private static final String UNEVEN_TEST = "title1, title 2\ncontent 1\ncontent1, content2,content3";
+	private static final String UNEVEN_TEST = "title1, title 2\ncontent 11\ncontent21, content22,content23";
 	private List< List<String> > result;
 	private CSVParser parser;
 	
@@ -83,47 +83,72 @@ public class CSVParserTest {
 		
 		parser = new CSVParser(UNEVEN_TEST );
 		assertEquals("title1, title 2",parser.getLine(0));
-		assertEquals("content 1",parser.getLine(1));
-		assertEquals("content1, content2,content3",parser.getLine(2));
+		assertEquals("content 11",parser.getLine(1));
+		assertEquals("content21, content22,content23",parser.getLine(2));
 	}
 	
-	@Test public void parseUnescaped() throws ImportExportException{
-		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3);
-		doAsserts(UNESCAPED_TEST, "Un-escaped without final linebreak",2,3);
+	 @Test public void parseUnescaped() throws ImportExportException{
+		doAsserts(UNESCAPED_TEST + '\n' , "Un-escaped with final linebreak",2,3, false);
+		doAsserts(UNESCAPED_TEST, "Un-escaped without final linebreak",2,3, false);
 	}
 	
-	@Test public void parseEscaped() throws ImportExportException{
-		doAsserts(ESCAPED_TEST + '\n' , "Escaped with final linebreak",2,3);
-		doAsserts(ESCAPED_TEST, "Escaped without final linebreak",2,3);
+	 @Test public void parseEscaped() throws ImportExportException{
+		doAsserts(ESCAPED_TEST + '\n' , "Escaped with final linebreak",2,3, false);
+		doAsserts(ESCAPED_TEST, "Escaped without final linebreak",2,3, false);
 	}
 	
-	@Test public void parseMixed() throws ImportExportException{
-		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST , "Un-escaped with final linebreak",4,3);
-		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3);
+	 @Test public void parseMixed() throws ImportExportException{
+		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST , "Un-escaped with final linebreak",4,3, false);
+		doAsserts(UNESCAPED_TEST + '\n' + ESCAPED_TEST + '\n', "Un-escaped without final linebreak",4,3, false);
 	}
 	
-	@Test public void parseBugged() {
+	 @Test public void parseBuggedIntolerant() {
 		parser = new CSVParser(UNEVEN_TEST );
+		parser.setTolerant(false);
 		try {
 			parser.parse();
 		} catch (ImportExportException e){
 			assertTrue("Exception caught" , true);
+			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
 			return;
 		}
 		fail("Unparsable CSV given, but no exception thrown!");
-//		List<Integer> unparsableLines = parser.getUnparsableLineNumbers();
-//		assertEquals("Should have two unparsable lines", unparsableLines.size(), 2);
-//		assertEquals("First wrong line" , "content 1", parser.getLine(unparsableLines.get(0)));
-//		assertEquals("Second wrong line" , "content1, content2,content3", parser.getLine(unparsableLines.get(1)));
-		
+	}
+
+	 @Test public void parseBuggedIntolerant2() {
+		String bla = "1\n2,3"; 
+		parser = new CSVParser(bla );
+		parser.setTolerant(false);
+		try {
+			parser.parse();
+		} catch (ImportExportException e){
+			assertTrue("Exception caught" , true);
+			assertEquals("Correct exception thrown" , "I_E-1000" , e.getErrorCode());
+			return;
+		}
+		fail("Unparsable CSV given, but no exception thrown!");
+	}
+	 
+	@Test public void parseBuggedTolerant() throws ImportExportException {
+		List<List<String>> result = doAsserts(UNEVEN_TEST , "Bugged lines with tolerant parser", 3, 2, true);
+		assertEquals("checking last element" , "content22" , result.get(2).get(1));
 	}
 	
-	protected void doAsserts(String line, String comment, int lines, int cells) throws ImportExportException{
+	@Test public void umlauts() throws ImportExportException {
+		final String umlaut = "Ümlaut title\nSonderßeichen cell";
+		List<List<String>> result = doAsserts(umlaut, "Checking umlauts", 2, 1, false);
+		assertEquals("Ü in title", "Ümlaut title" , result.get(0).get(0));
+		assertEquals("ß in cell", "Sonderßeichen cell" , result.get(1).get(0));
+	}
+	
+	protected List<List<String>> doAsserts(String line, String comment, int lines, int cells, boolean isTolerant) throws ImportExportException{
 		parser = new CSVParser(line);
+		parser.setTolerant(isTolerant);
 		result = parser.parse();
-		assertEquals(comment + ":: Number of lines",result.size(), lines);
+		assertEquals(comment + ":: Number of lines", lines, result.size());
 		for(List<String> currList : result){
-			assertEquals(comment + ":: Number of cells", currList.size() , cells);
+			assertEquals(comment + ":: Number of cells", cells, currList.size());
 		}
+		return result;
 	}
 }
