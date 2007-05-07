@@ -1,3 +1,8 @@
+* 2007-05-07 - marcus.klein@open-xchange.com
+
+  - Bugfix #6127: Fixed a small coding error causing the complete request to
+    fail.
+
 * 2007-05-07 - thorben.betten@open-xchange.com
 
  - Nearly every log statement which uses a level less than 'error'

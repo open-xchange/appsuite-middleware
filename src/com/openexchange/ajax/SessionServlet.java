@@ -214,7 +214,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     debug.append(cookie.getName());
                     debug.append(',');
                 }
-                debug.setCharAt(debug.length(), '.');
+                debug.setCharAt(debug.length() - 1, '.');
                 LOG.debug(debug.toString());
             }
             throw EXCEPTION.create(2);
