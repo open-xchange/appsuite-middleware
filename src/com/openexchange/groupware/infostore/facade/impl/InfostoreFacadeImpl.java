@@ -1174,7 +1174,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return getDocuments(folderId, columns, null, 0, ctx, user, userConfig);
 	}
 
-	@OXThrows(category = Category.USER_INPUT, desc = "The user may not create objects in the given folder. ", exceptionId = 7, msg = "You do not have sufficient permissions to create objects in this folder.")
+	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 7, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public TimedResult getDocuments(long folderId, Metadata[] columns,
 			Metadata sort, int order, Context ctx, User user,
 			UserConfiguration userConfig) throws OXException {
@@ -1218,7 +1218,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return getVersions(id, columns, null, 0, ctx, user, userConfig);
 	}
 
-	@OXThrows(category = Category.USER_INPUT, desc = "The user may not create objects in the given folder. ", exceptionId = 8, msg = "You do not have sufficient permissions to create objects in this folder.")
+	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 8, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public TimedResult getVersions(int id, Metadata[] columns, Metadata sort,
 			int order, Context ctx, User user, UserConfiguration userConfig)
 			throws OXException {
@@ -1246,7 +1246,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	}
 
-	@OXThrows(category = Category.USER_INPUT, desc = "The user may not create objects in the given folder. ", exceptionId = 9, msg = "You do not have sufficient permissions to create objects in this folder.")
+	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 9, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx,
 			User user, UserConfiguration userConfig) throws OXException {
 
@@ -1284,7 +1284,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 				ctx, user, userConfig);
 	}
 
-	@OXThrows(category = Category.USER_INPUT, desc = "The user may not create objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to create objects in this folder.")
+	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public Delta getDelta(long folderId, long updateSince, Metadata[] columns,
 			Metadata sort, int order, boolean ignoreDeleted, Context ctx,
 			User user, UserConfiguration userConfig) throws OXException {
@@ -1335,7 +1335,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	}
 
-	@OXThrows(category = Category.USER_INPUT, desc = "The user may not create objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to create objects in this folder.")
+	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public int countDocuments(long folderId, Context ctx, User user,
 			UserConfiguration userConfig) throws OXException {
 		boolean onlyOwn = false;
