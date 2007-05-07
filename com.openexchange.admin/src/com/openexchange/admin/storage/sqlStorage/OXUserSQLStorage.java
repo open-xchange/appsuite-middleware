@@ -73,6 +73,8 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
     // This class provides a mapper which maps the name of the field in the user
     // object to the name of the field in the database and the other way around
     protected static class Mapper {
+        public final static String PASSWORD_EXPIRED = "Password_expired";
+
         public final static Hashtable<String, String> method2field = new Hashtable<String, String>(99);
 
         public final static Hashtable<String, String> field2method = new Hashtable<String, String>(99);
@@ -88,7 +90,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             notallowed.add("Enabled");
             notallowed.add("ImapServer");
             notallowed.add("SmtpServer");
-            notallowed.add("Password_expired");
+            notallowed.add(PASSWORD_EXPIRED);
             notallowed.add("Language");
 
             
@@ -98,7 +100,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("Language", "preferredlanguage");
             method2field.put("Timezone", "timezone");
             method2field.put("Enabled", "mailEnabled");
-            method2field.put("Password_expired", "shadowLastChange");
+            method2field.put(PASSWORD_EXPIRED, "shadowLastChange");
             method2field.put("ImapServer", "imapserver");
             method2field.put("SmtpServer", "smtpserver");
 
