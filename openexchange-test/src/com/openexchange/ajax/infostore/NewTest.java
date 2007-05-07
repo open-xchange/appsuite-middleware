@@ -193,16 +193,22 @@ public class NewTest extends InfostoreAJAXTest {
 		}
 	}
 
-	//Bug 4269
+	//Bug 4269 and Bug 7143
 	public void testVirtualFolder() throws Exception {
+		virtualFolder(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+		virtualFolder(FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID);
+		virtualFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+	}
+	
+	public void virtualFolder(int folderId) throws Exception {
 		try {
-			createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+			createNew(getWebConversation(), getHostName(), sessionId, m("folder_id" , ""+folderId));
 			fail("Expected exception because we can't create a document in this virtual folder");
 		} catch (JSONException x) {
 			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
 		}
 	}
-	
+
 	
 	public void testTitleFromFilename() throws Exception {
 		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
