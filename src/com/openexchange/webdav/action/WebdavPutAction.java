@@ -53,11 +53,16 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavPutAction extends AbstractAction {
 
+	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
+	
 	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavException {
 		WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length"))
@@ -72,8 +77,7 @@ public class WebdavPutAction extends AbstractAction {
 				resource.create();
 			res.setStatus(HttpServletResponse.SC_CREATED);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.debug("Client Gone?", e);
 		}
 		
 	}

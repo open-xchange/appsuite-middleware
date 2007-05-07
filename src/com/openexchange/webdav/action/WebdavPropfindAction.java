@@ -54,6 +54,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -74,7 +76,11 @@ public class WebdavPropfindAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Protocol.DAV_NS;
 	
+	private static final Log LOG = LogFactory.getLog(WebdavPropfindAction.class);
+	
 	private XMLOutputter outputter = new XMLOutputter();
+	
+	
 	
 	public void perform(WebdavRequest req, WebdavResponse res)
 			throws WebdavException {
@@ -137,7 +143,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			res.setContentType("text/xml; charset=UTF-8");
 			outputter.output(responseBody, res.getOutputStream());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.debug("Client gone?", e);
 		}
 	}
 

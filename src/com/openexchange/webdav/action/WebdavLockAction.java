@@ -53,6 +53,8 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -71,6 +73,8 @@ import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 public class WebdavLockAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
+	
+	private static final Log LOG = LogFactory.getLog(WebdavLockAction.class);
 	
 	public void perform(WebdavRequest req, WebdavResponse res)
 			throws WebdavException {
@@ -125,11 +129,10 @@ public class WebdavLockAction extends AbstractAction {
 			outputter.output(responseDoc, res.getOutputStream());
 			
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("JDOM Exception",e);
+			throw new WebdavException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.debug("Client gone?", e);
 		}
 	}
 

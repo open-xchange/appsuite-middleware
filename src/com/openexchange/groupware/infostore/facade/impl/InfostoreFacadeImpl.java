@@ -338,7 +338,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		try {
 			return new LockDelta(delta, ctx, user, userConfig);
 		} catch (SearchIteratorException e) {
-			e.printStackTrace();
 			throw EXCEPTIONS.create(13,e);
 		}
 	}
@@ -731,8 +730,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 										document.getId(), con));
 						updatedCols.add(Metadata.VERSION_LITERAL);
 					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOG.error("SQLException: ",e);
 					} finally {
 						releaseReadConnection(sessionObj.getContext(), con);
 					}
@@ -954,10 +952,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					"infostore.id IN " + ids.toString(), Metadata.VALUES_ARRAY,
 					reuseProvider, sessionObj.getContext()).asList();
 		} catch (SearchIteratorException x) {
-			x.printStackTrace();
 			throw new InfostoreException(x);
 		} catch (Throwable t) {
-			t.printStackTrace();
+			LOG.error("Unexpected Error:",t);
 		}
 
 		// Check Permissions

@@ -90,7 +90,6 @@ public abstract class CommonRequest {
 	
 	protected void handle(Throwable t) {
 		LOG.debug("",t);
-		t.printStackTrace();
 		Response res = new Response();
 		if(t instanceof AbstractOXException) {
 			res.setException((AbstractOXException) t);

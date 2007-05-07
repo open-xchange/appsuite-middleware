@@ -640,7 +640,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		try {
 			lockHelper.transferLock(lock);
 		} catch (OXException e) {
-			e.printStackTrace();
 			throw new WebdavException(e.getMessage(),e,getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}

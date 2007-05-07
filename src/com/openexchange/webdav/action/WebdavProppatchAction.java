@@ -55,6 +55,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -70,6 +72,7 @@ import com.openexchange.webdav.protocol.util.Utils;
 public class WebdavProppatchAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
+	private static final Log LOG = LogFactory.getLog(WebdavProppatchAction.class);
 	
 	private PropertyAction SET = null;
 	private static final PropertyAction REMOVE = new RemoveAction();
@@ -120,11 +123,10 @@ public class WebdavProppatchAction extends AbstractAction {
 			
 			
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("JDOMException: ",e);
+			throw new WebdavException(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.debug("Client gone?" ,e);
 		}
 	}
 	

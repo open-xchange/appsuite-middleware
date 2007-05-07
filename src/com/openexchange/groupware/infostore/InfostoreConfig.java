@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.infostore;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
@@ -62,6 +65,8 @@ public class InfostoreConfig extends AbstractConfig {
 	}
 	
     private static final Property KEY = Property.INFOSTORE;
+    
+    private static final Log LOG = LogFactory.getLog(InfostoreConfig.class);
     
     private static InfostoreConfig singleton;
 
@@ -83,8 +88,7 @@ public class InfostoreConfig extends AbstractConfig {
 			try {
 				init();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Can't init config:",e);
 			}
 			
         return singleton.getPropertyInternal(key);

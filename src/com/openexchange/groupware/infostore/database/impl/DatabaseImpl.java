@@ -350,8 +350,7 @@ public class DatabaseImpl extends DBService {
 				result.add(dm);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("SQLException",e);
 		} finally {
 			close(stmt, rs);
 			releaseReadConnection(ctx, con);
@@ -385,8 +384,7 @@ public class DatabaseImpl extends DBService {
 				result.add(dm);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("SQLException: ",e);
 		} finally {
 			close(stmt, rs);
 			releaseReadConnection(ctx, con);

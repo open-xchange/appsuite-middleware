@@ -135,7 +135,6 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		try {
 			return new String(stream.getCapture().toByteArray(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
 			return e.toString();
 		}
 	}

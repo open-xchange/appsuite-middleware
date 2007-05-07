@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.attach;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
@@ -63,6 +66,8 @@ public class AttachmentConfig extends AbstractConfig {
 	}
 	
     private static final Property KEY = Property.ATTACHMENT;
+
+	private static final Log LOG = LogFactory.getLog(AttachmentConfig.class);
     
     private static AttachmentConfig singleton;
 
@@ -84,8 +89,7 @@ public class AttachmentConfig extends AbstractConfig {
 			try {
 				init();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error("Can't init config",e);
 			}
 			
         return singleton.getPropertyInternal(key);

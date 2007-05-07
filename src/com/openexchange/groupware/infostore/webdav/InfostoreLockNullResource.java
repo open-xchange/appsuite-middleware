@@ -318,7 +318,6 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			lockHelper.addLock(lock);
 			lockHelper.dumpLocksToDB();
 		} catch (Exception e) {
-			LOG.debug("",e); e.printStackTrace();
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}

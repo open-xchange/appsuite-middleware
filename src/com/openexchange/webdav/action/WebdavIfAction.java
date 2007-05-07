@@ -109,8 +109,7 @@ public class WebdavIfAction extends AbstractAction {
 			if(checkDestinationLocks)
 				checkDestinationLocks(ifHeader, req);
 		} catch (IfHeaderParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//Ignore
 		}
 		
 		yield(req,res);

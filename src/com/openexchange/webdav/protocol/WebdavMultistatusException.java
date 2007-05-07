@@ -59,7 +59,6 @@ public class WebdavMultistatusException extends WebdavException {
 	public WebdavMultistatusException(String url, WebdavException...exceptions) {
 		super(url, 207);
 		this.exceptions = exceptions;
-		for(Exception e : exceptions) { e.printStackTrace(); }
 	}
 	
 	public WebdavMultistatusException(String url, Collection<WebdavException> exceptions){
