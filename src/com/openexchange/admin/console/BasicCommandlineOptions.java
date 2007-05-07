@@ -76,10 +76,7 @@ public abstract class BasicCommandlineOptions {
      * Used when an option is missing to execute the cmd tool!
      */
     protected static final int SYSEXIT_MISSING_OPTION=104;
-    /**
-     * Used when an unknown option was passed to the cmd tool!
-     */
-    protected static final int SYSEXIT_UNKNOWN_OPTION=104;
+    
     
   
     /**
@@ -111,6 +108,11 @@ public abstract class BasicCommandlineOptions {
     * Used when a context aklready exists
     */
    protected static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
+   
+   /**
+    * Used when an unknown option was passed to the cmd tool!
+    */
+   protected static final int SYSEXIT_UNKNOWN_OPTION=111;
    
     
     protected static final int DEFAULT_CONTEXT=1;
