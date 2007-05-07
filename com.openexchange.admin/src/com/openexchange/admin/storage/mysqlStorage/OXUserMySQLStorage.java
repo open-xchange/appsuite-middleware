@@ -1304,9 +1304,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         } else if (paramtype.equalsIgnoreCase("java.lang.Integer")) {
                             method.invoke(newuser, rs3.getInt(fieldname));
                         } else if (paramtype.equalsIgnoreCase("java.lang.Boolean")) {
-                            if (methodnamewithoutset.equals(Mapper.notallowed
-                                    .toArray(new String[Mapper.notallowed
-                                            .size()])[7])) {
+                            if (methodnamewithoutset.equals(Mapper.PASSWORD_EXPIRED)) {
                                 method.invoke(newuser, getboolfromint(rs3
                                         .getInt(fieldname)));
                             } else {
