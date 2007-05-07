@@ -85,30 +85,40 @@ public class Starter {
 
 	public Starter(String args[]) {
 
-		LOG.info("Open-Xchange 6.0");
-		LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Open-Xchange 6.0");
+			LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+		}
 
 		try {
 			Properties p = System.getProperties();
-			LOG.info(p.getProperty("os.name") + " " + p.getProperty("os.arch") + " "
-					+ p.getProperty("os.version"));
+			if (LOG.isInfoEnabled()) {
+				LOG.info(p.getProperty("os.name") + " " + p.getProperty("os.arch") + " " + p.getProperty("os.version"));
+			}
 			path = p.getProperty("user.dir");
-			LOG.info(p.getProperty("java.runtime.version"));
+			if (LOG.isInfoEnabled()) {
+				LOG.info(p.getProperty("java.runtime.version"));
+			}
 			long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
-			LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory)
-					+ " KB");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
+			}
 			long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-			LOG.info(
-					"VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
+			}
 			long usedMemory = totalMemory - freeMemory;
-			LOG.info(
-					"VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
+			}
 		} catch (Exception gee) {
 			LOG.error(gee.getMessage(), gee);
 		}
 
-		LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
-		LOG.info("Server Footprint : "+AbstractOXException.SERVER_ID);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
+			LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
+		}
 
 		/* Config done */
         ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
@@ -120,7 +130,9 @@ public class Starter {
         }
         
 		try {
-			LOG.info("DEBUG: CLL -> " + ComfireConfig.properties.getProperty("InitWorker"));
+			if (LOG.isInfoEnabled()) {
+				LOG.info("DEBUG: CLL -> " + ComfireConfig.properties.getProperty("InitWorker"));
+			}
 			Class.forName(ComfireConfig.properties.getProperty("InitWorker"));
 			ComfireInitWorker worker = ComfireInitWorker.getWorker();
 			worker.doInit();
@@ -170,7 +182,9 @@ public class Starter {
          * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
          */
 
-		LOG.info("SYSTEM IS UP & RUNNING...");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("SYSTEM IS UP & RUNNING...");
+		}
 		
         // FIXME implement a server shutdown
 		try {

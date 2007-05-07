@@ -77,7 +77,7 @@ public class FolderParser extends FolderChildParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, FolderObject folderobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final FolderObject folderobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -94,9 +94,11 @@ public class FolderParser extends FolderChildParser {
 		}
 	}
 	
-	protected void parseElementFolder(FolderObject folderobject, XmlPullParser parser) throws Exception {
+	protected void parseElementFolder(final FolderObject folderobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			LOG.trace("unknown namespace in tag: " + parser.getName());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("unknown namespace in tag: " + parser.getName());
+			}
 			parser.nextText();
 			return ;
 		}
@@ -106,7 +108,7 @@ public class FolderParser extends FolderChildParser {
 			
 			return ;
 		} else if (isTag(parser, FolderFields.TYPE)) {
-			String type = getValue(parser);
+			final String type = getValue(parser);
 			if ("private".equals(type)) {
 				folderobject.setType(FolderObject.PRIVATE);
 			} else if ("public".equals(type)) {
@@ -117,7 +119,7 @@ public class FolderParser extends FolderChildParser {
 			
 			return ;
 		} else if (isTag(parser, FolderFields.MODULE)) {
-			String module = getValue(parser);
+			final String module = getValue(parser);
 			if ("calendar".equals(module)) {
 				folderobject.setModule(FolderObject.CALENDAR);
 			} else if ("contact".equals(module)) {
@@ -140,8 +142,8 @@ public class FolderParser extends FolderChildParser {
 		}
 	}
 	
-	protected void parseElementPermissions(FolderObject folderobject, XmlPullParser parser) throws OXException {
-		ArrayList permissions = new ArrayList();
+	protected void parseElementPermissions(final FolderObject folderobject, final XmlPullParser parser) throws OXException {
+		final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>();
 		
 		try {
 			boolean isPermission = true;
@@ -158,7 +160,7 @@ public class FolderParser extends FolderChildParser {
 					break;
 				}
 				
-				OCLPermission oclp = new OCLPermission();
+				final OCLPermission oclp = new OCLPermission();
 				
 				if (isTag(parser, "user")) {
 					parseElementPermissionAttributes(oclp, parser);
@@ -180,25 +182,25 @@ public class FolderParser extends FolderChildParser {
 		folderobject.setPermissions(permissions);
 	}
 	
-	protected void parseEntity(OCLPermission oclp, XmlPullParser parser) throws Exception {
+	protected void parseEntity(final OCLPermission oclp, final XmlPullParser parser) throws Exception {
 		oclp.setEntity( getValueAsInt(parser));
 	}
 	
-	protected void parseElementPermissionAttributes(OCLPermission oclp, XmlPullParser parser) throws Exception {
-		int fp = getPermissionAttributeValue(parser, "folderpermission");
-		int orp = getPermissionAttributeValue(parser, "objectreadpermission");
-		int owp = getPermissionAttributeValue(parser, "objectwritepermission");
-		int odp = getPermissionAttributeValue(parser, "objectdeletepermission");
+	protected void parseElementPermissionAttributes(final OCLPermission oclp, final XmlPullParser parser) throws Exception {
+		final int fp = getPermissionAttributeValue(parser, "folderpermission");
+		final int orp = getPermissionAttributeValue(parser, "objectreadpermission");
+		final int owp = getPermissionAttributeValue(parser, "objectwritepermission");
+		final int odp = getPermissionAttributeValue(parser, "objectdeletepermission");
 		
 		oclp.setAllPermission(fp, orp, owp, odp);
 		oclp.setFolderAdmin(getPermissionAdminFlag(parser));
 	}
 	
-	protected int getPermissionAttributeValue(XmlPullParser parser, String name) throws Exception {
+	protected int getPermissionAttributeValue(final XmlPullParser parser, final String name) throws Exception {
 		return Integer.parseInt(parser.getAttributeValue(XmlServlet.NAMESPACE, name));
 	}
 	
-	protected boolean getPermissionAdminFlag(XmlPullParser parser) throws Exception {
+	protected boolean getPermissionAdminFlag(final XmlPullParser parser) throws Exception {
 		return Boolean.parseBoolean(parser.getAttributeValue(XmlServlet.NAMESPACE, "admin_flag"));
 	}
 }

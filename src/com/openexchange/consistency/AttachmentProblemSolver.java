@@ -106,14 +106,12 @@ public class AttachmentProblemSolver extends ProblemSolver {
 				attachments.startTransaction();
 				final int[] numbers = attachments.removeAttachment(identifier, ctx);
 				attachments.commit();
-				if (numbers[0] ==  1) {
-					LOG.info("Inserted entry for identifier " + identifier +
-							" and Context " + ctx.getContextId() + " in " +
-							"del_attachments");
+				if (numbers[0] ==  1 && LOG.isInfoEnabled()) {
+					LOG.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId()
+							+ " in " + "del_attachments");
 				}
-				if (numbers[1] == 1) {
-					LOG.info("Removed attachment database entry for: " +
-							identifier);
+				if (numbers[1] == 1 && LOG.isInfoEnabled()) {
+					LOG.info("Removed attachment database entry for: " + identifier);
 				}
 			} catch (TransactionException e) {
 				LOG.debug("", e);
@@ -152,8 +150,9 @@ public class AttachmentProblemSolver extends ProblemSolver {
 		 * Here we operate in two stages. First we create a dummy entry in the
 		 * filestore. Second we update the Entries in the database
 		 */
+		final int size = set.size();
 		final Iterator<String> it = set.iterator();
-		while (it.hasNext()) {
+		for (int k = 0; k < size; k++) {
 			try {
 				final String identifier = createDummyFile();
 				final String old_identifier = it.next();
@@ -162,7 +161,7 @@ public class AttachmentProblemSolver extends ProblemSolver {
 				final int changed = attachments.modifyAttachment(old_identifier, identifier, 
 						"\nCaution! The file has changed", "text/plain", ctx);
 				attachments.commit();
-				if (changed == 1) {
+				if (changed == 1 && LOG.isInfoEnabled()) {
 					LOG.info("Created dummy entry for: " + old_identifier + 
 							". New identifier is: " + identifier);
 				}

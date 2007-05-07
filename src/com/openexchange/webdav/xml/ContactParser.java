@@ -79,7 +79,7 @@ public class ContactParser extends CommonParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, ContactObject contactobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final ContactObject contactobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -96,9 +96,11 @@ public class ContactParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementContact(ContactObject contactobject, XmlPullParser parser) throws Exception {
+	protected void parseElementContact(final ContactObject contactobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			LOG.trace("unknown namespace in tag: " + parser.getName());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("unknown namespace in tag: " + parser.getName());
+			}
 			parser.nextText();
 			return ;
 		}
@@ -188,7 +190,7 @@ public class ContactParser extends CommonParser {
 			contactobject.setFileAs(getValue(parser));
 			return;
 		} else if (isTag(parser, ContactFields.IMAGE1)) {
-			String image = getValue(parser);
+			final String image = getValue(parser);
 			if (image != null) {
 				contactobject.setImage1(Base64.decode(image));
 			} else {
@@ -404,8 +406,8 @@ public class ContactParser extends CommonParser {
 		}
 	}
 	
-	protected void parseElementDistributionlists(ContactObject oxobject, XmlPullParser parser) throws OXException {
-		ArrayList distributionlist = new ArrayList();
+	protected void parseElementDistributionlists(final ContactObject oxobject, final XmlPullParser parser) throws OXException {
+		final ArrayList<DistributionListEntryObject> distributionlist = new ArrayList<DistributionListEntryObject>();
 		
 		try {
 			boolean isDistributionList = true;
@@ -422,7 +424,7 @@ public class ContactParser extends CommonParser {
 					break;
 				}
 				
-				DistributionListEntryObject entry = new DistributionListEntryObject();
+				final DistributionListEntryObject entry = new DistributionListEntryObject();
 				
 				if (isTag(parser, "email")) {
 					parseElementEntry(parser, entry);
@@ -436,19 +438,19 @@ public class ContactParser extends CommonParser {
 			throw new OXException(exc);
 		}
 		
-		oxobject.setDistributionList((DistributionListEntryObject[])distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
+		oxobject.setDistributionList(distributionlist.toArray(new DistributionListEntryObject[distributionlist.size()]));
 	} 
 	
-	protected void parseElementEntry(XmlPullParser parser, DistributionListEntryObject entry) throws Exception {
+	protected void parseElementEntry(final XmlPullParser parser, final DistributionListEntryObject entry) throws Exception {
 		String s = null;
 		
 		if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.ID)) != null) {
-			int contact_id = Integer.parseInt(s);
+			final int contact_id = Integer.parseInt(s);
 			entry.setEntryID(contact_id);
 		} 
 		
 		if ((s = parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.FOLDER_ID)) != null) {
-			int folderId = Integer.parseInt(s);
+			final int folderId = Integer.parseInt(s);
 			entry.setFolderID(folderId);
 		} 
 		
@@ -457,8 +459,8 @@ public class ContactParser extends CommonParser {
 		entry.setEmailaddress(getValue(parser));
 	} 
 
-	protected void parseElementLinks(ContactObject oxobject, XmlPullParser parser) throws OXException {
-		ArrayList links = new ArrayList();
+	protected void parseElementLinks(final ContactObject oxobject, final XmlPullParser parser) throws OXException {
+		final ArrayList<LinkEntryObject> links = new ArrayList<LinkEntryObject>();
 		
 		try {
 			boolean isLinks = true;
@@ -475,7 +477,7 @@ public class ContactParser extends CommonParser {
 					break;
 				}
 				
-				LinkEntryObject link = new LinkEntryObject();
+				final LinkEntryObject link = new LinkEntryObject();
 				
 				if (isTag(parser, "link")) {
 					parseElementLink(parser, link);
@@ -489,10 +491,10 @@ public class ContactParser extends CommonParser {
 			throw new OXException(exc);
 		}
 		
-		oxobject.setLinks((LinkEntryObject[])links.toArray(new LinkEntryObject[links.size()]));
+		oxobject.setLinks(links.toArray(new LinkEntryObject[links.size()]));
 	} 
 	
-	protected void parseElementLink(XmlPullParser parser, LinkEntryObject link) throws Exception {
+	protected void parseElementLink(final XmlPullParser parser, final LinkEntryObject link) throws Exception {
 		link.setLinkDisplayname(parser.getAttributeValue(XmlServlet.NAMESPACE, ContactFields.DISPLAY_NAME));
 		link.setLinkID(getValueAsInt(parser));
 	}

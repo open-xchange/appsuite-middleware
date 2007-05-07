@@ -79,7 +79,9 @@ public class PushSocket implements Runnable {
 		
 		try {
 			if (config.isPushEnabled()) {
-				LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
+				}
 			
 				if (senderAddress != null) {
 					datagramSocket = new DatagramSocket(serverRegisterPort, senderAddress);
@@ -91,7 +93,9 @@ public class PushSocket implements Runnable {
 				thread.setName(PushSocket.class.getName());
 				thread.start();
 			} else {
-				LOG.info("Push Register Socket is disabled");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Push Register Socket is disabled");
+				}
 			}
 		} catch (Exception exc) {
 			LOG.error("PushSocket", exc);

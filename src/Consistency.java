@@ -110,7 +110,9 @@ public class Consistency {
 	private void outputSet(final SortedSet<String> set) {
 		final Iterator<String> itstr = set.iterator();
 		while (itstr.hasNext()) {
-			LOG.info(itstr.next());
+			if (LOG.isInfoEnabled()) {
+				LOG.info(itstr.next());
+			}
 		}
 	}
 
@@ -123,8 +125,9 @@ public class Consistency {
 		boolean retval = false;
 		first.removeAll(second);
 		if (!first.isEmpty()) {
-			LOG.info("Inconsistencies found in " + name + 
-				", the following files aren't in " + name2 + ':');
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
+			}
 			outputSet(first);
 			retval = true;
 		}
@@ -154,16 +157,24 @@ public class Consistency {
 			joineddbfileset.addAll(attachmentset);
 			
 			if (listout) {
-				LOG.info("Filestore:");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Filestore:");
+				}
 				outputSet(filestoreset);
 
-				LOG.info("DB_del:");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("DB_del:");
+				}
 				outputSet(dbdelfileset);
 
-				LOG.info("DB:");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("DB:");
+				}
 				outputSet(dbfileset);
 				
-				LOG.info("Attachments:");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Attachments:");
+				}
 				outputSet(attachmentset);
 			}
 			
@@ -207,14 +218,16 @@ public class Consistency {
 			}
 
 		} catch (OXException e) {
-			LOG.debug(e);
+			LOG.debug(e.getMessage(), e);
 		}
 	}
 
 	private void runSolver(final boolean dummy,
 			final SortedSet<String> set, final Context ctx, final ProblemSolver solver) {
 		if (!dryrun) {
-			LOG.info("Now trying to solve this...");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Now trying to solve this...");
+			}
 			if (dummy) {
 				solver.dummyEntries(set, ctx);					
 			} else {
@@ -223,7 +236,9 @@ public class Consistency {
 			try {
 				final FileStorage stor = solver.getStorage();
 				if (stor instanceof QuotaFileStorage) {
-					LOG.info("Recalculating usage...");
+					if (LOG.isInfoEnabled()) {
+						LOG.info("Recalculating usage...");
+					}
 					((QuotaFileStorage)stor).recalculateUsage();
 				}
 			} catch (FileStorageException e) {
@@ -237,11 +252,14 @@ public class Consistency {
 		final ContextStorage ctxstor = ContextStorage.getInstance();
 		final List<Integer> list = ctxstor.getAllContextIds();
 		final Iterator<Integer> it = list.iterator();
+		final int size = list.size();
 		
-		while (it.hasNext()) {
+		for (int i = 0; i < size; i++) {
 			final int cid = it.next().intValue();
-			LOG.info("-------------------------------------");
-			LOG.info("Checking Context Nr. " + cid + " ....");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("-------------------------------------");
+				LOG.info("Checking Context Nr. " + cid + " ....");
+			}
 			final Context ctx = ctxstor.getContext(cid);
 			checkOneContext(ctx);
 		}
@@ -252,8 +270,9 @@ public class Consistency {
 		final List<Integer> ids  = ctxstor.getAllContextIds();
 		final List<Integer> retval = new ArrayList<Integer>();
 		final Iterator<Integer> it = ids.iterator();
+		final int size = ids.size();
 		
-		while (it.hasNext()) {
+		for (int i = 0; i < size; i++) {
 			final int cid = it.next().intValue();
 			final Context ctx = ctxstor.getContext(cid);
 			if (ctx.getFilestoreId() == filestore_id) {
@@ -273,17 +292,21 @@ public class Consistency {
 		try {
 			list = AssignmentStorage.listContexts(database);
 			if (list.isEmpty()) {
-				LOG.info("There are no contexts which stored their " +
-					"data in " + database);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("There are no contexts which stored their " + "data in " + database);
+				}
 			} else {
 				final Iterator<Integer> it = list.iterator();
+				final int size = list.size();
 				
-				while (it.hasNext()) {
+				for (int i = 0; i < size; i++) {
 					Context ctx;
 					try {
 						final int cid = it.next().intValue();
-						LOG.info("-------------------------------------");
-						LOG.info("Checking Context Nr. " + cid + " ....");
+						if (LOG.isInfoEnabled()) {
+							LOG.info("-------------------------------------");
+							LOG.info("Checking Context Nr. " + cid + " ....");
+						}
 						ctx = ctxstor.getContext(cid);
 						checkOneContext(ctx);
 					} catch (ContextException e) {
@@ -314,17 +337,21 @@ public class Consistency {
 			list = getContextIdstoFilestore(filestore);
 
 			if (list.isEmpty()) {
-				LOG.info("There are no contexts which stored their " +
-					"data in " + filestore);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("There are no contexts which stored their " + "data in " + filestore);
+				}
 			} else {
 				final Iterator<Integer> it = list.iterator();
+				final int size = list.size();
 				
-				while (it.hasNext()) {
+				for (int i = 0; i < size; i++) {
 					Context ctx;
 					try {
 						final int cid = it.next().intValue();
-						LOG.info("-------------------------------------");
-						LOG.info("Checking Context Nr. " + cid + " ....");
+						if (LOG.isInfoEnabled()) {
+							LOG.info("-------------------------------------");
+							LOG.info("Checking Context Nr. " + cid + " ....");
+						}
 						ctx = ctxstor.getContext(cid);
 						checkOneContext(ctx);
 
@@ -344,6 +371,7 @@ public class Consistency {
 	}
 	
 	private void printusage() {
+		if (LOG.isInfoEnabled()) {
 		LOG.info('\n' +
 "Usage: --with-list-output		This parameter activates the output of\n" +
 			"					the identifier lists on both sides\n" +
@@ -378,6 +406,7 @@ public class Consistency {
 "       --dummyfile			The tool creates dummy entries in the \n" +
 			"					admin database for superfluous files.\n" + 
 			"					");
+		}
 	}
 	
 	public void start(final String[] args) {
@@ -391,7 +420,9 @@ public class Consistency {
             System.exit(1);
         }
         try {
-            LOG.info("Server name: " + Server.getServerName());
+            if (LOG.isInfoEnabled()) {
+				LOG.info("Server name: " + Server.getServerName());
+			}
             DatabaseInit.init();
         } catch (DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
@@ -440,7 +471,9 @@ public class Consistency {
 					 * Now we check only the contexts which are stored in that
 					 * database 
 					 */
-					LOG.info("Searching for database " + database);
+					if (LOG.isInfoEnabled()) {
+						LOG.info("Searching for database " + database);
+					}
 					databasechecking();
 				} else if (filestore != -1) {
 					/*
@@ -459,7 +492,9 @@ public class Consistency {
                 LOG.debug(e.getMessage(), e);
             }
 		}
-		LOG.info("Finished.");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Finished.");
+		}
 		System.exit(0);
 	}
 

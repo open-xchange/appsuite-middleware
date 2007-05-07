@@ -84,7 +84,9 @@ public class PushMulticastSocket implements Runnable {
 		
 		try {
 			if (config.isMultiCastEnabled()) {
-				LOG.info("Starting Multicast Socket on Port: " + multicastPort);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Starting Multicast Socket on Port: " + multicastPort);
+				}
 				multicastSocket = new MulticastSocket(multicastPort);
 				multicastSocket.joinGroup(multicastAddress);
 			
@@ -92,7 +94,9 @@ public class PushMulticastSocket implements Runnable {
 				thread.setName(PushMulticastSocket.class.getName());
 				thread.start();
 			} else {
-				LOG.info("Multicast Socket is disabled");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Multicast Socket is disabled");
+				}
 			}
 		} catch (Exception exc) {
 			LOG.error("MultiCastPushSocket", exc);

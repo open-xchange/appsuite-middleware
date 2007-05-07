@@ -102,7 +102,9 @@ public class EventQueue extends TimerTask {
 		delay = config.getEventQueueDelay();
 		
 		if (config.isEventQueueEnabled()) {
-			LOG.info("Starting EventQueue");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Starting EventQueue");
+			}
 			
 			queue1 = new ArrayList<EventObject>();
 			queue2 = new ArrayList<EventObject>();
@@ -116,7 +118,9 @@ public class EventQueue extends TimerTask {
 			
 			isEnabled = true;
 		} else {
-			LOG.info("EventQueue is disabled");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("EventQueue is disabled");
+			}
 		}
 		
 		isInit = true;

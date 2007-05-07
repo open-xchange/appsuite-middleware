@@ -75,17 +75,17 @@ public class DataParser {
 	
 	public static final int CONFIRM = 3;
 
-	protected SessionObject sessionObj = null;
+	protected SessionObject sessionObj;
 	
-	protected String client_id = null;
+	protected String client_id;
 	
 	protected int method = SAVE;
 	
-	protected int inFolder = 0;
+	protected int inFolder;
 	
 	private static final Log LOG = LogFactory.getLog(DataParser.class);
 	
-	protected void parseElement(DataObject dataobject, XmlPullParser parser) throws Exception {
+	protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws Exception {
 		if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {
 			dataobject.setObjectID(getValueAsInt(parser));
 		} else if (isTag(parser, DataFields.LAST_MODIFIED, XmlServlet.NAMESPACE)) {
@@ -93,7 +93,7 @@ public class DataParser {
 		} else if (isTag(parser, "client_id", XmlServlet.NAMESPACE)) {
 			client_id = getValue(parser);
 		} else if (isTag(parser, "method", XmlServlet.NAMESPACE)) {
-			String s = getValue(parser);
+			final String s = getValue(parser);
 			if (s != null) {
 				if (s.equalsIgnoreCase("save")) {
 					method = SAVE;
@@ -104,25 +104,27 @@ public class DataParser {
 				}
 			} 
 		} else {
-			LOG.trace("unknown xml tag: " + parser.getName());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("unknown xml tag: " + parser.getName());
+			}
 			getValue(parser);
 		}
 	}
 	
-	protected boolean hasCorrectNamespace(XmlPullParser parser) throws Exception {
-		if (parser.getEventType() == XmlPullParser.START_TAG) {
-			if (parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
+	protected boolean hasCorrectNamespace(final XmlPullParser parser) throws Exception {
+		if (parser.getEventType() == XmlPullParser.START_TAG && parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
+			//if (parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
 				return true;
-			}
+			//}
 		}
 		return false;
 	}
 		
-	public boolean isTag(XmlPullParser parser, String name) throws XmlPullParserException {
+	public boolean isTag(final XmlPullParser parser, final String name) throws XmlPullParserException {
 		return parser.getEventType() == XmlPullParser.START_TAG	&& (name == null || name.equals(parser.getName()));
 	}
 	
-	public boolean isTag(XmlPullParser parser, String name, String namespace) throws XmlPullParserException {
+	public boolean isTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
 		return parser.getEventType() == XmlPullParser.START_TAG	&& (name == null || name.equals(parser.getName()));
 	}
 	
@@ -138,47 +140,43 @@ public class DataParser {
 		return inFolder;
 	}
 	
-	public int getValueAsInt(XmlPullParser parser) throws XmlPullParserException, IOException {
+	public int getValueAsInt(final XmlPullParser parser) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = getValue(parser)) != null && s.length() > 0) {
 			return Integer.parseInt(s);
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 	
-	public float getValueAsFloat(XmlPullParser parser) throws XmlPullParserException, IOException {
+	public float getValueAsFloat(final XmlPullParser parser) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = getValue(parser)) != null && s.length() > 0) {
 			return Float.parseFloat(s);
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 	
-	public long getValueAsLong(XmlPullParser parser) throws XmlPullParserException, IOException {
+	public long getValueAsLong(final XmlPullParser parser) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = getValue(parser)) != null && s.length() > 0) {
 			return Long.parseLong(s);
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 	
-	public Date getValueAsDate(XmlPullParser parser) throws XmlPullParserException, IOException {
+	public Date getValueAsDate(final XmlPullParser parser) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = getValue(parser)) != null && s.length() > 0) {
 			return new Date(Long.parseLong(s));
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
-	public boolean getValueAsBoolean(XmlPullParser parser) throws XmlPullParserException, IOException {
+	public boolean getValueAsBoolean(final XmlPullParser parser) throws XmlPullParserException, IOException {
 		String s = null;
 		
 		if ((s = getValue(parser)) != null && s.equalsIgnoreCase("true")) {
@@ -187,8 +185,8 @@ public class DataParser {
 		return false;
 	}
 	
-	public byte[] getValueAsByteArray(XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = parser.nextText();
+	public byte[] getValueAsByteArray(final XmlPullParser parser) throws XmlPullParserException, IOException {
+		final String s = parser.nextText();
 		
 		if (s != null && s.length() == 0) {
 			return null;
@@ -196,8 +194,8 @@ public class DataParser {
 		return s.getBytes();
 	}
 	
-	public String getValue(XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = parser.nextText();
+	public String getValue(final XmlPullParser parser) throws XmlPullParserException, IOException {
+		final String s = parser.nextText();
 		
 		if (s != null && s.length() == 0) {
 			return null;
@@ -205,7 +203,7 @@ public class DataParser {
 		return s;
 	}
 	
-	public static boolean isEnd(XmlPullParser parser) throws XmlPullParserException {
+	public static boolean isEnd(final XmlPullParser parser) throws XmlPullParserException {
 		return (parser.getEventType() == XmlPullParser.END_DOCUMENT);
 	}
 }

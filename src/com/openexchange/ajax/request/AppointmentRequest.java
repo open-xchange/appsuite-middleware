@@ -90,6 +90,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -460,9 +461,17 @@ public class AppointmentRequest {
 			}
 		}
 		
-		int[][] objectIdAndFolderId = new int[objectIdMap.size()][2];
-		int i = 0;
-		final Iterator iterator = objectIdMap.keySet().iterator();
+		final int size = objectIdMap.size();
+		int[][] objectIdAndFolderId = new int[size][2];
+		//int i = 0;
+		final Iterator<Map.Entry<Integer, Integer>> iterator = objectIdMap.entrySet().iterator();
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<Integer, Integer> entry = iterator.next();
+			objectIdAndFolderId[i][0] = entry.getKey().intValue();
+			objectIdAndFolderId[i][1] = entry.getValue().intValue();
+		}
+		
+		/*final Iterator iterator = objectIdMap.keySet().iterator();
 		while (iterator.hasNext()) {
 			final int objectId = ((Integer)iterator.next()).intValue();
 			final int folderId = (objectIdMap.get(Integer.valueOf(objectId))).intValue();
@@ -470,7 +479,7 @@ public class AppointmentRequest {
 			objectIdAndFolderId[i][0] = objectId;
 			objectIdAndFolderId[i][1] = folderId;
 			i++;
-		}
+		}*/
 		
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);

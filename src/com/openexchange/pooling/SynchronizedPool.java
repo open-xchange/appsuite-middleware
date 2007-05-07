@@ -522,7 +522,9 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
      * {@inheritDoc}
      */
     public void run() {
-        LOG.trace("Starting cleaner run.");
+    	if (LOG.isTraceEnabled()) {
+    		LOG.trace("Starting cleaner run.");
+    	}
         synchronized (data) {
             try {
             int idleSize = data.numIdle();
@@ -567,7 +569,9 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
             LOG.error("Housekeeping problem.", e);
         }
         }
-        LOG.trace("Clean run ending.");
+        if (LOG.isTraceEnabled()) {
+        	LOG.trace("Clean run ending.");
+        }
     }
 
     public static class Config {

@@ -182,7 +182,9 @@ public final class Pools implements Runnable {
      * {@inheritDoc}
      */
     public void run() {
-        LOG.trace("Starting cleaner run.");
+        if (LOG.isTraceEnabled()) {
+			LOG.trace("Starting cleaner run.");
+		}
         lock.lock();
         try {
             final int size = POOLS.size();
@@ -200,7 +202,9 @@ public final class Pools implements Runnable {
         } finally {
             lock.unlock();
         }
-        LOG.trace("Cleaner run ending.");
+        if (LOG.isTraceEnabled()) {
+			LOG.trace("Cleaner run ending.");
+		}
     }
 
     /**
@@ -319,31 +323,33 @@ public final class Pools implements Runnable {
                 Property.TEST_ON_IDLE, config.testOnIdle);
             config.testThreads = ConfigDB.getBoolean(
                 Property.TEST_THREADS, config.testThreads);
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Database pooling options:\n");
-            sb.append("\tMinimum idle connections: ");
-            sb.append(config.minIdle);
-            sb.append("\n\tMaximum idle connections: ");
-            sb.append(config.maxIdle);
-            sb.append("\n\tMaximum idle time: ");
-            sb.append(config.maxIdleTime);
-            sb.append("ms\n\tMaximum active connections: ");
-            sb.append(config.maxActive);
-            sb.append("\n\tMaximum wait time for a connection: ");
-            sb.append(config.maxWait);
-            sb.append("ms\n\tMaximum life time of a connection: ");
-            sb.append(config.maxLifeTime);
-            sb.append("ms\n\tAction if connections exhausted: ");
-            sb.append(config.exhaustedAction.toString());
-            sb.append("\n\tTest connections on activate  : ");
-            sb.append(config.testOnActivate);
-            sb.append("\n\tTest connections on deactivate: ");
-            sb.append(config.testOnDeactivate);
-            sb.append("\n\tTest idle connections         : ");
-            sb.append(config.testOnIdle);
-            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
-            sb.append(config.testThreads);
-            LOG.info(sb.toString());
+            if (LOG.isInfoEnabled()) {
+	            final StringBuilder sb = new StringBuilder();
+	            sb.append("Database pooling options:\n");
+	            sb.append("\tMinimum idle connections: ");
+	            sb.append(config.minIdle);
+	            sb.append("\n\tMaximum idle connections: ");
+	            sb.append(config.maxIdle);
+	            sb.append("\n\tMaximum idle time: ");
+	            sb.append(config.maxIdleTime);
+	            sb.append("ms\n\tMaximum active connections: ");
+	            sb.append(config.maxActive);
+	            sb.append("\n\tMaximum wait time for a connection: ");
+	            sb.append(config.maxWait);
+	            sb.append("ms\n\tMaximum life time of a connection: ");
+	            sb.append(config.maxLifeTime);
+	            sb.append("ms\n\tAction if connections exhausted: ");
+	            sb.append(config.exhaustedAction.toString());
+	            sb.append("\n\tTest connections on activate  : ");
+	            sb.append(config.testOnActivate);
+	            sb.append("\n\tTest connections on deactivate: ");
+	            sb.append(config.testOnDeactivate);
+	            sb.append("\n\tTest idle connections         : ");
+	            sb.append(config.testOnIdle);
+	            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
+	            sb.append(config.testThreads);
+	            LOG.info(sb.toString());
+            }
         }
         return config;
     }

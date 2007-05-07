@@ -104,11 +104,11 @@ public class DBProblemSolver extends ProblemSolver {
 				database.startTransaction();
 				final int[] numbers = database.removeDocument(identifier, ctx);
 				database.commit();
-				if (numbers[0] == 1) {
+				if (numbers[0] == 1 && LOG.isInfoEnabled()) {
 					LOG.info("Have to change infostore version number " + 
 							"for entry: " + identifier);
 				}
-				if (numbers[1] == 1) {
+				if (numbers[1] == 1 && LOG.isInfoEnabled()) {
 					LOG.info("Deleted entry " + identifier + " from " + 
 							"infostore_documents.");
 				}
@@ -148,7 +148,7 @@ public class DBProblemSolver extends ProblemSolver {
 						identifier, "\nCaution! The file has changed",
 						"text/plain", ctx);
 				database.commit();
-				if (changed == 1) {
+				if (changed == 1 && LOG.isInfoEnabled()) {
 					LOG.info("Modified entry for identifier " + old_identifier +
 							" in context " + ctx.getContextId() + " to new " +
 							"dummy identifier " + identifier);

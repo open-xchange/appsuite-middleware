@@ -464,7 +464,9 @@ public class Contacts implements DeleteListener {
 			writecon.setAutoCommit(false);	
 			
 			final int id = IDGenerator.getId(so.getContext(), Types.CONTACT, writecon);
-			LOG.trace("Got ID from Generator -> "+id);
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Got ID from Generator -> " + id);
+			}
 			if (id == -1){
 				throw EXCEPTIONS.create(7);
 				//throw new OXException("-1 ID from IDGenerator");

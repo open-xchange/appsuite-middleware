@@ -68,11 +68,15 @@ public class SessiondInit {
 	}
 	
 	public static void init() {
-		LOG.info("Parse Sessiond properties");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Parse Sessiond properties");
+		}
 		final SessiondConfigWrapper config = new SessiondConfigWrapper(ComfireConfig.properties.getProperty("SESSIONDPROPERTIES"));
 		SessiondConnector.setConfig(config);
 
-		LOG.info("Starting Sessiond");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Starting Sessiond");
+		}
 		new Sessiond(config);
 	}
 }

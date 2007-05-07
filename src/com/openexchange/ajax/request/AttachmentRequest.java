@@ -54,8 +54,6 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.TimeZone;
 
-import javax.servlet.ServletException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -67,7 +65,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -102,18 +99,19 @@ public class AttachmentRequest extends CommonRequest {
 	}
 	
 	public boolean action(final String action, final SimpleRequest req){
-		if(LOG.isDebugEnabled())
-			LOG.debug("Attachments: "+action+" "+req);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Attachments: " + action + ' ' + req);
+		}
 		try {
 			
 			if (AJAXServlet.ACTION_GET.equals(action)) {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ID)) {
 					return true;
 				}
-				final int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				final int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 				
 				get(folderId,attachedId,moduleId,id);
 				return true;
@@ -121,17 +119,17 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_TIMESTAMP)) {
 					return true;
 				}
-				final int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
 				
-				final long timestamp = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				
 				final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 				
 				AttachmentField sort = null;
 				if(null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
-					sort = AttachmentField.get(Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_SORT)));
+					sort = AttachmentField.get(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_SORT)));
 				}
 				
 				int order = AttachmentBase.ASC;
@@ -147,15 +145,15 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
 					return true;
 				}
-				final int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
 				
 				final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 				
 				AttachmentField sort = null;
 				if(null != req.getParameter(AJAXServlet.PARAMETER_SORT)) {
-					sort = AttachmentField.get(Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_SORT)));
+					sort = AttachmentField.get(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_SORT)));
 				}
 				
 				int order = AttachmentBase.ASC;
@@ -168,9 +166,9 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
 					return true;
 				}
-				final int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
 				
 				final JSONArray idsArray = (JSONArray) req.getBody();
 				
@@ -180,7 +178,7 @@ public class AttachmentRequest extends CommonRequest {
 						ids[i] = idsArray.getInt(i);
 					} catch (JSONException e) {
 						try {
-							ids[i] = Integer.valueOf(idsArray.getString(i));
+							ids[i] = Integer.parseInt(idsArray.getString(i));
 						} catch (NumberFormatException e1) {
 							handle(e1);
 						} catch (JSONException e1) {
@@ -192,7 +190,7 @@ public class AttachmentRequest extends CommonRequest {
 				if(AJAXServlet.ACTION_DETACH.equals(action)) {
 					detach(folderId, attachedId, moduleId, ids);
 				} else {
-					AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+					final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 					list(folderId,attachedId,moduleId,ids,columns);
 				}
 				return true;
@@ -253,7 +251,7 @@ public class AttachmentRequest extends CommonRequest {
 			iter = delta.results();
 			iter2 = delta.getDeleted();
 			
-			AttachmentWriter aWriter = new AttachmentWriter(w);
+			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(delta.sequenceNumber());
 			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, TimeZone.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
@@ -272,32 +270,35 @@ public class AttachmentRequest extends CommonRequest {
 			} catch (TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
-			if(iter!=null)
+			if (iter!=null) {
 				try {
 					iter.close();
 				} catch (SearchIteratorException e1) {
 					LOG.error(e1.getMessage(), e1);
 				}
-			if(iter2!=null)
+			}
+			if (iter2!=null) {
 				try {
 					iter2.close();
 				} catch (SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
+			}
 		}
 	}
 	
-	private void all(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] fields, final AttachmentField sort, final int order) throws IOException {
+	private void all(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] fields, final AttachmentField sort, final int order) {
 		
 		SearchIterator iter = null;
 		
 		try {
 			ATTACHMENT_BASE.startTransaction();
 			TimedResult result;
-			if(sort != null)
+			if(sort != null) {
 				result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,fields,sort,order,ctx,user,userConfig);
-			else
+			} else {
 				result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,ctx,user,userConfig);
+			}
 			iter = result.results();
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(result.sequenceNumber());
@@ -318,12 +319,13 @@ public class AttachmentRequest extends CommonRequest {
 			} catch (TransactionException e) {
 				LOG.error(e.getMessage(), e);
 			}
-			if(iter!=null)
+			if (iter!=null) {
 				try {
 					iter.close();
 				} catch (SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
+			}
 		}
 	}
 	
@@ -350,7 +352,7 @@ public class AttachmentRequest extends CommonRequest {
 				LOG.error(e.getMessage(), e);
 			}
 		}
-		Response resp = new Response();
+		final Response resp = new Response();
 		resp.setData("");
 		resp.setTimestamp(new Date(timestamp));
 		try {
@@ -367,7 +369,7 @@ public class AttachmentRequest extends CommonRequest {
 		try {
 			ATTACHMENT_BASE.startTransaction();
 			
-			TimedResult result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,ids, fields, ctx,user,userConfig);
+			final TimedResult result = ATTACHMENT_BASE.getAttachments(folderId,attachedId,moduleId,ids, fields, ctx,user,userConfig);
 			
 			iter=result.results();
 			
@@ -392,12 +394,13 @@ public class AttachmentRequest extends CommonRequest {
 				LOG.error(e.getMessage(), e);
 			}
 			
-			if(iter!=null)
+			if (iter!=null) {
 				try {
 					iter.close();
 				} catch (SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 				}
+			}
 		}
 	}
 }

@@ -117,7 +117,9 @@ public abstract class OXServlet extends WebDavServlet {
             return;
         }
         try {
-            LOG.trace("Entering HTTP sub method. Session: " + getSession(req));
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("Entering HTTP sub method. Session: " + getSession(req));
+			}
             super.service(req, resp);
         } catch (RuntimeException e) {
             throw new ServletException(e.getMessage(), e);
@@ -146,7 +148,9 @@ public abstract class OXServlet extends WebDavServlet {
             session = getSession(sessionId);
         }
         if (null == sessionId || null == session) {
-            LOG.trace("No sessionId cookie found.");
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("No sessionId cookie found.");
+			}
             final String auth = req.getHeader(AUTH_HEADER);
             if (!checkForBasicAuthorization(auth)) {
             	if (LOG.isDebugEnabled()) {
@@ -157,7 +161,9 @@ public abstract class OXServlet extends WebDavServlet {
                     "Authorization Required!");
                 return false;
             }
-            LOG.trace("Authorization header found.");
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("Authorization header found.");
+			}
             final String[] userpass = OXServlet.decodeAuthorization(auth);
             final String login = userpass[0].toLowerCase();
             final String pass = userpass[1];
@@ -184,7 +190,9 @@ public abstract class OXServlet extends WebDavServlet {
                     "Authorization Required!");
                 return false;
             }
-            LOG.trace("Session created.");
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("Session created.");
+			}
             resp.addCookie(new Cookie("sessionid", session.getSessionID()));
             if (null != sessionId) {
                 final Cookie cookie = new Cookie("sessionid", sessionId);

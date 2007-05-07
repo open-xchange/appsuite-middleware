@@ -94,7 +94,9 @@ public class AppointmentParser extends CalendarParser {
 	
 	protected void parseElementAppointment(final AppointmentObject ao, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			LOG.trace("unknown namespace in tag: " + parser.getName());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("unknown namespace in tag: " + parser.getName());
+			}
 			parser.nextText();
 			return ;
 		}

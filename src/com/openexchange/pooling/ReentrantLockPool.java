@@ -284,10 +284,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             lock.unlock();
         }
         if (destroy) {
-            LOG.trace("Destroying object.");
+        	if (LOG.isTraceEnabled()) {
+        		LOG.trace("Destroying object.");
+        	}
             lifecycle.destroy(metaData.getPooled());
         }
-        LOG.trace("Back time: " + getWaitTime(startTime));
+        if (LOG.isTraceEnabled()) {
+        	LOG.trace("Back time: " + getWaitTime(startTime));
+        }
         return !destroy;
     }
 
@@ -424,8 +428,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     lock.unlock();
                 }
             }
-            LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: "
-                + created);
+            if (LOG.isTraceEnabled()) {
+	            LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: "
+	                + created);
+            }
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
@@ -647,7 +653,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      */
     public void run() {
         final long startTime = System.currentTimeMillis();
-        LOG.trace("Starting cleaner run.");
+        if (LOG.isTraceEnabled()) {
+        	LOG.trace("Starting cleaner run.");
+        }
         final List<PooledData> removed = new ArrayList<PooledData>();
         lock.lock();
         try {
@@ -708,7 +716,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } catch (PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
-        LOG.trace("Clean run ending. Time: " + getWaitTime(startTime));
+        if (LOG.isTraceEnabled()) {
+        	LOG.trace("Clean run ending. Time: " + getWaitTime(startTime));
+        }
     }
 
     public static class Config {

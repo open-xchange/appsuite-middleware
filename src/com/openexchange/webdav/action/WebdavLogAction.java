@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavLogAction extends AbstractAction {
 
-	private Log LOG = LogFactory.getLog(WebdavLogAction.class);
+	private static final Log LOG = LogFactory.getLog(WebdavLogAction.class);
 	private boolean logBody;
 	private boolean logResponse;
 	
@@ -73,7 +73,7 @@ public class WebdavLogAction extends AbstractAction {
 		for(String header : req.getHeaderNames()) {
 			b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
 		}
-		WebdavResource resource = req.getResource();
+		final WebdavResource resource = req.getResource();
 		b.append("Resource: "); b.append(resource); b.append('\n');
 		b.append("exists: "); b.append(resource.exists()); b.append('\n');
 		b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
@@ -87,8 +87,9 @@ public class WebdavLogAction extends AbstractAction {
 				req = new ReplayWebdavRequest(req);
 				printRequestBody(req);
 			}
-			if(logResponse)
+			if(logResponse) {
 				res = new CapturingWebdavResponse(res);
+			}
 		}
 		
 		try {
@@ -120,36 +121,39 @@ public class WebdavLogAction extends AbstractAction {
 		}
 	}
 
-	private void printRequestBody(WebdavRequest req) {
+	private void printRequestBody(final WebdavRequest req) {
 		if(logBody) {
 			BufferedReader reader = null;
 			try {
 				reader = new BufferedReader(new InputStreamReader(req.getBody(), "UTF-8"));
 				String line = null;
-				StringBuilder b = new StringBuilder();
+				final StringBuilder b = new StringBuilder();
 				while((line = reader.readLine()) != null) {
 					b.append(line);
 					b.append('\n');
 				}
-				LOG.trace(b);
+				if (LOG.isTraceEnabled()) {
+					LOG.trace(b);
+				}
 			} catch (IOException x) {
 				LOG.debug("",x);
 			}finally {
-				if(reader != null)
+				if(reader != null) {
 					try {
 						reader.close();
 					} catch (IOException x2) {
 						LOG.debug("",x2);
 					}
+				}
 			}
 		}
 	}
 	
-	public void setLogRequestBody(boolean b) {
+	public void setLogRequestBody(final boolean b) {
 		logBody = b;
 	}
 	
-	public void setLogResponseBody(boolean b) {
+	public void setLogResponseBody(final boolean b) {
 		logResponse = b;
 	}
 

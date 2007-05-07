@@ -149,8 +149,9 @@ public class CachingUserStorage extends UserStorage {
         int identifier = -1;
         final Integer tmp = (Integer) CACHE.get(key);
         if (null == tmp) {
-            LOG.trace("Cache MISS. Context: " + context.getContextId()
-                + " User: " + uid);
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
+			}
             identifier = getUserStorage().getUserId(uid);
             try {
                 CACHE.put(key, Integer.valueOf(identifier));
@@ -158,8 +159,9 @@ public class CachingUserStorage extends UserStorage {
                 throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
             }
         } else {
-            LOG.trace("Cache HIT. Context: " + context.getContextId()
-                + " User: " + uid);
+            if (LOG.isTraceEnabled()) {
+				LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
+			}
             identifier = tmp;
         }
         return identifier;

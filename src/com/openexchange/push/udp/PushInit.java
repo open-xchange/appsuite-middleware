@@ -70,7 +70,9 @@ public class PushInit {
 	}
 	
 	public static void init() {
-		LOG.info("Parse Push properties");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Parse Push properties");
+		}
 		final PushConfigInterface pushConfigInterface = new PushConfigInterfaceImpl(ComfireConfig.properties.getProperty("PUSHPROPERTIES"));
 		final PushSocket pushSocket = new PushSocket(pushConfigInterface);
 		final PushOutputQueue pushOutputQueue = new PushOutputQueue(pushConfigInterface);

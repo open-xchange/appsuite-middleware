@@ -533,7 +533,9 @@ public class RdbTaskStorage extends TaskStorage {
                 stmt.setString(pos++, pattern);
                 stmt.setString(pos++, pattern);
             }
-            LOG.trace(stmt);
+            if (LOG.isTraceEnabled()) {
+				LOG.trace(stmt);
+			}
             final ResultSet result = stmt.executeQuery();
             return new PrefetchIterator(new TaskIterator(ctx,
                 session.getUserObject().getId(), result, -1, columns,

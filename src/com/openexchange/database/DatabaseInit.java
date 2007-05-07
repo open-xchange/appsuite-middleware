@@ -81,7 +81,8 @@ public final class DatabaseInit {
     public static void init() throws DBPoolingException {
         Pools.init();
         AssignmentStorage.init();
-        LOG.info("Resolved server name \"" + Server.getServerName()
-            + "\" to identifier " + Server.getServerId());
+        if (LOG.isInfoEnabled()) {
+			LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+		}
     }
 }

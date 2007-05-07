@@ -117,7 +117,9 @@ public class PushMulticastRequestTimer extends TimerTask {
 		MULTICAST_REQUEST_BYTES = MULTICAST_REQUEST.getBytes();
 		
 		if (pushConfigInterface.isMultiCastEnabled()) {
-			LOG.info("Starting MulticastRequest");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Starting MulticastRequest");
+			}
 			
 			multicastPort = pushConfigInterface.getMultiCastPort();
 			
@@ -128,7 +130,9 @@ public class PushMulticastRequestTimer extends TimerTask {
 			final Timer t = ServerTimer.getTimer();
 			t.schedule(this, new Date(), remoteHostFresh);
 		} else {
-			LOG.info("MulticastRequest is disabled");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("MulticastRequest is disabled");
+			}
 		}
 	}
 	

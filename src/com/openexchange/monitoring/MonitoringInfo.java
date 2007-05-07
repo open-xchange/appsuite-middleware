@@ -207,8 +207,10 @@ public class MonitoringInfo {
 				numberOfActiveSessions += i;
 				break;
 			default:
-				LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ").append(
-						connectionType).toString());
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ")
+							.append(connectionType).toString());
+				}
 			}
 		}
 	}

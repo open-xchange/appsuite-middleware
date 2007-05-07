@@ -604,8 +604,10 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: "
-            + shared);
+        if (LOG.isTraceEnabled()) {
+	        LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: "
+	            + shared);
+        }
         SearchIterator retval;
         if (all.size() + own.size() + shared.size() == 0) {
             retval = SearchIterator.EMPTY_ITERATOR;

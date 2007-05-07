@@ -101,7 +101,9 @@ public final class Server {
                 LOG.fatal("Cannot resolve server id for server: "
                     + getServerName());
             } else  {
-                LOG.trace("Got server id: " + serverId);
+                if (LOG.isTraceEnabled()) {
+					LOG.trace("Got server id: " + serverId);
+				}
             }
         }
         return serverId;

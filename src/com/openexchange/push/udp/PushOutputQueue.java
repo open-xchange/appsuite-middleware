@@ -103,7 +103,9 @@ public class PushOutputQueue extends TimerTask {
 		remoteHost = pushConfigInterface.getRemoteHost();
 		
 		if (pushConfigInterface.isPushEnabled()) {
-			LOG.info("Starting PushOutputQueue");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Starting PushOutputQueue");
+			}
 			
 			remoteHost = pushConfigInterface.getRemoteHost();
 			
@@ -116,7 +118,9 @@ public class PushOutputQueue extends TimerTask {
 			
 			isEnabled = true;
 		} else {
-			LOG.info("PushOutputQueue is disabled");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("PushOutputQueue is disabled");
+			}
 		}
 		
 		isInit = true;
@@ -258,7 +262,9 @@ public class PushOutputQueue extends TimerTask {
 						if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
 							makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
 						} else {
-							LOG.trace("remote host object is timed out");
+							if (LOG.isTraceEnabled()) {
+								LOG.trace("remote host object is timed out");
+							}
 						}
 					} catch (Exception exc) {
 						LOG.error("createPushPackage", exc);
@@ -308,7 +314,9 @@ public class PushOutputQueue extends TimerTask {
 					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
 						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
 					} else {
-						LOG.trace("remote host object is timed out");
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("remote host object is timed out");
+						}
 					}
 				} catch (Exception exc) {
 					LOG.error("createRegisterPackage", exc);

@@ -78,34 +78,46 @@ public class EventInit {
 	}
 	
 	public static void init() {
-		LOG.info("Parse Event properties");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Parse Event properties");
+		}
 		final EventConfig eventConfig = new EventConfigImpl(ComfireConfig.properties.getProperty("EVENTPROPERTIES"));
 		final EventQueue eventQueue = new EventQueue(eventConfig);
 
-		LOG.info("Adding Notification Listener");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Adding Notification Listener");
+		}
 		final ParticipantNotify notify = new ParticipantNotify();
 		EventQueue.addAppointmentEvent(notify);
 		EventQueue.addTaskEvent(notify);
 
-		LOG.info("Adding LinkEventHandler");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Adding LinkEventHandler");
+		}
 		final LinksEventHandler linkHandler = new LinksEventHandler();
 		EventQueue.addAppointmentEvent(linkHandler);
 		EventQueue.addContactEvent(linkHandler);
 		EventQueue.addTaskEvent(linkHandler);
 		EventQueue.addInfostoreEvent(linkHandler);
 
-		LOG.info("Adding AttachmentCleaner");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Adding AttachmentCleaner");
+		}
 		final AttachmentCleaner attCleaner = new AttachmentCleaner();
 		EventQueue.addAppointmentEvent(attCleaner);
 		EventQueue.addContactEvent(attCleaner);
 		EventQueue.addTaskEvent(attCleaner);
 		
-		LOG.info("Adding PropertiesCleaner");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Adding PropertiesCleaner");
+		}
 		final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
 		
-		LOG.info("Adding LockCleaner");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Adding LockCleaner");
+		}
 		final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
 		EventQueue.addFolderEvent(lockCleaner);
 		EventQueue.addInfostoreEvent(lockCleaner);

@@ -380,7 +380,9 @@ public abstract class FileStorage {
     public void recreateStateFile() throws FileStorageException {
         lock(LOCK_TIMEOUT);
         try {
-            LOG.info("Repairing.");
+            if (LOG.isInfoEnabled()) {
+				LOG.info("Repairing.");
+			}
             final State state = repairState();
             save(STATEFILENAME, state.saveState());
         } finally {
@@ -396,7 +398,9 @@ public abstract class FileStorage {
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {
-                LOG.info("Repairing.");
+                if (LOG.isInfoEnabled()) {
+					LOG.info("Repairing.");
+				}
                 final State state = repairState();
                 save(STATEFILENAME, state.saveState());
             }

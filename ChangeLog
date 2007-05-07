@@ -1,3 +1,8 @@
+* 2007-05-07 - thorben.betten@open-xchange.com
+
+ - Nearly every log statement which uses a level less than 'error'
+   surrounded with an if-statement checking log level
+
 * 2007-05-07 - francisco.laguna@open-xchange.org
 
   - Bugfix #7053. Changed query for locks. Doesn't load locks and counts them but checks it query matches. 

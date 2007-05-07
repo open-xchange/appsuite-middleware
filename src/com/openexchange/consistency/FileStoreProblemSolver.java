@@ -103,7 +103,7 @@ public class FileStoreProblemSolver extends ProblemSolver {
 	public void deleteEntries(final SortedSet<String> set, final Context ctx) {
 		try {
 			for (String identifier : set) {
-				if (storage.deleteFile(identifier) == true) {
+				if (storage.deleteFile(identifier) == true && LOG.isInfoEnabled()) {
 					LOG.info("Deleted identifier: " + identifier);					
 				}
 			}
@@ -139,7 +139,7 @@ public class FileStoreProblemSolver extends ProblemSolver {
 				database.startTransaction();
 				final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
 				database.commit();
-				if (numbers[2] == 1) {
+				if (numbers[2] == 1 && LOG.isInfoEnabled()) {
 					LOG.info("Dummy entry for " + identifier + " in database " +
 							"created. The admin of this context has now " +
 							"a new document");

@@ -76,7 +76,7 @@ public class TaskParser extends CalendarParser {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void parse(XmlPullParser parser, Task taskobject) throws OXException, XmlPullParserException {
+	public void parse(final XmlPullParser parser, final Task taskobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
@@ -93,9 +93,11 @@ public class TaskParser extends CalendarParser {
 		}
 	}
 	
-	protected void parseElementTask(Task taskobject, XmlPullParser parser) throws Exception {
+	protected void parseElementTask(final Task taskobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			LOG.trace("unknown namespace in tag: " + parser.getName());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("unknown namespace in tag: " + parser.getName());
+			}
 			parser.nextText();
 			return ;
 		} 

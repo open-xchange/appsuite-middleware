@@ -53,6 +53,8 @@ package com.openexchange.groupware.reminder;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -69,22 +71,26 @@ import com.openexchange.server.ServerTimer;
 
 public class ReminderPool extends TimerTask {
 	
-	private static HashMap register = new HashMap();
+	private static final Map<String, ReminderEvent> register = new HashMap<String, ReminderEvent>();
 
-	private static HashSet pool = new HashSet();
+	private static final Set<ReminderObject> pool = new HashSet<ReminderObject>();
 	
 	private static final Log LOG = LogFactory.getLog(ReminderPool.class);
 	
 	public ReminderPool(ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {
-			LOG.info("Starting ReminderPool");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Starting ReminderPool");
+			}
 			
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
-			Timer t = ServerTimer.getTimer();
+			final Timer t = ServerTimer.getTimer();
 			t.schedule(this, reminderConfig.getReminderInterval());
 		} else {
-			LOG.info("ReminderPool is disabled");
+			if (LOG.isInfoEnabled()) {
+				LOG.info("ReminderPool is disabled");
+			}
 		}
 	}
 	
