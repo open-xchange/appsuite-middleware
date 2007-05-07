@@ -1,3 +1,10 @@
+* 2007-05-04 - martin.kauss@open-xchange.com
+
+  - Fixed bug #6910. Moving an existing appointment from a private folder
+    to a shared folder of another user was not visible anymore. Now the shared
+    folder owner is added to as participant and the appointment is visible in
+    both folders.
+
 * 2007-05-07 - tobias.prinz@open-xchange.com
 
   - Bugfix #7105: Parser has become more tolerant to different amounts of 
