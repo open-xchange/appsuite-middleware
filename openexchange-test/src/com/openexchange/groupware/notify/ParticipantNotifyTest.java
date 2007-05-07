@@ -90,6 +90,17 @@ public class ParticipantNotifyTest extends TestCase{
 		
 	}
 	
+	public void testOnlyResources() throws Exception {
+		Participant[] participants = getParticipants(U(),G(),S(), R(1));
+		Task t = getTask(participants);
+		
+		notify.taskCreated(t,session);
+		
+		Message msg = notify.getMessages().get(0);
+		
+		assertNames( msg.addresses, "resource_admin1@test.invalid" );
+		
+	}
 	
 	public void testExternal() throws Exception{
 		Participant[] participants = getParticipants(U(),G(),S("don.external@external.invalid"), R());
