@@ -146,7 +146,7 @@ public class RemoteCacheServerStartup {
 				LOG.debug("registryHost = [" + registryHost + ']');
 			}
 
-			if ("localhost".equals(registryHost) || "127.0.0.1".equals(registryHost)) {
+			if (("localhost".equals(registryHost) || "127.0.0.1".equals(registryHost)) && LOG.isWarnEnabled()) {
 				LOG.warn("The local address [" + registryHost
 						+ "] is INVALID.  Other machines must be able to use the address to reach this server.");
 			}

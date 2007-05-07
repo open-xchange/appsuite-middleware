@@ -75,9 +75,9 @@ import org.json.JSONWriter;
 
 public class ReminderRequest {
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
-	private JSONWriter jsonWriter = null;
+	private JSONWriter jsonWriter;
 	
 	private Date timestamp;
 	
@@ -87,12 +87,12 @@ public class ReminderRequest {
 		return timestamp;
 	}
 
-	public ReminderRequest(SessionObject sessionObj, Writer w) {
+	public ReminderRequest(final SessionObject sessionObj, final Writer w) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(w);
 	}
 	
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			actionDelete(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
@@ -104,7 +104,7 @@ public class ReminderRequest {
 		}
 	}
 
-	private void actionDelete(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException {
+	private void actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
 		final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
 		
@@ -119,7 +119,7 @@ public class ReminderRequest {
 		
 	}
 
-	private void actionUpdates(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
+	private void actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
 		timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
 		
 		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
@@ -128,8 +128,8 @@ public class ReminderRequest {
 		jsonWriter.array();
 		try {
 			while (it.hasNext()) {
-				ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
-				ReminderObject reminderObj = (ReminderObject)it.next();
+				final ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+				final ReminderObject reminderObj = (ReminderObject)it.next();
 				
 				if (reminderObj.isRecurrenceAppointment()) {
 					final int targetId = Integer.parseInt(reminderObj.getTargetId());
@@ -138,11 +138,12 @@ public class ReminderRequest {
 					final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
 					
 					if (alarm == null) {
-						LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
+						}
 						continue;
-					} else {
-						reminderObj.setDate(alarm);
 					}
+					reminderObj.setDate(alarm);
 				}
 				
 				reminderWriter.writeObject(reminderObj);
@@ -157,21 +158,21 @@ public class ReminderRequest {
 		}
 	}
 
-	private void actionRange(JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
-		Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
+	private void actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
+		final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
 		
 		SearchIterator it = null;
 		
 		jsonWriter.array();
 		
 		try {
-			ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
+			final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
 			it = reminderSql.listReminder(sessionObj.getUserObject().getId(), end);
 			
 
 			while (it.hasNext()) {
-				ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
-				ReminderObject reminderObj = (ReminderObject)it.next();
+				final ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+				final ReminderObject reminderObj = (ReminderObject)it.next();
 				
 				if (reminderObj.isRecurrenceAppointment()) {
 					final int targetId = Integer.parseInt(reminderObj.getTargetId());
@@ -182,9 +183,8 @@ public class ReminderRequest {
 					if (alarm == null) {
 						LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
 						continue;
-					} else {
-						reminderObj.setDate(alarm);
 					}
+					reminderObj.setDate(alarm);
 				}
 				
 				reminderWriter.writeObject(reminderObj);

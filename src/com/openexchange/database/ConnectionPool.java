@@ -257,7 +257,9 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     final DBPoolingException dbe = new DBPoolingException(
                         DBPoolingException.Code.TOO_LONG, Long.valueOf(data.getTimeDiff()));
                     addTrace(dbe, data);
-                    LOG.warn(dbe.getMessage(), dbe);
+                    if (LOG.isWarnEnabled()) {
+                    	LOG.warn(dbe.getMessage(), dbe);
+                    }
                 }
             } catch (SQLException e) {
                 retval = false;

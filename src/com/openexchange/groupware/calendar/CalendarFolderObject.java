@@ -134,7 +134,9 @@ public class CalendarFolderObject implements Serializable {
                     public_read_own.add(folderid);
                 }
             } else {
-                LOG.warn("Got an unknown folder type :"+type+" for folderid "+folderid);
+            	if (LOG.isWarnEnabled()) {
+            		LOG.warn("Got an unknown folder type :"+type+" for folderid "+folderid);
+            	}
             }
         } else if (fill_shared) {
             if (sharedfolder == null) {

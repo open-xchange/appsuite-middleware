@@ -116,6 +116,7 @@ public class ImportServlet extends ImportExport {
 		LOG = LogFactory.getLog(ImportServlet.class);
 	}
 	
+	@Override
 	@SuppressWarnings({ "unchecked" })
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -135,7 +136,7 @@ public class ImportServlet extends ImportExport {
 			UploadEvent ue = null;
 			try {
 				ue = processUpload(req);
-				Iterator<UploadFile> iter = ue.getUploadFilesIterator();
+				final Iterator<UploadFile> iter = ue.getUploadFilesIterator();
 				if(ue.getNumberOfUploadFiles() != 1){
 					sendResponse(EXCEPTIONS.create(0, ue.getNumberOfUploadFiles()), resp);
 					return;
@@ -170,7 +171,7 @@ public class ImportServlet extends ImportExport {
 			
 			//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
 			final String content = stringWriter.toString();
-			Response resObj = new Response();
+			final Response resObj = new Response();
 			resObj.setData(new JSONArray(content) );
 			
 			sendResponse(resObj.getJSON(), resp);
@@ -182,7 +183,7 @@ public class ImportServlet extends ImportExport {
 		}
 	}
 	
-	protected boolean isKnownContentType(String mime) {
+	protected boolean isKnownContentType(final String mime) {
 		return Format.getFormatByMimeType(mime) != null;
 	}
 
@@ -191,7 +192,7 @@ public class ImportServlet extends ImportExport {
 	 * @param jsonObj
 	 * @param resp
 	 */
-	protected void sendResponse(JSONObject jsonObj, HttpServletResponse resp){
+	protected void sendResponse(final JSONObject jsonObj, final HttpServletResponse resp){
 		resp.setContentType("text/html");
 		PrintWriter w = null;
 		try {
@@ -208,8 +209,8 @@ public class ImportServlet extends ImportExport {
 	 * @param exception
 	 * @param resp
 	 */
-	protected void sendResponse(AbstractOXException exception, HttpServletResponse resp){
-		Response error = new Response();
+	protected void sendResponse(final AbstractOXException exception, final HttpServletResponse resp){
+		final Response error = new Response();
 		error.setException(exception);
 		try {
 			sendResponse(error.getJSON(), resp);

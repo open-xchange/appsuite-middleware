@@ -797,7 +797,9 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 				// above the failure threshhold
 				if (!q.isWorking()) {
 					itr.remove();
-					log.warn("Cache event queue " + q + " is not working and removed from cache server.");
+					if (log.isWarnEnabled()) {
+						log.warn("Cache event queue " + q + " is not working and removed from cache server.");
+					}
 				}
 			}
 		}
