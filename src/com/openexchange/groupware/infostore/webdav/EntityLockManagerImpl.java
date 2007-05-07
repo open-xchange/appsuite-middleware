@@ -77,6 +77,11 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	public List<Lock> findLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
 		return findLocksByEntity(Arrays.asList(entity), ctx, user, userConfig).get(entity);
 	}
+	
+	public boolean isLocked(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+		return existsLockForEntity(Arrays.asList(new Integer[]{entity}), ctx, user, userConfig);
+	}
+
 
 	public int lock(int entity, long timeout, Scope scope, Type type, String ownerDesc, Context ctx, User user, UserConfiguration userConfig) throws OXException {
 		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig);
@@ -101,5 +106,6 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	public void transferLocks(Context ctx, int from_user, int to_user) throws OXException {
 		reassign(ctx, from_user, to_user);
 	}
+
 
 }

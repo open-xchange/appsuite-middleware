@@ -89,6 +89,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
 	private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
 	private String FIND_BY_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
+	private String EXISTS_BY_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
 	private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
 	private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
 	
@@ -108,6 +109,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		
 		FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll("%%tablename%%", tablename);
 		FIND_BY_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_ENTITY);
+		
+		EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll("%%tablename%%", tablename);
+		
 		
 		DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll("%%tablename%%", tablename);
 		
@@ -299,6 +303,36 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			releaseReadConnection(ctx, con);
 		}
 	}
+	
+	@OXThrows(
+			category=Category.CODE_ERROR, 
+			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 
+			exceptionId=7,
+			msg="Invalid SQL: '%s'"
+	)
+	public boolean existsLockForEntity(List<Integer> entities, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+		Connection con = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			StringBuilder entityIds = new StringBuilder("(");
+			entityIds.append(join(entities));
+			entityIds.append(")");
+			
+			con = getReadConnection(ctx);
+			stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
+			set(1, stmt, null, ctx.getContextId());
+			rs = stmt.executeQuery();
+			return rs.next();
+			
+		} catch (SQLException x) {
+			throw EXCEPTIONS.create(4,x,getStatement(stmt));
+		} finally {
+			close(stmt, null);
+			releaseReadConnection(ctx, con);
+		}
+	}
+	
 	@OXThrows(
 			category=Category.CODE_ERROR, 
 			desc="Indicates a faulty SQL query or a problem with the database. Ususally only R&D can do anything about this.", 

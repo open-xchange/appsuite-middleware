@@ -390,12 +390,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			SessionObject sessionObj) throws OXException {
 		if (document.getModifiedBy() == sessionObj.getUserObject().getId())
 			return;
-		List<Lock> locks = lockManager.findLocks(document.getId(), sessionObj
-				.getContext(), sessionObj.getUserObject(), sessionObj
-				.getUserConfiguration());
-		if (locks.size() > 0) {
-			throw EXCEPTIONS.create(15);
+		
+		if(lockManager.isLocked(document.getId(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration())) {
+			throw EXCEPTIONS.create(15);			
 		}
+		
 	}
 
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.", exceptionId = 16, msg = "You cannot unlock this document.")

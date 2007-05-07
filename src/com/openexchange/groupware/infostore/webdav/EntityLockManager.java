@@ -68,10 +68,12 @@ public interface EntityLockManager extends LockManager{
 	List<Lock> findLocks(int entity, Context ctx, User user,
 			UserConfiguration userConfig) throws OXException ;
 
+	boolean isLocked(int entity, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
 
 	void removeAll(int entity, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
 
 
 	void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
+
 
 }
