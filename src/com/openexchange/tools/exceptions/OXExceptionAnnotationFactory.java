@@ -143,14 +143,14 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 		}
 		
 		private void analyze(ClassDeclaration classDecl, List<OXErrorCode> allCodes) {
-			OXExceptionSource exceptionSource  = (OXExceptionSource) classDecl.getAnnotation(OXExceptionSource.class);
+			OXExceptionSource exceptionSource  = classDecl.getAnnotation(OXExceptionSource.class);
 			if(exceptionSource == null)
 				return;
 			
 			int classId = exceptionSource.classId();
 			
 			for(MethodDeclaration methodDecl : classDecl.getMethods()) {
-				OXThrows throwsInfo = (OXThrows) methodDecl.getAnnotation(OXThrows.class);
+				OXThrows throwsInfo = methodDecl.getAnnotation(OXThrows.class);
 				if(throwsInfo != null) {
 					OXErrorCode errorCode = new OXErrorCode();
 					errorCode.component = exceptionSource.component();
@@ -162,7 +162,7 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 				}
 					
 				
-				OXThrowsMultiple multiple = (OXThrowsMultiple) methodDecl.getAnnotation(OXThrowsMultiple.class);
+				OXThrowsMultiple multiple = methodDecl.getAnnotation(OXThrowsMultiple.class);
 				if(multiple != null) {
 					for(int i = 0; i < multiple.exceptionId().length; i++) {
 						OXErrorCode errorCode = new OXErrorCode();

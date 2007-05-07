@@ -128,13 +128,13 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 
 	public void infoitemModified(final DocumentMetadata metadata, final SessionObject sessionObject) {
 		// BOESE TODO
-		final int x = Integer.valueOf(metadata.getFolderId()+"").intValue();
+		final int x = Integer.parseInt(metadata.getFolderId()+"");
 		updateLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 
 	public void infoitemDeleted(final DocumentMetadata metadata, final SessionObject sessionObject) {
 		// BOESE TODO
-		final int x = Integer.valueOf(metadata.getFolderId()+"").intValue();
+		final int x = Integer.parseInt(metadata.getFolderId()+"");
 		deleteLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 	
@@ -193,17 +193,20 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 					tp = rs.getInt(3);
 					fp = rs.getInt(4);
 				}
-				if (fid !=  fp)
+				if (fid !=  fp) {
 					updater = true;
+				}
 			}		
 		} catch (Exception e){
 			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid="+so.getContext().getContextId()+" uid="+id+" type="+type+" fid="+fid+')', e);
 		}  finally {
 			try{
-				if (rs != null)
+				if (rs != null) {
 					rs.close();
-				if (smt != null)
+				}
+				if (smt != null) {
 					smt.close();
+				}
 			} catch (SQLException see){
 				LOG.warn("Unable to close Statement", see);
 			}

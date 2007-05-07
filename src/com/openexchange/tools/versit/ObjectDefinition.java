@@ -73,8 +73,8 @@ public class ObjectDefinition implements VersitDefinition {
 		super();
 	}
 	
-	public ObjectDefinition(String[] propertyNames, PropertyDefinition[] properties, String[] childNames,
-			ObjectDefinition[] children) {
+	public ObjectDefinition(final String[] propertyNames, final PropertyDefinition[] properties, final String[] childNames,
+			final ObjectDefinition[] children) {
 		for (int i = 0; i < properties.length; i++) {
 			addProperty(propertyNames[i], properties[i]);
 		}
@@ -128,7 +128,8 @@ public class ObjectDefinition implements VersitDefinition {
 	}
 	
 	public VersitObject parse(final VersitDefinition.Reader reader) throws IOException {
-		VersitObject child, object = parseBegin(reader);
+		VersitObject child;
+		final VersitObject object = parseBegin(reader);
 		if (object != null) {
 			while ((child = parseChild(reader, object)) != null) {
 				object.addChild(child);
@@ -161,15 +162,16 @@ public class ObjectDefinition implements VersitDefinition {
 		final Scanner s = (Scanner) reader;
 		Property property = parseProperty(s);
 		while (property != null) {
-			if (property.name.equalsIgnoreCase("END")) {
-				if (((String) property.getValue()).equalsIgnoreCase(object.name)) {
+			if (property.name.equalsIgnoreCase("END") && (((String) property.getValue()).equalsIgnoreCase(object.name))) {
+				//if (((String) property.getValue()).equalsIgnoreCase(object.name)) {
 					break;
-				}
+				//}
 			}
 			if (property.name.equalsIgnoreCase("BEGIN")) {
 				final String childName = ((String) property.getValue()).toUpperCase();
 				final VersitDefinition def = getChildDef(childName);
-				VersitObject grandchild, child = new VersitObject(childName);
+				VersitObject grandchild;
+				final VersitObject child = new VersitObject(childName);
 				while ((grandchild = def.parseChild(s, child)) != null) {
 					child.addChild(grandchild);
 				}

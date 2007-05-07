@@ -37,7 +37,7 @@ public class XmlPullParserFactory {
     final static Class referenceContextClass;
 
     static {
-        XmlPullParserFactory f = new XmlPullParserFactory();
+        final XmlPullParserFactory f = new XmlPullParserFactory();
         referenceContextClass = f.getClass();
     }
     
@@ -88,8 +88,8 @@ public class XmlPullParserFactory {
      * @param state if true feature will be set; if false will be ignored
      */
 
-    public void setFeature(String name,
-                           boolean state) throws XmlPullParserException {
+    public void setFeature(final String name,
+                           final boolean state) throws XmlPullParserException {
 
         features.put(name, Boolean.valueOf(state));
     }
@@ -104,8 +104,8 @@ public class XmlPullParserFactory {
      *     Unknown features are <string>always</strong> returned as false
      */
 
-    public boolean getFeature (String name) {
-        Boolean value = (Boolean) features.get(name);
+    public boolean getFeature (final String name) {
+        final Boolean value = (Boolean) features.get(name);
         return value != null ? value.booleanValue() : false;
     }
 
@@ -118,7 +118,7 @@ public class XmlPullParserFactory {
      *    will provide support for XML namespaces;  false otherwise.
      */
 
-    public void setNamespaceAware(boolean awareness) {
+    public void setNamespaceAware(final boolean awareness) {
         features.put (XmlPullParser.FEATURE_PROCESS_NAMESPACES, Boolean.valueOf (awareness));
     }
 
@@ -145,7 +145,7 @@ public class XmlPullParserFactory {
      * @param validating - if true the parsers created by this factory  must be validating.
      */
 
-    public void setValidating(boolean validating) {
+    public void setValidating(final boolean validating) {
         features.put (XmlPullParser.FEATURE_VALIDATION, Boolean.valueOf (validating));
     }
 
@@ -172,13 +172,17 @@ public class XmlPullParserFactory {
 
     public XmlPullParser newPullParser() throws XmlPullParserException {
 
-        if (parserClasses == null) throw new XmlPullParserException
-                ("Factory initialization was incomplete - has not tried "+classNamesLocation);
+        if (parserClasses == null) {
+			throw new XmlPullParserException
+			        ("Factory initialization was incomplete - has not tried "+classNamesLocation);
+		}
 
-        if (parserClasses.size() == 0) throw new XmlPullParserException
-                ("No valid parser classes found in "+classNamesLocation);
+        if (parserClasses.size() == 0) {
+			throw new XmlPullParserException
+			        ("No valid parser classes found in "+classNamesLocation);
+		}
 
-        final StringBuffer issues = new StringBuffer ();
+        final StringBuilder issues = new StringBuilder ();
 
         for (int i = 0; i < parserClasses.size (); i++) {
             final Class ppClass = (Class) parserClasses.elementAt (i);
@@ -188,7 +192,7 @@ public class XmlPullParserFactory {
                 //Enumeration keys = features.keys();
                 // while(keys.hasMoreElements()) {
 
-                for (Enumeration e = features.keys (); e.hasMoreElements ();) {
+                for (final Enumeration e = features.keys (); e.hasMoreElements ();) {
                     final String key = (String) e.nextElement();
                     final Boolean value = (Boolean) features.get(key);
                     if(value != null && value.booleanValue()) {
@@ -197,8 +201,8 @@ public class XmlPullParserFactory {
                 }
                 return pp;
 
-            } catch(Exception ex) {
-                issues.append (ppClass.getName () + ": "+ ex.toString ()+"; ");
+            } catch(final Exception ex) {
+                issues.append (ppClass.getName()).append(": ").append(ex.toString ()).append("; ");
             }
         }
 
@@ -227,7 +231,7 @@ public class XmlPullParserFactory {
                 ("No valid serializer classes found in "+classNamesLocation);
         }
 
-        final StringBuffer issues = new StringBuffer ();
+        final StringBuilder issues = new StringBuilder();
 
         for (int i = 0; i < serializerClasses.size (); i++) {
             final Class ppClass = (Class) serializerClasses.elementAt (i);
@@ -243,8 +247,8 @@ public class XmlPullParserFactory {
                 //                }
                 return ser;
 
-            } catch(Exception ex) {
-                issues.append (ppClass.getName () + ": "+ ex.toString ()+"; ");
+            } catch(final Exception ex) {
+                issues.append (ppClass.getName ()).append(": ").append(ex.toString ()).append("; ");
             }
         }
 
@@ -276,24 +280,28 @@ public class XmlPullParserFactory {
 
         if (classNames == null || classNames.length() == 0 || "DEFAULT".equals(classNames)) {
             try {
-                InputStream is = context.getResourceAsStream (RESOURCE_NAME);
+                final InputStream is = context.getResourceAsStream (RESOURCE_NAME);
 
-                if (is == null) throw new XmlPullParserException
-                        ("resource not found: "+RESOURCE_NAME
-                             +" make sure that parser implementing XmlPull API is available");
-                final StringBuffer sb = new StringBuffer();
+                if (is == null) {
+					throw new XmlPullParserException
+					        ("resource not found: "+RESOURCE_NAME
+					             +" make sure that parser implementing XmlPull API is available");
+				}
+                final StringBuilder sb = new StringBuilder();
 
                 while (true) {
                     final int ch = is.read();
-                    if (ch < 0) break;
-                    else if (ch > ' ')
-                        sb.append((char) ch);
+                    if (ch < 0) {
+						break;
+					} else if (ch > ' ') {
+						sb.append((char) ch);
+					}
                 }
                 is.close ();
 
                 classNames = sb.toString ();
             }
-            catch (Exception e) {
+            catch (final Exception e) {
                 throw new XmlPullParserException (null, null, e);
             }
             classNamesLocation = "resource "+RESOURCE_NAME+" that contained '"+classNames+"'";
@@ -310,7 +318,9 @@ public class XmlPullParserFactory {
         while (pos < classNames.length ()) {
             int cut = classNames.indexOf (',', pos);
 
-            if (cut == -1) cut = classNames.length ();
+            if (cut == -1) {
+				cut = classNames.length ();
+			}
             final String name = classNames.substring (pos, cut);
 
             Class candidate = null;
@@ -321,7 +331,7 @@ public class XmlPullParserFactory {
                 // necessary because of J2ME .class issue
                 instance = candidate.newInstance ();
             }
-            catch (Exception e) {
+            catch (final Exception e) {
             	LOG.error(e.getMessage(), e);
             }
 

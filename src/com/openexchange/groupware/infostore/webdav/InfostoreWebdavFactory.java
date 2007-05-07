@@ -108,7 +108,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		public final Map<Integer, FolderCollection> collectionsById = new HashMap<Integer, FolderCollection>();
 		public final Map<Integer, DocumentMetadataResource> resourcesById = new HashMap<Integer, DocumentMetadataResource>();
 		
-		public void addResource(OXWebdavResource res) {
+		public void addResource(final OXWebdavResource res) {
 			if(res.isCollection()) {
 				addCollection((FolderCollection)res);
 			} else {
@@ -116,23 +116,23 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			}
 		}
 
-		public void addResource(DocumentMetadataResource resource) {
+		public void addResource(final DocumentMetadataResource resource) {
 			resources.put(resource.getUrl(), resource);
-			resourcesById.put(resource.getId(), resource);
+			resourcesById.put(Integer.valueOf(resource.getId()), resource);
 		}
 
-		public void addCollection(FolderCollection collection) {
+		public void addCollection(final FolderCollection collection) {
 			folders.put(collection.getUrl(), collection);
-			collectionsById.put(collection.getId(), collection);
+			collectionsById.put(Integer.valueOf(collection.getId()), collection);
 		}
 		
-		public void invalidate(String url, int id, Type type) {
+		public void invalidate(final String url, final int id, final Type type) {
 			lockNull.remove(url);
 			switch(type) {
 			case COLLECTION:
 				folders.remove(url);
 				newFolders.remove(url);
-				collectionsById.remove(id);
+				collectionsById.remove(Integer.valueOf(id));
 				return;
 			case RESOURCE:
 				resources.remove(url);
@@ -144,34 +144,36 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			}
 		}
 		
-		public void remove(OXWebdavResource resource) throws WebdavException {
-			int id = resource.getParentId();
-			FolderCollection coll = getFolder(id);
-			if(coll == null)
+		public void remove(final OXWebdavResource resource) throws WebdavException {
+			final int id = resource.getParentId();
+			final FolderCollection coll = getFolder(id);
+			if(coll == null) {
 				return;
+			}
 			coll.unregisterChild(resource);
 		}
 		
-		public void registerNew(OXWebdavResource resource) throws WebdavException {
+		public void registerNew(final OXWebdavResource resource) throws WebdavException {
 			if(resource.isCollection()) {
-				collectionsById.put(resource.getId(), (FolderCollection) resource);
+				collectionsById.put(Integer.valueOf(resource.getId()), (FolderCollection) resource);
 			} else {
-				resourcesById.put(resource.getId(), (DocumentMetadataResource) resource);
+				resourcesById.put(Integer.valueOf(resource.getId()), (DocumentMetadataResource) resource);
 			}
-			int id = resource.getParentId();
-			FolderCollection coll = getFolder(id);
-			if(coll == null)
+			final int id = resource.getParentId();
+			final FolderCollection coll = getFolder(id);
+			if(coll == null) {
 				return;
+			}
 			coll.registerChild(resource);
 			
 			
 		}
 
-		private FolderCollection getFolder(int id) {
-			return collectionsById.get(id);
+		private FolderCollection getFolder(final int id) {
+			return collectionsById.get(Integer.valueOf(id));
 		}
 
-		public void addNewResource(OXWebdavResource res) {
+		public void addNewResource(final OXWebdavResource res) {
 			if(res.isCollection()) {
 				newFolders.put(res.getUrl(), (FolderCollection) res);
 			} else {
@@ -179,14 +181,14 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			}
 		}
 
-		public void addLockNull(OXWebdavResource res) {
+		public void addLockNull(final OXWebdavResource res) {
 			lockNull.put(res.getUrl(), res);
 		}
 	}
 	
-	private Set<Service> services = new HashSet<Service>();
+	private final Set<Service> services = new HashSet<Service>();
 
-	private ThreadLocal<State> state = new ThreadLocal<State>();
+	private final ThreadLocal<State> state = new ThreadLocal<State>();
 	private PathResolver resolver;
 	private SessionHolder sessionHolder;
 	private EntityLockManager lockNullLockManager;
@@ -197,7 +199,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	private InfostoreFacade database;
 	private DBProvider provider;
 	
-	private Log LOG = LogFactory.getLog(InfostoreWebdavFactory.class);
+	private final Log LOG = LogFactory.getLog(InfostoreWebdavFactory.class);
 
 	
 	public Protocol getProtocol() {
@@ -207,7 +209,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	public WebdavCollection resolveCollection(String url)
 			throws WebdavException {
 		url = normalize(url);
-		State s = state.get();
+		final State s = state.get();
 		if(s.folders.containsKey(url)) {
 			return s.folders.get(url);
 		}
@@ -215,7 +217,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			return s.newFolders.get(url);
 		}
 		if(s.lockNull.containsKey(url)) {
-			InfostoreLockNullResource res = (InfostoreLockNullResource) s.lockNull.get(url);
+			final InfostoreLockNullResource res = (InfostoreLockNullResource) s.lockNull.get(url);
 			res.setResource(new FolderCollection(url, this));
 			return res;
 		}
@@ -229,7 +231,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			} else {
 				s.addNewResource(res);
 			}
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.getMessage(),e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		if(!res.isCollection()) {
@@ -240,7 +242,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 
 	public WebdavResource resolveResource(String url) throws WebdavException {
 		url = normalize(url);
-		State s = state.get();
+		final State s = state.get();
 		if(s.resources.containsKey(url)) {
 			return s.resources.get(url);
 		}
@@ -254,11 +256,11 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			return s.newFolders.get(url);
 		}
 		if (s.lockNull.containsKey(url)) {
-			InfostoreLockNullResource res = (InfostoreLockNullResource) s.lockNull.get(url);
+			final InfostoreLockNullResource res = (InfostoreLockNullResource) s.lockNull.get(url);
 			res.setResource(new DocumentMetadataResource(url,this));
 		}
 		try {
-			OXWebdavResource res = tryLoad(url, new DocumentMetadataResource(url,this));	
+			final OXWebdavResource res = tryLoad(url, new DocumentMetadataResource(url,this));	
 			if (res.isLockNull()) {
 				s.addLockNull(res);
 			} else if(res.exists()) {
@@ -267,7 +269,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 				s.addNewResource(res);
 			}
 			return res;
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.getMessage(),e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -276,52 +278,54 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return this.services;
 	}
 	
-	private OXWebdavResource tryLoad(String url, OXWebdavResource def) throws OXException, WebdavException {
-		State s = state.get();
-		Context ctx = sessionHolder.getSessionObject().getContext();
-		SessionObject session = sessionHolder.getSessionObject();
+	private OXWebdavResource tryLoad(final String url, final OXWebdavResource def) throws OXException, WebdavException {
+		final State s = state.get();
+		final Context ctx = sessionHolder.getSessionObject().getContext();
+		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session.getContext(), session.getUserObject(), session.getUserConfiguration());
 			if(resolved.isFolder()) {
 				
 				return loadCollection(url, resolved.getId(), s);
 			}
-			DocumentMetadataResource resource = new DocumentMetadataResource(url, this);
+			final DocumentMetadataResource resource = new DocumentMetadataResource(url, this);
 			resource.setId(resolved.getId());
 			resource.setExists(true);
 			s.addResource(resource);
 			return resource;
-		} catch (OXObjectNotFoundException x) {
+		} catch (final OXObjectNotFoundException x) {
 			Connection readCon = null;
 			try {
 				readCon = provider.getReadConnection(ctx);
-				int lockNullId = InfostoreLockNullResource.findInfostoreLockNullResource(url, readCon, ctx);
+				final int lockNullId = InfostoreLockNullResource.findInfostoreLockNullResource(url, readCon, ctx);
 				if(lockNullId>0) {
 					return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
 				}
 			} finally {
-				if(readCon != null)
+				if(readCon != null) {
 					provider.releaseReadConnection(ctx, readCon);
+				}
 			}
 			return def;
 		}
 	}
 	
-	private FolderCollection loadCollection(String url, int id, State s) throws WebdavException {
-		FolderCollection collection = new FolderCollection(url, this);
+	private FolderCollection loadCollection(final String url, final int id, final State s) throws WebdavException {
+		final FolderCollection collection = new FolderCollection(url, this);
 		collection.setId(id);
 		collection.setExists(true);
 		s.addCollection(collection);
-		if(url == null)
+		if(url == null) {
 			collection.initUrl();
+		}
 		return collection;
 	}
 
-	public void load(LoadingHints loading) {
+	public void load(final LoadingHints loading) {
 		load(Arrays.asList(loading));
 	}
 
-	public void load(List<LoadingHints> hints) {
+	public void load(final List<LoadingHints> hints) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -330,7 +334,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return resolver;
 	}
 
-	public void setResolver(PathResolver resolver) {
+	public void setResolver(final PathResolver resolver) {
 		removeService(this.resolver);
 		this.resolver = resolver;
 		addService(this.resolver);
@@ -340,7 +344,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return sessionHolder;
 	}
 
-	public void setSessionHolder(SessionHolder sessionHolder) {
+	public void setSessionHolder(final SessionHolder sessionHolder) {
 		this.sessionHolder = sessionHolder;
 	}
 
@@ -348,7 +352,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return folderLockManager;
 	}
 
-	public void setFolderLockManager(FolderLockManager folderLockManager) {
+	public void setFolderLockManager(final FolderLockManager folderLockManager) {
 		removeService(this.folderLockManager);
 		this.folderLockManager = folderLockManager;
 		addService(this.folderLockManager);
@@ -358,7 +362,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return folderProperties;
 	}
 
-	public void setFolderProperties(PropertyStore folderProperties) {
+	public void setFolderProperties(final PropertyStore folderProperties) {
 		removeService(this.folderProperties);
 		this.folderProperties = folderProperties;
 		addService(this.folderProperties);
@@ -368,7 +372,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return infoLockManager;
 	}
 
-	public void setInfoLockManager(EntityLockManager infoLockManager) {
+	public void setInfoLockManager(final EntityLockManager infoLockManager) {
 		removeService(this.infoLockManager);
 		this.infoLockManager = infoLockManager;
 		addService(this.infoLockManager);
@@ -378,7 +382,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return infoProperties;
 	}
 
-	public void setInfoProperties(PropertyStore infoProperties) {
+	public void setInfoProperties(final PropertyStore infoProperties) {
 		removeService(this.infoProperties);
 		this.infoProperties = infoProperties;
 		addService(this.infoProperties);
@@ -388,7 +392,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return lockNullLockManager;
 	}
 	
-	public void setLockNullLockManager(EntityLockManager infoLockManager) {
+	public void setLockNullLockManager(final EntityLockManager infoLockManager) {
 		removeService(this.lockNullLockManager);
 		this.lockNullLockManager = infoLockManager;
 		addService(this.lockNullLockManager);
@@ -398,51 +402,55 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return database;
 	}
 	
-	public void setDatabase(InfostoreFacade database){
+	public void setDatabase(final InfostoreFacade database){
 		removeService(this.database);
 		this.database=database;
 		addService(this.database);
 	}
 
-	public Collection<? extends OXWebdavResource> getCollections(List<Integer> subfolderIds) throws WebdavException {
-		State s = state.get();
-		Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
-		List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
-		for(int id : subfolderIds) {
-			if(toLoad.contains(id) && s.collectionsById.containsKey(id)) {
-				retVal.add(s.collectionsById.get(id));
-				toLoad.remove(id);
+	public Collection<? extends OXWebdavResource> getCollections(final List<Integer> subfolderIds) throws WebdavException {
+		final State s = state.get();
+		final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
+		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
+		for(final int id : subfolderIds) {
+			if(toLoad.contains(Integer.valueOf(id)) && s.collectionsById.containsKey(Integer.valueOf(id))) {
+				retVal.add(s.collectionsById.get(Integer.valueOf(id)));
+				toLoad.remove(Integer.valueOf(id));
 			}
 		}
-		if(subfolderIds.isEmpty())
+		if(subfolderIds.isEmpty()) {
 			return retVal;
+		}
 		
-		for(int id : toLoad) {
+		for(final int id : toLoad) {
 			try {
 				retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-			} catch (WebdavException x) {
+			} catch (final WebdavException x) {
 				System.out.println(x.getStatus());
-				if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN)
+				if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
 					throw x;
+				}
 			}
 		}
 		
 		return retVal;
 	}
 
-	public Collection<? extends OXWebdavResource> getResourcesInFolder(FolderCollection collection, int folderId) throws OXException, IllegalAccessException, SearchIteratorException {
-		if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID)
+	public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException {
+		if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return new ArrayList<OXWebdavResource>();
-		State s = state.get();
-		SessionObject session = sessionHolder.getSessionObject();
-		SearchIterator iter = database.getDocuments(folderId, session.getContext(), session.getUserObject(), session.getUserConfiguration()).results();
-		List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
+		}
+		final State s = state.get();
+		final SessionObject session = sessionHolder.getSessionObject();
+		final SearchIterator iter = database.getDocuments(folderId, session.getContext(), session.getUserObject(), session.getUserConfiguration()).results();
+		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 		
 		while(iter.hasNext()) {
-			DocumentMetadata docMeta = (DocumentMetadata) iter.next();
-			if(null == docMeta.getFileName() || docMeta.getFileName().equals(""))
+			final DocumentMetadata docMeta = (DocumentMetadata) iter.next();
+			if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
 				continue;
-			DocumentMetadataResource res = s.resourcesById.get(docMeta.getId());
+			}
+			DocumentMetadataResource res = s.resourcesById.get(Integer.valueOf(docMeta.getId()));
 			if(res == null) {
 				res = new DocumentMetadataResource(collection.getUrl()+"/"+docMeta.getFileName(), docMeta, this);
 				s.addResource(res);
@@ -452,89 +460,93 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return retVal;
 	}
 	
-	private void addService(Service service) {
+	private void addService(final Service service) {
 		services.add(service);
 		if (service instanceof DBProviderUser) {
-			DBProviderUser defService = (DBProviderUser) service;
+			final DBProviderUser defService = (DBProviderUser) service;
 			defService.setProvider(getProvider());
 		}
 	}
 
-	private void removeService(Service service) {
-		if(null == service)
+	private void removeService(final Service service) {
+		if(null == service) {
 			return;
+		}
 		services.remove(service);
 	}
 
 	public void beginRequest() {
 		state.set(new State());
-		for(Service service : services())
+		for(final Service service : services()) {
 			try {
 				service.startTransaction();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error("",e);
 			}
+		}
 	}
 
-	public void endRequest(int status) {
+	public void endRequest(final int status) {
 		state.set(null);
-		for(Service service : services())
+		for (final Service service : services()) {
 			try {
 				service.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error("",e);
 			}
-		
+		}
 	}
 
 	public DBProvider getProvider() {
 		return provider;
 	}
 
-	public void setProvider(DBProvider provider) {
+	public void setProvider(final DBProvider provider) {
 		this.provider = provider;
-		for(Service service : services()) {
+		for(final Service service : services()) {
 			if (service instanceof DBProviderUser) {
-				DBProviderUser defService = (DBProviderUser) service;
+				final DBProviderUser defService = (DBProviderUser) service;
 				defService.setProvider(getProvider());
 			}
 		}
 	}
 
-	public void invalidate(String url, int id, Type type) {
-		State s = state.get();
+	public void invalidate(final String url, final int id, final Type type) {
+		final State s = state.get();
 		s.invalidate(url,id,type);
 		
-		for(Service service : services) {
+		for(final Service service : services) {
 			if (service instanceof URLCache) {
-				URLCache urlCache = (URLCache) service;
+				final URLCache urlCache = (URLCache) service;
 				urlCache.invalidate(url,id,type);
 			}
 		}
 	}
 
-	public void created(DocumentMetadataResource resource) throws WebdavException {
-		State s = state.get();
+	public void created(final DocumentMetadataResource resource) throws WebdavException {
+		final State s = state.get();
 		s.registerNew(resource);
 	}
 
-	public void created(FolderCollection collection) throws WebdavException {
-		State s = state.get();
+	public void created(final FolderCollection collection) throws WebdavException {
+		final State s = state.get();
 		s.registerNew(collection);
 	}
 	
-	public void removed(OXWebdavResource resource) throws WebdavException {
+	public void removed(final OXWebdavResource resource) throws WebdavException {
 		invalidate(resource.getUrl(), resource.getId(), (resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE );
-		State s = state.get();
+		final State s = state.get();
 		s.remove(resource);
 	}
 	
 	private final String normalize(String url) {
-		if(url.length()==0)
+		if(url.length()==0) {
 			return "/";
+		}
 		url = url.replaceAll("/+", "/");
-		if(url.charAt(url.length()-1)=='/')
+		if(url.charAt(url.length()-1)=='/') {
 			return url.substring(0,url.length()-1);
+		}
 		return url;
 	}
 

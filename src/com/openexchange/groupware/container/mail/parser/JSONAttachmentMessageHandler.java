@@ -298,13 +298,15 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 					/*
 					 * InputStream
 					 */
-					attachment.setContent((InputStream) o);
+					attachment.setContent(o);
 				} else {
 					/*
 					 * Unknown type
 					 */
-					LOG.warn(new StringBuilder("Unknown type in message attachment: ").append(o.getClass().getName())
-							.toString());
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder("Unknown type in message attachment: ").append(o.getClass().getName())
+								.toString());
+					}
 					attachment.setContent(part.getInputStream());
 				}
 				return false;

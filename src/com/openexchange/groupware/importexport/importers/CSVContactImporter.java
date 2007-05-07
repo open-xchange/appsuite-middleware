@@ -105,28 +105,32 @@ import com.openexchange.sessiond.SessionObject;
 		"Could not translate a single field of information, did not insert entry %s."})
 		
 public class CSVContactImporter implements Importer {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CSVContactImporter.class);
 
 	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
-	public boolean canImport(SessionObject sessObj, Format format, List<String> folders,
-			Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders,
+			final Map<String, String[]> optionalParams) throws ImportExportException {
 		String folder;
 		if(folders.size() != 1){
 			throw EXCEPTIONS.create(0);
-		} else {
-			folder = folders.get(0);
 		}
+		folder = folders.get(0);
 		if(! format.equals(Format.CSV) ){
 			return false;
 		}
 		FolderObject fo = null;
 		try {
 			fo = getFolderObject(sessObj, folder);
-		} catch (ImportExportException e) {
+		} catch (final ImportExportException e) {
 			return false;
 		} 
 		if(fo == null){
-			System.out.println("Folder does not exist: " + folder);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Folder does not exist: " + folder);
+			}
 			return false;
 		}
 		//check format of folder
@@ -137,37 +141,37 @@ public class CSVContactImporter implements Importer {
 		EffectivePermission perm;
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			return false;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			return false;
 		}
 		return perm.canCreateObjects();
 	}
 	
 
-	public List<ImportResult> importData(SessionObject sessObj, Format format,
-			InputStream is, List<String> folders,
-			Map<String, String[]> optionalParams) throws ImportExportException {
+	public List<ImportResult> importData(final SessionObject sessObj, final Format format,
+			final InputStream is, final List<String> folders,
+			final Map<String, String[]> optionalParams) throws ImportExportException {
 		if(! canImport(sessObj, format, folders, optionalParams)){
 			throw EXCEPTIONS.create(1);
 		}
-		String folder = folders.get(0);
-		String csvStr = transformInputStreamToString(is);
-		CSVParser csvParser = new CSVParser();
-		List <List <String> >csv = csvParser.parse(csvStr);
+		final String folder = folders.get(0);
+		final String csvStr = transformInputStreamToString(is);
+		final CSVParser csvParser = new CSVParser();
+		final List <List <String> >csv = csvParser.parse(csvStr);
 		
-		Iterator< List<String> > iter = csv.iterator();
+		final Iterator< List<String> > iter = csv.iterator();
 		//get header fields
-		List<String> fields = (List<String>) iter.next();
+		final List<String> fields = iter.next();
 		if ( ! _atLeastOneCorrectField(fields) ){
 			throw EXCEPTIONS.create(4);
 		}
 		
 		//reading entries...
-		List<ImportResult> results = new LinkedList<ImportResult>();
-		ContactSetter conSet = new ContactSetter();
-		ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
+		final List<ImportResult> results = new LinkedList<ImportResult>();
+		final ContactSetter conSet = new ContactSetter();
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
 		int lineNumber = 1;
 		while(iter.hasNext()){
 			//...and writing them
@@ -177,8 +181,8 @@ public class CSVContactImporter implements Importer {
 		return results;
 	}
 	
-	protected boolean _atLeastOneCorrectField(List<String> fields) {
-		for(String fieldname : fields){
+	protected boolean _atLeastOneCorrectField(final List<String> fields) {
+		for(final String fieldname : fields){
 			if(getRelevantField(fieldname) != null){
 				return true;
 			}
@@ -197,12 +201,12 @@ public class CSVContactImporter implements Importer {
 	 * @param lineNumber Number of the entry ins the CSV file (used for precise error message)
 	 * @return a report containing either the object ID of the entry created OR an error message
 	 */
-	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSwitcher conSet, int lineNumber){
+	protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSQLInterface contactsql, final ContactSwitcher conSet, final int lineNumber){
 		final ImportResult result = new ImportResult();
 		final ContactObject contactObj = new ContactObject();
 		result.setFolder( folder );
 		try{
-			List<String> wrongFields = new LinkedList<String>();
+			final List<String> wrongFields = new LinkedList<String>();
 			boolean atLeastOneFieldWithWrongName = false;
 			boolean atLeastOneFieldInserted = false;
 			for(int i = 0; i < fields.size(); i++){
@@ -228,10 +232,10 @@ public class CSVContactImporter implements Importer {
 			}
 			result.setDate( contactObj.getLastModified() );
 			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
-		} catch (ContactException e) {
+		} catch (final ContactException e) {
 			result.setException(e);
 			addErrorInformation(result, lineNumber , fields);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			result.setException(e);
 			addErrorInformation(result, lineNumber , fields);
 		}
@@ -244,9 +248,9 @@ public class CSVContactImporter implements Importer {
 	 * @param lineNumber Number of the buggy line in the CSV script.
 	 * @param entry CSV line that was buggy.
 	 */
-	protected void addErrorInformation(ImportResult result, int lineNumber, List<String> entry){
+	protected void addErrorInformation(final ImportResult result, final int lineNumber, final List<String> entry){
 		result.setEntryNumber(lineNumber);
-		StringBuilder bob = new StringBuilder();
+		final StringBuilder bob = new StringBuilder();
 		for(int i = 0; i < entry.size(); i++){
 			bob.append("\"");
 			bob.append(entry.get(i));
@@ -262,7 +266,7 @@ public class CSVContactImporter implements Importer {
 	 * @param name Name of the field
 	 * @return a ContactField that was identified by the given name
 	 */
-	protected ContactField getRelevantField(String name){
+	protected ContactField getRelevantField(final String name){
 		return ContactField.getByDisplayName(name);
 	}
 }

@@ -61,9 +61,9 @@ public class OldScanner extends Scanner {
 
 	private final PushbackInputStream r;
 
-	public boolean unfold = false;
+	public boolean unfold;
 
-	private boolean spaces = false;
+	private boolean spaces;
 
 	public OldEncoding DefaultEncoding = OldXBitEncoding.Default;
 
@@ -74,6 +74,7 @@ public class OldScanner extends Scanner {
 		peek = readImpl();
 	}
 
+	@Override
 	protected int readImpl() throws IOException {
 		int c = r.read();
 		Column++;
@@ -87,8 +88,9 @@ public class OldScanner extends Scanner {
 			if (unfold) {
 				if (c == '\r') {
 					c = r.read();
-					if (c == '\n')
+					if (c == '\n') {
 						c = r.read();
+					}
 				} else {
 					c = r.read();
 				}
@@ -117,6 +119,7 @@ public class OldScanner extends Scanner {
 				spaces = false;
 				return -2;
 			}
+		default:
 		}
 		return c;
 	}

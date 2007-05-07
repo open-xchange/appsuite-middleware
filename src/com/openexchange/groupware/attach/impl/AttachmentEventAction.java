@@ -82,16 +82,17 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 	private long ts;
 
 
-	protected void fireAttached(List<AttachmentMetadata> attachments, List<AttachmentMetadata> processed, User user, UserConfiguration userConfig, Context ctx, DBProvider provider) throws Exception {
+	protected void fireAttached(final List<AttachmentMetadata> attachments, final List<AttachmentMetadata> processed, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider) throws Exception {
 		long ts = 0;
-		for(AttachmentMetadata att : attachments) {
-			AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,ctx,provider,source);
+		for(final AttachmentMetadata att : attachments) {
+			final AttachmentEventImpl event = new AttachmentEventImpl(att,att.getFolderId(),att.getAttachedId(),att.getModuleId(),user,userConfig,ctx,provider,source);
 			
 			try {
-				for(AttachmentListener listener : listeners) {
-					long mod = listener.attached(event);
-					if(mod > ts)
+				for(final AttachmentListener listener : listeners) {
+					final long mod = listener.attached(event);
+					if(mod > ts) {
 						ts = mod;
+					}
 				}	
 			} finally {
 				event.close();
@@ -101,29 +102,29 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		this.ts = ts;
 	}
 	
-	protected void fireDetached(List<AttachmentMetadata> m, User user, UserConfiguration userConfig, Context ctx, DBProvider provider) throws Exception {
+	protected void fireDetached(final List<AttachmentMetadata> m, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider) throws Exception {
 		
-		Map<AttachmentAddress, Set<Integer>> collector = new HashMap<AttachmentAddress, Set<Integer>>();
-		for(AttachmentMetadata attachment : m) {
-			AttachmentAddress addr = new AttachmentAddress(attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
+		final Map<AttachmentAddress, Set<Integer>> collector = new HashMap<AttachmentAddress, Set<Integer>>();
+		for(final AttachmentMetadata attachment : m) {
+			final AttachmentAddress addr = new AttachmentAddress(attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
 			Set<Integer> ids = collector.get(addr);
 			if(ids == null) {
 				ids = new HashSet<Integer>();
 				collector.put(addr, ids);
 			}
-			ids.add(attachment.getId());
+			ids.add(Integer.valueOf(attachment.getId()));
 		}
-		for(Map.Entry<AttachmentAddress, Set<Integer>> entry : collector.entrySet()) {
+		for(final Map.Entry<AttachmentAddress, Set<Integer>> entry : collector.entrySet()) {
 			long ts = 0;
-			AttachmentAddress addr = entry.getKey();
-			Set<Integer> ids = entry.getValue();
-			int[] idsArr = new int[ids.size()];
+			final AttachmentAddress addr = entry.getKey();
+			final Set<Integer> ids = entry.getValue();
+			final int[] idsArr = new int[ids.size()];
 			int i = 0;
-			for(Integer id : ids) { idsArr[i++] = id; }
-			AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,ctx,provider,source);
+			for(final Integer id : ids) { idsArr[i++] = id.intValue(); }
+			final AttachmentEventImpl event = new AttachmentEventImpl(idsArr,addr.folder,addr.attached,addr.module,user,userConfig,ctx,provider,source);
 			try {
-				for(AttachmentListener listener : listeners) {
-					long mod = listener.detached(event);
+				for(final AttachmentListener listener : listeners) {
+					final long mod = listener.detached(event);
 					if (mod > ts) {
 						ts = mod;
 					}
@@ -135,7 +136,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		}
 	}
 
-	public void setAttachments(List<AttachmentMetadata> attachments) {
+	public void setAttachments(final List<AttachmentMetadata> attachments) {
 		this.attachments = attachments;
 	}
 	
@@ -143,7 +144,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		return attachments;
 	}
 
-	public void setContext(Context context) {
+	public void setContext(final Context context) {
 		this.ctx = context;
 	}
 	
@@ -151,7 +152,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		return ctx;
 	}
 
-	public void setUser(User user) {
+	public void setUser(final User user) {
 		this.user = user;
 	}
 	
@@ -159,7 +160,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		return user;
 	}
 
-	public void setUserConfiguration(UserConfiguration userConfig) {
+	public void setUserConfiguration(final UserConfiguration userConfig) {
 		this.userConfig = userConfig;
 	}
 	
@@ -167,7 +168,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		return userConfig;
 	}
 
-	public void setProvider(DBProvider provider) {
+	public void setProvider(final DBProvider provider) {
 		this.provider = provider;
 	}
 	
@@ -175,11 +176,11 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		return provider;
 	}
 
-	public void setAttachmentListeners(List<AttachmentListener> listeners) {
+	public void setAttachmentListeners(final List<AttachmentListener> listeners) {
 		this.listeners = listeners;
 	}
 	
-	public void setSource(AttachmentBase attachmentBase) {
+	public void setSource(final AttachmentBase attachmentBase) {
 		this.source = attachmentBase;
 	}
 	
@@ -202,18 +203,19 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		private UserConfiguration userConfig;
 
 		
-		public AttachmentEventImpl(AttachmentMetadata m, int folderId, int attachedId, int moduleId, User user, UserConfiguration userConfig, Context ctx, DBProvider provider, AttachmentBase base) {
+		public AttachmentEventImpl(final AttachmentMetadata m, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
 			this(folderId,attachedId,moduleId,user,userConfig,ctx,provider,base);
 			this.attachment = m;
 		}
 
 		public void close() {
-			if(writeCon != null)
+			if(writeCon != null) {
 				provider.releaseWriteConnection(ctx, writeCon);
+			}
 			writeCon = null;
 		}
 
-		public AttachmentEventImpl(int folderId, int attachedId, int moduleId, User user,UserConfiguration userConfig, Context ctx, DBProvider provider, AttachmentBase base) {
+		public AttachmentEventImpl(final int folderId, final int attachedId, final int moduleId, final User user,final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
 			this.folderId = folderId;
 			this.attachedId = attachedId;
 			this.moduleId = moduleId;
@@ -224,13 +226,13 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 			this.userConfig = userConfig;
 		}
 		
-		public AttachmentEventImpl(int[] ids, int folderId, int attachedId, int moduleId, User user, UserConfiguration userConfig, Context ctx, DBProvider provider, AttachmentBase base) {
+		public AttachmentEventImpl(final int[] ids, final int folderId, final int attachedId, final int moduleId, final User user, final UserConfiguration userConfig, final Context ctx, final DBProvider provider, final AttachmentBase base) {
 			this(folderId, attachedId, moduleId, user,userConfig, ctx, provider, base);
-			this.detached = (int[]) ids.clone();
+			this.detached = ids.clone();
 		}
 
 		public int[] getDetached() {
-			return (int[])detached.clone();
+			return detached.clone();
 		}
 
 		public AttachmentMetadata getAttachment() {
@@ -249,8 +251,9 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		}
 
 		public Connection getWriteConnection() throws OXException {
-			if(writeCon == null)
+			if(writeCon == null) {
 				writeCon = provider.getWriteConnection(ctx);
+			}
 			return writeCon;
 		}
 
@@ -285,19 +288,21 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 		public int folder;
 		public int module;
 
-		public AttachmentAddress(int module, int folder, int attached) {
+		public AttachmentAddress(final int module, final int folder, final int attached) {
 			this.module = module;
 			this.folder = folder;
 			this.attached = attached;
 		}
 		
+		@Override
 		public int hashCode(){
 			return module+folder+attached;
 		}
 		
-		public boolean equals(Object o) {
+		@Override
+		public boolean equals(final Object o) {
 			if (o instanceof AttachmentAddress) {
-				AttachmentAddress attAddr = (AttachmentAddress) o;
+				final AttachmentAddress attAddr = (AttachmentAddress) o;
 				return module == attAddr.module && folder == attAddr.folder && attached == attAddr.attached;
 			}
 			return false;

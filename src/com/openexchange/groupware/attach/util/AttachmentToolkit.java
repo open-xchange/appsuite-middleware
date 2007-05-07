@@ -56,12 +56,12 @@ public final class AttachmentToolkit {
 	private AttachmentToolkit() {
 	}
 	
-	public static final void copy(AttachmentMetadata source, AttachmentMetadata dest) {
+	public static void copy(final AttachmentMetadata source, final AttachmentMetadata dest) {
 		
-		GetSwitch get = new GetSwitch(source);
-		SetSwitch set = new SetSwitch(dest);
+		final GetSwitch get = new GetSwitch(source);
+		final SetSwitch set = new SetSwitch(dest);
 		
-		for(AttachmentField field : AttachmentField.VALUES) {
+		for(final AttachmentField field : AttachmentField.VALUES) {
 			set.setValue(field.doSwitch(get));
 			field.doSwitch(set);
 		}

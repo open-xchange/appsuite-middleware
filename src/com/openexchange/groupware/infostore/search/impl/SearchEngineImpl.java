@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.container.FolderObject;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,7 +66,10 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.SearchEngine;
@@ -76,21 +77,14 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.TaskException;
-import com.openexchange.groupware.tasks.TaskLogic;
-import com.openexchange.groupware.tasks.Tools;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.server.OCLPermission;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.groupware.infostore.Classes;
 
 
 /**
@@ -107,7 +101,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 	private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(SearchEngineImpl.class);
 	
-	private InfostoreSecurityImpl security = new InfostoreSecurityImpl();
+	private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 	
 	// private static final Log LOG = LogFactory.getLog(SearchEngineImpl.class);
 	
@@ -124,16 +118,17 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		super(null);
 	}
 	
-	public SearchEngineImpl(DBProvider provider) {
+	public SearchEngineImpl(final DBProvider provider) {
 		super(provider);
 		security.setProvider(provider);
 	}
 	
 	@Override
-	public void setProvider(DBProvider provider) {
+	public void setProvider(final DBProvider provider) {
 		super.setProvider(provider);
-		if(security!=null)
+		if(security!=null) {
 			security.setProvider(provider);
+		}
 	}
 
 	@OXThrowsMultiple(
@@ -145,7 +140,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			
 			msg={"Incorrect SQL Query: %s", "Cannot pre-fetch results."}
 	)
-	public SearchIterator search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public SearchIterator search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		
 		List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -158,26 +153,26 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
                         FolderObject.INFOSTORE, ctx);
                 while (iter.hasNext()) {
                     final FolderObject folder = (FolderObject) iter.next();
-                    EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
+                    final EffectivePermission perm = security.getFolderPermission(folder.getObjectID(), ctx, user, userConfig);
                     if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                        own.add(folder.getObjectID());
+                        own.add(Integer.valueOf(folder.getObjectID()));
                     } else if (perm.canReadAllObjects()){
-                        all.add(folder.getObjectID());
+                        all.add(Integer.valueOf(folder.getObjectID()));
                     }
                 }
             } else {
-                EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);
+                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig);
                 if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                    own.add(folderId);
+                    own.add(Integer.valueOf(folderId));
                 } else if (perm.canReadAllObjects()){
-                    all.add(folderId);
+                    all.add(Integer.valueOf(folderId));
                 } else {
                 	return SearchIteratorAdapter.EMPTY_ITERATOR;
                 }
             }
             all = Collections.unmodifiableList(all);
             own = Collections.unmodifiableList(own);
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             throw new OXException(e);
         }
 		
@@ -185,7 +180,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
         	return SearchIteratorAdapter.EMPTY_ITERATOR;
         }
         
-		StringBuffer SQL_QUERY = new StringBuffer();
+		final StringBuilder SQL_QUERY = new StringBuilder();
 		SQL_QUERY.append(getResultFieldsSelect(cols));
 		SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
 		.append(ctx.getContextId());
@@ -211,12 +206,13 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		query = query.replace('?', '_');
 		query = query.replaceAll("'", "\\\\'");
 
-		StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
-		for (String currentField : SEARCH_FIELDS) {
-			if (SQL_QUERY_OBJECTS.length() > 0)
+		final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
+		for (final String currentField : SEARCH_FIELDS) {
+			if (SQL_QUERY_OBJECTS.length() > 0) {
 				SQL_QUERY_OBJECTS.append(" OR ");
+			}
 			
-			if (query.indexOf("%") != -1) {
+			if (query.indexOf('%') != -1) {
 				SQL_QUERY_OBJECTS.append(currentField);
 				SQL_QUERY_OBJECTS.append(" LIKE ('");
 				SQL_QUERY_OBJECTS.append(query);
@@ -235,7 +231,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		}
 		
 		if (sortedBy != null && dir != NOT_SET) {
-			String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
+			final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
 			if ((orderColumn != null) && (orderColumn[0] != null)) {
 				if (dir == DESC) {
 					SQL_QUERY.append(" ORDER BY ");
@@ -267,23 +263,23 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				SQL_QUERY.append(end+1);
 			}
 		}
-		Connection con = getReadConnection(ctx);
+		final Connection con = getReadConnection(ctx);
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
 			return new InfostoreSearchIterator(stmt.executeQuery(SQL_QUERY.toString()), this, cols, ctx, con, stmt);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("",e);
 			throw EXCEPTIONS.create(0,e,SQL_QUERY.toString());
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error("",e);
 			throw EXCEPTIONS.create(1,e);
 		}
 	}
 
-	private String join(List<Integer> all) {
-		StringBuffer joined = new StringBuffer();
-		for(Integer i : all) {
+	private String join(final List<Integer> all) {
+		final StringBuffer joined = new StringBuffer();
+		for(final Integer i : all) {
 			joined.append(i.toString());
 			joined.append(',');
 		}
@@ -291,13 +287,13 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		return joined.toString();
 	}
 
-	public void index(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws OXException { }
+	public void index(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException { }
 	
-	public void unIndex0r(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException { }
+	public void unIndex0r(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException { }
 	
-	private String[] switchMetadata2DBColumns(Metadata[] columns) {
-		List<String> retval = new ArrayList<String>();
-		for (Metadata current : columns) {
+	private String[] switchMetadata2DBColumns(final Metadata[] columns) {
+		final List<String> retval = new ArrayList<String>();
+		for (final Metadata current : columns) {
 			Metadata2DBSwitch : switch(current.getId()) {
 			default : break Metadata2DBSwitch;
 			case Metadata.LAST_MODIFIED : retval.add("infostore.last_modified"); break Metadata2DBSwitch;
@@ -325,10 +321,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		return(retval.toArray(new String[0]));
 	}
 	
-	private String getResultFieldsSelect(Metadata[] RESULT_FIELDS) {
-		String[] DB_RESULT_FIELDS = switchMetadata2DBColumns(RESULT_FIELDS);
+	private String getResultFieldsSelect(final Metadata[] RESULT_FIELDS) {
+		final String[] DB_RESULT_FIELDS = switchMetadata2DBColumns(RESULT_FIELDS);
 		
-		StringBuilder selectFields = new StringBuilder();
+		final StringBuilder selectFields = new StringBuilder();
 		boolean id = false;
 		for (String currentField : DB_RESULT_FIELDS) {
 			if(currentField.equals("infostore.id")){
@@ -360,7 +356,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		private Connection readCon;
 		private Statement stmt;
 		
-		public InfostoreSearchIterator(ResultSet rs, SearchEngineImpl s, Metadata[] columns, Context ctx, Connection readCon, Statement stmt) throws SearchIteratorException {
+		public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws SearchIteratorException {
 			this.rs = rs;
 			this.s = s;
 			this.columns = columns;
@@ -373,7 +369,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				} else {
 					close();
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,e,Component.INFOSTORE);
 			}
 		}
@@ -402,7 +398,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 					close();
 				}
 				return retval;
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,exc,Component.INFOSTORE);
 			}
 		}
@@ -414,7 +410,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 					rs.close();
 				}
 				rs = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.debug("",e);
 			}
 			
@@ -423,7 +419,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 					stmt.close();
 				}
 				stmt = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.debug("",e);
 			}
 			
@@ -438,7 +434,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 			return false;
 		}
 		
-		private DocumentMetadataImpl fillDocumentMetadata(DocumentMetadataImpl retval, Metadata[] columns, ResultSet result) throws SQLException {
+		private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {
 			for (int i = 0; i < columns.length; i++) {
 				FillDocumentMetadata : switch(columns[i].getId()) {
 				default : break FillDocumentMetadata;
@@ -457,8 +453,9 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				case Metadata.DESCRIPTION : retval.setDescription(result.getString(i+1)); break FillDocumentMetadata;
 				case Metadata.LOCKED_UNTIL : 
 					retval.setLockedUntil(new Date(result.getLong(i+1)));
-					if (result.wasNull())
+					if (result.wasNull()) {
 						retval.setLockedUntil(null);
+					}
 					break FillDocumentMetadata;
 				case Metadata.URL : retval.setURL(result.getString(i+1)); break FillDocumentMetadata;
 				case Metadata.CREATED_BY : retval.setCreatedBy(result.getInt(i+1)); break FillDocumentMetadata;

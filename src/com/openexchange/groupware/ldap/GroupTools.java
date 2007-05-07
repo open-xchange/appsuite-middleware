@@ -74,7 +74,7 @@ public final class GroupTools {
         super();
     }
 
-    public static final Group getGroupZero(final Context ctx)
+    public static Group getGroupZero(final Context ctx)
         throws LdapException, UserException {
         final Group retval;
         try {

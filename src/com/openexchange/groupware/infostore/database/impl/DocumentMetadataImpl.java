@@ -107,7 +107,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	}
 	
 	public String getProperty(String key) {
-		return (String)properties.get(key);
+		return properties.get(key);
 	}
 
 	public Set getPropertyNames() {

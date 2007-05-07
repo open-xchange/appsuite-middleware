@@ -60,7 +60,7 @@ public class InfostoreException extends OXException {
 	}
 
 	public InfostoreException(Category category, String message, int id, Object...msgParams){
-		this(category,id,message, null,(Object[])msgParams);
+		this(category,id,message, null,msgParams);
 	}
 
 	public InfostoreException(AbstractOXException e1) {

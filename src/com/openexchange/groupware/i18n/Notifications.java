@@ -197,7 +197,7 @@ public class Notifications {
 		"=========\n"+
 		"[resources]\n"+
 		"\n"+
-		"==========================================";;
+		"==========================================";
 	
 	public static final String APPOINTMENT_CREATE_TITLE = "A new appointment has been created";
 	public static final String APPOINTMENT_UPDATE_TITLE = "An appointment has been changed";

@@ -150,7 +150,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/**
 	 * @param sessionObj
 	 */
-	public RdbFolderSQLInterface(SessionObject sessionObj) {
+	public RdbFolderSQLInterface(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
 		this.userId = sessionObj.getUserObject().getId();
 		this.groups = sessionObj.getUserObject().getGroups();
@@ -196,9 +196,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
 			}
 			return fo;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -302,9 +302,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 				manager.updateFolder(folderobject, false, lastModfified);
 			}
 			return folderobject;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -355,9 +355,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			final long lastModified = System.currentTimeMillis();
 			new OXFolderManagerImpl(sessionObj).deleteFolder(folderobject, true, lastModified);
 			return folderobject.getObjectID();
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -418,9 +418,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, sessionObj);
 			}
 			return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw e;
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -444,7 +444,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, sessionObj);
 			}
 			return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -468,7 +468,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, sessionObj);
 			}
 			return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -492,7 +492,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, sessionObj);
 			}
 			return new FolderObjectIterator(int2folder(result, oxfolderAccess), false);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -506,7 +506,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		try {
 			return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, sessionObj.getUserConfiguration()
 					.getAccessibleModules(), ctx);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -553,11 +553,11 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			}
 			return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, sessionObj
 					.getUserConfiguration(), since);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, Integer.valueOf(ctx.getContextId()));
 		}
 	}
@@ -576,7 +576,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			}
 			return OXFolderIteratorSQL.getVisibleSharedFolders(userId, groups, sessionObj.getUserConfiguration()
 					.getAccessibleModules(), owner, ctx, since);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -590,9 +590,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		try {
 			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, sessionObj.getUserConfiguration(),
 					sessionObj.getLocale(), ctx);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw e;
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -606,7 +606,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		try {
 			return OXFolderIteratorSQL.getDeletedFoldersSince(since, userId, groups, sessionObj.getUserConfiguration()
 					.getAccessibleModules(), ctx);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -620,7 +620,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		try {
 			return OXFolderIteratorSQL.getModifiedFoldersSince(since == null ? new Date(0) : since, userId, groups,
 					sessionObj.getUserConfiguration().getAccessibleModules(), false, ctx);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -633,7 +633,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	public SearchIterator getAllModifiedFolders(final Date since) throws OXException {
 		try {
 			return OXFolderIteratorSQL.getAllModifiedFoldersSince(since == null ? new Date(0) : since, ctx);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}
 	}
@@ -645,7 +645,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		for (int i = 0; i < size; i++) {
 			try {
 				retval.add(oxfolderAccess.getFolderObject(iter.next().intValue()));
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 				continue;
 			}

@@ -10,18 +10,18 @@ import com.openexchange.groupware.infostore.InfostoreException;
 public class QuotaFileStorageExceptionFactory extends
 		AbstractOXExceptionFactory {
 
-	public QuotaFileStorageExceptionFactory(Class clazz) {
+	public QuotaFileStorageExceptionFactory(final Class clazz) {
 		super(clazz);
 	}
 	
 	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY;
 	
 	@Override
-	protected AbstractOXException buildException(Component component, Category category, int number, String message, Throwable cause, Object... msgArgs) {
+	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
 		if(component != Component.FILESTORE) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the filestore");
 		}
-		return new InfostoreException(category,number,message,cause,(Object[])msgArgs);
+		return new InfostoreException(category,number,message,cause,msgArgs);
 	}
 	
 	@Override
@@ -29,12 +29,12 @@ public class QuotaFileStorageExceptionFactory extends
 		return CLASS;
 	}
 	
-	public InfostoreException create(int id, Object...msgParams) {
-		return (InfostoreException) createException(id,(Object[]) msgParams);
+	public InfostoreException create(final int id, final Object...msgParams) {
+		return (InfostoreException) createException(id,msgParams);
 	}
 	
-	public InfostoreException create(int id, Throwable cause, Object...msgParams) {
-		return (InfostoreException) createException(id,cause, (Object[]) msgParams);
+	public InfostoreException create(final int id, final Throwable cause, final Object...msgParams) {
+		return (InfostoreException) createException(id,cause, msgParams);
 	}
 
 }

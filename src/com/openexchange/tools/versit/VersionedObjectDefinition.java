@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * @author Viktor Pracht
@@ -65,7 +64,7 @@ import java.util.Map.Entry;
 public class VersionedObjectDefinition extends ObjectDefinition implements
 		VersitDefinition {
 
-	private final HashMap<String, ObjectDefinition> Definitions = new HashMap<String, ObjectDefinition>();
+	private final Map<String, ObjectDefinition> Definitions = new HashMap<String, ObjectDefinition>();
 
 	private ObjectDefinition Definition = ObjectDefinition.Default;
 
@@ -73,15 +72,15 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		super();
 	}
 
-	private VersionedObjectDefinition(final HashMap definitions,
+	private VersionedObjectDefinition(final Map<String, ObjectDefinition> definitions,
 			final ObjectDefinition definition) {
 		final int size = definitions.size();
-		final Iterator iter = definitions.entrySet().iterator();
+		final Iterator<Map.Entry<String, ObjectDefinition>> iter = definitions.entrySet().iterator();
 		for (int k = 0; k < size; k++) {
-			Map.Entry entry = (Entry) iter.next();
-			ObjectDefinition od = (ObjectDefinition) entry.getValue();
-			ObjectDefinition copy = (ObjectDefinition) od.copy();
-			addDefinition((String) entry.getKey(), copy);
+			final Map.Entry<String, ObjectDefinition> entry = iter.next();
+			final ObjectDefinition od = entry.getValue();
+			final ObjectDefinition copy = (ObjectDefinition) od.copy();
+			addDefinition(entry.getKey(), copy);
 			if (od == definition) {
 				Definition = copy;
 			}
@@ -89,8 +88,8 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		Definition = definition;
 	}
 
-	public VersionedObjectDefinition(String[] versions,
-			ObjectDefinition[] definitions) {
+	public VersionedObjectDefinition(final String[] versions,
+			final ObjectDefinition[] definitions) {
 		for (int i = 0; i < versions.length; i++) {
 			addDefinition(versions[i], definitions[i]);
 		}
@@ -110,25 +109,28 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		}
 	}
 
+	@Override
 	public Reader getReader(final InputStream stream, final String charset)
 			throws IOException {
 		return new ReaderScanner(new InputStreamReader(stream, charset));
 	}
 
+	@Override
 	public VersitObject parseChild(final Reader reader, final VersitObject object)
 			throws IOException {
 		final Scanner s = (Scanner) reader;
 		Property property = Definition.parseProperty(s);
 		while (property != null) {
-			if (property.name.equalsIgnoreCase("END")) {
-				if (((String) property.getValue()).equalsIgnoreCase(object.name)) {
+			if (property.name.equalsIgnoreCase("END") && (((String) property.getValue()).equalsIgnoreCase(object.name))) {
+				//if (((String) property.getValue()).equalsIgnoreCase(object.name)) {
 					break;
-				}
+				//}
 			}
 			if (property.name.equalsIgnoreCase("BEGIN")) {
 				final String childName = ((String) property.getValue()).toUpperCase();
 				final VersitDefinition def = Definition.getChildDef(childName);
-				VersitObject grandchild, child = new VersitObject(childName);
+				VersitObject grandchild;
+				final VersitObject child = new VersitObject(childName);
 				while ((grandchild = def.parseChild(s, child)) != null) {
 					child.addChild(grandchild);
 				}
@@ -146,6 +148,7 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		return null;
 	}
 
+	@Override
 	public void write(final Writer writer, final VersitObject object) throws IOException {
 		final Property VersionProperty = object.getProperty("VERSION");
 		if (VersionProperty != null) {
@@ -154,6 +157,7 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		Definition.write(writer, object);
 	}
 
+	@Override
 	public void writeProperties(final Writer writer, final VersitObject object)
 			throws IOException {
 		final Property VersionProperty = object.getProperty("VERSION");
@@ -163,19 +167,22 @@ public class VersionedObjectDefinition extends ObjectDefinition implements
 		Definition.writeProperties(writer, object);
 	}
 
+	@Override
 	public void writeEnd(final Writer writer, final VersitObject object) throws IOException {
 		Definition.writeEnd(writer, object);
 	}
 
+	@Override
 	public VersitDefinition getChildDef(final String name) {
 		return Definition.getChildDef(name);
 	}
 
+	@Override
 	public Iterator iterator() {
-		// TODO
 		return Definition.iterator();
 	}
 
+	@Override
 	public VersitDefinition copy() {
 		return new VersionedObjectDefinition(Definitions, Definition);
 	}

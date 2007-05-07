@@ -64,15 +64,15 @@ public class ImportExportException extends OXException {
 
 	private static final long serialVersionUID = 8368543799201210727L;
 
-	public ImportExportException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.IMPORT_EXPORT, category, id, String.format(message, (Object[]) msgParams),cause);
+	public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
+		super(Component.IMPORT_EXPORT, category, id, String.format(message, msgParams),cause);
 	}
 
-	public ImportExportException(Category category, String message, int id, Object...msgParams){
-		this(category,id,message, null,(Object[])msgParams);
+	public ImportExportException(final Category category, final String message, final int id, final Object...msgParams){
+		this(category,id,message, null,msgParams);
 	}
 
-	public ImportExportException(AbstractOXException e1) {
+	public ImportExportException(final AbstractOXException e1) {
 		super(e1);
 	}
 }

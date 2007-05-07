@@ -62,18 +62,18 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public class ImportExportExceptionFactory extends AbstractOXExceptionFactory {
 
-	public ImportExportExceptionFactory(Class clazz) {
+	public ImportExportExceptionFactory(final Class clazz) {
 		super(clazz);
 	}
 		
 	private static final int CLASS = ImportExportExceptionClasses.IMPORTEXPORTEXCEPTIONFACTORY;
 		
 	@Override
-	protected AbstractOXException buildException(Component component, Category category, int number, String message, Throwable cause, Object... msgArgs) {
+	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
 		if(component != Component.IMPORT_EXPORT) {
 			throw new IllegalArgumentException("This factory can only build exceptions for importers or exporters");
 		}
-		return new ImportExportException(category,number,message,cause,(Object[])msgArgs);
+		return new ImportExportException(category,number,message,cause,msgArgs);
 	}
 
 	@Override
@@ -81,12 +81,12 @@ public class ImportExportExceptionFactory extends AbstractOXExceptionFactory {
 		return CLASS;
 	}
 
-	public ImportExportException create(int id, Object...msgParams) {
-		return (ImportExportException) createException(id,(Object[]) msgParams);
+	public ImportExportException create(final int id, final Object...msgParams) {
+		return (ImportExportException) createException(id,msgParams);
 	}
 
-	public ImportExportException create(int id, Throwable cause, Object...msgParams) {
-		return (ImportExportException) createException(id,cause, (Object[]) msgParams);
+	public ImportExportException create(final int id, final Throwable cause, final Object...msgParams) {
+		return (ImportExportException) createException(id,cause, msgParams);
 	}
 
 }

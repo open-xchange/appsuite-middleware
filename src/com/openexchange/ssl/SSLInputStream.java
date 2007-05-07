@@ -74,31 +74,34 @@ public class SSLInputStream extends InputStream
                                        int outoff, 
                                        int outlen) throws SSLException;
 
-	public SSLInputStream(SSLSocket sslsock, InputStream is) throws IOException
+	public SSLInputStream(final SSLSocket sslsock, final InputStream is) throws IOException
 	{
 		this.socket = sslsock;
 		this.is = is;
 		ssl = this.socket.getSSL();
     }
 
+	@Override
 	public int read() throws IOException
 	{
        	int n;
-		byte[] b = new byte[1];
+		final byte[] b = new byte[1];
 
 		n = read(b);
-		if(n < 0) 
-            return n;
-		else 
-            return b[0];
+		if(n < 0) {
+			return n;
+		}
+		return b[0];
 	}
 
-   	public int read(byte b[]) throws IOException
+   	@Override
+	public int read(final byte b[]) throws IOException
 	{
        	return(read(b, 0, b.length));
    	}
 
-	public int read(byte b[], int off, int len) throws IOException
+	@Override
+	public int read(final byte b[], final int off, final int len) throws IOException
 	{
 		int ret;
 		int n;
@@ -106,13 +109,14 @@ public class SSLInputStream extends InputStream
 		n = nativeAvailable(ssl);
 		if(n > 0) 
 		{
-			if(n > len) 
-                n = len;
+			if(n > len) {
+				n = len;
+			}
 
 			try 
 			{
 				ret = nativeReadArray(ssl, null, 0, 0, b, off, n);
-			} catch(SSLException e) 
+			} catch(final SSLException e) 
 			{
 				e.printStackTrace();
 				throw new IOException();
@@ -120,15 +124,16 @@ public class SSLInputStream extends InputStream
 		} 
 		else 
 		{
-			byte in[] = new byte[4096];
+			final byte in[] = new byte[4096];
 			n = is.read(in, 0, in.length);
-			if(n < 0) 
+			if(n < 0) {
 				return n;
+			}
 
 			try 
 			{
 				ret = nativeReadArray(ssl, in, 0, n, b, off, len);
-			} catch(SSLException e) 
+			} catch(final SSLException e) 
 			{
 				e.printStackTrace();
 				throw new IOException();
@@ -137,43 +142,46 @@ public class SSLInputStream extends InputStream
 		return ret;
     }
 
-    public long skip(long n) throws IOException
+    @Override
+	public long skip(final long n) throws IOException
 	{
-		byte[] in = new byte[(int)n];
+		final byte[] in = new byte[(int)n];
 		return read(in, 0, in.length);
     }
 
-  	public int available() throws IOException
+  	@Override
+	public int available() throws IOException
   	{
-		byte in[] = new byte[4096];
+		final byte in[] = new byte[4096];
 	  	int len;
 
 	  	len = is.available();
-	  	if(len > 0) 
+	  	if(len > 0 && len > in.length) 
 		{
-			if(len > in.length) 
-			{
+			//if(len > in.length) {
 				len = in.length;
 			 	is.read(in, 0, len);
 			 	try 
 				{
 					nativeReadArray(ssl, in, 0, len, null, 0, 0);
-			 	} catch(SSLException e) 
+			 	} catch(final SSLException e) 
 				{
 				 	e.printStackTrace();
 				 	throw new IOException();
 			 	}
-		  	}
+		  	//}
 	  	}
 	  	return nativeAvailable(ssl);
   	}
 
-  	public void close() throws IOException 
+  	@Override
+	public void close() throws IOException 
 	{
     		is.close();
   	}
 
-  	public synchronized void mark(int readlimit)
+  	@Override
+	public synchronized void mark(final int readlimit)
   	{
 		is.mark(readlimit);
   	}

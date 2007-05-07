@@ -92,7 +92,7 @@ public class ListErrorCodes {
      * @throws IOException 
      * @throws IllegalArgumentException 
      */
-    public static void main(String[] args) throws ClassNotFoundException,
+    public static void main(final String[] args) throws ClassNotFoundException,
         InstantiationException, IllegalAccessException, NoSuchMethodException,
         InvocationTargetException, IOException {
     	
@@ -108,12 +108,12 @@ public class ListErrorCodes {
     	if(args.length > 1) {
     		try {
     			processor = (OXErrorCodeProcessor) Class.forName(args[1]).newInstance();
-    		} catch (Exception x) {
+    		} catch (final Exception x) {
     			x.printStackTrace();
     		}
     	}
     	
-    	List<OXErrorCode> allCodes = new ArrayList<OXErrorCode>();
+    	final List<OXErrorCode> allCodes = new ArrayList<OXErrorCode>();
     	
     	collectCodes(allCodes, packageName);
     	sort(allCodes);
@@ -143,25 +143,26 @@ public class ListErrorCodes {
         } */
     }
 
-    private static void processCodes(List<OXErrorCode> allCodes, OXErrorCodeProcessor processor) {
-		for(OXErrorCode code : allCodes)
+    private static void processCodes(final List<OXErrorCode> allCodes, final OXErrorCodeProcessor processor) {
+		for (final OXErrorCode code : allCodes) {
 			processor.process(code);
+		}
 		processor.done();
 	}
 
 	
 
-	private static void collectCodes(List<OXErrorCode> allCodes, String packageName) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		JarFile jar = new JarFile(new File(packageName));
-		Enumeration<JarEntry> e = jar.entries();
+	private static void collectCodes(final List<OXErrorCode> allCodes, final String packageName) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		final JarFile jar = new JarFile(new File(packageName));
+		final Enumeration<JarEntry> e = jar.entries();
 		
-		List<String> exceptionsAnalyzed = new ArrayList<String>();
+		final List<String> exceptionsAnalyzed = new ArrayList<String>();
 		while(e.hasMoreElements()) {
-			JarEntry entry = e.nextElement();
+			final JarEntry entry = e.nextElement();
 			try {
 				if(entry.getName().endsWith(".class") && !entry.getName().contains("$")) {
-					String classname = entry.getName().replaceAll("\\/",".").substring(0, entry.getName().length()-6);
-					Class analyzeMe = Class.forName(classname);
+					final String classname = entry.getName().replaceAll("\\/",".").substring(0, entry.getName().length()-6);
+					final Class analyzeMe = Class.forName(classname);
                     
 					if (isAbstractOXExceptionSubClass(analyzeMe)) {
 							analyzeAbstractOXException(analyzeMe, allCodes);
@@ -174,8 +175,8 @@ public class ListErrorCodes {
 						x.printStackTrace();
 					}*/
 				}
-			} catch (Throwable x) {
-				System.err.println("Couldn't analyze entry "+entry+' '+x);
+			} catch (final Throwable x) {
+				System.err.println(new StringBuilder("Couldn't analyze entry ").append(entry).append(' ').append(x).toString());
 			}
 		}
 		
@@ -189,21 +190,20 @@ public class ListErrorCodes {
         final Class superClazz = clazz.getSuperclass();
         if (AbstractOXException.class.equals(superClazz)) {
             return true;
-        } else {
-            return isAbstractOXExceptionSubClass(superClazz);
         }
+        return isAbstractOXExceptionSubClass(superClazz);
     }
     
-	private static void analyzeAbstractOXException(Class analyzeMe, List<OXErrorCode> allCodes) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	private static void analyzeAbstractOXException(final Class analyzeMe, final List<OXErrorCode> allCodes) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		System.out.println(analyzeMe.getName()+" looking for inner classes whose names end with "+CODE_NAME);
-        Class[] classes = analyzeMe.getDeclaredClasses();
+        final Class[] classes = analyzeMe.getDeclaredClasses();
         int count = 0;
-        for (Class test : classes) {
+        for (final Class test : classes) {
             if (test.getName().endsWith(CODE_NAME)) {
                 final Class<? extends Enum> codeClass =
                     (Class<? extends Enum>) test;
-                for (Enum e : codeClass.getEnumConstants()) {
-                    OXErrorCode code = getCode(e);
+                for (final Enum e : codeClass.getEnumConstants()) {
+                    final OXErrorCode code = getCode(e);
                     fillComponent(e, code);
                     allCodes.add(code);
                     count++;
@@ -226,7 +226,7 @@ public class ListErrorCodes {
         Method getNumberMethod;
         try {
             getNumberMethod = enumClass.getMethod(GET_NUMBER, new Class[0]);
-        } catch (NoSuchMethodException nsme) {
+        } catch (final NoSuchMethodException nsme) {
             getNumberMethod = enumClass.getMethod(GET_DETAIL_NUMBER,
                 new Class[0]);
         }
@@ -239,7 +239,7 @@ public class ListErrorCodes {
                 GET_DESCRIPTION, new Class[0]);
             retval.description = (String) getDescriptionMethod.invoke(e,
                 new Object[0]);
-        } catch (NoSuchMethodException nsme) {
+        } catch (final NoSuchMethodException nsme) {
             retval.description = "TODO";
         }
         return retval;
@@ -255,7 +255,7 @@ public class ListErrorCodes {
                 new Object[0] });
             final AbstractOXException exception = (AbstractOXException) tmp;
             code.component = exception.getComponent();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             System.out.println("Cannot get component of class "
                 + code.clazz.getName());
         }

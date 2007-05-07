@@ -228,8 +228,8 @@ public abstract class UserStorage {
      */
     public static UserStorage getInstance(final Context context)
         throws LdapException {
-        final boolean caching = Boolean.valueOf(LdapUtility
-            .findProperty(Names.CACHING)).booleanValue();
+        final boolean caching = Boolean.parseBoolean(LdapUtility
+            .findProperty(Names.CACHING));
         synchronized (UserStorage.class) {
             if (null == implementingClass) {
                 if (caching) {

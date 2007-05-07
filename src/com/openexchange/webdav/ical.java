@@ -748,7 +748,7 @@ public final class ical extends PermissionServlet {
 	private int getCalendarFolderID(final HttpServletRequest req) throws OXConflictException {
 		if ( req.getParameter(CALENDARFOLDER) != null) {
 			try {
-				return Integer.parseInt((String)req.getParameter(CALENDARFOLDER));
+				return Integer.parseInt(req.getParameter(CALENDARFOLDER));
 			} catch (NumberFormatException exc) {
 				throw new OXConflictException(CALENDARFOLDER + " is not a number");
 			}
@@ -760,7 +760,7 @@ public final class ical extends PermissionServlet {
 	private int getTaskFolderID(final HttpServletRequest req) throws OXConflictException {
 		if ( req.getParameter(TASKFOLDER) != null) {
 			try {
-				return Integer.parseInt((String)req.getParameter(TASKFOLDER));
+				return Integer.parseInt(req.getParameter(TASKFOLDER));
 			} catch (NumberFormatException exc) {
 				throw new OXConflictException(TASKFOLDER + " is not a number");
 			}

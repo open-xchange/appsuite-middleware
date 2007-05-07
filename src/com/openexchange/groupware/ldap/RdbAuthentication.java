@@ -82,7 +82,8 @@ public class RdbAuthentication extends Authentication {
     /**
      * {@inheritDoc}
      */
-    public Credentials authenticate(final String uid, final String password)
+    @Override
+	public Credentials authenticate(final String uid, final String password)
         throws LdapException {
         Credentials retval = null;
         if (null != password && password.length() > 0) {
@@ -114,7 +115,8 @@ public class RdbAuthentication extends Authentication {
     /**
      * {@inheritDoc}
      */
-    public boolean isPasswordExpired(final String uid) throws LdapException {
+    @Override
+	public boolean isPasswordExpired(final String uid) throws LdapException {
         final UserStorage users = UserStorage.getInstance(context);
         final int userId = users.getUserId(uid);
         final User user = users.getUser(userId);
@@ -124,7 +126,8 @@ public class RdbAuthentication extends Authentication {
     /**
      * {@inheritDoc}
      */
-    public boolean isUserEnabled(final String uid) throws LdapException {
+    @Override
+	public boolean isUserEnabled(final String uid) throws LdapException {
         final UserStorage users = UserStorage.getInstance(context);
         final int userId = users.getUserId(uid);
         final User user = users.getUser(userId);
@@ -145,10 +148,10 @@ public class RdbAuthentication extends Authentication {
             sha.update(password.getBytes("UTF-8"));
             final byte[] hash = sha.digest();
             hashed = new BASE64Encoder().encode(hash);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new LdapException(Component.USER, Code.HASH_ALGORITHM, e,
                 "SHA-1");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new LdapException(Component.USER, Code.UNSUPPORTED_ENCODING,
                 e, "UTF-8");
         }
@@ -529,14 +532,14 @@ public class RdbAuthentication extends Authentication {
           0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A
        };
 
-       private static final int byteToUnsigned(byte b)
+       private static final int byteToUnsigned(final byte b)
        {
-          int value = (int)b;
+          final int value = b;
 
           return(value >= 0 ? value : value + 256);
        }
 
-       private static int fourBytesToInt(byte b[], int offset)
+       private static int fourBytesToInt(final byte b[], int offset)
        {
           int value;
 
@@ -548,7 +551,7 @@ public class RdbAuthentication extends Authentication {
           return(value);
        }
 
-       private static final void intToFourBytes(int iValue, byte b[], int offset)
+       private static final void intToFourBytes(final int iValue, final byte b[], int offset)
        {
           b[offset++] = (byte)((iValue)        & 0xff);
           b[offset++] = (byte)((iValue >>> 8 ) & 0xff);
@@ -556,7 +559,7 @@ public class RdbAuthentication extends Authentication {
           b[offset++] = (byte)((iValue >>> 24) & 0xff);
        }
 
-       private static final void PERM_OP(int a, int b, int n, int m, int results[])
+       private static final void PERM_OP(int a, int b, final int n, final int m, final int results[])
        {
           int t;
 
@@ -568,7 +571,7 @@ public class RdbAuthentication extends Authentication {
           results[1] = b;
        }
 
-       private static final int HPERM_OP(int a, int n, int m)
+       private static final int HPERM_OP(int a, final int n, final int m)
        {
           int t;
 
@@ -578,14 +581,14 @@ public class RdbAuthentication extends Authentication {
           return(a);
        }
 
-       private static int [] des_set_key(byte key[])
+       private static int [] des_set_key(final byte key[])
        {
-          int schedule[] = new int[ITERATIONS * 2];
+          final int schedule[] = new int[ITERATIONS * 2];
 
           int c = fourBytesToInt(key, 0);
           int d = fourBytesToInt(key, 4);
 
-          int results[] = new int[2];
+          final int results[] = new int[2];
 
           PERM_OP(d, c, 4, 0x0f0f0f0f, results);
           d = results[0]; c = results[1];
@@ -647,7 +650,7 @@ public class RdbAuthentication extends Authentication {
 
        private static final int D_ENCRYPT
        (
-          int L, int R, int S, int E0, int E1, int s[]
+          int L, final int R, final int S, final int E0, final int E1, final int s[]
        )
        {
           int t, u, v;
@@ -671,7 +674,7 @@ public class RdbAuthentication extends Authentication {
           return(L);
        }
 
-       private static final int [] body(int schedule[], int Eswap0, int Eswap1)
+       private static final int [] body(final int schedule[], final int Eswap0, final int Eswap1)
        {
           int left = 0;
           int right = 0;
@@ -697,7 +700,7 @@ public class RdbAuthentication extends Authentication {
           left  &= 0xffffffff;
           right &= 0xffffffff;
 
-          int results[] = new int[2];
+          final int results[] = new int[2];
 
           PERM_OP(right, left, 1, 0x55555555, results); 
           right = results[0]; left = results[1];
@@ -714,7 +717,7 @@ public class RdbAuthentication extends Authentication {
           PERM_OP(right, left, 4, 0x0f0f0f0f, results);
           right = results[0]; left = results[1];
 
-          int out[] = new int[2];
+          final int out[] = new int[2];
 
           out[0] = left; out[1] = right;
 
@@ -731,38 +734,40 @@ public class RdbAuthentication extends Authentication {
        * @return A string consisting of the 2-character salt followed by the
        * encrypted password.
        */
-       public static final String crypt(String salt, String original)
+       public static final String crypt(String salt, final String original)
        {
-          while(salt.length() < 2)
-             salt += "A";
+          while(salt.length() < 2) {
+			salt += "A";
+		  }
 
-          StringBuffer buffer = new StringBuffer("             ");
+          final StringBuffer buffer = new StringBuffer("             ");
 
-          char charZero = salt.charAt(0);
-          char charOne  = salt.charAt(1);
+          final char charZero = salt.charAt(0);
+          final char charOne  = salt.charAt(1);
 
           buffer.setCharAt(0, charZero);
           buffer.setCharAt(1, charOne);
 
-          int Eswap0 = con_salt[(int)charZero];
-          int Eswap1 = con_salt[(int)charOne] << 4;
+          final int Eswap0 = con_salt[charZero];
+          final int Eswap1 = con_salt[charOne] << 4;
      
-          byte key[] = new byte[8];
+          final byte key[] = new byte[8];
 
-          for(int i = 0; i < key.length; i ++)
-             key[i] = (byte)0;
+          for(int i = 0; i < key.length; i ++) {
+			key[i] = (byte)0;
+		  }
 
           for(int i = 0; i < key.length && i < original.length(); i ++)
           {
-             int iChar = (int)original.charAt(i);
+             final int iChar = original.charAt(i);
 
              key[i] = (byte)(iChar << 1);
           }
 
-          int schedule[] = des_set_key(key);
-          int out[]      = body(schedule, Eswap0, Eswap1);
+          final int schedule[] = des_set_key(key);
+          final int out[]      = body(schedule, Eswap0, Eswap1);
 
-          byte b[] = new byte[9];
+          final byte b[] = new byte[9];
 
           intToFourBytes(out[0], b, 0);
           intToFourBytes(out[1], b, 4);
@@ -774,8 +779,9 @@ public class RdbAuthentication extends Authentication {
              {
                 c <<= 1;
 
-                if(((int)b[y] & u) != 0)
-                   c |= 1;
+                if((b[y] & u) != 0) {
+					c |= 1;
+				}
 
                 u >>>= 1;
 
@@ -797,10 +803,10 @@ public class RdbAuthentication extends Authentication {
        * @return A string consisting of the 2-character salt followed by the
        * encrypted password.
        */
-      public static final String crypt(String original)
+      public static final String crypt(final String original)
       {
-        java.util.Random randomGenerator = new java.util.Random();
-        int numSaltChars = saltChars.length;
+        final java.util.Random randomGenerator = new java.util.Random();
+        final int numSaltChars = saltChars.length;
         String salt;
         
         salt = (new StringBuffer()).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).toString();
@@ -818,10 +824,10 @@ public class RdbAuthentication extends Authentication {
        * otherwise aquired).
        * @return <B>true</B> if the password should be considered correct.
        */
-      public final static boolean matches(String encryptedPassword, String enteredPassword)
+      public final static boolean matches(final String encryptedPassword, final String enteredPassword)
       {
-        String salt = encryptedPassword.substring(0, 3);
-        String newCrypt = crypt(salt, enteredPassword);
+        final String salt = encryptedPassword.substring(0, 3);
+        final String newCrypt = crypt(salt, enteredPassword);
         
         return newCrypt.equals(encryptedPassword);
       }

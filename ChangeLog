@@ -9,6 +9,7 @@
    surrounded with an if-statement checking log level
  - Bugfix #7132: Added a flag a monitor connection state and check it's
    value on closure for proper counting
+ - Mighty code review
 
 * 2007-05-07 - francisco.laguna@open-xchange.org
 

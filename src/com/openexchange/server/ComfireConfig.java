@@ -71,7 +71,7 @@ public class ComfireConfig {
 	 */
     public static Properties properties;
 
-	public static void loadProperties(String propfile) {
+	public static void loadProperties(final String propfile) {
 		try {
 			properties = new Properties();
 			properties.load(new FileInputStream(propfile));
@@ -80,27 +80,27 @@ public class ComfireConfig {
 			String val = "";
 			while (en.hasMoreElements()) {
 				key = (String) en.nextElement();
-				val = (String) properties.getProperty(key);
-				if (val != null) {
-					if (val.endsWith("/")) {
+				val = properties.getProperty(key);
+				if (val != null && val.endsWith("/")) {
+					//if (val.endsWith("/")) {
 						val = val.substring(0, val.length() - 1);
 						properties.put(key, val);
-					}
+					//}
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ComfireLogger.log("ERROR: Cannot load propfile " + propfile + "! Abort.", 0);
 			System.exit(4);
 		}
         try {
             if (properties.getProperty("LOGLEVEL") != null) {
-                int ll = Integer.valueOf(properties.getProperty("LOGLEVEL")).intValue();
+                final int ll = Integer.parseInt(properties.getProperty("LOGLEVEL"));
                 if (ll >= 0) {
                     ComfireLogger.setLogLevel(ll);
                     ComfireLogger.log("Loglevel set to: " + properties.getProperty("LOGLEVEL"), 0);
                 }
             }
-        } catch (Exception ell) {
+        } catch (final Exception ell) {
             ell.printStackTrace();
         }
 	}

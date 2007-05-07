@@ -78,16 +78,16 @@ public class CheckSizeSwitch implements MetadataSwitcher {
 			exceptionId = 0,
 			msg = "Some fields have values, that are too long"
 	)
-	public static void checkSizes(DocumentMetadata metadata) throws OXException {
+	public static void checkSizes(final DocumentMetadata metadata) throws OXException {
 		boolean error = false;
 		
-		CheckSizeSwitch checkSize = new CheckSizeSwitch();
-		GetSwitch get = new GetSwitch(metadata);
+		final CheckSizeSwitch checkSize = new CheckSizeSwitch();
+		final GetSwitch get = new GetSwitch(metadata);
 		
-		List<Metadata> tooLongData = new ArrayList<Metadata>();
-		for(Metadata m : Metadata.VALUES) {
+		final List<Metadata> tooLongData = new ArrayList<Metadata>();
+		for(final Metadata m : Metadata.VALUES) {
 			checkSize.setValue(m.doSwitch(get));
-			if(m.doSwitch(checkSize) == (Boolean)false) {
+			if (!((Boolean)m.doSwitch(checkSize)).booleanValue()) {
 				tooLongData.add(m);
 				error = true;
 			}
@@ -95,8 +95,8 @@ public class CheckSizeSwitch implements MetadataSwitcher {
 		
 		if(error) {
 			
-			OXException x = EXCEPTIONS.create(0);
-			for(Metadata m : tooLongData) {
+			final OXException x = EXCEPTIONS.create(0);
+			for(final Metadata m : tooLongData) {
 				x.addTruncatedId(m.getId());
 			}
 			throw x;
@@ -105,105 +105,105 @@ public class CheckSizeSwitch implements MetadataSwitcher {
 	
 	private int length;
 	
-	public void setValue(Object value) {
+	public void setValue(final Object value) {
 		length = 0;
 		
 		if (value!= null && value instanceof String) {
-			String s = (String) value;
+			final String s = (String) value;
 			try {
 				length = s.getBytes("UTF-8").length;
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				length = s.length();
 			}
 		}
 	}
 	
 	public Object categories() {
-		return length < 255;
+		return Boolean.valueOf(length < 255);
 	}
 
 	public Object colorLabel() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object content() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object createdBy() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object creationDate() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object currentVersion() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object description() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object fileMD5Sum() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object fileMIMEType() {
-		return length <= 255;
+		return Boolean.valueOf(length <= 255);
 	}
 
 	public Object fileName() {
-		return length <= 255;
+		return Boolean.valueOf(length <= 255);
 	}
 
 	public Object fileSize() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object folderId() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object id() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object lastModified() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object lockedUntil() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object modifiedBy() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object sequenceNumber() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object title() {
-		return length <= 128;
+		return Boolean.valueOf(length <= 128);
 	}
 
 	public Object url() {
-		return length <= 128;
+		return Boolean.valueOf(length <= 128);
 	}
 
 	public Object version() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object versionComment() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Object filestoreLocation() {
-		return true;
+		return Boolean.TRUE;
 	}
 
 }

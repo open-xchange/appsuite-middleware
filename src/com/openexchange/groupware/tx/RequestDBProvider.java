@@ -85,7 +85,7 @@ public class RequestDBProvider implements DBProvider {
 		}
 	}
 	
-	private ThreadLocal<Integer> readCount = new ThreadLocal<Integer>(){
+	private final ThreadLocal<Integer> readCount = new ThreadLocal<Integer>(){
 
 		@Override
 		protected final Integer initialValue() {
@@ -97,7 +97,7 @@ public class RequestDBProvider implements DBProvider {
 		
 	public RequestDBProvider(){}
 	
-	public RequestDBProvider(DBProvider provider) {
+	public RequestDBProvider(final DBProvider provider) {
 		setProvider(provider);
 	}
 	
@@ -134,12 +134,12 @@ public class RequestDBProvider implements DBProvider {
 			if(ajpv13Thread.isDead()) {
 				try {
 					rollback();
-				} catch (TransactionException x) {
+				} catch (final TransactionException x) {
 					LOG.debug("",x);
 				}
 				try {
 					finish();
-				} catch (TransactionException x) {
+				} catch (final TransactionException x) {
 					LOG.debug("",x);
 				}
 				
@@ -170,7 +170,7 @@ public class RequestDBProvider implements DBProvider {
 			if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
 				tx.writeConnection.commit();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new TransactionException(new OXException(e)); // FIXME
 		}
 	}
@@ -186,7 +186,7 @@ public class RequestDBProvider implements DBProvider {
 				}
 				tx.writeConnection.rollback();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new TransactionException(new OXException(e)); //FIXME
 		}
 	}
@@ -244,7 +244,7 @@ public class RequestDBProvider implements DBProvider {
 			if(tx.writeConnection.getAutoCommit() == tx.transactional) {
 				tx.writeConnection.setAutoCommit(!tx.transactional);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			return null;
 		}
 		if(tx != null && tx.ctx == null)
@@ -284,14 +284,14 @@ public class RequestDBProvider implements DBProvider {
 	}
 	
 	public void releaseWriteConnection(final Context ctx, final Connection con){
-		DBTransaction tx = (DBTransaction) getActiveTransaction();
+		final DBTransaction tx = getActiveTransaction();
 		if(tx == null) {
 			getProvider().releaseWriteConnection(ctx, con);
 		}
 	}
 	
 	public void finish() throws TransactionException {
-		final DBTransaction tx = (DBTransaction) getActiveTransaction();
+		final DBTransaction tx = getActiveTransaction();
 		if(tx == null) {
 			return;
 		}
@@ -308,7 +308,7 @@ public class RequestDBProvider implements DBProvider {
 				readCount.set(0);
 				tx.readConnection = null;
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new TransactionException(new OXException(e)); //FIXME
 		}
 		txIds.set(null);
@@ -316,7 +316,7 @@ public class RequestDBProvider implements DBProvider {
 		if(prov instanceof Closeable) {
 			try {
 				((Closeable)prov).close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.debug("",e);
 			}
 		}

@@ -260,6 +260,9 @@ public class ConfigMenu extends SessionServlet {
                 } catch (JSONException e) {
                     // I check if there is a JSON array in the value.
                     // No logging here because this is not an error.
+                	if (LOG.isTraceEnabled()) { // Added to remove PMD warning about an empty catch clause
+                		LOG.trace(e.getMessage(), e);
+                	}
                 }
             }
             storage.save(userId, setting);

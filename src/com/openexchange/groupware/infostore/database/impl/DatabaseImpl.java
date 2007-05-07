@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -87,8 +86,6 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.Classes;
@@ -107,11 +104,9 @@ import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.tx.Undoable;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -120,6 +115,16 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DATABASEIMPL, component = Component.INFOSTORE)
 public class DatabaseImpl extends DBService {
+
+	private static final String TABLE_DEL_INFOSTORE_DOCUMENT = "del_infostore_document";
+
+	private static final String TABLE_DEL_INFOSTORE = "del_infostore";
+
+	private static final String[] DEL_TABLES = new String[] { TABLE_DEL_INFOSTORE, TABLE_DEL_INFOSTORE_DOCUMENT };
+
+	private static final String MSG_INVALID_SQL_QUERY = "Invalid SQL Query: %s";
+
+	private static final String ERR_SQL_FAULT = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D";
 
 	private static final Log LOG = LogFactory.getLog(DatabaseImpl.class);
 
@@ -194,7 +199,7 @@ public class DatabaseImpl extends DBService {
 		this(null);
 	}
 
-	public DatabaseImpl(DBProvider provider) {
+	public DatabaseImpl(final DBProvider provider) {
 		super(provider);
 
 		switch (FETCH) {
@@ -231,20 +236,20 @@ public class DatabaseImpl extends DBService {
 			"infostore_document.file_md5sum",
 			"infostore_document.file_version_comment" };
 
-	private ThreadLocal<List<String>> fileIdAddList = new ThreadLocal<List<String>>();
+	private final ThreadLocal<List<String>> fileIdAddList = new ThreadLocal<List<String>>();
 
-	private ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
+	private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
 
-	private ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
+	private final ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 0, msg = "Invalid SQL Query: %s")
-	public boolean exists(int id, int version, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 0, msg = MSG_INVALID_SQL_QUERY)
+	public boolean exists(final int id, final int version, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		boolean retval = false;
 
-		Connection con = getReadConnection(ctx);
+		final Connection con = getReadConnection(ctx);
 
-		StringBuilder sql = new StringBuilder();
+		final StringBuilder sql = new StringBuilder();
 		if (version == InfostoreFacade.CURRENT_VERSION) {
 			sql.append("SELECT id from infostore WHERE cid=? AND id=?");
 		} else {
@@ -266,7 +271,7 @@ public class DatabaseImpl extends DBService {
 			}
 			result.close();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw EXCEPTIONS.create(0, e, getStatement(stmt));
 		} finally {
@@ -277,9 +282,9 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 1, msg = "Invalid SQL Query: %s")
-	public DocumentMetadata getDocumentMetadata(int id, int version,
-			Context ctx, User user, UserConfiguration userConfig)
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 1, msg = MSG_INVALID_SQL_QUERY)
+	public DocumentMetadata getDocumentMetadata(final int id, final int version,
+			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		DocumentMetadataImpl dmi = new DocumentMetadataImpl();
 		Connection con = null;
@@ -292,8 +297,7 @@ public class DatabaseImpl extends DBService {
 			versionString = String.valueOf(version);
 		}
 		try {
-			int[] columns = switchMetadata2DBColumns(
-					(Metadata[]) Metadata.VALUES_ARRAY, false);
+			final int[] columns = switchMetadata2DBColumns(Metadata.VALUES_ARRAY, false);
 			con = getReadConnection(ctx);
 			stmt = con
 					.prepareStatement(getSQLSelectForInfostoreColumns(columns,
@@ -310,24 +314,26 @@ public class DatabaseImpl extends DBService {
 			}
 			result.close();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw EXCEPTIONS.create(1, e, getStatement(stmt));
 		} finally {
 			close(stmt, result);
-			if (con != null)
+			if (con != null) {
 				releaseReadConnection(ctx, con);
+			}
 		}
 
-		if (dmi != null)
+		if (dmi != null) {
 			dmi.setSequenceNumber(System.currentTimeMillis());
+		}
 
 		return dmi;
 	}
 
-	public List<DocumentMetadata> getAllVersions(Context ctx,
-			Metadata[] columns, String where) throws OXException {
-		List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
+	public List<DocumentMetadata> getAllVersions(final Context ctx,
+			final Metadata[] columns, final String where) throws OXException {
+		final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -344,13 +350,13 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
 			while (rs.next()) {
-				DocumentMetadataImpl dm = new DocumentMetadataImpl();
+				final DocumentMetadataImpl dm = new DocumentMetadataImpl();
 				fillDocumentMetadata(dm,
 						switchMetadata2DBColumns(columns, true), rs);
 				result.add(dm);
 			}
-		} catch (SQLException e) {
-			LOG.error("SQLException",e);
+		} catch (final SQLException e) {
+			LOG.error("SQLException", e);
 		} finally {
 			close(stmt, rs);
 			releaseReadConnection(ctx, con);
@@ -359,9 +365,9 @@ public class DatabaseImpl extends DBService {
 		return result;
 	}
 
-	public List<DocumentMetadata> getAllDocuments(Context ctx,
-			Metadata[] columns, String where) throws OXException {
-		List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
+	public List<DocumentMetadata> getAllDocuments(final Context ctx,
+			final Metadata[] columns, final String where) throws OXException {
+		final List<DocumentMetadata> result = new ArrayList<DocumentMetadata>();
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -378,13 +384,13 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
 			while (rs.next()) {
-				DocumentMetadataImpl dm = new DocumentMetadataImpl();
+				final DocumentMetadataImpl dm = new DocumentMetadataImpl();
 				fillDocumentMetadata(dm,
 						switchMetadata2DBColumns(columns, true), rs);
 				result.add(dm);
 			}
-		} catch (SQLException e) {
-			LOG.error("SQLException: ",e);
+		} catch (final SQLException e) {
+			LOG.error("SQLException", e);
 		} finally {
 			close(stmt, rs);
 			releaseReadConnection(ctx, con);
@@ -395,16 +401,16 @@ public class DatabaseImpl extends DBService {
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR }, desc = {
-			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
+			ERR_SQL_FAULT,
 			"This indicates a problem accessing the underlying filestorage. Look at the exceptions given as cause for this one.",
 			"The context specific data about a filestorage could not be loaded. Look at the underlying exceptions for a hint." }, exceptionId = {
-			2, 3, 4 }, msg = { "Invalid SQL Query: %s",
+			2, 3, 4 }, msg = { MSG_INVALID_SQL_QUERY,
 			"Could not access file store.", "Could not get file store location." })
-	public InputStream getDocument(int id, int version, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public InputStream getDocument(final int id, final int version, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		InputStream retval = null;
 
-		StringBuilder sql = new StringBuilder();
+		final StringBuilder sql = new StringBuilder();
 		if (version != -1) {
 			sql
 					.append("SELECT file_store_location FROM infostore_document WHERE cid=? AND infostore_id=? AND version_number=? AND file_store_location is not null");
@@ -429,16 +435,16 @@ public class DatabaseImpl extends DBService {
 			}
 			result = stmt.executeQuery();
 			if (result.next()) {
-				FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this
+				final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this
 						.getProvider());
 				retval = fs.getFile(result.getString(1));
 				fs.close();
 			}
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(2, x, getStatement(stmt));
-		} catch (FileStorageException e) {
+		} catch (final FileStorageException e) {
 			throw new InfostoreException(e);
-		} catch (FilestoreException e) {
+		} catch (final FilestoreException e) {
 			throw new InfostoreException(e);
 		} finally {
 			close(stmt, result);
@@ -449,25 +455,25 @@ public class DatabaseImpl extends DBService {
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.CODE_ERROR }, desc = {
-			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
-			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D" }, exceptionId = {
-			14, 15 }, msg = { "Invalid SQL Query: %s", "Invalid SQL Query: %s" })
+			ERR_SQL_FAULT,
+			ERR_SQL_FAULT }, exceptionId = {
+			14, 15 }, msg = { MSG_INVALID_SQL_QUERY, MSG_INVALID_SQL_QUERY })
 	@Deprecated
-	public Set<Integer> removeDocuments(Set<Integer> ids, long date,
-			Context ctx, User user, UserConfiguration userConfig)
+	public Set<Integer> removeDocuments(final Set<Integer> ids, final long date,
+			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
-		Map<Integer, List<String>> filesAttachedToInfostoreObject = new HashMap<Integer, List<String>>();
-		List<String> filesToDelete = new ArrayList<String>();
-		Set<Integer> notDeletedDocuments = new HashSet<Integer>();
+		final Map<Integer, List<String>> filesAttachedToInfostoreObject = new HashMap<Integer, List<String>>();
+		final List<String> filesToDelete = new ArrayList<String>();
+		final Set<Integer> notDeletedDocuments = new HashSet<Integer>();
 
 		if (ids.size() > 0) {
-			StringBuilder getAllAttachedFileStoreLocationsSQL = new StringBuilder(
+			final StringBuilder getAllAttachedFileStoreLocationsSQL = new StringBuilder(
 					"SELECT infostore_id, file_store_location FROM infostore_document WHERE infostore_id IN (");
 			for (int current = 0; current < ids.size(); current++) {
 				if (current > 0) {
-					getAllAttachedFileStoreLocationsSQL.append(",");
+					getAllAttachedFileStoreLocationsSQL.append(',');
 				}
-				getAllAttachedFileStoreLocationsSQL.append("?");
+				getAllAttachedFileStoreLocationsSQL.append('?');
 			}
 			getAllAttachedFileStoreLocationsSQL
 					.append(") AND cid=? AND file_store_location is not null ");
@@ -480,15 +486,15 @@ public class DatabaseImpl extends DBService {
 				stmt = readCon
 						.prepareStatement(getAllAttachedFileStoreLocationsSQL
 								.toString());
-				Iterator<Integer> iter = ids.iterator();
+				final Iterator<Integer> iter = ids.iterator();
 				for (int current = 0; iter.hasNext(); current++) {
 					stmt.setInt(current + 1, iter.next());
 				}
 				stmt.setInt(ids.size() + 1, ctx.getContextId());
 				result = stmt.executeQuery();
 				while (result.next()) {
-					int currentInfostoreId = result.getInt(1);
-					String currentInfostorePath = result.getString(2);
+					final int currentInfostoreId = result.getInt(1);
+					final String currentInfostorePath = result.getString(2);
 					List<String> currentIdList = new ArrayList<String>();
 					if (filesAttachedToInfostoreObject
 							.containsKey(currentInfostoreId)) {
@@ -499,7 +505,7 @@ public class DatabaseImpl extends DBService {
 					filesAttachedToInfostoreObject.put(currentInfostoreId,
 							currentIdList);
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw EXCEPTIONS.create(14, e, getStatement(stmt));
 			} finally {
 				close(stmt, result);
@@ -522,12 +528,12 @@ public class DatabaseImpl extends DBService {
 
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
-		for (int id : ids) {
+		for (final int id : ids) {
 			try {
 				writeCon = getWriteConnection(ctx);
 				copyRows(
 						writeCon,
-						"del_infostore",
+						TABLE_DEL_INFOSTORE,
 						"SELECT cid, id, folder_id, version, color_label, creating_date, last_modified, created_by, changed_by FROM infostore WHERE cid = ? AND id = ?",
 						ctx.getContextId(), id);
 				stmt = writeCon
@@ -541,7 +547,7 @@ public class DatabaseImpl extends DBService {
 
 				copyRows(
 						writeCon,
-						"del_infostore_document",
+						TABLE_DEL_INFOSTORE_DOCUMENT,
 						"SELECT cid, infostore_id, version_number, creating_date, last_modified, created_by, changed_by, title, url, description, categories, filename, file_store_location, file_size, file_mimetype, file_md5sum, file_version_comment FROM infostore_document WHERE cid = ? AND infostore_id = ?",
 						ctx.getContextId(), id);
 
@@ -589,7 +595,7 @@ public class DatabaseImpl extends DBService {
 						filesToDelete.addAll(filesAttachedToInfostoreObject
 								.get(id));
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.error("", e);
 				throw EXCEPTIONS.create(15, e, stmt.toString());
 			} finally {
@@ -603,14 +609,14 @@ public class DatabaseImpl extends DBService {
 		return notDeletedDocuments;
 	}
 
-	public int[] removeDocument(String identifier, Context ctx)
+	public int[] removeDocument(final String identifier, final Context ctx)
 			throws OXException {
 		return removeDocumentFromTable(identifier, ctx, "infostore");
 	}
 
-	public int[] removeDelDocument(String identifier, Context ctx)
+	public int[] removeDelDocument(final String identifier, final Context ctx)
 			throws OXException {
-		return removeDocumentFromTable(identifier, ctx, "del_infostore");
+		return removeDocumentFromTable(identifier, ctx, TABLE_DEL_INFOSTORE);
 	}
 
 	/**
@@ -625,18 +631,18 @@ public class DatabaseImpl extends DBService {
 	 *         number of deleted entries in int[1]
 	 * @throws BackendException
 	 */
-	private int[] removeDocumentFromTable(String identifier, Context ctx,
-			String basetablename) throws OXException {
+	private int[] removeDocumentFromTable(final String identifier, final Context ctx,
+			final String basetablename) throws OXException {
 		/*
 		 * When deleting the fitting version line for the identifier we have to
 		 * check the basetable, too. In the basetable we set the current version
 		 * to the right value. This value is determined by the sorted set.
 		 */
-		String documentstable = basetablename.concat("_document");
+		final String documentstable = basetablename.concat("_document");
 
-		Connection writecon = getWriteConnection(ctx);
+		final Connection writecon = getWriteConnection(ctx);
 
-		int[] retval = new int[2];
+		final int[] retval = new int[2];
 		int version_nr = 0;
 		int current_version = 0;
 		int infostore_id = 0;
@@ -676,7 +682,7 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(1, infostore_id);
 			stmt.setInt(2, ctx.getContextId());
 			result = stmt.executeQuery();
-			SortedSet<Integer> set = new TreeSet<Integer>();
+			final SortedSet<Integer> set = new TreeSet<Integer>();
 			while (result.next()) {
 				set.add(result.getInt(1));
 			}
@@ -698,7 +704,7 @@ public class DatabaseImpl extends DBService {
 			stmt.setString(2, identifier);
 			retval[1] = stmt.executeUpdate();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException("Error while removing documents from table.",
 					e);
 		} finally {
@@ -707,26 +713,26 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	public int modifyDocument(String oldidentifier, String newidentifier,
-			String description, String mimetype, Context ctx)
+	public int modifyDocument(final String oldidentifier, final String newidentifier,
+			final String description, final String mimetype, final Context ctx)
 			throws OXException {
 		return modifyDocumentInTable(oldidentifier, newidentifier, description,
 				mimetype, ctx, "infostore");
 	}
 
-	public int modifyDelDocument(String oldidentifier, String newidentifier,
-			String description, String mimetype, Context ctx)
+	public int modifyDelDocument(final String oldidentifier, final String newidentifier,
+			final String description, final String mimetype, final Context ctx)
 			throws OXException {
 		return modifyDocumentInTable(oldidentifier, newidentifier, description,
-				mimetype, ctx, "del_infostore");
+				mimetype, ctx, TABLE_DEL_INFOSTORE);
 	}
 
-	private int modifyDocumentInTable(String oldidentifier,
-			String newidentifier, String description, String mimetype,
-			Context ctx, String basetablename) throws OXException {
-		String documentstable = basetablename.concat("_document");
+	private int modifyDocumentInTable(final String oldidentifier,
+			final String newidentifier, final String description, final String mimetype,
+			final Context ctx, final String basetablename) throws OXException {
+		final String documentstable = basetablename.concat("_document");
 		int retval = -1;
-		Connection writecon = getWriteConnection(ctx);
+		final Connection writecon = getWriteConnection(ctx);
 
 		final StringBuilder select_description = new StringBuilder(
 				"SELECT description FROM " + documentstable
@@ -743,7 +749,7 @@ public class DatabaseImpl extends DBService {
 					.prepareStatement(select_description.toString());
 			stmt.setString(1, oldidentifier);
 			stmt.setInt(2, ctx.getContextId());
-			ResultSet result = stmt.executeQuery();
+			final ResultSet result = stmt.executeQuery();
 			if (result.next()) {
 				olddescription = result.getString(1);
 			}
@@ -762,7 +768,7 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(5, ctx.getContextId());
 			retval = stmt.executeUpdate();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXException(
 					"Error while getting permissions for folder.", e);
 		} finally {
@@ -771,21 +777,21 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	public int[] saveDocumentMetadata(String identifier,
-			DocumentMetadata document, User user, Context ctx)
+	public int[] saveDocumentMetadata(final String identifier,
+			final DocumentMetadata document, final User user, final Context ctx)
 			throws OXException {
-		int[] retval = new int[3];
+		final int[] retval = new int[3];
 		PreparedStatement stmt = null;
 		Connection writeCon = null;
 		try {
-			int folder_id = OXFolderTools.getDefaultFolder(user.getId(),
+			final int folder_id = OXFolderTools.getDefaultFolder(user.getId(),
 					FolderObject.INFOSTORE, ctx);
 			writeCon = getWriteConnection(ctx);
 
-			int infostore_id = IDGenerator
+			final int infostore_id = IDGenerator
 					.getId(ctx, Types.INFOSTORE, writeCon);
 
-			Date date = new Date(System.currentTimeMillis());
+			final Date date = new Date(System.currentTimeMillis());
 
 			stmt = writeCon
 					.prepareStatement("INSERT INTO infostore (cid, id, folder_id, version, locked_until, color_label, creating_date, last_modified, created_by, changed_by) VALUES (?,?,?,?,?,?,?,?,?,?)");
@@ -841,10 +847,10 @@ public class DatabaseImpl extends DBService {
 			retval[2] = stmt.executeUpdate();
 			document.setVersion(1);
 			document.setId(infostore_id);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw new OXException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error("", e);
 			throw new OXException(e);
 		} finally {
@@ -856,23 +862,23 @@ public class DatabaseImpl extends DBService {
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR,
 			Category.CODE_ERROR }, desc = {
-			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D",
-			"A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D" }, exceptionId = {
-			16, 17 }, msg = { "Invalid SQL Query: %s", "Invalid SQL Query: %s" })
+			ERR_SQL_FAULT,
+			ERR_SQL_FAULT }, exceptionId = {
+			16, 17 }, msg = { MSG_INVALID_SQL_QUERY, MSG_INVALID_SQL_QUERY })
 	@Deprecated
-	public List<Integer> removeVersion(int id, int[] versionId, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
-		List<Integer> notDeletedVersions = new ArrayList<Integer>();
+	public List<Integer> removeVersion(final int id, final int[] versionId, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
+		final List<Integer> notDeletedVersions = new ArrayList<Integer>();
 
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 
-		Date updated = new Date();
+		final Date updated = new Date();
 		int currentVersion = 0;
 		try {
-			List<String> filesToDelete = new ArrayList<String>();
-			StringBuilder getAllAttachedFileStoreLocationsSQL = new StringBuilder(
+			final List<String> filesToDelete = new ArrayList<String>();
+			final StringBuilder getAllAttachedFileStoreLocationsSQL = new StringBuilder(
 					"SELECT file_store_location FROM infostore_document WHERE cid=? AND infostore_id=? AND (");
 			for (int current = 0; current < versionId.length; current++) {
 				if (current > 0) {
@@ -908,7 +914,7 @@ public class DatabaseImpl extends DBService {
 			if (result.next()) {
 				currentVersion = result.getInt(1);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(16, e, getStatement(stmt));
 		} finally {
 			close(stmt, result);
@@ -917,7 +923,7 @@ public class DatabaseImpl extends DBService {
 
 		Connection writeCon = null;
 
-		StringBuilder insertDelCopyInfostoreDocument = new StringBuilder(
+		final StringBuilder insertDelCopyInfostoreDocument = new StringBuilder(
 				"INSERT INTO del_infostore_document ("
 						+ "del_infostore_document.cid,"
 						+ "del_infostore_document.infostore_id,"
@@ -955,15 +961,15 @@ public class DatabaseImpl extends DBService {
 						+ "infostore_document.file_md5sum,"
 						+ "infostore_document.file_version_comment"
 						+ " FROM infostore_document WHERE cid=? AND infostore_id=? AND version_number=?");
-		StringBuilder deleteVersionFromDocumentDB = new StringBuilder(
+		final StringBuilder deleteVersionFromDocumentDB = new StringBuilder(
 				"DELETE infostore_document.* FROM infostore_document JOIN infostore ON infostore.cid=? AND infostore_document.cid=? AND infostore.id=? AND infostore_document.infostore_id=? AND infostore_document.version_number=? AND infostore_document.version_number!=0 AND infostore.last_modified <= ?");
-		StringBuilder rollback = new StringBuilder(
+		final StringBuilder rollback = new StringBuilder(
 				"DELETE FROM del_infostore_document WHERE cid=? AND infostore_id=? AND version_number=?");
 
 		try {
 			boolean deleteCurrentVersion = false;
 			writeCon = getWriteConnection(ctx);
-			for (int current : versionId) {
+			for (final int current : versionId) {
 				stmt = writeCon.prepareStatement(insertDelCopyInfostoreDocument
 						.toString());
 				stmt.setInt(1, ctx.getContextId());
@@ -979,7 +985,7 @@ public class DatabaseImpl extends DBService {
 				stmt.setInt(4, id);
 				stmt.setInt(5, current);
 				stmt.setLong(6, updated.getTime());
-				int deletedRows = stmt.executeUpdate();
+				final int deletedRows = stmt.executeUpdate();
 				stmt.close();
 				if (deletedRows <= 0) {
 					stmt = writeCon.prepareStatement(rollback.toString());
@@ -995,7 +1001,7 @@ public class DatabaseImpl extends DBService {
 			}
 
 			if (notDeletedVersions.size() != versionId.length) {
-				StringBuilder updateMainDocument = new StringBuilder();
+				final StringBuilder updateMainDocument = new StringBuilder();
 				updateMainDocument
 						.append("UPDATE infostore SET last_modified=?, changed_by=?");
 				if (deleteCurrentVersion) {
@@ -1026,12 +1032,13 @@ public class DatabaseImpl extends DBService {
 					stmt.setInt(2, currentVersion);
 					stmt.setInt(3, ctx.getContextId());
 					result = stmt.executeQuery();
-					if (!result.next())
+					if (!result.next()) {
 						throw new SQLException(
 								"Didn't find former current version");
-					String title = result.getString(1);
-					String url = result.getString(2);
-					String description = result.getString(3);
+					}
+					final String title = result.getString(1);
+					final String url = result.getString(2);
+					final String description = result.getString(3);
 					stmt.close();
 					result.close();
 					stmt = writeCon
@@ -1044,7 +1051,7 @@ public class DatabaseImpl extends DBService {
 					stmt.executeUpdate();
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw EXCEPTIONS.create(17, e, stmt.toString());
 		} finally {
@@ -1065,9 +1072,9 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 18, 19 },
 
 	msg = { "Incorrect SQL Query: %s", "Cannot pre-fetch results." })
-	public TimedResult getDocuments(long folderId, Metadata[] columns,
-			Metadata sort, int order, boolean onlyOwnObjects, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+			final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		String onlyOwn = "";
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -1077,9 +1084,9 @@ public class DatabaseImpl extends DBService {
 				onlyOwn = " AND created_by=?";
 			}
 
-			int[] dbColumns = switchMetadata2DBColumns(columns, false);
+			final int[] dbColumns = switchMetadata2DBColumns(columns, false);
 
-			StringBuilder sql = new StringBuilder(
+			final StringBuilder sql = new StringBuilder(
 					getSQLSelectForInfostoreColumns(dbColumns, false));
 			sql
 					.append(" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore.id=infostore_document.infostore_id AND infostore_document.version_number=infostore.version AND infostore.folder_id=?");
@@ -1107,22 +1114,22 @@ public class DatabaseImpl extends DBService {
 
 			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
 					this, ctx, con, true), System.currentTimeMillis());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(18, e, getStatement(stmt));
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(19, e);
 		}
 	}
 
-	public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx)
+	public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx)
 			throws OXException {
-		SortedSet<String> _strReturnArray = new TreeSet<String>();
-		Connection con = getReadConnection(ctx);
-		StringBuilder SQL = new StringBuilder(
+		final SortedSet<String> _strReturnArray = new TreeSet<String>();
+		final Connection con = getReadConnection(ctx);
+		final StringBuilder SQL = new StringBuilder(
 				"SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
 		try {
 			final PreparedStatement stmt = con.prepareStatement(SQL.toString());
@@ -1133,7 +1140,7 @@ public class DatabaseImpl extends DBService {
 			}
 			result.close();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw new OXException(e);
 		}
@@ -1142,10 +1149,10 @@ public class DatabaseImpl extends DBService {
 	}
 
 	public SortedSet<String> getDelDocumentFileStoreLocationsperContext(
-			Context ctx) throws OXException {
-		SortedSet<String> _strReturnArray = new TreeSet<String>();
-		Connection con = getReadConnection(ctx);
-		StringBuilder SQL = new StringBuilder(
+			final Context ctx) throws OXException {
+		final SortedSet<String> _strReturnArray = new TreeSet<String>();
+		final Connection con = getReadConnection(ctx);
+		final StringBuilder SQL = new StringBuilder(
 				"SELECT file_store_location from del_infostore_document where del_infostore_document.cid=? AND file_store_location is not null");
 		try {
 			final PreparedStatement stmt = con.prepareStatement(SQL.toString());
@@ -1156,7 +1163,7 @@ public class DatabaseImpl extends DBService {
 			}
 			result.close();
 			stmt.close();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw new OXException(e);
 		}
@@ -1174,16 +1181,16 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 20, 21 },
 
 	msg = { "Incorrect SQL Query: %s", "Cannot pre-fetch results." })
-	public TimedResult getVersions(int id, Metadata[] columns, Metadata sort,
-			int order, Context ctx, User user, UserConfiguration userConfig)
+	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
+			final int order, final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 		try {
-			int[] dbColumns = switchMetadata2DBColumns(columns, true);
+			final int[] dbColumns = switchMetadata2DBColumns(columns, true);
 
-			StringBuilder sql = new StringBuilder(
+			final StringBuilder sql = new StringBuilder(
 					getSQLSelectForInfostoreColumns(dbColumns, false)
 							.toString());
 			sql
@@ -1209,11 +1216,11 @@ public class DatabaseImpl extends DBService {
 
 			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
 					this, ctx, con, true), System.currentTimeMillis());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(20, e, getStatement(stmt));
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(21, e);
@@ -1230,15 +1237,15 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 22, 23 },
 
 	msg = { "Incorrect SQL Query: %s", "Cannot pre-fetch results." })
-	public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 		try {
 			con = getReadConnection(ctx);
-			int[] dbColumns = switchMetadata2DBColumns(columns, false);
-			StringBuilder SQL_JOIN = new StringBuilder(
+			final int[] dbColumns = switchMetadata2DBColumns(columns, false);
+			final StringBuilder SQL_JOIN = new StringBuilder(
 					getSQLSelectForInfostoreColumns(dbColumns, false));
 			SQL_JOIN
 					.append(" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore.id=infostore_document.infostore_id AND infostore_document.version_number=infostore.version AND (");
@@ -1260,11 +1267,11 @@ public class DatabaseImpl extends DBService {
 
 			return new TimedResultImpl(buildIterator(result, stmt, dbColumns,
 					this, ctx, con, true), System.currentTimeMillis());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(22, e, getStatement(stmt));
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			close(stmt, result);
 			releaseReadConnection(ctx, con);
 			throw EXCEPTIONS.create(23, e);
@@ -1281,14 +1288,14 @@ public class DatabaseImpl extends DBService {
 	exceptionId = { 24, 25 },
 
 	msg = { "Incorrect SQL Query.", "Cannot pre-fetch results." })
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns,
-			Metadata sort, int order, boolean onlyOwnObjects,
-			boolean ignoreDeleted, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+			final Metadata sort, final int order, final boolean onlyOwnObjects,
+			final boolean ignoreDeleted, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		DeltaImpl retval = null;
 
 		String onlyOwn = "";
-		StringBuilder ORDER = new StringBuilder();
+		final StringBuilder ORDER = new StringBuilder();
 		if (sort != null) {
 			ORDER.append(" ORDER BY ");
 			ORDER.append(INFOSTORE_DATACOLUMNS[switchMetadata2DBColumns(
@@ -1314,15 +1321,15 @@ public class DatabaseImpl extends DBService {
 				onlyOwn = " AND created_by=?";
 			}
 
-			int[] dbColumns = switchMetadata2DBColumns(columns, false);
-			StringBuilder SELECT = new StringBuilder(
+			final int[] dbColumns = switchMetadata2DBColumns(columns, false);
+			final StringBuilder SELECT = new StringBuilder(
 					getSQLSelectForInfostoreColumns(dbColumns, false));
-			StringBuilder JOIN_NEW = new StringBuilder(
+			final StringBuilder JOIN_NEW = new StringBuilder(
 					" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.creating_date>?").append(onlyOwn);
-			StringBuilder JOIN_MODIFIED = new StringBuilder(
+			final StringBuilder JOIN_MODIFIED = new StringBuilder(
 					" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id  AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.last_modified>? AND infostore.creating_date<infostore.last_modified"
 							).append(onlyOwn);
-			StringBuilder DELETE_SELECT = new StringBuilder(
+			final StringBuilder DELETE_SELECT = new StringBuilder(
 					"SELECT id FROM del_infostore WHERE cid=? AND folder_id=? AND last_modified>?"
 							).append(onlyOwn);
 
@@ -1358,19 +1365,19 @@ public class DatabaseImpl extends DBService {
 			}
 			resultDeleted = stmtDeleted.executeQuery();
 
-			SearchIterator isiNew = buildIterator(resultNew, stmtNew,
+			final SearchIterator isiNew = buildIterator(resultNew, stmtNew,
 					dbColumns, this, ctx, con, false);
-			SearchIterator isiModified = buildIterator(resultModified,
+			final SearchIterator isiModified = buildIterator(resultModified,
 					stmtModified, dbColumns, this, ctx, con, false);
-			SearchIterator isiDeleted = buildIterator(resultDeleted,
+			final SearchIterator isiDeleted = buildIterator(resultDeleted,
 					stmtDeleted, new int[] { INFOSTORE_id }, this, ctx, con,
 					false);
 
 			retval = new DeltaImpl(isiNew, isiModified, isiDeleted, System
 					.currentTimeMillis());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(24, e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw EXCEPTIONS.create(25, e);
 		} finally {
 			if (FETCH.equals(Fetch.PREFETCH)) {
@@ -1384,9 +1391,9 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 26, msg = "Invalid SQL Query: %s")
-	public int countDocuments(long folderId, boolean onlyOwnObjects,
-			Context ctx, User user, UserConfiguration userConfig)
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 26, msg = MSG_INVALID_SQL_QUERY)
+	public int countDocuments(final long folderId, final boolean onlyOwnObjects,
+			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -1394,7 +1401,7 @@ public class DatabaseImpl extends DBService {
 
 		try {
 			con = getReadConnection(ctx);
-			StringBuilder SQL = new StringBuilder(
+			final StringBuilder SQL = new StringBuilder(
 					"SELECT count(id) from infostore where infostore.folder_id=?");
 			if (onlyOwnObjects) {
 				SQL.append(" AND infostore.created_by=?");
@@ -1408,7 +1415,7 @@ public class DatabaseImpl extends DBService {
 			if (result.next()) {
 				return result.getInt(1);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(26, e, getStatement(stmt));
 		} finally {
 			close(stmt, result);
@@ -1417,12 +1424,12 @@ public class DatabaseImpl extends DBService {
 		return 0;
 	}
 
-	public int countDocumentsperContext(Context ctx) throws OXException {
+	public int countDocumentsperContext(final Context ctx) throws OXException {
 		int retval = 0;
 
-		Connection con = getReadConnection(ctx);
+		final Connection con = getReadConnection(ctx);
 		try {
-			StringBuilder SQL = new StringBuilder(
+			final StringBuilder SQL = new StringBuilder(
 					"SELECT count(id) from infostore where infostore.cid=?");
 			final PreparedStatement stmt = con.prepareStatement(SQL.toString());
 			stmt.setInt(1, ctx.getContextId());
@@ -1432,7 +1439,7 @@ public class DatabaseImpl extends DBService {
 			}
 			result.close();
 			stmt.close();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("", e);
 			throw new OXException(
 					"Error while getting permissions for folder.", e);
@@ -1443,12 +1450,12 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 27, msg = "Invalid SQL Query: %s")
-	public boolean hasFolderForeignObjects(long folderId, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 27, msg = MSG_INVALID_SQL_QUERY)
+	public boolean hasFolderForeignObjects(final long folderId, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		boolean retval = true;
 
-		Connection con = getReadConnection(ctx);
+		final Connection con = getReadConnection(ctx);
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 		try {
@@ -1466,7 +1473,7 @@ public class DatabaseImpl extends DBService {
 				retval = false;
 			}
 
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw EXCEPTIONS.create(27, e, getStatement(stmt));
 		} finally {
@@ -1477,11 +1484,11 @@ public class DatabaseImpl extends DBService {
 		return retval;
 	}
 
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 28, msg = "Invalid SQL Query: %s")
-	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 28, msg = MSG_INVALID_SQL_QUERY)
+	public boolean isFolderEmpty(final long folderId, final Context ctx) throws OXException {
 		boolean retval = false;
 
-		Connection con = getReadConnection(ctx);
+		final Connection con = getReadConnection(ctx);
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 		try {
@@ -1493,7 +1500,7 @@ public class DatabaseImpl extends DBService {
 			if (result.next() && result.getInt(1) <= 0) {
 				retval = true;
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw EXCEPTIONS.create(28, e, getStatement(stmt));
 		} finally {
@@ -1510,7 +1517,7 @@ public class DatabaseImpl extends DBService {
 	private static final List<String> tables = Arrays.asList("infostore",
 			"infostore_document");
 
-public void removeUser(int id, Context ctx, SessionObject session, EntityLockManager locks) throws OXException {
+public void removeUser(final int id, final Context ctx, final SessionObject session, final EntityLockManager locks) throws OXException {
 		if(id != ctx.getMailadmin()) {
 			removePrivate(id,ctx,session);
 			assignToAdmin(id,ctx,session);
@@ -1522,60 +1529,62 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		locks.transferLocks(ctx, id, ctx.getMailadmin());
 	}
 	
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 35, msg = "Invalid SQL Query: %s")
-	private void removeFromDel(int id, Context ctx) throws OXException{
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 35, msg = MSG_INVALID_SQL_QUERY)
+	private void removeFromDel(final int id, final Context ctx) throws OXException{
 		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = new StringBuilder("NO QUERY");
 		try {
 			writeCon = getWriteConnection(ctx);
 			stmt = writeCon.createStatement();
-			for (String table : new String[]{"del_infostore", "del_infostore_document"}) {
+			for (final String table : DEL_TABLES) {
 				query = new StringBuilder("DELETE FROM ").append(table).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND created_by = ").append(id);
 				stmt.executeUpdate(query.toString());
 			}
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(35, query.toString());
 		} finally {
-			if(stmt != null)
+			if(stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException e) {
+				} catch (final SQLException e) {
 					LOG.error(e);
 				}
-			if(writeCon != null)
+			}
+			if(writeCon != null) {
 				releaseWriteConnection(ctx, writeCon);
+			}
 		}
 	}
 	
-	private void removeAll(Context ctx, SessionObject session) throws OXException {
+	private void removeAll(final Context ctx, final SessionObject session) throws OXException {
 		try {
 			
-			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+			final List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
 			
 			SearchIterator iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(" infostore.cid = "+ctx.getContextId(), Metadata.VALUES_ARRAY, getProvider(), ctx);
 			while(iter.hasNext()) {
-				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				final DocumentMetadata metadata = (DocumentMetadata)iter.next();
 				documents.add(metadata);
 			}
 			
-			List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
+			final List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
 			
 			iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allVersionsWhere(" infostore.cid = "+ctx.getContextId(), Metadata.VALUES_ARRAY, getProvider(), ctx);
 			while(iter.hasNext()) {
-				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				final DocumentMetadata metadata = (DocumentMetadata)iter.next();
 				versions.add(metadata);
 			}
 			
-			InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
+			final InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
 			
-			DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
+			final DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
 			deleteDocumentAction.setProvider(getProvider());
 			deleteDocumentAction.setContext(ctx);
 			deleteDocumentAction.setDocuments(documents);
 			deleteDocumentAction.setQueryCatalog(catalog);
 			
-			DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
+			final DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
 			deleteVersionAction.setProvider(getProvider());
 			deleteVersionAction.setContext(ctx);
 			deleteVersionAction.setDocuments(versions);
@@ -1584,86 +1593,89 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			deleteVersionAction.perform();
 			try {
 				deleteDocumentAction.perform();
-			} catch (AbstractOXException e) {
+			} catch (final AbstractOXException e) {
 				try {
 					deleteVersionAction.undo();
 					throw new InfostoreException(e);
-				} catch (AbstractOXException e1) {
+				} catch (final AbstractOXException e1) {
 					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
 				}
 			}
 						
-			FileStorage fs = getFileStorage(ctx);
+			final FileStorage fs = getFileStorage(ctx);
 
 //			Remove the files. No rolling back from this point onward
 			
-			for(DocumentMetadata version : versions) {
-				if(null != version.getFilestoreLocation())
+			for(final DocumentMetadata version : versions) {
+				if(null != version.getFilestoreLocation()) {
 					fs.deleteFile(version.getFilestoreLocation());
+				}
 			}
 			
-			EventClient ec = new EventClient(session);
+			final EventClient ec = new EventClient(session);
 
-			for (DocumentMetadata m : documents) {
+			for (final DocumentMetadata m : documents) {
 				try {
 					ec.delete(m);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOG.error("", e);
 				}
 			}
 			
-		} catch (AbstractOXException x) {
+		} catch (final AbstractOXException x) {
 			throw new InfostoreException(x);
 		}
 		
 	}
 
 
-	private void removePrivate(int id, Context ctx, SessionObject session) throws OXException {
+	private void removePrivate(final int id, final Context ctx, final SessionObject session) throws OXException {
 		try {
-			List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
-			if(foldersWithPrivateItems.size() == 0)
+			final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
+			if (foldersWithPrivateItems.size() == 0) {
 				return;
-			StringBuffer where = new StringBuffer("infostore.folder_id in (");
-			for(FolderObject folder : foldersWithPrivateItems){
-				where.append(folder.getObjectID()).append(",");
+			}
+			StringBuilder where = new StringBuilder("infostore.folder_id in (");
+			for(final FolderObject folder : foldersWithPrivateItems){
+				where.append(folder.getObjectID()).append(',');
 			}
 			where.setCharAt(where.length()-1, ')');
 			where.append(" and infostore.cid = ").append(ctx.getContextId());
 			
 			SearchIterator iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(where.toString(), Metadata.VALUES_ARRAY, getProvider(), ctx);
-			where = new StringBuffer("infostore_document.cid = ");
+			where = new StringBuilder("infostore_document.cid = ");
 			where.append(ctx.getContextId()).append(" and infostore_document.infostore_id in (");
 			
-			List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+			final List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
 			while(iter.hasNext()) {
-				DocumentMetadata metadata = (DocumentMetadata)iter.next();
-				where.append(metadata.getId()).append(",");
+				final DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				where.append(metadata.getId()).append(',');
 				documents.add(metadata);
 			}
-			if(documents.size() == 0)
+			if (documents.size() == 0) {
 				return;
+			}
 			
 			where.setCharAt(where.length()-1, ')');
 			
-			List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
+			final List<DocumentMetadata> versions = new ArrayList<DocumentMetadata>();
 			
 			iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allVersionsWhere(where.toString(), Metadata.VALUES_ARRAY, getProvider(), ctx);
 			
 			while(iter.hasNext()) {
-				DocumentMetadata metadata = (DocumentMetadata)iter.next();
+				final DocumentMetadata metadata = (DocumentMetadata)iter.next();
 				versions.add(metadata);
 			}
 			
-			InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
+			final InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
 			
-			DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
+			final DeleteDocumentAction deleteDocumentAction = new DeleteDocumentAction();
 			deleteDocumentAction.setProvider(getProvider());
 			deleteDocumentAction.setContext(ctx);
 			deleteDocumentAction.setDocuments(documents);
 			deleteDocumentAction.setQueryCatalog(catalog);
 			
-			DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
+			final DeleteVersionAction deleteVersionAction = new DeleteVersionAction();
 			deleteVersionAction.setProvider(getProvider());
 			deleteVersionAction.setContext(ctx);
 			deleteVersionAction.setDocuments(versions);
@@ -1672,50 +1684,51 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			deleteVersionAction.perform();
 			try {
 				deleteDocumentAction.perform();
-			} catch (AbstractOXException e) {
+			} catch (final AbstractOXException e) {
 				try {
 					deleteVersionAction.undo();
 					throw new InfostoreException(e);
-				} catch (AbstractOXException e1) {
+				} catch (final AbstractOXException e1) {
 					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
 				}
 			}
 						
-			FileStorage fs = getFileStorage(ctx);
+			final FileStorage fs = getFileStorage(ctx);
 
 //			Remove the files. No rolling back from this point onward
 			
-			for(DocumentMetadata version : versions) {
-				if(null != version.getFilestoreLocation())
+			for(final DocumentMetadata version : versions) {
+				if(null != version.getFilestoreLocation()) {
 					fs.deleteFile(version.getFilestoreLocation());
+				}
 			}
 			
-			EventClient ec = new EventClient(session);
+			final EventClient ec = new EventClient(session);
 
-			for (DocumentMetadata m : documents) {
+			for (final DocumentMetadata m : documents) {
 				try {
 					ec.delete(m);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOG.error("", e);
 				}
 			}
 			
-		} catch (AbstractOXException x) {
+		} catch (final AbstractOXException x) {
 			throw new InfostoreException(x);
 		}
 		
 	}
-	@OXThrows(category = Category.CODE_ERROR, desc = "A faulty SQL Query was sent to the SQL server. This can only be fixed in R&D", exceptionId = 29, msg = "Invalid SQL Query: %s")
+	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 29, msg = MSG_INVALID_SQL_QUERY)
 	
 
-	private void assignToAdmin(int id, Context ctx, SessionObject session) throws OXException {		Connection writeCon = null;
+	private void assignToAdmin(final int id, final Context ctx, final SessionObject session) throws OXException {		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = null;
 		try {
 			writeCon = getWriteConnection(ctx);
 			stmt = writeCon.createStatement();
-			for (String table : tables) {
-				for (String userField : userFields) {
+			for (final String table : tables) {
+				for (final String userField : userFields) {
 					query = new StringBuilder("UPDATE ").append(table).append(
 							" SET ").append(userField).append(" = ").append(
 							ctx.getMailadmin()).append(" WHERE cid = ").append(
@@ -1724,27 +1737,28 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 					stmt.executeUpdate(query.toString());
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(29, e, (query != null) ? query.toString()
 					: "");
 		} finally {
-			if (stmt != null)
+			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException e) {
+				} catch (final SQLException e) {
 					LOG.debug("", e);
 				}
+			}
 			releaseWriteConnection(ctx, writeCon);
 		}
 	}
 
-	private StringBuffer getSQLSelectForInfostoreColumns(int[] columns,
-			boolean deleteTable) {
+	private StringBuffer getSQLSelectForInfostoreColumns(final int[] columns,
+			final boolean deleteTable) {
 		String delete = "";
 		if (deleteTable) {
 			delete = "del_";
 		}
-		StringBuffer select = new StringBuffer("SELECT ");
+		final StringBuffer select = new StringBuffer("SELECT ");
 		for (int i = 0; i < columns.length; i++) {
 			select.append(delete);
 			select.append(INFOSTORE_DATACOLUMNS[columns[i]]);
@@ -1755,9 +1769,9 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		return (select);
 	}
 
-	private int[] switchMetadata2DBColumns(Metadata[] columns,
-			boolean versionPriorityHigh) {
-		int[] retval = new int[columns.length];
+	private int[] switchMetadata2DBColumns(final Metadata[] columns,
+			final boolean versionPriorityHigh) {
+		final int[] retval = new int[columns.length];
 		for (int i = 0; i < columns.length; i++) {
 			Metadata2DBSwitch: switch (columns[i].getId()) {
 			default:
@@ -1852,7 +1866,7 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 	}
 
 	private final DocumentMetadataImpl fillDocumentMetadata(
-			DocumentMetadataImpl dmi, int[] columns, ResultSet result)
+			final DocumentMetadataImpl dmi, final int[] columns, final ResultSet result)
 			throws SQLException {
 		int currentVersion = -1;
 		int versionNumber = -1;
@@ -1873,8 +1887,9 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 				break setObjectColumns;
 			case INFOSTORE_locked_until:
 				dmi.setLockedUntil(new Date(result.getLong(i + 1)));
-				if (result.wasNull())
+				if (result.wasNull()) {
 					dmi.setLockedUntil(null);
+				}
 				break setObjectColumns;
 			case INFOSTORE_creating_date:
 				dmi.setCreationDate(new Date(result.getLong(i + 1)));
@@ -1955,7 +1970,7 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		return dmi;
 	}
 
-	private void addFile(String fileInFilespoolPath, Context ctx) {
+	private void addFile(final String fileInFilespoolPath, final Context ctx) {
 		if (inTransaction()) {
 			ctxHolder.set(ctx);
 			fileIdAddList.get().add(fileInFilespoolPath);
@@ -1968,25 +1983,25 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			"An error occurred while removing the file from the file storage." }, exceptionId = {
 			30, 31 }, msg = { "Cannot find file store location.",
 			"Could not remove file. %s" })
-	private void delFiles(List<String> filesToDelete, Context ctx)
+	private void delFiles(final List<String> filesToDelete, final Context ctx)
 			throws OXException {
 		if (inTransaction()) {
 			ctxHolder.set(ctx);
 			fileIdRemoveList.get().addAll(filesToDelete);
 		} else {
-			for (String id : filesToDelete) {
+			for (final String id : filesToDelete) {
 				try {
 					getFileStorage(ctx).deleteFile(id);
-				} catch (FilestoreException e) {
+				} catch (final FilestoreException e) {
 					throw EXCEPTIONS.create(30, e);
-				} catch (FileStorageException e) {
+				} catch (final FileStorageException e) {
 					throw new InfostoreException(e);
 				}
 			}
 		}
 	}
 
-	protected FileStorage getFileStorage(Context ctx) throws FileStorageException,
+	protected FileStorage getFileStorage(final Context ctx) throws FileStorageException,
 			FilestoreException {
 		return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this.getProvider());
 	}
@@ -2003,13 +2018,13 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = { "An error occurred while removing the file from the file storage." }, exceptionId = { 32 }, msg = { "Could not remove file. %s" })
 	@Override
 	public void commit() throws TransactionException {
-		Context ctx = ctxHolder.get();
-		for (String id : fileIdRemoveList.get()) {
+		final Context ctx = ctxHolder.get();
+		for (final String id : fileIdRemoveList.get()) {
 			try {
 				getFileStorage(ctx).deleteFile(id);
-			} catch (FilestoreException e) {
+			} catch (final FilestoreException e) {
 				throw new TransactionException(e); // ErrorCode?
-			} catch (FileStorageException e) {
+			} catch (final FileStorageException e) {
 				throw new TransactionException(e);
 			}
 		}
@@ -2028,23 +2043,24 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = { "An error occurred while removing the file from the file storage." }, exceptionId = { 33 }, msg = { "Could not remove file. %s" })
 	@Override
 	public void rollback() throws TransactionException {
-		Context ctx = ctxHolder.get();
-		for (String id : fileIdAddList.get()) {
+		final Context ctx = ctxHolder.get();
+		for (final String id : fileIdAddList.get()) {
 			try {
 				getFileStorage(ctx).deleteFile(id);
-			} catch (FilestoreException e) {
+			} catch (final FilestoreException e) {
 				throw new TransactionException(e); // ErrorCode?
-			} catch (FileStorageException e) {
+			} catch (final FileStorageException e) {
 				throw new TransactionException(e);
 			}
 		}
 		super.rollback();
 	}
 
-	private int getId(Context context, Connection writeCon) throws SQLException {
-		boolean autoCommit = writeCon.getAutoCommit();
-		if (autoCommit)
+	private int getId(final Context context, final Connection writeCon) throws SQLException {
+		final boolean autoCommit = writeCon.getAutoCommit();
+		if (autoCommit) {
 			writeCon.setAutoCommit(false);
+		}
 		try {
 			return IDGenerator.getId(context, Types.INFOSTORE, writeCon);
 		} finally {
@@ -2055,8 +2071,8 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		}
 	}
 
-	private int getNextVersionNumberForInfostoreObject(int cid,
-			int infostore_id, Connection con) throws SQLException {
+	private int getNextVersionNumberForInfostoreObject(final int cid,
+			final int infostore_id, final Connection con) throws SQLException {
 		int retval = 0;
 
 		PreparedStatement stmt = con
@@ -2076,9 +2092,10 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		stmt.setInt(2, infostore_id);
 		result = stmt.executeQuery();
 		if (result.next()) {
-			int delVersion = result.getInt(1);
-			if (delVersion > retval)
+			final int delVersion = result.getInt(1);
+			if (delVersion > retval) {
 				retval = delVersion;
+			}
 		}
 		result.close();
 		stmt.close();
@@ -2086,32 +2103,33 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 		return retval + 1;
 	}
 
-	private void copyRows(Connection writeCon, String intoTable, String sql,
-			Object... substitutes) throws SQLException {
+	private void copyRows(final Connection writeCon, final String intoTable, final String sql,
+			final Object... substitutes) throws SQLException {
 		PreparedStatement readStatement = null;
 		PreparedStatement stmt = null;
 
 		ResultSet rs = null;
 
 		try {
-			StringBuilder queryBuilder = new StringBuilder("INSERT INTO ");
+			final StringBuilder queryBuilder = new StringBuilder("INSERT INTO ");
 			queryBuilder.append(intoTable);
-			queryBuilder.append("(");
+			queryBuilder.append('(');
 
-			StringBuilder questionMarks = new StringBuilder();
+			final StringBuilder questionMarks = new StringBuilder();
 
 			readStatement = writeCon.prepareStatement(sql);
 			int i = 1;
-			for (Object sub : substitutes)
+			for (final Object sub : substitutes) {
 				readStatement.setObject(i++, sub);
+			}
 
 			rs = readStatement.executeQuery();
 
-			ResultSetMetaData rsMeta = rs.getMetaData();
-			int cCount = rsMeta.getColumnCount();
+			final ResultSetMetaData rsMeta = rs.getMetaData();
+			final int cCount = rsMeta.getColumnCount();
 			for (int index = 1; index != cCount; index++) {
 				queryBuilder.append(rsMeta.getColumnName(index));
-				queryBuilder.append(",");
+				queryBuilder.append(',');
 				questionMarks.append("?,");
 			}
 
@@ -2138,9 +2156,9 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 
 	}
 
-	private SearchIterator buildIterator(ResultSet result,
-			PreparedStatement stmt, int[] dbColumns, DatabaseImpl service,
-			Context ctx, Connection con, boolean closeIfPossible)
+	private SearchIterator buildIterator(final ResultSet result,
+			final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl service,
+			final Context ctx, final Connection con, final boolean closeIfPossible)
 			throws SearchIteratorException, SQLException {
 
 		return fetchMode.buildIterator(result, stmt, dbColumns, service, ctx,
@@ -2158,13 +2176,13 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 
 	private class PrefetchMode implements FetchMode {
 
-		public SearchIterator buildIterator(ResultSet result,
-				PreparedStatement stmt, int[] dbColumns, DatabaseImpl impl,
-				Context ctx, Connection con, boolean closeIfPossible)
+		public SearchIterator buildIterator(final ResultSet result,
+				final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl,
+				final Context ctx, final Connection con, final boolean closeIfPossible)
 				throws SearchIteratorException, SQLException {
-			List<DocumentMetadata> resultList = new ArrayList<DocumentMetadata>();
+			final List<DocumentMetadata> resultList = new ArrayList<DocumentMetadata>();
 			while (result.next()) {
-				DocumentMetadataImpl dmi = new DocumentMetadataImpl();
+				final DocumentMetadataImpl dmi = new DocumentMetadataImpl();
 				fillDocumentMetadata(dmi, dbColumns, result);
 				resultList.add(dmi);
 			}
@@ -2179,9 +2197,9 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 
 	private static class CloseLaterMode implements FetchMode {
 
-		public SearchIterator buildIterator(ResultSet result,
-				PreparedStatement stmt, int[] dbColumns, DatabaseImpl impl,
-				Context ctx, Connection con, boolean closeIfPossible)
+		public SearchIterator buildIterator(final ResultSet result,
+				final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl,
+				final Context ctx, final Connection con, final boolean closeIfPossible)
 				throws SearchIteratorException, SQLException {
 			return new InfostoreIterator(result, stmt, dbColumns, impl, ctx,
 					con);
@@ -2191,9 +2209,9 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 
 	private class CloseImmediatelyMode implements FetchMode {
 
-		public SearchIterator buildIterator(ResultSet result,
-				PreparedStatement stmt, int[] dbColumns, DatabaseImpl impl,
-				Context ctx, Connection con, boolean closeIfPossible)
+		public SearchIterator buildIterator(final ResultSet result,
+				final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl,
+				final Context ctx, final Connection con, final boolean closeIfPossible)
 				throws SearchIteratorException, SQLException {
 			if (closeIfPossible) {
 				close(stmt, result);
@@ -2222,8 +2240,8 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 
 		private Connection readCon;
 
-		public InfostoreIterator(ResultSet rs, Statement stmt, int[] columns,
-				DatabaseImpl d, Context ctx, Connection readCon)
+		public InfostoreIterator(final ResultSet rs, final Statement stmt, final int[] columns,
+				final DatabaseImpl d, final Context ctx, final Connection readCon)
 				throws SearchIteratorException {
 			this.rs = rs;
 			this.stmt = stmt;
@@ -2239,13 +2257,13 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 				} else {
 					close();
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
 						e, Component.INFOSTORE);
 			}
 		}
 
-		public InfostoreIterator(ResultSet rs, int[] columns, DatabaseImpl d) {
+		public InfostoreIterator(final ResultSet rs, final int[] columns, final DatabaseImpl d) {
 			this.rs = rs;
 			this.columns = columns;
 			this.d = d;
@@ -2286,7 +2304,7 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 					close();
 				}
 				return retval;
-			} catch (SQLException exc) {
+			} catch (final SQLException exc) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
 						exc, Component.INFOSTORE);
 			}
@@ -2303,12 +2321,13 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 				}
 				rs = null;
 				stmt = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
 						e, Component.INFOSTORE);
 			} finally {
-				if (readCon != null)
+				if (readCon != null) {
 					d.releaseReadConnection(ctx, readCon);
+				}
 			}
 		}
 	}
@@ -2319,7 +2338,7 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			exceptionId = 34,
 			msg = "Invalid SQL Query : %s"
 	)
-	public int getMaxActiveVersion(int id, Context context) throws OXException {
+	public int getMaxActiveVersion(final int id, final Context context) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -2330,16 +2349,17 @@ public void removeUser(int id, Context ctx, SessionObject session, EntityLockMan
 			stmt.setInt(1, context.getContextId());
 			stmt.setInt(2, id);
 			rs = stmt.executeQuery();
-			if (rs.next())
+			if (rs.next()) {
 				return rs.getInt(1);
-			else
-				return -1;
-		} catch (SQLException e) {
+			}
+			return -1;
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(34, e, getStatement(stmt));
 		} finally {
 			close(stmt, rs);
-			if (con != null)
+			if (con != null) {
 				releaseReadConnection(context, con);
+			}
 		}
 	}
 }

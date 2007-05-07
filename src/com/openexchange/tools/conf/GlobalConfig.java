@@ -89,9 +89,9 @@ public class GlobalConfig {
     static final String servletmappingfile = "servletmapping.properties";
     static String CalendarSQLImpl;
 
-    private static HashMap datePattern = new HashMap();
-    private static HashMap parameters = new HashMap();
-    private static HashMap categories = new HashMap();
+    private static final HashMap datePattern = new HashMap();
+    private static final HashMap parameters = new HashMap();
+    private static final HashMap categories = new HashMap();
 
     static {
 //	datePattern.put("DEFAULT", "dd.MM.yyyy HH:mm");
@@ -137,7 +137,7 @@ public class GlobalConfig {
     }
 
 	 
-    public static void loadConf(String propertyfile) {
+    public static void loadConf(final String propertyfile) {
 	if (propertyfile != null) {
 	    ComfireConfig.loadProperties(propertyfile);
 	    loadConf();
@@ -155,41 +155,41 @@ public class GlobalConfig {
 
 
     // This is small copy of loading langCodes method
-    public static void loadLangCategories(String file) {
-	File list = new File(file);
+    public static void loadLangCategories(final String file) {
+	final File list = new File(file);
 	if ((!(list.exists())) || (!(list.isDirectory()))) {
 	    return;
 	}
 
-	String[] allFilesInDir = list.list();
+	final String[] allFilesInDir = list.list();
 	for (int i = 0; i < allFilesInDir.length; i++) {
 	    if ((new File(file + System.getProperty("file.separator") + allFilesInDir[i]).isFile()) &&
 		((allFilesInDir[i]).endsWith(".cat")) &&
 		((allFilesInDir[i]).length() > 4)) {
 
-		String language = allFilesInDir[i].substring(0, allFilesInDir[i].lastIndexOf("."));		
-		Vector tp = new Vector();
+		final String language = allFilesInDir[i].substring(0, allFilesInDir[i].lastIndexOf("."));		
+		final Vector tp = new Vector();
 		boolean encodingerror = false;
 		try {
-		    FileInputStream fis = new FileInputStream(file+System.getProperty("file.separator")+allFilesInDir[i]);
-		    InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-		    BufferedReader br = new BufferedReader(isr);
+		    final FileInputStream fis = new FileInputStream(file+System.getProperty("file.separator")+allFilesInDir[i]);
+		    final InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+		    final BufferedReader br = new BufferedReader(isr);
 		    
 		    String line = "";
 		    
 		    while ((line = br.readLine()) != null) {
 			line = line.trim();			
-			if (!line.startsWith("#")) {
+			if (line.charAt(0) != '#') {
 			    tp.addElement(line);
 			}		
 		    }
 		    br.close();
 		    isr.close();
 		    fis.close();
-		} catch (UnsupportedEncodingException uce) {
+		} catch (final UnsupportedEncodingException uce) {
 		    System.out.println("UnsupportedEncodingException at " + file + System.getProperty("file.separator") + allFilesInDir[i] + " (file is not UTF-8 encoded!)");
 		    encodingerror = true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		    System.out.println("Exception while parsing dlc file : " + file + System.getProperty("file.separator") + allFilesInDir[i]);
 		    e.printStackTrace();
 		}
@@ -198,8 +198,8 @@ public class GlobalConfig {
 		    System.out.println("Starting fallback mode (reading " + file + System.getProperty("file.separator") + allFilesInDir[i] + " with standard encoding)");
 
 		    try {
-			FileReader fr = new FileReader(file+System.getProperty("file.separator")+allFilesInDir[i]);
-			BufferedReader br = new BufferedReader(fr);
+			final FileReader fr = new FileReader(file+System.getProperty("file.separator")+allFilesInDir[i]);
+			final BufferedReader br = new BufferedReader(fr);
 			
 			String line = "";
 			
@@ -211,7 +211,7 @@ public class GlobalConfig {
 			}
 			br.close();
 			fr.close();
-		    } catch (Exception e) {
+		    } catch (final Exception e) {
 			System.out.println("Exception while parsing dlc file : " + file + System.getProperty("file.separator") + allFilesInDir[i]);
 			e.printStackTrace();
 		    }
@@ -223,14 +223,14 @@ public class GlobalConfig {
     }
 
     // loading user layouts
-    public static Vector loadUserLayouts(String file, String user) {
-        File list = new File(file);
+    public static Vector loadUserLayouts(final String file, final String user) {
+        final File list = new File(file);
         if ((!(list.exists())) || (!(list.isDirectory()))) {
             return null;
         }
 
         Vector tp = new Vector();
-        File f = new File(file + System.getProperty("file.separator") + user + ".layout");
+        final File f = new File(file + System.getProperty("file.separator") + user + ".layout");
 
         if (f.isFile() && f.length() > 1) {
             boolean encodingerror = false;
@@ -239,7 +239,7 @@ public class GlobalConfig {
             try {
                 fis = new FileInputStream(f);
                 isr = new InputStreamReader(fis, "UTF-8");
-                BufferedReader br = new BufferedReader(isr);
+                final BufferedReader br = new BufferedReader(isr);
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     line = line.trim();
@@ -248,10 +248,10 @@ public class GlobalConfig {
                     }
                 }
                 br.close();
-            } catch (UnsupportedEncodingException uce) {
+            } catch (final UnsupportedEncodingException uce) {
                 ComfireLogger.log("ERROR: LoadUserLayout(...): UnsupportedEncodingException at " + file + System.getProperty("file.separator") + user + ".layout (file is not UTF-8 encoded!)", ComfireLogger.ERROR);
                 encodingerror = true;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 ComfireLogger.log("ERROR: LoadUserLayout(...): Exception while parsing layout file : " + file + System.getProperty("file.separator") + user + ".layout", ComfireLogger.ERROR);
                 e.printStackTrace();
             } finally {
@@ -260,7 +260,7 @@ public class GlobalConfig {
                         isr.close();
                     if (fis != null)
                         fis.close();
-                } catch (IOException e) { }
+                } catch (final IOException e) {}
             }
 
             if (encodingerror) {
@@ -278,7 +278,7 @@ public class GlobalConfig {
                             tp.addElement(line);
                         }
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     ComfireLogger.log("ERROR: LoadUserLayout(...): Exception while parsing layout file : " + file + System.getProperty("file.separator") + user + ".layout", ComfireLogger.ERROR);
                     e.printStackTrace();
                 } finally {
@@ -287,7 +287,7 @@ public class GlobalConfig {
                             br.close();
                         if (fr != null)
                             fr.close();
-                    } catch (IOException e) { }
+                    } catch (final IOException e) { }
                 }
             }
         }
@@ -311,24 +311,24 @@ public class GlobalConfig {
     }
     
 
-    public static void loadLangCodes(String file) {
-	File list = new File(file);
+    public static void loadLangCodes(final String file) {
+	final File list = new File(file);
 	if ((!(list.exists())) || (!(list.isDirectory()))) {
 	    return;
 	}
 
-	String[] allFilesInDir = list.list();
+	final String[] allFilesInDir = list.list();
 	for (int i = 0; i < allFilesInDir.length; i++) {
 	    if ((new File(file + System.getProperty("file.separator") + allFilesInDir[i]).isFile()) &&
 		((allFilesInDir[i]).endsWith(".dlc")) &&
 		((allFilesInDir[i]).length() > 4)) {
-		String language = allFilesInDir[i].substring(0, allFilesInDir[i].lastIndexOf("."));		
+		final String language = allFilesInDir[i].substring(0, allFilesInDir[i].lastIndexOf("."));		
 
 		boolean encodingerror = false;
 		try {
-		    FileInputStream fis = new FileInputStream(file+System.getProperty("file.separator")+allFilesInDir[i]);
-		    InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-		    BufferedReader br = new BufferedReader(isr);
+		    final FileInputStream fis = new FileInputStream(file+System.getProperty("file.separator")+allFilesInDir[i]);
+		    final InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+		    final BufferedReader br = new BufferedReader(isr);
 		    
 		    boolean found = false;
 		    String line = "";
@@ -366,10 +366,10 @@ public class GlobalConfig {
 		    br.close();
 		    isr.close();
 		    fis.close();
-		} catch (UnsupportedEncodingException uce) {
+		} catch (final UnsupportedEncodingException uce) {
 		    System.out.println("UnsupportedEncodingException at " + file + System.getProperty("file.separator") + allFilesInDir[i] + " (file is not UTF-8 encoded!)");
 		    encodingerror = true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		    System.out.println("Exception while parsing dlc file : "
 				       + file + System.getProperty("file.separator") + allFilesInDir[i]);
 		    e.printStackTrace();
@@ -379,8 +379,8 @@ public class GlobalConfig {
 		    System.out.println("Starting fallback mode (reading " + file + System.getProperty("file.separator") + allFilesInDir[i] + " with standard encoding)");
 
 		    try {
-			FileReader fr = new FileReader(file+System.getProperty("file.separator")+allFilesInDir[i]);
-			BufferedReader br = new BufferedReader(fr);
+			final FileReader fr = new FileReader(file+System.getProperty("file.separator")+allFilesInDir[i]);
+			final BufferedReader br = new BufferedReader(fr);
 			
 			boolean found = false;
 			String line = "";
@@ -417,7 +417,7 @@ public class GlobalConfig {
 			}
 			br.close();
 			fr.close();
-		    } catch (Exception e) {
+		    } catch (final Exception e) {
 			System.out.println("Exception while parsing dlc file : "
 					   + file + System.getProperty("file.separator") + allFilesInDir[i]);
 			e.printStackTrace();
@@ -437,7 +437,7 @@ public class GlobalConfig {
 	    if (time_to_check < 30000) {
 		time_to_check = 30000;
 	    }
-	} catch (Exception e) { }
+	} catch (final Exception e) { }
 	
 	setParameter("mail_check_time", "" + time_to_check);
 
@@ -449,55 +449,55 @@ public class GlobalConfig {
 		if (time_to_check < 300000) {
 		    time_to_check = 300000;
 		}
-	    } catch (Exception e) { }
+	    } catch (final Exception e) { }
 	    
 	    setParameter("portal_reload_time", "" + time_to_check);
 	}
     }
     
-    public static void loadParametersFromFile(String filename) {
+    public static void loadParametersFromFile(final String filename) {
 	if (!new File(filename).exists()) {
 	    return;
 	}
 	try {
-	    FileInputStream fis = new FileInputStream(filename);
-	    BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+	    final FileInputStream fis = new FileInputStream(filename);
+	    final BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 	    String line = null;
 	    while ((line = br.readLine()) != null) {
 		line = line.trim();
 		if (line.startsWith("#") || line.startsWith("!")) {
 		    continue;
 		}
-		int separator = line.indexOf("=");
+		final int separator = line.indexOf("=");
 		if (separator == -1) {
 		    continue;
 		}
-		String name = line.substring(0, separator);
-		String value = line.substring(separator+1);
+		final String name = line.substring(0, separator);
+		final String value = line.substring(separator+1);
 
 	    }
 	    br.close();
 	    fis.close();
-	} catch (IOException ie) {
+	} catch (final IOException ie) {
 	    System.out.println("Error while reading parameter file \""+filename+"\".");
 	    System.out.println(ie.getMessage());
 	}
     }
    
-    public static String getDatePattern(String country) {
+    public static String getDatePattern(final String country) {
 	try {
-	    String returnPattern = datePattern.get(country.toUpperCase()).toString();
+	    final String returnPattern = datePattern.get(country.toUpperCase()).toString();
 	    return returnPattern.substring(0, returnPattern.indexOf(" "));
-	} catch(NullPointerException npe) {
-	    String defaultPattern = datePattern.get("DEFAULT").toString();
+	} catch(final NullPointerException npe) {
+	    final String defaultPattern = datePattern.get("DEFAULT").toString();
 	    return defaultPattern.substring(0, defaultPattern.indexOf(" "));
 	}
     }
 
-    public static String getDateTimePattern(String country) {
+    public static String getDateTimePattern(final String country) {
 	try {
 	    return datePattern.get(country.toUpperCase()).toString();
-	} catch(NullPointerException npe) {
+	} catch(final NullPointerException npe) {
 	    return datePattern.get("DEFAULT").toString();
 	}
     }
@@ -507,12 +507,12 @@ public class GlobalConfig {
      * /etc/imap/globals.conf
      * /etc/openldap/ldap.conf
      */
-    public static void loadExternalConfigs(String imapfile) {
+    public static void loadExternalConfigs(final String imapfile) {
 	try {
-	    File f = new File(imapfile);
+	    final File f = new File(imapfile);
 	    if (f.exists()) {
-		FileReader fr = new FileReader(f);
-		BufferedReader br = new BufferedReader(fr);
+		final FileReader fr = new FileReader(f);
+		final BufferedReader br = new BufferedReader(fr);
 		String line = "";
 		while ((line = br.readLine()) != null) {
 		    if (line.startsWith("AdministrativeHostname=")) {
@@ -544,7 +544,7 @@ public class GlobalConfig {
 		}
 		fr.close();
 	    }
-	} catch (Exception e) {  
+	} catch (final Exception e) {  
 	    System.out.println("config file \"" + imapfile + "\" read error! --> " + e);
 	}
 
@@ -553,14 +553,14 @@ public class GlobalConfig {
     /**
      * Laden der Datenbankanbindung aus der nasi.con
      */
-    public static void loadDBParameters(String serverconf) {
+    public static void loadDBParameters(final String serverconf) {
 	
 	try {
 	    
-	    File f = new File(serverconf);
+	    final File f = new File(serverconf);
 	    
-	    FileReader fr = new FileReader(f);
-	    BufferedReader br = new BufferedReader(fr);
+	    final FileReader fr = new FileReader(f);
+	    final BufferedReader br = new BufferedReader(fr);
 	    String line = "";
 	    
 	    while ((line = br.readLine()) != null) {
@@ -596,7 +596,7 @@ public class GlobalConfig {
 	    br.close();
 	    fr.close();
 	
-	} catch (Exception e) {
+	} catch (final Exception e) {
 	    System.out.println("config file \"" + serverconf + "\" read error!");
 	}
 	
@@ -605,23 +605,23 @@ public class GlobalConfig {
     /**
      * Einen Parameter aus der Parameterliste auslesen
      */
-    public static String getParameter(String name) {
+    public static String getParameter(final String name) {
 	return (String)parameters.get(name);
     }
     
     /**
      * Einen Parameter in der Parameterliste spezifizieren
      */
-    public static void setParameter(String name, String value) {
+    public static void setParameter(final String name, final String value) {
     parameters.put(name, value);
     }
 
 
-    private static String[] seperateHTMLData(String data) {
-	String[] retval = new String[2];
+    private static String[] seperateHTMLData(final String data) {
+	final String[] retval = new String[2];
 	
-	int start = data.indexOf("=\"")+2;
-	int end = data.indexOf("\">", start);
+	final int start = data.indexOf("=\"")+2;
+	final int end = data.indexOf("\">", start);
 	
 	retval[0] = data.substring(start, end);
 	retval[1] = data.substring(end+2, data.indexOf("</text>"));
@@ -632,22 +632,22 @@ public class GlobalConfig {
 	private static final void checkCalendarConfig() {
 		if (GlobalConfig.getParameter("set_max_end_years_for_sequences") != null) {
 			try {
-				int test = Integer.valueOf(GlobalConfig.getParameter("set_max_end_years_for_sequences")).intValue();
+				final int test = Integer.parseInt(GlobalConfig.getParameter("set_max_end_years_for_sequences"));
 				 CalendarRecurringCollection.setMAX_END_YEARS(test);
-			} catch(NumberFormatException nfe) { 
+			} catch(final NumberFormatException nfe) { 
 				ComfireLogger.log("set_max_end_years_for_sequences not set!", ComfireLogger.DEBUG);
 			}
 		}
 	}
 	
-	 private static void loadServletMapping(String file) {
-		File f = new File(file);
+	 private static void loadServletMapping(final String file) {
+		final File f = new File(file);
 		FileInputStream fis = null;
 		try {
 			if (f.exists()) {
 				fis = new FileInputStream(f);
 				
-				Properties properties = new Properties();		
+				final Properties properties = new Properties();		
 				properties.load(fis);
 				
 				fis.close();
@@ -665,9 +665,9 @@ public class GlobalConfig {
 						value = properties.get(name).toString();
 
 						servletConstructorMap.put(name, Class.forName(value).getConstructor(new Class[] {}));
-					} catch (SecurityException e) {
+					} catch (final SecurityException e) {
 						e.printStackTrace();
-					} catch (ClassNotFoundException e) {
+					} catch (final ClassNotFoundException e) {
 						e.printStackTrace();
 					}
 				}
@@ -676,7 +676,7 @@ public class GlobalConfig {
 			} else {
 				ComfireLogger.log("Cannot find property file: " + file, ComfireLogger.WARN);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			ComfireLogger.log("Cannot load property file: " + file + " " + exc, ComfireLogger.WARN);
 			exc.printStackTrace();
 		}

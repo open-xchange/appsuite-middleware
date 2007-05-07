@@ -69,13 +69,13 @@ public class WebdavFileStorage extends FileStorage {
 	private String userName;
 	private String password;
 	
-	private ThreadLocal<WebdavResource> lock = new ThreadLocal<WebdavResource>();
+	private final ThreadLocal<WebdavResource> lock = new ThreadLocal<WebdavResource>();
 	
-	private static WebdavLockManager lockMgr = null;
+	private static WebdavLockManager lockMgr;
 	
-	private List<WebdavResource> locks = new ArrayList<WebdavResource>();
+	private final List<WebdavResource> locks = new ArrayList<WebdavResource>();
 
-	public static void setVMID(String vmID) {
+	public static void setVMID(final String vmID) {
 		if(null == lockMgr) {
 			lockMgr = new WebdavLockManager(vmID);
 		} else {
@@ -83,42 +83,48 @@ public class WebdavFileStorage extends FileStorage {
 		}
 	}
 	
-	public WebdavFileStorage(Object... initArgs) throws FileStorageException{
+	public WebdavFileStorage(final Object... initArgs) throws FileStorageException{
 		super(initArgs);
 		if(lockMgr == null) {
 			throw new IllegalStateException("Please call #setVMID(String) once before creating a WebdavFileStorage");
 		}
 		
 		this.host = (String) initArgs[2];
-		if(host == null)
+		if(host == null) {
 			throw new IllegalArgumentException("Please specify a host");
+		}
 		this.path = (String) initArgs[3];
-		if(path == null)
+		if(path == null) {
 			path = "/";
+		}
 		this.userName = (String) initArgs[4];
 		this.password = (String) initArgs[5];
 	}
 	
 	
 
-	protected WebdavResource getResource(String subPath) throws IOException{
-		if(!host.endsWith("/"))
+	protected WebdavResource getResource(final String subPath) throws IOException{
+		if(!host.endsWith("/")) {
 			host += "/";
+		}
 		
 		if(path == null) { 
 			path = "";
-		} else if(!path.endsWith("/"))
+		} else if(!path.endsWith("/")) {
 			path += "/";
+		}
 		
-		HttpURL url = new HttpURL("http://" + host + path + subPath) {
+		final HttpURL url = new HttpURL("http://" + host + path + subPath) {
 
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public char[] getRawPassword() {
 				// Fix for bug in http-client
 				char[] pw = super.getRawPassword();
-				if (null == pw)
+				if (null == pw) {
 					return new char[0];
+				}
 				return pw;
 			}
 		};
@@ -152,43 +158,43 @@ public class WebdavFileStorage extends FileStorage {
 	}*/
 	
 	@Override
-	protected boolean delete(String name) throws FileStorageException {
+	protected boolean delete(final String name) throws FileStorageException {
         try {
-    		WebdavResource res = getResource(name);
-    		boolean del = res.deleteMethod();
+    		final WebdavResource res = getResource(name);
+    		final boolean del = res.deleteMethod();
     		return del;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
     }
 
 	@Override
-	protected void save(String name, InputStream input) throws FileStorageException {
+	protected void save(final String name, final InputStream input) throws FileStorageException {
         try {
-    		WebdavResource res = getResource(name);
+    		final WebdavResource res = getResource(name);
     		if(name.contains("/")) {
-    			mkParentDirs(name.substring(0,name.lastIndexOf("/")));
+    			mkParentDirs(name.substring(0,name.lastIndexOf('/')));
     		}
     		if(!res.putMethod(input)){
     			throw new FileStorageException(FileStorageException.Code
                     .CREATE_FAILED, res);
     		}
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
 	}
 
-	private void mkParentDirs(String path) throws FileStorageException {
+	private void mkParentDirs(final String path) throws FileStorageException {
 		if(!exists(path)){
 			if(path.contains("/")){
-				mkParentDirs(path.substring(0,path.lastIndexOf("/")));
+				mkParentDirs(path.substring(0,path.lastIndexOf('/')));
 			}
             try {
-                WebdavResource res = getResource(path);
+                final WebdavResource res = getResource(path);
                 res.mkcolMethod();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new FileStorageException(FileStorageException.Code
                     .CREATE_DIR_FAILED, path);
             }
@@ -196,74 +202,77 @@ public class WebdavFileStorage extends FileStorage {
 	}
 
 	@Override
-	protected InputStream load(String name) throws FileStorageException {
+	protected InputStream load(final String name) throws FileStorageException {
         try {
-            WebdavResource res = getResource(name);
+            final WebdavResource res = getResource(name);
             return res.getMethodData();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
 	}
 
 	@Override
-	protected long length(String name) throws FileStorageException {
+	protected long length(final String name) throws FileStorageException {
         try {
-    		WebdavResource res = getResource(name);
-    		Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTLENGTH);
-    		if(!e.hasMoreElements())
-    			throw new IOException("Cannot get content length.");
-    		return new Long((String)e.nextElement());
-        } catch (IOException e) {
+    		final WebdavResource res = getResource(name);
+    		final Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTLENGTH);
+    		if(!e.hasMoreElements()) {
+				throw new IOException("Cannot get content length.");
+			}
+    		return Long.parseLong((String)e.nextElement());
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
 	}
 
 	@Override
-	protected String type(String name) throws FileStorageException {
+	protected String type(final String name) throws FileStorageException {
         try {
-    		WebdavResource res = getResource(name);
-    		Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTTYPE);
-    		if(!e.hasMoreElements())
-    			throw new IOException("Cannot get content type.");
+    		final WebdavResource res = getResource(name);
+    		final Enumeration e = res.propfindMethod(WebdavResource.GETCONTENTTYPE);
+    		if(!e.hasMoreElements()) {
+				throw new IOException("Cannot get content type.");
+			}
     		return (String)e.nextElement();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
 	}
 
 	@Override
-	protected boolean exists(String name) throws FileStorageException {
+	protected boolean exists(final String name) throws FileStorageException {
         try {
-    		WebdavResource res = getResource(name);
+    		final WebdavResource res = getResource(name);
     		try {
     			res.setProperties(1);
-    		} catch (Exception e) {
+    		} catch (final Exception e) {
     			LOG.debug(e.getMessage(), e);
     		}
     		return res.exists();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
 	}
 
 	@Override
-	protected void lock(long timeout) throws FileStorageException {
+	protected void lock(final long timeout) throws FileStorageException {
         try {
-    		if(lock.get()!=null)
-    			return; // Reentrant lock
-    		WebdavResource l = getResource("lock");
+    		if(lock.get()!=null) {
+				return; // Reentrant lock
+			}
+    		final WebdavResource l = getResource("lock");
     		try {
     			lockMgr.lock(l,timeout);
-    		} catch (InterruptedException e) {
+    		} catch (final InterruptedException e) {
     			return;
     		}
     		lock.set(l);
     		locks.add(l);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
@@ -272,13 +281,14 @@ public class WebdavFileStorage extends FileStorage {
 	@Override
 	protected void unlock() throws FileStorageException {
         try {
-    		WebdavResource lock = this.lock.get();
-    		if(lock == null)
-    			throw new IllegalStateException("The Thread "+Thread.currentThread().getName()+" doesn't hold the lock for this FileStorage");
+    		final WebdavResource lock = this.lock.get();
+    		if(lock == null) {
+				throw new IllegalStateException("The Thread "+Thread.currentThread().getName()+" doesn't hold the lock for this FileStorage");
+			}
     		lockMgr.unlock(lock);
     		this.lock.set(null);
     		locks.remove(lock);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
@@ -286,12 +296,13 @@ public class WebdavFileStorage extends FileStorage {
 
 	@Override
 	protected void closeImpl() {
-		for(WebdavResource res : locks)
+		for (final WebdavResource res : locks) {
 			try {
 				lockMgr.unlock(res);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.debug("",e);
 			}
+		}
 	}
 
 }

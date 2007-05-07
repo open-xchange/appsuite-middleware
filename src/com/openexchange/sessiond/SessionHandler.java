@@ -281,10 +281,10 @@ public class SessionHandler extends TimerTask {
 			LOG.error("ERROR! IMAPException OCCURRED " + e.getMessage());
 		}
 		
-		if (sessions.containsKey(sessionId)) {
-			if (LOG.isDebugEnabled()) {
+		if (sessions.containsKey(sessionId) && LOG.isDebugEnabled()) {
+			//if (LOG.isDebugEnabled()) {
 				LOG.debug("session REBORN sessionid=" + sessionId);
-			}
+			//}
 		}
 		
 		// Load user's configuration from db!

@@ -56,18 +56,18 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
 
-	public InfostoreExceptionFactory(Class clazz) {
+	public InfostoreExceptionFactory(final Class clazz) {
 		super(clazz);
 	}
 	
 	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY;
 	
 	@Override
-	protected AbstractOXException buildException(Component component, Category category, int number, String message, Throwable cause, Object... msgArgs) {
+	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
 		if(component != Component.INFOSTORE) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
 		}
-		return new InfostoreException(category,number,message,cause,(Object[])msgArgs);
+		return new InfostoreException(category,number,message,cause,msgArgs);
 	}
 	
 	@Override
@@ -75,15 +75,15 @@ public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
 		return CLASS;
 	}
 	
-	public InfostoreException create(int id, Object...msgParams) {
-		return (InfostoreException) createException(id,(Object[]) msgParams);
+	public InfostoreException create(final int id, final Object...msgParams) {
+		return (InfostoreException) createException(id,msgParams);
 	}
 	
-	public InfostoreException create(int id, Throwable cause, Object...msgParams) {
-		return (InfostoreException) createException(id,cause, (Object[]) msgParams);
+	public InfostoreException create(final int id, final Throwable cause, final Object...msgParams) {
+		return (InfostoreException) createException(id,cause, msgParams);
 	}
 
-	public static boolean isPermissionException(InfostoreException x) {
+	public static boolean isPermissionException(final InfostoreException x) {
 		switch(x.getDetailNumber()) {
 		default: return false;
 		case 400: case 401: case 418: case 417: case 402: case 403: case 404: case 406: case 407: case 408: case 409: case 410: case 411: return true;

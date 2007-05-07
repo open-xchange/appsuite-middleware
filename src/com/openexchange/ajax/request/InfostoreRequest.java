@@ -99,7 +99,7 @@ public class InfostoreRequest extends CommonRequest{
 
 	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
 	
-	public InfostoreRequest(SessionObject sessionObj, Writer w) {
+	public InfostoreRequest(final SessionObject sessionObj, final Writer w) {
 		super(w);
 		this.sessionObj = sessionObj;
 	}
@@ -128,12 +128,13 @@ public class InfostoreRequest extends CommonRequest{
 				if(!checkRequired(req, AJAXServlet.PARAMETER_ID)) {
 					return true;
 				}
-				int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 				
 				int version = InfostoreFacade.CURRENT_VERSION;
 				
-				if(req.getParameter(AJAXServlet.PARAMETER_VERSION) != null)
-					version = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_VERSION));
+				if(req.getParameter(AJAXServlet.PARAMETER_VERSION) != null) {
+					version = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_VERSION));
+				}
 				
 				get(id, version);
 				
@@ -150,8 +151,8 @@ public class InfostoreRequest extends CommonRequest{
 				if(!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_TIMESTAMP)) {
 					return true;
 				}
-				int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
-				long ts = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final long ts = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				
 				revert(id,ts);
 				return true;
@@ -159,14 +160,14 @@ public class InfostoreRequest extends CommonRequest{
 				if(!checkRequired(req, AJAXServlet.PARAMETER_COLUMNS)){
 					return true;
 				}
-				JSONArray array = (JSONArray) req.getBody();
-				int[] ids = parseIDList(array);
+				final JSONArray array = (JSONArray) req.getBody();
+				final int[] ids = parseIDList(array);
 				
 				Metadata[] cols = null;
 				
 				try {
 					cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-				} catch (InfostoreParser.UnknownMetadataException x) {
+				} catch (final InfostoreParser.UnknownMetadataException x) {
 					unknownColumn(x.getColumnId());
 					return true;
 				}
@@ -178,20 +179,20 @@ public class InfostoreRequest extends CommonRequest{
 				if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP)) {
 					return true;
 				}
-				JSONArray array = (JSONArray) req.getBody();
-				int[] ids = parseIDList(array);
-				long timestamp = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				final JSONArray array = (JSONArray) req.getBody();
+				final int[] ids = parseIDList(array);
+				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				delete(ids,timestamp);
 				return true;
 			} else if (action.equals(AJAXServlet.ACTION_DETACH)) {
 				if(!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP, AJAXServlet.PARAMETER_ID)) {
 					return true;
 				}
-				JSONArray array = (JSONArray) req.getBody();
-				long timestamp = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-				int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final JSONArray array = (JSONArray) req.getBody();
+				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 				
-				int[] versions = new int[array.length()];
+				final int[] versions = new int[array.length()];
 				for(int i = 0; i < array.length(); i++) {
 					versions[i] = array.getInt(i);
 				}
@@ -204,29 +205,30 @@ public class InfostoreRequest extends CommonRequest{
 					return true;
 				}
 				
-				int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
-				long timestamp = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				
-				String updateBody = req.getBody().toString();
-				DocumentMetadata updated = PARSER.getDocumentMetadata(updateBody);
+				final String updateBody = req.getBody().toString();
+				final DocumentMetadata updated = PARSER.getDocumentMetadata(updateBody);
 				updated.setId(id);
 				Metadata[] presentFields = null;
 				
 				try {
 					presentFields = PARSER.findPresentFields(updateBody);
-				} catch (UnknownMetadataException x) {
+				} catch (final UnknownMetadataException x) {
 					unknownColumn(x.getColumnId());
 					return true;
 				}
 				
-				if(action.equals(AJAXServlet.ACTION_UPDATE))
+				if(action.equals(AJAXServlet.ACTION_UPDATE)) {
 					update(id, updated,timestamp, presentFields);
-				else
+				} else {
 					copy(id,updated,timestamp,presentFields);
+				}
 				return true;
 			} else if (action.equals(AJAXServlet.ACTION_NEW)){
 				
-				DocumentMetadata newDocument = PARSER.getDocumentMetadata(req.getBody().toString());
+				final DocumentMetadata newDocument = PARSER.getDocumentMetadata(req.getBody().toString());
 				//newDocument.setFolderId(new Long(req.getParameter(PARAMETER_FOLDERID)));
 				newDocument(newDocument);
 				return true;
@@ -236,9 +238,9 @@ public class InfostoreRequest extends CommonRequest{
 				}
 				long diff = -1;
 				if(null != req.getParameter("diff")) {
-					diff = new Long(req.getParameter("diff"));
+					diff = Long.parseLong(req.getParameter("diff"));
 				}
-				int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 				lock(id,diff);
 				
 				return true;
@@ -247,7 +249,7 @@ public class InfostoreRequest extends CommonRequest{
 				if(!checkRequired(req,action,AJAXServlet.PARAMETER_ID)) {
 					return true;
 				}
-				unlock(Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID)));
+				unlock(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID)));
 				
 				return true;
 			} else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
@@ -261,69 +263,69 @@ public class InfostoreRequest extends CommonRequest{
 				if(!checkRequired(req,action,AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHMENT)) {
 					return true;
 				}
-				int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				int attachedId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				int moduleId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				int attachment = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ATTACHMENT));
+				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+				final int attachment = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHMENT));
 				
-				String body = req.getBody().toString();
-				DocumentMetadata newDocument = PARSER.getDocumentMetadata(body);
-				Metadata[] fields = PARSER.findPresentFields(body);
+				final String body = req.getBody().toString();
+				final DocumentMetadata newDocument = PARSER.getDocumentMetadata(body);
+				final Metadata[] fields = PARSER.findPresentFields(body);
 				saveAs(newDocument,fields,folderId,attachedId,moduleId,attachment);
 				return true;
 
 			}
 			return false;
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			LOG.info("Lost contact to client", x);
 			return true;
-		} catch (JSONException x) {
+		} catch (final JSONException x) {
 			handle(x);
 			return true;
-		} catch (UnknownMetadataException x) {
+		} catch (final UnknownMetadataException x) {
 			handle(x);
 			return true;
-		} catch (OXException x) {
+		} catch (final OXException x) {
 			handle(x);
 			return true;
-		} catch (SearchIteratorException x) {
+		} catch (final SearchIteratorException x) {
 			handle(x);
 			return true;
-		} catch (NumberFormatException x) {
+		} catch (final NumberFormatException x) {
 			handle(x);
 			return true;
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			handle(t);
 			return true;
 		}
 	}
 
-	protected int[] parseIDList(JSONArray array) throws JSONException {
-		int[] ids = new int[array.length()];
+	protected int[] parseIDList(final JSONArray array) throws JSONException {
+		final int[] ids = new int[array.length()];
 		
 		for(int i = 0; i < array.length(); i++) {
-			JSONObject tuple = array.getJSONObject(i);
+			final JSONObject tuple = array.getJSONObject(i);
 			try {
 				ids[i] = tuple.getInt(AJAXServlet.PARAMETER_ID);
-			} catch (JSONException x) {
-				ids[i] = Integer.valueOf(tuple.getString(AJAXServlet.PARAMETER_ID));
+			} catch (final JSONException x) {
+				ids[i] = Integer.parseInt(tuple.getString(AJAXServlet.PARAMETER_ID));
 			}
 		}
 		return ids;
 	}
 	
-	protected void doSortedSearch(SimpleRequest req) throws JSONException, IOException, SearchIteratorException, OXException {
+	protected void doSortedSearch(final SimpleRequest req) throws JSONException, IOException, SearchIteratorException, OXException {
 		Metadata[] cols = null;
 		
 		try {
 			cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-		} catch (InfostoreParser.UnknownMetadataException x) {
+		} catch (final InfostoreParser.UnknownMetadataException x) {
 			unknownColumn(x.getColumnId());
 			return;
 		}
 		
-		String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
-		String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
+		final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+		final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
 		
 		
 		if(order != null && !checkRequired(req, AJAXServlet.PARAMETER_SORT)){
@@ -336,65 +338,68 @@ public class InfostoreRequest extends CommonRequest{
 		if(sort != null) {
 			
 			dir = InfostoreFacade.ASC;
-			if(order != null) {
-				if(order.equalsIgnoreCase("DESC"))
+			if(order != null && order.equalsIgnoreCase("DESC")) {
+				//if(order.equalsIgnoreCase("DESC")) {
 					dir = InfostoreFacade.DESC;
+				//}
 			}
-			sortedBy = Metadata.get(Integer.valueOf(sort));
+			sortedBy = Metadata.get(Integer.parseInt(sort));
 			if(sortedBy == null) {
 				invalidParameter(AJAXServlet.PARAMETER_SORT, sort);
 				return;
 			}
 		}
 		
-		String action = req.getParameter(AJAXServlet.PARAMETER_ACTION);
+		final String action = req.getParameter(AJAXServlet.PARAMETER_ACTION);
 			
 		if(action.equals(AJAXServlet.ACTION_ALL)) {
 			if(!checkRequired(req,action,AJAXServlet.PARAMETER_FOLDERID)) {
 				return;
 			}
-			int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+			final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
 			all(folderId,cols,sortedBy,dir);
 		} else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
 			if(!checkRequired(req,action,AJAXServlet.PARAMETER_ID)) {
 				return;
 			}
-			int id = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_ID));
+			final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 			versions(id,cols,sortedBy,dir);
 		} else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
 			if(!checkRequired(req,action,AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_TIMESTAMP)) {
 				return;
 			}
-			int folderId = Integer.valueOf(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-			long timestamp = new Long(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-			String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
+			final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+			final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+			final String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
 			updates(folderId,cols,sortedBy,dir,timestamp,delete != null && delete.equals("deleted"));
 			
 		} else if (action.equals(AJAXServlet.ACTION_SEARCH)){
-			JSONObject queryObject = (JSONObject) req.getBody();
-			String query = queryObject.getString("pattern");
+			final JSONObject queryObject = (JSONObject) req.getBody();
+			final String query = queryObject.getString("pattern");
 			
 			int folderId = SearchEngine.NO_FOLDER;
-			String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+			final String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
 			if(null != folderS) {
-				folderId = Integer.valueOf(folderS);
+				folderId = Integer.parseInt(folderS);
 			}
 			
 			int start = SearchEngine.NOT_SET;
-			String startS = req.getParameter(AJAXServlet.PARAMETER_START);
-			if(null != startS)
-				start = Integer.valueOf(startS);
+			final String startS = req.getParameter(AJAXServlet.PARAMETER_START);
+			if(null != startS) {
+				start = Integer.parseInt(startS);
+			}
 			
 			
 			int end = SearchEngine.NOT_SET;
-			String endS = req.getParameter(AJAXServlet.PARAMETER_END);
-			if(null != endS)
-				end = Integer.valueOf(endS);
+			final String endS = req.getParameter(AJAXServlet.PARAMETER_END);
+			if(null != endS) {
+				end = Integer.parseInt(endS);
+			}
 			
 			if(start == SearchEngine.NOT_SET && end == SearchEngine.NOT_SET) {
-				String limitS = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
+				final String limitS = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
 				if(limitS != null) {
-					int limit = Integer.valueOf(limitS);
+					final int limit = Integer.parseInt(limitS);
 					start = 0;
 					end = limit-1;
 				}
@@ -406,8 +411,8 @@ public class InfostoreRequest extends CommonRequest{
 	
 	// Actions
 
-	protected void list(int[] ids, Metadata[] cols) throws JSONException, SearchIteratorException, OXException {
-		InfostoreFacade infostore = getInfostore();
+	protected void list(final int[] ids, final Metadata[] cols) throws JSONException, SearchIteratorException, OXException {
+		final InfostoreFacade infostore = getInfostore();
 		TimedResult result = null;
 		SearchIterator iter = null;
 		try {
@@ -416,103 +421,107 @@ public class InfostoreRequest extends CommonRequest{
 			
 			iter = result.results();
 			
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
 			iWriter.writeMetadata(iter ,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 			w.flush();
 			
 		
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			handle(t);
 			
 		} finally {
-			if(iter!=null)
+			if(iter!=null) {
 				iter.close();
+			}
 		}
 	} 
 	
-	protected void get(int id , int version ){
-		InfostoreFacade infostore = getInfostore();
+	protected void get(final int id , final int version ){
+		final InfostoreFacade infostore = getInfostore();
 		DocumentMetadata dm = null;
 		try {
 			
 			dm = infostore.getDocumentMetadata(id,version,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			if(dm==null) {
-				sendErrorAsJS("Cannot find document: %s ", ((Integer)id).toString());
+				sendErrorAsJS("Cannot find document: %s ", String.valueOf(id));
 			}
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			handle(t);
 			return;
 		}
 				
 		try {
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(dm.getSequenceNumber());
 			iWriter.write(dm,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("", e);
 		}
 	}
 	
-	protected void revert(int id, long ts) throws IOException {
-		InfostoreFacade infostore = getInfostore();
+	protected void revert(final int id, final long ts) throws IOException {
+		final InfostoreFacade infostore = getInfostore();
 		SearchIterator iter = null;
 		long timestamp = -1;
 		try {
 			//SearchENgine?
 			infostore.startTransaction();
 			infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
-			TimedResult result = infostore.getVersions(id,new Metadata[]{Metadata.VERSION_LITERAL}, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final TimedResult result = infostore.getVersions(id,new Metadata[]{Metadata.VERSION_LITERAL}, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			if(timestamp > ts) {
 				throw new OXConflictException();
 			}
 			iter = result.results();
-			List<Integer> versions = new ArrayList<Integer>();
+			final List<Integer> versions = new ArrayList<Integer>();
 			while(iter.hasNext()) {
-				int version =((DocumentMetadata)iter.next()).getVersion();
-				if(version == 0)
+				final int version =((DocumentMetadata)iter.next()).getVersion();
+				if(version == 0) {
 					continue;
-				versions.add(version);
+				}
+				versions.add(Integer.valueOf(version));
 			}
 			iter.close();
-			int[] versionsArray = new int[versions.size()];
+			final int[] versionsArray = new int[versions.size()];
 			int index = 0;
-			for(int version : versions) 
+			for(final int version : versions) {
 				versionsArray[index++] = version;
+			}
 			infostore.removeVersion(id, versionsArray, sessionObj);
 			timestamp = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
 			infostore.commit();
-			JSONObject object = new JSONObject();
+			final JSONObject object = new JSONObject();
 			object.put("data", new JSONObject());
 			object.put("timestamp", timestamp);
 			w.write(object.toString());
 			w.flush();
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			try {
 				infostore.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 			return;
 		} finally {
-			if(iter!=null)
+			if(iter!=null) {
 				try {
 					iter.close();
-				} catch (SearchIteratorException e) {
+				} catch (final SearchIteratorException e) {
 					LOG.debug("", e);
 				}
+			}
 			try {
 				infostore.finish();
-			} catch (TransactionException e1) {
+			} catch (final TransactionException e1) {
 				LOG.debug("", e1);
 			}
 		}
 	}
 	
-	protected void all(int folderId, Metadata[] cols, Metadata sortedBy, int dir) throws SearchIteratorException, JSONException, OXException {
+	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException, JSONException, OXException {
 		/**System.out.println("ALL: "+System.currentTimeMillis());
 		System.out.println("---------all-------------");
 		System.out.println(folderId);
@@ -524,7 +533,7 @@ public class InfostoreRequest extends CommonRequest{
 		System.out.println(dir);
 		System.out.println("----------all------------");
 		*/
-		InfostoreFacade infostore = getInfostore(folderId);
+		final InfostoreFacade infostore = getInfostore(folderId);
 		TimedResult result = null;
 		SearchIterator iter = null;
 		try {
@@ -537,49 +546,51 @@ public class InfostoreRequest extends CommonRequest{
 			
 			iter = result.results();
 			
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
 			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 		
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			handle(t);
 			return;
 		} finally {
-			if(iter!=null)
+			if(iter!=null) {
 				iter.close();
+			}
 		}
 	}
 	
-	protected void versions(int id, Metadata[] cols, Metadata sortedBy, int dir) throws SearchIteratorException, JSONException, OXException {
-		InfostoreFacade infostore = getInfostore();
+	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException, JSONException, OXException {
+		final InfostoreFacade infostore = getInfostore();
 		TimedResult result = null;
 		SearchIterator iter = null;
 		try {
 			
-			if(sortedBy == null)
+			if(sortedBy == null) {
 				result = infostore.getVersions(id,cols,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			else {
+			} else {
 				result = infostore.getVersions(id,cols,sortedBy,dir,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			}
 			iter = result.results();
 			iter.next(); // Skip version zero
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
 			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 		
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			handle(t);
 			return;
 		} finally {
-			if(iter!=null)
+			if(iter!=null) {
 				iter.close();
+			}
 		}
 	}
 	
-	protected void updates(int folderId, Metadata[] cols, Metadata sortedBy, int dir, long timestamp, boolean ignoreDelete) throws SearchIteratorException, JSONException, OXException, IOException {
-		InfostoreFacade infostore = getInfostore(folderId);
+	protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final long timestamp, final boolean ignoreDelete) throws SearchIteratorException, JSONException, OXException, IOException {
+		final InfostoreFacade infostore = getInfostore(folderId);
 		Delta delta = null;
 		
 		
@@ -589,35 +600,37 @@ public class InfostoreRequest extends CommonRequest{
 		try {
 			
 			
-			if(sortedBy == null)
+			if(sortedBy == null) {
 				delta = infostore.getDelta(folderId,timestamp,cols,ignoreDelete,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			else {
+			} else {
 				delta = infostore.getDelta(folderId,timestamp,cols,sortedBy,dir,ignoreDelete,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			}
 			
 			iter = delta.results();
 			iter2 = delta.getDeleted();
 			
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(delta.sequenceNumber());
 			iWriter.writeDelta(iter, iter2, cols,ignoreDelete,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 			w.flush();
 		
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			handle(t);
 			return;
 		} finally {
-			if(iter!=null)
+			if(iter!=null) {
 				iter.close();
-			if(iter2!=null)
+			}
+			if(iter2!=null) {
 				iter2.close();
+			}
 		}
 	}
 	
-	protected void delete(int[] ids, long timestamp) throws IOException {
-		InfostoreFacade infostore = getInfostore();
-		SearchEngine searchEngine = getSearchEngine();
+	protected void delete(final int[] ids, final long timestamp) throws IOException {
+		final InfostoreFacade infostore = getInfostore();
+		final SearchEngine searchEngine = getSearchEngine();
 		
 		int[] notDeleted = new int[0];
 		if(ids.length!=0) {
@@ -628,11 +641,11 @@ public class InfostoreRequest extends CommonRequest{
 				
 				notDeleted = infostore.removeDocument(ids,timestamp, sessionObj);
 				
-				Set<Integer> notDeletedSet = new HashSet<Integer>();
-				for(int nd : notDeleted) { notDeletedSet.add(nd); }
+				final Set<Integer> notDeletedSet = new HashSet<Integer>();
+				for(final int nd : notDeleted) { notDeletedSet.add(nd); }
 				
-				for(int id : ids) {
-					if(!notDeletedSet.contains(id)){
+				for(final int id : ids) {
+					if(!notDeletedSet.contains(Integer.valueOf(id))){
 						searchEngine.unIndex0r(id,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 					}
 				}
@@ -640,13 +653,13 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.commit();
 				searchEngine.commit();
 				
-			} catch (Throwable t){
+			} catch (final Throwable t){
 				LOG.debug("",t);
 				try {
 					infostore.rollback();
 					searchEngine.rollback();
 					return;
-				} catch (TransactionException e) {
+				} catch (final TransactionException e) {
 					LOG.debug("", e);
 				}
 				handle(t);
@@ -655,29 +668,30 @@ public class InfostoreRequest extends CommonRequest{
 				try {
 					infostore.finish();
 					searchEngine.finish();
-				} catch (TransactionException e) {
+				} catch (final TransactionException e) {
 					LOG.debug("", e);
 				}
 				
 			}
 		}
 		
-		StringBuilder b = new StringBuilder();
-		b.append("[");
+		final StringBuilder b = new StringBuilder();
+		b.append('[');
 		for (int i = 0; i < notDeleted.length; i++) {
-			int nd = notDeleted[i];
+			final int nd = notDeleted[i];
 			b.append(nd);
-			if(i != notDeleted.length-1)
-				b.append(",");
+			if(i != notDeleted.length-1) {
+				b.append(',');
+			}
 		}
-		b.append("]");
+		b.append(']');
 		
 		w.write(b.toString());
 	}
 	
-	protected void detach(int objectId, int[] ids, long timestamp) throws IOException {
-		InfostoreFacade infostore = getInfostore();
-		SearchEngine searchEngine = getSearchEngine();
+	protected void detach(final int objectId, final int[] ids, final long timestamp) throws IOException {
+		final InfostoreFacade infostore = getInfostore();
+		final SearchEngine searchEngine = getSearchEngine();
 		
 		int[] notDetached = new int[0];
 		if(ids.length!=0) {
@@ -692,14 +706,14 @@ public class InfostoreRequest extends CommonRequest{
 				
 				infostore.commit();
 				searchEngine.commit();
-			} catch (Throwable t){
+			} catch (final Throwable t){
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(t);
 				}
 				try {
 					infostore.rollback();
 					searchEngine.rollback();
-				} catch (TransactionException e) {
+				} catch (final TransactionException e) {
 					LOG.debug("",e);
 				}
 				handle(t);
@@ -708,29 +722,30 @@ public class InfostoreRequest extends CommonRequest{
 				try {
 					infostore.finish();
 					searchEngine.finish();
-				} catch (TransactionException e) {
+				} catch (final TransactionException e) {
 					LOG.debug("", e);
 				}
 				
 			}
 		}
 		
-		StringBuilder b = new StringBuilder();
-		b.append("[");
+		final StringBuilder b = new StringBuilder();
+		b.append('[');
 		for (int i = 0; i < notDetached.length; i++) {
-			int nd = notDetached[i];
+			final int nd = notDetached[i];
 			b.append(nd);
-			if(i != notDetached.length-1)
-				b.append(",");
+			if(i != notDetached.length-1) {
+				b.append(',');
+			}
 		}
-		b.append("]");
+		b.append(']');
 		
 		w.write(b.toString());
 	}
 	
-	protected void newDocument(DocumentMetadata newDocument) throws JSONException, IOException {
-		InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-		SearchEngine searchEngine = getSearchEngine();
+	protected void newDocument(final DocumentMetadata newDocument) throws JSONException, IOException {
+		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
+		final SearchEngine searchEngine = getSearchEngine();
 		try {
 			
 			infostore.startTransaction();
@@ -741,7 +756,7 @@ public class InfostoreRequest extends CommonRequest{
 			//System.out.println("DONE SAVING: "+System.currentTimeMillis());
 			searchEngine.index(newDocument,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			searchEngine.commit();
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(t);
 			}
@@ -749,7 +764,7 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.rollback();
 				searchEngine.rollback();
 				
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
@@ -758,44 +773,47 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("",e);
 			}	
 		}
-		JSONObject obj = new JSONObject();
+		final JSONObject obj = new JSONObject();
 		obj.put("data", newDocument.getId());
 		w.write(obj.toString());
 	}
 	
-	protected void saveAs(DocumentMetadata newDocument, Metadata[] fields, int folderId, int attachedId, int moduleId, int attachment) throws JSONException, IOException {
-		Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(fields));
-		if(!alreadySet.contains(Metadata.FOLDER_ID_LITERAL))
+	protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId, final int attachedId, final int moduleId, final int attachment) throws JSONException, IOException {
+		final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(fields));
+		if(!alreadySet.contains(Metadata.FOLDER_ID_LITERAL)) {
 			try {
 				missingParameter("folder_id in object",AJAXServlet.ACTION_SAVE_AS);
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				LOG.debug("", e1);
 			}
+		}
 		
-		AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
-		InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-		SearchEngine searchEngine = getSearchEngine();
+		final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
+		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
+		final SearchEngine searchEngine = getSearchEngine();
 		InputStream in = null;
 		try {
 			attachmentBase.startTransaction();
 			infostore.startTransaction();
 			searchEngine.startTransaction();
 			
-			AttachmentMetadata att = attachmentBase.getAttachment(folderId,attachedId,moduleId,attachment,sessionObj.getContext(),sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(att);
-			SetSwitch set = new SetSwitch(newDocument);
+			final AttachmentMetadata att = attachmentBase.getAttachment(folderId,attachedId,moduleId,attachment,sessionObj.getContext(),sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(att);
+			final SetSwitch set = new SetSwitch(newDocument);
 			
-			for(Metadata attachmentCompatible : Metadata.VALUES) {
-				if(alreadySet.contains(attachmentCompatible))
+			for(final Metadata attachmentCompatible : Metadata.VALUES) {
+				if(alreadySet.contains(attachmentCompatible)) {
 					continue;
-				AttachmentField attField = Metadata.getAttachmentField(attachmentCompatible);
-				if(null == attField)
+				}
+				final AttachmentField attField = Metadata.getAttachmentField(attachmentCompatible);
+				if(null == attField) {
 					continue;
-				Object value = attField.doSwitch(get);
+				}
+				final Object value = attField.doSwitch(get);
 				set.setValue(value);
 				attachmentCompatible.doSwitch(set);
 			}
@@ -809,7 +827,7 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			searchEngine.commit();
 			attachmentBase.commit();
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(t);
 			}
@@ -817,7 +835,7 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.rollback();
 				searchEngine.rollback();
 				attachmentBase.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
@@ -827,25 +845,26 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.finish();
 				searchEngine.finish();
 				attachmentBase.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
-			if(in != null)
+			if(in != null) {
 				try {
 					in.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
+			}
 		}
 		
-		JSONObject obj = new JSONObject();
+		final JSONObject obj = new JSONObject();
 		obj.put("data", newDocument.getId());
 		w.write(obj.toString());
 	}
 	
-	protected void update(int id, DocumentMetadata updated, long timestamp, Metadata[] presentFields) throws IOException {
-		InfostoreFacade infostore = getInfostore(updated.getFolderId());
-		SearchEngine searchEngine = getSearchEngine();
+	protected void update(final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) throws IOException {
+		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
+		final SearchEngine searchEngine = getSearchEngine();
 		
 		try {
 			
@@ -853,7 +872,7 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.startTransaction();
 			
 			boolean version = false;
-			for(Metadata m : presentFields) {
+			for(final Metadata m : presentFields) {
 				if(m.equals(Metadata.VERSION_LITERAL)){
 					version = true;
 					break;
@@ -872,14 +891,14 @@ public class InfostoreRequest extends CommonRequest{
 			
 			infostore.commit();
 			searchEngine.commit();
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(t);
 			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
@@ -888,7 +907,7 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			
@@ -897,10 +916,10 @@ public class InfostoreRequest extends CommonRequest{
 		w.write("{}");
 	}
 	
-	protected void copy(int id, DocumentMetadata updated, long timestamp, Metadata[] presentFields) throws IOException {
+	protected void copy(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) throws IOException {
 
-		InfostoreFacade infostore = getInfostore(updated.getFolderId());
-		SearchEngine searchEngine = getSearchEngine();
+		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
+		final SearchEngine searchEngine = getSearchEngine();
 		DocumentMetadata metadata = null;
 		
 		try {
@@ -912,10 +931,10 @@ public class InfostoreRequest extends CommonRequest{
 			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration()));
 			
 			
-			SetSwitch set = new SetSwitch(metadata);
-			GetSwitch get = new GetSwitch(updated);
-			for(Metadata field : presentFields) {
-				Object value = field.doSwitch(get);
+			final SetSwitch set = new SetSwitch(metadata);
+			final GetSwitch get = new GetSwitch(updated);
+			for(final Metadata field : presentFields) {
+				final Object value = field.doSwitch(get);
 				set.setValue(value);
 				field.doSwitch(set);
 				//System.out.println(field+" : "+value);
@@ -932,14 +951,14 @@ public class InfostoreRequest extends CommonRequest{
 			
 			infostore.commit();
 			searchEngine.commit();
-		} catch (Throwable t){
+		} catch (final Throwable t){
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(t);
 			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
@@ -948,18 +967,18 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			
 		}
 				
-		w.write("{ \"data\" :"+metadata.getId()+"}");
+		w.write("{ \"data\" :"+metadata.getId()+'}');
 		
 	}
 
-	protected void lock(int id, long diff) {
-		InfostoreFacade infostore = getInfostore();
+	protected void lock(final int id, final long diff) {
+		final InfostoreFacade infostore = getInfostore();
 		
 		try {
 			infostore.startTransaction();
@@ -971,24 +990,24 @@ public class InfostoreRequest extends CommonRequest{
 			w.write("{}");
 			w.flush();
 			
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				infostore.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				infostore.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 		}
 	}
 	
-	protected void unlock(int id) {
-		InfostoreFacade infostore = getInfostore();
+	protected void unlock(final int id) {
+		final InfostoreFacade infostore = getInfostore();
 		
 		try {
 			infostore.startTransaction();
@@ -1002,17 +1021,17 @@ public class InfostoreRequest extends CommonRequest{
 			w.write("{}");
 			w.flush();
 			
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				infostore.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				infostore.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 		}
@@ -1020,32 +1039,32 @@ public class InfostoreRequest extends CommonRequest{
 		
 	}
 	
-	protected void search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end) {
-		SearchEngine searchEngine = getSearchEngine();
+	protected void search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end) {
+		final SearchEngine searchEngine = getSearchEngine();
 		
 		try {
 			searchEngine.startTransaction();
 			
-			SearchIterator results = searchEngine.search(query,cols,folderId,sortedBy,dir,start,end, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final SearchIterator results = searchEngine.search(query,cols,folderId,sortedBy,dir,start,end, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			
-			InfostoreWriter iWriter = new InfostoreWriter(w);
+			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(System.currentTimeMillis());
 			iWriter.writeMetadata(results,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 			w.flush();
 			
 			searchEngine.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				searchEngine.rollback();
-			} catch (TransactionException x) {
+			} catch (final TransactionException x) {
 				LOG.debug("", x);
 			}
 			handle(t);
 		} finally {
 			try {
 				searchEngine.finish();
-			} catch (TransactionException x){
+			} catch (final TransactionException x){
 				LOG.debug("", x);
 			}
 		}

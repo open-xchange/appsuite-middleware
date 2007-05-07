@@ -134,7 +134,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		private Set<Metadata> fieldSet;
 		private Metadata[] fields;
 
-		private Table(Metadata[] fields, Set<Metadata> fieldSet, String tablename) {
+		private Table(final Metadata[] fields, final Set<Metadata> fieldSet, final String tablename) {
 			this.fields = fields;
 			this.fieldSet = fieldSet;
 			this.tablename = tablename;
@@ -161,23 +161,23 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		}
 	}
 	
-	private static String buildInsert(String tablename, Metadata[] metadata,MetadataSwitcher columnNames, String...additionalFields) {
-		StringBuilder builder = new StringBuilder();
+	private static String buildInsert(final String tablename, final Metadata[] metadata,final MetadataSwitcher columnNames, final String...additionalFields) {
+		final StringBuilder builder = new StringBuilder();
 		builder.append("INSERT INTO ").append(tablename).append(" (");
-		StringBuilder questionMarks = new StringBuilder();
+		final StringBuilder questionMarks = new StringBuilder();
 		
-		for(Metadata m : metadata) {
-			String col = (String) m.doSwitch(columnNames);
+		for(final Metadata m : metadata) {
+			final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
-				builder.append(",");
+				builder.append(',');
 				questionMarks.append("?,");
 			}
 		}
 		
-		for(String s : additionalFields) {
+		for(final String s : additionalFields) {
 			builder.append(s);
-			builder.append(",");
+			builder.append(',');
 			
 			questionMarks.append("?,");
 		}
@@ -185,27 +185,27 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		builder.setLength(builder.length()-1);
 		questionMarks.setLength(questionMarks.length()-1);
 		
-		builder.append(") VALUES (").append(questionMarks.toString()).append(")");
+		builder.append(") VALUES (").append(questionMarks.toString()).append(')');
 		
 		return builder.toString();
 	}
 	
-	private static String buildInsert(Table t, String...additionalFields) {
+	private static String buildInsert(final Table t, final String...additionalFields) {
 		return buildInsert(t.getTablename(), t.getFields(), t.getFieldSwitcher(),additionalFields);
 	}
 	
-	private static String buildUpdateWithoutWhere(String tablename, Metadata[] metadata,MetadataSwitcher columnNames, String...additionalFields) {
-		StringBuilder builder = new StringBuilder();
+	private static String buildUpdateWithoutWhere(final String tablename, final Metadata[] metadata,final MetadataSwitcher columnNames, final String...additionalFields) {
+		final StringBuilder builder = new StringBuilder();
 		builder.append("UPDATE ").append(tablename).append(" SET ");
-		for(Metadata m : metadata) {
-			String col = (String) m.doSwitch(columnNames);
+		for(final Metadata m : metadata) {
+			final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
 				builder.append(" = ?,");
 			}
 		}
 		
-		for(String s : additionalFields) {
+		for(final String s : additionalFields) {
 			builder.append(s);
 			builder.append(" = ?,");
 		}
@@ -214,7 +214,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		return builder.toString();
 	}
 	
-	private static String buildUpdateWithoutWhere(Table t, String...additionalFields) {
+	private static String buildUpdateWithoutWhere(final Table t, final String...additionalFields) {
 		return buildUpdateWithoutWhere(t.getTablename(), t.getFields(), t.getFieldSwitcher(), additionalFields);
 	}
 	
@@ -223,175 +223,176 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 	private static final String INSERT_INFOSTORE_DOCUMENT_WITH_FILESTORE_LOC = buildInsert(Table.INFOSTORE_DOCUMENT,"ctx","filestore_location");
 	
 	
-	private static final void fillStatement(PreparedStatement stmt, Metadata[] fields,DocumentMetadata doc, Object...additional) throws SQLException {
-		GetSwitch get = new GetSwitch(doc);
+	private static final void fillStatement(final PreparedStatement stmt, final Metadata[] fields,final DocumentMetadata doc, final Object...additional) throws SQLException {
+		final GetSwitch get = new GetSwitch(doc);
 		int i = 1;
-		for(Metadata m : fields) {
+		for(final Metadata m : fields) {
 			stmt.setObject(i++, m.doSwitch(get));
 		}
 		
-		for(Object o : additional) {
+		for(final Object o : additional) {
 			stmt.setObject(i++, o);
 		}
 	}
 	
 	public InfoDatabaseImpl(){}
 	
-	public InfoDatabaseImpl(DBProvider provider) {
+	public InfoDatabaseImpl(final DBProvider provider) {
 		super(provider);
 	}
 
-	public void delete(int[] ids, Context ctx) throws OXException {
-		StringBuilder del = new StringBuilder("DELETE FROM infostore WHERE id IN (");
-		StringBuilder delVers = new StringBuilder("DELETE FROM infostore_document WHERE infostore_id IN (");
-		for(int id : ids) {
-			del.append(id).append(",");
-			delVers.append(id).append(",");
+	public void delete(final int[] ids, final Context ctx) throws OXException {
+		final StringBuilder del = new StringBuilder("DELETE FROM infostore WHERE id IN (");
+		final StringBuilder delVers = new StringBuilder("DELETE FROM infostore_document WHERE infostore_id IN (");
+		for(final int id : ids) {
+			del.append(id).append(',');
+			delVers.append(id).append(',');
 		}
 		del.setLength(del.length()-1);
 		delVers.setLength(delVers.length()-1);
 		
-		del.append(")");
-		delVers.append(")");
+		del.append(')');
+		delVers.append(')');
 		executeUpdate(del.toString(),new Metadata[0],null,ctx);
 		executeUpdate(delVers.toString(),new Metadata[0],null,ctx);
 		
 	}
 
-	public void insertDocument(DocumentMetadata document, Context ctx) throws OXException {
-		executeUpdate(INSERT_INFOSTORE, Table.INFOSTORE.getFields(), document, ctx, ctx.getContextId());
+	public void insertDocument(final DocumentMetadata document, final Context ctx) throws OXException {
+		executeUpdate(INSERT_INFOSTORE, Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()));
 	}
 	
-	public void insertVersion(DocumentMetadata document, Context ctx) throws OXException {
-		executeUpdate(INSERT_INFOSTORE_DOCUMENT,Table.INFOSTORE.getFields(), document, ctx, ctx.getContextId());
+	public void insertVersion(final DocumentMetadata document, final Context ctx) throws OXException {
+		executeUpdate(INSERT_INFOSTORE_DOCUMENT,Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()));
 	}
 	
-	public void insertVersion(DocumentMetadata document, Context ctx, String filestoreLocation) throws OXException {
-		executeUpdate(INSERT_INFOSTORE_DOCUMENT_WITH_FILESTORE_LOC,Table.INFOSTORE.getFields(), document, ctx, ctx.getContextId(), filestoreLocation);
+	public void insertVersion(final DocumentMetadata document, final Context ctx, final String filestoreLocation) throws OXException {
+		executeUpdate(INSERT_INFOSTORE_DOCUMENT_WITH_FILESTORE_LOC,Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()), filestoreLocation);
 	}
 	
-	public void updateDocument(DocumentMetadata document, Metadata[] fields, Context ctx) throws OXException {
-		StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE));
+	public void updateDocument(final DocumentMetadata document, final Metadata[] fields, final Context ctx) throws OXException {
+		final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE));
 		update.append(" WHERE id = ? and cid = ?");
-		executeUpdate(update.toString(),Table.INFOSTORE.getFields(), document, ctx, document.getId(), ctx.getContextId());
+		executeUpdate(update.toString(),Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
 	}
 	
-	public void updateVersion(DocumentMetadata document, Metadata[] fields, Context ctx) throws OXException {
-		StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT));
+	public void updateVersion(final DocumentMetadata document, final Metadata[] fields, final Context ctx) throws OXException {
+		final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT));
 		update.append(" WHERE id = ? and cid = ?");
-		executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, document.getId(), ctx.getContextId());
+		executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
 	}
 	
-	public void updateVersion(DocumentMetadata document, String filestoreLoc, Metadata[] fields, Context ctx) throws OXException {
-		StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT,"filestore_location"));
+	public void updateVersion(final DocumentMetadata document, final String filestoreLoc, final Metadata[] fields, final Context ctx) throws OXException {
+		final StringBuilder update = new StringBuilder(buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT,"filestore_location"));
 		update.append(" WHERE id = ? and cid = ?");
-		executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, filestoreLoc, document.getId(), ctx.getContextId());
+		executeUpdate(update.toString(),Table.INFOSTORE_DOCUMENT.getFields(), document, ctx, filestoreLoc, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
 	}
 	
-	public DocumentMetadata[] findModifiedSince(long mod, long folderId, Metadata[] fields, Metadata orderBy, boolean asc, Context ctx) throws OXException {
-		FieldChooser chooser = new DocumentWins();
-		StringBuilder where = new StringBuilder(getFieldName(chooser, Metadata.LAST_MODIFIED_LITERAL));
+	public DocumentMetadata[] findModifiedSince(final long mod, final long folderId, final Metadata[] fields, final Metadata orderBy, final boolean asc, final Context ctx) throws OXException {
+		final FieldChooser chooser = new DocumentWins();
+		final StringBuilder where = new StringBuilder(getFieldName(chooser, Metadata.LAST_MODIFIED_LITERAL));
 		where.append(" > ?");
-		return select(fields,where.toString(),orderBy,asc,chooser,ctx,mod);
+		return select(fields,where.toString(),orderBy,asc,chooser,ctx,Long.valueOf(mod));
 	}
 	
-	public DocumentMetadata[] findByFolderId(long folderId, Metadata[] fields,Context ctx) throws OXException {
+	public DocumentMetadata[] findByFolderId(final long folderId, final Metadata[] fields,final Context ctx) throws OXException {
 		return findByFolderId(folderId, fields,null,false, ctx);
 	}
 	
-	public DocumentMetadata[] findByFolderId(long folderId, Metadata[] fields,Metadata orderBy, boolean asc, Context ctx) throws OXException {
-		FieldChooser chooser = new DocumentWins();
-		StringBuilder where = new StringBuilder(getFieldName(chooser, Metadata.FOLDER_ID_LITERAL));
+	public DocumentMetadata[] findByFolderId(final long folderId, final Metadata[] fields,final Metadata orderBy, final boolean asc, final Context ctx) throws OXException {
+		final FieldChooser chooser = new DocumentWins();
+		final StringBuilder where = new StringBuilder(getFieldName(chooser, Metadata.FOLDER_ID_LITERAL));
 		where.append(" = ?");
-		return select(fields,where.toString(),orderBy,asc,chooser,ctx,folderId);
+		return select(fields,where.toString(),orderBy,asc,chooser,ctx,Long.valueOf(folderId));
 	}
 	
-	private DocumentMetadata[] select(Metadata[] fields, String where, FieldChooser chooser, Context ctx, Object...queryArgs) throws OXException {
+	private DocumentMetadata[] select(final Metadata[] fields, final String where, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
 		return select(fields,where,(String)null,false,chooser,ctx,queryArgs);
 	}
 	
-	private DocumentMetadata[] select(Metadata[] fields, String where, Metadata orderBy, boolean asc, FieldChooser chooser, Context ctx, Object...queryArgs) throws OXException {
+	private DocumentMetadata[] select(final Metadata[] fields, final String where, final Metadata orderBy, final boolean asc, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
 		
 		return select(fields, where,getFieldName(chooser, orderBy) , asc, chooser, ctx, queryArgs);
 	}
 	
-	private final String getFieldName(FieldChooser chooser, Metadata m) {
-		Table t = chooser.choose(m);
-		return t.getTablename()+"."+m.doSwitch(t.getFieldSwitcher());
+	private final String getFieldName(final FieldChooser chooser, final Metadata m) {
+		final Table t = chooser.choose(m);
+		return t.getTablename()+'.'+m.doSwitch(t.getFieldSwitcher());
 	}
 
 	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL Query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=1, msg="Invalid SQL Query: %s")
-	private DocumentMetadata[] select(Metadata[] fields, String where, String orderBy, boolean asc, FieldChooser chooser, Context ctx, Object...queryArgs) throws OXException {
-		StringBuilder query = new StringBuilder();
+	private DocumentMetadata[] select(final Metadata[] fields, final String where, final String orderBy, final boolean asc, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
+		final StringBuilder query = new StringBuilder();
 		query.append("SELECT ");
 		appendFields(fields, query, chooser);
 		query.append("WHERE ").append(where);
 		if(orderBy != null) {
 			query.append(" ORDER BY ").append(orderBy);
-			if(asc)
+			if(asc) {
 				query.append(" ASC");
-			else
+			} else {
 				query.append(" DESC");
+			}
 		}
 		
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		List<DocumentMetadata> results = new ArrayList<DocumentMetadata>();
+		final List<DocumentMetadata> results = new ArrayList<DocumentMetadata>();
 		try {
 			con = getReadConnection(ctx);
 			stmt = con.prepareStatement(query.toString());
 			int i = 1;
-			for(Object queryArg : queryArgs) {
+			for(final Object queryArg : queryArgs) {
 				stmt.setObject(i++, queryArg);
 			}
 			rs = stmt.executeQuery();
 			while(rs.next()) {
-				DocumentMetadata m = new DocumentMetadataImpl();
+				final DocumentMetadata m = new DocumentMetadataImpl();
 				fillDocumentMetadata(rs, m, fields, chooser);
 				results.add(m);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(0,e,getStatement(stmt));
 		} finally {
 			close(stmt,rs);
 			releaseReadConnection(ctx, con);
 		}
-		return (DocumentMetadata[]) results.toArray(new DocumentMetadata[results.size()]);
+		return results.toArray(new DocumentMetadata[results.size()]);
 	}
 
-	private void fillDocumentMetadata(ResultSet rs, DocumentMetadata m, Metadata[] fields, FieldChooser chooser) throws SQLException {
-		SetSwitch set = new SetSwitch(m);
-		for(Metadata field : fields) {
-			Table t = chooser.choose(field);
-			String fieldName = t.getTablename()+"."+field.doSwitch(t.getFieldSwitcher());
+	private void fillDocumentMetadata(final ResultSet rs, final DocumentMetadata m, final Metadata[] fields, final FieldChooser chooser) throws SQLException {
+		final SetSwitch set = new SetSwitch(m);
+		for(final Metadata field : fields) {
+			final Table t = chooser.choose(field);
+			final String fieldName = t.getTablename()+'.'+field.doSwitch(t.getFieldSwitcher());
 			set.setValue(rs.getObject(fieldName));
 		}
 	}
 
 	
-	private void appendFields(Metadata[] fields, StringBuilder query, FieldChooser chooser) {
-		Set<Table> tables = new HashSet<Table>();
-		for(Metadata m : fields) {
-			Table t = chooser.choose(m);
+	private void appendFields(final Metadata[] fields, final StringBuilder query, final FieldChooser chooser) {
+		final Set<Table> tables = new HashSet<Table>();
+		for(final Metadata m : fields) {
+			final Table t = chooser.choose(m);
 			tables.add(t);
-			query.append(t.getTablename()+"."+m.doSwitch(t.getFieldSwitcher())).append(",");
+			query.append(t.getTablename()).append('.').append(m.doSwitch(t.getFieldSwitcher())).append(',');
 		}
 		query.setLength(query.length()-1);
 		query.append(" FROM ");
 		if(tables.size()>1) {
 			query.append(Table.INFOSTORE.getTablename()).append(" JOIN ").append(Table.INFOSTORE_DOCUMENT.getTablename()).append(" ON (")
-			.append(Table.INFOSTORE.getTablename()+"."+Metadata.ID_LITERAL.doSwitch(Table.INFOSTORE.getFieldSwitcher()))
+			.append(Table.INFOSTORE.getTablename()).append('.').append(Metadata.ID_LITERAL.doSwitch(Table.INFOSTORE.getFieldSwitcher()))
 			.append(" = ")
-			.append(Table.INFOSTORE_DOCUMENT.getTablename()+"."+Metadata.ID_LITERAL.doSwitch(Table.INFOSTORE_DOCUMENT.getFieldSwitcher()));
+			.append(Table.INFOSTORE_DOCUMENT.getTablename()).append('.').append(Metadata.ID_LITERAL.doSwitch(Table.INFOSTORE_DOCUMENT.getFieldSwitcher()));
 		} else {
-			Table t = tables.iterator().next();
+			final Table t = tables.iterator().next();
 			query.append(t.getTablename());
 		}
 	}
 
 	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL Query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=0, msg="Invalid SQL Query: %s")
-	private final void executeUpdate(String statement, Metadata[] fields, DocumentMetadata document, Context ctx, Object...additionals) throws OXException {
+	private final void executeUpdate(final String statement, final Metadata[] fields, final DocumentMetadata document, final Context ctx, final Object...additionals) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		try {
@@ -399,7 +400,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 			stmt = con.prepareStatement(statement);
 			fillStatement(stmt, fields ,document,additionals);
 			stmt.executeUpdate();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(0,e,getStatement(stmt));
 		} finally {
 			close(stmt,null);
@@ -598,7 +599,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 	
 	private static class VersionWins implements FieldChooser {
 
-		public Table choose(Metadata m) {
+		public Table choose(final Metadata m) {
 			if(Table.INFOSTORE_DOCUMENT.getFieldSet().contains(m)) {
 				return Table.INFOSTORE_DOCUMENT;
 			}
@@ -608,7 +609,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 	}
 	
 	private static class DocumentWins implements FieldChooser {
-		public Table choose(Metadata m) {
+		public Table choose(final Metadata m) {
 			if(Table.INFOSTORE.getFieldSet().contains(m)) {
 				return Table.INFOSTORE;
 			}

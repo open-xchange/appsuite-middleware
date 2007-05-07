@@ -95,7 +95,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
          * Allthough a maximum number of active objects is defined the pool will
          * enlarge the number of pooled objects if they are needed.
          */
-        GROW };
+        GROW }
 
     /* --- Settings --- */
 

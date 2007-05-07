@@ -51,8 +51,6 @@ package com.openexchange.webdav.xml.resources;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,35 +78,37 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	private String charset;
 
-	protected Multistatus<Iterable<WebdavProperty>> getProps(WebdavResource resource) {
+	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
 		return new Multistatus<Iterable<WebdavProperty>>();
 	}
 
 	private static final Log LOG = LogFactory.getLog(PropertiesMarshaller.class);
 	
-	public PropertiesMarshaller(String charset){
+	public PropertiesMarshaller(final String charset){
 		this.charset = charset;
 	}
 	
-	public PropertiesMarshaller(String uriPrefix, String charset) {
+	public PropertiesMarshaller(final String uriPrefix, final String charset) {
 		this.uriPrefix = uriPrefix;
-		if(!this.uriPrefix.endsWith("/"))
+		if(!this.uriPrefix.endsWith("/")) {
 			this.uriPrefix += "/";
+		}
 		this.charset = charset;
 	}
 
-	public List<Element> marshal(WebdavResource resource) {
-		Element response =  new Element("response",DAV_NS);
+	public List<Element> marshal(final WebdavResource resource) {
+		final Element response =  new Element("response",DAV_NS);
 		response.addContent(marshalHREF(resource.getUrl()));
-		Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
-		for(int statusCode : multistatus.getStatusCodes()) {
-			for(WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
-				Element propstat = new Element("propstat",DAV_NS);
-				Element prop = new Element("prop", DAV_NS);
+		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
+		for(final int statusCode : multistatus.getStatusCodes()) {
+			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
+				final Element propstat = new Element("propstat",DAV_NS);
+				final Element prop = new Element("prop", DAV_NS);
 				
-				for(WebdavProperty p : status.getAdditional()) {
-					if(p != null)
+				for(final WebdavProperty p : status.getAdditional()) {
+					if(p != null) {
 						prop.addContent(marshalProperty(p));
+					}
 				}
 				propstat.addContent(prop);
 				propstat.addContent(marshalStatus(statusCode));
@@ -120,15 +120,16 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	
 	
 	public Element marshalHREF(String uri) {
-		Element href = new Element("href", DAV_NS);
-		if(uri.startsWith("/"))
+		final Element href = new Element("href", DAV_NS);
+		if(uri.charAt(0) == '/') {
 			uri = uri.substring(1);
+		}
 		
 		href.setText(escape(uriPrefix+uri));
 		return href;
 	}
 	
-	private String escape(String string) {
+	private String escape(final String string) {
 		/*try {
 			String[] components = string.split("/+");
 			StringBuilder builder = new StringBuilder();
@@ -146,9 +147,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return string;
 	}
 
-	public Element marshalStatus(int s) {
-		Element status = new Element("status",DAV_NS);
-		StringBuilder content = new StringBuilder("HTTP/1.1 ");
+	public Element marshalStatus(final int s) {
+		final Element status = new Element("status",DAV_NS);
+		final StringBuilder content = new StringBuilder("HTTP/1.1 ");
 		content.append(s);
 		content.append(" ");
 		content.append(Utils.getStatusString(s));
@@ -156,10 +157,11 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return status;
 	}
 
-	public Element marshalProperty(WebdavProperty property) {
-		Element propertyElement = new Element(property.getName(), getNamespace(property));
-		if(property.getValue() == null)
+	public Element marshalProperty(final WebdavProperty property) {
+		final Element propertyElement = new Element(property.getName(), getNamespace(property));
+		if(property.getValue() == null) {
 			return propertyElement;
+		}
 		if(property.isXML()) {
 			try {
 				String asXML = null;
@@ -168,13 +170,13 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				} else {
 					asXML = "<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns=\""+property.getNamespace()+"\">"+property.getValue()+"</FKR:fakeroot>";
 				}
-				Document doc = new SAXBuilder().build(new StringReader(asXML));
+				final Document doc = new SAXBuilder().build(new StringReader(asXML));
 				propertyElement.setContent(doc.getRootElement().cloneContent());
-			} catch (JDOMException e) {
+			} catch (final JDOMException e) {
 				// NO XML
 				LOG.error(e);
 				propertyElement.setText(property.getValue());
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e);
 			}
 		} else {
@@ -186,10 +188,11 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return propertyElement;
 	}
 
-	private Namespace getNamespace(WebdavProperty property) {
-		String namespace = property.getNamespace();
-		if(namespace.equals("DAV:"))
+	private Namespace getNamespace(final WebdavProperty property) {
+		final String namespace = property.getNamespace();
+		if(namespace.equals("DAV:")) {
 			return DAV_NS;
+		}
 		return Namespace.getNamespace(namespace);
 	}
 

@@ -71,11 +71,11 @@ public class InfostoreWriter extends TimedWriter {
 	
 	public static final Log LOG = LogFactory.getLog(InfostoreWriter.class);
 	
-	public InfostoreWriter(Writer w) {
+	public InfostoreWriter(final Writer w) {
 		super(w);
 	}
 	
-	public void writeMetadata(SearchIterator iter, Metadata[] cols, TimeZone tz) throws SearchIteratorException, JSONException, OXException {
+	public void writeMetadata(final SearchIterator iter, final Metadata[] cols, final TimeZone tz) throws SearchIteratorException, JSONException, OXException {
 		jsonWriter.array();
 		
 		fillArray(iter,cols,tz);
@@ -84,27 +84,28 @@ public class InfostoreWriter extends TimedWriter {
 	}
 	
 	
-	protected void fillArray(SearchIterator iter, Object[] cols, TimeZone tz) throws SearchIteratorException, JSONException, OXException {
-		WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
+	@Override
+	protected void fillArray(final SearchIterator iter, final Object[] cols, final TimeZone tz) throws SearchIteratorException, JSONException, OXException {
+		final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
 		
 		//The array contains one array for every DocumentMetadata, and filled according to the requested columns
 		
-		for(;iter.hasNext();) {
+		while (iter.hasNext()) {
 			sw.setDocumentMetadata((DocumentMetadata) iter.next());
 			jsonWriter.array();
-			for(Metadata column : (Metadata[]) cols) {
+			for(final Metadata column : (Metadata[]) cols) {
 				column.doSwitch(sw);
 			}
 			jsonWriter.endArray();
 		}
 	}
 
-	public void write(DocumentMetadata dm, TimeZone tz) throws JSONException {
+	public void write(final DocumentMetadata dm, final TimeZone tz) throws JSONException {
 		jsonWriter.object();
 		
-		WriterSwitch w = new WriterSwitch(jsonWriter, tz);
+		final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
 		w.setDocumentMetadata(dm);
-		for(Metadata metadata : Metadata.HTTPAPI_VALUES) {
+		for(final Metadata metadata : Metadata.HTTPAPI_VALUES) {
 			w.setMetadata(metadata);
 			metadata.doSwitch(w);
 		}
@@ -117,19 +118,19 @@ public class InfostoreWriter extends TimedWriter {
 		private JSONWriter writer;
 		private TimeZone tz;
 		
-		public WriterSwitch(JSONWriter writer, TimeZone tz) {
+		public WriterSwitch(final JSONWriter writer, final TimeZone tz) {
 			this.writer = writer;
 			this.tz = tz;
 		}
 	
-		public void setDocumentMetadata(DocumentMetadata dm) {
+		public void setDocumentMetadata(final DocumentMetadata dm) {
 			this.dm = dm;
 		}
 		
-		public void setMetadata(Metadata current) {
+		public void setMetadata(final Metadata current) {
 			try {
 				writer.key(current.getName());
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
@@ -210,25 +211,25 @@ public class InfostoreWriter extends TimedWriter {
 		}
 	
 		public Object categories() {
-			String categoriesString = dm.getCategories();
+			final String categoriesString = dm.getCategories();
 			if(categoriesString==null || categoriesString.equals("")) {
 				try {
 					writer.array();
 					writer.endArray();
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					LOG.debug("",e);
 				}
 				return null;
 			}
-			String[] categoriesArray = categoriesString.split("\\s*,\\s*");
+			final String[] categoriesArray = categoriesString.split("\\s*,\\s*");
 			
 			try {
 				writer.array();
-				for(String cat : categoriesArray) {
+				for(final String cat : categoriesArray) {
 					writer.value(cat);
 				}
 				writer.endArray();
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 			return null;
@@ -263,9 +264,9 @@ public class InfostoreWriter extends TimedWriter {
 			return null;
 		}
 		
-		private void writeDate(Date date) {
+		private void writeDate(final Date date) {
 			if(date != null) {
-				int offset = tz.getOffset(date.getTime());
+				final int offset = tz.getOffset(date.getTime());
 				long time = date.getTime()+offset;
 				// Happens on infinite locks.
 				if(time < 0) {
@@ -275,32 +276,33 @@ public class InfostoreWriter extends TimedWriter {
 			}
 		}
 		
-		private void writeId(long id) {
-			writeString(((Long)id).toString());
+		private void writeId(final long id) {
+			writeString(String.valueOf(id));
 		}
 	
 		private void writeString(String string) {
-			if(null == string)
+			if(null == string) {
 				string = "";
+			}
 			try {
 				writer.value(string);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
 	
-		private void writeInteger(long l) {
+		private void writeInteger(final long l) {
 			try {
 				writer.value(l);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
 		
-		private void writeBoolean(boolean b) {
+		private void writeBoolean(final boolean b) {
 			try {
 				writer.value(b);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.debug("",e);
 			}
 		}
@@ -312,7 +314,7 @@ public class InfostoreWriter extends TimedWriter {
 	}
 
 	@Override
-	protected int getId(Object object) {
+	protected int getId(final Object object) {
 		return ((DocumentMetadata)object).getId();
 	}
 	

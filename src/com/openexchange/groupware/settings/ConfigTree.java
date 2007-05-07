@@ -313,7 +313,7 @@ public final class ConfigTree {
          * @return the name of the mail bit setting.
          */
         protected abstract String getName();
-    };
+    }
 
     static {
         TREE = new Setting("", true);

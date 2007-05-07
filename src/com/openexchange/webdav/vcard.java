@@ -610,7 +610,7 @@ public final class vcard extends PermissionServlet {
 	private int getContactFolderID(final HttpServletRequest req) throws OXConflictException {
 		if ( req.getParameter(CONTACTFOLDER) != null) {
 			try {
-				return Integer.parseInt((String)req.getParameter(CONTACTFOLDER));
+				return Integer.parseInt(req.getParameter(CONTACTFOLDER));
 			} catch (NumberFormatException exc) {
 				throw new OXConflictException(CONTACTFOLDER + " is not a number");
 			}

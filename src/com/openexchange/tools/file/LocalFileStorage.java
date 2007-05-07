@@ -102,15 +102,15 @@ public class LocalFileStorage extends FileStorage {
         super(initData);
         if (!(initData[2] instanceof URI)) {
             throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, 2, initData[2].getClass().getName());
+                .INVALID_PARAMETER, Integer.valueOf(2), initData[2].getClass().getName());
         }
         final URI uri = (URI) initData[2];
         try {
             storage = new File(uri);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, uri);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             throw new FileStorageException(FileStorageException.Code
                 .INSTANTIATIONERROR, e, uri);
         }
@@ -123,10 +123,11 @@ public class LocalFileStorage extends FileStorage {
     /**
      * {@inheritDoc}
      */
-    protected InputStream load(final String name) throws FileStorageException {
+    @Override
+	protected InputStream load(final String name) throws FileStorageException {
         try {
             return new FileInputStream(new File(storage, name));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         }
@@ -135,7 +136,8 @@ public class LocalFileStorage extends FileStorage {
     /**
      * {@inheritDoc}
      */
-    protected long length(final String name) {
+    @Override
+	protected long length(final String name) {
         return new File(storage, name).length();
     }
 
@@ -148,28 +150,32 @@ public class LocalFileStorage extends FileStorage {
 	/**
      * {@inheritDoc}
      */
-    protected boolean exists(final String name) {
+    @Override
+	protected boolean exists(final String name) {
         return new File(storage, name).exists();
     }
 
     /**
      * {@inheritDoc}
      */
-    protected void closeImpl() {
+    @Override
+	protected void closeImpl() {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    protected boolean delete(final String name) {
+    @Override
+	protected boolean delete(final String name) {
         return new File(storage, name).delete();
     }
 
     /**
      * {@inheritDoc}
      */
-    protected void save(final String name, final InputStream input)
+    @Override
+	protected void save(final String name, final InputStream input)
         throws FileStorageException {
         final File file = new File(storage, name);
         file.getParentFile().mkdirs();
@@ -182,17 +188,17 @@ public class LocalFileStorage extends FileStorage {
                 fos.write(buf, 0, len);
                 len = input.read(buf);
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
                 e);
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new FileStorageException(FileStorageException.Code
                         .IOERROR, e);
                 }
@@ -203,11 +209,13 @@ public class LocalFileStorage extends FileStorage {
     /**
      * {@inheritDoc}
      */
-    protected void unlock() throws FileStorageException {
+    @Override
+	protected void unlock() throws FileStorageException {
         final File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
-        	if(lock.exists())
-        		LOG.error("Couldn't delete lock file : "+lock.getAbsolutePath()+". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+        	if(lock.exists()) {
+				LOG.error("Couldn't delete lock file : "+lock.getAbsolutePath()+". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+			}
             throw new FileStorageException(FileStorageException.Code.UNLOCK);
         }
     }
@@ -215,14 +223,15 @@ public class LocalFileStorage extends FileStorage {
     /**
      * {@inheritDoc}
      */
-    protected void lock(final long timeout) throws FileStorageException {
+    @Override
+	protected void lock(final long timeout) throws FileStorageException {
         final File lock = new File(storage, LOCK_FILENAME);
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
         do {
             try {
                 created = lock.createNewFile();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // Try again to create the file.
             	if (LOG.isDebugEnabled()) {
             		LOG.debug(e.getMessage(), e);
@@ -231,8 +240,11 @@ public class LocalFileStorage extends FileStorage {
             if (!created) {
                 try {
                     Thread.sleep(RELOCK_TIME);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     // Won't be interrupted.
+                	if (LOG.isErrorEnabled()) {
+                		LOG.error(e.getMessage(), e);
+                	}
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);

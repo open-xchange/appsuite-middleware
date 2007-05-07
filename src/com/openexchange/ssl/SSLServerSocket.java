@@ -75,35 +75,36 @@ public class SSLServerSocket
 	private native boolean nativeAcceptFinished(long ssl);
 	private native byte[] nativeAccept(long ssl, byte[] in, int off, int len) throws SSLException;
 
-	private void initialize(SSLCtx ctx) throws SSLException
+	private void initialize(final SSLCtx ctx) throws SSLException
 	{
-		if(ctx == null)
+		if(ctx == null) {
 			throw new SSLException("SSLGlobal parameter null input");
+		}
 
 		this.ctx = ctx;
 	}
 
-	public SSLServerSocket(SSLCtx ctx, int port) throws IOException, SSLException
+	public SSLServerSocket(final SSLCtx ctx, final int port) throws IOException, SSLException
 	{
 		initialize(ctx);
 		socket = new ServerSocket(port);
 	}
 
-	public SSLServerSocket(SSLCtx ctx, int port, int backlog) throws IOException, SSLException
+	public SSLServerSocket(final SSLCtx ctx, final int port, final int backlog) throws IOException, SSLException
 	{
 		initialize(ctx);
 		socket = new ServerSocket(port, backlog);
 	}
 
-	public SSLServerSocket(SSLCtx ctx, int port, int backlog, InetAddress bindAddr) throws IOException, SSLException
+	public SSLServerSocket(final SSLCtx ctx, final int port, final int backlog, final InetAddress bindAddr) throws IOException, SSLException
 	{
 		initialize(ctx);
 		socket = new ServerSocket(port, backlog, bindAddr);
 	}
 
-	public void finalize()
+	/*public void finalize()
 	{
-	}
+	}*/
 
 	public SSLSocket accept() throws IOException, SSLException
 	{
@@ -123,14 +124,16 @@ public class SSLServerSocket
 		os = new DataOutputStream(socket.getOutputStream());
 		is = new DataInputStream(socket.getInputStream());
 
-		byte ret[], in[] = new byte[4096];
+		byte ret[];
+		final byte in[] = new byte[4096];
 		int len;
 
 		do 
 		{
 			len = is.read(in, 0, in.length);
-			if(len == -1) 
+			if(len == -1) {
 				throw new IOException("the end of the stream has been reached");
+			}
 
 			ret = nativeAccept(ssl, in, 0, len);
 			if(ret != null) 
@@ -159,7 +162,7 @@ public class SSLServerSocket
     	socket.close();
    	}
 
-   	public synchronized void setSoTimeout(int timeout) throws SocketException
+   	public synchronized void setSoTimeout(final int timeout) throws SocketException
 	{
 	    socket.setSoTimeout(timeout);
    	}
@@ -174,7 +177,7 @@ public class SSLServerSocket
 		return ("SSL" + socket.toString());
    	}
 
-   	public static synchronized void setSocketFactory(SocketImplFactory fac) throws IOException
+   	public static synchronized void setSocketFactory(final SocketImplFactory fac) throws IOException
 	{
 		ServerSocket.setSocketFactory(fac);
 	}

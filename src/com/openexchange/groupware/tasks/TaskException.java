@@ -140,7 +140,7 @@ public class TaskException extends AbstractOXException {
          * Data has been truncated storing them in the database.
          */
         TRUNCATED
-    };
+    }
 
     /**
      * Error codes for task exceptions.

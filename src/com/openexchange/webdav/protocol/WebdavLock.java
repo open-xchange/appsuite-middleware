@@ -52,7 +52,7 @@ package com.openexchange.webdav.protocol;
 
 public class WebdavLock {
 
-	public static enum Type { WRITE_LITERAL };
+	public static enum Type { WRITE_LITERAL }
 	public static enum Scope { EXCLUSIVE_LITERAL, SHARED_LITERAL }
 
 	public static final long NEVER = -1;
@@ -62,38 +62,39 @@ public class WebdavLock {
 	private int depth;
 	private String owner;
 	private long expires;
-	private boolean neverExpires = false;
+	private boolean neverExpires;
 	private String token;
-	private long creationTime = System.currentTimeMillis();
+	private final long creationTime = System.currentTimeMillis();
 	
 	public int getDepth() {
 		return depth;
 	}
-	public void setDepth(int depth) {
+	public void setDepth(final int depth) {
 		this.depth = depth;
 	}
 	public String getOwner() {
 		return owner;
 	}
-	public void setOwner(String owner) {
+	public void setOwner(final String owner) {
 		this.owner = owner;
 	}
 	public Scope getScope() {
 		return scope;
 	}
-	public void setScope(Scope scope) {
+	public void setScope(final Scope scope) {
 		this.scope = scope;
 	}
 	public long getTimeout() {
 		if(neverExpires) {
 			return NEVER;
 		}
-		long timeout = expires-System.currentTimeMillis();
-		if(timeout < 0)
+		final long timeout = expires-System.currentTimeMillis();
+		if(timeout < 0) {
 			return 0;
+		}
 		return timeout;
 	}
-	public void setTimeout(long timeout) {
+	public void setTimeout(final long timeout) {
 		if(timeout == NEVER) {
 			neverExpires = true;
 			return;
@@ -104,46 +105,50 @@ public class WebdavLock {
 	public String getToken() {
 		return token;
 	}
-	public void setToken(String token) {
+	public void setToken(final String token) {
 		this.token = token;
 	}
 	public Type getType() {
 		return type;
 	}
-	public void setType(Type type) {
+	public void setType(final Type type) {
 		this.type = type;
 	}
 	
-	public boolean locks(WebdavResource locked, WebdavResource resource) {
-		String urlLocked = locked.getUrl();
-		String urlRes = resource.getUrl();
+	public boolean locks(final WebdavResource locked, final WebdavResource resource) {
+		final String urlLocked = locked.getUrl();
+		final String urlRes = resource.getUrl();
 				
-		if(!urlRes.startsWith(urlLocked))
+		if(!urlRes.startsWith(urlLocked)) {
 			return false;
-		if(depth == WebdavCollection.INFINITY)
+		}
+		if(depth == WebdavCollection.INFINITY) {
 			return true;
+		}
 		if(depth == 0) {
 			return urlLocked.equals(urlRes);
 		}
 		if(depth == 1) {
-			return urlLocked.equals(urlRes.substring(0,urlRes.lastIndexOf("/")));
+			return urlLocked.equals(urlRes.substring(0,urlRes.lastIndexOf('/')));
 		}
 		return false;
 	}
 	
+	@Override
 	public int hashCode(){
 		return token.hashCode();
 	}
 	
-	public boolean equals(Object other){
+	@Override
+	public boolean equals(final Object other){
 		if (other instanceof WebdavLock) {
-			WebdavLock otherLock = (WebdavLock) other;
+			final WebdavLock otherLock = (WebdavLock) other;
 			return otherLock.token.equals(token);
 		}
 		return false;
 	}
 	
-	public boolean isActive(long time) {
+	public boolean isActive(final long time) {
 		return getTimeout()!=0;
 	}
 	

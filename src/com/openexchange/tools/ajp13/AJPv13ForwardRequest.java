@@ -186,7 +186,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		try {
 			servletRequest.setProtocol(parseString());
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "protocol");
 		}
 		/*
@@ -203,7 +203,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 			}
 			servletRequest.setRequestURI(requestURI);
 			servletRequest.setPathInfo(requestURI);
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "req_uri");
 		}
 		/*
@@ -211,7 +211,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		try {
 			servletRequest.setRemoteAddr(parseString());
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "remote_addr");
 		}
 		/*
@@ -219,7 +219,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		try {
 			servletRequest.setRemoteHost(parseString());
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "remote_host");
 		}
 		/*
@@ -227,7 +227,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		try {
 			servletRequest.setServerName(parseString());
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "server_name");
 		}
 		/*
@@ -376,7 +376,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 						if ("$Version".equalsIgnoreCase(cookieNameValuePair[0])) {
 							try {
 								version = Integer.parseInt(cookieNameValuePair[1]);
-							} catch (NumberFormatException e) {
+							} catch (final NumberFormatException e) {
 								LOG.error(new StringBuilder("Special Cookie could not be parsed: $Version=")
 										.append(cookieNameValuePair[1]));
 								version = 0;
@@ -390,7 +390,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 					} else {
 						try {
 							c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
-						} catch (IllegalArgumentException e) {
+						} catch (final IllegalArgumentException e) {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn("Discarding cookie: " + e.getMessage(), e);
 							}
@@ -524,9 +524,9 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		if (encoded) {
 			try {
 				return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw new AJPv13Exception(AJPCode.MESSAGING_ERROR, e, e.getMessage());
 			}
 		}

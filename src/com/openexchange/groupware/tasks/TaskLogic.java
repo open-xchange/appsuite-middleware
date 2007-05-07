@@ -861,6 +861,9 @@ public final class TaskLogic {
             // If the task does not have a reminder this exception is
             // thrown. Which is quite okay because not every task must have
             // a reminder.
+        	if (LOG.isTraceEnabled()) { // Added to remove PMD warning about an empty catch clause
+        		LOG.trace(e.getMessage(), e);
+        	}
         } catch (OXException e) {
             throw new TaskException(e);
         }

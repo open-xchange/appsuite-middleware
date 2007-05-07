@@ -100,16 +100,16 @@ public class FolderQueryCacheManager {
 			ConfigurationInit.init();
 			Configuration.load();
 			folderQueryCache = JCS.getInstance(REGION_NAME);
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
 		}
@@ -161,7 +161,7 @@ public class FolderQueryCacheManager {
 				while (busy) {
 					WAIT.await();
 				}
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOG.error(e.getMessage(), e);
 			} finally {
 				LOCK_MODIFY.unlock();
@@ -235,7 +235,7 @@ public class FolderQueryCacheManager {
 			if (insertMap) {
 				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), map);
 			}
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 		} finally {
 			busy = false;
