@@ -142,6 +142,9 @@ public class WebdavGetAction extends WebdavHeadAction {
 	
 	private List<ByteRange> getRanges(WebdavRequest req, WebdavResponse res) throws WebdavException {
 		String byteRanges = req.getHeader("Bytes");
+		if(req.getResource().isCollection())
+			return new ArrayList<ByteRange>();
+		
 		long length = req.getResource().getLength();
 		
 		List<ByteRange> retVal = new ArrayList<ByteRange>();

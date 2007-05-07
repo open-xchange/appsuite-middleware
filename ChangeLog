@@ -7,6 +7,7 @@
 
   - Bugfix #7053. Changed query for locks. Doesn't load locks and counts them but checks it query matches. 
   - Bugfix #7131. Fixed NPE in HEAD query for folders.
+  - Bugfix #6334. NPE due to autoboxing on partial GET for folders.
 
 * 2007-05-04 - stefan.preuss@open-xchange.org
 
