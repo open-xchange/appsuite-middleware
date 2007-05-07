@@ -697,12 +697,15 @@ public class Infostore extends PermissionServlet {
 		return FACADE;
 	}
 	
-	protected InfostoreFacade getInfostore(final long folderId){
-		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
+	public static InfostoreFacade getInfostore(final long folderId){
+		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID 
+				|| folderId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID
+				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return VIRTUAL_FACADE;
 		}
 		return FACADE;
 	}
+	
 	
 	protected SearchEngine getSearchEngine(){
 		return SEARCH_ENGINE;

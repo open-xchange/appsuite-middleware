@@ -240,7 +240,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 			category=Category.USER_INPUT,
 			desc="The folders to which this user has access, but that belong to other users, are collected in a virtual folder. This virtual folder cannot contain documents itself.",
 			exceptionId=0,
-			msg="This folder is a virtual folder used for displaying folders other users share with you. It cannot contain documents.")
+			msg="This folder is a virtual folder. It cannot contain documents.")
 	private void virtualFolder() throws OXException{
 		throw EXCEPTIONS.create(0);
 	}

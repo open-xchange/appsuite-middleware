@@ -16,7 +16,8 @@
   - Bugfix #7131. Fixed NPE in HEAD query for folders.
   - Bugfix #6334. NPE due to autoboxing on partial GET for folders.
   - Removed some printStackTrace calls.
-  
+  - Bugfix #7143 Infostore and User Store are now considered virtual folders
+
 * 2007-05-04 - tobias.prinz@open-xchange.com
 
  - Added check to ImportServlet for empty files. Did not solve

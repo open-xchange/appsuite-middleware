@@ -1056,10 +1056,8 @@ public class InfostoreRequest extends CommonRequest{
 		return Infostore.FACADE;
 	}
 	
-	protected InfostoreFacade getInfostore(long folderId){
-		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID)
-			return Infostore.VIRTUAL_FACADE;
-		return Infostore.FACADE;
+	protected InfostoreFacade getInfostore(long folderId) {
+		return Infostore.getInfostore(folderId);
 	}
 	
 	protected SearchEngine getSearchEngine(){
