@@ -440,7 +440,11 @@ public class CalendarOperation implements SearchIterator {
                     Connection rc = null;
                     try {
                         rc  = DBPool.pickup(cdao.getContext());
-                        cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), rc));
+                        if (cdao.containsParentFolderID()) {
+                            cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(cdao.getParentFolderID(), cdao.getContext(), rc));
+                        } else {
+                             cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), rc));
+                        }
                     } catch(DBPoolingException dbpe) {
                         throw new OXException(dbpe);
                     } finally {
@@ -464,7 +468,7 @@ public class CalendarOperation implements SearchIterator {
                     Connection rc = null;
                     try {
                         rc  = DBPool.pickup(cdao.getContext());
-                        p.setIdentifier(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), rc));
+                        p.setIdentifier(cdao.getSharedFolderOwner());
                     } catch(DBPoolingException dbpe) {
                         throw new OXException(dbpe);
                     } finally {

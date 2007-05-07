@@ -345,7 +345,8 @@ public class CalendarCommonCollection {
                     }
                     if (!check[f].containsConfirmMessage()) {
                         check[f].setConfirmMessage(orig[0].getConfirmMessage());
-                    }                    
+                    }
+                    check[f].setPersonalFolderId(orig[0].getPersonalFolderId());
                 }
                 
                 return check;

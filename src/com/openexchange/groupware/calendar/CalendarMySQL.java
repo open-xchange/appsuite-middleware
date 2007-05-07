@@ -1323,7 +1323,7 @@ class CalendarMySQL implements CalendarSqlImp {
         
         if (cdao.getFolderMove() && cdao.getFolderType() == FolderObject.PUBLIC && edao.getPrivateFlag()) {
             throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.PRIVATE_MOVE_TO_PUBLIC));
-        }
+        } 
         
         CalendarCommonCollection.detectFolderMoveAction(cdao, edao);
         
@@ -1798,12 +1798,26 @@ class CalendarMySQL implements CalendarSqlImp {
                         } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
                             pu.setNull(3, java.sql.Types.INTEGER);
                         } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                            //throw new OXCalendarException(OXCalendarException.Code.UPDATE_USER_SHARED_MISMATCH);
-                            if (cdao.getGlobalFolderID() != 0) {
-                                pu.setInt(3, cdao.getGlobalFolderID());
-                                modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                            if (modified_userparticipants[a].getIdentifier() == uid && uid == cdao.getSharedFolderOwner()) {
+                                if (cdao.getGlobalFolderID() != 0) {
+                                    pu.setInt(3, cdao.getGlobalFolderID());
+                                    modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
+                                } else {
+                                    try {
+                                        int pfid = 0;
+                                        if (modified_userparticipants[a].getPersonalFolderId() > 0) {
+                                            pfid = modified_userparticipants[a].getPersonalFolderId();
+                                        } else {
+                                            pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(modified_userparticipants[a].getIdentifier(), cdao.getContext()));
+                                            modified_userparticipants[a].setPersonalFolderId(pfid);
+                                        }
+                                        pu.setInt(3, pfid);
+                                    } catch (Exception fe) {
+                                        throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 6);
+                                    }
+                                }
                             } else {
-                                try {
+                               try {
                                     int pfid = 0;
                                     if (modified_userparticipants[a].getPersonalFolderId() > 0) {
                                         pfid = modified_userparticipants[a].getPersonalFolderId();
@@ -1814,7 +1828,7 @@ class CalendarMySQL implements CalendarSqlImp {
                                     pu.setInt(3, pfid);
                                 } catch (Exception fe) {
                                     throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, fe, 6);
-                                }
+                                }                                
                             }
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
