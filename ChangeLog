@@ -9,7 +9,18 @@
   - Bugfix #7131. Fixed NPE in HEAD query for folders.
   - Bugfix #6334. NPE due to autoboxing on partial GET for folders.
   - Removed some printStackTrace calls.
+  
+* 2007-05-04 - tobias.prinz@open-xchange.com
 
+ - Added check to ImportServlet for empty files. Did not solve
+   bug #7089, but is useful anyway.
+ - Fixed #7089, which was a never terminating while-loop in case
+   of a broken file. Now the appropriate exception is caught inside
+   the while-loop and the loop is stopped.
+ - Added some more error messages to the importers to make it easier
+   for the GUI team to know whether an import did work partially or 
+   not at all.
+   
 * 2007-05-04 - stefan.preuss@open-xchange.org
 
   - Bugfix #7112. Setting "Color quoted lines" has no effect.
