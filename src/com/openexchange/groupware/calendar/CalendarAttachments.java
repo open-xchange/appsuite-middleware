@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
@@ -58,6 +59,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.tools.StringCollection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * CalendarAttachments
@@ -65,6 +69,8 @@ import com.openexchange.sessiond.SessionObjectWrapper;
  */
 
 public class CalendarAttachments implements  AttachmentListener, AttachmentAuthorization {
+    
+    private static final Log LOG = LogFactory.getLog(CalendarAttachments.class);    
     
     public long attached(AttachmentEvent e) throws Exception {
         CalendarSql csql = new CalendarSql(null);
@@ -82,6 +88,11 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
+        } catch (OXObjectNotFoundException oxonfe) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
+            }
+            throw oxonfe;            
         } catch(Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 14);
         }
@@ -97,6 +108,11 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
             }
+        } catch (OXObjectNotFoundException oxonfe) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayReadAttachments failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
+            }
+            throw oxonfe;
         } catch(Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 15);
         }
