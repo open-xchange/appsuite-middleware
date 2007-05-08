@@ -1626,4 +1626,73 @@ public class AppointmentBugTests extends TestCase {
         
      }
      
+     /*
+     * Create a recurrence appointment
+     * Create an exception
+     * Delete this exception
+     * The "recurrence_id" xmltag is missing, so there is no way for the OXtender to
+       reference the deleted item.
+     */
+     public void testBug6960() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testBug6960");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        
+        
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 3);
+        RecurringResult rs = rss.getRecurringResult(0);
+        long new_start = rs.getStart()+3600000;
+        long new_end = rs.getEnd()+3600000;
+        
+        Date test_new_start_date = new Date(new_start);
+        Date test_new_end_date = new Date(new_end);
+        
+        update.setStartDate(test_new_start_date);
+        update.setEndDate(test_new_end_date);
+        
+        update.setTitle("testBug6960 - Exception");
+        
+        Date test_exception_date = new Date(CalendarRecurringCollection.normalizeLong(new_start));
+        
+        update.setRecurrenceDatePosition(test_exception_date);
+        
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+ 
+        CalendarDataObject testdelete = new CalendarDataObject();
+        testdelete.setContext(so.getContext());
+        testdelete.setObjectID(update.getObjectID());
+        csql.deleteAppointmentObject(testdelete, folder_id, new Date(SUPER_END));
+        
+        assertTrue("Check that we got the recurrence id back", testdelete.containsRecurrenceID());
+        assertEquals("Check that we got the correct recurrence id", object_id, testdelete.getRecurrenceID());
+       
+        
+        
+ 
+     }
+     
 }
