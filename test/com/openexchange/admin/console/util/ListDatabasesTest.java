@@ -49,8 +49,6 @@ package com.openexchange.admin.console.util;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.swing.plaf.basic.BasicOptionPaneUI;
-
 import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
