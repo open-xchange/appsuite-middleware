@@ -328,7 +328,7 @@ public class UserTest extends AbstractTest {
     
     // This test is used to check how the change method deals with changing values which are null before changing
     @Test
-    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final Credentials cred = DummyCredentials();
         final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(OXLoginInterface.RMI_NAME);
         // Here we get the user object of the admin from the database
