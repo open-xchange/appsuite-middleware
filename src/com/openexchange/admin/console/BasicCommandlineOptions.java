@@ -63,56 +63,56 @@ public abstract class BasicCommandlineOptions {
     /**
      * Used when username/password credentials were not correct!
      */
-    protected static final int SYSEXIT_INVALID_CREDENTIALS=101;
+    public static final int SYSEXIT_INVALID_CREDENTIALS=101;
     /**
      * Used when the requested context does not exists on the server!
      */
-    protected static final int SYSEXIT_NO_SUCH_CONTEXT=102;
+    public static final int SYSEXIT_NO_SUCH_CONTEXT=102;
     /**
      * Used when wrong data was sent to the server!
      */
-    protected static final int SYSEXIT_INVALID_DATA=103;
+    public static final int SYSEXIT_INVALID_DATA=103;
     /**
      * Used when an option is missing to execute the cmd tool!
      */
-    protected static final int SYSEXIT_MISSING_OPTION=104;
+    public static final int SYSEXIT_MISSING_OPTION=104;
     
     
   
     /**
      * Used when a communication problem was encountered
      */
-    protected static final int SYSEXIT_COMMUNICATION_ERROR =105;
+    public static final int SYSEXIT_COMMUNICATION_ERROR =105;
     
     /**
      * Used when a storage problem was encountered on the server!
      */
-    protected static final int SYSEXIT_SERVERSTORAGE_ERROR =106;
+    public static final int SYSEXIT_SERVERSTORAGE_ERROR =106;
     
     /**
     * Used when a remote server problem was encountered !
     */
-   protected static final int SYSEXIT_REMOTE_ERROR =107;
+    public static final int SYSEXIT_REMOTE_ERROR =107;
    
    /**
     * Used when an user does not exists
     */
-   protected static final int SYSEXIT_NO_SUCH_USER =108;
+    public static final int SYSEXIT_NO_SUCH_USER =108;
    
    /**
     * Used when an unknown option was passed to the cmd tool!
     */
-   protected static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
+    public static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
    
    /**
     * Used when a context aklready exists
     */
-   protected static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
+    public static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
    
    /**
     * Used when an unknown option was passed to the cmd tool!
     */
-   protected static final int SYSEXIT_UNKNOWN_OPTION=111;
+    public static final int SYSEXIT_UNKNOWN_OPTION=111;
    
     
     protected static final int DEFAULT_CONTEXT=1;
