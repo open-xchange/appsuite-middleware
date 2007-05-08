@@ -373,8 +373,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             st.executeBatch();
 
             pumpData2Database(cache.getOXDBInitialQueries(), "ox initial", con, db.getScheme());
-            pumpData2Database(cache.getOXDBOptimizeQueries(), "ox optimize", con, db.getScheme());
-            pumpData2Database(cache.getOXDBConsistencyQueries(), "ox consistency", con, db.getScheme());
 
         } catch (final OXGenericException oxgen) {
             log.error("Error reading DB init Queries!", oxgen);
