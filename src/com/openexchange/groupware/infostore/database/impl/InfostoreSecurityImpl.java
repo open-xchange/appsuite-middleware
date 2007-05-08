@@ -75,6 +75,7 @@ import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.infostore.Classes;
@@ -94,8 +95,8 @@ public class InfostoreSecurityImpl extends DBService{
 			exceptionId = 0,
 			msg = "The requested item does not exist."
 	)
-	public EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		List<DocumentMetadata> documentData = getFolderIdAndCreatorForDocuments(ctx.getContextId(), new int[]{id}, ctx, user, userConfig);			
+	public EffectiveInfostorePermission getInfostorePermission(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		final List<DocumentMetadata> documentData = getFolderIdAndCreatorForDocuments(ctx.getContextId(), new int[]{id}, ctx, user, userConfig);			
 		if (documentData == null || documentData.size() <= 0 || documentData.get(0) == null) {
 			throw EXCEPTIONS.create(0);
 		}
@@ -104,7 +105,7 @@ public class InfostoreSecurityImpl extends DBService{
 		Connection con = null;
 		try {
 			con = getReadConnection(ctx);
-			EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
+			final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
 			return new EffectiveInfostorePermission(isperm, documentData.get(0),user);
 		} finally {
 			releaseReadConnection(ctx, con);
@@ -118,40 +119,42 @@ public class InfostoreSecurityImpl extends DBService{
 			exceptionId = 1,
 			msg = "Could not load documents to check the permissions"
 	)
-	private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(int contextId, int[] is, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		InfostoreIterator iter = InfostoreIterator.list(is, new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL}, getProvider(), ctx);
+	private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int contextId, final int[] is, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		final InfostoreIterator iter = InfostoreIterator.list(is, new Metadata[]{Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.CREATED_BY_LITERAL}, getProvider(), ctx);
 		
 		try {
 			return iter.asList();
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			throw EXCEPTIONS.create(1,e);
 		}
 	}
 
-	public EffectivePermission getFolderPermission(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public EffectivePermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		Connection readCon = null;
 		try {
 			readCon = getReadConnection(ctx);
-			return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
+			return new OXFolderAccess(readCon, ctx).getFolderPermission((int) folderId, user.getId(), userConfig);
+			//return OXFolderTools.getEffectiveFolderOCL((int)folderId, user.getId(), user.getGroups(),ctx, userConfig, readCon);
 		} finally {
 			releaseReadConnection(ctx, readCon);
 		}
 	}
 
-	public <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserConfiguration userConfig, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException {
-		Map<Integer, EffectivePermission> cache = new HashMap<Integer,EffectivePermission>();
-		List<EffectiveInfostorePermission> permissions = new ArrayList<EffectiveInfostorePermission>();
+	public <L> L injectInfostorePermissions(final int[] ids, final Context ctx, final User user, final UserConfiguration userConfig, final L list, final Injector<L, EffectiveInfostorePermission> injector) throws OXException {
+		final Map<Integer, EffectivePermission> cache = new HashMap<Integer,EffectivePermission>();
+		final List<EffectiveInfostorePermission> permissions = new ArrayList<EffectiveInfostorePermission>();
 		Connection con = null;
-		List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ctx.getContextId(), ids, ctx, user, userConfig);
+		final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ctx.getContextId(), ids, ctx, user, userConfig);
 		try {
 			con = getReadConnection(ctx);
-			for(DocumentMetadata m : metadata) {
-				EffectivePermission isperm = null;
-				if(!cache.containsKey(m.getFolderId())) {
-					isperm = OXFolderTools.getEffectiveFolderOCL((int)m.getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
-					cache.put((int) m.getFolderId(), isperm);
+			final OXFolderAccess access = new OXFolderAccess(con, ctx);
+			for(final DocumentMetadata m : metadata) {
+				final EffectivePermission isperm;
+				if(!cache.containsKey(Long.valueOf(m.getFolderId()))) {
+					isperm = access.getFolderPermission((int) m.getFolderId(), user.getId(), userConfig);
+					cache.put(Integer.valueOf((int) m.getFolderId()), isperm);
 				} else {
-					isperm = cache.get((int) m.getFolderId());
+					isperm = cache.get(Integer.valueOf((int) m.getFolderId()));
 				}
 				permissions.add(new EffectiveInfostorePermission(isperm, m,user));
 			}
@@ -170,8 +173,8 @@ public class InfostoreSecurityImpl extends DBService{
 			exceptionId = 2,
 			msg = "The folder %d is not an Infostore Folder"
 	)
-	public void checkFolderId(long folderId, Context ctx) throws OXException {
-		FolderCacheManager cache = FolderCacheManager.getInstance();
+	public void checkFolderId(final long folderId, final Context ctx) throws OXException {
+		final FolderCacheManager cache = FolderCacheManager.getInstance();
 		FolderObject fo = cache.getFolderObject((int)folderId, ctx);
 		if(fo == null) {
 			Connection readCon = null;
@@ -183,7 +186,7 @@ public class InfostoreSecurityImpl extends DBService{
 			}
 		}
 		if(fo.getModule() != FolderObject.INFOSTORE) {
-			throw EXCEPTIONS.create(1,folderId);
+			throw EXCEPTIONS.create(2,Long.valueOf(folderId));
 		}
 	}
 
