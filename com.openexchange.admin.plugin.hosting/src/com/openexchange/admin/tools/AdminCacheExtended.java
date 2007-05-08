@@ -27,8 +27,6 @@ public class AdminCacheExtended extends AdminCache {
     
     private ArrayList<String> sequence_tables = null;
 
-    private ArrayList<String> ox_queries_consistency = null;
-    private ArrayList<String> ox_queries_optimize = null;
     private ArrayList<String> ox_queries_initial = null;
 
     private Log log = LogFactory.getLog(this.getClass());
@@ -50,8 +48,6 @@ public class AdminCacheExtended extends AdminCache {
         }
 
         // ox
-        ox_queries_consistency = convertData2Objects(getConsistencyOXSqlDir(), getConsistencyOXOrder());
-        ox_queries_optimize = convertData2Objects(getOptimizeOXSqlDir(), getOptimizeOXOrder());
         ox_queries_initial = convertData2Objects(getInitialOXDBSqlDir(), getInitialOXDBOrder());
     }
 
@@ -92,20 +88,6 @@ public class AdminCacheExtended extends AdminCache {
         return pool.getSchemeForContextId(context_id);
     }
     
-    public ArrayList getOXDBConsistencyQueries() throws OXGenericException {
-        if (ox_queries_consistency == null) {
-            throw new OXGenericException(DATABASE_INIT_SCRIPTS_ERROR_MESSAGE);
-        }
-        return ox_queries_consistency;
-    }
-
-    public ArrayList<String> getOXDBOptimizeQueries() throws OXGenericException {
-        if (ox_queries_optimize == null) {
-            throw new OXGenericException(DATABASE_INIT_SCRIPTS_ERROR_MESSAGE);
-        }
-        return ox_queries_optimize;
-    }
-
     public ArrayList<String> getOXDBInitialQueries() throws OXGenericException {
         if (ox_queries_initial == null) {
             throw new OXGenericException(DATABASE_INIT_SCRIPTS_ERROR_MESSAGE);
@@ -178,14 +160,6 @@ public class AdminCacheExtended extends AdminCache {
         return al;
     }
 
-    private String getConsistencyOXSqlDir() {
-        return prop.getSqlProp("CONSISTENCY_OX_SQL_DIR", "/opt/openexchange-internal/system/setup/mysql/consistency/");
-    }
-
-    private String[] getConsistencyOXOrder() {
-        return getOrdered(prop.getSqlProp("CONSISTENCY_OX_SQL_ORDER", "first.sql,sequences.sql,ldap2sql.sql,oxfolder.sql," + "settings.sql,tasks.sql,projects.sql,attachment.sql,misc.sql,ical_vcard.sql,last.sql"));
-    }
-
     private String[] getOrdered(String data) {
         String[] ret = new String[0];
         if (data != null) {
@@ -200,21 +174,12 @@ public class AdminCacheExtended extends AdminCache {
         return ret;
     }
 
-    private String getOptimizeOXSqlDir() {
-        return prop.getSqlProp("OPTIMIZE_OX_SQL_DIR", "/opt/openexchange-internal/system/setup/mysql/optimize/");
-    }
-
-    private String[] getOptimizeOXOrder() {
-
-        return getOrdered(prop.getSqlProp("OPTIMIZE_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql," + "calendar.sql,contacts.sql,tasks.sql,projects.sql,forum.sql,pinboard.sql,infostore.sql,attachment.sql," + "misc.sql,ical_vcard.sql"));
-    }
-
     private String[] getInitialOXDBOrder() {
         return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql" + ",calendar.sql,contacts.sql,tasks.sql,projects.sql,infostore.sql,attachment.sql,forum.sql,pinboard.sql," + "misc.sql,ical_vcard.sql"));
     }
 
     private void readSequenceTables() {
-        final String seqfile = getInitialOXDBSqlDir() + "/optimize/sequences.sql";
+        final String seqfile = getInitialOXDBSqlDir() + "/sequences.sql";
 
         final File f = new File(seqfile);
         if (!f.canRead()) {
