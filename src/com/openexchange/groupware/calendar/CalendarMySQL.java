@@ -2599,6 +2599,10 @@ class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement del_rights = null;
         PreparedStatement update = null;
         
+        if (edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
+            cdao.setRecurrenceID(edao.getRecurrenceID());
+        }
+        
         long modified = 0;
         
         try {
