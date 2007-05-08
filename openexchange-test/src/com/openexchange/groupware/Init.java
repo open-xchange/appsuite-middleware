@@ -206,6 +206,7 @@ public final class Init {
 
     public synchronized static void initContext() throws AbstractOXException {
         if (!contextInitialized) {
+            loadSystemProperties();
             ContextInit.init();
             contextInitialized = true;
         }
