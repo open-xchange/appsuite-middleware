@@ -57,28 +57,25 @@ import java.util.Map;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.infostore.Classes;
 
 
 @OXExceptionSource(
@@ -105,7 +102,8 @@ public class InfostoreSecurityImpl extends DBService{
 		Connection con = null;
 		try {
 			con = getReadConnection(ctx);
-			final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
+			final EffectivePermission isperm = new OXFolderAccess(con, ctx).getFolderPermission((int)documentData.get(0).getFolderId(), user.getId(), userConfig);
+			//final EffectivePermission isperm = OXFolderTools.getEffectiveFolderOCL((int)documentData.get(0).getFolderId(), user.getId(), user.getGroups(), ctx, userConfig, con);
 			return new EffectiveInfostorePermission(isperm, documentData.get(0),user);
 		} finally {
 			releaseReadConnection(ctx, con);
