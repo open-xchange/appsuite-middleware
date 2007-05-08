@@ -433,7 +433,7 @@ public class CalendarOperation implements SearchIterator {
                     if (action || cdao.containsParticipants()) {
                         UserParticipant up = new UserParticipant();
                         up.setIdentifier(uid);
-                        up.setConfirm(1);
+                        up.setConfirm(CalendarDataObject.ACCEPT);
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
                 } else if (cdao.getFolderType() == FolderObject.SHARED) {
@@ -459,9 +459,15 @@ public class CalendarOperation implements SearchIterator {
                     if (action || cdao.containsParticipants()) {
                         UserParticipant up = new UserParticipant();
                         up.setIdentifier(cdao.getSharedFolderOwner());
+                        up.setConfirm(CalendarDataObject.ACCEPT);
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
-                }
+                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
+                        UserParticipant up = new UserParticipant();
+                        up.setIdentifier(uid);
+                        up.setConfirm(CalendarDataObject.ACCEPT);
+                        CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
+                 }
                 
                 Participant p = new UserParticipant();
                 if (cdao.getFolderType() == FolderObject.SHARED) {

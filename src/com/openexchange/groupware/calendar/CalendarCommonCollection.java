@@ -323,6 +323,22 @@ public class CalendarCommonCollection {
         }
     }
     
+    static final void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+    	final UserParticipant check[] = cdao.getUsers();
+        if (check != null && check.length > 0) {
+            Arrays.sort(check);
+            int fi = Arrays.binarySearch(check, up);
+            if (fi >= 0) {
+                if (!check[fi].containsConfirm()) {
+                    check[fi].setConfirm(CalendarDataObject.ACCEPT);
+                    cdao.setUsers(check);
+                }
+            }
+        } else {
+            cdao.setUsers(new UserParticipant[] { up } );
+        }
+    }    
+    
     static final UserParticipant[] checkAndModifyAlarm(CalendarDataObject cdao, UserParticipant check[], int uid,  UserParticipant orig[]) {
         if (cdao.containsAlarm()) {
         	final UserParticipant up = new UserParticipant();
