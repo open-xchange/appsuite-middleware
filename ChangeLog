@@ -9,6 +9,9 @@
  - Enhanced logging if an attachment is requested via the webdav interface but
    the object does not exists. The bug nummer for this issue is 7141.
 
+ - Fixed bug #7168. Now the status of the participant is automatically set to
+   ACCEPT if an appointment is created.
+
 * 2007-05-08 - sebastian.kauss@open-xchange.com
 
   - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
