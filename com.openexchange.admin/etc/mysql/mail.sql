@@ -1,4 +1,4 @@
-#@(#) mail.sql optimizations
+#@(#) mail.sql
 
 CREATE TABLE mail_domains (
     cid INT4 UNSIGNED NOT NULL,
