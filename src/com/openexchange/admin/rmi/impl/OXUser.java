@@ -281,7 +281,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
         if(ctx==null || usrdata==null|| usrdata.getId()==null
                 ||auth==null|| auth.getLogin()==null||auth.getPassword()==null){
@@ -316,7 +316,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         
         if (!tools.existsUser(ctx, usrdata.getId())) {
-            throw new InvalidDataException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
+            throw new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
         }
 
         checkChangeUserData(ctx, usrdata, this.prop);
@@ -350,12 +350,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     }
 
-    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, new User[]{user}, auth);
     }
 
     public void delete(final Context ctx, final User[] users, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
         if(ctx==null || users ==null){
             throw new InvalidDataException();            
@@ -379,7 +379,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final int[] user_ids = getUserIdArrayFromUsers(users);
         // FIXME: Change function form int to user object
         if (!tools.existsUser(ctx, user_ids)) {
-            throw new InvalidDataException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
+            throw new NoSuchUserException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
             
         }
         for (final User user : users) {
@@ -448,7 +448,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
         if(ctx==null){
             throw new InvalidDataException();            
@@ -469,7 +469,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         if (!tools.existsUser(ctx, user_id)) {
-            throw new InvalidDataException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
            
         }
 
@@ -479,7 +479,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
     
         if(ctx==null || moduleAccess ==null){
             throw new InvalidDataException();            
@@ -501,7 +501,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         if (!tools.existsUser(ctx, user_id)) {
-            throw new InvalidDataException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
             
         }
 
