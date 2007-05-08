@@ -6,6 +6,9 @@
  - Fixed bug #6960. The recurrence id was missing in the return object if a
    recurring exception was deleted. This has been fixed.
 
+ - Enhanced logging if an attachment is requested via the webdav interface but
+   the object does not exists. The bug nummer for this issue is 7141.
+
 * 2007-05-08 - sebastian.kauss@open-xchange.com
 
   - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
