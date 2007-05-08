@@ -128,6 +128,9 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }catch(URISyntaxException urex){
             throw new InvalidDataException("Invalid filstore url");
             //throw UTIL_EXCEPTIONS.create(1,urex.getMessage());
+        }catch(IllegalArgumentException urex){
+            throw new InvalidDataException("Invalid filstore url");
+            //throw UTIL_EXCEPTIONS.create(1,urex.getMessage());
         }
         
         OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
