@@ -58,8 +58,10 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 import java.rmi.Naming;
+import java.util.ArrayList;
 
 import junit.framework.JUnit4TestAdapter;
 
@@ -351,6 +353,27 @@ public class GroupTest extends AbstractTest {
         }
         if (group.getName() != null) {
             group.setName(group.getName() + change_suffix);
+        }
+    }
+
+    public static void compareGroup(final Group a, final Group b) {
+        System.out.println("GROUPA" + a.toString());
+        System.out.println("GROUPB" + b.toString());
+        
+        assertEquals("displayname not equal", a.getDisplayname(), b.getDisplayname());
+        assertEquals("email not equal", a.getEmail(), b.getEmail());
+        assertEquals("name not equal", a.getName(), b.getName());
+        assertEquals("members not equal", a.getMembers(), b.getMembers());
+        assertEquals("id not equal", a.getId(), b.getId());
+        
+        final ArrayList<OXGroupExtensionInterface> aexts = a.getExtensions();
+        final ArrayList<OXGroupExtensionInterface> bexts = b.getExtensions();
+        if (aexts.size() == bexts.size()) {
+            for (int i = 0; i < aexts.size(); i++) {
+                final OXGroupExtensionInterface aext = aexts.get(i);
+                final OXGroupExtensionInterface bext = bexts.get(i);
+                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            }
         }
     }
 }
