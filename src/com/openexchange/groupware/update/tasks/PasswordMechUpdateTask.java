@@ -107,7 +107,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	private static final String SQL_MODIFY = "ALTER TABLE user ADD COLUMN passwordMech VARCHAR(32) NOT NULL";
 
-	private static final String SQL_UPDATE = "UPDATE TABLE user SET passwordMech = ?";
+	private static final String SQL_UPDATE = "UPDATE user SET passwordMech = ?";
 
 	private static final String SHA = "{SHA}";
 
