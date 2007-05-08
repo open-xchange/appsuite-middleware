@@ -54,6 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 
@@ -103,9 +104,10 @@ public interface OXResourceInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
+     * @throws NoSuchResourceException 
      */
     public void change(Context ctx, Resource res, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Get Resource from given context.
@@ -121,9 +123,10 @@ public interface OXResourceInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
+     * @throws NoSuchResourceException 
      */
     public Resource get(Context ctx, Resource res, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Delete resource from given context.
@@ -138,9 +141,10 @@ public interface OXResourceInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
+     * @throws NoSuchResourceException 
      */
     public void delete(Context ctx, final Resource res, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * List resources matching <code>pattern</code> in given context.
