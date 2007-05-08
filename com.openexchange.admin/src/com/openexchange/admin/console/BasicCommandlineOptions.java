@@ -114,6 +114,10 @@ public abstract class BasicCommandlineOptions {
     */
     public static final int SYSEXIT_UNKNOWN_OPTION=111;
    
+    /**
+     * Used when a group does not exists
+     */
+    public static final int SYSEXIT_NO_SUCH_GROUP =112;
     
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
