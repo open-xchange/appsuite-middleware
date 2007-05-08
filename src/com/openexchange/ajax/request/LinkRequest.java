@@ -69,17 +69,17 @@ public class LinkRequest {
 	
 	private static final String PARAMETER_MODULE = "module";
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
 	final JSONWriter jsonWriter;
 
-	public LinkRequest(SessionObject sessionObj, Writer pw) {
+	public LinkRequest(final SessionObject sessionObj, final Writer pw) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(pw);
 		
 	}
 	
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -91,7 +91,7 @@ public class LinkRequest {
 		}
 	}
 	
-	public void actionAll(JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -131,25 +131,31 @@ public class LinkRequest {
 		}
 	}
 
-	public void actionNew(JSONObject jsonObj) throws JSONException, OXException {
+	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException {
 		final LinkObject lo = new LinkObject();
 		final int user = sessionObj.getUserObject().getId();
 		final int[] group =	sessionObj.getUserObject().getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
 		
-		if (jData.has("id1"))
+		if (jData.has("id1")) {
 			lo.setFirstId(jData.getInt("id1"));
-		if (jData.has("module1"))
+		}
+		if (jData.has("module1")) {
 			lo.setFirstType(jData.getInt("module1"));
-		if (jData.has("folder1"))
+		}
+		if (jData.has("folder1")) {
 			lo.setFirstFolder(jData.getInt("folder1"));
-		if (jData.has("id2"))
+		}
+		if (jData.has("id2")) {
 			lo.setSecondId(jData.getInt("id2"));
-		if (jData.has("module2"))
+		}
+		if (jData.has("module2")) {
 			lo.setSecondType(jData.getInt("module2"));
-		if (jData.has("folder2"))
+		}
+		if (jData.has("folder2")) {
 			lo.setSecondFolder(jData.getInt("folder2"));
+		}
 		lo.setContext(sessionObj.getContext().getContextId());
 		
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
@@ -161,7 +167,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -171,10 +177,10 @@ public class LinkRequest {
 		
 		final JSONArray jo = jData.getJSONArray("data");
 		
-		int[][] del = new int[jo.length()][3];
+		final int[][] del = new int[jo.length()][3];
 		
 		for (int i = 0; i < jo.length(); i++){
-			JSONArray dl = jo.getJSONArray(i);
+			final JSONArray dl = jo.getJSONArray(i);
 			del[i][0] = dl.getInt(0);
 			del[i][1] = dl.getInt(1);
 			del[i][2] = dl.getInt(2);
@@ -184,12 +190,13 @@ public class LinkRequest {
 		
 		jsonWriter.array();
 
+		final JSONArray jo2 = new JSONArray();
 		for (int i=0; i<rep.length;i++) {
-			final JSONArray jo2 = new JSONArray();
 			jo2.put(0,rep[i][0]);
 			jo2.put(1,rep[i][1]);
 			jo2.put(2,rep[i][2]);
 			jsonWriter.value(jo2);
+			jo2.reset();
 		}
 		
 		jsonWriter.endArray();

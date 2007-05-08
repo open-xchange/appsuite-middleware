@@ -49,16 +49,12 @@
 
 package com.openexchange.tools.exceptions;
 
-import static java.util.Collections.sort;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import com.sun.mirror.apt.AnnotationProcessor;
@@ -70,10 +66,13 @@ import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 
 public class OXErrorCodeFinder implements AnnotationProcessorFactory {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(OXErrorCodeFinder.class);
 
 	public AnnotationProcessor getProcessorFor(
-			Set<AnnotationTypeDeclaration> arg0,
-			AnnotationProcessorEnvironment arg1) {
+			final Set<AnnotationTypeDeclaration> arg0,
+			final AnnotationProcessorEnvironment arg1) {
 		return new OXCodeEnumFinderProcessor(arg1);
 	}
 
@@ -82,27 +81,27 @@ public class OXErrorCodeFinder implements AnnotationProcessorFactory {
 	}
 
 	public Collection<String> supportedOptions() {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 	
 	private static final class OXCodeEnumFinderProcessor implements AnnotationProcessor {
 
 		private AnnotationProcessorEnvironment env;
 
-		public OXCodeEnumFinderProcessor(AnnotationProcessorEnvironment env) {
+		public OXCodeEnumFinderProcessor(final AnnotationProcessorEnvironment env) {
 			this.env = env;
 		}
 		
 		public void process() {
-			StringBuilder builder = new StringBuilder();
-			Collection<TypeDeclaration> types = env.getTypeDeclarations();
+			final StringBuilder builder = new StringBuilder();
+			final Collection<TypeDeclaration> types = env.getTypeDeclarations();
 			
-			for(TypeDeclaration decl : types) {
+			for(final TypeDeclaration decl : types) {
 				if(decl instanceof ClassDeclaration) {
-					ClassDeclaration classDecl = (ClassDeclaration) decl;
-					for(TypeDeclaration nestedDecl : classDecl.getNestedTypes()) {
+					final ClassDeclaration classDecl = (ClassDeclaration) decl;
+					for(final TypeDeclaration nestedDecl : classDecl.getNestedTypes()) {
 						if (nestedDecl instanceof EnumDeclaration) {
-							EnumDeclaration enumDecl = (EnumDeclaration) nestedDecl;
+							final EnumDeclaration enumDecl = (EnumDeclaration) nestedDecl;
 							if(enumDecl.getSimpleName().endsWith("Code")) {
 								builder.append(enumDecl.getQualifiedName()).append("\n");
 							}
@@ -115,11 +114,12 @@ public class OXErrorCodeFinder implements AnnotationProcessorFactory {
 			try {
 				w = new PrintWriter(new FileWriter("errorCodeCandidates.txt"));
 				w.print(builder.toString());
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (final IOException e) {
+				LOG.error(e.getMessage(), e);
 			} finally {
-				if(w != null)
+				if(w != null) {
 					w.close();
+				}
 			}
 		}
 		

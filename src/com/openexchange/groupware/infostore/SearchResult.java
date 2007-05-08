@@ -57,21 +57,21 @@ public class SearchResult implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private List<Serializable> entries = Collections.EMPTY_LIST;
+	private List<Serializable> entries = Collections.emptyList();
 	
 	private String sortedBy = "";
 	private int order = -1;
 	
-	private int from = 0;
-	private int to = 0;
+	private int from;
+	private int to;
 	
-	private int max = 0;
+	private int max;
 
 	public List getEntries() {
 		return entries;
 	}
 
-	public void setEntries(List<Serializable> entries) {
+	public void setEntries(final List<Serializable> entries) {
 		this.entries = entries;
 	}
 
@@ -79,7 +79,7 @@ public class SearchResult implements Serializable {
 		return from;
 	}
 
-	public void setFrom(int from) {
+	public void setFrom(final int from) {
 		this.from = from;
 	}
 
@@ -87,7 +87,7 @@ public class SearchResult implements Serializable {
 		return max;
 	}
 
-	public void setMax(int max) {
+	public void setMax(final int max) {
 		this.max = max;
 	}
 
@@ -95,7 +95,7 @@ public class SearchResult implements Serializable {
 		return order;
 	}
 
-	public void setOrder(int order) {
+	public void setOrder(final int order) {
 		this.order = order;
 	}
 
@@ -103,7 +103,7 @@ public class SearchResult implements Serializable {
 		return sortedBy;
 	}
 
-	public void setSortedBy(String sortedBy) {
+	public void setSortedBy(final String sortedBy) {
 		this.sortedBy = sortedBy;
 	}
 
@@ -111,7 +111,7 @@ public class SearchResult implements Serializable {
 		return to;
 	}
 
-	public void setTo(int to) {
+	public void setTo(final int to) {
 		this.to = to;
 	}
 	

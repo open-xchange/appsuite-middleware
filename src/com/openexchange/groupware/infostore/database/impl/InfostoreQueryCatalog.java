@@ -63,6 +63,22 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class InfostoreQueryCatalog {
 	
+	private static final String SQL_CHUNK05 = " AND infostore.last_modified >= ";
+
+	private static final String SQL_CHUNK04 = " FROM infostore JOIN infostore_document ON infostore.cid = ";
+
+	private static final String SQL_CHUNK03 = " AND infostore_document.cid = ";
+
+	private static final String SQL_CHUNK02 = " AND infostore.created_by = ";
+
+	private static final String SQL_CHUNK01 = " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ";
+
+	private static final String STR_SELECT = "SELECT ";
+	
+	private static final String STR_ORDER_BY = " ORDER BY ";
+
+	private static final String STR_CID = "cid";
+
 	public static final Metadata[] INFOSTORE_FIELDS = new Metadata[]{
 		Metadata.ID_LITERAL,
 		Metadata.FOLDER_ID_LITERAL,
@@ -109,7 +125,7 @@ public class InfostoreQueryCatalog {
 		private Set<Metadata> fieldSet;
 		private Metadata[] fields;
 
-		private Table(Metadata[] fields, Set<Metadata> fieldSet, String tablename) {
+		private Table(final Metadata[] fields, final Set<Metadata> fieldSet, final String tablename) {
 			this.fields = fields;
 			this.fieldSet = fieldSet;
 			this.tablename = tablename;
@@ -136,23 +152,23 @@ public class InfostoreQueryCatalog {
 		}
 	}
 	
-	private static String buildInsert(String tablename, Metadata[] metadata,MetadataSwitcher columnNames, String...additionalFields) {
-		StringBuilder builder = new StringBuilder();
+	private static String buildInsert(final String tablename, final Metadata[] metadata,final MetadataSwitcher columnNames, final String...additionalFields) {
+		final StringBuilder builder = new StringBuilder();
 		builder.append("INSERT INTO ").append(tablename).append(" (");
-		StringBuilder questionMarks = new StringBuilder();
+		final StringBuilder questionMarks = new StringBuilder();
 		
-		for(Metadata m : metadata) {
-			String col = (String) m.doSwitch(columnNames);
+		for(final Metadata m : metadata) {
+			final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
-				builder.append(",");
+				builder.append(',');
 				questionMarks.append("?,");
 			}
 		}
 		
-		for(String s : additionalFields) {
+		for(final String s : additionalFields) {
 			builder.append(s);
-			builder.append(",");
+			builder.append(',');
 			
 			questionMarks.append("?,");
 		}
@@ -160,31 +176,31 @@ public class InfostoreQueryCatalog {
 		builder.setLength(builder.length()-1);
 		questionMarks.setLength(questionMarks.length()-1);
 		
-		builder.append(") VALUES (").append(questionMarks.toString()).append(")");
+		builder.append(") VALUES (").append(questionMarks.toString()).append(')');
 		
 		return builder.toString();
 	}
 	
-	private static String buildInsert(Table t, String...additionalFields) {
+	private static String buildInsert(final Table t, final String...additionalFields) {
 		return buildInsert(t.getTablename(), t.getFields(), t.getFieldSwitcher(),additionalFields);
 	}
 	
-	private static StringBuilder buildUpdateWithoutWhere(String tablename, Metadata[] metadata,MetadataSwitcher columnNames, String...additionalFields) {
-		StringBuilder builder = new StringBuilder();
+	private static StringBuilder buildUpdateWithoutWhere(final String tablename, final Metadata[] metadata,final MetadataSwitcher columnNames, final String...additionalFields) {
+		final StringBuilder builder = new StringBuilder();
 		builder.append("UPDATE ").append(tablename).append(" SET ");
-		for(Metadata m : metadata) {
+		for(final Metadata m : metadata) {
 			//FIXME
 			if(m == Metadata.VERSION_LITERAL && ( tablename.equals("infostore_document") || tablename.equals("del_infostore_document"))) {
 				continue;
 			}
-			String col = (String) m.doSwitch(columnNames);
+			final String col = (String) m.doSwitch(columnNames);
 			if(col != null) {
 				builder.append(col);
 				builder.append(" = ?,");
 			}
 		}
 		
-		for(String s : additionalFields) {
+		for(final String s : additionalFields) {
 			builder.append(s);
 			builder.append(" = ?,");
 		}
@@ -193,26 +209,26 @@ public class InfostoreQueryCatalog {
 		return builder;
 	}
 	
-	private static StringBuilder buildUpdateWithoutWhere(Table t, String...additionalFields) {
+	/*private static StringBuilder buildUpdateWithoutWhere(final Table t, final String...additionalFields) {
 		return buildUpdateWithoutWhere(t.getTablename(), t.getFields(), t.getFieldSwitcher(), additionalFields);
-	}
+	}*/
 	
-	private static final String INSERT_INFOSTORE = buildInsert(Table.INFOSTORE,"cid");
-	private static final String INSERT_INFOSTORE_DOCUMENT = buildInsert(Table.INFOSTORE_DOCUMENT,"cid");
+	private static final String INSERT_INFOSTORE = buildInsert(Table.INFOSTORE,STR_CID);
+	private static final String INSERT_INFOSTORE_DOCUMENT = buildInsert(Table.INFOSTORE_DOCUMENT,STR_CID);
 	
-	private static final String INSERT_DEL_INFOSTORE = buildInsert(Table.DEL_INFOSTORE,"cid");
-	private static final String INSERT_DEL_INFOSTORE_DOCUMENT = buildInsert(Table.DEL_INFOSTORE_DOCUMENT,"cid");
+	private static final String INSERT_DEL_INFOSTORE = buildInsert(Table.DEL_INFOSTORE,STR_CID);
+	private static final String INSERT_DEL_INFOSTORE_DOCUMENT = buildInsert(Table.DEL_INFOSTORE_DOCUMENT,STR_CID);
 	
 	
 	
-	public String getDelete(Table t, List<DocumentMetadata> documents) {
+	public String getDelete(final Table t, final List<DocumentMetadata> documents) {
 		switch(t) {
 		default: break;
 		case INFOSTORE_DOCUMENT : case DEL_INFOSTORE_DOCUMENT: throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
 		}
-		StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
-		for(DocumentMetadata doc : documents) {
-			delete.append(doc.getId()).append(",");
+		final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
+		for(final DocumentMetadata doc : documents) {
+			delete.append(doc.getId()).append(',');
 		}
 		delete.setLength(delete.length()-1);
 		delete.append(") AND cid = ?");
@@ -228,7 +244,7 @@ public class InfostoreQueryCatalog {
 	}
 
 	
-	public String getDocumentUpdate(Metadata[] fields) {
+	public String getDocumentUpdate(final Metadata[] fields) {
 		return buildUpdateWithoutWhere(Table.INFOSTORE.getTablename(), fields, Table.INFOSTORE.getFieldSwitcher()).append(" WHERE cid = ? and id = ? and last_modified <= ?").toString();
 	}
 	
@@ -236,21 +252,23 @@ public class InfostoreQueryCatalog {
 		return Table.INFOSTORE.getFields();
 	}
 	
-	public Metadata[] filterForDocument(Metadata[] modified) {
-		List<Metadata> m = new ArrayList<Metadata>();
-		Set<Metadata> knownFields = Table.INFOSTORE.getFieldSet();
-		for(Metadata metadata : modified) {
-			if(knownFields.contains(metadata))
+	public Metadata[] filterForDocument(final Metadata[] modified) {
+		final List<Metadata> m = new ArrayList<Metadata>();
+		final Set<Metadata> knownFields = Table.INFOSTORE.getFieldSet();
+		for(final Metadata metadata : modified) {
+			if(knownFields.contains(metadata)) {
 				m.add(metadata);
+			}
 		}
 		return m.toArray(new Metadata[m.size()]);
 	}
 	
-	public boolean updateDocument(Metadata[] modifiedColumns) {
-		Set<Metadata> fields = Table.INFOSTORE.getFieldSet();
-		for(Metadata m : modifiedColumns) {
-			if(fields.contains(m))
+	public boolean updateDocument(final Metadata[] modifiedColumns) {
+		final Set<Metadata> fields = Table.INFOSTORE.getFieldSet();
+		for(final Metadata m : modifiedColumns) {
+			if(fields.contains(m)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -263,7 +281,7 @@ public class InfostoreQueryCatalog {
 		return INSERT_DEL_INFOSTORE_DOCUMENT;
 	}
 	
-	public String getVersionUpdate(Metadata[] fields) {
+	public String getVersionUpdate(final Metadata[] fields) {
 		return buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT.getTablename(), fields, Table.INFOSTORE_DOCUMENT.getFieldSwitcher()).append(" WHERE cid = ? and infostore_id = ? and version_number = ? and last_modified <= ?").toString();
 	}
 	
@@ -271,34 +289,37 @@ public class InfostoreQueryCatalog {
 		return Table.INFOSTORE_DOCUMENT.getFields();	
 	}
 	
-	public Metadata[] filterForVersion(Metadata[] modified) {
-		List<Metadata> m = new ArrayList<Metadata>();
-		Set<Metadata> knownFields = Table.INFOSTORE_DOCUMENT.getFieldSet();
-		for(Metadata metadata : modified) {
-			if(metadata == Metadata.VERSION_LITERAL)
+	public Metadata[] filterForVersion(final Metadata[] modified) {
+		final List<Metadata> m = new ArrayList<Metadata>();
+		final Set<Metadata> knownFields = Table.INFOSTORE_DOCUMENT.getFieldSet();
+		for(final Metadata metadata : modified) {
+			if(metadata == Metadata.VERSION_LITERAL) {
 				continue;
-			if(knownFields.contains(metadata))
+			}
+			if(knownFields.contains(metadata)) {
 				m.add(metadata);
+			}
 		}
 		return m.toArray(new Metadata[m.size()]);
 	}
 	
-	public boolean updateVersion(Metadata[] modifiedColumns) {
-		Set<Metadata> fields = Table.INFOSTORE_DOCUMENT.getFieldSet();
-		for(Metadata m : modifiedColumns) {
-			if(fields.contains(m))
+	public boolean updateVersion(final Metadata[] modifiedColumns) {
+		final Set<Metadata> fields = Table.INFOSTORE_DOCUMENT.getFieldSet();
+		for(final Metadata m : modifiedColumns) {
+			if(fields.contains(m)) {
 				return true;
+			}
 		}
 		return false;
 	}
 	
-	public String getVersionDelete(Table t, List<DocumentMetadata> documents) {
+	public String getVersionDelete(final Table t, final List<DocumentMetadata> documents) {
 		switch(t) {
 		default: break;
 		case INFOSTORE : case DEL_INFOSTORE: throw new IllegalArgumentException("getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
 		}
-		StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ( ");
-		for(DocumentMetadata doc : documents) {
+		final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ( ");
+		for(final DocumentMetadata doc : documents) {
 			delete.append("( ").append(Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ").append(doc.getId())
 			.append(" AND ").append(Metadata.VERSION_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ").append(doc.getVersion())
 			.append(" ) OR ");
@@ -308,16 +329,17 @@ public class InfostoreQueryCatalog {
 		return delete.toString();
 	}
 	
-	public FieldChooser getChooserForVersion(int version) {
-		if(version == InfostoreFacade.CURRENT_VERSION)
+	public FieldChooser getChooserForVersion(final int version) {
+		if(version == InfostoreFacade.CURRENT_VERSION) {
 			return new DocumentWins();
+		}
 		return new VersionWins();
 	}
 	
-	public String getSelectDocument(int id, int version, int ctx_id) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(Metadata.VALUES_ARRAY, getChooserForVersion(version))).append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getSelectDocument(final int id, final int version, final int ctx_id) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(Metadata.VALUES_ARRAY, getChooserForVersion(version))).append(SQL_CHUNK04)
 		.append(ctx_id)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(ctx_id)
 		.append(" AND infostore.id = infostore_document.infostore_id ");
 		if(version == InfostoreFacade.CURRENT_VERSION) {
@@ -332,214 +354,216 @@ public class InfostoreQueryCatalog {
 		return builder.toString();
 	}
 
-	public String getListQuery(int[] id, Metadata[] metadata, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getListQuery(final int[] id, final Metadata[] metadata, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
 		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.id IN (");
-		for(int i : id) { builder.append(i).append(","); }
+		for(final int i : id) { builder.append(i).append(','); }
 		builder.setLength(builder.length()-1);
-		builder.append(")");
+		builder.append(')');
 		return builder.toString();
 	}
 	
-	public String getDocumentsQuery(long folderId, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getDocumentsQuery(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		
 		return builder.toString();
 	}
 	
-	public String getDocumentsQuery(long folderId, int userId, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getDocumentsQuery(final long folderId, final int userId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
-		.append(" AND infostore.created_by = ").append(userId);
+		.append(SQL_CHUNK02).append(userId);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 
-	public String getVersionsQuery(int id, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getVersionsQuery(final int id, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
 		.append(" AND infostore.id = infostore_document.infostore_id ")
 		.append(" WHERE infostore.id = ")
 		.append(id);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 	
-	public String getNewDocumentsQuery(long folderId, long since, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getNewDocumentsQuery(final long folderId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
 		.append(" AND infostore.creating_date >= ").append(since);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 
-	public String getModifiedDocumentsQuery(long folderId, long since, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getModifiedDocumentsQuery(final long folderId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
-		.append(" AND infostore.last_modified >= ").append(since);
+		.append(SQL_CHUNK05).append(since);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 
-	public String getDeletedDocumentsQuery(long folderId, long since, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT infostore.id")
+	public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder("SELECT infostore.id")
 		.append(" FROM del_infostore as infostore WHERE infostore.folder_id = ")
 		.append(folderId)
 		.append(" AND infostore.cid = ").append(contextId)
-		.append(" AND infostore.last_modified >= ").append(since);
+		.append(SQL_CHUNK05).append(since);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 	
-	public String getNewDocumentsQuery(long folderId,int userId, long since, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getNewDocumentsQuery(final long folderId,final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
 		.append(" AND infostore.creating_date >= ").append(since)
-		.append(" AND infostore.created_by = ").append(userId);
+		.append(SQL_CHUNK02).append(userId);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 
-	public String getModifiedDocumentsQuery(long folderId,int userId, long since, Metadata[] metadata, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getModifiedDocumentsQuery(final long folderId,final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
-		.append(" AND infostore.last_modified >= ").append(since)
-		.append(" AND infostore.created_by = ").append(userId);
+		.append(SQL_CHUNK05).append(since)
+		.append(SQL_CHUNK02).append(userId);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 
-	public String getDeletedDocumentsQuery(long folderId,int userId, long since, Metadata sort, int order, FieldChooser wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT infostore.id")
+	public String getDeletedDocumentsQuery(final long folderId,final int userId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder("SELECT infostore.id")
 		.append(" FROM del_infostore as infostore WHERE infostore.folder_id = ")
 		.append(folderId)
 		.append(" AND infostore.cid = ").append(contextId)
-		.append(" AND infostore.last_modified >= ").append(since)
-		.append(" AND infostore.created_by = ").append(userId);
+		.append(SQL_CHUNK05).append(since)
+		.append(SQL_CHUNK02).append(userId);
 		if(sort != null) {
-			builder.append(" ORDER BY ").append(fieldName(sort,wins))
-			.append(" ").append(order(order));
+			builder.append(STR_ORDER_BY).append(fieldName(sort,wins))
+			.append(' ').append(order(order));
 		}
 		return builder.toString();
 	}
 	
-	public String getCurrentFilenameQuery(long folderId, Metadata[] metadata, DocumentWins wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getCurrentFilenameQuery(final long folderId, final Metadata[] metadata, final DocumentWins wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
-		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.folder_id = ")
+		.append(SQL_CHUNK01)
 		.append(folderId)
 		.append(" AND infostore_document.filename = ?");
 		return builder.toString();
 	}	
 
-	public String getAllVersionsQuery(String where, Metadata[] metadata, VersionWins wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getAllVersionsQuery(final String where, final Metadata[] metadata, final VersionWins wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
 		.append(" AND infostore.id = infostore_document.infostore_id")
 		.append(" WHERE ").append(where);
 		return builder.toString();
 	}
 
-	public String getAllDocumentsQuery(String where, Metadata[] metadata, DocumentWins wins, int contextId) {
-		StringBuilder builder = new StringBuilder("SELECT ").append(fields(metadata,wins))
-		.append(" FROM infostore JOIN infostore_document ON infostore.cid = ")
+	public String getAllDocumentsQuery(final String where, final Metadata[] metadata, final DocumentWins wins, final int contextId) {
+		final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata,wins))
+		.append(SQL_CHUNK04)
 		.append(contextId)
-		.append(" AND infostore_document.cid = ")
+		.append(SQL_CHUNK03)
 		.append(contextId)
 		.append(" AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE ").append(where);
 		return builder.toString();
 	}
 	
-	private String order(int order) {
-		if(order == InfostoreFacade.DESC)
+	private String order(final int order) {
+		if(order == InfostoreFacade.DESC) {
 			return "DESC";
+		}
 		return "ASC";
 	}
 
-	private String fieldName(Metadata sort, FieldChooser wins) {
+	private String fieldName(final Metadata sort, final FieldChooser wins) {
 		if(sort == Metadata.CURRENT_VERSION_LITERAL) {
 			return "(infostore.version = infostore_document.version_number) AS current_version";
 		}
-		Table t = wins.choose(sort);
-		String col = (String) sort.doSwitch(t.getFieldSwitcher());
-		if(col == null)
+		final Table t = wins.choose(sort);
+		final String col = (String) sort.doSwitch(t.getFieldSwitcher());
+		if(col == null) {
 			return null;
+		}
 		return new StringBuilder(t.getTablename()).append('.').append(col).toString();
 	}
 
-	private String fields(Metadata[] metadata, FieldChooser wins) {
-		StringBuilder builder = new StringBuilder();
-		for(Metadata m : metadata) {
-			String col = fieldName(m,wins);
+	private String fields(final Metadata[] metadata, final FieldChooser wins) {
+		final StringBuilder builder = new StringBuilder();
+		for(final Metadata m : metadata) {
+			final String col = fieldName(m,wins);
 			if(col != null) {
 				builder.append(col).append(',');
 			}
@@ -739,7 +763,7 @@ public class InfostoreQueryCatalog {
 	
 	public static class VersionWins implements FieldChooser {
 
-		public Table choose(Metadata m) {
+		public Table choose(final Metadata m) {
 			if(Table.INFOSTORE_DOCUMENT.getFieldSet().contains(m)) {
 				return Table.INFOSTORE_DOCUMENT;
 			}
@@ -749,7 +773,7 @@ public class InfostoreQueryCatalog {
 	}
 	
 	public static class DocumentWins implements FieldChooser {
-		public Table choose(Metadata m) {
+		public Table choose(final Metadata m) {
 			if(Table.INFOSTORE.getFieldSet().contains(m)) {
 				return Table.INFOSTORE;
 			}

@@ -47,76 +47,72 @@
  *
  */
 
-
-
 package com.openexchange.ssl;
 
 /*
- * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com
- * date: Fri Jul 23 14:36:51 GMT 2004
+ * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com date: Fri Jul 23
+ * 14:36:51 GMT 2004
  */
 
-public class SSLCtx
-{
-   private static boolean libLoaded = false;
-   
-   private long ctx;
-    
-	private native long nativeNew(String cafile, 
-                                  String certfile, 
-                                  String keyfile) throws SSLException;
+public class SSLCtx {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SSLCtx.class);
+	
+	private static boolean libLoaded;
+
+	private long ctx;
+
+	private native long nativeNew(String cafile, String certfile, String keyfile) throws SSLException;
+
 	private native void nativeFree(long ctx);
 
-    /**
-     * Constructor
-     *
-     * @param CAFILE, ca certificate (absolute path)
-     * @param CERTFILE, certificate (absolute path)
-     * @param KEYFILE, private key (absolute path)
-     */ 
-	public SSLCtx(String CAFILE, 
-		          String CERTFILE,
-		          String KEYFILE) throws SSLException
-    {
-        ctx = nativeNew(CAFILE, CERTFILE, KEYFILE);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param CAFILE,
+	 *            ca certificate (absolute path)
+	 * @param CERTFILE,
+	 *            certificate (absolute path)
+	 * @param KEYFILE,
+	 *            private key (absolute path)
+	 */
+	public SSLCtx(String CAFILE, String CERTFILE, String KEYFILE) throws SSLException {
+		ctx = nativeNew(CAFILE, CERTFILE, KEYFILE);
+	}
 
-    /**
-     * Return the Context
-     */
-	public long getCTX()
-    {
-        return ctx;
-    }
+	/**
+	 * Return the Context
+	 */
+	public long getCTX() {
+		return ctx;
+	}
 
-    /**
-     * Free the SSL thing
-     */
-	public void finalize()
-    {
-        if(ctx != 0) 
-        {
-            nativeFree(ctx);
-            ctx = 0;
-        }
-    }
+	/**
+	 * Free the SSL thing
+	 * 
+	 * @throws Throwable
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		if (ctx != 0) {
+			nativeFree(ctx);
+			ctx = 0;
+		}
+		super.finalize();
+	}
 
-   /**
-    * Load C Library
-    */
-   static
-   {
-      if (!libLoaded) {
-         try
-         {
-            System.loadLibrary("oxssl");
-            libLoaded = true;
-         }
-         catch(Exception e)
-         {
-            System.err.println("oxssl library not found");
-            e.printStackTrace();
-         }
-      }
-   }
+	/**
+	 * Load C Library
+	 */
+	static {
+		if (!libLoaded) {
+			try {
+				System.loadLibrary("oxssl");
+				libLoaded = true;
+			} catch (Exception e) {
+				LOG.error("oxssl library not found", e);
+			}
+		}
+	}
 }

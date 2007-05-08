@@ -57,18 +57,21 @@ import com.openexchange.tools.exceptions.SerializationProcessor;
 import static java.util.Collections.sort;
 
 public class ProcessErrorCodes {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ProcessErrorCodes.class);
 
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		List<OXErrorCode> allCodes = new ArrayList<OXErrorCode>();
+	public static void main(final String[] args) {
+		final List<OXErrorCode> allCodes = new ArrayList<OXErrorCode>();
 		
-		for(String file : args) {
+		for(final String file : args) {
 			try {
 				allCodes.addAll(SerializationProcessor.load(file));
-			} catch (Exception x) {
-				x.printStackTrace();
+			} catch (final Exception x) {
+				LOG.error(x.getMessage(), x);
 				System.exit(-1);
 			}
 		}
@@ -76,13 +79,13 @@ public class ProcessErrorCodes {
 		sort(allCodes);
 		
 		try {
-			OXErrorCodeProcessor processor = (OXErrorCodeProcessor) Class.forName(System.getProperty("errorCodeProcessor", "com.openexchange.tools.exceptions.EchoProcessor")).newInstance();
-			for(OXErrorCode code : allCodes) {
+			final OXErrorCodeProcessor processor = (OXErrorCodeProcessor) Class.forName(System.getProperty("errorCodeProcessor", "com.openexchange.tools.exceptions.EchoProcessor")).newInstance();
+			for(final OXErrorCode code : allCodes) {
 				processor.process(code);
 			}
 			processor.done();
-		} catch (Exception x) {
-			x.printStackTrace();
+		} catch (final Exception x) {
+			LOG.error(x.getMessage(), x);
 			System.exit(-2);
 		}
 	}

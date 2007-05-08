@@ -49,44 +49,41 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.request.ContactRequest;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.OXConcurrentModificationException;
-import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.upload.UploadEvent;
-import com.openexchange.groupware.upload.UploadException;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.Logging;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.http.Tools;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.parser.ContactParser;
+import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.request.ContactRequest;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.upload.UploadEvent;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.Logging;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Tools;
 
 public class Contact extends DataServlet {
 
@@ -97,6 +94,7 @@ public class Contact extends DataServlet {
 	
 	private static final Log LOG = LogFactory.getLog(Contact.class);
 	
+	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -106,7 +104,7 @@ public class Contact extends DataServlet {
 			JSONObject jsonObj = null;
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);	
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(_doGet, e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -134,7 +132,7 @@ public class Contact extends DataServlet {
 					if (contactObj.getImage1() != null) {
 						os.write(contactObj.getImage1());
 					}
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					LOG.error("actionImage", e);
 					httpServletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "");
 				}
@@ -151,15 +149,15 @@ public class Contact extends DataServlet {
 			response.setTimestamp(contactRequest.getTimestamp());
 			try {
 				response.setData(new JSONArray(sw.toString()));	
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				response.setData(new JSONObject(sw.toString()));
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
             Logging.log(LOG, e);
 			response.setException(e);
 		}
@@ -169,7 +167,7 @@ public class Contact extends DataServlet {
 	}
 	
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		Response response = new Response();
+		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
@@ -181,7 +179,7 @@ public class Contact extends DataServlet {
 
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
 		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
 		            writeResponse(response, httpServletResponse);
@@ -198,18 +196,18 @@ public class Contact extends DataServlet {
 					response.setTimestamp(contactRequest.getTimestamp());
 					try {
 						response.setData(new JSONArray(sw.toString()));	
-					} catch (JSONException e) {
+					} catch (final JSONException e) {
 						response.setData(new JSONObject(sw.toString()));
 					}
 				} else if (data.charAt(0) == '{') {
-					JSONObject jsonDataObj = new JSONObject(data);
+					final JSONObject jsonDataObj = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
 				
 					contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
 					try {
 						response.setData(new JSONArray(sw.toString()));	
-					} catch (JSONException e) {
+					} catch (final JSONException e) {
 						response.setData(new JSONObject(sw.toString()));
 					}
 				} else {
@@ -218,12 +216,12 @@ public class Contact extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
             Logging.log(LOG, e);
 			response.setException(e);
 		}
@@ -232,6 +230,7 @@ public class Contact extends DataServlet {
 
 	}
 	
+	@Override
 	protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		httpServletResponse.setContentType("text/html");
 		String callbackSite = null;
@@ -326,21 +325,21 @@ public class Contact extends DataServlet {
 			} else {
 				throw new AjaxException(AjaxException.Code.UnknownAction, action);
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
             Logging.log(LOG, e);
 			response.setException(e);
 		}
 		try {
 			// Replaces every 2+2x parameter through the 3+2x parameter in the first parameter string
 			callbackSite = AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT, AJAXServlet.PARAMETER_JSON, response.getJSON().toString(), AJAXServlet.PARAMETER_ACTION, action);
-			PrintWriter pw = httpServletResponse.getWriter();
+			final PrintWriter pw = httpServletResponse.getWriter();
 			pw.print(callbackSite);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			log(RESPONSE_ERROR, e);
 			sendError(httpServletResponse);
 		}

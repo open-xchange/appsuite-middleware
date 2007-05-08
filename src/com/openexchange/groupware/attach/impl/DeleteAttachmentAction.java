@@ -74,8 +74,9 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
 	)
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		if(getAttachments().size() == 0)
+		if(getAttachments().size() == 0) {
 			return;
+		}
 		try {
 			
 			doUpdates(new Update(getQueryCatalog().getDelete("del_attachment", getAttachments())) {
@@ -88,7 +89,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
 			});
 			
 			doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
-		} catch (UpdateException x) {
+		} catch (final UpdateException x) {
 			throw EXCEPTIONS.create(0, x.getSQLException(), x.getStatement());
 		}
 	}
@@ -100,10 +101,11 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
 			msg = "Invalid SQL Query: %s"
 	)
 	public void perform() throws AbstractOXException {
-		if(getAttachments().size() == 0)
+		if(getAttachments().size() == 0) {
 			return;
+		}
 		final Date delDate = new Date();
-		UpdateBlock[] updates = new UpdateBlock[getAttachments().size()+1];
+		final UpdateBlock[] updates = new UpdateBlock[getAttachments().size()+1];
 		int i = 0;
 		for(final AttachmentMetadata m : getAttachments()) {
 			updates[i++] = new Update(getQueryCatalog().getInsertIntoDel()){
@@ -130,7 +132,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
 		
 		try {
 			doUpdates(updates);
-		} catch (UpdateException x) {
+		} catch (final UpdateException x) {
 			throw EXCEPTIONS.create(1, x.getSQLException(), x.getStatement());
 		}
 	}

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ssl;
 
 import java.io.DataInputStream;
@@ -62,94 +60,93 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /*
- * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com
- * date: Fri Jul 23 14:36:51 GMT 2004
+ * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com date: Fri Jul 23
+ * 14:36:51 GMT 2004
  */
 
-public class SSLSocket
-{
-	private Socket socket = null;
-	private long ssl = 0;
+public class SSLSocket {
+	private Socket socket;
+
+	private long ssl;
+
 	private SSLCtx ctx;
 
 	private native long nativeNew(long ctx) throws SSLException;
-	private native void nativeFree(long ssl);
-	private native boolean nativeConnectFinished(long ssl);
-	private native void nativeShutdown(long ssl);
-	private native void nativeAsignSession(long ssl, byte sess[], int len) throws SSLException;
-	private	native byte[] nativeConnect(long ssl, byte[] in, int off, int len) throws SSLException;
 
-	private void initialize(SSLCtx ctx) throws SSLException
-	{
-		if(ctx == null)
+	private native void nativeFree(long ssl);
+
+	private native boolean nativeConnectFinished(long ssl);
+
+	private native void nativeShutdown(long ssl);
+
+	private native void nativeAsignSession(long ssl, byte sess[], int len) throws SSLException;
+
+	private native byte[] nativeConnect(long ssl, byte[] in, int off, int len) throws SSLException;
+
+	private void initialize(final SSLCtx ctx) throws SSLException {
+		if (ctx == null) {
 			throw new SSLException("SSLCtx is null!");
+		}
 
 		this.ctx = ctx;
 		ssl = nativeNew(ctx.getCTX());
 	}
 
-	public long getSSL()
-	{
+	public long getSSL() {
 		return ssl;
 	}
 
-	public SSLSocket(long ssl, Socket socket) throws UnknownHostException, IOException, SSLException
-	{
+	public SSLSocket(final long ssl, final Socket socket) {
 		this.socket = socket;
 		this.ssl = ssl;
 	}
 
-	public SSLSocket(SSLCtx ctx, String host, int port) throws UnknownHostException, IOException, SSLException
-   	{
+	public SSLSocket(final SSLCtx ctx, final String host, final int port) throws UnknownHostException, IOException, SSLException {
 		socket = new Socket(host, port);
 		initialize(ctx);
 		SSLConnect();
-   	}
+	}
 
-   	public SSLSocket(SSLCtx ctx, InetAddress address, int port) throws IOException, SSLException
-	{
-    	socket = new Socket(address, port);
+	public SSLSocket(final SSLCtx ctx, final InetAddress address, final int port) throws IOException, SSLException {
+		socket = new Socket(address, port);
 		initialize(ctx);
 		SSLConnect();
-   	}
+	}
 
-   	public SSLSocket(SSLCtx ctx, String host, int port, InetAddress localAddr, int localPort) throws IOException, SSLException
-	{
-    	socket = new Socket(host, port, localAddr, localPort);
+	public SSLSocket(final SSLCtx ctx, final String host, final int port, final InetAddress localAddr, final int localPort) throws IOException,
+			SSLException {
+		socket = new Socket(host, port, localAddr, localPort);
 		initialize(ctx);
 		SSLConnect();
-   	}
+	}
 
-   	public SSLSocket(SSLCtx ctx, InetAddress address, int port, InetAddress localAddr, int localPort) throws IOException, SSLException
-	{
+	public SSLSocket(final SSLCtx ctx, final InetAddress address, final int port, final InetAddress localAddr, final int localPort)
+			throws IOException, SSLException {
 		socket = new Socket(address, port, localAddr, localPort);
 		initialize(ctx);
 		SSLConnect();
-   	}
+	}
 
-   	public SSLSocket(SSLCtx ctx, String host, int port, boolean stream) throws IOException, SocketException
-	{
-	    	throw new SocketException("not supported constructor");
-   	}
-
-   	public SSLSocket(SSLCtx ctx, InetAddress host, int port, boolean stream) throws IOException, SocketException
-	{
+	public SSLSocket(final SSLCtx ctx, final String host, final int port, final boolean stream) throws IOException, SocketException {
 		throw new SocketException("not supported constructor");
-   	}
+	}
 
-	public void finalize()
-	{
-		if(ssl != 0) 
-        {
+	public SSLSocket(final SSLCtx ctx, final InetAddress host, final int port, final boolean stream) throws IOException, SocketException {
+		throw new SocketException("not supported constructor");
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		if (ssl != 0) {
 			nativeFree(ssl);
 			ssl = 0;
 		}
+		super.finalize();
 	}
 
-	private void SSLConnect() throws IOException, SSLException
-	{
+	private void SSLConnect() throws IOException, SSLException {
 		DataInputStream ips;
-	    	DataOutputStream ops;
+		DataOutputStream ops;
 		int timeout;
 
 		timeout = socket.getSoTimeout();
@@ -157,144 +154,117 @@ public class SSLSocket
 		ips = new DataInputStream(socket.getInputStream());
 		ops = new DataOutputStream(socket.getOutputStream());
 
-		byte ret[], in[] = new byte[4096];
+		byte ret[];
+		final byte in[] = new byte[4096];
 		int len;
 
-        /** shake my hand, baby **/
+		/** shake my hand, baby * */
 		ret = nativeConnect(ssl, null, 0, 0);
-		if(ret != null) 
-		{
+		if (ret != null) {
 			ops.write(ret);
 			ops.flush();
 		}
 
-		do 
-		{
+		do {
 			len = ips.read(in, 0, in.length);
-			if(len == -1) 
-			{
+			if (len == -1) {
 				throw new IOException("the end of the stream has been reached");
 			}
 			ret = nativeConnect(ssl, in, 0, len);
-			if(ret != null) 
-			{
+			if (ret != null) {
 				ops.write(ret);
 				ops.flush();
 			}
 		} while (!nativeConnectFinished(ssl));
 		socket.setSoTimeout(timeout);
-   	}
+	}
 
-	public InetAddress getInetAddress()
-	{
+	public InetAddress getInetAddress() {
 		return socket.getInetAddress();
-   	}
+	}
 
-   	public InetAddress getLocalAddress()
-	{
+	public InetAddress getLocalAddress() {
 		return socket.getLocalAddress();
-   	}
+	}
 
-   	public int getPort()
-	{
-    	return socket.getPort();
-   	}
+	public int getPort() {
+		return socket.getPort();
+	}
 
-   	public int getLocalPort()
-	{
+	public int getLocalPort() {
 		return socket.getLocalPort();
-   	}
+	}
 
-   	public InputStream getInputStream() throws IOException
-	{
+	public InputStream getInputStream() throws IOException {
 		return new SSLInputStream(this, socket.getInputStream());
-   	}
+	}
 
-   	public OutputStream getOutputStream() throws IOException
-	{
+	public OutputStream getOutputStream() throws IOException {
 		return new SSLOutputStream(this, socket.getOutputStream());
-   	}
+	}
 
-   	public void setTcpNoDelay(boolean on) throws SocketException
-	{
+	public void setTcpNoDelay(final boolean on) throws SocketException {
 		socket.setTcpNoDelay(on);
-   	}
+	}
 
-   	public boolean getTcpNoDelay() throws SocketException
-	{
+	public boolean getTcpNoDelay() throws SocketException {
 		return socket.getTcpNoDelay();
-   	}
+	}
 
-   	public void setSoLinger(boolean on, int linger) throws SocketException
-	{
+	public void setSoLinger(final boolean on, final int linger) throws SocketException {
 		socket.setSoLinger(on, linger);
-   	}
+	}
 
-   	public int getSoLinger() throws SocketException
-	{
+	public int getSoLinger() throws SocketException {
 		return socket.getSoLinger();
-   	}
+	}
 
-   	public synchronized void setSoTimeout(int timeout) throws SocketException
-	{
+	public synchronized void setSoTimeout(final int timeout) throws SocketException {
 		socket.setSoTimeout(timeout);
-   	}
+	}
 
-   	public synchronized int getSoTimeout() throws SocketException
-	{
+	public synchronized int getSoTimeout() throws SocketException {
 		return socket.getSoTimeout();
-   	}
+	}
 
-   	public synchronized void setSendBufferSize(int size) throws SocketException
-	{
+	public synchronized void setSendBufferSize(final int size) throws SocketException {
 		socket.setSendBufferSize(size);
-   	}
+	}
 
-   	public synchronized int getSendBufferSize() throws SocketException
-	{
+	public synchronized int getSendBufferSize() throws SocketException {
 		return socket.getSendBufferSize();
-   	}
+	}
 
-    public synchronized void setReceiveBufferSize(int size) throws SocketException
-	{
-	    socket.setReceiveBufferSize(size);
-    }
+	public synchronized void setReceiveBufferSize(final int size) throws SocketException {
+		socket.setReceiveBufferSize(size);
+	}
 
-   	public synchronized int getReceiveBufferSize() throws SocketException
-	{
+	public synchronized int getReceiveBufferSize() throws SocketException {
 		return socket.getReceiveBufferSize();
-   	}
+	}
 
-   	public void setKeepAlive(boolean on) throws SocketException
-	{
+	public void setKeepAlive(final boolean on) throws SocketException {
 		socket.setKeepAlive(on);
-   	}
+	}
 
-   	public boolean getKeepAlive() throws SocketException
-	{
+	public boolean getKeepAlive() throws SocketException {
 		return socket.getKeepAlive();
-   	}
+	}
 
-   	public synchronized void close() throws IOException
-	{
+	public synchronized void close() throws IOException {
 		socket.close();
 		nativeShutdown(ssl);
-   	}
+	}
 
-    public void shutdownInput() throws IOException
-    {
-	    socket.shutdownInput();
-   	}
+	public void shutdownInput() throws IOException {
+		socket.shutdownInput();
+	}
 
-   	public void shutdownOutput() throws IOException
-   	{
+	public void shutdownOutput() throws IOException {
 		socket.shutdownOutput();
-   	}
+	}
 
-   	public String toString()
-	{
+	public String toString() {
 		return ("SSL" + socket.toString());
 	}
 }
-
-

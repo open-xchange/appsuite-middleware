@@ -76,11 +76,12 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 	)
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		if(oldAttachments.size() == 0)
+		if(oldAttachments.size() == 0) {
 			return;
+		}
 		try {
 			doUpdates(getQueryCatalog().getUpdate(), oldAttachments, true);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 	}
@@ -92,16 +93,17 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 			msg = "Invalid SQL Query: %s"
 	)
 	public void perform() throws AbstractOXException {
-		if(getAttachments().size() == 0)
+		if(getAttachments().size() == 0) {
 			return;
+		}
 		try {
 			doUpdates(getQueryCatalog().getUpdate(), getAttachments(), true);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 	}
 	
-	public void setOldAttachments(List<AttachmentMetadata> attachments) {
+	public void setOldAttachments(final List<AttachmentMetadata> attachments) {
 		this.oldAttachments = attachments;
 	}
 

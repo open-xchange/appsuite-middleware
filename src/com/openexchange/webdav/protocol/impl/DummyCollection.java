@@ -66,13 +66,14 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyCollection extends DummyResource implements WebdavCollection {
 	
-	private List<WebdavResource> children = new ArrayList<WebdavResource>();
+	private final List<WebdavResource> children = new ArrayList<WebdavResource>();
 
-	public DummyCollection(DummyResourceManager manager, String url) {
+	public DummyCollection(final DummyResourceManager manager, final String url) {
 		super(manager,url);
 	}
 	
-	protected boolean isset(Property p) {
+	@Override
+	protected boolean isset(final Property p) {
 		switch(p.getId()) {
 		case Protocol.GETCONTENTLANGUAGE : case Protocol.GETCONTENTLENGTH : case Protocol.GETCONTENTTYPE : case Protocol.GETETAG :
 			return false;
@@ -80,6 +81,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		}
 	}
 
+	@Override
 	public boolean isCollection(){
 		return true;
 	}
@@ -95,16 +97,17 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-	public void putBody(InputStream data, boolean guessSize) throws WebdavException {
+	public void putBody(final InputStream data, final boolean guessSize) throws WebdavException {
 		throw new WebdavException("Collections may not have bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
+	@Override
 	public String getLanguage() throws WebdavException{
 		return null;
 	}
 	
 	@Override
-	public void setLanguage(String lang) throws WebdavException{
+	public void setLanguage(final String lang) throws WebdavException{
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
@@ -115,18 +118,18 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	
 	@Override
 	public void delete() throws WebdavException {
-		List<WebdavResource> copy = new ArrayList<WebdavResource>(children);
-		List<WebdavException> exceptions = new ArrayList<WebdavException>();
-		for(WebdavResource res : copy) {
+		final List<WebdavResource> copy = new ArrayList<WebdavResource>(children);
+		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
+		for(final WebdavResource res : copy) {
 			try {
 				res.delete();
-			} catch (WebdavException x) {
+			} catch (final WebdavException x) {
 				exceptions.add(x);
 			}
 		}
 		try {
 			super.delete();
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {
@@ -134,33 +137,36 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		}
 	}
 	
-	public DummyCollection instance(String url) {
+	@Override
+	public DummyCollection instance(final String url) {
 		return new DummyCollection(mgr,url);
 	}
 	
 	
 	@Override
-	public WebdavResource copy(String dest, boolean noroot, boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		checkParentExists(dest);
-		List<WebdavException> exceptions = new ArrayList<WebdavException>();
+		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
 		try {
 			WebdavResource copy = null;
-			if(!noroot)
+			if(!noroot) {
 				copy = super.copy(dest,noroot, overwrite);
-			else
+			} else {
 				copy = mgr.resolveCollection(dest);
+			}
 			
-			for(WebdavResource res : new ArrayList<WebdavResource>(children)) {
-				String oldUri = res.getUrl();
-				String name = oldUri.substring(oldUri.lastIndexOf("/")+1);
+			final List<WebdavResource> tmpList = new ArrayList<WebdavResource>(children);
+			for(final WebdavResource res : tmpList) {
+				final String oldUri = res.getUrl();
+				final String name = oldUri.substring(oldUri.lastIndexOf('/')+1);
 				try {
-					res.copy(dest+"/"+name);
-				} catch (WebdavException x) {
+					res.copy(dest+'/'+name);
+				} catch (final WebdavException x) {
 					exceptions.add(x);
 				}
 			}
 			return copy;
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {
@@ -170,35 +176,37 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 
 	@Override
-	public void setLength(Long l) throws WebdavException {
+	public void setLength(final Long l) throws WebdavException {
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 	
+	@Override
 	public String getETag() throws WebdavException{
 		return null;
 	}
 	
-	public void setContentType(String s) throws WebdavException {
+	@Override
+	public void setContentType(final String s) throws WebdavException {
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(String subPath) throws WebdavException {
-		return mgr.resolveResource(url+"/"+subPath);
+	public WebdavResource resolveResource(final String subPath) throws WebdavException {
+		return mgr.resolveResource(url+'/'+subPath);
 	}
 
-	public WebdavCollection resolveCollection(String subPath) throws WebdavException {
-		return mgr.resolveCollection(url+"/"+subPath);
+	public WebdavCollection resolveCollection(final String subPath) throws WebdavException {
+		return mgr.resolveCollection(url+'/'+subPath);
 	}
 	
 	public List<WebdavResource> getChildren(){
 		return new ArrayList<WebdavResource>(children );
 	}
 	
-	public void addChild(WebdavResource child) {
+	public void addChild(final WebdavResource child) {
 		children.add(child);
 	}
 	
-	public void removeChild(WebdavResource child) {
+	public void removeChild(final WebdavResource child) {
 		children.remove(child);
 	}
 
@@ -220,25 +228,28 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		private Iterator<WebdavResource> subIterator;
 		private Iterator<WebdavResource> childIterator;
 		
-		public ChildTreeIterator(Iterator<WebdavResource> childIterator) {
+		public ChildTreeIterator(final Iterator<WebdavResource> childIterator) {
 			this.childIterator = childIterator;
 		}
 		
 		public boolean hasNext() {
 			if(subIterator != null) {
-				if(subIterator.hasNext())
+				if(subIterator.hasNext()) {
 					return true;
+				}
 				subIterator = null;
 			}
 			return childIterator.hasNext();
 		}
 
 		public WebdavResource next() {
-			if(subIterator != null && subIterator.hasNext())
+			if(subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
-			WebdavResource res = childIterator.next();
-			if(res.isCollection())
+			}
+			final WebdavResource res = childIterator.next();
+			if(res.isCollection()) {
 				subIterator = res.toCollection().iterator();
+			}
 			return res;
 		}
 

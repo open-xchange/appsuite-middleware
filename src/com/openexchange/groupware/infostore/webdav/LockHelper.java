@@ -72,46 +72,48 @@ public abstract class LockHelper {
 	private String url;
 	protected int id;
 	
-	private Set<String> removedLocks = new HashSet<String>();
-	private Set<Integer> removedLockIDs = new HashSet<Integer>();
+	private final Set<String> removedLocks = new HashSet<String>();
+	private final Set<Integer> removedLockIDs = new HashSet<Integer>();
 	private SessionHolder sessionHolder;
 	private LockManager lockManager;
 	private boolean loadedLocks;
 
 
-	public LockHelper(LockManager lockManager, SessionHolder sessionHolder, String url) {
+	public LockHelper(final LockManager lockManager, final SessionHolder sessionHolder, final String url) {
 		this.lockManager = lockManager;
-		if(null == sessionHolder)
+		if(null == sessionHolder) {
 			throw new IllegalArgumentException("sessionHolder may not be null");
+		}
 		this.sessionHolder = sessionHolder;
 		this.url = url;
 	}
 
-	public void setId(int id){
+	public void setId(final int id){
 		this.id = id;
 	}
 	
-	public WebdavLock getLock(String token) throws WebdavException {
+	public WebdavLock getLock(final String token) throws WebdavException {
 		loadLocks();
 		return locks.get(token);
 	}
 
 	public List<WebdavLock> getAllLocks() throws WebdavException {
 		loadLocks();
-		List<WebdavLock> lockList = new ArrayList<WebdavLock>(locks.values());
-		List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
-		long now = System.currentTimeMillis();
-		for(WebdavLock lock : lockList) {
-			if(!lock.isActive(now)) {
-				removeLock(lock.getToken());
-			} else
+		final List<WebdavLock> lockList = new ArrayList<WebdavLock>(locks.values());
+		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
+		final long now = System.currentTimeMillis();
+		for(final WebdavLock lock : lockList) {
+			if(lock.isActive(now)) {
 				notExpired.add(lock);
+			} else {
+				removeLock(lock.getToken());
+			}
 		}
 		
 		return notExpired;
 	}
 
-	public void addLock(WebdavLock lock) throws WebdavException {
+	public void addLock(final WebdavLock lock) throws WebdavException {
 		try {
 			loadLocks();
 			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
@@ -119,10 +121,10 @@ public abstract class LockHelper {
 				return;
 			}
 			
-			int lockId = saveLock(lock);
+			final int lockId = saveLock(lock);
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.toString(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -131,14 +133,14 @@ public abstract class LockHelper {
 
 	protected abstract int saveLock(WebdavLock lock) throws OXException ;
 
-	public void removeLock(String token) {
+	public void removeLock(final String token) {
 		locks.remove(token);
 		markRemovedLock(token);
 	}
 	
-	public void setLocks(List<Lock> locks) {
-		for(Lock lock : locks) {
-			WebdavLock l = toWebdavLock(lock);
+	public void setLocks(final List<Lock> locks) {
+		for(final Lock lock : locks) {
+			final WebdavLock l = toWebdavLock(lock);
 			this.locks.put(l.getToken(), l);
 		}
 	}
@@ -147,39 +149,43 @@ public abstract class LockHelper {
 	protected abstract Lock toLock(WebdavLock lock);
 
 	private synchronized void loadLocks() throws WebdavException {
-		if(loadedLocks)
+		if(loadedLocks) {
 			return;
-		if(id == 0)
+		}
+		if(id == 0) {
 			return;
+		}
 		loadedLocks = true;
-		SessionObject session = sessionHolder.getSessionObject();
+		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			List<Lock> locks = lockManager.findLocks(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
-			List<Lock> cleanedLocks = new ArrayList<Lock>();
-			for(Lock lock : locks) {
-				if (!removedLockIDs.contains(lock.getId()))
+			final List<Lock> locks = lockManager.findLocks(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final List<Lock> cleanedLocks = new ArrayList<Lock>();
+			for(final Lock lock : locks) {
+				if (!removedLockIDs.contains(Integer.valueOf(lock.getId()))) {
 					cleanedLocks.add(lock);
+				}
 			}
 			setLocks(cleanedLocks);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	
-	private void markRemovedLock(String token) {
+	private void markRemovedLock(final String token) {
 		removedLocks.add(token);
-		int lockId = Integer.valueOf(token.substring(41));
-		removedLockIDs.add(lockId);
+		final int lockId = Integer.parseInt(token.substring(41));
+		removedLockIDs.add(Integer.valueOf(lockId));
 	}
 	
 	public void dumpLocksToDB() throws OXException {
-		if(removedLocks.isEmpty())
+		if(removedLocks.isEmpty()) {
 			return;
-		SessionObject session = sessionHolder.getSessionObject();
-		Context ctx = session.getContext();
-		User user = session.getUserObject();
-		UserConfiguration userConfig = session.getUserConfiguration();
-		for(int id : removedLockIDs) {
+		}
+		final SessionObject session = sessionHolder.getSessionObject();
+		final Context ctx = session.getContext();
+		final User user = session.getUserObject();
+		final UserConfiguration userConfig = session.getUserConfiguration();
+		for(final int id : removedLockIDs) {
 			lockManager.unlock(id, ctx, user, userConfig);
 		}
 		removedLocks.clear();
@@ -187,12 +193,12 @@ public abstract class LockHelper {
 	}
 	
 	public void deleteLocks() throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
+		final SessionObject session = sessionHolder.getSessionObject();
 		lockManager.removeAll(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
 	}
 
-	public void transferLock(WebdavLock lock) throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
+	public void transferLock(final WebdavLock lock) throws OXException {
+		final SessionObject session = sessionHolder.getSessionObject();
 		lockManager.insertLock(id, toLock(lock), session.getContext(), session.getUserObject(), session.getUserConfiguration());
 	}
 }

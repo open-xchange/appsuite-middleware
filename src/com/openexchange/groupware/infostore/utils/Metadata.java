@@ -163,7 +163,7 @@ public class Metadata {
 	private String name;
 	private int id;
 	
-	private Metadata(int id,String name){
+	private Metadata(final int id,final String name){
 		this.name = name;
 		this.id = id;
 	}
@@ -176,7 +176,7 @@ public class Metadata {
 		return id;
 	}
 	
-	public static Metadata get(int id){
+	public static Metadata get(final int id){
 		switch(id){
 		case LAST_MODIFIED : return LAST_MODIFIED_LITERAL;
 		case CREATION_DATE : return CREATION_DATE_LITERAL;
@@ -204,15 +204,15 @@ public class Metadata {
 		}
 	}
 	
-	public static Metadata get(String s){
-		for(Metadata metadata : VALUES){
+	public static Metadata get(final String s){
+		for(final Metadata metadata : VALUES){
 			if(metadata.getName().equals(s))
 				return metadata;
 		}
 		return null;
 	}
 	
-	public Object doSwitch(MetadataSwitcher switcher){
+	public Object doSwitch(final MetadataSwitcher switcher){
 		switch(id){
 		case LAST_MODIFIED : return switcher.lastModified();
 		case CREATION_DATE : return switcher.creationDate();
@@ -240,7 +240,7 @@ public class Metadata {
 		}
 	}
 
-	public static AttachmentField getAttachmentField(Metadata attachmentCompatible) {
+	public static AttachmentField getAttachmentField(final Metadata attachmentCompatible) {
 		switch(attachmentCompatible.getId()) {
 		case FILENAME : return AttachmentField.FILENAME_LITERAL;
 		case FILE_SIZE : return AttachmentField.FILE_SIZE_LITERAL;

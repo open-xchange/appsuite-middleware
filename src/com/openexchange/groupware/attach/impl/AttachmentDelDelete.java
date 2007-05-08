@@ -14,12 +14,13 @@ import com.openexchange.server.DBPoolingException;
 public class AttachmentDelDelete extends ContextDelete implements
 		DeleteListener {
 
-	public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon,
-			Connection writeCon) throws DeleteFailedException, LdapException,
+	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon,
+			final Connection writeCon) throws DeleteFailedException, LdapException,
 			SQLException, DBPoolingException {
 
-		if(!isContextDelete(sqlDelEvent))
+		if(!isContextDelete(sqlDelEvent)) {
 			return;
+		}
 		PreparedStatement stmt = null;
 		
 		try {
@@ -27,8 +28,9 @@ public class AttachmentDelDelete extends ContextDelete implements
 			stmt.setInt(1,sqlDelEvent.getContext().getContextId());
 			stmt.executeUpdate();
 		} finally {
-			if(stmt != null)
+			if(stmt != null) {
 				stmt.close();
+			}
 			
 		}
 		

@@ -76,56 +76,57 @@ public class OXSpellCheckResult {
     /**
      * @param response
      */
-    public OXSpellCheckResult(String line) {
-        if (line == null || line.length() <= 0)
-            parseErr(line);
-        else if (line.charAt(0) == '*')
-            parseOk(line);
-        else if (line.charAt(0) == '&')
-            parseSuggestion(line);
-        else if (line.charAt(0) == '#')
-            parseNon(line);
-        else
-            parseErr(line);
+    public OXSpellCheckResult(final String line) {
+        if (line == null || line.length() <= 0) {
+			parseErr(line);
+		} else if (line.charAt(0) == '*') {
+			parseOk(line);
+		} else if (line.charAt(0) == '&') {
+			parseSuggestion(line);
+		} else if (line.charAt(0) == '#') {
+			parseNon(line);
+		} else {
+			parseErr(line);
+		}
     }
 
-    private void parseErr(String line) {
+    private void parseErr(final String line) {
         offset = 0;
         type = ERROR;
         suggestions = new ArrayList<String>();
         origWord = "";
     }
 
-    private void parseOk(String line) {
+    private void parseOk(final String line) {
         offset = 0;
         type = OK;
         suggestions = new ArrayList<String>();
         origWord = "";
     }
 
-    private void parseNon(String line) {
+    private void parseNon(final String line) {
         type = NONE;
         suggestions = new ArrayList<String>();
 
-        StringTokenizer st = new StringTokenizer(line);
+        final StringTokenizer st = new StringTokenizer(line);
         st.nextToken(); // skip '#'
         origWord = st.nextToken();
         offset = Integer.parseInt(st.nextToken());
     }
 
-    private void parseSuggestion(String line) {
+    private void parseSuggestion(final String line) {
         type = SUGGESTION;
 
         StringTokenizer st = new StringTokenizer(line);
         st.nextToken(); // skip '#'
         origWord = st.nextToken();
-        int count = Integer.parseInt(st.nextToken().trim());
+        final int count = Integer.parseInt(st.nextToken().trim());
         suggestions = new ArrayList<String>(count);
         offset = Integer.parseInt(st.nextToken(":").trim());
 
         st = new StringTokenizer(st.nextToken(":"), ",");
         while (st.hasMoreTokens()) {
-            String suggestion = st.nextToken().trim();
+            final String suggestion = st.nextToken().trim();
             suggestions.add(suggestion);
         }
     }
@@ -149,11 +150,12 @@ public class OXSpellCheckResult {
     private static class Type {
         private final String typeName;
 
-        Type(String typeName) {
+        Type(final String typeName) {
             this.typeName = typeName;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return typeName;
         }
     }

@@ -256,10 +256,12 @@ public class GlobalConfig {
                 e.printStackTrace();
             } finally {
                 try {
-                    if (isr != null)
-                        isr.close();
-                    if (fis != null)
-                        fis.close();
+                    if (isr != null) {
+						isr.close();
+					}
+                    if (fis != null) {
+						fis.close();
+					}
                 } catch (final IOException e) {}
             }
 

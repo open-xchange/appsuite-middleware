@@ -72,38 +72,40 @@ public class DBPoolProvider implements DBProvider {
 	private static final Log LOG = LogFactory.getLog(DBPoolProvider.class);
 	
 	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=0, msg="Database cannot be reached.")	
-	public Connection getReadConnection(Context ctx) throws TransactionException {
+	public Connection getReadConnection(final Context ctx) throws TransactionException {
 		try {
-			Connection readCon = DBPool.pickup(ctx);
+			final Connection readCon = DBPool.pickup(ctx);
 			return readCon;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.fatal("",e);
 			throw EXCEPTIONS.create(0,e);
 		}
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
-		if(con != null)
+	public void releaseReadConnection(final Context ctx, final Connection con) {
+		if(con != null) {
 			DBPool.closeReaderSilent(ctx,con); //FIXME
+		}
 	}
 
 	@OXThrows(category=Category.SUBSYSTEM_OR_SERVICE_DOWN, desc="The Database does not seem to be reachable. This must be fixed by the system administration", exceptionId=1, msg="Database cannot be reached.")	
-	public Connection getWriteConnection(Context ctx) throws TransactionException {
+	public Connection getWriteConnection(final Context ctx) throws TransactionException {
 		try {
-			Connection writeCon = DBPool.pickupWriteable(ctx);
+			final Connection writeCon = DBPool.pickupWriteable(ctx);
 			return writeCon;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.fatal("",e);
 			throw EXCEPTIONS.create(1,e);
 		}
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
-		if(con == null)
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
+		if(con == null) {
 			return;
+		}
 		try {
 			con.setAutoCommit(true);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.fatal("",e);
 		}
 		DBPool.closeWriterSilent(ctx,con);

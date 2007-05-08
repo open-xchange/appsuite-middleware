@@ -113,7 +113,7 @@ public class AttachmentField {
 	
 
 	
-	public static AttachmentField get(int i){
+	public static AttachmentField get(final int i){
 		switch(i){
 		case CREATED_BY : return CREATED_BY_LITERAL;
 		case CREATION_DATE : return CREATION_DATE_LITERAL;
@@ -131,15 +131,16 @@ public class AttachmentField {
 		}
 	}
 	
-	public static AttachmentField get(String s) {
-		for(AttachmentField field : VALUES) {
-			if(field.name.equals(s))
+	public static AttachmentField get(final String s) {
+		for(final AttachmentField field : VALUES) {
+			if(field.name.equals(s)) {
 				return field;
+			}
 		}
 		return null;
 	}
 	
-	public Object doSwitch(AttachmentSwitch sw){
+	public Object doSwitch(final AttachmentSwitch sw){
 		switch(id){
 		case CREATED_BY : return sw.createdBy();
 		case CREATION_DATE : return sw.creationDate();
@@ -158,11 +159,11 @@ public class AttachmentField {
 	}
 	
 	
-	private int id = 0;
+	private int id;
 	private String name = "";
 	
 	
-	private AttachmentField(int id, String name){
+	private AttachmentField(final int id, final String name){
 		this.id=id;
 		this.name=name;
 	}
@@ -175,6 +176,7 @@ public class AttachmentField {
 		return id;
 	}
 	
+	@Override
 	public String toString(){
 		return name;
 	}

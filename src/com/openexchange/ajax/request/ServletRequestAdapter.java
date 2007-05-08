@@ -70,29 +70,31 @@ public class ServletRequestAdapter implements SimpleRequest {
 	private Object body;
 	
 
-	public ServletRequestAdapter(HttpServletRequest req, HttpServletResponse res) {
+	public ServletRequestAdapter(final HttpServletRequest req, final HttpServletResponse res) {
 		this.req=req;
 		this.res=res;
 	}
 
-	public String getParameter(String param) {
+	public String getParameter(final String param) {
 		return req.getParameter(param);
 	}
 
 	public Writer getWriter() throws IOException {
-		if(w==null)
+		if(w==null) {
 			w = res.getWriter();
+		}
 		return w;
 	}
 
-	public String[] getParameterValues(String param) {
-		String commaSeparated =  req.getParameter(param);
+	public String[] getParameterValues(final String param) {
+		final String commaSeparated =  req.getParameter(param);
 		return commaSeparated.split("\\s*,\\s*");
 	}
 
 	public Object getBody() {
-		if(null != body)
+		if(null != body) {
 			return body;
+		}
 		try {
 			final InputStream input = req.getInputStream();
 	        final ByteArrayOutputStream baos = new ByteArrayOutputStream(
@@ -104,25 +106,24 @@ public class ServletRequestAdapter implements SimpleRequest {
 	        }
 	        String characterEncoding = req.getCharacterEncoding();
 	        if (null == characterEncoding) {
-//	        	throw new IOException("No character encoding provided.");
 				characterEncoding="UTF-8";
 			}
-			String body =  new String(baos.toByteArray(), characterEncoding);
+			final String body =  new String(baos.toByteArray(), characterEncoding);
 			
-			JSONObject o = new JSONObject("{\"data\": "+body+"}");
-			return this.body = o.get("data");
-		} catch (IOException e) {
+			return this.body = new JSONObject("{\"data\": "+body+'}').get("data");
+		} catch (final IOException e) {
 			return null;
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			return null;
 		}
 	}
 	
+	@Override
 	public String toString(){
-		StringBuffer b = new StringBuffer();
-		Enumeration e = req.getParameterNames();
+		final StringBuilder b = new StringBuilder();
+		final Enumeration e = req.getParameterNames();
 		while(e.hasMoreElements()) {
-			String name = e.nextElement().toString();
+			final String name = e.nextElement().toString();
 			b.append(" | ");
 			b.append(name);
 			b.append(" : ");
@@ -130,11 +131,12 @@ public class ServletRequestAdapter implements SimpleRequest {
 			b.append(" | ");
 		}
 		b.append("BODY: ");
-		Object body = getBody();
-		if(null == body)
+		final Object body = getBody();
+		if(null == body) {
 			b.append("No body");
-		else
+		} else {
 			b.append(body);
+		}
 		return b.toString();
 	}
 }

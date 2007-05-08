@@ -50,18 +50,15 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.tx.UndoableAction;
-
 import com.openexchange.groupware.attach.Classes;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.tx.UndoableAction;
 
 @OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION, component=Component.ATTACHMENT)
 public class CreateAttachmentAction extends AttachmentListQueryAction implements UndoableAction{
@@ -76,8 +73,9 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 	)
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		if(getAttachments().size() == 0)
+		if(getAttachments().size() == 0) {
 			return;
+		}
 		try {
 			doUpdates(new Update(getQueryCatalog().getDelete("prg_attachment", getAttachments())){
 
@@ -100,8 +98,9 @@ public class CreateAttachmentAction extends AttachmentListQueryAction implements
 			msg = "Invalid SQL Query: %s"
 	)
 	public void perform() throws AbstractOXException {
-		if(getAttachments().size() == 0)
+		if(getAttachments().size() == 0) {
 			return;
+		}
 		try {
 			doUpdates(getQueryCatalog().getInsert(), getAttachments(),false);
 		} catch (UpdateException e) {

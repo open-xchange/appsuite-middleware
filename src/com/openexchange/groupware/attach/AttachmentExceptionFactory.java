@@ -56,16 +56,17 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 public class AttachmentExceptionFactory extends AbstractOXExceptionFactory {
 
-	public AttachmentExceptionFactory(Class clazz) {
+	public AttachmentExceptionFactory(final Class clazz) {
 		super(clazz);
 	}
 	
 	@Override
-	protected AbstractOXException buildException(Component component,
-			Category category, int number, String message, Throwable cause,
-			Object... msgArgs) {
-		if(component != Component.ATTACHMENT)
+	protected AbstractOXException buildException(final Component component,
+			final Category category, final int number, final String message, final Throwable cause,
+			final Object... msgArgs) {
+		if(component != Component.ATTACHMENT) {
 			throw new IllegalArgumentException("This Exception Factory can only create AttachmentExceptions");
+		}
 		return new AttachmentException(category,number,message,cause,msgArgs);
 	}
 
@@ -74,11 +75,11 @@ public class AttachmentExceptionFactory extends AbstractOXExceptionFactory {
 		return Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY;
 	}
 	
-	public AttachmentException create(int id, Object...msgArgs) {
+	public AttachmentException create(final int id, final Object...msgArgs) {
 		return (AttachmentException) createException(id, msgArgs);
 	}
 	
-	public AttachmentException create(int id, Throwable t, Object...msgArgs) {
+	public AttachmentException create(final int id, final Throwable t, final Object...msgArgs) {
 		return (AttachmentException) createException(id,t, msgArgs);
 	}
 

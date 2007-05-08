@@ -79,11 +79,11 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	private static final Log LOG = LogFactory.getLog(DBService.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(DBService.class);
 		
-	private ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
+	private final ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
 	
 	private static final class ThreadState {
 		public List<Undoable> undoables = new ArrayList<Undoable>();
-		public boolean preferWriteCon = false;
+		public boolean preferWriteCon;
 		public Set<Connection> writeCons = new HashSet<Connection>();
 	}
 	
@@ -92,26 +92,26 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 		return this.provider;
 	}
 	
-	public void setProvider(DBProvider provider) {
+	public void setProvider(final DBProvider provider) {
 		this.provider = new RequestDBProvider(provider);
 		this.provider.setTransactional(true);
 	}
 	
 	public DBService(){}
 	
-	public DBService(DBProvider provider) {
+	public DBService(final DBProvider provider) {
 		setProvider(provider);
 	}
 
-	public Connection getReadConnection(Context ctx) throws TransactionException {
+	public Connection getReadConnection(final Context ctx) throws TransactionException {
 		if(txState.get() != null && txState.get().preferWriteCon) {
 			return getWriteConnection(ctx);
 		}
 		return provider.getReadConnection(ctx);
 	}
 
-	public Connection getWriteConnection(Context ctx) throws TransactionException {
-		Connection writeCon = provider.getWriteConnection(ctx);
+	public Connection getWriteConnection(final Context ctx) throws TransactionException {
+		final Connection writeCon = provider.getWriteConnection(ctx);
 		if(txState.get() != null && txState.get().preferWriteCon) {
 			txState.get().writeCons.add(writeCon);
 			return writeCon;
@@ -122,7 +122,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 		return writeCon;
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
+	public void releaseReadConnection(final Context ctx, final Connection con) {
 		if(txState.get() != null && txState.get().preferWriteCon && txState.get().writeCons.contains(con)){
 			releaseWriteConnection(ctx,con);
 			return;
@@ -130,7 +130,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 		provider.releaseReadConnection(ctx, con);
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 		if(txState.get() != null && txState.get().preferWriteCon) {
 			txState.get().writeCons.remove(con);
 		}
@@ -141,7 +141,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 		provider.commit();
 	}
 
-	public void commitDBTransaction(Undoable undo) throws TransactionException {
+	public void commitDBTransaction(final Undoable undo) throws TransactionException {
 		provider.commit();
 		addUndoable(undo);
 	}
@@ -169,22 +169,22 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	
 	@OXThrows(category=Category.INTERNAL_ERROR, desc="This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!", exceptionId=1, msg="This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool!")
 	public void rollback() throws TransactionException {
-		List<Undoable> failed = new ArrayList<Undoable>();
-		List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
+		final List<Undoable> failed = new ArrayList<Undoable>();
+		final List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
 		Collections.reverse(undos);
-		for(Undoable undo : undos) {
+		for(final Undoable undo : undos) {
 			try {
 				undo.undo();
-			} catch (AbstractOXException x) {
+			} catch (final AbstractOXException x) {
 				LOG.fatal(x.getMessage(),x);
 				failed.add(undo);
 			}
 		}
 		if(failed.size() != 0) {
-			TransactionException exception = EXCEPTIONS.create(1);
+			final TransactionException exception = EXCEPTIONS.create(1);
 			if(LOG.isFatalEnabled()) {
-				StringBuilder explanations = new StringBuilder();
-				for(Undoable undo : failed) {
+				final StringBuilder explanations = new StringBuilder();
+				for(final Undoable undo : failed) {
 					explanations.append(undo.error());
 					explanations.append("\n");
 				}
@@ -198,31 +198,34 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	
 	}
 	
-	public void setRequestTransactional(boolean transactional) {
+	public void setRequestTransactional(final boolean transactional) {
 		provider.setRequestTransactional(transactional);
 	}
 		
-	protected void close(PreparedStatement stmt, ResultSet rs) {
-		if(stmt != null)
+	protected void close(final PreparedStatement stmt, final ResultSet rs) {
+		if(stmt != null) {
 			try {
 				stmt.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.debug("",e);
 			}
-		if(rs != null)
+		}
+		if(rs != null) {
 			try {
 				rs.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.debug("",e);
 			}
+		}
 	}
-	protected void addUndoable(Undoable undo) throws TransactionException {
-		if(null == txState.get() || null == txState.get().undoables) 
+	protected void addUndoable(final Undoable undo) throws TransactionException {
+		if(null == txState.get() || null == txState.get().undoables) {
 			return;
+		}
 		txState.get().undoables.add(undo);
 	}
 	
-	protected void perform(UndoableAction action, boolean dbTransaction) throws AbstractOXException {
+	protected void perform(final UndoableAction action, final boolean dbTransaction) throws AbstractOXException {
 		try {
 			if(dbTransaction) {
 				startDBTransaction();
@@ -233,17 +236,19 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 			} else {
 				addUndoable(action);
 			}
-		} catch (AbstractOXException e) {	
-			if(dbTransaction)
+		} catch (final AbstractOXException e) {	
+			if(dbTransaction) {
 				rollbackDBTransaction();
+			}
 			throw e;
 		} finally {
-			if(dbTransaction)
+			if(dbTransaction) {
 				finishDBTransaction();
+			}
 		}
 	}
 	@Deprecated
-	public void setTransactional(boolean tx){}
+	public void setTransactional(final boolean tx){}
 	
 	public boolean inTransaction(){
 		return txState.get() != null;

@@ -69,40 +69,42 @@ public class JSProcessor implements OXErrorCodeProcessor {
 
 	private String filename;
 	
-	private Set<Category> categories = null;
-	private boolean include = false;
+	private Set<Category> categories;
+	private boolean include;
 	
-	private JSONObject assoc = new JSONObject();
+	private final JSONObject assoc = new JSONObject();
 	
 	public void done() {
 		PrintWriter out = null;
 		try {
 			out = new PrintWriter(new BufferedWriter(new FileWriter(new File(filename))));
 			out.print(assoc);
-		} catch(IOException  x) {
+		} catch(final IOException  x) {
 			x.printStackTrace();
 			System.exit(-1);
 		} finally {
-			if(out!=null)
+			if(out!=null) {
 				out.close();
+			}
 		}
 	}
 
-	public void process(OXErrorCode errorCode) {
+	public void process(final OXErrorCode errorCode) {
 		initConfig();
 		write(errorCode);
 		
 	}
 	
-	private void write(OXErrorCode errorCode) {
+	private void write(final OXErrorCode errorCode) {
 		final StringBuilder sb = new StringBuilder();
         sb.append(errorCode.component == null ? Component.NONE.getAbbreviation() : errorCode.component.getAbbreviation());
         sb.append('-');
         sb.append(AbstractOXException.DF.format(errorCode.number));
         try {
-        	if((include && categories.contains(errorCode.category)) || (!include && !categories.contains(errorCode.category)))
-        		assoc.put(sb.toString(), errorCode.message);
-		} catch (JSONException e) {
+        	if((include && categories.contains(errorCode.category)) || (!include && !categories.contains(errorCode.category))) {
+				assoc.put(sb.toString(), errorCode.message);
+			}
+		} catch (final JSONException e) {
 			e.printStackTrace();
 		}
 	}
@@ -110,8 +112,8 @@ public class JSProcessor implements OXErrorCodeProcessor {
 	private void initConfig() {
 		filename = System.getProperty("filename","codes");
 		filename += ".js";
-		String includeCat = System.getProperty("includeCategories",null);
-		String excludeCat = System.getProperty("excludeCategories",null);
+		final String includeCat = System.getProperty("includeCategories",null);
+		final String excludeCat = System.getProperty("excludeCategories",null);
 		if(includeCat != null && excludeCat != null) {
 			throw new IllegalArgumentException("Please specify only one of -DincludeCategories or -DexcludeCategories");
 		}
@@ -126,14 +128,14 @@ public class JSProcessor implements OXErrorCodeProcessor {
 		}
 	}
 
-	private Set<Category> parseCateogories(String categories) {
-		String[] cats  = categories.split("\\s*,\\s*");
-		Set<Category> catSet = new HashSet<Category>();
-		for(String catString : cats) {
+	private Set<Category> parseCateogories(final String categories) {
+		final String[] cats  = categories.split("\\s*,\\s*");
+		final Set<Category> catSet = new HashSet<Category>();
+		for(final String catString : cats) {
 			try {
-				int num = Integer.valueOf(catString);
+				final int num = Integer.parseInt(catString);
 				catSet.add(Category.byCode(num));	
-			} catch (NumberFormatException x) {
+			} catch (final NumberFormatException x) {
 				catSet.add(Category.valueOf(catString.toUpperCase()));
 			}
 		}

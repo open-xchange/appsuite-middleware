@@ -157,6 +157,7 @@ public class ListErrorCodes {
 		final Enumeration<JarEntry> e = jar.entries();
 		
 		final List<String> exceptionsAnalyzed = new ArrayList<String>();
+		final StringBuilder errBuilder = new StringBuilder(50);
 		while(e.hasMoreElements()) {
 			final JarEntry entry = e.nextElement();
 			try {
@@ -176,7 +177,8 @@ public class ListErrorCodes {
 					}*/
 				}
 			} catch (final Throwable x) {
-				System.err.println(new StringBuilder("Couldn't analyze entry ").append(entry).append(' ').append(x).toString());
+				System.err.println(errBuilder.append("Couldn't analyze entry ").append(entry).append(' ').append(x).toString());
+				errBuilder.setLength(0);
 			}
 		}
 		

@@ -160,7 +160,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	
 	@Override
 	protected List<WebdavProperty> internalGetAllProps() throws WebdavException {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -445,7 +445,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 
 	public List<WebdavResource> getChildren() throws WebdavException {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	public void transferLock(final WebdavLock lock) {

@@ -647,7 +647,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
 			obj.put(STR_ERROR, error);
-			obj.put(STR_ERROR_PARAMS, Collections.EMPTY_LIST);
+			obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substitute(JS_FRAGMENT, "json", obj.toString(), "action", action));
 		} catch (JSONException e) {
 			LOG.error(e);
@@ -851,13 +851,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		try {
 			final int size = registeredUploadListeners.size();
 			final Iterator<UploadListener> iter = registeredUploadListeners.iterator();
+			final StringBuilder errBuilder = new StringBuilder(100);
 			for (int i = 0; i < size; i++) {
 				final UploadListener uploadListener = iter.next();
 				try {
 					uploadListener.action(uploadEvent);
 				} catch (OXException e) {
-					LOG.error(new StringBuilder("ERROR: Upload method \"action()\" failed for UploadListener ")
+					LOG.error(errBuilder.append("ERROR: Upload method \"action()\" failed for UploadListener ")
 							.append(uploadListener.getClass()), e);
+					errBuilder.setLength(0);
 				}
 			}
 		} finally {

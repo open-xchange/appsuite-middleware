@@ -85,12 +85,13 @@ public class AttachmentConfig extends AbstractConfig {
     }
 
     public static String getProperty(final String key) {
-    	if(null == singleton)
+    	if(null == singleton) {
 			try {
 				init();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				LOG.error("Can't init config",e);
 			}
+		}
 			
         return singleton.getPropertyInternal(key);
     }
@@ -106,24 +107,24 @@ public class AttachmentConfig extends AbstractConfig {
         singleton.loadPropertiesInternal();
     }
     
-    public static long getMaxUploadSize(){
-    	String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
-    	if(null == sizeS) {
-    		return sysconfMaxUpload();
-    	} else {
-    		long size = Long.valueOf(sizeS);
-    		if(-1 == size)
-    			return sysconfMaxUpload();
-    		else
-    			return size;
-    	}
-     }
+    public static long getMaxUploadSize() {
+		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
+		if (null == sizeS) {
+			return sysconfMaxUpload();
+		}
+		final long size = Long.parseLong(sizeS);
+		if (-1 == size) {
+			return sysconfMaxUpload();
+		}
+		return size;
+	}
 
 	private static long sysconfMaxUpload() {
-		String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-		if(null == sizeS)
+		final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+		if(null == sizeS) {
 			return 0;
-		return Long.valueOf(sizeS);
+		}
+		return Long.parseLong(sizeS);
 	}
 
 }

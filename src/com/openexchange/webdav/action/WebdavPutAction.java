@@ -63,20 +63,22 @@ public class WebdavPutAction extends AbstractAction {
 
 	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
 	
-	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavException {
-		WebdavResource resource = req.getResource();
-		if(null != req.getHeader("content-length"))
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+		final WebdavResource resource = req.getResource();
+		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
+		}
 		resource.setContentType(req.getHeader("content-type"));
 		
 		try {
 			resource.putBodyAndGuessLength(req.getBody());
-			if(resource.exists())
+			if(resource.exists()) {
 				resource.save();
-			else
+			} else {
 				resource.create();
+			}
 			res.setStatus(HttpServletResponse.SC_CREATED);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug("Client Gone?", e);
 		}
 		

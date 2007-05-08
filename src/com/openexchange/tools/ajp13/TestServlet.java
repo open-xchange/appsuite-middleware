@@ -67,10 +67,10 @@ public class TestServlet extends HttpServlet implements SingleThreadModel {
 
 	public TestServlet() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	@Override
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		resp.setStatus(HttpServletResponse.SC_OK);
 		String htmlPage = "<html>\n<head><title>TestServlet's doGet Page</title></head>\n" +
 				"<body>\n<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n" +
@@ -80,16 +80,16 @@ public class TestServlet extends HttpServlet implements SingleThreadModel {
 				"</body>\n" +
 				"</html>";
 		htmlPage += "<p><b>Parameters</b><br>";
-		for (Enumeration e = req.getParameterNames(); e.hasMoreElements();) {
-			String pn = (String)e.nextElement();
+		for (final Enumeration e = req.getParameterNames(); e.hasMoreElements();) {
+			final String pn = (String)e.nextElement();
 			htmlPage += pn + ": " + req.getParameter(pn) + "<br>";
 		}
 		htmlPage += "</p>";
 		htmlPage += "<p><b>Headers</b><br>";
-		for (Enumeration e = req.getHeaderNames(); e.hasMoreElements();) {
-			String hn = (String)e.nextElement();
+		for (final Enumeration e = req.getHeaderNames(); e.hasMoreElements();) {
+			final String hn = (String)e.nextElement();
 			htmlPage += hn + ": ";
-			for (Enumeration e2 = req.getHeaders(hn); e2.hasMoreElements();) {
+			for (final Enumeration e2 = req.getHeaders(hn); e2.hasMoreElements();) {
 				htmlPage += e2.nextElement() + (e2.hasMoreElements() ? ", " : "");
 			}
 			htmlPage += "<br>";

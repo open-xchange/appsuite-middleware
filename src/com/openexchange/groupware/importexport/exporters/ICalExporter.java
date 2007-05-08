@@ -171,17 +171,17 @@ public class ICalExporter implements Exporter {
 	};
 	
 	
-	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
+	private static final ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
 	
 	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if(! format.equals(Format.ICAL)){
 			return false;
 		}
-		int folderId = Integer.parseInt(folder);
+		final int folderId = Integer.parseInt(folder);
 		FolderObject fo;
 		try {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			return false;
 		}
 		//check format of folder
@@ -192,9 +192,9 @@ public class ICalExporter implements Exporter {
 		EffectivePermission perm;
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw importExportExceptionFactory.create(2, folder);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw importExportExceptionFactory.create(2, folder);
 		}
 		
@@ -205,8 +205,8 @@ public class ICalExporter implements Exporter {
 		return false;
 	}
 	
-	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
 			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
@@ -219,7 +219,7 @@ public class ICalExporter implements Exporter {
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(Integer.parseInt(folder), sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw importExportExceptionFactory.create(4, folder);
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
@@ -245,9 +245,9 @@ public class ICalExporter implements Exporter {
 					exportTask(oxContainerConverter, taskDef, versitWriter, (Task)searchIterator.next());
 				}
 			} else {
-				throw importExportExceptionFactory.create(3, fo.getModule());
+				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(3, exc, folder);
 		}
 		
@@ -257,11 +257,11 @@ public class ICalExporter implements Exporter {
 				Format.ICAL);
 	}
 	
-	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
-			VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+			final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
 			final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
 			versitDefinition.writeProperties(versitWriter, versitObjectContainer);
 			final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
@@ -271,7 +271,7 @@ public class ICalExporter implements Exporter {
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(Integer.parseInt(folder), sessObj.getContext());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw importExportExceptionFactory.create(4, folder);
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
@@ -285,11 +285,11 @@ public class ICalExporter implements Exporter {
 				
 				exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);
 			} else {
-				throw importExportExceptionFactory.create(3, fo.getModule());
+				throw importExportExceptionFactory.create(3, Integer.valueOf(fo.getModule()));
 			}
 			
 			versitWriter.flush();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw importExportExceptionFactory.create(4, folder);
 		}
 		
@@ -299,14 +299,14 @@ public class ICalExporter implements Exporter {
 				Format.ICAL);
 	}
 	
-	protected void exportAppointment(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, AppointmentObject appointmentObj) throws Exception {
-		VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
+	protected void exportAppointment(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final AppointmentObject appointmentObj) throws Exception {
+		final VersitObject versitObject = oxContainerConverter.convertAppointment(appointmentObj);
 		versitDef.write(writer, versitObject);
 		writer.flush();
 	}
 	
-	protected void exportTask(OXContainerConverter oxContainerConverter, VersitDefinition versitDef, VersitDefinition.Writer writer, Task taskObj) throws Exception {
-		VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
+	protected void exportTask(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Task taskObj) throws Exception {
+		final VersitObject versitObject = oxContainerConverter.convertTask(taskObj);
 		versitDef.write(writer, versitObject);
 		writer.flush();
 	}

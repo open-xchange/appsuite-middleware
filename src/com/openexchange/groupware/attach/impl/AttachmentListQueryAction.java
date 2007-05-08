@@ -57,20 +57,21 @@ import com.openexchange.groupware.tx.TransactionException;
 
 public abstract class AttachmentListQueryAction extends AbstractAttachmentAction {
 
-	private List<AttachmentMetadata> attachments = null;
+	private List<AttachmentMetadata> attachments;
 	
 	
-	protected void doUpdates(String query, List<AttachmentMetadata> attachments, final boolean addId) throws TransactionException, UpdateException {
-		UpdateBlock[] updates = new UpdateBlock[attachments.size()];
+	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws TransactionException, UpdateException {
+		final UpdateBlock[] updates = new UpdateBlock[attachments.size()];
 		int i = 0;
 		for(final AttachmentMetadata m : attachments) {
 			updates[i++] = new Update(query) {
 				
 				@Override
 				public void fillStatement() throws SQLException {
-					int number = fillFields(m, stmt);
-					if(addId)
+					final int number = fillFields(m, stmt);
+					if(addId) {
 						stmt.setInt(number,m.getId());
+					}
 				}
 				
 			};
@@ -82,7 +83,7 @@ public abstract class AttachmentListQueryAction extends AbstractAttachmentAction
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentMetadata> attachments) {
+	public void setAttachments(final List<AttachmentMetadata> attachments) {
 		this.attachments = attachments;
 	}
 
