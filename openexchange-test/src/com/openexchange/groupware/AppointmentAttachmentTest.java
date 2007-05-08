@@ -7,6 +7,9 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.server.DBPool;
+import com.openexchange.tools.oxfolder.OXFolderTools;
+import java.sql.Connection;
 import junit.framework.TestCase;
 
 import com.openexchange.event.EventConfigImpl;
@@ -41,7 +44,12 @@ public class AppointmentAttachmentTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
         cdao.setTitle("testAttachAndDetachToAppointment");
-        cdao.setParentFolderID(CalendarTest.getPrivateFolder());
+        
+        Connection readcon = DBPool.pickup(context);       
+        int fid = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
+        DBPool.push(context, readcon);
+        
+        cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         SessionObject sessionobject = SessionObjectWrapper.createSessionObject(userid, context, "AttachmentTestId");
         CalendarSql csql = new CalendarSql(sessionobject);
