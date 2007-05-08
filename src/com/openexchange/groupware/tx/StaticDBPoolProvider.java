@@ -59,23 +59,23 @@ public class StaticDBPoolProvider implements DBProvider{
 	
 	
 
-	public StaticDBPoolProvider(Connection writeCon) {
+	public StaticDBPoolProvider(final Connection writeCon) {
 		super();
 		this.writeCon = writeCon;
 	}
 
-	public Connection getReadConnection(Context ctx) {
+	public Connection getReadConnection(final Context ctx) {
 		return writeCon;
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
+	public void releaseReadConnection(final Context ctx, final Connection con) {
 	}
 
-	public Connection getWriteConnection(Context ctx) {
+	public Connection getWriteConnection(final Context ctx) {
 		return writeCon;
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 		
 	}
 

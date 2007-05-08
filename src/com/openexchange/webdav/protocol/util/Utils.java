@@ -53,7 +53,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,9 +76,10 @@ public class Utils {
     
     private static final SimpleDateFormat output_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
    
-	public static Date convert(String s) {
-		if(s == null)
+	public static Date convert(final String s) {
+		if(s == null) {
 			return null;
+		}
 		Date date = null;
         // Parsing the HTTP Date
         for (int i = 0; (date == null) && (i < formats.length); i++) {
@@ -87,7 +87,7 @@ public class Utils {
                 synchronized (formats[i]) {
                     date = formats[i].parse(s);
                 }
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
             	// Ignore and try the others
             	if (LOG.isDebugEnabled()) {
             		LOG.debug(e.getMessage(), e);
@@ -97,15 +97,16 @@ public class Utils {
         return date;
 	}
 	
-	public static String convert(Date d) {
-		if(d == null)
+	public static String convert(final Date d) {
+		if(d == null) {
 			return null;
+		}
 		synchronized(output_format) {
 			return output_format.format(d);
 		}
 	}
 
-	public static String getStatusString(int s) {
+	public static String getStatusString(final int s) {
 		switch(s) {
 		case HttpServletResponse.SC_OK : return "OK";
 		case HttpServletResponse.SC_NOT_FOUND : return "NOT FOUND";
