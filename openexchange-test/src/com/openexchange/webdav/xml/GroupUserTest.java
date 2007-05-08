@@ -6,7 +6,6 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceGroup;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
@@ -54,11 +53,75 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 	}
 	
 	public void testSearchResource() throws Exception {
-		Resource[] resource = searchResource(webCon, "*", new Date(0), PROTOCOL + hostName, login, password);
+		Resource[] resource = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
 		for (int a = 0; a < resource.length; a++) {
 			assertTrue("id > 0 expected", resource[a].getIdentifier() > 0);
 			assertNotNull("last modified is null", resource[a].getLastModified());
 		} 
+	}
+	
+	public void testSearchGroupWithLastModifed() throws Exception {
+		Group group[] = searchGroup(getWebConversation(), "*", new Date(0), PROTOCOL + hostName, login, password);
+		assertTrue("no group found in response (group array length == 0)", group.length > 0);
+		
+		int posInArray = 0;
+		
+		for (int a = 0; a < group.length; a++) {
+			if (group[a].getIdentifier() != 1) {
+				posInArray = a;
+				break;
+			}
+		}
+		
+		int id = group[posInArray].getIdentifier();
+		String displayName = group[posInArray].getDisplayName();
+		Date lastModifed = group[posInArray].getLastModified();
+		
+		
+		group = searchGroup(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		
+		for (int a = 0; a < group.length; a++) {
+			if (group[a].getIdentifier() == id) {
+				found = true;
+				break;
+			}
+		}
+
+		assertFalse("unexpected id found in response", found);
+	}
+	
+	public void testSearchResourceWithLastModifed() throws Exception {
+		Resource resource[] = searchResource(getWebConversation(), "*", new Date(0), PROTOCOL + getHostName(), getLogin(), getPassword());
+		assertTrue("no group found in response (group array length == 0)", resource.length > 0);
+		
+		int posInArray = 0;
+		
+		for (int a = 0; a < resource.length; a++) {
+			if (resource[a].getIdentifier() != 1) {
+				posInArray = a;
+				break;
+			}
+		}
+		
+		int id = resource[posInArray].getIdentifier();
+		String displayName = resource[posInArray].getDisplayName();
+		Date lastModifed = resource[posInArray].getLastModified();
+		
+		
+		resource = searchResource(getWebConversation(), displayName, new Date(lastModifed.getTime()+5000), PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		
+		for (int a = 0; a < resource.length; a++) {
+			if (resource[a].getIdentifier() == id) {
+				found = true;
+				break;
+			}
+		}
+
+		assertFalse("unexpected id found in response", found);
 	}
 	
 	public void testSearchResourceGroup() throws Exception {
