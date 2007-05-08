@@ -1,3 +1,4 @@
+# What about the version table?
 
 # 2007-02-05, Carsten Hoeger, initial entries
 ALTER TABLE user_setting_mail ADD COLUMN confirmed_ham VARCHAR(128) NOT NULL;
