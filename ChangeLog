@@ -8,6 +8,8 @@
   - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
     that the last modified attributes was not used in request for groups and resources.
 
+  - Fixed Bug #7152: Fixed a problem that active sessions are not deremented correctly.
+
 * 2007-05-08 - francisco.laguna@open-xchange.com
 
    - Bugfix #7012: exists routine now also checks access permissions to filter links properly.
