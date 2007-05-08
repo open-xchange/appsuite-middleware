@@ -15,7 +15,7 @@ CREATE TABLE user_mail_restrictions (
 	id INT4 UNSIGNED NOT NULL,
 	className VARCHAR(64) NOT NULL,
 	address VARCHAR(255) NOT NULL,
-    PRIMARY KEY (cid, id),
+    PRIMARY KEY (cid, address),
 	INDEX(className),
     CONSTRAINT user_mail_restrictions_address_unique UNIQUE (address)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
