@@ -62,7 +62,7 @@ import org.jdom.Element;
 
 public class FolderChildWriter extends DataWriter {
 	
-	protected void writeFolderChildElements(FolderChildObject folderchildobject, Element e_prop) throws Exception {
+	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) throws Exception {
 		writeDataElements(folderchildobject, e_prop);
 		
 		if (folderchildobject.containsParentFolderID()) {

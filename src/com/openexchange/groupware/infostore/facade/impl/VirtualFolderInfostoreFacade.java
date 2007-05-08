@@ -81,134 +81,134 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(VirtualFolderInfostoreFacade.class);
 	
-	public int countDocuments(long folderId, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public int countDocuments(final long folderId, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return 0;
 	}
 
-	public boolean exists(int id, int version, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public boolean exists(final int id, final int version, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return false;
 	}
 
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns,
-			boolean ignoreDeleted, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+			final boolean ignoreDeleted, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return new DeltaImpl(SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,System.currentTimeMillis());
 	}
 
-	public Delta getDelta(long folderId, long updateSince, Metadata[] columns,
-			Metadata sort, int order, boolean ignoreDeleted, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
+			final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		return new DeltaImpl(SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,SearchIteratorAdapter.EMPTY_ITERATOR,System.currentTimeMillis());
 	}
 
-	public InputStream getDocument(int id, int version, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public InputStream getDocument(final int id, final int version, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		virtualFolder(); return null;
 	}
 
-	public DocumentMetadata getDocumentMetadata(int id, int version,
-			Context ctx, User user, UserConfiguration userConfig)
+	public DocumentMetadata getDocumentMetadata(final int id, final int version,
+			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		virtualFolder(); return null;
 	}
 
-	public TimedResult getDocuments(long folderId, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public TimedResult getDocuments(final long folderId, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getDocuments(long folderId, Metadata[] columns,
-			Context ctx, User user, UserConfiguration userConfig)
+	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getDocuments(long folderId, Metadata[] columns,
-			Metadata sort, int order, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public TimedResult getDocuments(final long folderId, final Metadata[] columns,
+			final Metadata sort, final int order, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getDocuments(int[] ids, Metadata[] columns, Context ctx,
-			User user, UserConfiguration userConfig)
+	public TimedResult getDocuments(final int[] ids, final Metadata[] columns, final Context ctx,
+			final User user, final UserConfiguration userConfig)
 			throws IllegalAccessException, OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getVersions(int id, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public TimedResult getVersions(final int id, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getVersions(int id, Metadata[] columns, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	public TimedResult getVersions(final int id, final Metadata[] columns, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public TimedResult getVersions(int id, Metadata[] columns, Metadata sort,
-			int order, Context ctx, User user, UserConfiguration userConfig)
+	public TimedResult getVersions(final int id, final Metadata[] columns, final Metadata sort,
+			final int order, final Context ctx, final User user, final UserConfiguration userConfig)
 			throws OXException {
 		return new TimedResultImpl(SearchIteratorAdapter.EMPTY_ITERATOR, System.currentTimeMillis());
 	}
 
-	public boolean hasFolderForeignObjects(long folderId, Context ctx,
-			User user, UserConfiguration userConfig) throws OXException {
+	public boolean hasFolderForeignObjects(final long folderId, final Context ctx,
+			final User user, final UserConfiguration userConfig) throws OXException {
 		return false;
 	}
 
-	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
+	public boolean isFolderEmpty(final long folderId, final Context ctx) throws OXException {
 		return true;
 	}
 
-	public void lock(int id, long diff, SessionObject sessionObj)
+	public void lock(final int id, final long diff, final SessionObject sessionObj)
 			throws OXException {
 		virtualFolder();
 	}
 
-	public void removeDocument(long folderId, long date,
-			SessionObject sessionObj) throws OXException {
+	public void removeDocument(final long folderId, final long date,
+			final SessionObject sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public int[] removeDocument(int[] id, long date, SessionObject sessionObj)
+	public int[] removeDocument(final int[] id, final long date, final SessionObject sessionObj)
 			throws OXException {
 		return id;
 	}
 
-	public void removeUser(int id, Context context, SessionObject session) throws OXException {
+	public void removeUser(final int id, final Context context, final SessionObject session) throws OXException {
 		
 	}
 
-	public int[] removeVersion(int id, int[] versionId, SessionObject sessionObj)
+	public int[] removeVersion(final int id, final int[] versionId, final SessionObject sessionObj)
 			throws OXException {
 		return versionId;
 	}
 
-	public void saveDocument(DocumentMetadata document, InputStream data,
-			long sequenceNumber, SessionObject sessionObj) throws OXException {
+	public void saveDocument(final DocumentMetadata document, final InputStream data,
+			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public void saveDocument(DocumentMetadata document, InputStream data,
-			long sequenceNumber, Metadata[] modifiedColumns,
-			SessionObject sessionObj) throws OXException {
+	public void saveDocument(final DocumentMetadata document, final InputStream data,
+			final long sequenceNumber, final Metadata[] modifiedColumns,
+			final SessionObject sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public void saveDocumentMetadata(DocumentMetadata document,
-			long sequenceNumber, SessionObject sessionObj) throws OXException {
+	public void saveDocumentMetadata(final DocumentMetadata document,
+			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public void saveDocumentMetadata(DocumentMetadata document,
-			long sequenceNumber, Metadata[] modifiedColumns,
-			SessionObject sessionObj) throws OXException {
+	public void saveDocumentMetadata(final DocumentMetadata document,
+			final long sequenceNumber, final Metadata[] modifiedColumns,
+			final SessionObject sessionObj) throws OXException {
 		virtualFolder();
 	}
 	
-	public void unlock(int id, SessionObject sessionObj) throws OXException {
+	public void unlock(final int id, final SessionObject sessionObj) throws OXException {
 		
 	}
 
@@ -224,11 +224,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		
 	}
 
-	public void setRequestTransactional(boolean transactional) {
+	public void setRequestTransactional(final boolean transactional) {
 		
 	}
 
-	public void setTransactional(boolean transactional) {
+	public void setTransactional(final boolean transactional) {
 		
 	}
 

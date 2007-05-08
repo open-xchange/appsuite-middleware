@@ -61,11 +61,12 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldSoundPropertyDefinition extends OldPropertyDefinition {
 
-	public OldSoundPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldSoundPropertyDefinition(final String[] paramNames,
+			final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
+	@Override
 	public Object parseValue(final Property property, final OldScanner s, final byte[] value,
 			final String charset) throws IOException {
 		final Parameter param = property.getParameter("VALUE");
@@ -78,7 +79,7 @@ public class OldSoundPropertyDefinition extends OldPropertyDefinition {
 		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
 			try {
 				return new URI(new String(value, charset).trim());
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				final VersitException ve = new VersitException(s, e.getMessage());
 				ve.initCause(e);
 				throw ve;
@@ -87,17 +88,19 @@ public class OldSoundPropertyDefinition extends OldPropertyDefinition {
 		return new String(value, charset);
 	}
 
-	public void write(OldFoldingWriter fw, Property property)
+	@Override
+	public void write(final OldFoldingWriter fw, final Property property)
 			throws IOException {
-		Object value = property.getValue();
+		final Object value = property.getValue();
 		if (value instanceof byte[]) {
 			writeType(fw, property);
 			fw.write(";");
 			fw.write("BASE64");
 			fw.write(":");
 			OldBase64Encoding.Default.encode(fw, (byte[]) property.getValue());
-		} else
+		} else {
 			super.write(fw, property);
+		}
 	}
 
 }

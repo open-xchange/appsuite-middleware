@@ -186,9 +186,10 @@ public enum ContactField{
 
 
   private int columnNumber;
-  private String dbName, readableName, fieldName, outlookENName, outlookDEName, outlookFRName;
+  private String dbName, readableName, fieldName, outlookENName;
+  private String outlookDEName, outlookFRName;
 
-  private ContactField(int columnNumber, String fieldName, String dbName, String readableName, String outlookENName){
+  private ContactField(final int columnNumber, final String fieldName, final String dbName, final String readableName, final String outlookENName){
 	this.fieldName = fieldName;
     this.columnNumber = columnNumber;
     this.dbName = dbName ;
@@ -219,7 +220,7 @@ public enum ContactField{
   }
   
   public static ContactField getByDBFieldName(final String dbFieldName){
-	for(ContactField field: values()){
+	for(final ContactField field: values()){
 		  if(dbFieldName.equals( field.getDBName() )){
 			  return field;
 		  }
@@ -228,7 +229,7 @@ public enum ContactField{
   }
 
 public static ContactField getByDisplayName(final String displayName){
-  for(ContactField field : values()){
+  for(final ContactField field : values()){
 	if(displayName.equals( field.getReadableName() ) ){
 		return field;
 	}
@@ -237,7 +238,7 @@ public static ContactField getByDisplayName(final String displayName){
 }
 
 public static ContactField getByValue(final int value){
-	for(ContactField field: values()){
+	for(final ContactField field: values()){
 		if(value == field.getNumber()){
 			return field;
 		}
@@ -246,7 +247,7 @@ public static ContactField getByValue(final int value){
 }
 
 public static ContactField getByOutlookName(final String outlook){
-	for(ContactField field: values()){
+	for(final ContactField field: values()){
 		if(outlook.equals( field.getOutlookENName() ) ){
 			return field;
 		}
@@ -255,7 +256,7 @@ public static ContactField getByOutlookName(final String outlook){
 }
 
 
-public Object doSwitch(ContactSwitcher switcher, Object... objects) throws ContactException{
+public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws ContactException{
     switch(this){
       case DISPLAY_NAME : return switcher.displayname(objects);
       case SUR_NAME : return switcher.surname(objects);

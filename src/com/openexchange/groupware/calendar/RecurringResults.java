@@ -58,7 +58,7 @@ public class RecurringResults {
     
     private static final int DEFAULT_SIZE = 4;
     private RecurringResult recurring_result[];
-    private int counter = 0;
+    private int counter;
     
     
     public RecurringResults() {
@@ -72,10 +72,10 @@ public class RecurringResults {
         recurring_result = new RecurringResult[size];
     }
     
-    public final void add(RecurringResult rr) {
+    public final void add(final RecurringResult rr) {
         //CalendarCommonCollection.debugRecurringResult(rr); // uncomment this in runtime edition
         if (counter == recurring_result.length) {
-            RecurringResult new_recurring_result[] = new RecurringResult[recurring_result.length*2];
+            final RecurringResult new_recurring_result[] = new RecurringResult[recurring_result.length*2];
             System.arraycopy(recurring_result, 0, new_recurring_result, 0, counter);
             recurring_result = new_recurring_result;
         }
@@ -83,9 +83,9 @@ public class RecurringResults {
         counter++;
     }
     
-    public final RecurringResult getRecurringResultByPosition(int recurring_position) {
+    public final RecurringResult getRecurringResultByPosition(final int recurring_position) {
         if (recurring_position <= counter) {
-            int internal_position = recurring_position-1;
+            final int internal_position = recurring_position-1;
             if (recurring_result[internal_position] != null) {
                 if (recurring_result[internal_position].getPosition() == recurring_position)  {
                     return recurring_result[internal_position];
@@ -100,7 +100,7 @@ public class RecurringResults {
         return null;
     }
     
-    public final RecurringResult getRecurringResult(int position) {
+    public final RecurringResult getRecurringResult(final int position) {
         if (position <= counter && position >= 0) {
             return recurring_result[position];
         }
@@ -111,7 +111,7 @@ public class RecurringResults {
         return counter;
     }
     
-    final int getPositionByLong(long l) {
+    final int getPositionByLong(final long l) {
         for (int a = 0; a < counter; a++) {
             if (recurring_result[a].getNormalized() == l) {
                 return recurring_result[a].getPosition();

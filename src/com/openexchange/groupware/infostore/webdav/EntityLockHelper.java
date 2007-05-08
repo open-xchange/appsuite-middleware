@@ -63,14 +63,15 @@ public class EntityLockHelper extends LockHelper {
 	private static final String TOKEN_PREFIX = "http://www.open-xchange.com/webdav/locks/";
 	private static final int TOKEN_PREFIX_LENGTH = TOKEN_PREFIX.length();
 	
-	public EntityLockHelper(EntityLockManager entityLockManager, SessionHolder sessionHolder, String url) {
+	public EntityLockHelper(final EntityLockManager entityLockManager, final SessionHolder sessionHolder, final String url) {
 		super(entityLockManager, sessionHolder, url);
 		this.sessionHolder = sessionHolder;
 		this.entityLockManager = entityLockManager;
 	}
 	
-	protected WebdavLock toWebdavLock(Lock lock) {
-		WebdavLock l = new WebdavLock();
+	@Override
+	protected WebdavLock toWebdavLock(final Lock lock) {
+		final WebdavLock l = new WebdavLock();
 		l.setDepth(0);
 		l.setTimeout(lock.getTimeout());
 		l.setToken(TOKEN_PREFIX+lock.getId());
@@ -81,9 +82,9 @@ public class EntityLockHelper extends LockHelper {
 	}
 	
 	@Override
-	protected Lock toLock(WebdavLock lock) {
-		Lock l = new Lock();
-		l.setId(Integer.valueOf(lock.getToken().substring( 41 )));
+	protected Lock toLock(final WebdavLock lock) {
+		final Lock l = new Lock();
+		l.setId(Integer.parseInt(lock.getToken().substring( 41 )));
 		//TODOl.setOwner(userid)
 		l.setOwnerDescription(lock.getOwner());
 		l.setScope(lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED);
@@ -93,8 +94,8 @@ public class EntityLockHelper extends LockHelper {
 	}
 
 	@Override
-	protected int saveLock(WebdavLock lock) throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
+	protected int saveLock(final WebdavLock lock) throws OXException {
+		final SessionObject session = sessionHolder.getSessionObject();
 		return entityLockManager.lock(id,
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(),
 						lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
@@ -106,9 +107,9 @@ public class EntityLockHelper extends LockHelper {
 	}
 
 	@Override
-	protected void relock(WebdavLock lock) throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
-		int lockId = getLockId(lock);
+	protected void relock(final WebdavLock lock) throws OXException {
+		final SessionObject session = sessionHolder.getSessionObject();
+		final int lockId = getLockId(lock);
 		entityLockManager.relock(
 				lockId,
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(),
@@ -121,8 +122,8 @@ public class EntityLockHelper extends LockHelper {
 		);
 	}
 
-	private int getLockId(WebdavLock lock) {
-		return Integer.valueOf(lock.getToken().substring(TOKEN_PREFIX_LENGTH));
+	private int getLockId(final WebdavLock lock) {
+		return Integer.parseInt(lock.getToken().substring(TOKEN_PREFIX_LENGTH));
 	}
 
 

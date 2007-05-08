@@ -67,456 +67,455 @@ public class ContactStringGetter implements ContactSwitcher {
 	 * @param obj a given object
 	 * @return an empty string if <code>obj == null</code>, otherwise the result of <code>obj.toString()</obj>;
 	 */
-	public static final String stringify(Object obj){
+	public static final String stringify(final Object obj){
 		if(obj == null){
 			return "";
-		} else {
-			return obj.toString();
 		}
+		return obj.toString();
 	}
 	/* DELEGATE */
 	public ContactSwitcher getDelegate() {
 		return delegate;
 	}
 
-	public void setDelegate(ContactSwitcher delegate) {
+	public void setDelegate(final ContactSwitcher delegate) {
 		this.delegate = delegate;
 	}
 	
 	/* INTERFACE */
-	public Object anniversary(Object... objects) throws ContactException {
+	public Object anniversary(final Object... objects) throws ContactException {
 		return stringify(delegate.anniversary(objects));
 	}
 
-	public Object assistantname(Object... objects) throws ContactException {
+	public Object assistantname(final Object... objects) throws ContactException {
 		return stringify(delegate.assistantname(objects));
 	}
 
-	public Object birthday(Object... objects) throws ContactException {
+	public Object birthday(final Object... objects) throws ContactException {
 		return stringify(delegate.birthday(objects));
 	}
 
-	public Object branches(Object... objects) throws ContactException {
+	public Object branches(final Object... objects) throws ContactException {
 		return stringify(delegate.branches(objects));
 	}
 
-	public Object businesscategory(Object... objects) throws ContactException {
+	public Object businesscategory(final Object... objects) throws ContactException {
 		return stringify(delegate.businesscategory(objects));
 	}
 
-	public Object categories(Object... objects) throws ContactException {
+	public Object categories(final Object... objects) throws ContactException {
 		return stringify(delegate.categories(objects));
 	}
 
-	public Object cellulartelephone1(Object... objects) throws ContactException {
+	public Object cellulartelephone1(final Object... objects) throws ContactException {
 		return stringify(delegate.cellulartelephone1(objects));
 	}
 
-	public Object cellulartelephone2(Object... objects) throws ContactException {
+	public Object cellulartelephone2(final Object... objects) throws ContactException {
 		return stringify(delegate.cellulartelephone2(objects));
 	}
 
-	public Object citybusiness(Object... objects) throws ContactException {
+	public Object citybusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.citybusiness(objects));
 	}
 
-	public Object cityhome(Object... objects) throws ContactException {
+	public Object cityhome(final Object... objects) throws ContactException {
 		return stringify(delegate.cityhome(objects));
 	}
 
-	public Object cityother(Object... objects) throws ContactException {
+	public Object cityother(final Object... objects) throws ContactException {
 		return stringify(delegate.cityother(objects));
 	}
 
-	public Object commercialregister(Object... objects) throws ContactException {
+	public Object commercialregister(final Object... objects) throws ContactException {
 		return stringify(delegate.commercialregister(objects));
 	}
 
-	public Object company(Object... objects) throws ContactException {
+	public Object company(final Object... objects) throws ContactException {
 		return stringify(delegate.company(objects));
 	}
 
-	public Object contextid(Object... objects) throws ContactException {
+	public Object contextid(final Object... objects) throws ContactException {
 		return stringify(delegate.contextid(objects));
 	}
 
-	public Object countrybusiness(Object... objects) throws ContactException {
+	public Object countrybusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.countrybusiness(objects));
 	}
 
-	public Object countryhome(Object... objects) throws ContactException {
+	public Object countryhome(final Object... objects) throws ContactException {
 		return stringify(delegate.countryhome(objects));
 	}
 
-	public Object countryother(Object... objects) throws ContactException {
+	public Object countryother(final Object... objects) throws ContactException {
 		return stringify(delegate.countryother(objects));
 	}
 
-	public Object createdby(Object... objects) throws ContactException {
+	public Object createdby(final Object... objects) throws ContactException {
 		return stringify(delegate.createdby(objects));
 	}
 
-	public Object creationdate(Object... objects) throws ContactException {
+	public Object creationdate(final Object... objects) throws ContactException {
 		return stringify(delegate.creationdate(objects));
 	}
 
-	public Object defaultaddress(Object... objects) throws ContactException {
+	public Object defaultaddress(final Object... objects) throws ContactException {
 		return stringify(delegate.defaultaddress(objects));
 	}
 
-	public Object department(Object... objects) throws ContactException {
+	public Object department(final Object... objects) throws ContactException {
 		return stringify(delegate.department(objects));
 	}
 
-	public Object displayname(Object... objects) throws ContactException {
+	public Object displayname(final Object... objects) throws ContactException {
 		return stringify(delegate.displayname(objects));
 	}
 
-	public Object distributionlist(Object... objects) throws ContactException {
+	public Object distributionlist(final Object... objects) throws ContactException {
 		return stringify(delegate.distributionlist(objects));
 	}
 
-	public Object email1(Object... objects) throws ContactException {
+	public Object email1(final Object... objects) throws ContactException {
 		return stringify(delegate.email1(objects));
 	}
 
-	public Object email2(Object... objects) throws ContactException {
+	public Object email2(final Object... objects) throws ContactException {
 		return stringify(delegate.email2(objects));
 	}
 
-	public Object email3(Object... objects) throws ContactException {
+	public Object email3(final Object... objects) throws ContactException {
 		return stringify(delegate.email3(objects));
 	}
 
-	public Object employeetype(Object... objects) throws ContactException {
+	public Object employeetype(final Object... objects) throws ContactException {
 		return stringify(delegate.employeetype(objects));
 	}
 
-	public Object faxbusiness(Object... objects) throws ContactException {
+	public Object faxbusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.faxbusiness(objects));
 	}
 
-	public Object faxhome(Object... objects) throws ContactException {
+	public Object faxhome(final Object... objects) throws ContactException {
 		return stringify(delegate.faxhome(objects));
 	}
 
-	public Object faxother(Object... objects) throws ContactException {
+	public Object faxother(final Object... objects) throws ContactException {
 		return stringify(delegate.faxother(objects));
 	}
 
-	public Object fileas(Object... objects) throws ContactException {
+	public Object fileas(final Object... objects) throws ContactException {
 		return stringify(delegate.fileas(objects));
 	}
 
-	public Object givenname(Object... objects) throws ContactException {
+	public Object givenname(final Object... objects) throws ContactException {
 		return stringify(delegate.givenname(objects));
 	}
 
-	public Object imagelastmodified(Object... objects) throws ContactException {
+	public Object imagelastmodified(final Object... objects) throws ContactException {
 		return stringify(delegate.imagelastmodified(objects));
 	}
 
-	public Object info(Object... objects) throws ContactException {
+	public Object info(final Object... objects) throws ContactException {
 		return stringify(delegate.info(objects));
 	}
 
-	public Object instantmessenger1(Object... objects) throws ContactException {
+	public Object instantmessenger1(final Object... objects) throws ContactException {
 		return stringify(delegate.instantmessenger1(objects));
 	}
 
-	public Object instantmessenger2(Object... objects) throws ContactException {
+	public Object instantmessenger2(final Object... objects) throws ContactException {
 		return stringify(delegate.instantmessenger2(objects));
 	}
 
-	public Object internaluserid(Object... objects) throws ContactException {
+	public Object internaluserid(final Object... objects) throws ContactException {
 		return stringify(delegate.internaluserid(objects));
 	}
 
-	public Object label(Object... objects) throws ContactException {
+	public Object label(final Object... objects) throws ContactException {
 		return stringify(delegate.label(objects));
 	}
 
-	public Object lastmodified(Object... objects) throws ContactException {
+	public Object lastmodified(final Object... objects) throws ContactException {
 		return stringify(delegate.lastmodified(objects));
 	}
 
-	public Object links(Object... objects) throws ContactException {
+	public Object links(final Object... objects) throws ContactException {
 		return stringify(delegate.links(objects));
 	}
 
-	public Object managername(Object... objects) throws ContactException {
+	public Object managername(final Object... objects) throws ContactException {
 		return stringify(delegate.managername(objects));
 	}
 
-	public Object maritalstatus(Object... objects) throws ContactException {
+	public Object maritalstatus(final Object... objects) throws ContactException {
 		return stringify(delegate.maritalstatus(objects));
 	}
 
-	public Object middlename(Object... objects) throws ContactException {
+	public Object middlename(final Object... objects) throws ContactException {
 		return stringify(delegate.middlename(objects));
 	}
 
-	public Object modifiedby(Object... objects) throws ContactException {
+	public Object modifiedby(final Object... objects) throws ContactException {
 		return stringify(delegate.modifiedby(objects));
 	}
 
-	public Object nickname(Object... objects) throws ContactException {
+	public Object nickname(final Object... objects) throws ContactException {
 		return stringify(delegate.nickname(objects));
 	}
 
-	public Object note(Object... objects) throws ContactException {
+	public Object note(final Object... objects) throws ContactException {
 		return stringify(delegate.note(objects));
 	}
 
-	public Object numberofattachments(Object... objects) throws ContactException {
+	public Object numberofattachments(final Object... objects) throws ContactException {
 		return stringify(delegate.numberofattachments(objects));
 	}
 
-	public Object numberofchildren(Object... objects) throws ContactException {
+	public Object numberofchildren(final Object... objects) throws ContactException {
 		return stringify(delegate.numberofchildren(objects));
 	}
 
-	public Object numberofdistributionlists(Object... objects) throws ContactException {
+	public Object numberofdistributionlists(final Object... objects) throws ContactException {
 		return stringify(delegate.numberofdistributionlists(objects));
 	}
 
-	public Object numberofemployee(Object... objects) throws ContactException {
+	public Object numberofemployee(final Object... objects) throws ContactException {
 		return stringify(delegate.numberofemployee(objects));
 	}
 
-	public Object numberoflinks(Object... objects) throws ContactException {
+	public Object numberoflinks(final Object... objects) throws ContactException {
 		return stringify(delegate.numberoflinks(objects));
 	}
 
-	public Object objectid(Object... objects) throws ContactException {
+	public Object objectid(final Object... objects) throws ContactException {
 		return stringify(delegate.objectid(objects));
 	}
 
-	public Object parentfolderid(Object... objects) throws ContactException {
+	public Object parentfolderid(final Object... objects) throws ContactException {
 		return stringify(delegate.parentfolderid(objects));
 	}
 
-	public Object position(Object... objects) throws ContactException {
+	public Object position(final Object... objects) throws ContactException {
 		return stringify(delegate.position(objects));
 	}
 
-	public Object postalcodebusiness(Object... objects) throws ContactException {
+	public Object postalcodebusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.postalcodebusiness(objects));
 	}
 
-	public Object postalcodehome(Object... objects) throws ContactException {
+	public Object postalcodehome(final Object... objects) throws ContactException {
 		return stringify(delegate.postalcodehome(objects));
 	}
 
-	public Object postalcodeother(Object... objects) throws ContactException {
+	public Object postalcodeother(final Object... objects) throws ContactException {
 		return stringify(delegate.postalcodeother(objects));
 	}
 
-	public Object privateflag(Object... objects) throws ContactException {
+	public Object privateflag(final Object... objects) throws ContactException {
 		return stringify(delegate.privateflag(objects));
 	}
 
-	public Object profession(Object... objects) throws ContactException {
+	public Object profession(final Object... objects) throws ContactException {
 		return stringify(delegate.profession(objects));
 	}
 
-	public Object roomnumber(Object... objects) throws ContactException {
+	public Object roomnumber(final Object... objects) throws ContactException {
 		return stringify(delegate.roomnumber(objects));
 	}
 
-	public Object salesvolume(Object... objects) throws ContactException {
+	public Object salesvolume(final Object... objects) throws ContactException {
 		return stringify(delegate.salesvolume(objects));
 	}
 
-	public Object spousename(Object... objects) throws ContactException {
+	public Object spousename(final Object... objects) throws ContactException {
 		return stringify(delegate.spousename(objects));
 	}
 
-	public Object statebusiness(Object... objects) throws ContactException {
+	public Object statebusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.statebusiness(objects));
 	}
 
-	public Object statehome(Object... objects) throws ContactException {
+	public Object statehome(final Object... objects) throws ContactException {
 		return stringify(delegate.statehome(objects));
 	}
 
-	public Object stateother(Object... objects) throws ContactException {
+	public Object stateother(final Object... objects) throws ContactException {
 		return stringify(delegate.stateother(objects));
 	}
 
-	public Object streetbusiness(Object... objects) throws ContactException {
+	public Object streetbusiness(final Object... objects) throws ContactException {
 		return stringify(delegate.streetbusiness(objects));
 	}
 
-	public Object streethome(Object... objects) throws ContactException {
+	public Object streethome(final Object... objects) throws ContactException {
 		return stringify(delegate.streethome(objects));
 	}
 
-	public Object streetother(Object... objects) throws ContactException {
+	public Object streetother(final Object... objects) throws ContactException {
 		return stringify(delegate.streetother(objects));
 	}
 
-	public Object suffix(Object... objects) throws ContactException {
+	public Object suffix(final Object... objects) throws ContactException {
 		return stringify(delegate.suffix(objects));
 	}
 
-	public Object surname(Object... objects) throws ContactException {
+	public Object surname(final Object... objects) throws ContactException {
 		return stringify(delegate.surname(objects));
 	}
 
-	public Object taxid(Object... objects) throws ContactException {
+	public Object taxid(final Object... objects) throws ContactException {
 		return stringify(delegate.taxid(objects));
 	}
 
-	public Object telephoneassistant(Object... objects) throws ContactException {
+	public Object telephoneassistant(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneassistant(objects));
 	}
 
-	public Object telephonebusiness1(Object... objects) throws ContactException {
+	public Object telephonebusiness1(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonebusiness1(objects));
 	}
 
-	public Object telephonebusiness2(Object... objects) throws ContactException {
+	public Object telephonebusiness2(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonebusiness2(objects));
 	}
 
-	public Object telephonecallback(Object... objects) throws ContactException {
+	public Object telephonecallback(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonecallback(objects));
 	}
 
-	public Object telephonecar(Object... objects) throws ContactException {
+	public Object telephonecar(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonecar(objects));
 	}
 
-	public Object telephonecompany(Object... objects) throws ContactException {
+	public Object telephonecompany(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonecompany(objects));
 	}
 
-	public Object telephonehome1(Object... objects) throws ContactException {
+	public Object telephonehome1(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonehome1(objects));
 	}
 
-	public Object telephonehome2(Object... objects) throws ContactException {
+	public Object telephonehome2(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonehome2(objects));
 	}
 
-	public Object telephoneip(Object... objects) throws ContactException {
+	public Object telephoneip(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneip(objects));
 	}
 
-	public Object telephoneisdn(Object... objects) throws ContactException {
+	public Object telephoneisdn(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneisdn(objects));
 	}
 
-	public Object telephoneother(Object... objects) throws ContactException {
+	public Object telephoneother(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneother(objects));
 	}
 
-	public Object telephonepager(Object... objects) throws ContactException {
+	public Object telephonepager(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonepager(objects));
 	}
 
-	public Object telephoneprimary(Object... objects) throws ContactException {
+	public Object telephoneprimary(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneprimary(objects));
 	}
 
-	public Object telephoneradio(Object... objects) throws ContactException {
+	public Object telephoneradio(final Object... objects) throws ContactException {
 		return stringify(delegate.telephoneradio(objects));
 	}
 
-	public Object telephonetelex(Object... objects) throws ContactException {
+	public Object telephonetelex(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonetelex(objects));
 	}
 
-	public Object telephonettyttd(Object... objects) throws ContactException {
+	public Object telephonettyttd(final Object... objects) throws ContactException {
 		return stringify(delegate.telephonettyttd(objects));
 	}
 
-	public Object title(Object... objects) throws ContactException {
+	public Object title(final Object... objects) throws ContactException {
 		return stringify(delegate.title(objects));
 	}
 
-	public Object url(Object... objects) throws ContactException {
+	public Object url(final Object... objects) throws ContactException {
 		return stringify(delegate.url(objects));
 	}
 
-	public Object userfield01(Object... objects) throws ContactException {
+	public Object userfield01(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield01(objects));
 	}
 
-	public Object userfield02(Object... objects) throws ContactException {
+	public Object userfield02(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield02(objects));
 	}
 
-	public Object userfield03(Object... objects) throws ContactException {
+	public Object userfield03(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield03(objects));
 	}
 
-	public Object userfield04(Object... objects) throws ContactException {
+	public Object userfield04(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield04(objects));
 	}
 
-	public Object userfield05(Object... objects) throws ContactException {
+	public Object userfield05(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield05(objects));
 	}
 
-	public Object userfield06(Object... objects) throws ContactException {
+	public Object userfield06(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield06(objects));
 	}
 
-	public Object userfield07(Object... objects) throws ContactException {
+	public Object userfield07(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield07(objects));
 	}
 
-	public Object userfield08(Object... objects) throws ContactException {
+	public Object userfield08(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield08(objects));
 	}
 
-	public Object userfield09(Object... objects) throws ContactException {
+	public Object userfield09(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield09(objects));
 	}
 
-	public Object userfield10(Object... objects) throws ContactException {
+	public Object userfield10(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield10(objects));
 	}
 
-	public Object userfield11(Object... objects) throws ContactException {
+	public Object userfield11(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield11(objects));
 	}
 
-	public Object userfield12(Object... objects) throws ContactException {
+	public Object userfield12(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield12(objects));
 	}
 
-	public Object userfield13(Object... objects) throws ContactException {
+	public Object userfield13(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield13(objects));
 	}
 
-	public Object userfield14(Object... objects) throws ContactException {
+	public Object userfield14(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield14(objects));
 	}
 
-	public Object userfield15(Object... objects) throws ContactException {
+	public Object userfield15(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield15(objects));
 	}
 
-	public Object userfield16(Object... objects) throws ContactException {
+	public Object userfield16(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield16(objects));
 	}
 
-	public Object userfield17(Object... objects) throws ContactException {
+	public Object userfield17(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield17(objects));
 	}
 
-	public Object userfield18(Object... objects) throws ContactException {
+	public Object userfield18(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield18(objects));
 	}
 
-	public Object userfield19(Object... objects) throws ContactException {
+	public Object userfield19(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield19(objects));
 	}
 
-	public Object userfield20(Object... objects) throws ContactException {
+	public Object userfield20(final Object... objects) throws ContactException {
 		return stringify(delegate.userfield20(objects));
 	}
 

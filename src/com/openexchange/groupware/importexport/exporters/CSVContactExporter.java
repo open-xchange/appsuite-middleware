@@ -223,14 +223,14 @@ public class CSVContactExporter implements Exporter {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
 	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 	
-	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, Map <String, String[]> optionalParams)  throws ImportExportException {
+	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams)  throws ImportExportException {
 		if( !format.equals(Format.CSV) ){
 			return false;
 		}
 		FolderObject fo;
 		try {
 			fo = getFolderObject(sessObj, folder);
-		} catch (ImportExportException e) {
+		} catch (final ImportExportException e) {
 			return false;
 		}
 		//check format of folder
@@ -241,9 +241,9 @@ public class CSVContactExporter implements Exporter {
 		EffectivePermission perm;
 		try {
 			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			return false;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			return false;
 		}
 		return perm.canReadAllObjects();
@@ -251,7 +251,7 @@ public class CSVContactExporter implements Exporter {
 
 	
 	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
-			final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
+			final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
 		}
@@ -261,18 +261,18 @@ public class CSVContactExporter implements Exporter {
 		if( fieldsToBeExported == null || fieldsToBeExported.length == 0){
 			cols = POSSIBLE_FIELDS;
 		} else {
-			Set <Integer> s1 = transformIntArrayToSet(fieldsToBeExported);
-			Set <Integer> s2 = transformIntArrayToSet(POSSIBLE_FIELDS);
+			final Set <Integer> s1 = transformIntArrayToSet(fieldsToBeExported);
+			final Set <Integer> s2 = transformIntArrayToSet(POSSIBLE_FIELDS);
 			s1.retainAll(s2);
 			cols = transformSetToIntArray( s1 );
 		}
 		SearchIterator conIter;
 		try {
 			conIter = contactSql.getContactsInFolder(folderId, 0, contactSql.getNumberOfContacts(folderId), 0, "ASC", cols);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw EXCEPTIONS.create(2, e);
 		}
-		StringBuilder ret = new StringBuilder();
+		final StringBuilder ret = new StringBuilder();
 		ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
 		
 		while(conIter.hasNext()){
@@ -280,9 +280,9 @@ public class CSVContactExporter implements Exporter {
 			try {
 				current = (ContactObject) conIter.next();
 				ret.append( convertToLine( convertToList(current, cols) ) );
-			} catch (SearchIteratorException e) {
+			} catch (final SearchIteratorException e) {
 				LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error("Could not retrieve contact from folder " + folder + ", OXException was: ", e);
 			}
 			
@@ -292,14 +292,14 @@ public class CSVContactExporter implements Exporter {
 					new ByteArrayInputStream ( ret.toString().getBytes("UTF-8")) ,  
 					ret.toString().getBytes().length,
 					Format.CSV);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			throw EXCEPTIONS.create(4);
 		}
 	}
 
 	
 	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
-			final int objectId,	final int[] fieldsToBeExported, Map <String, String[]> optionalParams) throws ImportExportException {
+			final int objectId,	final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
 		}
@@ -314,11 +314,11 @@ public class CSVContactExporter implements Exporter {
 		ContactObject conObj;
 		try {
 			conObj = contactSql.getObjectById(objectId, folderId);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw EXCEPTIONS.create(2, e);
 		}
 
-		StringBuilder ret = new StringBuilder();
+		final StringBuilder ret = new StringBuilder();
 		ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
 		ret.append( convertToLine( convertToList(conObj, cols) ) );
 		
@@ -328,24 +328,24 @@ public class CSVContactExporter implements Exporter {
 				Format.CSV);
 	}
 	
-	protected List<String> convertToList(ContactObject conObj, int[] cols){
-		List<String> l = new LinkedList<String>();
-		ContactStringGetter getter = new ContactStringGetter();
+	protected List<String> convertToList(final ContactObject conObj, final int[] cols){
+		final List<String> l = new LinkedList<String>();
+		final ContactStringGetter getter = new ContactStringGetter();
 		getter.setDelegate( new ContactGetter() );
 		ContactField tempField;
-		for(int col : cols){
+		for(final int col : cols){
 			tempField = ContactField.getByValue(col);
 			try {
 				l.add( (String) tempField.doSwitch(getter, conObj) );
-			} catch (ContactException e) {
+			} catch (final ContactException e) {
 				l.add("");
 			}
 		}
 		return l;
 	}
 	
-	protected String convertToLine(List<String> line){
-		StringBuilder bob = new StringBuilder();
+	protected String convertToLine(final List<String> line){
+		final StringBuilder bob = new StringBuilder();
 		for(String str : line){
 			bob.append("\"");
 			str = str.replace("\"", "\"\"");

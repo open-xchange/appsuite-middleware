@@ -83,43 +83,43 @@ public class FolderWriter extends FolderChildWriter {
 	
 	protected static final String SHARED_STRING = "shared";
 	
-	protected int counter = 0;
+	protected int counter;
 	
 	protected int userId = -1;
 	
 	private static final Log LOG = LogFactory.getLog(FolderWriter.class);
 	
-	public FolderWriter(int userId) {
+	public FolderWriter(final int userId) {
 		this.userId = userId;
 	}
 	
-	public FolderWriter(SessionObject sessionObj) {
+	public FolderWriter(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
 		
 		userId = sessionObj.getUserObject().getId();
 	}
 	
-	public void startWriter(int objectId,  OutputStream os) throws Exception {
-		FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
+	public void startWriter(final int objectId,  final OutputStream os) throws Exception {
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
 		
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
 		try {
 			final FolderObject folderObj = sqlinterface.getFolderById(objectId);
 			writeObject(folderObj, eProp, false, xo, os);
-		} catch (OXFolderNotFoundException exc) {
+		} catch (final OXFolderNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
 	}
 	
-	public void startWriter(boolean modified, boolean deleted, Date lastsync, OutputStream os) throws Exception {
-		FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
+	public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
 		
-		XMLOutputter xo = new XMLOutputter();
+		final XMLOutputter xo = new XMLOutputter();
 		
 		if (lastsync == null) {
 			lastsync = new Date(0);
@@ -150,18 +150,18 @@ public class FolderWriter extends FolderChildWriter {
 		}
 	}
 	
-	public void writeIterator(SearchIterator it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject((FolderObject)it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(FolderObject folderobject, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final FolderObject folderobject, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		writeObject(folderobject, new Element("prop", "D", "DAV:"), delete, xo, os);
 	}
 	
-	public void writeObject(FolderObject folderobject, Element e_prop, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
-		int module = folderobject.getModule();
+	public void writeObject(final FolderObject folderobject, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+		final int module = folderobject.getModule();
 		
 		if (module == FolderObject.CALENDAR || module == FolderObject.TASK || module == FolderObject.CONTACT) {
 			int status = 200;
@@ -171,7 +171,7 @@ public class FolderWriter extends FolderChildWriter {
 			try {
 				object_id = folderobject.getObjectID();
 				addContent2PropElement(e_prop, folderobject, delete);
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				LOG.error("writeObject", exc);
 				status = 500;
 				description = "Server Error: " + exc.getMessage();
@@ -182,15 +182,15 @@ public class FolderWriter extends FolderChildWriter {
 		}
 	}
 	
-	public void addContent2PropElement(Element e_prop, FolderObject folderobject, boolean delete) throws Exception {
+	public void addContent2PropElement(final Element e_prop, final FolderObject folderobject, final boolean delete) throws Exception {
 		counter++;
 		if (delete) {
 			addElement("object_id", folderobject.getObjectID(), e_prop);
 			addElement("object_status", "DELETE", e_prop);
 		} else {
-			int type = folderobject.getType();
-			int owner = folderobject.getCreator();
-			int module = folderobject.getModule();
+			final int type = folderobject.getType();
+			final int owner = folderobject.getCreator();
+			final int module = folderobject.getModule();
 			
 			addElement("object_status", "CREATE", e_prop);
 			
@@ -236,17 +236,17 @@ public class FolderWriter extends FolderChildWriter {
 		}
 	}
 	
-	public static void addElementPermission(List permissions, Element e_prop) throws Exception {
-		Element e_permissions = new Element("permissions", XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+	public static void addElementPermission(final List permissions, final Element e_prop) throws Exception {
+		final Element e_permissions = new Element("permissions", XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 		
 		if (permissions != null) {
 			for (int a = 0; a < permissions.size(); a++) {
-				OCLPermission oclp = (OCLPermission)permissions.get(a);
-				int entity = oclp.getEntity();
-				int fp = oclp.getFolderPermission();
-				int orp = oclp.getReadPermission();
-				int owp = oclp.getWritePermission();
-				int odp = oclp.getDeletePermission();
+				final OCLPermission oclp = (OCLPermission)permissions.get(a);
+				final int entity = oclp.getEntity();
+				final int fp = oclp.getFolderPermission();
+				final int orp = oclp.getReadPermission();
+				final int owp = oclp.getWritePermission();
+				final int odp = oclp.getDeletePermission();
 				
 				if (oclp.isGroupPermission()) {
 					addElementGroup(e_permissions, entity, fp, orp, owp, odp, oclp.isFolderAdmin());
@@ -259,21 +259,21 @@ public class FolderWriter extends FolderChildWriter {
 		e_prop.addContent(e_permissions);
 	}
 	
-	protected static void addElementUser(Element e_permissions, int entity, int fp, int orp, int owp, int odp, boolean adminFlag) throws Exception {
-		Element e = new Element("user", namespace);
+	protected static void addElementUser(final Element e_permissions, final int entity, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
+		final Element e = new Element("user", namespace);
 		addAttributes(e, fp, orp, owp, odp, adminFlag);
 		e.addContent(String.valueOf(entity));
 		e_permissions.addContent(e);
 	}
 	
-	protected static void addElementGroup(Element e_permissions, int entity, int fp, int orp, int owp, int odp, boolean adminFlag) throws Exception {
-		Element e = new Element("group", namespace);
+	protected static void addElementGroup(final Element e_permissions, final int entity, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
+		final Element e = new Element("group", namespace);
 		addAttributes(e, fp, orp, owp, odp, adminFlag);
 		e.addContent(String.valueOf(entity));
 		e_permissions.addContent(e);
 	}
 	
-	protected static void addAttributes(Element e, int fp, int orp, int owp, int odp, boolean adminFlag) throws Exception {
+	protected static void addAttributes(final Element e, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
 		e.setAttribute("folderpermission", String.valueOf(fp), namespace);
 		e.setAttribute("objectreadpermission", String.valueOf(orp), namespace);
 		e.setAttribute("objectwritepermission", String.valueOf(owp), namespace);

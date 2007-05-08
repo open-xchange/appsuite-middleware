@@ -67,23 +67,24 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class ReplayWebdavRequest implements WebdavRequest{
-	private WebdavRequest delegate = null;
+	private WebdavRequest delegate;
 	private byte[] body;
 	
-	public ReplayWebdavRequest(WebdavRequest req) {
+	public ReplayWebdavRequest(final WebdavRequest req) {
 		this.delegate = req;
 	}
 
 	public InputStream getBody() throws IOException {
-		if(this.body != null)
+		if(this.body != null) {
 			return new ByteArrayInputStream(this.body);
+		}
 		
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		final ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		InputStream in = null;
 		
 		in = delegate.getBody();
 		
-		byte[] buffer = new byte[200];
+		final byte[] buffer = new byte[200];
 		int b = 0;
 		
 		while((b = in.read(buffer))!=-1) {
@@ -110,7 +111,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getDestinationUrl();
 	}
 
-	public String getHeader(String header) {
+	public String getHeader(final String header) {
 		return delegate.getHeader(header);
 	}
 
@@ -134,7 +135,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getURLPrefix();
 	}
 	
-	public int getDepth(int depth) {
+	public int getDepth(final int depth) {
 		return delegate.getDepth(depth);
 	}
 

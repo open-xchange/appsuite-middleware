@@ -49,17 +49,15 @@
 
 package com.openexchange.tools.file;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.tx.AbstractUndoable;
 import com.openexchange.groupware.tx.UndoableAction;
 
 public class SaveFileWithQuotaAction extends SaveFileAction implements
 		UndoableAction {
 
-	private QuotaFileStorage storage = null;
+	private QuotaFileStorage storage;
 	private long sizeHint;
 	private InputStream in;
 	
@@ -70,29 +68,33 @@ public class SaveFileWithQuotaAction extends SaveFileAction implements
 		storage.deleteFile(id);
 	}
 	
+	@Override
 	public void perform() throws AbstractOXException {
 		id = storage.saveNewFile(in,sizeHint);
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
-	public void setIn(InputStream in) {
+	@Override
+	public void setIn(final InputStream in) {
 		this.in = in;
 	}
 
-	public void setSizeHint(long sizeHint) {
+	public void setSizeHint(final long sizeHint) {
 		this.sizeHint = sizeHint;
 	}
 
-	public void setStorage(QuotaFileStorage storage) {
+	public void setStorage(final QuotaFileStorage storage) {
 		this.storage = storage;
 	}
 	
-	public void setStorage(FileStorage storage) {
+	@Override
+	public void setStorage(final FileStorage storage) {
 		if (storage instanceof QuotaFileStorage) {
-			QuotaFileStorage qfs = (QuotaFileStorage) storage;
+			final QuotaFileStorage qfs = (QuotaFileStorage) storage;
 			this.storage = qfs;
 		} else {
 			super.setStorage(storage);

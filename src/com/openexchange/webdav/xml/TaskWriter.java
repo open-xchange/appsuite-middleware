@@ -127,27 +127,27 @@ public class TaskWriter extends CalendarWriter {
 		
 	}
 	
-	public TaskWriter(SessionObject sessionObj) {
+	public TaskWriter(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	
-	public void startWriter(int objectId, int folderId, OutputStream os) throws Exception {
+	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
 		try {
-			TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
-			Task taskobject = tasksql.getTaskById(objectId, folderId);
+			final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+			final Task taskobject = tasksql.getTaskById(objectId, folderId);
 			writeObject(taskobject, false, xo, os);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
 	}
 	
-	public void startWriter(boolean modified, boolean deleted, int folder_id, Date lastsync, OutputStream os) throws Exception {
-		TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
-		XMLOutputter xo = new XMLOutputter();
+	public void startWriter(final boolean modified, final boolean deleted, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+		final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+		final XMLOutputter xo = new XMLOutputter();
 		
 		if (modified) {
 			SearchIterator it = null;
@@ -174,17 +174,17 @@ public class TaskWriter extends CalendarWriter {
 		}
 	}
 	
-	public void writeIterator(SearchIterator it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		while (it.hasNext()) {
 			writeObject((Task)it.next(), delete, xo, os);
 		}
 	}
 	
-	public void writeObject(Task taskObj, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final Task taskObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		writeObject(taskObj, new Element("prop", "D", "DAV:"), delete, xo, os); 
 	}
 	
-	public void writeObject(Task taskObj, Element e_prop, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeObject(final Task taskObj, final Element e_prop, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
 		int status = 200;
 		String description = "OK";
 		int object_id = 0;
@@ -192,7 +192,7 @@ public class TaskWriter extends CalendarWriter {
 		try {
 			object_id = taskObj.getObjectID();
 			addContent2PropElement(e_prop, taskObj, delete);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeObject", exc);
 			status = 500;
 			description = "Server Error: " + exc.getMessage();
@@ -202,7 +202,7 @@ public class TaskWriter extends CalendarWriter {
 		writeResponseElement(e_prop, object_id, status, description, xo, os);
 	}
 	
-	public void addContent2PropElement(Element e_prop, Task taskObj, boolean delete) throws Exception {
+	public void addContent2PropElement(final Element e_prop, final Task taskObj, final boolean delete) throws Exception {
 		if (delete) {
 			addElement(TaskFields.OBJECT_ID, taskObj.getObjectID(), e_prop);
 			addElement(TaskFields.LAST_MODIFIED, taskObj.getLastModified(), e_prop);
@@ -270,6 +270,7 @@ public class TaskWriter extends CalendarWriter {
 		}
 	}
 	
+	@Override
 	protected int getModule() {
 		return Types.TASK;
 	}

@@ -202,6 +202,18 @@ public class OXFolderAccess {
 	public final int getFolderModule(final int folderId) throws OXException {
 		return getFolderObject(folderId).getModule();
 	}
+	
+	/**
+	 * Determines folder owner
+	 * 
+	 * @param folderId -
+	 *            the folder ID
+	 * @return folder owner
+	 * @throws OXException
+	 */
+	public final int getFolderOwner(final int folderId) throws OXException {
+		return getFolderObject(folderId).getCreatedBy();
+	}
 
 	/**
 	 * Determines if folder is shared. <b>NOTE:</b> This method assumes that

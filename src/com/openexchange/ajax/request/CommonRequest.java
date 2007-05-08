@@ -68,29 +68,29 @@ import com.openexchange.groupware.AbstractOXException;
 public abstract class CommonRequest {
 	protected Writer w;
 	
-	private Log LOG = LogFactory.getLog(CommonRequest.class);
+	private final Log LOG = LogFactory.getLog(CommonRequest.class);
 
-	public CommonRequest(Writer w) {
+	public CommonRequest(final Writer w) {
 		this.w = w;
 	}
 	
-	protected void sendErrorAsJS(String error, String...errorParams) {
-		JSONObject response = new JSONObject();
+	protected void sendErrorAsJS(final String error, final String...errorParams) {
+		final JSONObject response = new JSONObject();
 		try {
 			response.put("error",error);
-			JSONArray arr = new JSONArray(Arrays.asList(errorParams));
+			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
 			response.put("error_params",arr);
 			w.write(response.toString());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug(e.getMessage(),e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
 	
-	protected void handle(Throwable t) {
+	protected void handle(final Throwable t) {
 		LOG.debug("",t);
-		Response res = new Response();
+		final Response res = new Response();
 		if(t instanceof AbstractOXException) {
 			res.setException((AbstractOXException) t);
 		} else {
@@ -98,21 +98,21 @@ public abstract class CommonRequest {
 		}
 		try {
 			Response.write(res, w);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error("",t);
 		}
 	}
 	
-	protected void invalidParameter(String parameter, String value) {
+	protected void invalidParameter(final String parameter, final String value) {
 		sendErrorAsJS("Invalid parameter value '%s' for parameter %s",value,parameter);
 	}
 
-	protected void unknownColumn(String columnId) {
+	protected void unknownColumn(final String columnId) {
 		sendErrorAsJS("Unknown column id: %s",columnId);
 	}
 
-	protected boolean checkRequired(SimpleRequest req, String action, String ...parameters) throws IOException {
-		for(String param : parameters) {
+	protected boolean checkRequired(final SimpleRequest req, final String action, final String ...parameters) throws IOException {
+		for(final String param : parameters) {
 			if(req.getParameter(param) == null) {
 				missingParameter(param,action);
 				return false;
@@ -121,7 +121,7 @@ public abstract class CommonRequest {
 		return true;
 	}
 	
-	protected void missingParameter(String parameter, String action) throws IOException {
+	protected void missingParameter(final String parameter, final String action) throws IOException {
 		sendErrorAsJS("Missing Parameter: %s for action: %s",parameter,action);
 		
 	}

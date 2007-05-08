@@ -51,28 +51,26 @@
 
 package com.openexchange.groupware.reminder;
 
-import com.openexchange.groupware.IDGenerator;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import java.util.Date;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.ResultSet;
+import java.util.Date;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * ReminderHandler
@@ -82,7 +80,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class ReminderHandler implements Types, ReminderSQLInterface {
 	
-	private Context context = null;
+	private Context context;
 	
 	private static final String sqlInsert = "INSERT INTO reminder (object_id, cid, target_id, module, userid, alarm, recurrence, last_modified, folder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
@@ -110,13 +108,13 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	
 	private static final String ERROR_MISSING_DATE = "missing date";
 	
-	private static final Log LOG = LogFactory.getLog(ReminderHandler.class);
+	//private static final transient Log LOG = LogFactory.getLog(ReminderHandler.class);
 	
-	public ReminderHandler(SessionObject sessionObj) {
+	public ReminderHandler(final SessionObject sessionObj) {
 		context = sessionObj.getContext();
 	}
 	
-	public ReminderHandler(Context context) {
+	public ReminderHandler(final Context context) {
 		this.context = context;
 	}
 	
@@ -127,7 +125,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			writeCon = DBPool.pickupWriteable(context);
 			
 			return insertReminder(reminderObj, writeCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeWriterSilent(context,writeCon);
@@ -169,7 +167,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			ps.close();
 			
 			return objectId;
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -181,7 +179,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			writeCon = DBPool.pickupWriteable(context);
 			
 			updateReminder(reminderObj, writeCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeWriterSilent(context,writeCon);
@@ -226,12 +224,12 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			ps.executeUpdate();
 			ps.close();
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
 	
-	public void deleteReminder(int objectId) throws OXException {
+	public void deleteReminder(final int objectId) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement ps = null;
 		try {
@@ -248,9 +246,9 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (deleted == 0) {
 				throw new OXObjectNotFoundException("no reminder to delete!");
 			}
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeWriterSilent(context,writeCon);
@@ -268,7 +266,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			writeCon = DBPool.pickupWriteable(context);
 			
 			deleteReminder(targetId, userId, module, writeCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeWriterSilent(context,writeCon);
@@ -304,7 +302,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (deleted == 0) {
 				throw new OXObjectNotFoundException("no reminder to delete!");
 			}
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -320,7 +318,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			writeCon = DBPool.pickupWriteable(context);
 			
 			deleteReminder(targetId, module, writeCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeWriterSilent(context,writeCon);
@@ -351,7 +349,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (deleted == 0) {
 				throw new OXObjectNotFoundException("no reminder to delete!");
 			}
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -360,7 +358,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		try {
 			loadReminder(targetId, userId, module);
 			return true;
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			return false;
 		}
 	}
@@ -376,7 +374,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			readCon = DBPool.pickup(context);
 			
 			return loadReminder(targetId, userId, module, readCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeReaderSilent(context,readCon);
@@ -401,7 +399,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			rs = ps.executeQuery();
 			return convertResult2ReminderObject(rs, ps, true);
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -413,7 +411,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			readCon = DBPool.pickup(context);
 			
 			return loadReminder(objectId, readCon);
-		} catch (DBPoolingException exc) {
+		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
 			DBPool.closeReaderSilent(context,readCon);
@@ -433,15 +431,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			if (reminderObj != null) {
 				return reminderObj;
-			} else {
-				throw new OXObjectNotFoundException("reminder object not found!");
 			}
-		} catch (SQLException exc) {
+			throw new OXObjectNotFoundException("reminder object not found!");
+		} catch (final SQLException exc) {
 			throw new OXException(exc);
 		}
 	}
 	
-	public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, boolean closeStatements) throws SQLException, OXObjectNotFoundException {
+	public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, final boolean closeStatements) throws SQLException, OXObjectNotFoundException {
 		try {
 			if (rs.next()) {
 				int a = 0;
@@ -457,9 +454,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				reminderObj.setLastModified(new Date(rs.getLong(++a))); // TODO: Fix me
 				
 				return reminderObj;
-			} else {
-				throw new OXObjectNotFoundException("reminder object not found");
 			}
+			throw new OXObjectNotFoundException("reminder object not found");
 		} finally {
 			if (closeStatements) {
 				if (rs != null) {
@@ -485,7 +481,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			final ResultSet rs = ps.executeQuery();
 			return new ReminderSearchIterator(rs, ps, readCon);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -503,7 +499,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			final ResultSet rs = ps.executeQuery();
 			return new ReminderSearchIterator(rs, ps, readCon);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
@@ -521,18 +517,18 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			final ResultSet rs = ps.executeQuery();
 			return new ReminderSearchIterator(rs, ps, readCon);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
 	}
 	
 	private class ReminderSearchIterator implements SearchIterator {
 		
-		private ReminderObject next = null;
+		private ReminderObject next;
 		
-		private ResultSet rs = null;
+		private ResultSet rs;
 		
-		private PreparedStatement preparedStatement = null;
+		private PreparedStatement preparedStatement;
 		
 		private Connection readCon;
 		
@@ -542,9 +538,9 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			this.preparedStatement = preparedStatement;
 			try {
 				next = convertResult2ReminderObject(rs, preparedStatement, false);
-			} catch (OXObjectNotFoundException exc) {
+			} catch (final OXObjectNotFoundException exc) {
 				next = null;
-			} catch (SQLException exc) {
+			} catch (final SQLException exc) {
 				throw new SearchIteratorException(exc);
 			}
 		}
@@ -557,9 +553,9 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final ReminderObject reminderObj = next;
 			try {
 				next = convertResult2ReminderObject(rs, preparedStatement, false);
-			} catch (OXObjectNotFoundException exc) {
+			} catch (final OXObjectNotFoundException exc) {
 				next = null;
-			} catch (SQLException exc) {
+			} catch (final SQLException exc) {
 				throw new SearchIteratorException(exc);
 			}
 			return reminderObj;
@@ -576,7 +572,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				}
 				
 				DBPool.closeReaderSilent(context,readCon);
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				throw new SearchIteratorException(exc);
 			}
 		}

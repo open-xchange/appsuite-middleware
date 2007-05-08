@@ -69,9 +69,9 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
 
 	@Override
-	protected ImportResult writeEntry(List<String> fields, List<String> entry, String folder, ContactSQLInterface contactsql, ContactSwitcher conSet, int lineNumber){
+	protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSQLInterface contactsql, final ContactSwitcher conSet, final int lineNumber){
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		switcher.setDateFormat(sdf);
 		switcher.setDelegate(conSet);
@@ -79,13 +79,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	}
 
 	@Override
-	protected ContactField getRelevantField(String name) {
+	protected ContactField getRelevantField(final String name) {
 		return ContactField.getByOutlookName(name);
 	}
 
 	@Override
 	protected CSVParser getCSVParser() {
-		CSVParser result = super.getCSVParser();
+		final CSVParser result = super.getCSVParser();
 		result.setTolerant(true);
 		return result;
 	}

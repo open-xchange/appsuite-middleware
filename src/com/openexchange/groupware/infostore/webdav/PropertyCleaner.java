@@ -18,62 +18,62 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 	
 	private static final Log LOG = LogFactory.getLog(PropertyCleaner.class);
 
-	public PropertyCleaner(PropertyStore folderProperties, PropertyStore infoProperties){
+	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;
 		this.infoProperties = infoProperties;
 		
 	}
 
-	public void folderCreated(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderCreated(final FolderObject folderObj, final SessionObject sessionObj) {
 
 	}
 
-	public void folderDeleted(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderDeleted(final FolderObject folderObj, final SessionObject sessionObj) {
 		try {
 			folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			folderProperties.commit();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			LOG.fatal(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.fatal(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
 				folderProperties.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e);
 			}
 		}
 	}
 
-	public void folderModified(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderModified(final FolderObject folderObj, final SessionObject sessionObj) {
 
 	}
 
-	public void infoitemCreated(DocumentMetadata metadata,
-			SessionObject sessionObject) {
+	public void infoitemCreated(final DocumentMetadata metadata,
+			final SessionObject sessionObject) {
 
 	}
 
-	public void infoitemDeleted(DocumentMetadata metadata,
-			SessionObject sessionObject) {
+	public void infoitemDeleted(final DocumentMetadata metadata,
+			final SessionObject sessionObject) {
 
 	}
 
-	public void infoitemModified(DocumentMetadata metadata,
-			SessionObject sessionObj) {
+	public void infoitemModified(final DocumentMetadata metadata,
+			final SessionObject sessionObj) {
 		try {
 			infoProperties.startTransaction();
 			infoProperties.removeAll(metadata.getId(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			infoProperties.commit();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			LOG.fatal(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.fatal(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
 				infoProperties.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e);
 			}
 		}

@@ -69,17 +69,17 @@ import org.json.JSONWriter;
 
 public class ContactWriter extends CommonWriter {
 	
-	public ContactWriter(PrintWriter w, TimeZone timeZone) {
+	public ContactWriter(final PrintWriter w, final TimeZone timeZone) {
 		jsonwriter = new JSONWriter(w);
 		this.timeZone = timeZone;
 	}
 	
-	public ContactWriter(JSONWriter jsonwriter, TimeZone timeZone) {
+	public ContactWriter(final JSONWriter jsonwriter, final TimeZone timeZone) {
 		this.jsonwriter = jsonwriter;
 		this.timeZone = timeZone;
 	}
 	
-	public void writeArray(ContactObject contactobject, int cols[]) throws JSONException {
+	public void writeArray(final ContactObject contactobject, final int cols[]) throws JSONException {
 		jsonwriter.array();
 		
 		for (int a = 0; a < cols.length; a++) {
@@ -89,7 +89,7 @@ public class ContactWriter extends CommonWriter {
 		jsonwriter.endArray();
 	}
 	
-	public void writeContact(ContactObject contactobject) throws JSONException {
+	public void writeContact(final ContactObject contactobject) throws JSONException {
 		jsonwriter.object();
 		writeCommonFields(contactobject);
 		
@@ -194,8 +194,8 @@ public class ContactWriter extends CommonWriter {
 		jsonwriter.endObject();
 	}
 	
-	public void writeLinks(ContactObject contactobject, boolean isObject) throws JSONException {
-		LinkEntryObject[] linkentries = contactobject.getLinks();
+	public void writeLinks(final ContactObject contactobject, final boolean isObject) throws JSONException {
+		final LinkEntryObject[] linkentries = contactobject.getLinks();
 		
 		if (linkentries != null) {
 			if (isObject) {
@@ -220,8 +220,8 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void writeDistributionList(ContactObject contactobject, boolean isObject) throws JSONException {
-		DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
+	public void writeDistributionList(final ContactObject contactobject, final boolean isObject) throws JSONException {
+		final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
 		
 		if (distributionlist != null) {
 			if (isObject) {
@@ -233,7 +233,7 @@ public class ContactWriter extends CommonWriter {
 			for (int a = 0; a < distributionlist.length; a++) {
 				jsonwriter.object();
 				
-				int emailField = distributionlist[a].getEmailfield();
+				final int emailField = distributionlist[a].getEmailfield();
 				
 				if (!(emailField == DistributionListEntryObject.INDEPENDENT)) {
 					writeParameter(DistributionListFields.ID, distributionlist[a].getEntryID());
@@ -254,7 +254,7 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void write(int field, ContactObject contactobject) throws JSONException {
+	public void write(final int field, final ContactObject contactobject) throws JSONException {
 		switch (field) {
 			case ContactObject.OBJECT_ID:
 				writeValue(contactobject.getObjectID());

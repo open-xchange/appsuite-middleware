@@ -326,6 +326,9 @@ public class IMAPPropertiesFactory {
 			} else if (credSrc.equalsIgnoreCase(CREDSRC_USER_IMAP_LOGIN)) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
+			} else {
+				throw new IMAPException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
+						+ credSrc);
 			}
 		} else if (loginType.equalsIgnoreCase(LOGINTYPE_ANONYMOUS)) {
 			String imapServer = userObj.getImapServer();
@@ -349,7 +352,8 @@ public class IMAPPropertiesFactory {
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
 		} else {
-			throw new IMAPException("Unknown login type set in " + PROP_FILE + ": " + loginType);
+			throw new IMAPException("Unknown value in property " + PROP_LOGINTYPE + " set in " + PROP_FILE + ": "
+					+ loginType);
 		}
 		/*
 		 * Load global IMAP properties if not done, yet

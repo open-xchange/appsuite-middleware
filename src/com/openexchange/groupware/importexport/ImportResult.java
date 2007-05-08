@@ -87,7 +87,7 @@ public class ImportResult {
 	 * @param type
 	 * @param timestamp
 	 */
-	public ImportResult(String objectId, String folder, Date date){
+	public ImportResult(final String objectId, final String folder, final Date date){
 		this(objectId, folder, date, null);
 	}
 	
@@ -98,7 +98,7 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(String objectId, String folder, Date date, OXException exception){
+	public ImportResult(final String objectId, final String folder, final Date date, final OXException exception){
 		this(objectId, folder, date, exception, -1, null);
 	}
 
@@ -109,7 +109,7 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(String objectId, String folder, Date date, OXException exception, int entryNumber, String content){
+	public ImportResult(final String objectId, final String folder, final Date date, final OXException exception, final int entryNumber, final String content){
 		this.objectId = objectId;
 		this.folder = folder;
 		this.date = date;
@@ -124,7 +124,7 @@ public class ImportResult {
 	 * @param folder
 	 * @param timestamp
 	 */
-	public ImportResult(String objectId, String folder, long timestamp){
+	public ImportResult(final String objectId, final String folder, final long timestamp){
 		this(objectId, folder, new Date(timestamp));
 	}
 	
@@ -135,7 +135,7 @@ public class ImportResult {
 	 * @param timestamp
 	 * @param exception
 	 */
-	public ImportResult(String objectId, String folder, long timestamp, OXException exception){
+	public ImportResult(final String objectId, final String folder, final long timestamp, final OXException exception){
 		this(objectId, folder, new Date(timestamp), exception);
 	}
 	
@@ -151,37 +151,37 @@ public class ImportResult {
 	public OXException getException() {
 		return this.exception;
 	}
-	public void setException(OXException exception){
+	public void setException(final OXException exception){
 		this.exception = exception;
 	}
 	public String getObjectId() {
 		return objectId;
 	}
-	public void setObjectId(String objectId) {
+	public void setObjectId(final String objectId) {
 		this.objectId = objectId;
 	}
 	public Date getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(final Date date) {
 		this.date = date;
 	}
 	public String getFolder() {
 		return folder;
 	}
-	public void setFolder(String folder) {
+	public void setFolder(final String folder) {
 		this.folder = folder;
 	}
 	public String getContent() {
 		return content;
 	}
-	public void setContent(String content) {
+	public void setContent(final String content) {
 		this.content = content;
 	}
 	public int getEntryNumber() {
 		return entryNumber;
 	}
-	public void setEntryNumber(int entryNumber) {
+	public void setEntryNumber(final int entryNumber) {
 		this.entryNumber = entryNumber;
 	}
 	

@@ -64,35 +64,35 @@ import com.openexchange.groupware.tx.DBProvider;
 
 public class FolderTreeUtilImpl implements FolderTreeUtil {
 
-	private static Mode MODE = null;
+	private static Mode MODE;
 	
-	public FolderTreeUtilImpl(DBProvider provider) {
+	public FolderTreeUtilImpl(final DBProvider provider) {
 		MODE = new CACHE_MODE(provider);
 	}
 	
-	public List<Integer> getPath(int folderid, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
-		List<Integer> path = new ArrayList<Integer>();
+	public List<Integer> getPath(final int folderid, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
+		final List<Integer> path = new ArrayList<Integer>();
 		try {
 			FolderObject folder = getFolder(folderid, ctx);
-			path.add(folder.getObjectID());
+			path.add(Integer.valueOf(folder.getObjectID()));
 			while(folder != null) {
 				if(folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
-					path.add(FolderObject.SYSTEM_ROOT_FOLDER_ID);
+					path.add(Integer.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
 					folder = null;
 				} else {
 					folder = getFolder(folder.getParentFolderID(), ctx);
-					path.add(folder.getObjectID());
+					path.add(Integer.valueOf(folder.getObjectID()));
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new OXException(e);
 		}
 		Collections.reverse(path);
 		return path;
 	}
 
-	private FolderObject getFolder(int folderid, Context ctx) throws Exception {
+	private FolderObject getFolder(final int folderid, final Context ctx) throws Exception {
 		return MODE.getFolder(folderid, ctx);
 	}
 	
@@ -104,11 +104,11 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
 
 		private DBProvider provider;
 
-		public CACHE_MODE(DBProvider provider) {
+		public CACHE_MODE(final DBProvider provider) {
 			this.provider = provider;
 		}
 		
-		public FolderObject getFolder(int folderid, Context ctx)  throws Exception{
+		public FolderObject getFolder(final int folderid, final Context ctx)  throws Exception{
 			try {
 				FolderObject o =  FolderCacheManager.getInstance().getFolderObject(folderid, ctx);
 				if(o == null) {
@@ -121,7 +121,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
 					}
 				}
 				return o;
-			} catch (FolderCacheNotEnabledException e) {
+			} catch (final FolderCacheNotEnabledException e) {
 				MODE = new NORMAL_MODE();
 				return MODE.getFolder(folderid, ctx);
 			}
@@ -130,7 +130,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
 	
 	private static final class NORMAL_MODE implements Mode {
 
-		public FolderObject getFolder(int folderid, Context ctx) throws Exception {
+		public FolderObject getFolder(final int folderid, final Context ctx) throws Exception {
 			return FolderObject.loadFolderObjectFromDB(folderid, ctx);
 		}
 		

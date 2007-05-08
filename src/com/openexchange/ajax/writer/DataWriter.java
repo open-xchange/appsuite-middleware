@@ -66,64 +66,64 @@ import org.json.JSONWriter;
 
 public class DataWriter {
 	
-	protected TimeZone timeZone = null;
+	protected TimeZone timeZone;
 	
-	protected JSONWriter jsonwriter = null;
+	protected JSONWriter jsonwriter;
 	
-	public void writeParameter(String name, String value) throws JSONException {
+	public void writeParameter(final String name, final String value) throws JSONException {
 		if (value != null && value.length() > 0) {
 			jsonwriter.key(name);
 			jsonwriter.value(value);
 		}
 	}
 	
-	public void writeParameter(String name, int value) throws JSONException {
+	public void writeParameter(final String name, final int value) throws JSONException {
 		jsonwriter.key(name);
 		jsonwriter.value(value);
 	}
 	
-	public void writeParameter(String name, long value) throws JSONException {
+	public void writeParameter(final String name, final long value) throws JSONException {
 		jsonwriter.key(name);
 		jsonwriter.value(value);
 	}
 	
-	public void writeParameter(String name, float value) throws JSONException {
+	public void writeParameter(final String name, final float value) throws JSONException {
 		jsonwriter.key(name);
 		jsonwriter.value(value);
 	}
 	
-	public void writeParameter(String name, boolean value) throws JSONException {
+	public void writeParameter(final String name, final boolean value) throws JSONException {
 		jsonwriter.key(name);
 		jsonwriter.value(value);
 	}
 	
-	public void writeParameter(String name, Date value) throws JSONException {
+	public void writeParameter(final String name, final Date value) throws JSONException {
 		if (value != null) {
 			jsonwriter.key(name);
 			jsonwriter.value(value.getTime());
 		}
 	}
 
-	public void writeParameter(String name, Date value, TimeZone timeZone) throws JSONException {
+	public void writeParameter(final String name, final Date value, final TimeZone timeZone) throws JSONException {
 		writeParameter(name, value, value, timeZone);
 	}
 	
-	public void writeParameter(String name, Date value, Date offsetDate, TimeZone timeZone) throws JSONException {
+	public void writeParameter(final String name, final Date value, final Date offsetDate, final TimeZone timeZone) throws JSONException {
 		if (value != null) {
 			jsonwriter.key(name);
-			int offset = timeZone.getOffset(offsetDate.getTime());
+			final int offset = timeZone.getOffset(offsetDate.getTime());
 			jsonwriter.value(value.getTime() + offset);
 		}
 	}
 	
-	public void writeParameter(String name, byte[] value) throws JSONException {
+	public void writeParameter(final String name, final byte[] value) throws JSONException {
 		if (value != null) {
 			jsonwriter.key(name);
 			jsonwriter.value(new String(value));			
 		}
 	}
 	
-	public void writeValue(String value) throws JSONException {
+	public void writeValue(final String value) throws JSONException {
        	if (value != null && value.length() > 0) {
 			jsonwriter.value(value);
 		} else {
@@ -131,23 +131,23 @@ public class DataWriter {
 		}
 	}
 
-	public void writeValue(int value) throws JSONException {
+	public void writeValue(final int value) throws JSONException {
 		jsonwriter.value(value);
 	}
 	
-	public void writeValue(float value) throws JSONException {
+	public void writeValue(final float value) throws JSONException {
 		jsonwriter.value(value);
 	}
 
-	public void writeValue(long value) throws JSONException {
+	public void writeValue(final long value) throws JSONException {
 		jsonwriter.value(value);
 	}
 
-	public void writeValue(boolean value) throws JSONException {
+	public void writeValue(final boolean value) throws JSONException {
 		jsonwriter.value(value);
 	}
 	
-	public void writeValue(Date value) throws JSONException {
+	public void writeValue(final Date value) throws JSONException {
 		if (value != null) {
 			jsonwriter.value(value.getTime());
 		} else {
@@ -155,12 +155,12 @@ public class DataWriter {
 		}
 	}
 	
-	public void writeValue(Date value, TimeZone timeZone) throws JSONException {
+	public void writeValue(final Date value, final TimeZone timeZone) throws JSONException {
 		writeValue(value, value, timeZone);
 	}
 
-	public void writeValue(Date value, Date offsetDate, TimeZone timeZone) throws JSONException {
-		int offset = timeZone.getOffset(offsetDate.getTime());
+	public void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone) throws JSONException {
+		final int offset = timeZone.getOffset(offsetDate.getTime());
 		if (value != null) {
 			jsonwriter.value(value.getTime()+offset);
 		} else {
@@ -168,7 +168,7 @@ public class DataWriter {
 		}
 	}
 	
-	public void writeValue(byte[] value) throws JSONException {
+	public void writeValue(final byte[] value) throws JSONException {
 		if (value != null) {
 			jsonwriter.value(new String(value));
 		} else {

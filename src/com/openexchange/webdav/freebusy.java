@@ -83,13 +83,19 @@ import org.apache.commons.logging.LogFactory;
 
 public class freebusy extends HttpServlet {
 	
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 6336387126907903347L;
+
 	private static final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 	
 	private static final SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 	
-	private static final Log LOG = LogFactory.getLog(freebusy.class);
+	private static final transient Log LOG = LogFactory.getLog(freebusy.class);
 	
-	protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	@Override
+	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		
 		int contextid = -1;
 		String mailPrefix = null;
@@ -125,7 +131,7 @@ public class freebusy extends HttpServlet {
 					
 					bPeriod = true;
 				}
-			} catch (NumberFormatException ex) {
+			} catch (final NumberFormatException ex) {
 				httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: period");
 				return;
 			}
@@ -135,7 +141,7 @@ public class freebusy extends HttpServlet {
 			if (httpServletRequest.getParameter("start") != null) {
 				try {
 					start = inputFormat.parse(httpServletRequest.getParameter("start"));
-				} catch (ParseException ex) {
+				} catch (final ParseException ex) {
 					httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: start");
 					return;
 				}
@@ -147,7 +153,7 @@ public class freebusy extends HttpServlet {
 			if (httpServletRequest.getParameter("end") != null) {
 				try {
 					end = inputFormat.parse(httpServletRequest.getParameter("end"));
-				} catch (ParseException ex) {
+				} catch (final ParseException ex) {
 					httpServletResponse.sendError(HttpServletResponse.SC_CONFLICT, "invalid value in parameter: end");
 					return;
 				}
@@ -172,16 +178,16 @@ public class freebusy extends HttpServlet {
 		}
 		
 		httpServletResponse.setContentType("text/html");
-		PrintWriter printWriter = httpServletResponse.getWriter();
+		final PrintWriter printWriter = httpServletResponse.getWriter();
 		try {
 			writeVCalendar(contextid, start, end, mailPrefix, mailSuffix, httpServletRequest.getRemoteHost(), printWriter);
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doGet", exc);
 		}
 	}
 	
-	private void writeVCalendar(int contextId, Date start, Date end, String mailPrefix, String mailSuffix, String remoteHost, PrintWriter printWriter) throws Exception {
-		final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
+	private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter) throws Exception {
+		/*final SessiondConnector sessiondConnector = */SessiondConnector.getInstance();
 		
 		SearchIterator it = null;
 		
@@ -190,20 +196,20 @@ public class freebusy extends HttpServlet {
 		printWriter.println("VERSION:2.0");
 		printWriter.println("METHOD:PUBLISH");
 		printWriter.println("BEGIN:VFREEBUSY");
-		printWriter.println("ORGANIZER:"+mailPrefix+"@"+mailSuffix);
+		printWriter.println("ORGANIZER:"+mailPrefix+'@'+mailSuffix);
 		
 		try {
 			final Context context = new ContextImpl(contextId);
 			final UserStorage userStorage = UserStorage.getInstance(context);
-			User user = userStorage.searchUser(mailPrefix + "@" + mailSuffix);
+			final User user = userStorage.searchUser(mailPrefix + '@' + mailSuffix);
 			final SessionObject sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
 			
-			AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
+			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
 			it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);
 			while (it.hasNext()) {
 				writeFreeBusy((AppointmentObject)it.next(), printWriter);
 			}
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("writeVCalendar", exc);
 		} finally {
 			if (it != null) {
@@ -216,7 +222,7 @@ public class freebusy extends HttpServlet {
 		printWriter.flush();
 	}
 	
-	private void writeFreeBusy(AppointmentObject appointmentObject, PrintWriter printWriter) throws Exception {
+	private void writeFreeBusy(final AppointmentObject appointmentObject, final PrintWriter printWriter) throws Exception {
 		printWriter.print("FREEBUSY;");
 		
 		switch (appointmentObject.getShownAs()) {

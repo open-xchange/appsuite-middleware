@@ -70,17 +70,17 @@ public class TaskWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 	
-	public TaskWriter(PrintWriter w, TimeZone timeZone) {
+	public TaskWriter(final PrintWriter w, final TimeZone timeZone) {
 		jsonwriter = new JSONWriter(w);
 		this.timeZone = timeZone;
 	}
 	
-	public TaskWriter(JSONWriter jsonwriter, TimeZone timeZone) {
+	public TaskWriter(final JSONWriter jsonwriter, final TimeZone timeZone) {
 		this.jsonwriter = jsonwriter;
 		this.timeZone = timeZone;
 	}
 	
-	public void writeArray(Task taskObject, int cols[]) throws JSONException {
+	public void writeArray(final Task taskObject, final int cols[]) throws JSONException {
 		jsonwriter.array();
 		for (int a = 0; a < cols.length; a++) {
 			write(cols[a], taskObject);
@@ -88,7 +88,7 @@ public class TaskWriter extends CalendarWriter {
 		jsonwriter.endArray();
 	}
 	
-	public void writeTask(Task taskObject) throws JSONException {
+	public void writeTask(final Task taskObject) throws JSONException {
 		jsonwriter.object();
 		
 		writeCommonFields(taskObject);
@@ -145,7 +145,7 @@ public class TaskWriter extends CalendarWriter {
 		jsonwriter.endObject();
 	}
 	
-	public void write(int field, Task taskObject) throws JSONException {
+	public void write(final int field, final Task taskObject) throws JSONException {
 		switch (field) {
 			case Task.OBJECT_ID:
 				writeValue(taskObject.getObjectID());

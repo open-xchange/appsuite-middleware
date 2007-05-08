@@ -54,8 +54,8 @@ import com.openexchange.webdav.protocol.WebdavLock;
 
 public class WebdavLockWriter {
 
-	public String lock2xml(WebdavLock lock) {
-		StringBuffer lockXML = new StringBuffer();
+	public String lock2xml(final WebdavLock lock) {
+		final StringBuffer lockXML = new StringBuffer();
 		activeLock(lockXML);
 		lockType(lock, lockXML);
 		lockScope(lock, lockXML);
@@ -67,18 +67,18 @@ public class WebdavLockWriter {
 		return lockXML.toString();
 	}
 
-	private final void endActiveLock(StringBuffer lockXML) {
+	private final void endActiveLock(final StringBuffer lockXML) {
 		lockXML.append("</D:activelock>");
 	}
 
-	private final void lockToken(WebdavLock lock, StringBuffer lockXML) {
+	private final void lockToken(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:locktoken><D:href>");
 		lockXML.append(lock.getToken());
 		lockXML.append("</D:href></D:locktoken>");
 		
 	}
 
-	private final void timeout(WebdavLock lock, StringBuffer lockXML) {
+	private final void timeout(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:timeout>");
 		if(WebdavLock.NEVER == lock.getTimeout()) {
 			lockXML.append("Infinite");
@@ -88,13 +88,13 @@ public class WebdavLockWriter {
 		lockXML.append("</D:timeout>");
 	}
 
-	private final void owner(WebdavLock lock, StringBuffer lockXML) {
+	private final void owner(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:owner>");
 		lockXML.append(lock.getOwner()); //TODO: OWNER NS
 		lockXML.append("</D:owner>");
 	}
 
-	private final void depth(WebdavLock lock, StringBuffer lockXML) {
+	private final void depth(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:depth>");
 		if(lock.getDepth() == WebdavCollection.INFINITY) {
 			lockXML.append("infinity");
@@ -104,7 +104,7 @@ public class WebdavLockWriter {
 		lockXML.append("</D:depth>");
 	}
 
-	private final void lockScope(WebdavLock lock, StringBuffer lockXML) {
+	private final void lockScope(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:lockscope>");
 		if(lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL)){
 			lockXML.append("<D:exclusive/>");
@@ -114,7 +114,7 @@ public class WebdavLockWriter {
 		lockXML.append("</D:lockscope>");
 	}
 
-	private final void lockType(WebdavLock lock, StringBuffer lockXML) {
+	private final void lockType(final WebdavLock lock, final StringBuffer lockXML) {
 		lockXML.append("<D:locktype>");
 		/*switch(lock.getType()) {
 		case WebdavLock.Type.WRITE_LITERAL: lockXML.append("<write />"); break;
@@ -126,7 +126,7 @@ public class WebdavLockWriter {
 		lockXML.append("</D:locktype>");
 	}
 
-	private final void activeLock(StringBuffer lockXML) {
+	private final void activeLock(final StringBuffer lockXML) {
 		lockXML.append("<D:activelock>");
 	}
 

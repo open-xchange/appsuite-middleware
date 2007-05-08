@@ -164,7 +164,7 @@ public class CSVContactImporter implements Importer {
 		
 		final Iterator< List<String> > iter = csv.iterator();
 		//get header fields
-		final List<String> fields = (List<String>) iter.next();
+		final List<String> fields = iter.next();
 		if ( ! _atLeastOneCorrectField(fields) ){
 			throw EXCEPTIONS.create(4);
 		}
@@ -187,7 +187,7 @@ public class CSVContactImporter implements Importer {
 	}
 
 
-	protected boolean _atLeastOneCorrectField(List<String> fields) {
+	protected boolean _atLeastOneCorrectField(final List<String> fields) {
 		for(final String fieldname : fields){
 			if(getRelevantField(fieldname) != null){
 				return true;
@@ -233,7 +233,7 @@ public class CSVContactImporter implements Importer {
 			if(atLeastOneFieldInserted){
 				contactsql.insertContactObject(contactObj);
 			} else {
-				result.setException(EXCEPTIONS.create(5, lineNumber));
+				result.setException(EXCEPTIONS.create(5, Integer.valueOf(lineNumber)));
 				
 			}
 			result.setDate( contactObj.getLastModified() );

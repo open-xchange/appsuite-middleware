@@ -55,41 +55,41 @@ public class WebdavProperty {
 	private String lang = "";
 	private String value = "";
 	private boolean xml;
-	private boolean date = false;
+	private boolean date;
 	
 	public WebdavProperty(){
 		
 	}
 	
-	public WebdavProperty(String namespace, String name) {
+	public WebdavProperty(final String namespace, final String name) {
 		setNamespace(namespace);
 		setName(name);
 	}
 	public String getLanguage() {
 		return lang;
 	}
-	public void setLanguage(String lang) {
+	public void setLanguage(final String lang) {
 		this.lang = lang;
 	}
 	
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 	
 	public String getNamespace() {
 		return namespace;
 	}
-	public void setNamespace(String namespace) {
+	public void setNamespace(final String namespace) {
 		this.namespace = namespace;
 	}
 	
 	public String getValue() {
 		return value;
 	}
-	public void setValue(String value) {
+	public void setValue(final String value) {
 		this.value = value;
 	}	
 	
@@ -97,7 +97,7 @@ public class WebdavProperty {
 		return xml;
 	}
 	
-	public void setXML(boolean xml) {
+	public void setXML(final boolean xml) {
 		this.xml = xml;
 	}
 	
@@ -106,9 +106,9 @@ public class WebdavProperty {
 		return name.hashCode()+namespace.hashCode();
 	}
 	
-	public boolean equals(Object o){
+	public boolean equals(final Object o){
 		if (o instanceof WebdavProperty) {
-			WebdavProperty prop = (WebdavProperty) o;
+			final WebdavProperty prop = (WebdavProperty) o;
 			return prop.lang.equals(lang) && prop.name.equals(name) && prop.namespace.equals(namespace) && prop.value.equals(value);
 		}
 		return false;
@@ -118,7 +118,7 @@ public class WebdavProperty {
 		return date;
 	}
 	
-	public void setDate(boolean b) {
+	public void setDate(final boolean b) {
 		this.date = b;
 	}
 

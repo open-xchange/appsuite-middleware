@@ -68,7 +68,7 @@ public class SizedInputStream extends InputStream{
 	private long size;
 	private Format format; 
 	
-	public SizedInputStream(InputStream in, long size, Format format){
+	public SizedInputStream(final InputStream in, final long size, final Format format){
 		this.size = size;
 		this.in = in;
 		this.format = format;
@@ -98,7 +98,7 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public synchronized void mark(int readlimit) {
+	public synchronized void mark(final int readlimit) {
 		in.mark(readlimit);
 	}
 
@@ -108,12 +108,12 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
+	public int read(final byte[] b, final int off, final int len) throws IOException {
 		return in.read(b, off, len);
 	}
 
 	@Override
-	public int read(byte[] b) throws IOException {
+	public int read(final byte[] b) throws IOException {
 		return in.read(b);
 	}
 
@@ -123,7 +123,7 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public long skip(long n) throws IOException {
+	public long skip(final long n) throws IOException {
 		return in.skip(n);
 	}
 	

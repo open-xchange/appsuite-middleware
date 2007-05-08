@@ -64,8 +64,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class CalendarFolderObject implements Serializable {
     
-    private int uid = 0;
-    private int cid = 0;
+    private int uid;
+    private int cid;
     
     private ArrayList<Integer> privatefolder;
     private ArrayList<Integer> publicfolder;
@@ -86,37 +86,38 @@ public class CalendarFolderObject implements Serializable {
     private Object shared_read_own_sorted[];
     
     
-    private boolean fill_shared = false;
+    private boolean fill_shared;
     private static final Object[] EMPTY = new Object[0];
     
-    private static final Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
+    private static final transient Log LOG = LogFactory.getLog(CalendarCommonCollection.class);
     
     public static final String IDENTIFIER = "CalendarFolderObject@";
     
     
-    public CalendarFolderObject(int uid, int cid, boolean fill_shared) {
+    public CalendarFolderObject(final int uid, final int cid, final boolean fill_shared) {
         this.uid = uid;
         this.cid = cid;
         this.fill_shared = fill_shared;
     }
     
-    void addFolder(boolean readall, boolean readown, boolean shared, int folderid, int type) {
-        if (!shared) {
+    void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
+        final Integer folderID = Integer.valueOf(folderid);
+    	if (!shared) {
             if (type == FolderObject.PRIVATE) {
                 if (privatefolder == null) {
                     privatefolder = new ArrayList<Integer>(4);
                 }
-                privatefolder.add(folderid);
+                privatefolder.add(folderID);
                 if (readall) {
                     if (private_read_all == null) {
                         private_read_all = new ArrayList<Integer>(4);
                     }
-                    private_read_all.add(folderid);
+                    private_read_all.add(folderID);
                 } else if (readown) {
                     if (private_read_own == null) {
                         private_read_own = new ArrayList<Integer>(4);
                     }
-                    private_read_own.add(folderid);
+                    private_read_own.add(folderID);
                 }                    
             } else if (type == FolderObject.PUBLIC) {
                 if (publicfolder == null) {
@@ -126,12 +127,12 @@ public class CalendarFolderObject implements Serializable {
                     if (public_read_all == null) {
                         public_read_all = new ArrayList<Integer>(4);
                     }
-                    public_read_all.add(folderid);
+                    public_read_all.add(folderID);
                 } else if (readown) {
                     if (public_read_own == null) {
                         public_read_own = new ArrayList<Integer>(4);
                     }
-                    public_read_own.add(folderid);
+                    public_read_own.add(folderID);
                 }
             } else {
             	if (LOG.isWarnEnabled()) {
@@ -142,17 +143,17 @@ public class CalendarFolderObject implements Serializable {
             if (sharedfolder == null) {
                 sharedfolder = new ArrayList<Integer>(4);
             }
-            sharedfolder.add(folderid);
+            sharedfolder.add(folderID);
             if (readall) {
                 if (shared_read_all == null) {
                     shared_read_all = new ArrayList<Integer>(4);
                 }
-                shared_read_all.add(folderid);
+                shared_read_all.add(folderID);
             } else if (readown) {
                 if (shared_read_own == null) {
                     shared_read_own = new ArrayList<Integer>(4);
                 }
-                shared_read_own.add(folderid);
+                shared_read_own.add(folderID);
             }
         }
     }
@@ -245,11 +246,13 @@ public class CalendarFolderObject implements Serializable {
     }
 
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return uid ^ cid ^ (fill_shared ? 1 : 0);
     }    
     
-    public boolean equals(Object o) {
+    @Override
+	public boolean equals(final Object o) {
         if ( o == null ) {
             return false;
         }
@@ -259,31 +262,31 @@ public class CalendarFolderObject implements Serializable {
         if (!(o instanceof CalendarFolderObject)) {
             return false;
         }
-        CalendarFolderObject oo = (CalendarFolderObject)o;
+        final CalendarFolderObject oo = (CalendarFolderObject)o;
         return this.uid == oo.uid && this.cid == oo.cid && this.fill_shared == oo.fill_shared;
   }
     
   public String getObjectKey() {
-      StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append(".");
+      final StringBuilder key = new StringBuilder(IDENTIFIER);
+      key.append('.');
       key.append(uid);
-      key.append(".");
+      key.append('.');
       key.append(cid);
-      key.append(".");
+      key.append('.');
       key.append(fill_shared);
       return key.toString();
   }
   
   public String getGroupKey() {
-      StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append(".");
+      final StringBuilder key = new StringBuilder(IDENTIFIER);
+      key.append('.');
       key.append(cid);
       return key.toString();
   }
   
-  public static final String createGroupKeyFromContextID(int cid) {
-      StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append(".");
+  public static final String createGroupKeyFromContextID(final int cid) {
+      final StringBuilder key = new StringBuilder(IDENTIFIER);
+      key.append('.');
       key.append(cid);
       return key.toString();      
   }

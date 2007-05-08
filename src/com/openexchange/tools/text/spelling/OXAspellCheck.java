@@ -72,11 +72,11 @@ public class OXAspellCheck implements OXSpellCheck {
 	BufferedWriter _spWriter;
 	Process _spProcess;
 	String _spVersion;
-	final String _spPrefix = "^";
+	static final String _spPrefix = "^";
 	String _spCmd;
    String _spEncoding = "UTF-8";
     
-	public OXAspellCheck(String spCmd) throws IOException {
+	public OXAspellCheck(final String spCmd) throws IOException {
 		_spCmd = spCmd;
 		init();
 	}
@@ -86,23 +86,24 @@ public class OXAspellCheck implements OXSpellCheck {
 	 * @throws IOException
 	 */
 	private void init() throws IOException {
-        Runtime runtime = Runtime.getRuntime();
+        final Runtime runtime = Runtime.getRuntime();
         _spProcess = runtime.exec(_spCmd);
         _spReader = new BufferedReader(new InputStreamReader(_spProcess.getInputStream(), _spEncoding));
         _spWriter = new BufferedWriter(new OutputStreamWriter(_spProcess.getOutputStream(), _spEncoding));
         _spVersion = _spReader.readLine();
     }
 	
-	public List parseLine(String line) throws IOException {
-        List results = new ArrayList();
+	public List<OXSpellCheckResult> parseLine(final String line) throws IOException {
+        final List<OXSpellCheckResult> results = new ArrayList<OXSpellCheckResult>();
         _spWriter.write(_spPrefix + line);
         _spWriter.newLine();
         _spWriter.flush();
         String response = _spReader.readLine();
         while (response != null && !response.equals("")) {
-            OXSpellCheckResult result = new OXSpellCheckResult(response);
-            if (result.getType() == OXSpellCheckResult.SUGGESTION)
-                results.add(result);
+            final OXSpellCheckResult result = new OXSpellCheckResult(response);
+            if (result.getType() == OXSpellCheckResult.SUGGESTION) {
+				results.add(result);
+			}
             response = _spReader.readLine();
         }
         return results;
@@ -112,7 +113,7 @@ public class OXAspellCheck implements OXSpellCheck {
 		return _spVersion;
 	}
 	
-    public void setEncoding(String encoding) {
+    public void setEncoding(final String encoding) {
         _spEncoding = encoding;
     }
     
