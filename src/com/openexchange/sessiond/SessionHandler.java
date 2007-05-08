@@ -323,7 +323,8 @@ public class SessionHandler extends TimerTask {
 					sessionList.get(0).put(sessionid, sessionobject);
 					if (a > 0) {
 						sessions.remove(sessionid);
-						MonitoringInfo.decrementNumberOfActiveSessions();
+						// the session is only moved to the first container so a decrement is not nessesary
+						// MonitoringInfo.decrementNumberOfActiveSessions();
 					}
 					
 					return true;
