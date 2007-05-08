@@ -119,6 +119,11 @@ public abstract class BasicCommandlineOptions {
      */
     public static final int SYSEXIT_NO_SUCH_GROUP =112;
     
+    /**
+     * Used when a resource does not exists
+     */
+    public static final int SYSEXIT_NO_SUCH_RESOURCE =113;
+
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
