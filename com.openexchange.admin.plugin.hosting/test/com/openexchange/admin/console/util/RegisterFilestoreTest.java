@@ -134,7 +134,9 @@ public class RegisterFilestoreTest extends AbstractTest {
     public static String[] getAllOptionData(String store){
         String[] tmp = {OPTION_SUPER_ADMIN_USER, 
                 OPTION_SUPER_ADMIN_PWD,
-                "--storepath="+store               
+                "--storepath="+store,
+                "--storesize=1000",
+                "--maxcontexts=1000"
                 };
         return tmp;
     }
@@ -142,7 +144,9 @@ public class RegisterFilestoreTest extends AbstractTest {
     public static String[] getAllOptionDataWithInvalidCredentials(String store){
         String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzfoobar", 
                 OPTION_SUPER_ADMIN_PWD+"_barfoo",
-                "--storepath="+store               
+                "--storepath="+store,
+                "--storesize=1000",
+                "--maxcontexts=1000"
                 };
         return tmp;
     }
