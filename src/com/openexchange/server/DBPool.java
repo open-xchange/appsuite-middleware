@@ -67,7 +67,7 @@ public class DBPool  {
         return Database.get(false);
     }
     
-    public static final Connection pickup(Context context) throws DBPoolingException {
+    public static final Connection pickup(final Context context) throws DBPoolingException {
         return Database.get(context, false);
     }
     
@@ -75,43 +75,43 @@ public class DBPool  {
         return Database.get(true);
     }
     
-    public static final Connection pickupWriteable(Context context) throws DBPoolingException {
+    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
         return Database.get(context, true);
     }
     
-    public static final boolean push(Connection con) throws DBPoolingException {
+    public static final boolean push(final Connection con) throws DBPoolingException {
         Database.back(false, con);
         return true;
     }
     
-    public static final boolean push(Context context, Connection con) throws DBPoolingException {
+    public static final boolean push(final Context context, final Connection con) throws DBPoolingException {
         Database.back(context, false, con);
         return true;
     }
     
-    public static final boolean pushWrite(Connection con) throws DBPoolingException {
+    public static final boolean pushWrite(final Connection con) throws DBPoolingException {
         Database.back(true, con);
         return true;
     }
     
-    public static final boolean pushWrite(Context context, Connection con) throws DBPoolingException {
+    public static final boolean pushWrite(final Context context, final Connection con) throws DBPoolingException {
         Database.back(context, true, con);
         return true;
     }
     
-    public static final void closeReaderSilent(Connection con) {
+    public static final void closeReaderSilent(final Connection con) {
         Database.back(false, con);
     }
     
-    public static final void closeReaderSilent(Context context, Connection con) {
+    public static final void closeReaderSilent(final Context context, final Connection con) {
         Database.back(context, false, con);
     }
     
-    public static final void closeWriterSilent(Connection con) {
+    public static final void closeWriterSilent(final Connection con) {
         Database.back(true, con);
     }
     
-    public static final void closeWriterSilent(Context context, Connection con) {
+    public static final void closeWriterSilent(final Context context, final Connection con) {
         Database.back(context, true, con);
     }
 }

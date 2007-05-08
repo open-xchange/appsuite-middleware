@@ -51,13 +51,14 @@
 
 package com.openexchange.webdav.xml;
 
+import java.net.URLEncoder;
+
+import org.jdom.Element;
+
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.webdav.xml.fields.CommonFields;
-import java.net.URLEncoder;
-import org.jdom.Element;
 
 /**
  * CommonWriter
@@ -67,7 +68,7 @@ import org.jdom.Element;
 
 public abstract class CommonWriter extends FolderChildWriter {
 	
-	protected void writeCommonElements(CommonObject commonobject, Element e_prop) throws Exception {
+	protected void writeCommonElements(final CommonObject commonobject, final Element e_prop) throws Exception {
 		
 		if (commonobject.containsParentFolderID() && commonobject.getParentFolderID() == 0) {
 			addElement("personal_folder_id", commonobject.getParentFolderID(), e_prop);
@@ -84,19 +85,19 @@ public abstract class CommonWriter extends FolderChildWriter {
 		addElement("private_flag", commonobject.getPrivateFlag(), e_prop);
 	}
 	
-	protected void writeElementAttachments(CommonObject commonobject, Element e_prop) throws Exception {
-		Element e_attachments = new Element("attachments", XmlServlet.NS);
+	protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws Exception {
+		final Element e_attachments = new Element("attachments", XmlServlet.NS);
 		SearchIterator it = null;
 		try {
 			XmlServlet.attachmentBase.startTransaction();
-			TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(), commonobject.getObjectID(), getModule(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(), commonobject.getObjectID(), getModule(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			
 			it = tResult.results();
 			
 			while (it.hasNext()) {
-				AttachmentMetadata attachmentMeta = (AttachmentMetadata)it.next();
+				final AttachmentMetadata attachmentMeta = (AttachmentMetadata)it.next();
 				
-				Element e = new Element("attachment", XmlServlet.NS);
+				final Element e = new Element("attachment", XmlServlet.NS);
 				
 				String filename = attachmentMeta.getFilename();
 				
