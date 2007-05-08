@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
@@ -61,28 +59,26 @@ import com.openexchange.tools.versit.VersitException;
 
 public class OldAttachPropertyDefinition extends OldPropertyDefinition {
 
-	public OldAttachPropertyDefinition(String[] paramNames,
-			OldParamDefinition[] params) {
+	public OldAttachPropertyDefinition(final String[] paramNames, final OldParamDefinition[] params) {
 		super(paramNames, params);
 	}
 
-	public Object parseValue(final Property property, final OldScanner s, final byte[] value,
-			final String charset) throws IOException {
+	public Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset)
+			throws IOException {
 		final Parameter param = property.getParameter("VALUE");
-		if (param == null
-				|| "INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
-			return new String(value, charset);
-		} else if ("URL".equalsIgnoreCase(param.getValue(0).getText()))
-			try {
-				return new URI(new String(value, charset).trim());
-			} catch (URISyntaxException e) {
-				VersitException ve = new VersitException(s, e.getMessage());
-				ve.initCause(e);
-				throw ve;
+		if (param != null && !"INLINE".equalsIgnoreCase(param.getValue(0).getText())) {
+			if ("URL".equalsIgnoreCase(param.getValue(0).getText())) {
+				try {
+					return new URI(new String(value, charset).trim());
+				} catch (final URISyntaxException e) {
+					final VersitException ve = new VersitException(s, e.getMessage());
+					ve.initCause(e);
+					throw ve;
+				}
 			}
-		else {
 			return new String(value, charset);
 		}
+		return new String(value, charset);
 	}
 
 }

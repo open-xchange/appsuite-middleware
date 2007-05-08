@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.StringCollection;
-
-import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * CalendarDataObject
@@ -74,16 +73,17 @@ public class CalendarDataObject extends AppointmentObject {
     private int shared_folder_owner;
     private int folder_move_action;
     
-    private boolean is_hard_conflict = false;
+    private boolean is_hard_conflict;
     
-    private boolean contains_resources = false;
-    private boolean folder_move = false;
-    private boolean b_recurrencestring = false;
+    private boolean contains_resources;
+    private boolean folder_move;
+    private boolean b_recurrencestring;
     
     
-    public final void setUntil(Date until) {
+    @Override
+	public final void setUntil(Date until) {
         if (until != null) {
-            long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
+            final long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {
                 until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
             }
@@ -91,7 +91,7 @@ public class CalendarDataObject extends AppointmentObject {
         }
     }
     
-    public final void setSharedFolderOwner(int shared_folder_owner) {
+    public final void setSharedFolderOwner(final int shared_folder_owner) {
         this.shared_folder_owner = shared_folder_owner;
     }
     
@@ -99,7 +99,7 @@ public class CalendarDataObject extends AppointmentObject {
         return shared_folder_owner;
     }
     
-    public final void setFolderType(int folder_type) {
+    public final void setFolderType(final int folder_type) {
         this.folder_type = folder_type;
     }
     
@@ -107,7 +107,7 @@ public class CalendarDataObject extends AppointmentObject {
         return folder_type;
     }
     
-    public final void setActionFolder(int action_folder) {
+    public final void setActionFolder(final int action_folder) {
         this.action_folder = action_folder;
     }
     
@@ -129,7 +129,7 @@ public class CalendarDataObject extends AppointmentObject {
         return 1;
     }
     
-    public void setCreatingDate(Timestamp creating_date) {
+    public void setCreatingDate(final Timestamp creating_date) {
         this.creating_date = creating_date;
         super.setCreationDate(new Date(creating_date.getTime()));
     }
@@ -144,7 +144,7 @@ public class CalendarDataObject extends AppointmentObject {
         return new Timestamp(System.currentTimeMillis());
     }
     
-    public final void setChangingDate(Timestamp changing_date) {
+    public final void setChangingDate(final Timestamp changing_date) {
         if (changing_date != null) {
             this.changing_date = changing_date;
             super.setLastModified(new Date(changing_date.getTime()));
@@ -158,7 +158,7 @@ public class CalendarDataObject extends AppointmentObject {
         return new Timestamp(System.currentTimeMillis());
     }
     
-    public final void setGlobalFolderID(int fid) {
+    public final void setGlobalFolderID(final int fid) {
         super.setParentFolderID(fid);
     }
     
@@ -166,7 +166,7 @@ public class CalendarDataObject extends AppointmentObject {
         return getParentFolderID();
     }
     
-    public final void setPrivateFolderID(int pfid) {
+    public final void setPrivateFolderID(final int pfid) {
         this.pfid = pfid;
     }
     
@@ -182,12 +182,12 @@ public class CalendarDataObject extends AppointmentObject {
         } else if (getActionFolder() != 0) {
             return getActionFolder();
         } else {
-            System.out.println("FIX ME AND PROVIDE A FOLDER  :"+StringCollection.getStackAsString()); // TODO: Remove me
+            /*System.out.println("FIX ME AND PROVIDE A FOLDER  :"+StringCollection.getStackAsString());*/ // TODO: Remove me
             return 0;
         }
     }
     
-    public final void setContext(Context context) {
+    public final void setContext(final Context context) {
         this.context = context;
     }
     
@@ -198,12 +198,11 @@ public class CalendarDataObject extends AppointmentObject {
     public final int getContextID() {
         if (context != null) {
             return context.getContextId();
-        } else {
-            return 0;
         }
+        return 0;
     }
     
-    public final void setRecurrence(String rec_string) {
+    public final void setRecurrence(final String rec_string) {
         this.rec_string = rec_string;
         if (rec_string != null) {
             b_recurrencestring = true;
@@ -218,7 +217,7 @@ public class CalendarDataObject extends AppointmentObject {
         return rec_string;
     }
     
-    public final void setDelExceptions(String delete_execptions) {
+    public final void setDelExceptions(final String delete_execptions) {
         if (delete_execptions != null) {
             super.setDeleteExceptions(CalendarCommonCollection.convertString2Dates(delete_execptions));
         } else {
@@ -229,12 +228,11 @@ public class CalendarDataObject extends AppointmentObject {
     public final String getDelExceptions() {
         if (containsDeleteExceptions()) {
             return CalendarCommonCollection.convertDates2String(getDeleteException());
-        } else {
-            return null;
         }
+        return null;
     }
     
-    public final void setExceptions(String change_exceptions) {
+    public final void setExceptions(final String change_exceptions) {
         if (change_exceptions != null) {
             super.setChangeExceptions(CalendarCommonCollection.convertString2Dates(change_exceptions));
         } else {
@@ -245,9 +243,8 @@ public class CalendarDataObject extends AppointmentObject {
     public final String getExceptions() {
         if (containsChangeExceptions()) {
             return CalendarCommonCollection.convertDates2String(getChangeException());
-        } else {
-            return null;
         }
+        return null;
     }
     
     public final boolean calculateRecurrence() throws OXException {
@@ -257,18 +254,18 @@ public class CalendarDataObject extends AppointmentObject {
         return false;
     }
     
-    public final Date getUntil() {
+    @Override
+	public final Date getUntil() {
         if (!containsUntil()) {
             if (getRecurrenceType() != CalendarObject.YEARLY) {
                 return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS())));
-            } else {
-                return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)));
             }
+            return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * 99)));
         }
         return super.getUntil();
     }
     
-    public final boolean isSequence(boolean what) {
+    public final boolean isSequence(final boolean what) {
         if (what) {
             if (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0)) {
                 return true;
@@ -285,7 +282,7 @@ public class CalendarDataObject extends AppointmentObject {
         return isSequence(true);
     }
     
-    public void setFolderMove(boolean folder_move) {
+    public void setFolderMove(final boolean folder_move) {
         this.folder_move = folder_move;
     }
     
@@ -293,7 +290,7 @@ public class CalendarDataObject extends AppointmentObject {
         return folder_move;
     }
     
-    public void setFolderMoveAction(int folder_move_action) {
+    public void setFolderMoveAction(final int folder_move_action) {
         this.folder_move_action = folder_move_action;
     }
     
@@ -301,7 +298,7 @@ public class CalendarDataObject extends AppointmentObject {
         return folder_move_action;
     }
     
-    public void setContainsResources(boolean contains_resources) {
+    public void setContainsResources(final boolean contains_resources) {
         this.contains_resources = contains_resources;
     }
     
@@ -319,7 +316,8 @@ public class CalendarDataObject extends AppointmentObject {
     
     
     
-    public Object clone() {
+    @Override
+	public Object clone() {
         final CalendarDataObject clone = new CalendarDataObject();
         clone.setContext(getContext());
         if (containsTitle()) {
@@ -413,18 +411,21 @@ public class CalendarDataObject extends AppointmentObject {
         return clone;
     }
     
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-	sb.append(getClass().getName());
-        sb.append("@");
+    private static final String STR_DELIM = " - ";
+    
+    @Override
+	public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getName());
+        sb.append('@');
         sb.append("\n");
         sb.append("object_id - title - start - end : ");
         sb.append(getObjectID());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getTitle());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getStartDate());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getEndDate());
         sb.append("\n");
         sb.append("context_id: ");
@@ -432,31 +433,31 @@ public class CalendarDataObject extends AppointmentObject {
         sb.append("\n");
         sb.append("folder_information (parent:effective:action:type:move:move_action): ");
         sb.append(getParentFolderID());
-        sb.append(":");
+        sb.append(':');
         sb.append(getEffectiveFolderId());
-        sb.append(":");
+        sb.append(':');
         sb.append(getActionFolder());
-        sb.append(":");
+        sb.append(':');
         sb.append(getFolderType());
-        sb.append(":");
+        sb.append(':');
         sb.append(getFolderMove());
-        sb.append(":");
+        sb.append(':');
         sb.append(getFolderMoveAction());
-        sb.append(")");
+        sb.append(')');
         sb.append("\n");
         sb.append("recurrence: ");
         sb.append(getRecurrence());
         sb.append(" -- ");
         sb.append(getRecurrenceID());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getRecurrenceType());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getInterval());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getDays());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getMonth());
-        sb.append(" - ");
+        sb.append(STR_DELIM);
         sb.append(getDayInMonth());
         return sb.toString();
     }    

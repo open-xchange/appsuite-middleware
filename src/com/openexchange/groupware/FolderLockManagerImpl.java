@@ -68,41 +68,41 @@ import com.openexchange.groupware.tx.DBProvider;
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
 		FolderLockManager {
 	
-	private String findLocks = "SELECT * FROM oxfolder_lock WHERE cid = ? AND ((entity = ?) OR (entity = ? AND depth = 1) OR (entity IN (%%path%%) AND depth = "+INFINITE+" ) )";
+	private final static String findLocks = "SELECT * FROM oxfolder_lock WHERE cid = ? AND ((entity = ?) OR (entity = ? AND depth = 1) OR (entity IN (%%path%%) AND depth = "+INFINITE+" ) )";
 	
 	public FolderLockManagerImpl(){
 		super("oxfolder_lock");
 	}
 	
-	public FolderLockManagerImpl(DBProvider provider) {
+	public FolderLockManagerImpl(final DBProvider provider) {
 		super(provider, "oxfolder_lock");
 	}
 	
-	public List<Lock> findLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(entity), ctx, user, userConfig).get(entity));
+	public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), ctx, user, userConfig).get(Integer.valueOf(entity)));
 	}
 	
-	public List<FolderLock> findAllLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public List<FolderLock> findAllLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		return findFolderLocks(entity, ctx, user, userConfig);
 	}
 
-	public List<FolderLock> findFolderLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
+	public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
 		List<Integer> path = treeUtil.getPath(entity, ctx, user, userConfig);
-		int parent = path.get(path.size()-2);
+		final int parent = path.get(path.size()-2).intValue();
 		path = path.subList(0, path.size()-2);
-		String query = findLocks.replaceAll("%%path%%", join(path).toString());
+		final String query = findLocks.replaceAll("%%path%%", join(path).toString());
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			readCon = getReadConnection(ctx);
 			stmt = readCon.prepareStatement(query);
-			set(1, stmt, null, ctx.getContextId(), entity, parent);
+			set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(entity), Integer.valueOf(parent));
 			rs = stmt.executeQuery();
-			List<FolderLock> locks = new ArrayList<FolderLock>();
+			final List<FolderLock> locks = new ArrayList<FolderLock>();
 			while(rs.next()) {
-				FolderLock lock = newLock();
+				final FolderLock lock = newLock();
 				fillLock(lock, rs);
 				if(lock.getTimeout()<1) {
 					removeLock(lock.getId(), ctx, user, userConfig);
@@ -111,7 +111,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 				}
 			}
 			return locks;
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw new OXException();
 		} finally {
 			close(stmt, rs);
@@ -119,19 +119,19 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 		}
 	}
 
-	public Map<Integer, List<FolderLock>> loadOwnLocks(List<Integer> entities, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public Map<Integer, List<FolderLock>> loadOwnLocks(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		return findLocksByEntity(entities, ctx, user, userConfig);
 	}
 
-	public void insertLock(int entity, Lock lock, Context ctx, User user, UserConfiguration userConfig) throws OXException{
-		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig, ((FolderLock)lock).getDepth());
+	public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
+		createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,userConfig, Integer.valueOf(((FolderLock) lock).getDepth()));
 	}
 	
-	public int lock(int entity, long timeout, Scope scope, Type type, int depth, String ownerDesc, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig, depth);
+	public int lock(final int entity, final long timeout, final Scope scope, final Type type, final int depth, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, userConfig, Integer.valueOf(depth));
 	}
 
-	public void unlock(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		removeLock(id, ctx, user, userConfig);
 	}
 
@@ -141,13 +141,13 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 	}
 
 	@Override
-	protected void fillLock(FolderLock lock, ResultSet rs) throws SQLException {
+	protected void fillLock(final FolderLock lock, final ResultSet rs) throws SQLException {
 		super.fillLock(lock, rs);
 		lock.setDepth(rs.getInt("depth"));
 	}
 
 	@Override
-	protected String initAdditionalFIND_BY_ENTITY(String findByEntity) {
+	protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
 		return findByEntity.replaceAll("%%additional_fields%%", ", depth");
 	}
 
@@ -162,7 +162,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 		return Types.INFOSTORE;
 	}
 
-	public void removeAll(int entity, Context context, User userObject, UserConfiguration userConfiguration) throws OXException {
+	public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
 		removeAllFromEntity(entity, context, userObject, userConfiguration);
 	}
 }

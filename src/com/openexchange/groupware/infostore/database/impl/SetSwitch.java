@@ -60,10 +60,10 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class SetSwitch implements MetadataSwitcher{
 
-	public static void copy(DocumentMetadata source, DocumentMetadata dest) {
-		SetSwitch sw = new SetSwitch(dest);
-		GetSwitch gw = new GetSwitch(source);
-		for(Metadata metadata : Metadata.VALUES) {
+	public static void copy(final DocumentMetadata source, final DocumentMetadata dest) {
+		final SetSwitch sw = new SetSwitch(dest);
+		final GetSwitch gw = new GetSwitch(source);
+		for(final Metadata metadata : Metadata.VALUES) {
 			sw.setValue(metadata.doSwitch(gw));
 			metadata.doSwitch(sw);
 		}
@@ -72,11 +72,11 @@ public class SetSwitch implements MetadataSwitcher{
 	private Object value;
 	private DocumentMetadata impl;
 	
-	public SetSwitch(DocumentMetadata impl) {
+	public SetSwitch(final DocumentMetadata impl) {
 		this.impl = impl;
 	}
 
-	public void setValue(Object value) {
+	public void setValue(final Object value) {
 		this.value = value;
 	}
 	
@@ -92,13 +92,13 @@ public class SetSwitch implements MetadataSwitcher{
 
 	public Object modifiedBy() {
 		nullNumber();
-		impl.setModifiedBy((Integer)value);
+		impl.setModifiedBy(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object folderId() {
 		nullNumberAsLong();
-		impl.setFolderId((Long)value);
+		impl.setFolderId(((Long)value).longValue());
 		return null;
 	}
 
@@ -108,7 +108,7 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object version() {
-		impl.setVersion((Integer)value);
+		impl.setVersion(((Integer)value).intValue());
 		return null;
 	}
 
@@ -118,13 +118,13 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object id() {
-		impl.setId((Integer)value);
+		impl.setId(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object fileSize() {
 		nullNumberAsLong();
-		impl.setFileSize((Long)value);
+		impl.setFileSize(((Long)value).longValue());
 		return null;
 	}
 
@@ -140,7 +140,7 @@ public class SetSwitch implements MetadataSwitcher{
 
 	public Object createdBy() {
 		nullNumber();
-		impl.setCreatedBy((Integer)value);
+		impl.setCreatedBy(((Integer)value).intValue());
 		return null;
 	}
 
@@ -180,24 +180,26 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	public Object currentVersion() {
-		impl.setIsCurrentVersion((Boolean)value);
+		impl.setIsCurrentVersion(((Boolean)value).booleanValue());
 		return null;
 	}
 
 	public Object colorLabel() {
 		nullNumber();
-		impl.setColorLabel((Integer)value);
+		impl.setColorLabel(((Integer)value).intValue());
 		return null;
 	}
 
 	private void nullNumber() {
-		if(value == null)
-			value = 0;
+		if(value == null) {
+			value = Integer.valueOf(0);
+		}
 	}
 	
 	private void nullNumberAsLong() {
-		if(value == null)
-			value = 0l;
+		if(value == null) {
+			value = Long.valueOf(0);
+		}
 	}
 
 	public Object filestoreLocation() {
