@@ -200,7 +200,7 @@ public class LocalFileStorage extends FileStorage {
                     fos.close();
                 } catch (final IOException e) {
                     throw new FileStorageException(FileStorageException.Code
-                        .IOERROR, e);
+                        .IOERROR, e.getMessage(), e);
                 }
             }
         }
