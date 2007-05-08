@@ -57,7 +57,7 @@
          		<ref bean="iCalImporter" />
          		<ref bean="vCardImporter" />
          		<ref bean="csvContactImporter" />
-         		<ref bean="OutlookCSVImporter" />
+         		<ref bean="outlookCSVImporter" />
          	</list>
          </property>
          
