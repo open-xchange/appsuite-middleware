@@ -73,7 +73,7 @@ public class FileAuthenticationImpl implements AuthenticationInterface {
      * 
      */
     public boolean authenticate(final Credentials authdata) {
-        Credentials master = ClientAdminThread.cache.getMasterCredentials();
+        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
         if(master != null && authdata != null &&
            master.getLogin() != null && authdata.getLogin() != null &&
            master.getPassword() != null && authdata.getPassword() != null &&
@@ -89,7 +89,7 @@ public class FileAuthenticationImpl implements AuthenticationInterface {
         return false;
     }
 
-    public boolean authenticateUser(Credentials authdata, Context ctx) throws StorageException {        
+    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {        
         return false;
     }
 
