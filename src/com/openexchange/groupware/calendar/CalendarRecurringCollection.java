@@ -616,8 +616,8 @@ public final class CalendarRecurringCollection {
         final long sst = sr;
         long e = cdao.getEndDate().getTime();
         final long c1 = s % MILLI_DAY;
-        final  long c2 = e % MILLI_DAY;
-        final  long diff = Math.abs(c2-c1);
+        final long c2 = e % MILLI_DAY;
+        final long diff = Math.abs(c2-c1);
         e = cdao.getUntil().getTime();
         
         String change_exceptions = null;
@@ -629,7 +629,7 @@ public final class CalendarRecurringCollection {
             calc_timezone = ((CalendarDataObject)cdao).getTimezone();
         }
         
-        final  Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+        final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(Calendar.MONDAY); // Make this configurable
         if (cdao.getRecurrenceType() == CalendarObject.DAILY) {
             if (cdao.getInterval() < 1) {
@@ -800,7 +800,7 @@ public final class CalendarRecurringCollection {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY_2,Integer.valueOf(day_or_type));
                 }
                 
-                final Calendar helper = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+                final Calendar helper = (Calendar) calc.clone();
                 if (cdao.containsOccurrence()) {
                     e += MILLI_MONTH;
                 }
@@ -981,7 +981,7 @@ public final class CalendarRecurringCollection {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL_2,Integer.valueOf(cdao.getInterval()));
                 }
                 
-                final Calendar helper = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+                final Calendar helper = (Calendar) calc.clone();
                 helper.setTimeInMillis(s);
                 helper.set(Calendar.MONTH, month);
                 helper.set(Calendar.WEEK_OF_MONTH, 1);
