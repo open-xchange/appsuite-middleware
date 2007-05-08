@@ -54,11 +54,16 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.AbstractOXException.Category;
 
 public abstract class AbstractOXExceptionFactory<T> {
     private int classId;
     private Component component;
+    
+    private static final Log LOG = LogFactory.getLog(AbstractOXExceptionFactory.class);
 
     private Map<Integer, ExceptionInfo> throwsMap = new HashMap<Integer, ExceptionInfo>();
 
@@ -74,10 +79,12 @@ public abstract class AbstractOXExceptionFactory<T> {
 
         public ExceptionInfo(OXThrowsMultiple throwsInfo, int index) {
             if(throwsInfo.category().length <= index) {
+            	LOG.fatal("Missing Category for Exceptions near ids "+idList(throwsInfo.exceptionId()));
                 throw new IllegalArgumentException("Missing Category for Exceptions near ids "+idList(throwsInfo.exceptionId()));
             }
             if(throwsInfo.msg().length <= index) {
-                throw new IllegalArgumentException("Missing Message for Exceptions near ids "+idList(throwsInfo.exceptionId()));
+            	LOG.fatal("Missing Message for Exceptions near ids "+idList(throwsInfo.exceptionId()));
+            	throw new IllegalArgumentException("Missing Message for Exceptions near ids "+idList(throwsInfo.exceptionId()));
             }
             this.category = throwsInfo.category()[index];
             this.message = throwsInfo.msg()[index];
@@ -94,6 +101,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     protected AbstractOXExceptionFactory(Class<?> clazz) {
     	final OXExceptionSource exceptionSource  = clazz.getAnnotation(OXExceptionSource.class);
         if(exceptionSource == null) {
+        	LOG.fatal(clazz+" doesn't seem to be an OXExceptionSource");
             throw new IllegalArgumentException(clazz+" doesn't seem to be an OXExceptionSource");
         }
         classId = exceptionSource.classId();
@@ -134,6 +142,7 @@ public abstract class AbstractOXExceptionFactory<T> {
         if(multiple != null) {
             for(int i = 0; i < multiple.exceptionId().length; i++) {
                 if(throwsMap.containsKey(Integer.valueOf(multiple.exceptionId()[i]))) {
+                	LOG.fatal("Exception ID "+multiple.exceptionId()[i]+" is used twice in "+clazz.getName());
                     throw new IllegalArgumentException("Exception ID "+multiple.exceptionId()[i]+" is used twice in "+clazz.getName());
                 }
                 throwsMap.put(Integer.valueOf(multiple.exceptionId()[i]), new ExceptionInfo(multiple,i));
@@ -144,6 +153,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     private void addThrows(final OXThrows throwsInfo, final Class clazz) {
         if(throwsInfo != null) {
             if(throwsMap.containsKey(Integer.valueOf(throwsInfo.exceptionId()))) {
+            	LOG.fatal("Exception ID "+throwsInfo.exceptionId()+" is used twice in "+clazz.getName());
                 throw new IllegalArgumentException("Exception ID "+throwsInfo.exceptionId()+" is used twice in "+clazz.getName());
             }
             throwsMap.put(Integer.valueOf(throwsInfo.exceptionId()),new ExceptionInfo(throwsInfo));
