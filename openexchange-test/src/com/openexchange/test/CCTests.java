@@ -116,6 +116,7 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreDeleteTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreFacadeTest.class);
 		tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
 		tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
 		
