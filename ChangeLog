@@ -1,3 +1,8 @@
+* 2007-05-08 - martin.kauss@open-xchange.com
+
+ - Fixed bug #7126. Some monthly recurring appointmens were calculated wrong
+   if the daylight saving time changed. This has been fixed.
+
 * 2007-05-08 - sebastian.kauss@open-xchange.com
 
   - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
