@@ -58,9 +58,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author cutmasta
  */
 public interface AuthenticationInterface {
-    public boolean authenticate(Credentials authdata);
+    public boolean authenticate(final Credentials authdata);
     
-    public boolean authenticate(Credentials authdata,Context ctx) throws StorageException;
+    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException;
     
-    public boolean authenticateUser(Credentials authdata,Context ctx) throws StorageException;
+    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException;
 }
