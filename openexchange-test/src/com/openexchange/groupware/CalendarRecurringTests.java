@@ -43,6 +43,7 @@ public class CalendarRecurringTests extends TestCase {
     
     protected void setUp() throws Exception {
         super.setUp();
+        //com.openexchange.groupware.Init.initContext();
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         this.userid = getUserId();
@@ -1212,10 +1213,10 @@ public class CalendarRecurringTests extends TestCase {
         update.setTitle("testComplexOccurrence - Step 2");
         update.setOccurrence(5);
         update.setObjectID(object_id);
-        /*
-        update.setStartDate(cdao.getStartDate());
-        update.setEndDate(cdao.getEndDate());
-        */
+        
+        //update.setStartDate(cdao.getStartDate());
+        //update.setEndDate(cdao.getEndDate());
+        
         
         csql.updateAppointmentObject(update, folder_id, cdao.getLastModified());
         
@@ -1266,7 +1267,69 @@ public class CalendarRecurringTests extends TestCase {
         
         assertTrue("Recurring Appointments should not conflict!", conflicts == null);
     }
+
     
+    public void testMonthlyRecurringWithDayLightSavingTimeShift() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+    
+        long s = 1172754000000L; // 01.03.2007 14:00:00 CET
+        long e = 1172757600000L; // 01.03.2007 15:00:00 CET
+        
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        
+        Calendar check_start = Calendar.getInstance();
+        check_start.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        check_start.setTimeInMillis(s);
+        int check_start_hour = check_start.get(Calendar.HOUR);
+        int check_start_minute = check_start.get(Calendar.MINUTE);
+        
+        cdao.setTitle("testMonthlyRecurringWithDayLightSavingTimeShift");
+
+        cdao.setRecurrenceType(CalendarObject.MONTHLY);
+        cdao.setDays(CalendarObject.FRIDAY);
+        cdao.setDayInMonth(1);
+        cdao.setInterval(1);
+        
+        cdao.setOccurrence(3);
+        
+        cdao.setParentFolderID(fid);
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(test_dao, 0, 0, 0);
+        assertTrue("Result != null", m != null);
+        assertTrue("Got results", m.size() > 0);
+        
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rs = m.getRecurringResult(a);
+
+            Calendar test_start = Calendar.getInstance();
+            test_start.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+            test_start.setTimeInMillis(rs.getStart());
+            int test_start_hour = test_start.get(Calendar.HOUR);
+            int test_start_minute = test_start.get(Calendar.MINUTE);
+            
+            //System.out.println(">>> "+new Date(rs.getStart()));
+            assertEquals("Test hour (of occurence "+rs.getPosition()+")", check_start_hour, test_start_hour);
+            assertEquals("Test minute (of occurence "+rs.getPosition()+")", check_start_minute, test_start_minute);
+            
+        }
+
+    }
     
     
 }
