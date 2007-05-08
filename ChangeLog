@@ -2,6 +2,7 @@
 
    - Bugfix #7012: exists routine now also checks access permissions to filter links properly.
    - Bugfix #7160: corrected LocalFileStorage to provide all arguments to the exception.
+   - Optimized SearchEngine for empty patterns, to avoid involving a BLOB field.
 
 * 2007-05-08 - thorben.betten@open-xchange.com
 

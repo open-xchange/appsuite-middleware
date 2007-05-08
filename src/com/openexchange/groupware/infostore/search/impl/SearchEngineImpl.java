@@ -202,32 +202,35 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
  			SQL_QUERY.append(')');
  		}
 		
-		query = query.replace('*', '%');
-		query = query.replace('?', '_');
-		query = query.replaceAll("'", "\\\\'");
-
-		final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
-		for (final String currentField : SEARCH_FIELDS) {
-			if (SQL_QUERY_OBJECTS.length() > 0) {
-				SQL_QUERY_OBJECTS.append(" OR ");
-			}
+		if(!query.equals("") && !query.equals("*") ) {
 			
-			if (query.indexOf('%') != -1) {
-				SQL_QUERY_OBJECTS.append(currentField);
-				SQL_QUERY_OBJECTS.append(" LIKE ('");
-				SQL_QUERY_OBJECTS.append(query);
-				SQL_QUERY_OBJECTS.append("')");
-			} else {
-				SQL_QUERY_OBJECTS.append(currentField);
-				SQL_QUERY_OBJECTS.append(" LIKE ('%");
-				SQL_QUERY_OBJECTS.append(query);
-				SQL_QUERY_OBJECTS.append("%')");
+			query = query.replace('*', '%');
+			query = query.replace('?', '_');
+			query = query.replaceAll("'", "\\\\'");
+	
+			final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
+			for (final String currentField : SEARCH_FIELDS) {
+				if (SQL_QUERY_OBJECTS.length() > 0) {
+					SQL_QUERY_OBJECTS.append(" OR ");
+				}
+				
+				if (query.indexOf('%') != -1) {
+					SQL_QUERY_OBJECTS.append(currentField);
+					SQL_QUERY_OBJECTS.append(" LIKE ('");
+					SQL_QUERY_OBJECTS.append(query);
+					SQL_QUERY_OBJECTS.append("')");
+				} else {
+					SQL_QUERY_OBJECTS.append(currentField);
+					SQL_QUERY_OBJECTS.append(" LIKE ('%");
+					SQL_QUERY_OBJECTS.append(query);
+					SQL_QUERY_OBJECTS.append("%')");
+				}
 			}
-		}
-		if (SQL_QUERY_OBJECTS.length() > 0) {
-			SQL_QUERY.append(" AND (");
-			SQL_QUERY.append(SQL_QUERY_OBJECTS);
-			SQL_QUERY.append(") ");
+			if (SQL_QUERY_OBJECTS.length() > 0) {
+				SQL_QUERY.append(" AND (");
+				SQL_QUERY.append(SQL_QUERY_OBJECTS);
+				SQL_QUERY.append(") ");
+			}
 		}
 		
 		if (sortedBy != null && dir != NOT_SET) {
@@ -263,6 +266,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				SQL_QUERY.append(end+1);
 			}
 		}
+		
 		final Connection con = getReadConnection(ctx);
 		Statement stmt = null;
 		try {
