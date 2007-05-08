@@ -111,7 +111,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DATABASEIMPL, component = Component.INFOSTORE)
 public class DatabaseImpl extends DBService {
@@ -488,7 +488,7 @@ public class DatabaseImpl extends DBService {
 								.toString());
 				final Iterator<Integer> iter = ids.iterator();
 				for (int current = 0; iter.hasNext(); current++) {
-					stmt.setInt(current + 1, iter.next());
+					stmt.setInt(current + 1, iter.next().intValue());
 				}
 				stmt.setInt(ids.size() + 1, ctx.getContextId());
 				result = stmt.executeQuery();
@@ -497,12 +497,12 @@ public class DatabaseImpl extends DBService {
 					final String currentInfostorePath = result.getString(2);
 					List<String> currentIdList = new ArrayList<String>();
 					if (filesAttachedToInfostoreObject
-							.containsKey(currentInfostoreId)) {
+							.containsKey(Integer.valueOf(currentInfostoreId))) {
 						currentIdList = filesAttachedToInfostoreObject
-								.get(currentInfostoreId);
+								.get(Integer.valueOf(currentInfostoreId));
 					}
 					currentIdList.add(currentInfostorePath);
-					filesAttachedToInfostoreObject.put(currentInfostoreId,
+					filesAttachedToInfostoreObject.put(Integer.valueOf(currentInfostoreId),
 							currentIdList);
 				}
 			} catch (final SQLException e) {
@@ -535,7 +535,7 @@ public class DatabaseImpl extends DBService {
 						writeCon,
 						TABLE_DEL_INFOSTORE,
 						"SELECT cid, id, folder_id, version, color_label, creating_date, last_modified, created_by, changed_by FROM infostore WHERE cid = ? AND id = ?",
-						ctx.getContextId(), id);
+						Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
 				stmt = writeCon
 						.prepareStatement("UPDATE del_infostore SET last_modified=?, changed_by=? WHERE cid=? AND id=?");
 				stmt.setLong(1, System.currentTimeMillis());
@@ -549,7 +549,7 @@ public class DatabaseImpl extends DBService {
 						writeCon,
 						TABLE_DEL_INFOSTORE_DOCUMENT,
 						"SELECT cid, infostore_id, version_number, creating_date, last_modified, created_by, changed_by, title, url, description, categories, filename, file_store_location, file_size, file_mimetype, file_md5sum, file_version_comment FROM infostore_document WHERE cid = ? AND infostore_id = ?",
-						ctx.getContextId(), id);
+						Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
 
 				stmt = writeCon
 						.prepareStatement("UPDATE del_infostore_document SET last_modified=?, changed_by=? WHERE cid=? AND infostore_id=?");
@@ -578,7 +578,7 @@ public class DatabaseImpl extends DBService {
 				close(stmt, null);
 				if (status <= 0) {
 
-					notDeletedDocuments.add(id);
+					notDeletedDocuments.add(Integer.valueOf(id));
 					stmt = writeCon
 							.prepareStatement("DELETE FROM del_infostore_document WHERE cid=? AND infostore_id=?");
 					stmt.setInt(1, ctx.getContextId());
@@ -591,13 +591,14 @@ public class DatabaseImpl extends DBService {
 					stmt.setInt(2, id);
 					stmt.execute();
 				} else {
-					if (filesAttachedToInfostoreObject.containsKey(id))
+					if (filesAttachedToInfostoreObject.containsKey(Integer.valueOf(id))) {
 						filesToDelete.addAll(filesAttachedToInfostoreObject
-								.get(id));
+								.get(Integer.valueOf(id)));
+					}
 				}
 			} catch (final SQLException e) {
 				LOG.error("", e);
-				throw EXCEPTIONS.create(15, e, stmt.toString());
+				throw EXCEPTIONS.create(15, e, stmt == null ? "" : stmt.toString());
 			} finally {
 				close(stmt, null);
 				releaseWriteConnection(ctx, writeCon);
@@ -684,14 +685,14 @@ public class DatabaseImpl extends DBService {
 			result = stmt.executeQuery();
 			final SortedSet<Integer> set = new TreeSet<Integer>();
 			while (result.next()) {
-				set.add(result.getInt(1));
+				set.add(Integer.valueOf(result.getInt(1)));
 			}
-			set.remove(version_nr);
+			set.remove(Integer.valueOf(version_nr));
 
 			if (version_nr == current_version) {
 				stmt = writecon.prepareStatement(changeversioninbasetable
 						.toString());
-				stmt.setInt(1, set.last());
+				stmt.setInt(1, set.last().intValue());
 				stmt.setInt(2, infostore_id);
 				stmt.setInt(3, ctx.getContextId());
 				retval[0] = stmt.executeUpdate();
@@ -784,8 +785,7 @@ public class DatabaseImpl extends DBService {
 		PreparedStatement stmt = null;
 		Connection writeCon = null;
 		try {
-			final int folder_id = OXFolderTools.getDefaultFolder(user.getId(),
-					FolderObject.INFOSTORE, ctx);
+			final int folder_id = new OXFolderAccess(ctx).getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
 			writeCon = getWriteConnection(ctx);
 
 			final int infostore_id = IDGenerator
@@ -994,7 +994,7 @@ public class DatabaseImpl extends DBService {
 					stmt.setInt(3, current);
 					stmt.execute();
 					stmt.close();
-					notDeletedVersions.add(current);
+					notDeletedVersions.add(Integer.valueOf(current));
 				} else if (current == currentVersion) {
 					deleteCurrentVersion = true;
 				}
@@ -1023,7 +1023,7 @@ public class DatabaseImpl extends DBService {
 				stmt.close();
 
 				if (deleteCurrentVersion
-						&& !notDeletedVersions.contains(currentVersion)) {
+						&& !notDeletedVersions.contains(Integer.valueOf(currentVersion))) {
 					// Copy title, url and description of former current version
 					// into version 0
 					stmt = writeCon
@@ -1517,7 +1517,7 @@ public class DatabaseImpl extends DBService {
 	private static final List<String> tables = Arrays.asList("infostore",
 			"infostore_document");
 
-public void removeUser(final int id, final Context ctx, final SessionObject session, final EntityLockManager locks) throws OXException {
+	public void removeUser(final int id, final Context ctx, final SessionObject session, final EntityLockManager locks) throws OXException {
 		if(id != ctx.getMailadmin()) {
 			removePrivate(id,ctx,session);
 			assignToAdmin(id,ctx,session);
@@ -1970,12 +1970,12 @@ public void removeUser(final int id, final Context ctx, final SessionObject sess
 		return dmi;
 	}
 
-	private void addFile(final String fileInFilespoolPath, final Context ctx) {
+	/*private void addFile(final String fileInFilespoolPath, final Context ctx) {
 		if (inTransaction()) {
 			ctxHolder.set(ctx);
 			fileIdAddList.get().add(fileInFilespoolPath);
 		}
-	}
+	}*/
 
 	@OXThrowsMultiple(category = { Category.INTERNAL_ERROR,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
@@ -2056,7 +2056,7 @@ public void removeUser(final int id, final Context ctx, final SessionObject sess
 		super.rollback();
 	}
 
-	private int getId(final Context context, final Connection writeCon) throws SQLException {
+	/*private int getId(final Context context, final Connection writeCon) throws SQLException {
 		final boolean autoCommit = writeCon.getAutoCommit();
 		if (autoCommit) {
 			writeCon.setAutoCommit(false);
@@ -2069,9 +2069,9 @@ public void removeUser(final int id, final Context ctx, final SessionObject sess
 				writeCon.setAutoCommit(true);
 			}
 		}
-	}
+	}*/
 
-	private int getNextVersionNumberForInfostoreObject(final int cid,
+	/*private int getNextVersionNumberForInfostoreObject(final int cid,
 			final int infostore_id, final Connection con) throws SQLException {
 		int retval = 0;
 
@@ -2101,7 +2101,7 @@ public void removeUser(final int id, final Context ctx, final SessionObject sess
 		stmt.close();
 
 		return retval + 1;
-	}
+	}*/
 
 	private void copyRows(final Connection writeCon, final String intoTable, final String sql,
 			final Object... substitutes) throws SQLException {
@@ -2138,7 +2138,7 @@ public void removeUser(final int id, final Context ctx, final SessionObject sess
 
 			queryBuilder.append(") VALUES (");
 			queryBuilder.append(questionMarks.toString());
-			queryBuilder.append(")");
+			queryBuilder.append(')');
 
 			stmt = writeCon.prepareStatement(queryBuilder.toString());
 

@@ -78,30 +78,30 @@ public class WebdavPropfindAction extends AbstractAction {
 	
 	private static final Log LOG = LogFactory.getLog(WebdavPropfindAction.class);
 	
-	private XMLOutputter outputter = new XMLOutputter();
+	private final XMLOutputter outputter = new XMLOutputter();
 	
 	
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
+	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavException {
 		
-		Element response = new Element("multistatus",DAV_NS);
-		Document responseBody = new Document(response);
+		final Element response = new Element("multistatus",DAV_NS);
+		final Document responseBody = new Document(response);
 		
 		boolean forceAllProp = false;
 		Document requestBody = null;
 		try {
 			requestBody = req.getBodyAsDocument();
-		} catch (JDOMException e1) {
+		} catch (final JDOMException e1) {
 			
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			throw new WebdavException("",HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
 		ResourceMarshaller marshaller = null;
-		LoadingHints loadingHints = new LoadingHints();
+		final LoadingHints loadingHints = new LoadingHints();
 		loadingHints.setUrl(req.getUrl());
 		
 		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
@@ -117,8 +117,8 @@ public class WebdavPropfindAction extends AbstractAction {
 			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.SOME);
 			
-			for(Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
-				for(Element requested : (List<Element>) props.getChildren()) {
+			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
+				for(final Element requested : (List<Element>) props.getChildren()) {
 					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());
 					loadingHints.addProperty(requested.getNamespaceURI(), requested.getName());
 				}
@@ -127,22 +127,25 @@ public class WebdavPropfindAction extends AbstractAction {
 		
 		if(null != req.getHeader("Depth")) {
 			int depth = 0;
-			if(req.getHeader("depth").trim().equalsIgnoreCase("infinity"))
+			if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
 				depth = WebdavCollection.INFINITY;
-			else
-				depth = Integer.valueOf(req.getHeader("Depth"));
+			} else {
+				depth = Integer.parseInt(req.getHeader("Depth"));
+			}
 			
 			marshaller = new RecursiveMarshaller(marshaller, depth);
 			loadingHints.setDepth(depth);
 		}
 		preLoad(loadingHints);
-		response.addContent(marshaller.marshal(req.getResource()));
+		if (marshaller != null) {
+			response.addContent(marshaller.marshal(req.getResource()));
+		}
 		
 		try {
 			res.setStatus(Protocol.SC_MULTISTATUS);
 			res.setContentType("text/xml; charset=UTF-8");
 			outputter.output(responseBody, res.getOutputStream());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug("Client gone?", e);
 		}
 	}

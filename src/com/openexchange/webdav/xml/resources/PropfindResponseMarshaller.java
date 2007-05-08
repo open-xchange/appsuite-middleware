@@ -65,39 +65,42 @@ import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
 public class PropfindResponseMarshaller extends PropertiesMarshaller implements ResourceMarshaller{
 
-	public PropfindResponseMarshaller(String uriPrefix, String charset) {
+	public PropfindResponseMarshaller(final String uriPrefix, final String charset) {
 		super(uriPrefix,charset);
 	}
 
-	private Set<WebdavProperty> requestedProps = new HashSet<WebdavProperty>();
+	private final Set<WebdavProperty> requestedProps = new HashSet<WebdavProperty>();
 
 
-	public PropfindResponseMarshaller addProperty(String namespace, String name) {
+	public PropfindResponseMarshaller addProperty(final String namespace, final String name) {
 		requestedProps.add(new WebdavProperty(namespace, name));
 		return this;
 	}
 
 
 	@Override
-	protected Multistatus<Iterable<WebdavProperty>> getProps(WebdavResource resource) {
-		Multistatus<Iterable<WebdavProperty>> multistatus =  new Multistatus<Iterable<WebdavProperty>>();
-		List<WebdavProperty> props = new LinkedList<WebdavProperty>();
-		List<WebdavProperty> notFound = new LinkedList<WebdavProperty>();
-		for(WebdavProperty prop : requestedProps) {
+	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
+		final Multistatus<Iterable<WebdavProperty>> multistatus =  new Multistatus<Iterable<WebdavProperty>>();
+		final List<WebdavProperty> props = new LinkedList<WebdavProperty>();
+		final List<WebdavProperty> notFound = new LinkedList<WebdavProperty>();
+		for(final WebdavProperty prop : requestedProps) {
 			try {
-				WebdavProperty p = resource.getProperty(prop.getNamespace(), prop.getName());
-				if(p != null)
-					props.add(p);
-				else
+				final WebdavProperty p = resource.getProperty(prop.getNamespace(), prop.getName());
+				if(p == null) {
 					notFound.add(prop);
-			} catch (WebdavException e) {
+				} else {
+					props.add(p);
+				}
+			} catch (final WebdavException e) {
 				multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(e.getStatus(), e.getUrl(),Arrays.asList(prop)));
 			}
 		}
-		if(!props.isEmpty())
+		if(!props.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), props));
-		if(!notFound.isEmpty())
+		}
+		if(!notFound.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), notFound));
+		}
 		
 		return multistatus;
 	}

@@ -89,14 +89,14 @@ public class Format implements Serializable {
 	private String mimeType;
 	private String extension;
 	
-	private Format(int id, String name, String mimeType, String extension){
+	private Format(final int id, final String name, final String mimeType, final String extension){
 		this.id = id;
 		this.name = name;
 		this.mimeType = mimeType;
 		this.extension = extension;
 	}
 	
-	public static Format get(int i){
+	public static Format get(final int i){
 		switch(i){
 		case HTML: return HTML_LITERAL;
 		case PDF: return PDF_LITERAL;
@@ -107,10 +107,11 @@ public class Format implements Serializable {
 		}
 	}
 	
-	public static Format get(String format){
-		for(Format f : VALUES){
-			if(f.getName().equals(format))
+	public static Format get(final String format){
+		for(final Format f : VALUES){
+			if(f.getName().equals(format)) {
 				return f;
+			}
 		}
 		return null;
 	}
@@ -131,22 +132,25 @@ public class Format implements Serializable {
 		return extension;
 	}
 	
+	@Override
 	public int hashCode(){
 		return id;
 	}
 	
-	public boolean equals(Object o){
+	@Override
+	public boolean equals(final Object o){
 		try {
 			return ((Format)o).id == id;
-		} catch (ClassCastException x){
+		} catch (final ClassCastException x){
 			return false;
 		}
 	}
 
-	public static Format getByExtension(String extension) {
-		for(Format f : VALUES){
-			if(f.getExtension().equals(extension))
+	public static Format getByExtension(final String extension) {
+		for(final Format f : VALUES){
+			if(f.getExtension().equals(extension)) {
 				return f;
+			}
 		}
 		return null;
 	}

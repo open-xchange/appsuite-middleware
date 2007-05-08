@@ -57,14 +57,14 @@ import com.openexchange.groupware.contexts.Context;
 public class ReuseReadConProvider implements DBProvider {
 
 	private DBProvider provider;
-	private Connection readCon = null;
-	private int refCount = 0;
+	private Connection readCon;
+	private int refCount;
 
-	public ReuseReadConProvider(DBProvider provider) {
+	public ReuseReadConProvider(final DBProvider provider) {
 		this.provider = provider;
 	}
 
-	public Connection getReadConnection(Context ctx)
+	public Connection getReadConnection(final Context ctx)
 			throws TransactionException {
 		if(readCon != null) {
 			refCount++;
@@ -75,16 +75,18 @@ public class ReuseReadConProvider implements DBProvider {
 		return readCon;
 	}
 
-	public Connection getWriteConnection(Context ctx)
+	public Connection getWriteConnection(final Context ctx)
 			throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 
-	public void releaseReadConnection(Context ctx, Connection con) {
-		if(con == null)
+	public void releaseReadConnection(final Context ctx, final Connection con) {
+		if(con == null) {
 			return;
-		if(!readCon.equals(con))
+		}
+		if(!readCon.equals(con)) {
 			throw new IllegalArgumentException("I don't know this connection");
+		}
 		refCount--;
 		if(refCount == 0) {
 			provider.releaseReadConnection(ctx, con);
@@ -92,7 +94,7 @@ public class ReuseReadConProvider implements DBProvider {
 		}
 	}
 
-	public void releaseWriteConnection(Context ctx, Connection con) {
+	public void releaseWriteConnection(final Context ctx, final Connection con) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -52,23 +52,15 @@ package com.openexchange.tools.exceptions;
 import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-
-
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
@@ -76,13 +68,15 @@ import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ClassType;
 
 public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(OXExceptionAnnotationFactory.class);
 
 	public AnnotationProcessor getProcessorFor(
-			Set<AnnotationTypeDeclaration> declarations,
-			AnnotationProcessorEnvironment env) {
+			final Set<AnnotationTypeDeclaration> declarations,
+			final AnnotationProcessorEnvironment env) {
 		
 		OXErrorCodeProcessor processor = null;
 		processor = getProcessor(env.getOptions());
@@ -91,14 +85,14 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 		return new OXErrorCodeAnnotationProcessor(processor, env);
 	}
 
-	private OXErrorCodeProcessor getProcessor(Map<String, String> options) {
-		for(String key : options.keySet()){
+	private OXErrorCodeProcessor getProcessor(final Map<String, String> options) {
+		for(final String key : options.keySet()){
 			if(key.startsWith("-AerrorCodeProcessor=")) {
-				String classname = key.substring(21);
+				final String classname = key.substring(21);
 				try {
 					return (OXErrorCodeProcessor) Class.forName(classname).newInstance();
-				} catch (Exception x) {
-					x.printStackTrace();
+				} catch (final Exception x) {
+					LOG.error(x.getMessage(), x);
 				}
 			}
 		}
@@ -118,41 +112,42 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 		private AnnotationProcessorEnvironment env;
 		private OXErrorCodeProcessor processor;
 
-		public OXErrorCodeAnnotationProcessor(OXErrorCodeProcessor processor, AnnotationProcessorEnvironment env) {
+		public OXErrorCodeAnnotationProcessor(final OXErrorCodeProcessor processor, final AnnotationProcessorEnvironment env) {
 			this.processor = processor;
 			this.env = env;
 		}
 
 		public void process() {
-			Collection<TypeDeclaration> types = env.getTypeDeclarations();
-			List<OXErrorCode> codes = new ArrayList<OXErrorCode>();
+			final Collection<TypeDeclaration> types = env.getTypeDeclarations();
+			final List<OXErrorCode> codes = new ArrayList<OXErrorCode>();
 			
-			for(TypeDeclaration decl : types) {
+			for(final TypeDeclaration decl : types) {
 				if(decl instanceof ClassDeclaration) {
-					ClassDeclaration classDecl = (ClassDeclaration) decl;
+					final ClassDeclaration classDecl = (ClassDeclaration) decl;
 					analyze(classDecl, codes);
 				}
 			}
 			
 			sort(codes);
 			
-			for(OXErrorCode errorCode : codes) {
+			for(final OXErrorCode errorCode : codes) {
 				processor.process(errorCode);
 			}
 			processor.done();
 		}
 		
-		private void analyze(ClassDeclaration classDecl, List<OXErrorCode> allCodes) {
-			OXExceptionSource exceptionSource  = classDecl.getAnnotation(OXExceptionSource.class);
-			if(exceptionSource == null)
+		private void analyze(final ClassDeclaration classDecl, final List<OXErrorCode> allCodes) {
+			final OXExceptionSource exceptionSource  = classDecl.getAnnotation(OXExceptionSource.class);
+			if(exceptionSource == null) {
 				return;
+			}
 			
-			int classId = exceptionSource.classId();
+			final int classId = exceptionSource.classId();
 			
-			for(MethodDeclaration methodDecl : classDecl.getMethods()) {
-				OXThrows throwsInfo = methodDecl.getAnnotation(OXThrows.class);
+			for(final MethodDeclaration methodDecl : classDecl.getMethods()) {
+				final OXThrows throwsInfo = methodDecl.getAnnotation(OXThrows.class);
 				if(throwsInfo != null) {
-					OXErrorCode errorCode = new OXErrorCode();
+					final OXErrorCode errorCode = new OXErrorCode();
 					errorCode.component = exceptionSource.component();
 					errorCode.category = throwsInfo.category();
 					errorCode.description = throwsInfo.desc();
@@ -162,16 +157,17 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 				}
 					
 				
-				OXThrowsMultiple multiple = methodDecl.getAnnotation(OXThrowsMultiple.class);
+				final OXThrowsMultiple multiple = methodDecl.getAnnotation(OXThrowsMultiple.class);
 				if(multiple != null) {
 					for(int i = 0; i < multiple.exceptionId().length; i++) {
-						OXErrorCode errorCode = new OXErrorCode();
+						final OXErrorCode errorCode = new OXErrorCode();
 						errorCode.component = exceptionSource.component();
 						errorCode.category = multiple.category()[i];
-						if(multiple.desc().length > i)
+						if(multiple.desc().length > i) {
 							errorCode.description = multiple.desc()[i];
-						else
+						} else {
 							errorCode.description = "No Description";
+						}
 						errorCode.message = multiple.msg()[i];
 						errorCode.number=classId*100+multiple.exceptionId()[i];
 						allCodes.add(errorCode);

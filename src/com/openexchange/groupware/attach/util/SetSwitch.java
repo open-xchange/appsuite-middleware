@@ -58,46 +58,51 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 	private AttachmentMetadata attachment;
 	private Object value;
 
-	public SetSwitch(AttachmentMetadata attachment) {
+	public SetSwitch(final AttachmentMetadata attachment) {
 		this.attachment = attachment;
 	}
 	
-	public void setValue(Object value) {
+	public void setValue(final Object value) {
 		this.value = value;
 	}
 	
 	public Object createdBy() {
-		if(value == null)
-			value = -1;
-		attachment.setCreatedBy((Integer)value);
+		if(value == null) {
+			value = Integer.valueOf(-1);
+		}
+		attachment.setCreatedBy(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object id() {
-		if(value == null)
-			value = -1;
-		attachment.setId((Integer)value);
+		if(value == null) {
+			value = Integer.valueOf(-1);
+		}
+		attachment.setId(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object moduleId() {
-		if(value == null)
-			value = -1;
-		attachment.setModuleId((Integer)value);
+		if(value == null) {
+			value = Integer.valueOf(-1);
+		}
+		attachment.setModuleId(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object attachedId() {
-		if(value == null)
-			value = -1;
-		attachment.setAttachedId((Integer)value);
+		if(value == null) {
+			value = Integer.valueOf(-1);
+		}
+		attachment.setAttachedId(((Integer)value).intValue());
 		return null;
 	}
 
 	public Object fileSize() {
-		if(value == null)
-			value = 0;
-		attachment.setFilesize((Long)value);
+		if(value == null) {
+			value = Integer.valueOf(0);
+		}
+		attachment.setFilesize(((Long)value).longValue());
 		return null;
 	}
 
@@ -112,9 +117,10 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 	}
 
 	public Object folderId() {
-		if(value == null)
-			value = -1;
-		attachment.setFolderId((Integer)value);
+		if(value == null) {
+			value = Integer.valueOf(-1);
+		}
+		attachment.setFolderId(((Integer)value).intValue());
 		return null;
 	}
 	
@@ -124,9 +130,10 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 	}
 	
 	public Object rtfFlag(){
-		if(value == null)
-			value = false;
-		attachment.setRtfFlag((Boolean)value);
+		if(value == null) {
+			value = Boolean.FALSE;
+		}
+		attachment.setRtfFlag(((Boolean)value).booleanValue());
 		return null;
 	}
 

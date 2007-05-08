@@ -63,25 +63,26 @@ import com.openexchange.server.DBPoolingException;
 
 public class InfostoreDelete implements DeleteListener {
 
-	private ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
+	private final ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
 	
-	private InfostoreFacade database = new InfostoreFacadeImpl(provider);
+	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
 	
-	public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon,
-			Connection writeCon) throws DeleteFailedException {
-		if(sqlDelEvent.getType() != DeleteEvent.TYPE_USER)
+	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon,
+			final Connection writeCon) throws DeleteFailedException {
+		if(sqlDelEvent.getType() != DeleteEvent.TYPE_USER) {
 			return;
+		}
 		provider.setReadConnection(readCon);
 		provider.setWriteConnection(writeCon);
 		try {
 			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), sqlDelEvent.getSession());
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new DeleteFailedException(e);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			throw new DeleteFailedException(e);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new DeleteFailedException(e);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new DeleteFailedException(e);
 		} finally {
 			provider.reset();

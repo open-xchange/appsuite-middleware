@@ -87,27 +87,32 @@ public enum Format {
 		return this.constantName;
 	}
 	
-	public static Format getFormatByMimeType(String mimeType) {
-		for (Format f : Format.values()) {
+	public static Format getFormatByMimeType(final String mimeType) {
+		for (final Format f : Format.values()) {
 			if (f.getMimeType().equals(mimeType)) {
 				return f;
 			}
 		}
-		if(mimeType.equals("text/comma-separated-values"))
+		if(mimeType.equals("text/comma-separated-values")) {
 			return CSV;
-		if(mimeType.equals("text/vcard"))
+		}
+		if(mimeType.equals("text/vcard")) {
 			return VCARD;
-		if(mimeType.equals("text/directory"))
+		}
+		if(mimeType.equals("text/directory")) {
 			return VCARD;
-		if(mimeType.equals("text/calendar"))
+		}
+		if(mimeType.equals("text/calendar")) {
 			return VCARD;
-		if(mimeType.equals("text/x-vcalendar"))
+		}
+		if(mimeType.equals("text/x-vcalendar")) {
 			return VCARD;
+		}
 		return null;
 	}
 	
-	public static Format getFormatByConstantName(String constantName) {
-		for (Format f : Format.values()) {
+	public static Format getFormatByConstantName(final String constantName) {
+		for (final Format f : Format.values()) {
 			if (f.getConstantName().equals(constantName)) {
 				return f;
 			}
@@ -115,8 +120,8 @@ public enum Format {
 		return null;
 	}
 	
-	public static boolean containsConstantName(String name){
-		for(Format f: Format.values()){
+	public static boolean containsConstantName(final String name){
+		for(final Format f: Format.values()){
 			if(name.equals( f.constantName )){
 				return true;
 			}

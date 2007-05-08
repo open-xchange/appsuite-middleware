@@ -610,10 +610,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		} catch (final SearchIteratorException e) {
 			throw new InfostoreException(e);
 		} finally {
-			try {
-				iter.close();
-			} catch (final SearchIteratorException e) {
-				throw new InfostoreException(e);
+			if (iter != null) {
+				try {
+					iter.close();
+				} catch (final SearchIteratorException e) {
+					throw new InfostoreException(e);
+				}
 			}
 		}
 		
@@ -985,28 +987,32 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		final List<DocumentMetadata> toDeleteDocs = new ArrayList<DocumentMetadata>();
 		final List<DocumentMetadata> toDeleteVersions = new ArrayList<DocumentMetadata>();
 
-		for (final DocumentMetadata m : allDocuments) {
-			idSet.remove(Integer.valueOf(m.getId()));
-			EffectivePermission p = perms.get(Long.valueOf(m.getFolderId()));
-			if (p == null) {
-				p = security.getFolderPermission(m.getFolderId(), sessionObj
-						.getContext(), sessionObj.getUserObject(), sessionObj
-						.getUserConfiguration());
-				perms.put(Long.valueOf(m.getFolderId()), p);
-			}
-			final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
-					p, m, sessionObj.getUserObject());
-			if (!infoPerm.canDeleteObject()) {
-				rejected.add(m);
-				rejectedIds.add(Integer.valueOf(m.getId()));
-			} else {
-				toDeleteDocs.add(m);
+		if (allDocuments != null) {
+			for (final DocumentMetadata m : allDocuments) {
+				idSet.remove(Integer.valueOf(m.getId()));
+				EffectivePermission p = perms.get(Long.valueOf(m.getFolderId()));
+				if (p == null) {
+					p = security.getFolderPermission(m.getFolderId(), sessionObj
+							.getContext(), sessionObj.getUserObject(), sessionObj
+							.getUserConfiguration());
+					perms.put(Long.valueOf(m.getFolderId()), p);
+				}
+				final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
+						p, m, sessionObj.getUserObject());
+				if (!infoPerm.canDeleteObject()) {
+					rejected.add(m);
+					rejectedIds.add(Integer.valueOf(m.getId()));
+				} else {
+					toDeleteDocs.add(m);
+				}
 			}
 		}
 
-		for (final DocumentMetadata m : allVersions) {
-			if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
-				toDeleteVersions.add(m);
+		if (allVersions != null) {
+			for (final DocumentMetadata m : allVersions) {
+				if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
+					toDeleteVersions.add(m);
+				}
 			}
 		}
 
@@ -1302,7 +1308,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
 	public Delta getDelta(final long folderId, final long updateSince, final Metadata[] columns,
-			final Metadata sort, final int order, boolean ignoreDeleted, final Context ctx,
+			final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException {
 		boolean onlyOwn = false;
 
@@ -1343,12 +1349,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		
 		final Delta delta = new DeltaImpl(newIter, modIter, (ignoreDeleted ? SearchIteratorAdapter.createEmptyIterator() : delIter), System.currentTimeMillis());
 		
-		if (addLocked)
+		if (addLocked) {
 			return addLocked(delta, ctx,
 					user, userConfig);
-		else
-			return delta;
-
+		}
+		return delta;
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
@@ -1380,8 +1385,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	private int getId(final Context context, final Connection writeCon) throws SQLException {
 		final boolean autoCommit = writeCon.getAutoCommit();
-		if (autoCommit)
+		if (autoCommit) {
 			writeCon.setAutoCommit(false);
+		}
 		try {
 			return IDGenerator.getId(context, Types.INFOSTORE, writeCon);
 		} finally {
@@ -1402,6 +1408,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
+	@Override
 	@OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
 			"Cannot reach the file store so some documents were not deleted.",
@@ -1437,6 +1444,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.commit();
 	}
 
+	@Override
 	public void finish() throws TransactionException {
 		fileIdRemoveList.set(null);
 		ctxHolder.set(null);
@@ -1445,6 +1453,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.finish();
 	}
 
+	@Override
 	public void rollback() throws TransactionException {
 		db.rollback();
 		security.rollback();
@@ -1452,6 +1461,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.rollback();
 	}
 
+	@Override
 	public void setRequestTransactional(final boolean transactional) {
 		db.setRequestTransactional(transactional);
 		security.setRequestTransactional(transactional);
@@ -1459,10 +1469,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.setRequestTransactional(transactional);
 	}
 
+	@Override
 	public void setTransactional(final boolean transactional) {
 		lockManager.setTransactional(transactional);
 	}
 
+	@Override
 	public void startTransaction() throws TransactionException {
 		fileIdRemoveList.set(new ArrayList<String>());
 		ctxHolder.set(null);
@@ -1472,6 +1484,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.startTransaction();
 	}
 
+	@Override
 	public void setProvider(final DBProvider provider) {
 		super.setProvider(provider);
 		db.setProvider(provider);
@@ -1483,7 +1496,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	private final class LockTimedResult implements TimedResult {
 
-		private long sequenceNumber = 0;
+		private long sequenceNumber;
 
 		private SearchIterator results;
 

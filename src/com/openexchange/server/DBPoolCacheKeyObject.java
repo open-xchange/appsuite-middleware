@@ -66,7 +66,7 @@ public class DBPoolCacheKeyObject implements Serializable {
     public static final String IDENTIFIER = "DBPoolCacheKeyObject@";
     private String identifier;
     
-    public DBPoolCacheKeyObject(int cid, int server_id, boolean rw) {
+    public DBPoolCacheKeyObject(final int cid, final int server_id, final boolean rw) {
         this.cid = cid;
         this.server_id = server_id;
         this.rw = rw;
@@ -89,12 +89,15 @@ public class DBPoolCacheKeyObject implements Serializable {
         return cid ^ server_id ^ getBooleanHashCode();
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return getHashCode();
     }
     
     private final int getBooleanHashCode() {
-        if (rw) return 1;
+        if (rw) {
+			return 1;
+		}
         return 0;
     }
 
@@ -102,14 +105,18 @@ public class DBPoolCacheKeyObject implements Serializable {
         return identifier;
     }
     
-    public boolean equals(Object o) {
-        if ( o == null )
-            return false;
-        if ( o == this )
-            return true;
-        if (!(o instanceof DBPoolCacheKeyObject))
-            return false;
-        DBPoolCacheKeyObject oo = (DBPoolCacheKeyObject)o;
+    @Override
+	public boolean equals(final Object o) {
+        if ( o == null ) {
+			return false;
+		}
+        if ( o == this ) {
+			return true;
+		}
+        if (!(o instanceof DBPoolCacheKeyObject)) {
+			return false;
+		}
+        final DBPoolCacheKeyObject oo = (DBPoolCacheKeyObject)o;
         return this.cid == oo.cid && this.server_id == oo.server_id && this.rw == oo.rw;
   }
     

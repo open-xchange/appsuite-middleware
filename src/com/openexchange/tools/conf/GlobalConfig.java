@@ -285,10 +285,12 @@ public class GlobalConfig {
                     e.printStackTrace();
                 } finally {
                     try {
-                        if (br != null)
-                            br.close();
-                        if (fr != null)
-                            fr.close();
+                        if (br != null) {
+							br.close();
+						}
+                        if (fr != null) {
+							fr.close();
+						}
                     } catch (final IOException e) { }
                 }
             }

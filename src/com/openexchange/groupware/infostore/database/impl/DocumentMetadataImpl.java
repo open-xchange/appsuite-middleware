@@ -93,20 +93,20 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		
 	}
 	
-	public DocumentMetadataImpl(int id){
+	public DocumentMetadataImpl(final int id){
 		this.id = id;
 	}
 	
-	public DocumentMetadataImpl(DocumentMetadata dm){
-		SetSwitch setSwitch = new SetSwitch(this);
-		GetSwitch getSwitch = new GetSwitch(dm);
-		for(Metadata attr : Metadata.VALUES) {
+	public DocumentMetadataImpl(final DocumentMetadata dm){
+		final SetSwitch setSwitch = new SetSwitch(this);
+		final GetSwitch getSwitch = new GetSwitch(dm);
+		for(final Metadata attr : Metadata.VALUES) {
 			setSwitch.setValue(attr.doSwitch(getSwitch));
 			attr.doSwitch(setSwitch);
 		}
 	}
 	
-	public String getProperty(String key) {
+	public String getProperty(final String key) {
 		return properties.get(key);
 	}
 
@@ -138,13 +138,15 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return version;
 	}
 
+	@Override
 	public int hashCode(){
 		return getId();
 	}
 	
-	public boolean equals(Object o){
+	@Override
+	public boolean equals(final Object o){
 		if (o instanceof DocumentMetadata) {
-			DocumentMetadata other = (DocumentMetadata) o;
+			final DocumentMetadata other = (DocumentMetadata) o;
 			return id == other.getId();
 		}
 		return false;
@@ -154,28 +156,28 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return properties;
 	}
 
-	public void setProperties(Map properties) {
+	public void setProperties(final Map<String,String> properties) {
 		this.properties = properties;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public void setFolderId(long folderId) {
+	public void setFolderId(final long folderId) {
 		this.folderId = folderId;
 	}
 
 
-	public void setLastModified(Date lastModified) {
+	public void setLastModified(final Date lastModified) {
 		this.lastModified = lastModified;
 	}
 
-	public void setTitle(String name) {
+	public void setTitle(final String name) {
 		this.name = name;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(final int version) {
 		this.version = version;
 	}
 	
@@ -195,7 +197,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 
@@ -203,19 +205,19 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return url;
 	}
 
-	public void setURL(String url) {
+	public void setURL(final String url) {
 		this.url = url;
 	}
 
-	public void setContent(String content) {
+	public void setContent(final String content) {
 		this.content = content;
 	}
 
-	public void setFileSize(long contentLength) {
+	public void setFileSize(final long contentLength) {
 		this.contentLength = contentLength;
 	}
 
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 
@@ -223,7 +225,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return contentType;
 	}
 
-	public void setFileMIMEType(String contentType) {
+	public void setFileMIMEType(final String contentType) {
 		this.contentType = contentType;
 	}
 
@@ -231,7 +233,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return createdBy;
 	}
 
-	public void setCreatedBy(int createdBy) {
+	public void setCreatedBy(final int createdBy) {
 		this.createdBy = createdBy;
 	}
 
@@ -239,7 +241,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return filename;
 	}
 
-	public void setFileName(String filename) {
+	public void setFileName(final String filename) {
 		this.filename = filename;
 	}
 
@@ -247,20 +249,21 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return modifiedBy;
 	}
 
-	public void setModifiedBy(int modifiedBy) {
+	public void setModifiedBy(final int modifiedBy) {
 		this.modifiedBy = modifiedBy;
 	}
 
 	public long getSequenceNumber() {
-		if(lastModified == null)
+		if(lastModified == null) {
 			return 0;
+		}
 		return lastModified.getTime();
 	}
 
-	public void setSequenceNumber(long sequenceNumber) {
+	public void setSequenceNumber(final long sequenceNumber) {
 	}
 	
-	public void setCategories(String categories) {
+	public void setCategories(final String categories) {
 		this.categories = categories;
 	}
 	
@@ -272,11 +275,11 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return lockedUntil;
 	}
 
-	public void setLockedUntil(Date lockedUntil) {
+	public void setLockedUntil(final Date lockedUntil) {
 		this.lockedUntil = lockedUntil;
 	}
 	
-	public void setFileMD5Sum(String sum){
+	public void setFileMD5Sum(final String sum){
 		this.md5 = sum;
 	}
 	
@@ -284,7 +287,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return this.md5;
 	}
 	
-	protected void setFileSpoolPath(String filespoolPath){
+	protected void setFileSpoolPath(final String filespoolPath){
 		this.filespoolPath = filespoolPath;
 	}
 	
@@ -296,7 +299,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return colorLabel;
 	}
 
-	public void setColorLabel(int color) {
+	public void setColorLabel(final int color) {
 		this.colorLabel=color;
 	}
 
@@ -304,7 +307,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return currentVersion;
 	}
 
-	public void setIsCurrentVersion(boolean bool) {
+	public void setIsCurrentVersion(final boolean bool) {
 		this.currentVersion=bool;
 	}
 
@@ -312,7 +315,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return versionComment;
 	}
 
-	public void setVersionComment(String comment) {
+	public void setVersionComment(final String comment) {
 		this.versionComment=comment;
 	}
 
@@ -320,7 +323,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return getFileSpoolPath();
 	}
 
-	public void setFilestoreLocation(String string) {
+	public void setFilestoreLocation(final String string) {
 		setFileSpoolPath(string);
 	}
 	

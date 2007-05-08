@@ -67,21 +67,23 @@ public class OXErrorCode implements Comparable,Serializable {
 	public String message;
 	public int number;
 	
-	public int compareTo(Object o) {
+	public int compareTo(final Object o) {
 		if (o instanceof OXErrorCode) {
-			OXErrorCode other = (OXErrorCode) o;
+			final OXErrorCode other = (OXErrorCode) o;
 			
 			if(other.component != component) {
-				if(other.component == null)
+				if(other.component == null) {
 					return 1;
-				if(component == null)
+				}
+				if(component == null) {
 					return -1;
+				}
 				return component.compareTo(other.component);
 			}
 			if(other.category != category) {
 				return category.compareTo(other.category);
 			}
-			return ((Integer)number).compareTo(other.number);
+			return (Integer.valueOf(number)).compareTo(Integer.valueOf(other.number));
 		}
 		throw new IllegalArgumentException();
 	}
@@ -91,7 +93,7 @@ public class OXErrorCode implements Comparable,Serializable {
 	@Override
     public String toString() {
         final StringBuilder out = new StringBuilder();
-        out.append((component == null) ? component.NONE.getAbbreviation() : component.getAbbreviation());
+        out.append((component == null) ? Component.NONE.getAbbreviation() : component.getAbbreviation());
         out.append(',');
         out.append(category.getCode());
         out.append(',');

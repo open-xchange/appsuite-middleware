@@ -61,17 +61,20 @@ import java.util.Set;
 import static java.util.Collections.sort;
 
 public class JavaMessageCatalogBuilder implements OXErrorCodeProcessor {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(JavaMessageCatalogBuilder.class);
 
-	private Set<String> messages = new HashSet<String>();
+	private final Set<String> messages = new HashSet<String>();
 	
 	
 	public void done() {
-		List<String> messagesSorted = new ArrayList<String>(messages);
+		final List<String> messagesSorted = new ArrayList<String>(messages);
 		sort(messagesSorted);
 		
-		String pName = System.getProperty("packageName", "");
-		String cName = System.getProperty("className", "GUIMessages");
-		String fName = System.getProperty("output","GUIMessages.java");
+		final String pName = System.getProperty("packageName", "");
+		final String cName = System.getProperty("className", "GUIMessages");
+		final String fName = System.getProperty("output","GUIMessages.java");
 		
 		PrintWriter out = null;
 		try {
@@ -81,22 +84,24 @@ public class JavaMessageCatalogBuilder implements OXErrorCodeProcessor {
 			}
 			out.println(String.format("\npublic class %s {", cName));
 			int i = 1;
-			for(String msg : messagesSorted) {
+			for(final String msg : messagesSorted) {
 				out.println(String.format("\tpublic static final String MSG_%d = %s;",i++,quote(msg)));
 			}
 			out.println("}");
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (final IOException e) {
+			LOG.error(e.getMessage(), e);
 		} finally {
-			out.close();
+			if (out != null) {
+				out.close();
+			}
 		}
 	}
 
-	public void process(OXErrorCode errorCode) {
+	public void process(final OXErrorCode errorCode) {
 		messages.add(errorCode.message == null ? "" : errorCode.message);
 	}
 	
-	private String quote(String s) {
+	private String quote(final String s) {
         // must be triple quoted because String.format removes a quote.
 		return '"'+s.replaceAll("\"", "\\\\\\\"")+'"';
 	}

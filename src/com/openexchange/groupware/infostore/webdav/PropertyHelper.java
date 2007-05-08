@@ -62,18 +62,16 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class PropertyHelper {
 	
 	private final Map<WebdavProperty, WebdavProperty> properties = new HashMap<WebdavProperty, WebdavProperty>();
 	
-	private Set<WebdavProperty> removedProperties = new HashSet<WebdavProperty>();
+	private final Set<WebdavProperty> removedProperties = new HashSet<WebdavProperty>();
 	private boolean loadedAllProps;
-	private List<WebdavProperty> changedProps = new ArrayList<WebdavProperty>();
+	private final List<WebdavProperty> changedProps = new ArrayList<WebdavProperty>();
 
 	private PropertyStore propertyStore;
 	private SessionHolder sessionHolder;
@@ -84,7 +82,7 @@ public class PropertyHelper {
 	private boolean changed;
 	
 	
-	public PropertyHelper(PropertyStore props, SessionHolder sessionHolder, String url) {
+	public PropertyHelper(final PropertyStore props, final SessionHolder sessionHolder, final String url) {
 		this.propertyStore = props;
 		this.sessionHolder = sessionHolder;
 		this.url = url;
@@ -95,37 +93,37 @@ public class PropertyHelper {
 		return new ArrayList<WebdavProperty>(properties.values());
 	}
 
-	public WebdavProperty getProperty(String namespace, String name) throws WebdavException {
+	public WebdavProperty getProperty(final String namespace, final String name) throws WebdavException {
 		loadProperty(namespace, name);
 		return properties.get(new WebdavProperty(namespace, name));
 	}
 
-	public void putProperty(WebdavProperty prop) {
+	public void putProperty(final WebdavProperty prop) {
 		properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 		markSetProperty(prop);
 		markChanged();
 	}
 
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 
-	public void removeProperty(String namespace, String name) {
+	public void removeProperty(final String namespace, final String name) {
 		if (properties.remove(new WebdavProperty(namespace, name)) != null) {
 			markRemovedProperty(new WebdavProperty(namespace, name));
 		}
 	}
 	
-	public boolean isRemoved(WebdavProperty property) {
+	public boolean isRemoved(final WebdavProperty property) {
 		return removedProperties.contains(property);
 	}
 
-	private void markRemovedProperty(WebdavProperty property) {
+	private void markRemovedProperty(final WebdavProperty property) {
 		removedProperties.add(property);
 		changedProps.remove(properties.get(property));
 	}
 
-	private void markSetProperty(WebdavProperty property) {
+	private void markSetProperty(final WebdavProperty property) {
 		removedProperties.remove(property);
 		changedProps.add(property);
 	}
@@ -134,44 +132,49 @@ public class PropertyHelper {
 		changed = true;
 	}
 	
-	private void loadProperty(String namespace, String name) throws WebdavException {
-		if(removedProperties.contains(new WebdavProperty(namespace, name)))
+	private void loadProperty(final String namespace, final String name) throws WebdavException {
+		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
-		if(loadedAllProps)
+		}
+		if(loadedAllProps) {
 			return;
-		SessionObject session = sessionHolder.getSessionObject();
+		}
+		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext(), session.getUserObject(), session.getUserConfiguration());
-			if(list.isEmpty())
+			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			if(list.isEmpty()) {
 				return;
-			WebdavProperty prop = list.get(0);
+			}
+			final WebdavProperty prop = list.get(0);
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	private void loadAllProperties() throws WebdavException {
-		if(loadedAllProps)
+		if(loadedAllProps) {
 			return;
+		}
 		loadedAllProps = true;
-		SessionObject session = sessionHolder.getSessionObject();
+		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
-			for(WebdavProperty prop : list) {
+			final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			for(final WebdavProperty prop : list) {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	public void dumpPropertiesToDB() throws OXException {
-		if(!changed)
+		if(!changed) {
 			return;
+		}
 		changed = false;
-		SessionObject session = sessionHolder.getSessionObject();
+		final SessionObject session = sessionHolder.getSessionObject();
 		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext(), session.getUserObject(), session.getUserConfiguration());
 		changedProps.clear();
 		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext(), session.getUserObject(), session.getUserConfiguration());
@@ -179,7 +182,7 @@ public class PropertyHelper {
 	}
 	
 	public void deleteProperties() throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
+		final SessionObject session = sessionHolder.getSessionObject();
 		propertyStore.removeAll(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
 	}
 	

@@ -55,9 +55,10 @@ import com.openexchange.webdav.protocol.WebdavException;
 
 public class WebdavExistsAction extends AbstractAction {
 
-	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavException {
-		if(!req.getResource().exists())
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+		if(!req.getResource().exists()) {
 			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+		}
 		yield(req,res);
 	}
 

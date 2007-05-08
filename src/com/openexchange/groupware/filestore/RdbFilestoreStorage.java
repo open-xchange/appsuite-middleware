@@ -90,7 +90,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         msg = { "Cannot find filestore with id %1$d.",
             "Cannot create URI from \"%1$s\"." }
     )
-	public Filestore getFilestore(int id) throws FilestoreException {
+	public Filestore getFilestore(final int id) throws FilestoreException {
 		
 		
 		Connection readCon = null;
@@ -104,41 +104,44 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 			
 			rs = stmt.executeQuery();
 			
-			if(!rs.next())
-				throw EXCEPTION.create(3, id);
+			if(!rs.next()) {
+				throw EXCEPTION.create(3, Integer.valueOf(id));
+			}
 			
-			FilestoreImpl filestore = new FilestoreImpl();
+			final FilestoreImpl filestore = new FilestoreImpl();
 			filestore.setId(id);
             String tmp = null;
 			try {
                 tmp = rs.getString("uri");
 				filestore.setUri(new URI(tmp));
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				throw EXCEPTION.create(4, e, tmp);
 			}
 			filestore.setSize(rs.getLong("size"));
 			filestore.setMaxContext(rs.getLong("max_context"));
 			return filestore;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.debug(e);
 			return null;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.debug(e);
 			return null;
 		} finally {
 			
-			if(stmt!=null)
+			if(stmt!=null) {
 				try {
 					stmt.close();
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.debug("",e1);
 				}
-			if(rs!=null)
+			}
+			if(rs!=null) {
 				try {
 					rs.close();
-				} catch (SQLException e) {
+				} catch (final SQLException e) {
 					LOG.debug("",e);
 				}
+			}
 			if(readCon!=null){
 				DBPool.closeReaderSilent(readCon);
 			}

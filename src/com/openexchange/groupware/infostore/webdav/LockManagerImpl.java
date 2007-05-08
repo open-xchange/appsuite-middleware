@@ -83,6 +83,8 @@ import static com.openexchange.tools.sql.DBUtils.getStatement;
 )
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 	
+	private static final String PAT_TABLENAME = "%%tablename%%";
+
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(LockManagerImpl.class);
 	
 	private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
@@ -93,44 +95,44 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
 	private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
 	
-	public LockManagerImpl(String tablename) {
+	public LockManagerImpl(final String tablename) {
 		this(null, tablename);
 	}
 	
-	public LockManagerImpl(DBProvider provider, String tablename) {
+	public LockManagerImpl(final DBProvider provider, final String tablename) {
 		setProvider(provider);
 		initTablename(tablename);
 	}
 
-	private void initTablename(String tablename) {
-		INSERT = INSERT.replaceAll("%%tablename%%", tablename);
+	private void initTablename(final String tablename) {
+		INSERT = INSERT.replaceAll(PAT_TABLENAME, tablename);
 		INSERT = initAdditionalINSERT(INSERT);
-		DELETE = DELETE.replaceAll("%%tablename%%", tablename);
+		DELETE = DELETE.replaceAll(PAT_TABLENAME, tablename);
 		
-		FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll("%%tablename%%", tablename);
+		FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
 		FIND_BY_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_ENTITY);
 		
-		EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll("%%tablename%%", tablename);
+		EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
 		
 		
-		DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll("%%tablename%%", tablename);
+		DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
 		
-		UPDATE_BY_ID = UPDATE_BY_ID.replaceAll("%%tablename%%", tablename);
+		UPDATE_BY_ID = UPDATE_BY_ID.replaceAll(PAT_TABLENAME, tablename);
 		UPDATE_BY_ID = initAdditionalUPDATE_BY_ID(UPDATE_BY_ID);
 		
-		REASSIGN = REASSIGN.replaceAll("%%tablename%%", tablename);
+		REASSIGN = REASSIGN.replaceAll(PAT_TABLENAME, tablename);
 	}
 	
 	
-	private String initAdditionalUPDATE_BY_ID(String query) {
+	private String initAdditionalUPDATE_BY_ID(final String query) {
 		return query.replaceAll("%%additional_updates%%","");
 	}
 
-	protected String initAdditionalINSERT(String insert) {
+	protected String initAdditionalINSERT(final String insert) {
 		return insert.replaceAll("%%additional_fields%%","").replaceAll("%%additional_question_marks%%", "");
 	}
 	
-	protected String initAdditionalFIND_BY_ENTITY(String findByEntity) {
+	protected String initAdditionalFIND_BY_ENTITY(final String findByEntity) {
 		return findByEntity.replaceAll("%%additional_fields%%", "");
 	}
 	
@@ -140,16 +142,17 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 	
 	protected abstract T newLock();
 	
-	protected void fillLock(T lock, ResultSet rs) throws SQLException {
+	protected void fillLock(final T lock, final ResultSet rs) throws SQLException {
 		lock.setId(rs.getInt("id"));
 		lock.setOwner(rs.getInt("userid"));
-		int scopeNum = rs.getInt("scope");
-		for(Scope scope : Scope.values()) {
-			if(scopeNum == scope.ordinal())
+		final int scopeNum = rs.getInt("scope");
+		for(final Scope scope : Scope.values()) {
+			if(scopeNum == scope.ordinal()) {
 				lock.setScope(scope);
+			}
 		}
 		lock.setType(Type.WRITE);
-		long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
+		final long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
 		lock.setTimeout(timeout);
 		lock.setOwnerDescription(rs.getString("ownerDesc"));
 	}
@@ -160,8 +163,8 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=0,
 			msg="Invalid SQL: '%s'"
 	)
-	protected int createLockForceId(int entity, int id, long timeout, Scope scope, Type type, String ownerDesc,
-			Context ctx, User user, UserConfiguration userConfig, Object...additional) throws OXException {
+	protected int createLockForceId(final int entity, final int id, final long timeout, final Scope scope, final Type type, final String ownerDesc,
+			final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		try {
@@ -171,14 +174,16 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			if(timeout != INFINITE) {
 				tm = System.currentTimeMillis()+timeout; 
 				// Previously Infinite Locks exceed long range if ms counter increased by 1 since loading
-				if(tm<0)
+				if(tm<0) {
 					tm = Long.MAX_VALUE;
-			} else
+				}
+			} else {
 				tm = Long.MAX_VALUE;
-			set(1, stmt, additional, entity, tm, scope.ordinal(), type.ordinal(), ownerDesc, ctx.getContextId(), user.getId(), id);
+			}
+			set(1, stmt, additional, Integer.valueOf(entity), Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(user.getId()), Integer.valueOf(id));
 			stmt.executeUpdate();
 			return id;
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(0, x, getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -192,11 +197,11 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=1,
 			msg="Error in SQL Update"
 	)
-	protected int createLock(int entity, long timeout, Scope scope, Type type, String ownerDesc,
-			Context ctx, User user, UserConfiguration userConfig, Object...additional) throws OXException {
+	protected int createLock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc,
+			final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
 		try {
 			return createLockForceId(entity, IDGenerator.getId(ctx, getType()), timeout, scope, type, ownerDesc, ctx, user, userConfig, additional);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(1,e);
 		}
 	}
@@ -207,21 +212,22 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=2,
 			msg="Invalid SQL: '%s'"
 	)
-	protected void updateLock(int lockId, long timeout, Scope scope, Type type, String ownerDesc, Context ctx, User user, UserConfiguration userConfig, Object...additional) throws OXException {
+	protected void updateLock(final int lockId, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig, final Object...additional) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		try {
 			con = getWriteConnection(ctx);
 			stmt = con.prepareStatement(UPDATE_BY_ID);
 			long tm = 0;
-			if(timeout != INFINITE)
+			if(timeout != INFINITE) {
 				tm = System.currentTimeMillis()+timeout;
-			else
+			} else {
 				tm = Long.MAX_VALUE;
-			int index = set(1, stmt, additional, tm, scope.ordinal(), type.ordinal(), ownerDesc);
-			set(index, stmt, null, lockId, ctx.getContextId());
+			}
+			final int index = set(1, stmt, additional, Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc);
+			set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
 			stmt.executeUpdate();
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(2,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -235,16 +241,16 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=3,
 			msg="Invalid SQL: '%s'"
 	)
-	protected void removeLock(int id, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	protected void removeLock(final int id, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		try {
 			con = getWriteConnection(ctx);
 			stmt = con.prepareStatement(DELETE);
-			set(1, stmt, null, ctx.getContextId(), id);
+			set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(id));
 			stmt.executeUpdate();
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(3,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -258,33 +264,33 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=4,
 			msg="Invalid SQL: '%s'"
 	)
-	public Map<Integer,List<T>> findLocksByEntity(List<Integer> entities, Context ctx, User user,
-			UserConfiguration userConfig) throws OXException {
+	public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			StringBuilder entityIds = new StringBuilder("(");
+			final StringBuilder entityIds = new StringBuilder().append('(');
 			entityIds.append(join(entities));
-			entityIds.append(")");
+			entityIds.append(')');
 			
 			con = getReadConnection(ctx);
 			stmt = con.prepareStatement(FIND_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-			set(1, stmt, null, ctx.getContextId());
+			set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
 			rs = stmt.executeQuery();
-			Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>();
-			Set<Integer> entitySet = new HashSet<Integer>(entities);
+			final Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>();
+			final Set<Integer> entitySet = new HashSet<Integer>(entities);
 			
 			while(rs.next()) {
-				int entity = rs.getInt("entity");
-				entitySet.remove(entity);
-				List<T> lockList = locks.get(entity);
+				final int entity = rs.getInt("entity");
+				entitySet.remove(Integer.valueOf(entity));
+				List<T> lockList = locks.get(Integer.valueOf(entity));
 				if(null == lockList) {
 					lockList = new ArrayList<T>();
-					locks.put(entity, lockList);
+					locks.put(Integer.valueOf(entity), lockList);
 				}
 				
-				T lock = newLock();
+				final T lock = newLock();
 				fillLock(lock, rs);
 				if(lock.getTimeout()<1){
 					removeLock(lock.getId(), ctx, user, userConfig);
@@ -292,11 +298,11 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 					lockList.add(lock);
 				}
 			}
-			for(Integer entity : entitySet) {
+			for(final Integer entity : entitySet) {
 				locks.put(entity, new ArrayList<T>());
 			}
 			return locks;
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(4,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -310,22 +316,22 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=7,
 			msg="Invalid SQL: '%s'"
 	)
-	public boolean existsLockForEntity(List<Integer> entities, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public boolean existsLockForEntity(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			StringBuilder entityIds = new StringBuilder("(");
+			final StringBuilder entityIds = new StringBuilder().append('(');
 			entityIds.append(join(entities));
-			entityIds.append(")");
+			entityIds.append(')');
 			
 			con = getReadConnection(ctx);
 			stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-			set(1, stmt, null, ctx.getContextId());
+			set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
 			rs = stmt.executeQuery();
 			return rs.next();
 			
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(4,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -339,7 +345,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=5,
 			msg="Invalid SQL: '%s'"
 	)
-	public void reassign(Context ctx, int from, int to) throws OXException {
+	public void reassign(final Context ctx, final int from, final int to) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
@@ -349,7 +355,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			stmt.setInt(2, from);
 			stmt.setInt(3, ctx.getContextId());
 			stmt.executeUpdate();
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(5,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -363,7 +369,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			exceptionId=6,
 			msg="Invalid SQL: '%s'"
 	)
-	protected void removeAllFromEntity(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	protected void removeAllFromEntity(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
@@ -372,7 +378,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, entity);
 			stmt.executeUpdate();
-		} catch (SQLException x) {
+		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(6,x,getStatement(stmt));
 		} finally {
 			close(stmt, null);
@@ -380,20 +386,21 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		}
 	}
 	
-	protected CharSequence join(List<Integer> entities) {
-		StringBuilder b = new StringBuilder();
-		for(int entity : entities) { b.append(entity); b.append(", "); }
+	protected CharSequence join(final List<Integer> entities) {
+		final StringBuilder b = new StringBuilder();
+		for(final int entity : entities) { b.append(entity); b.append(", "); }
 		b.setLength(b.length()-2);
 		return b;
 	}
 
-	protected final int set(int index, PreparedStatement stmt, Object[] additional, Object...values) throws SQLException {
-		for(Object o : values) {
+	protected final int set(int index, final PreparedStatement stmt, final Object[] additional, final Object...values) throws SQLException {
+		for(final Object o : values) {
 			stmt.setObject(index++,o);
 		}
-		if(null == additional)
+		if(null == additional) {
 			return index;
-		for(Object o : additional) {
+		}
+		for(final Object o : additional) {
 			stmt.setObject(index++,o);
 		}
 		return index;

@@ -76,16 +76,17 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 			msg = "Invalid SQL Query : %s")
 	@Override
 	protected void undoAction() throws AbstractOXException {
-		if(getDocuments().size() == 0)
+		if(getDocuments().size() == 0) {
 			return;
-		UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
+		}
+		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
 		int i = 0;
 		for(final DocumentMetadata doc : getDocuments()) {
 			updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,getContext().getContextId());
+					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};
@@ -101,7 +102,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 		
 		try {
 			doUpdates(updates);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(0, e.getSQLException(), e.getStatement());
 		}
 	}
@@ -112,16 +113,17 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 			exceptionId = 1,
 			msg = "Invalid SQL Query : %s")
 	public void perform() throws AbstractOXException {
-		if(getDocuments().size() == 0)
+		if(getDocuments().size() == 0) {
 			return;
-		UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
+		}
+		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
 		int i = 0;
 		for(final DocumentMetadata doc : getDocuments()) {
 			updates[i++] = new Update(getQueryCatalog().getDelDocumentInsert()) {
 
 				@Override
 				public void fillStatement() throws SQLException {
-					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,getContext().getContextId());
+					fillStmt(stmt,getQueryCatalog().getDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
 				}
 				
 			};
@@ -137,14 +139,14 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 		
 		try {
 			doUpdates(updates);
-		} catch (UpdateException e) {
+		} catch (final UpdateException e) {
 			throw EXCEPTIONS.create(1, e.getSQLException(), e.getStatement());
 		}
 		
 	}
 
 	@Override
-	protected Object[] getAdditionals(DocumentMetadata doc) {
+	protected Object[] getAdditionals(final DocumentMetadata doc) {
 		return null;
 	}
 

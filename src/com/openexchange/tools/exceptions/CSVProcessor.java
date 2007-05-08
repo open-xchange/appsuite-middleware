@@ -52,8 +52,11 @@ package com.openexchange.tools.exceptions;
 import java.io.*;
 
 public class CSVProcessor implements OXErrorCodeProcessor {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CSVProcessor.class);
 
-	private PrintWriter out = null;
+	private PrintWriter out;
 	
 	public void done() {
 		closeStream();
@@ -63,12 +66,12 @@ public class CSVProcessor implements OXErrorCodeProcessor {
 		out.close();
 	}
 
-	public void process(OXErrorCode errorCode) {
+	public void process(final OXErrorCode errorCode) {
 		openStream();
 		write(errorCode);
 	}
 
-	private void write(OXErrorCode errorCode) {
+	private void write(final OXErrorCode errorCode) {
 		out.print(quote((errorCode.component == null) ? "" : errorCode.component.getAbbreviation()));
 		out.print(';');
         out.print(quote((errorCode.component == null) ? "" : errorCode.component.toString()));
@@ -88,15 +91,17 @@ public class CSVProcessor implements OXErrorCodeProcessor {
 		out.flush();
 	}
 
-	private String quote(String s) {
-		if(s == null)
+	private String quote(final String s) {
+		if(s == null) {
 			return "";
+		}
 		return '"'+s.replaceAll("\\\"", "\\\"")+'"';
 	}
 
 	private void openStream() {
-		if(out != null)
+		if(out != null) {
 			return;
+		}
 		try {
 			out = new PrintWriter(new BufferedWriter(new FileWriter(System.getProperty("com.openexchange.tools.exceptions.CSVProcessor.file", "codes.csv"))));
 			out.print("\"Component\"");
@@ -115,8 +120,8 @@ public class CSVProcessor implements OXErrorCodeProcessor {
             out.print(";");
             out.print("\"Exception Class\"");
             out.println(";");
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (final IOException e) {
+			LOG.error(e.getMessage(), e);
 		}
 	}
 

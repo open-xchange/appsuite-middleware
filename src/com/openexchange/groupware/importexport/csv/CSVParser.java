@@ -102,7 +102,7 @@ public class CSVParser {
 	private int pointer;
 	private char[] fileAsArray;
 	
-	public CSVParser(String file){
+	public CSVParser(final String file){
 		this();
 		this.file = file;
 	}
@@ -126,11 +126,11 @@ public class CSVParser {
 	 * Sets the parser to behave tolerant to broken CSV formats
 	 * @param isTolerant
 	 */
-	public void setTolerant(boolean isTolerant) {
+	public void setTolerant(final boolean isTolerant) {
 		this.isTolerant = isTolerant;
 	}
 
-	public List< List<String> > parse(String str) throws ImportExportException{
+	public List< List<String> > parse(final String str) throws ImportExportException{
 		this.file = str;
 		this.unparsableLines = new LinkedList<Integer>();
 		return parse();
@@ -174,7 +174,7 @@ public class CSVParser {
 		return structure;
 	}
 	
-	protected void handleDefault()  throws ImportExportException {
+	protected void handleDefault() {
 		currentCell.append(fileAsArray[pointer]);
 	}
 
@@ -194,7 +194,7 @@ public class CSVParser {
 		}
 	}
 
-	protected void handleEscaping() throws ImportExportException {
+	protected void handleEscaping() {
 		if(isEscaping){
 			if( (pointer+1) < fileAsArray.length && fileAsArray[pointer+1] == ESCAPER){
 				currentCell.append(ESCAPER);
@@ -215,15 +215,16 @@ public class CSVParser {
 			if(currentLine.size() < numberOfCells || numberOfCells == STARTING_LENGTH){
 				currentLine.add( currentCell.toString().trim() );
 			} else {
-				if(! isTolerant() )
-					throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+				if(! isTolerant() ) {
+					throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
+				}
 			}
 			currentCell = new StringBuilder();
 			if(numberOfCells == STARTING_LENGTH ){
 				numberOfCells = currentLine.size();
 				structure.add(currentLine);
 			} else if(numberOfCells != currentLine.size() && !isTolerant() ){
-				throw EXCEPTIONS.create(0, numberOfCells, currentLineNumber, currentLine.size());
+				throw EXCEPTIONS.create(0, Integer.valueOf(numberOfCells), Integer.valueOf(currentLineNumber), Integer.valueOf(currentLine.size()));
 				//unparsableLines.add(currentLineNumber-1);
 			} else {
 				for(int j = currentLine.size(); j < numberOfCells; j++){
@@ -239,11 +240,11 @@ public class CSVParser {
 		return this.unparsableLines;
 	}
 	
-	public void setFileContent(String content){
+	public void setFileContent(final String content){
 		this.file = content;
 	}
 	
-	public String getLine(int lineNumber){
+	public String getLine(final int lineNumber){
 		file = wellform(file);
 		return file.split("\n")[lineNumber];
 	}

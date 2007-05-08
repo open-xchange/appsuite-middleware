@@ -56,15 +56,16 @@ import java.io.UnsupportedEncodingException;
 
 public class CapturingWebdavResponse implements WebdavResponse {
 	private WebdavResponse delegate;
-	private CapturingOutputStream stream = null;
+	private CapturingOutputStream stream;
 	
-	public CapturingWebdavResponse(WebdavResponse delegate) {
+	public CapturingWebdavResponse(final WebdavResponse delegate) {
 		this.delegate = delegate;
 	}
 
 	public OutputStream getOutputStream() throws IOException {
-		if(stream != null)
+		if(stream != null) {
 			return stream;
+		}
 		return stream = new CapturingOutputStream(delegate.getOutputStream());
 	}
 
@@ -72,54 +73,62 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		return delegate.getStatus();
 	}
 
-	public void setHeader(String header, String value) {
+	public void setHeader(final String header, final String value) {
 		delegate.setHeader(header, value);
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(final int status) {
 		delegate.setStatus(status);
 	}
 	
 	private static final class CapturingOutputStream extends OutputStream {
-		private OutputStream delegate = null;
-		private ByteArrayOutputStream capture = null;
+		private OutputStream delegate;
+		private ByteArrayOutputStream capture;
 		
-		public CapturingOutputStream(OutputStream delegate) {
+		public CapturingOutputStream(final OutputStream delegate) {
 			this.delegate = delegate;
 			this.capture = new ByteArrayOutputStream();
 		}
 
+		@Override
 		public void close() throws IOException {
 			delegate.close();
 		}
 
-		public boolean equals(Object arg0) {
+		@Override
+		public boolean equals(final Object arg0) {
 			return delegate.equals(arg0);
 		}
 
+		@Override
 		public void flush() throws IOException {
 			delegate.flush();
 		}
-
+		
+		@Override
 		public int hashCode() {
 			return delegate.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return delegate.toString();
 		}
 
-		public void write(byte[] arg0, int arg1, int arg2) throws IOException {
+		@Override
+		public void write(final byte[] arg0, final int arg1, final int arg2) throws IOException {
 			delegate.write(arg0, arg1, arg2);
 			capture.write(arg0,arg1,arg2);
 		}
 
-		public void write(byte[] arg0) throws IOException {
+		@Override
+		public void write(final byte[] arg0) throws IOException {
 			delegate.write(arg0);
 			capture.write(arg0);
 		}
 
-		public void write(int arg0) throws IOException {
+		@Override
+		public void write(final int arg0) throws IOException {
 			delegate.write(arg0);
 			capture.write(arg0);
 		}
@@ -130,16 +139,17 @@ public class CapturingWebdavResponse implements WebdavResponse {
 	}
 
 	public String getBodyAsString() {
-		if(stream == null)
+		if(stream == null) {
 			return "No Body";
+		}
 		try {
 			return new String(stream.getCapture().toByteArray(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			return e.toString();
 		}
 	}
 
-	public void setContentType(String s) {
+	public void setContentType(final String s) {
 		delegate.setContentType(s);
 	}
 }
