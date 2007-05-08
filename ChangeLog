@@ -1,3 +1,7 @@
+* 2007-05-08 - francisco.laguna@open-xchange.com
+
+   - Bugfix #7012: exists routine now also checks access permissions to filter links properly.
+
 * 2007-05-08 - thorben.betten@open-xchange.com
 
  - Continue code review
@@ -36,7 +40,8 @@
   - Bugfix #6334. NPE due to autoboxing on partial GET for folders.
   - Removed some printStackTrace calls.
   - Bugfix #7143 Infostore and User Store are now considered virtual folders
-  - Partial Fix #7012: Corrected error messages when user has insufficient read permissions
+  - Bugfix #7012: Corrected error messages when user has insufficient read permissions
+      Changed filtering for links to check for permissions
 
 * 2007-05-04 - tobias.prinz@open-xchange.com
 

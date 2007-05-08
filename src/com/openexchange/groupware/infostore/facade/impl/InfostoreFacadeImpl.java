@@ -168,15 +168,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	public boolean exists(final int id, final int version, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
-		final InfostoreIterator iter = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
-		final boolean exists = iter.hasNext();
 		try {
-			iter.close();
-		} catch (final SearchIteratorException e) {
-			throw new InfostoreException(e);
+			return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
+		} catch (InfostoreException x) {
+			if(x.getDetailNumber() == Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL*100) {
+				return false;
+			}
+			throw x;
 		}
-		
-		return exists;
 	}
 
 	@OXThrowsMultiple(
