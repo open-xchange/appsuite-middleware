@@ -145,7 +145,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             stmt = con.prepareStatement(SELECT_GROUPS + " AND lastModified>=?");
             stmt.setLong(1, context.getContextId());
-            stmt.setTimestamp(2, new Timestamp(modifiedSince.getTime()));
+            stmt.setLong(2, modifiedSince.getTime());
             result = stmt.executeQuery();
             final List<Group> tmp = new ArrayList<Group>();
             while (result.next()) {
@@ -223,8 +223,7 @@ public class RdbGroupStorage extends GroupStorage {
         ResultSet result = null;
         Group[] groups = null;
         try {
-            stmt = con
-                .prepareStatement(SELECT_GROUPS);
+            stmt = con.prepareStatement(SELECT_GROUPS);
             stmt.setLong(1, context.getContextId());
             result = stmt.executeQuery();
             final List<Group> tmp = new ArrayList<Group>();
