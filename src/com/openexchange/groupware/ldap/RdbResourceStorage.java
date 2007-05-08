@@ -88,6 +88,7 @@ public class RdbResourceStorage extends ResourceStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResourceGroup getGroup(final int groupId) throws LdapException {
         final ResourceGroup[] groups = getGroups(new int[] { groupId });
         if (null == groups || groups.length == 0) {
@@ -104,6 +105,7 @@ public class RdbResourceStorage extends ResourceStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResourceGroup[] getGroups() throws LdapException {
         final Connection con;
         try {
@@ -232,6 +234,7 @@ public class RdbResourceStorage extends ResourceStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Resource getResource(final int resourceId) throws LdapException {
         final Resource[] resources = getResources(new int[] { resourceId });
         if (resources.length == 0) {
@@ -306,6 +309,7 @@ public class RdbResourceStorage extends ResourceStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResourceGroup[] searchGroups(final String pattern)
         throws LdapException {
         final Connection con;
@@ -347,6 +351,7 @@ public class RdbResourceStorage extends ResourceStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Resource[] searchResources(final String pattern)
         throws LdapException {
         Connection con = null;
@@ -365,6 +370,51 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt = con.prepareStatement(sql);
             stmt.setLong(1, context.getContextId());
             stmt.setString(2, pattern.replace('*', '%'));
+            result = stmt.executeQuery();
+            while (result.next()) {
+                final Resource res = new Resource();
+                int pos = 1;
+                res.setIdentifier(result.getInt(pos++));
+                pos++; // skip identifier string
+                res.setDisplayName(result.getString(pos++));
+                res.setMail(result.getString(pos++));
+                res.setAvailable(result.getBoolean(pos++));
+                res.setDescription(result.getString(pos++));
+                res.setLastModified(new Date(result.getLong(pos++)));
+                resources.add(res);
+            }
+        } catch (SQLException e) {
+            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+                e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+        return resources.toArray(new Resource[resources.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Resource[] listModified(final Date modifiedSince)
+        throws LdapException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (Exception e) {
+            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+        }
+        final String sql = "SELECT id,identifier,displayName,mail,"
+            + "available,description,lastModified FROM resource WHERE cid=? "
+            + "AND lastModified>=?";
+        final List<Resource> resources = new ArrayList<Resource>();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setLong(1, context.getContextId());
+            stmt.setLong(2, modifiedSince.getTime());
             result = stmt.executeQuery();
             while (result.next()) {
                 final Resource res = new Resource();

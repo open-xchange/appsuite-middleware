@@ -51,6 +51,8 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.util.Date;
+
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -137,5 +139,16 @@ public abstract class ResourceStorage {
      * underlying persistent storage.
      */
     public abstract Resource[] searchResources(String pattern)
+        throws LdapException;
+
+    /**
+     * This method returns resources that have been modified since the given
+     * timestamp.
+     * @param modifiedSince timestamp after that the resources have been
+     * modified.
+     * @return an array of resources.
+     * @throws LdapException if an error occurs.
+     */
+    public abstract Resource[] listModified(Date modifiedSince)
         throws LdapException;
 }
