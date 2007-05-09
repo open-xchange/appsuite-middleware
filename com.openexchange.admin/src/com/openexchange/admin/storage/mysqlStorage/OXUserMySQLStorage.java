@@ -1359,9 +1359,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_confirmed_spam_name(rs3.getString("confirmed_spam"));
                     int bits = rs3.getInt("bits");
                     if( (bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED ) {
-                        newuser.setSpam_filter_enabled(true);
+                        newuser.set_GUI_Spam_filter_capabilities_enabled(true);
                     } else {
-                        newuser.setSpam_filter_enabled(false);
+                        newuser.set_GUI_Spam_filter_capabilities_enabled(false);
                     }
                 }
                 rs3.close();
