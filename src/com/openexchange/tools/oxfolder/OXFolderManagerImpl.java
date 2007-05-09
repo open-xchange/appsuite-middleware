@@ -113,7 +113,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 
 	/**
 	 * Constructor which only uses <code>SessionObject</code>. Optional
-	 * connection are going to be set to <code>null</code>.
+	 * connections are going to be set to <code>null</code>.
 	 */
 	public OXFolderManagerImpl(final SessionObject session) {
 		this(session, null, null);

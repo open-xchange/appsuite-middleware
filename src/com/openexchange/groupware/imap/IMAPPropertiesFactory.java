@@ -68,7 +68,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.sessiond.SessionHandler;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -161,7 +160,7 @@ public class IMAPPropertiesFactory {
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
-	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
+	private static final Log LOG = LogFactory.getLog(IMAPPropertiesFactory.class);
 
 	// ##################################################
 	private static final String TEST_PW = "oxTEST";
@@ -520,7 +519,7 @@ public class IMAPPropertiesFactory {
 				 * Switch flag
 				 */
 				IMAPProperties.setGlobalPropertiesLoaded(true);
-				logBuilder.append("Global IMAP properties successfully loaded...");
+				logBuilder.append("Global IMAP properties successfully loaded!");
 				if (LOG.isInfoEnabled()) {
 					LOG.info(logBuilder.toString());
 				}
