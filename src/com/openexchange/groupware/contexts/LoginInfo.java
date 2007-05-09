@@ -140,12 +140,14 @@ public abstract class LoginInfo {
      */
     protected String[] split(final String loginInfo) throws LoginException {
         final int pos = loginInfo.lastIndexOf('@');
-        if (-1 == pos) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
-        }
         final String[] splitted = new String[2];
-        splitted[1] = loginInfo.substring(0, pos);
-        splitted[0] = loginInfo.substring(pos + 1);
+        if (-1 == pos) {
+            splitted[1] = loginInfo;
+            splitted[0] = "defaultcontext";
+        } else {
+            splitted[1] = loginInfo.substring(0, pos);
+            splitted[0] = loginInfo.substring(pos + 1);
+        }
         return splitted;
     }
 }
