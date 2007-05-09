@@ -103,8 +103,10 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
 		// tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
 	   // tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
+		
 		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
+		tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
 		
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class);

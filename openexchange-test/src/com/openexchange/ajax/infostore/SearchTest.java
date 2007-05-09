@@ -69,6 +69,12 @@ public class SearchTest extends InfostoreAJAXTest {
 		
 	}
 	
+	public void testAll() throws Exception {
+		Response res = search(getWebConversation(), getHostName(), sessionId, "", COLS);
+		assertNoError(res);
+		assertTitles(res,all);
+	}
+	
 	
 	public void testCaseInsensitive() throws Exception {
 		Response res = search(getWebConversation(), getHostName(), sessionId, "test", COLS);
