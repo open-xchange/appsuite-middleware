@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends ResourceAbstraction {
@@ -172,6 +173,9 @@ public class Change extends ResourceAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
+        } catch (NoSuchResourceException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
         }
