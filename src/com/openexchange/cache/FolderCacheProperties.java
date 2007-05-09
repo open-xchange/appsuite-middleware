@@ -74,7 +74,7 @@ public class FolderCacheProperties {
 
 	private static boolean enableFolderCache = true;
 
-	private static boolean ignoreGlobalAddressbook;
+	private static boolean ignoreSharedAddressbook;
 
 	private static boolean enableInternalUsersEdit;
 
@@ -108,10 +108,10 @@ public class FolderCacheProperties {
 			 */
 			enableFolderCache = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty("ENABLE_FOLDER_CACHE", "true"));
 			/*
-			 * IGNORE_GLOBAL_ADDRESSBOOK
+			 * IGNORE_SHARED_ADDRESSBOOK
 			 */
-			ignoreGlobalAddressbook = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty(
-					"IGNORE_GLOBAL_ADDRESSBOOK", "false"));
+			ignoreSharedAddressbook = trueStr.equalsIgnoreCase(FOLDER_CACHE_PROPS.getProperty(
+					"IGNORE_SHARED_ADDRESSBOOK", "false"));
 			/*
 			 * ENABLE_INTERNAL_USER_EDIT
 			 */
@@ -133,7 +133,7 @@ public class FolderCacheProperties {
 			sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
 			sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
 			sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
-			sb.append("\tIGNORE_GLOBAL_ADDRESSBOOK=").append(ignoreGlobalAddressbook);
+			sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
 			LOG.info(sb.toString());
 		}
 	}
@@ -146,8 +146,8 @@ public class FolderCacheProperties {
 		return enableFolderCache;
 	}
 
-	public static boolean isIgnoreGlobalAddressbook() {
-		return ignoreGlobalAddressbook;
+	public static boolean isIgnoreSharedAddressbook() {
+		return ignoreSharedAddressbook;
 	}
 
 	public static boolean isEnableInternalUsersEdit() {
