@@ -95,7 +95,7 @@ public class RegisterDatabase extends UtilAbstraction {
                 } else {
                     printError(" master id must be set if this database isn't the master");
                     parser.printUsage();
-                    System.exit(1);
+                    sysexit(1);
                 }
             }
 
