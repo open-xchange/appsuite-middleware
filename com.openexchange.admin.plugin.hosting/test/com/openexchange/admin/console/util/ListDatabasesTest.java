@@ -94,7 +94,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getOptionDataInvalidCredentials()){
+        new ListDatabase(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -109,13 +109,7 @@ public class ListDatabasesTest extends AbstractTest {
                 };
         return tmp;
     }
-    
-    public static String[] getOptionDataInvalidCredentials(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzfoobar", 
-                OPTION_SUPER_ADMIN_PWD+"xyzfoobar"
-                };
-        return tmp;
-    }
+        
     
     public static String[] getOptionDataCSV(){
         String[] tmp = {OPTION_SUPER_ADMIN_USER, 
