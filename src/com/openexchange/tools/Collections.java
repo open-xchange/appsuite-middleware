@@ -55,6 +55,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -76,6 +77,31 @@ public final class Collections {
 		super();
 	}
 
+	
+	/**
+	 * Finds the first element in a collection that satisfies the filter
+	 * 
+	 * @return
+	 */
+	public static <T> T findFirst(Collection<T> collection, Filter<T> filter) {
+		for(T object : collection) {
+			if(filter.accept(object))
+				return object;
+		}
+		return null;
+	}
+	
+	/**
+	 * Adds all elements from input that satisfy the filter to output
+	 */
+	public static <T> void collect(Collection<T> input, Filter<T> filter, Collection<T> output) {
+		for(T object : input) {
+			if(filter.accept(object)) {
+				output.add(object);
+			}
+		}
+	}
+	
 	/**
 	 * Converts a list of Integer into an int array.
 	 * 
@@ -400,5 +426,18 @@ public final class Collections {
 			return iter.next();
 		}
 	}
+	
+	/**
+	 * 
+	 * Interface to provide filtering opportunities for collections
+	 * 
+	 * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
+	 *
+	 * @param <T>
+	 */
+	public interface Filter<T> {
+		public boolean accept(T object);
+	}
+
 
 }
