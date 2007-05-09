@@ -1,70 +1,28 @@
-CREATE TABLE prg_attachment (
-	cid INTEGER,
-    id INTEGER,
-	created_by INTEGER,
-	creation_date TIMESTAMP,
-	file_mimetype TEXT,
-	file_size INTEGER,
-	filename TEXT,
-	attached INTEGER,
-	module INTEGER,
-	rtf_flag BOOLEAN,
-	comment TEXT,
-	file_id TEXT
-);
-
-CREATE TABLE del_attachment (
-	cid INTEGER,
-	id INTEGER,
-	attached INTEGER,
-	module INTEGER,
-	del_date TIMESTAMP
-);ALTER TABLE prg_attachment
-    MODIFY cid INT4 UNSIGNED ,
-    MODIFY id INT4 UNSIGNED ,
-    MODIFY creation_date INT8 ,
-    MODIFY created_by INT4 UNSIGNED ,
-	MODIFY attached INT4 UNSIGNED ,
-	MODIFY module INT4 UNSIGNED ,
-	MODIFY file_mimetype VARCHAR(255) ,
-	MODIFY filename VARCHAR(255) ,
-	MODIFY comment VARCHAR(255) ,
-	MODIFY file_id VARCHAR(255) ,
-	MODIFY file_size INT4 UNSIGNED ,
-	ADD PRIMARY KEY (cid, id),
-	ADD INDEX(cid, attached, module),
-	ENGINE=InnoDB;
+CREATE TABLE `prg_attachment` (
+  `cid` int(10) unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `creation_date` bigint(20) NOT NULL,
+  `file_mimetype` varchar(255) NOT NULL,
+  `file_size` int(10) unsigned NOT NULL,
+  `filename` varchar(255) NOT NULL,
+  `attached` int(10) unsigned NOT NULL,
+  `module` int(10) unsigned NOT NULL,
+  `rtf_flag` tinyint(1),
+  `comment` varchar(255),
+  `file_id` varchar(255) NOT NULL,
+  PRIMARY KEY  (`cid`,`id`),
+  KEY `cid` (`cid`,`attached`,`module`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 
-ALTER TABLE del_attachment
-    MODIFY cid INT4 UNSIGNED ,
-    MODIFY id INT4 UNSIGNED ,
-    MODIFY del_date INT8 ,
-	MODIFY attached INT4 UNSIGNED ,
-	MODIFY module INT4 UNSIGNED ,
-	ADD PRIMARY KEY (cid, id),
-	ADD INDEX (cid, attached, module),
-	ENGINE=InnoDB;
-    ALTER TABLE prg_attachment
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    MODIFY id INT4 UNSIGNED NOT NULL,
-    MODIFY creation_date INT8 NOT NULL,
-    MODIFY created_by INT4 UNSIGNED NOT NULL,
-	MODIFY attached INT4 UNSIGNED NOT NULL,
-	MODIFY module INT4 UNSIGNED NOT NULL,
-	MODIFY file_mimetype VARCHAR(255) NOT NULL,
-	MODIFY filename VARCHAR(255) NOT NULL,
-	MODIFY comment VARCHAR(255),
-	MODIFY file_id VARCHAR(255) NOT NULL,
-	MODIFY file_size INT4 UNSIGNED NOT NULL,
-    ENGINE=InnoDB;
+CREATE TABLE `del_attachment` (
+  `cid` int(10) unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL,
+  `attached` int(10) unsigned NOT NULL,
+  `module` int(10) unsigned NOT NULL,
+  `del_date` bigint(20) NOT NULL,
+  PRIMARY KEY  (`cid`,`id`),
+  KEY `cid` (`cid`,`attached`,`module`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-ALTER TABLE del_attachment
-    MODIFY cid INT4 UNSIGNED NOT NULL,
-    MODIFY id INT4 UNSIGNED NOT NULL,
-    MODIFY del_date INT8 NOT NULL,
-	MODIFY attached INT4 UNSIGNED NOT NULL,
-	MODIFY module INT4 UNSIGNED NOT NULL,
-    ENGINE=InnoDB;
-    
