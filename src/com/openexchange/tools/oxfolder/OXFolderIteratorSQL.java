@@ -118,7 +118,7 @@ public class OXFolderIteratorSQL {
 				.append(OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(
 						")))");
 		if (FolderCacheProperties.isIgnoreSharedAddressbook()) {
-			retValBuilder.append(" AND (ot.fuid !=").append(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).append(')');
+			retValBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).append(')');
 		}
 		if (accessibleModules != null) {
 			retValBuilder.append(" AND (ot.module IN ").append(accessibleModules).append(')');
