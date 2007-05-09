@@ -2399,6 +2399,10 @@ public class User implements Serializable, Cloneable {
         return extensions.remove(o);
     }
 
+    public OXUserExtensionInterface removeExtensionByIndex(final int index) {
+        return extensions.remove(index);
+    }
+
     /**
      * This method is used to get the extensions through the name of the
      * extension. An Array with all extensions where the name fits will be returned, 
