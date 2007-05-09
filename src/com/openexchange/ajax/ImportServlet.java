@@ -119,7 +119,6 @@ public class ImportServlet extends ImportExport {
 	}
 	
 	@Override
-	@SuppressWarnings({ "unchecked" })
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		final Response resObj = new Response();
 		try {

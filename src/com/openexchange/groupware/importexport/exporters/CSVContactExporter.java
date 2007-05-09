@@ -290,7 +290,7 @@ public class CSVContactExporter implements Exporter {
 		try {
 			return new SizedInputStream(
 					new ByteArrayInputStream ( ret.toString().getBytes("UTF-8")) ,  
-					ret.toString().getBytes().length,
+					ret.toString().getBytes("UTF-8").length,
 					Format.CSV);
 		} catch (final UnsupportedEncodingException e) {
 			throw EXCEPTIONS.create(4);
@@ -322,10 +322,15 @@ public class CSVContactExporter implements Exporter {
 		ret.append( convertToLine( com.openexchange.groupware.importexport.csv.CSVLibrary.convertToList(cols) ) );
 		ret.append( convertToLine( convertToList(conObj, cols) ) );
 		
-		return new SizedInputStream(
-				new ByteArrayInputStream ( ret.toString().getBytes()) ,  
-				ret.toString().getBytes().length,
-				Format.CSV);
+		try {
+			return new SizedInputStream(
+					new ByteArrayInputStream ( ret.toString().getBytes("UTF-8")) ,  
+					ret.toString().getBytes().length,
+					Format.CSV);
+		} catch (UnsupportedEncodingException e) {
+			LOG.fatal(e);
+			throw EXCEPTIONS.create(4);
+		}
 	}
 	
 	protected List<String> convertToList(final ContactObject conObj, final int[] cols){

@@ -1,3 +1,11 @@
+* 2007-05-09 - tobias.prinz@open-xchange.com
+
+ - Fixed several conversions of Streams to strings which did rely on
+   UTF-8 as encoding. Should fix #7106, but that needs more tests for 
+   confirmation.
+ - Fixed bug in OutlookImporter that made the importer not act on getting 
+   an Outlook CSV file.
+
 * 2007-05-09 - thorben.betten@open-xchange.com
 
  - New method to clear folder's content
@@ -32,7 +40,7 @@
   - Fixed Bug #7083: Fixed a problem in the webdav xml interface 
     that the last modified attributes was not used in request for groups and resources.
 
-  - Fixed Bug #7152: Fixed a problem that active sessions are not deremented correctly.
+  - Fixed Bug #7152: Fixed a problem that active sessions are not decremented correctly.
 
 * 2007-05-08 - francisco.laguna@open-xchange.com
 

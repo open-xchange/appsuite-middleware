@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport.importers;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -98,16 +99,18 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	Category.USER_INPUT,
 	Category.CODE_ERROR,
 	Category.CODE_ERROR,
-	Category.USER_INPUT},
-		desc={"","","","","",""},
-		exceptionId={0,1,2,3,4,5},
+	Category.USER_INPUT,
+	Category.CODE_ERROR},
+		desc={"","","","","","",""},
+		exceptionId={0,1,2,3,4,5,6},
 		msg={
 	"Could not import into the folder %s.",
 	"Subsystem down",
 	"User input Error %s",
 	"Programming Error - Folder %s",
 	"Could not load folder %s",
-	"Could not recognize format of the following data: %s"})
+	"Could not recognize format of the following data: %s",
+	"Could not use UTF-8 encoding."})
 	
 	/**
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -184,7 +187,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			VCardTokenizer tokenizer = new VCardTokenizer(new InputStreamReader(is));
+			VCardTokenizer tokenizer = new VCardTokenizer(new InputStreamReader(is, "UTF-8"));
 			List<VCardFileToken> chunks = tokenizer.split();
 			for(VCardFileToken chunk: chunks){
 				VersitDefinition def = chunk.getVersitDefinition();
@@ -222,6 +225,9 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 				}
 				list.add(importResult);
 			}
+		} catch (UnsupportedEncodingException e){
+			LOG.fatal(e);
+			throw importExportExceptionFactory.create(6);
 		} catch (Exception exc) {
 			throw importExportExceptionFactory.create(4, contactFolderId);
 		} finally {

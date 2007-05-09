@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,13 +79,15 @@ import com.openexchange.sessiond.SessionObject;
 	category={
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.CODE_ERROR,
+		Category.CODE_ERROR,
 		Category.CODE_ERROR}, 
-	desc={"","",""}, 
-	exceptionId={0,1,2}, 
+	desc={"","","", ""}, 
+	exceptionId={0,1,2,3}, 
 	msg={
 		"Could not load folder %s",
 		"Could not create folderId from String %s",
-		"Could not read InputStream as String"})
+		"Could not read InputStream as String",
+		"Missing ability to encode or decode UTF-8 on server, cannot read file."})
 public class CSVLibrary {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -149,7 +152,13 @@ public class CSVLibrary {
 	}
 	
 	public static String transformInputStreamToString(final InputStream is) throws ImportExportException{
-		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			LOG.fatal(e1);
+			throw EXCEPTIONS.create(3);
+		}
 		final StringBuilder bob = new StringBuilder();
 		String buffer;
 		try {

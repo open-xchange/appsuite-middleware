@@ -151,6 +151,11 @@ public class CSVContactImporter implements Importer {
 	}
 	
 
+	protected Format getResponsibleFor() {
+		return Format.CSV;
+	}
+
+
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format,
 			final InputStream is, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {

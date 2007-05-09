@@ -57,6 +57,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
+import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
@@ -88,6 +89,11 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 		final CSVParser result = super.getCSVParser();
 		result.setTolerant(true);
 		return result;
+	}
+
+	@Override
+	protected Format getResponsibleFor() {
+		return Format.OUTLOOK_CSV;
 	}
 	
 	
