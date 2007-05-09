@@ -93,7 +93,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getOptionDataInvalidCredentials()){
+        new ListFilestore(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -114,13 +114,6 @@ public class ListFilestoreTest extends AbstractTest {
         };
         
         assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
-    }
-    
-    public static String[] getOptionDataInvalidCredentials(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzfoobar", 
-                OPTION_SUPER_ADMIN_PWD+"xyzfoobar"
-                };
-        return tmp;
     }
     
     public static String[] getOptionData(){
