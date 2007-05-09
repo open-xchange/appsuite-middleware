@@ -58,17 +58,16 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
  * @author cutmasta
  *
  */
-public class ListDatabasesTest extends AbstractTest {
-    
+public class ListServertest extends AbstractTest {
     
     @Test
-    public void testListDatabase() {
+    public void testListServer() {
         
         resetBuffers();
         
-        new ListDatabase(getMasterCredentialsOptionData()){
+        new ListServer(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListServertest.this.returnCode = exitCode;
             }
         };
         
@@ -76,13 +75,13 @@ public class ListDatabasesTest extends AbstractTest {
     }
     
     @Test
-    public void testListDatabaseCSV() {
+    public void testListServerCSV() {
         
         resetBuffers();
         
-        new ListDatabase(getCSVMasterOptionData()){
+        new ListServer(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListServertest.this.returnCode = exitCode;
             }
         };
         
@@ -90,13 +89,13 @@ public class ListDatabasesTest extends AbstractTest {
     }
     
     @Test
-    public void testListDatabaseInvalidCredentials() {
+    public void testListServerInvalidCredentials() {
         
         resetBuffers();
         
-        new ListDatabase(getWrongMasterCredentialsOptionData()){
+        new ListServer(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListServertest.this.returnCode = exitCode;
             }
         };
         
@@ -104,19 +103,18 @@ public class ListDatabasesTest extends AbstractTest {
     }
     
     @Test
-    public void testListDatabaseUnknownOption() {
+    public void testListServerUnknownOption() {
         
         resetBuffers();
         
-        new ListDatabase(getUnknownOptionData()){
+        new ListServer(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListServertest.this.returnCode = exitCode;
             }
         };
         
-        assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
+        assertTrue("Expected unknown options as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
     }
-    
     
     
 }

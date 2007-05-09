@@ -58,17 +58,16 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
  * @author cutmasta
  *
  */
-public class ListDatabasesTest extends AbstractTest {
-    
-    
+public class ListReasonTest extends AbstractTest {
+
     @Test
     public void testListDatabase() {
         
         resetBuffers();
         
-        new ListDatabase(getMasterCredentialsOptionData()){
+        new ListReason(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -80,9 +79,9 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getCSVMasterOptionData()){
+        new ListReason(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -94,9 +93,9 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getWrongMasterCredentialsOptionData()){
+        new ListReason(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -104,19 +103,17 @@ public class ListDatabasesTest extends AbstractTest {
     }
     
     @Test
-    public void testListDatabaseUnknownOption() {
+    public void testListDatabaseWithUnknownOption() {
         
         resetBuffers();
         
-        new ListDatabase(getUnknownOptionData()){
+        new ListReason(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
-                ListDatabasesTest.this.returnCode = exitCode;
+                ListReasonTest.this.returnCode = exitCode;
             }
         };
         
         assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
     }
-    
-    
     
 }
