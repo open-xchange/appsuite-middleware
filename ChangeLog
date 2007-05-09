@@ -24,7 +24,12 @@
 
  - Code clean up in some calendar classes. Avoided the use of the deprecated
    OXFolderTools.
-
+ 
+ - Optimized calendar performance by reducing single SQL statements. Now many
+   requests are bundled and executed by some requests. Additional the conflict
+   resolution was optimized by reducing SQL queries and using an cached object
+   instead.
+ 
 * 2007-05-09 - marcus.klein@open-xchange.com
 
   - Bugfix #7121: Changed database authentication mechanism to prevent security
