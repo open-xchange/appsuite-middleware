@@ -80,7 +80,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getMasterCredentialsOptionData()){
+        new ListDatabase(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
