@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Delete extends GroupAbstraction {
@@ -146,6 +147,9 @@ public class Delete extends GroupAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
+        } catch (NoSuchGroupException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
         }

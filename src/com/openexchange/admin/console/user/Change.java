@@ -67,6 +67,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends UserAbstraction {
@@ -171,6 +172,9 @@ public class Change extends UserAbstraction {
             sysexit(1);
         } catch (final InvocationTargetException e) {
             printError(e.getMessage());
+            sysexit(1);
+        } catch (NoSuchUserException e) {
+            printServerResponse(e.getMessage());
             sysexit(1);
         }
     }
