@@ -83,8 +83,6 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private static final String PROTOCOL_IMAP = "imap";
 
-	private static final String CHARENC_UTF8 = "UTF-8";
-
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
 	private static int counter;
