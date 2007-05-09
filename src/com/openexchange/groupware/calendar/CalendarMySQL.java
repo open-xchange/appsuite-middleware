@@ -123,6 +123,7 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String PD_CREATED_FROM_IS = " AND pd.created_from = ";
     private static final String DATES_IDENTIFIER_IS = " AND intfield01 = ";
     private static final String PARTICIPANTS_IDENTIFIER_IS = " AND object_id = ";
+    private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
     
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
     
@@ -1157,6 +1158,85 @@ class CalendarMySQL implements CalendarSqlImp {
         }
     }
     
+    public final void getParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final String sqlin) throws SQLException {
+        
+        final Statement stmt = readcon.createStatement();
+        final StringBuilder query = new StringBuilder(128);
+        query.append("SELECT object_id, id, type, dn, ma from prg_date_rights WHERE cid = ");
+        query.append(cid);
+        query.append(PARTICIPANTS_IDENTIFIER_IN);
+        query.append(sqlin);
+        query.append(" ORDER BY object_id ASC");
+        final ResultSet rs = stmt.executeQuery(query.toString());
+        int last_oid = -1;
+        Participants participants = null;
+        CalendarDataObject cdao = null;
+        Participant participant = null;
+        try {
+            while (rs.next()) {
+                final int oid = rs.getInt(1);
+                if (last_oid != oid) {
+                    if (participants != null) {
+                        if (cdao != null) {
+                            cdao.setParticipants(participants.getList());
+                        }
+                    }
+                    participants = new Participants();
+                    last_oid = oid;
+                    cdao = CalendarCommonCollection.getDAOFromList(al, oid);
+                }
+                
+                final int id = rs.getInt(2);
+                final int type = rs.getInt(3);
+                if (type == Participant.USER) {
+                    participant = new UserParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.GROUP) {
+                    participant = new GroupParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.RESOURCE) {
+                    participant = new ResourceParticipant();
+                    participant.setIdentifier(id);
+                    cdao.setContainsResources(true);
+                } else if (type == Participant.RESOURCEGROUP) {
+                    participant = new ResourceGroupParticipant();
+                    participant.setIdentifier(id);
+                } else if (type == Participant.EXTERNAL_USER) {
+                    participant = new ExternalUserParticipant();
+                    String temp = rs.getString(4);
+                    if (!rs.wasNull()) {
+                        participant.setDisplayName(temp);
+                    }
+                    temp = rs.getString(5);
+                    if (!rs.wasNull()) {
+                        participant.setEmailAddress(temp);
+                    }
+                } else if (type == Participant.EXTERNAL_GROUP) {
+                    participant = new ExternalGroupParticipant();
+                    String temp = rs.getString(4);
+                    if (!rs.wasNull()) {
+                        participant.setDisplayName(temp);
+                    }
+                    temp = rs.getString(5);
+                    if (!rs.wasNull()) {
+                        participant.setEmailAddress(temp);
+                    }
+                } else {
+                    LOG.warn("Unknown type detected for Participant :"+type);
+                }
+                if (participant != null) {
+                    participants.add(participant);
+                }
+            }
+            if (cdao != null && cdao.getObjectID() == last_oid) {
+                cdao.setParticipants(participants.getList());
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closeStatement(stmt);
+        }
+    }
+    
     public final Participants getParticipants(final CalendarDataObject cdao, final Connection readcon) throws SQLException {
         final Participants participants = new Participants();
         final Statement stmt = readcon.createStatement();
@@ -1216,6 +1296,90 @@ class CalendarMySQL implements CalendarSqlImp {
             CalendarCommonCollection.closeStatement(stmt);
         }
         return participants;
+    }
+    
+    public final void getUserParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
+        final Statement stmt = readcon.createStatement();
+        final StringBuilder query = new StringBuilder(140);
+        query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
+        query.append(cid);
+        query.append(PARTICIPANTS_IDENTIFIER_IN);
+        query.append(sqlin);
+        query.append(" ORDER BY object_id");
+        final ResultSet rs = stmt.executeQuery(query.toString());
+        String temp = null;
+        int last_oid = -1;
+        UserParticipant up = null;
+        Participants participants = null;
+        CalendarDataObject cdao = null;
+        try {
+            while (rs.next()) {
+                final int oid = rs.getInt(1);
+                if (last_oid != oid) {
+                    if (participants != null) {
+                        participants.add(up);
+                        if (cdao != null) {
+                            cdao.setUsers(participants.getUsers());
+                        }
+                    }
+                    participants = new Participants();
+                    last_oid = oid;
+                    cdao = CalendarCommonCollection.getDAOFromList(al, oid);
+                }
+                up = new UserParticipant();
+                final int tuid = rs.getInt(2);
+                up.setIdentifier(tuid);
+                up.setConfirm(rs.getInt(3));
+                temp = rs.getString(4);
+                if (!rs.wasNull()) {
+                    up.setConfirmMessage(temp);
+                }
+                final int pfid = rs.getInt(5);
+                
+                if (!rs.wasNull()) {
+                    if (pfid < 1) {
+                        LOG.error("Write me!"); // TODO
+                    }
+                    if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                        if  (uid == tuid) {
+                            cdao.setGlobalFolderID(pfid);
+                            cdao.setPrivateFolderID(pfid);
+                        }
+                        up.setPersonalFolderId(pfid);
+                    }  else if (cdao.getFolderType() == FolderObject.SHARED) {
+                        if (cdao.getSharedFolderOwner() != 0) {
+                            if (cdao.getSharedFolderOwner() == tuid) {
+                                cdao.setGlobalFolderID(pfid);
+                                cdao.setPrivateFolderID(pfid);
+                                up.setPersonalFolderId(pfid);
+                            }
+                        } else {
+                            throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
+                        }
+                    } else if (uid == tuid) {
+                        cdao.setGlobalFolderID(pfid);
+                        cdao.setPrivateFolderID(pfid);
+                    } else {
+                        cdao.setActionFolder(pfid);
+                    }
+                }
+                
+                final int alarm = rs.getInt(6);
+                if (!rs.wasNull()) {
+                    up.setAlarmMinutes(alarm);
+                    cdao.setAlarm(up.getAlarmMinutes());
+                }
+                if (participants != null) {
+                    participants.add(up);
+                }
+            }
+            if (cdao != null && cdao.getObjectID() == last_oid) {
+                cdao.setUsers(participants.getUsers());
+            }
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closeStatement(stmt);
+        }
     }
     
     public final Participants getUserParticipants(final CalendarDataObject cdao, final Connection readcon, final int uid) throws SQLException, OXException {

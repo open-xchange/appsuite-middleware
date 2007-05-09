@@ -611,15 +611,21 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 break;
                             case AppointmentObject.USERS:                                
-                                if (!cdao.containsUserParticipants()) {
+                                if (!cdao.containsUserParticipants() && !CachedCalendarIterator.cached_iterator_fast_fetch) {
                                     final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                     cdao.setUsers(users.getUsers());
+                                    bbs = true;
+                                } else {
+                                    cdao.setFillUserParticipants();
                                 }
-                                bbs = true;
                                 break;
                             case AppointmentObject.PARTICIPANTS:
-                                final Participants participants = cimp.getParticipants(cdao, readcon);
-                                cdao.setParticipants(participants.getList());
+                                if (!CachedCalendarIterator.cached_iterator_fast_fetch) {
+                                    final Participants participants = cimp.getParticipants(cdao, readcon);
+                                    cdao.setParticipants(participants.getList());
+                                } else {
+                                    cdao.setFillParticipants();
+                                }
                                 break;
                             case AppointmentObject.FOLDER_ID:
                                 if (CalendarCommonCollection.getFieldName(AppointmentObject.FOLDER_ID) != null) {
@@ -634,10 +640,12 @@ public class CalendarOperation implements SearchIterator {
                                             } else {
                                                 if (bbs) {
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                                } else {
+                                                } else if (!CachedCalendarIterator.cached_iterator_fast_fetch) {
                                                     Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                                     cdao.setUsers(users.getUsers());
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
+                                                } else {
+                                                    cdao.setFillFolderID();
                                                 }
                                             }
                                         }

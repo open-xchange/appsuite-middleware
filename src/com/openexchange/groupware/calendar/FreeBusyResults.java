@@ -100,6 +100,11 @@ public class FreeBusyResults implements SearchIterator {
     private long range_start;
     private long range_end;
     
+    private int last_up_oid;
+    private UserParticipant last_up[] = null;
+    private int last_p_oid;
+    private Participant last_p[] = null;
+    
     private ArrayList<Object> al = new ArrayList<Object>(16);
     private int counter;
     
@@ -365,7 +370,14 @@ public class FreeBusyResults implements SearchIterator {
                 final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
-                final UserParticipant op[] = CalendarSql.getCalendarSqlImplementation().getUserParticipants(temp, con, uid).getUsers();
+                UserParticipant op[] = null;
+                if (oid != last_up_oid)  {
+                    op = CalendarSql.getCalendarSqlImplementation().getUserParticipants(temp, con, uid).getUsers();
+                    last_up_oid = oid;
+                    last_up = op;
+                } else {
+                    op = last_up;
+                }
                 if (op != null && op.length > 1) {
                     final  UserParticipant up[] = (UserParticipant[])conflict_objects;
                     for (int a = 0; a < up.length; a++) {
@@ -388,7 +400,14 @@ public class FreeBusyResults implements SearchIterator {
                 final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
-                final Participant op[] = CalendarSql.getCalendarSqlImplementation().getParticipants(temp, con).getList();
+                Participant op[] = null;
+                if (oid != last_p_oid) {
+                    op = CalendarSql.getCalendarSqlImplementation().getParticipants(temp, con).getList();
+                    last_p_oid = oid;
+                    last_p = op;
+                } else {
+                    op = last_p;
+                }
                 if (op != null && op.length > 1) {
                     for (int a = 0; a < conflict_objects.length; a++) {
                         for (int b = 0; b < op.length; b++) {

@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
@@ -1232,4 +1233,15 @@ public class CalendarCommonCollection {
         
     }
     
+    
+    public static final CalendarDataObject getDAOFromList(ArrayList al, int oid) {
+        CalendarDataObject cdao = null;
+        for (int a = 0; a < al.size(); a++) {
+            cdao = (CalendarDataObject) al.get(a);
+            if (cdao.getObjectID() == oid) {
+                return cdao;
+            }
+        }
+        return null;
+    }        
 }

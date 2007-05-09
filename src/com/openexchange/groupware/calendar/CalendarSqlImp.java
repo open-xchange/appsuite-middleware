@@ -61,6 +61,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
 
@@ -111,6 +112,10 @@ public interface CalendarSqlImp {
     public PreparedStatement getPreparedStatement(Connection readcon, String sql) throws SQLException;
     
     public Participants getUserParticipants(CalendarDataObject cdao, Connection readcon, int uid) throws SQLException, OXException;
+    
+    public void getUserParticipantsSQLIn(ArrayList al, Connection readcon, int cid, int uid, String sqlin) throws SQLException, OXException;
+    
+    public void getParticipantsSQLIn(final ArrayList al, final Connection readcon, final int cid, final String sqlin) throws SQLException;
     
     public Participants getParticipants(CalendarDataObject cdao, Connection readcon) throws SQLException;
     
