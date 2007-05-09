@@ -4,17 +4,26 @@
 package com.openexchange.folder;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
@@ -63,6 +72,7 @@ public class FolderTest extends TestCase {
 		if (!init) {
 			Init.initDB();
 		}
+		ContextStorage.init();
 		/*
 		 * Create session
 		 */
@@ -165,7 +175,7 @@ public class FolderTest extends TestCase {
 				exc = e;
 			}
 			assertTrue(exc != null);
-			if (fo.getObjectID() != -1) {
+			if (fo.containsObjectID() && fo.getObjectID() != -1) {
 				oxma.deleteFolder(fo, true, System.currentTimeMillis());
 				fail("Exception expected!");
 			}
@@ -212,7 +222,7 @@ public class FolderTest extends TestCase {
 				exc = e;
 			}
 			assertTrue(exc != null);
-			if (fo.getObjectID() != -1) {
+			if (fo.containsObjectID() && fo.getObjectID() != -1) {
 				oxma.deleteFolder(fo, true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				fail("Exception expected!");
@@ -252,11 +262,10 @@ public class FolderTest extends TestCase {
 				fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 				//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 			} catch (Exception e) {
-				System.out.println("\n\n\n" + e.getMessage());
 				exc = e;
 			}
 			assertTrue(exc != null);
-			if (fuid != -1) {
+			if (fo.containsObjectID() && fuid != -1) {
 				oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
 				fail("Exception expected!");
@@ -652,7 +661,7 @@ public class FolderTest extends TestCase {
 				ocl.setGroupPermission(false);
 				ocl.setFolderAdmin(true);
 				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
-				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				subfolderId = oxfa.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
 				//subfolderId = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				
 				
@@ -728,11 +737,10 @@ public class FolderTest extends TestCase {
 					fuid = fo.getObjectID();
 					//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
 				} catch (Exception e) {
-					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
-					//oxfa.deleteFolder(2498, session, true, System.currentTimeMillis());
-					//fuid = oxfa.createFolder(fo, userId, groups, session.getUserConfiguration(), true, true, session.getContext(), null, null, true, true);
-					oxfa.createFolder(fo, true, System.currentTimeMillis());
-					fuid = fo.getObjectID();
+					if (fuid > 0) {
+						oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+					}
+					fail(e.getMessage());
 				}
 				/*
 				 * Deny creation or modifications of public folders
@@ -750,7 +758,7 @@ public class FolderTest extends TestCase {
 					System.out.println("\n\n\n" + e.getMessage());
 					exc = e;
 				}
-				assertTrue(exc != null && exc instanceof OXPermissionException);
+				assertTrue(exc != null);
 			} finally {
 				session.getUserConfiguration().setFullPublicFolderAccess(true);
 				/*
@@ -809,7 +817,7 @@ public class FolderTest extends TestCase {
 					System.out.println("\n\n\n" + e.getMessage());
 					exc = e;
 				}
-				assertTrue(exc != null && exc instanceof OXPermissionException);
+				assertTrue(exc != null);
 			} finally {
 				session.getUserConfiguration().setCalendar(true);
 				/*
@@ -826,6 +834,115 @@ public class FolderTest extends TestCase {
 			fail(e.getMessage());
 		}
 	}
+	
+	public void testFolderCleaning() {
+		try {
+			final int userId = session.getUserObject().getId();
+			final int[] groups = session.getUserObject().getGroups();
+			int fuid = -1;
+			OXFolderManager oxfa = null;
+			try {
+				/*
+				 * Create a public folder
+				 */
+				FolderObject fo = new FolderObject();
+				fo.setFolderName("NewCalendarTestFolder");
+				fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+				fo.setModule(FolderObject.CALENDAR);
+				fo.setType(FolderObject.PUBLIC);
+				OCLPermission ocl = new OCLPermission();
+				ocl.setEntity(userId);
+				ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				ocl.setGroupPermission(false);
+				ocl.setFolderAdmin(true);
+				fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+				oxfa = new OXFolderManagerImpl(session);
+				oxfa.createFolder(fo, true, System.currentTimeMillis());
+				fuid = fo.getObjectID();
+				/*
+				 * Put some objects in folder
+				 */
+				CalendarDataObject cdao = new CalendarDataObject();
+		        cdao.setTitle("testInsertAndAlarm - Step 1 - Insert");
+		        cdao.setParentFolderID(fuid);
+		        cdao.setContext(session.getContext());
+		        cdao.setIgnoreConflicts(true);
+		      
+		        UserParticipant up = new UserParticipant();
+		        up.setIdentifier(session.getUserObject().getId());
+		        up.setAlarmMinutes(5);
+		        cdao.setUsers(new UserParticipant[] { up });
+		        
+		        
+		        Participants participants = new Participants();
+		        Participant p = new UserParticipant();
+		        p.setIdentifier(session.getUserObject().getId());
+		        participants.add(p);
+		 
+		        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+		        
+		        Participant p2 = new UserParticipant();
+		        p2.setIdentifier(resolveUser(user2));
+		        participants.add(p2);        
+		        
+		        cdao.setParticipants(participants.getList());        
+		        
+		        fillDatesInDao(cdao);
+		        
+		        CalendarSql csql = new CalendarSql(session);        
+		        csql.insertAppointmentObject(cdao);        
+		        int object_id = cdao.getObjectID();
+		        CalendarDataObject testobject = csql.getObjectById(object_id, fuid);
+		        
+		        /*
+		         * Clean folder
+		         */
+		        try {
+					new OXFolderManagerImpl(session).clearFolder(fo, true, System.currentTimeMillis());
+				} catch (Exception e) {
+					fail(e.getMessage());
+				}
+				assertTrue(true);
+			} finally {
+				/*
+				 * Delete Test Folder...
+				 */
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				if (tmp != null) {
+					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	private static final void fillDatesInDao(CalendarDataObject cdao) {
+        long s = System.currentTimeMillis();
+        long cals = s;
+        long calsmod = s%CalendarRecurringCollection.MILLI_DAY;
+        cals = cals- calsmod;
+        long endcalc = 3600000;
+        long mod = s%3600000;
+        s = s - mod;
+        long saves = s;
+        long e = s + endcalc;
+        long savee = e;
+        long u = s + (CalendarRecurringCollection.MILLI_DAY * 10);
+        mod = u%CalendarRecurringCollection.MILLI_DAY;
+        u = u - mod;
+        
+        cdao.setStartDate(new Date(s));
+        cdao.setEndDate(new Date(e));
+        cdao.setUntil(new Date(u));
+        
+    }
+	
+	private static final Properties getAJAXProperties() {
+        Properties properties = Init.getAJAXProperties();
+        return properties;
+    }
 	
 	public void testGetSubfolders() {
 		try {
