@@ -105,7 +105,7 @@ public class OXFolderIteratorSQL {
 	
 	/**
 	 * Returns the core sql statement to query user-visible folders. This query
-	 * can be further parametrized by additional conditions (e.g. only folders
+	 * can be further parameterized by additional conditions (e.g. only folders
 	 * of a certain type or module)
 	 */
 	private final static String getSQLUserVisibleFolders(final String fields, final String permissionIds,
