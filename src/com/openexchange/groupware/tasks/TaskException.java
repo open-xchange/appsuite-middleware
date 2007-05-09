@@ -376,7 +376,12 @@ public class TaskException extends AbstractOXException {
          * Cannot add external participant without email address.
          */
         EXTERNAL_WITHOUT_MAIL("Cannot add external participant without email "
-            + "address.", Category.USER_INPUT, Detail.MANDATORY_FIELD, 44);
+            + "address.", Category.USER_INPUT, Detail.MANDATORY_FIELD, 44),
+        /**
+         * Problem with a thread.
+         */
+        THREAD_ISSUE("Problem with a thread.", Category.CODE_ERROR,
+            Detail.OTHER, 45);
 
         /**
          * Message of the exception.

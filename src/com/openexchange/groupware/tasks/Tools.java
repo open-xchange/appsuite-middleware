@@ -50,8 +50,10 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,6 +79,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.tools.Collections;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
@@ -345,7 +348,7 @@ public final class Tools {
     }
 
     /**
-     * Loads a reminder for a user.
+     * Loads a reminder for a user and a task.
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @param task loaded task.
@@ -363,6 +366,33 @@ public final class Tools {
                 + " in context " + ctx.getContextId());
         } catch (OXException e) {
             throw new TaskException(e);
+        }
+    }
+
+    /**
+     * Loads reminder for a user and several tasks.
+     * @param ctx Context.
+     * @param userId unique identifier of the user.
+     * @param tasks load reminder for this tasks.
+     * @throws TaskException if an error occurs.
+     */
+    static void loadReminder(final Context ctx, final int userId,
+        final Collection<Task> tasks) throws TaskException {
+        final ReminderSQLInterface remStor = new ReminderHandler(ctx);
+        final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
+        for (Task task : tasks) {
+            tmp.put(task.getObjectID(), task);
+        }
+        final ReminderObject[] reminders;
+        try {
+            reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
+                userId, Types.TASK);
+        } catch (OXException e) {
+            throw new TaskException(e);
+        }
+        for (ReminderObject reminder : reminders) {
+            tmp.get(Integer.parseInt(reminder.getTargetId())).setAlarm(reminder
+                .getDate());
         }
     }
 }

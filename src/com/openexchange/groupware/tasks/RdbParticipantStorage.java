@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,8 +58,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -93,22 +96,26 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    Set<TaskInternalParticipant> selectInternal(final Context ctx,
-        final Connection con, final int taskId, final StorageType type)
-        throws TaskException {
-        final Set<TaskInternalParticipant> participants =
-            new HashSet<TaskInternalParticipant>();
+    protected Map<Integer, Set<TaskInternalParticipant>> selectInternal(
+        final Context ctx, final Connection con, final int[] tasks,
+        final StorageType type) throws TaskException {
+        final Map<Integer, HashSet<TaskInternalParticipant>> tmp =
+            new HashMap<Integer, HashSet<TaskInternalParticipant>>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(
-                SQL.SELECT_PARTS.get(type));
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, taskId);
+            stmt = con.prepareStatement(getIN(SQL.SELECT_PARTS.get(type),
+                tasks.length));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            for (int taskId : tasks) {
+                stmt.setInt(pos++, taskId);
+            }
             result = stmt.executeQuery();
             while (result.next()) {
                 final UserParticipant participant = new UserParticipant();
-                int pos = 1;
+                pos = 1;
+                final int taskId = result.getInt(pos++);
                 participant.setIdentifier(result.getInt(pos++));
                 Integer groupId = result.getInt(pos++);
                 if (result.wasNull()) {
@@ -126,6 +133,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
                         taskParticipant.setFolderId(folderId);
                     }
                 }
+                HashSet<TaskInternalParticipant> participants = tmp.get(taskId);
+                if (null == participants) {
+                    participants = new HashSet<TaskInternalParticipant>();
+                    tmp.put(taskId, participants);
+                }
                 participants.add(taskParticipant);
             }
         } catch (SQLException e) {
@@ -133,7 +145,10 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return participants;
+        final Map<Integer, Set<TaskInternalParticipant>> retval =
+            new HashMap<Integer, Set<TaskInternalParticipant>>();
+        retval.putAll(tmp);
+        return retval;
     }
 
     /**
@@ -262,26 +277,36 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    Set<TaskExternalParticipant> selectExternal(final Context ctx,
-        final Connection con, final int taskId, final StorageType type)
-        throws TaskException {
+    protected Map<Integer, Set<TaskExternalParticipant>> selectExternal(
+        final Context ctx, final Connection con, final int[] tasks,
+        final StorageType type) throws TaskException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final Set<TaskExternalParticipant> participants =
-            new HashSet<TaskExternalParticipant>();
+        final Map<Integer, Set<TaskExternalParticipant>> retval =
+            new HashMap<Integer, Set<TaskExternalParticipant>>();
         try {
-            stmt = con.prepareStatement(SQL.SELECT_EXTERNAL.get(type));
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, taskId);
+            stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type),
+                tasks.length));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            for (int taskId : tasks) {
+                stmt.setInt(pos++, taskId);
+            }
             result = stmt.executeQuery();
             while (result.next()) {
+                pos = 1;
+                final int taskId = result.getInt(pos++);
                 final ExternalUserParticipant external =
                     new ExternalUserParticipant();
-                int pos = 1;
                 external.setEmailAddress(result.getString(pos++));
                 external.setDisplayName(result.getString(pos++));
                 final TaskExternalParticipant participant =
                     new TaskExternalParticipant(external);
+                Set<TaskExternalParticipant> participants = retval.get(taskId);
+                if (null == participants) {
+                    participants = new HashSet<TaskExternalParticipant>();
+                    retval.put(taskId, participants);
+                }
                 participants.add(participant);
             }
         } catch (SQLException e) {
@@ -289,7 +314,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return participants;
+        return retval;
     }
 
     /**
@@ -305,7 +330,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         PreparedStatement stmt = null;
         int deleted = 0;
         try {
-            stmt = con.prepareStatement(SQL.getIN(SQL.DELETE_EXTERNAL.get(type),
+            stmt = con.prepareStatement(getIN(SQL.DELETE_EXTERNAL.get(type),
                 addresses.length));
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());

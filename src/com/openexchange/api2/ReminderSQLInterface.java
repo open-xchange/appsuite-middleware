@@ -86,7 +86,18 @@ public interface ReminderSQLInterface {
 	public boolean existsReminder(int targetId, int userId, int module) throws OXException;
 	
 	public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
-	
+
+    /**
+     * This method loads the reminder for several target objects.
+     * @param targetIds unique identifier of several target objects.
+     * @param userId unique identifier of the user.
+     * @param module module type of target objects.
+     * @return an array of found reminders.
+     * @throws OXException if reading the reminder fails.
+     */
+    ReminderObject[] loadReminder(int[] targetIds, int userId, int module)
+        throws OXException;
+
 	public SearchIterator listReminder(int targetId) throws OXException;
 	
 	public SearchIterator listReminder(int userId, Date end) throws OXException;

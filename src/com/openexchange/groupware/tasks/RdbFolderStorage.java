@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -174,7 +175,7 @@ public class RdbFolderStorage extends FolderStorage {
         PreparedStatement stmt = null;
         int deleted = 0;
         try {
-            stmt = con.prepareStatement(SQL.getIN(SQL.DELETE_FOLDER.get(type),
+            stmt = con.prepareStatement(getIN(SQL.DELETE_FOLDER.get(type),
                 folderIds.length));
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());

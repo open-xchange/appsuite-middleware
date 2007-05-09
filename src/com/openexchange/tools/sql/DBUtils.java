@@ -244,4 +244,19 @@ public final class DBUtils {
 		}
 		return retval.toArray(new String[retval.size()]);
 	}
+
+    /**
+     * Extends a SQL statement with enough ? characters in the last IN argument.
+     * @param sql SQL statment ending with "IN (";
+     * @param length number of entries.
+     * @return the ready to use SQL statement.
+     */
+    public static String getIN(final String sql, final int length) {
+        final StringBuilder retval = new StringBuilder(sql);
+        for (int i = 0; i < length; i++) {
+            retval.append("?,");
+        }
+        retval.setCharAt(retval.length() - 1, ')');
+        return retval.toString();
+    }
 }

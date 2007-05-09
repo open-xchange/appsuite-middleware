@@ -58,17 +58,21 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Methods for easy handling of collections.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
 	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Collections.class);
+	/**
+     * Logger.
+	 */
+    private static final Log LOG = LogFactory.getLog(Collections.class);
 
 	/**
 	 * Prevent instanciation.
@@ -104,14 +108,14 @@ public final class Collections {
 	
 	/**
 	 * Converts a list of Integer into an int array.
-	 * 
-	 * @param list
+	 *
+	 * @param col
 	 *            list to convert.
 	 * @return the converted int array.
 	 */
-	public static int[] toArray(final List<Integer> list) {
-		final int[] retval = new int[list.size()];
-		final Iterator<Integer> iter = list.iterator();
+	public static int[] toArray(final Collection<Integer> col) {
+		final int[] retval = new int[col.size()];
+		final Iterator<Integer> iter = col.iterator();
 		for (int i = 0; i < retval.length; i++) {
 			retval[i] = iter.next().intValue();
 		}

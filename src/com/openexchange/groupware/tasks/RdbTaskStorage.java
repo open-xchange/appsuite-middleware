@@ -267,7 +267,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    protected TaskIterator load(final Context ctx, final int[] taskIds,
+    protected SearchIterator load(final Context ctx, final int[] taskIds,
         final int[] columns) throws TaskException {
         Connection con;
         try {
@@ -399,8 +399,10 @@ public class RdbTaskStorage extends TaskStorage {
             if (onlyOwn) {
                 stmt.setInt(pos++, userId);
             }
-            return new PrefetchIterator<Task>(new TaskIterator(ctx, userId,
-                stmt.executeQuery(), folderId, columns, StorageType.ACTIVE));
+//            return new PrefetchIterator<Task>(new TaskIterator(ctx, userId,
+//                stmt.executeQuery(), folderId, columns, StorageType.ACTIVE));
+            return new TaskIterator(ctx, userId, stmt.executeQuery(),
+                folderId, columns, StorageType.ACTIVE);
         } catch (SQLException e) {
             DBPool.closeWriterSilent(ctx, con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
@@ -467,8 +469,10 @@ public class RdbTaskStorage extends TaskStorage {
                     stmt.setInt(pos++, userId);
                 }
             }
-            return new PrefetchIterator(new TaskIterator(ctx, userId,
-                stmt.executeQuery(), folderId, columns, type));
+//            return new PrefetchIterator(new TaskIterator(ctx, userId,
+//                stmt.executeQuery(), folderId, columns, type));
+            return new TaskIterator(ctx, userId, stmt.executeQuery(),
+                folderId, columns, type);
         } catch (SQLException e) {
             DBPool.closeWriterSilent(ctx, con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
@@ -485,6 +489,7 @@ public class RdbTaskStorage extends TaskStorage {
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
+        final int userId = session.getUserObject().getId();
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -515,7 +520,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
                 for (int i : own) {
                     stmt.setInt(pos++, i);
-                    stmt.setInt(pos++, session.getUserObject().getId());
+                    stmt.setInt(pos++, userId);
                 }
                 for (int i : shared) {
                     stmt.setInt(pos++, i);
@@ -537,9 +542,11 @@ public class RdbTaskStorage extends TaskStorage {
 				LOG.trace(stmt);
 			}
             final ResultSet result = stmt.executeQuery();
-            return new PrefetchIterator(new TaskIterator(ctx,
-                session.getUserObject().getId(), result, -1, columns,
-                StorageType.ACTIVE));
+//            return new PrefetchIterator(new TaskIterator(ctx,
+//                session.getUserObject().getId(), result, -1, columns,
+//                StorageType.ACTIVE));
+            return new TaskIterator(ctx, userId, result, -1, columns,
+                StorageType.ACTIVE);
         } catch (SQLException e) {
             DBPool.closeReaderSilent(ctx, con);
             throw new TaskException(Code.SEARCH_FAILED, e, e.getMessage());
@@ -950,14 +957,15 @@ public class RdbTaskStorage extends TaskStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement(SQL.SELECT_EXTERNAL.get(type));
+                stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL
+                    .get(type), 1));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, taskId);
                 result = stmt.executeQuery();
                 while (result.next()) {
                     final ExternalUserParticipant external =
                         new ExternalUserParticipant();
-                    int pos = 1;
+                    int pos = 2;
                     external.setEmailAddress(result.getString(pos++));
                     external.setDisplayName(result.getString(pos++));
                     final TaskExternalParticipant participant =
@@ -1103,6 +1111,9 @@ public class RdbTaskStorage extends TaskStorage {
         }
     }
 
+    /**
+     * @deprecated Use ParticipantStorage.
+     */
     private void deleteParticipants(final Context ctx, final Connection con,
         final int taskId) throws SQLException, TaskException {
         final ParticipantStorage partStor = ParticipantStorage.getInstance();

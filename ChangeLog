@@ -30,6 +30,8 @@
   - Bugfix #7121: Changed database authentication mechanism to prevent security
     holes.
   - Bugfix #6215: Split login information at last @ sign.
+  - Bugfix #6602: Now an additional thread is used for prereading found tasks
+    while request thread reads bunches of participants and reminders.
 
 * 2007-05-08 - martin.kauss@open-xchange.com
 

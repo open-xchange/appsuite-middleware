@@ -57,7 +57,9 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class contains the methods for mapping object attributes to database+
@@ -1003,11 +1005,30 @@ public final class Mapping {
     private static final Map<Integer, Mapper> ID_MAPPING;
 
     /**
+     * This set contains all possible fields that can be used with tasks.
+     */
+    private static final Set<Integer> ALL_ATTRIBUTES;
+
+    /**
      * @param attributeId identifier of the attribute.
      * @return the mapper implementation for the given attribute.
      */
     static Mapper getMapping(final int attributeId) {
         return ID_MAPPING.get(attributeId);
+    }
+
+    /**
+     * Checks if the requested attributes are implemented for tasks.
+     * @param attributes requested attributes.
+     * @return <code>true</code> if the attributes are implemented, otherwise
+     * <code>false</code>.
+     */
+    static boolean implemented(final int[] attributes) {
+        boolean retval = true;
+        for (int i = 0; i < attributes.length && retval; i++) {
+            retval = ALL_ATTRIBUTES.contains(attributes[i]);
+        }
+        return retval;
     }
 
     static {
@@ -1040,5 +1061,11 @@ public final class Mapping {
         };
         tmp.put(identifier.getId(), identifier);
         ID_MAPPING = Collections.unmodifiableMap(tmp);
+        Set<Integer> tmp2 = new HashSet<Integer>();
+        tmp2.addAll(ID_MAPPING.keySet());
+        tmp2.add(Task.PARTICIPANTS);
+        tmp2.add(Task.FOLDER_ID);
+        tmp2.add(Task.ALARM);
+        ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
     }
 }

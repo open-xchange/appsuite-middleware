@@ -180,21 +180,6 @@ final class SQL {
     }
 
     /**
-     * Extends a SQL statement with enough ? characters in the last IN argument.
-     * @param sql SQL statment ending with "IN (";
-     * @param length number of entries.
-     * @return the ready to use SQL statement.
-     */
-    static String getIN(final String sql, final int length) {
-        final StringBuilder retval = new StringBuilder(sql);
-        for (int i = 0; i < length; i++) {
-            retval.append("?,");
-        }
-        retval.setCharAt(retval.length() - 1, ')');
-        return retval.toString();
-    }
-
-    /**
      * @return all fields colon seperated for using in SELECT and INSERT
      * statements.
      */
@@ -410,14 +395,14 @@ final class SQL {
         }
 
         SELECT_PARTS.put(StorageType.ACTIVE,
-            "SELECT user,group_id,accepted,description FROM task_participant "
-            + "WHERE cid=? AND task=?");
+            "SELECT task,user,group_id,accepted,description "
+            + "FROM task_participant WHERE cid=? AND task IN (");
         SELECT_PARTS.put(StorageType.REMOVED,
-            "SELECT user,group_id,accepted,description,folder "
-            + "FROM task_removedparticipant WHERE cid=? AND task=?");
+            "SELECT task,user,group_id,accepted,description,folder "
+            + "FROM task_removedparticipant WHERE cid=? AND task IN (");
         SELECT_PARTS.put(StorageType.DELETED,
-            "SELECT user,group_id,accepted,description "
-            + "FROM del_task_participant WHERE cid=? AND task=?");
+            "SELECT task,user,group_id,accepted,description "
+            + "FROM del_task_participant WHERE cid=? AND task IN (");
         sql = "UPDATE " + tableName + " SET group_id=?, accepted=?, "
             + "description=? WHERE cid=? AND task=? AND user=?";
         for (StorageType type : StorageType.values()) {
@@ -446,8 +431,8 @@ final class SQL {
             DELETE_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));
         }
-        sql = "SELECT mail,display_name FROM " + tableName
-            + " WHERE cid=? AND task=?";
+        sql = "SELECT task,mail,display_name FROM " + tableName
+            + " WHERE cid=? AND task IN (";
         for (StorageType type : activeDelete) {
             SELECT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));

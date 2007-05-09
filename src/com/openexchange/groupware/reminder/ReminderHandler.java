@@ -56,21 +56,29 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * ReminderHandler
@@ -79,7 +87,12 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 
 public class ReminderHandler implements Types, ReminderSQLInterface {
-	
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ReminderHandler.class);
+    
 	private Context context;
 	
 	private static final String sqlInsert = "INSERT INTO reminder (object_id, cid, target_id, module, userid, alarm, recurrence, last_modified, folder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -93,7 +106,9 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	private static final String sqlDeleteReminderOfObject = "DELETE FROM reminder WHERE cid = ? AND target_id = ? AND module = ?";
 	
 	private static final String sqlLoad = "SELECT object_id, target_id, module, userid, alarm, recurrence, description, folder, last_modified FROM reminder WHERE cid = ? AND target_id = ? AND module = ? AND userid = ?";
-	
+
+    private static final String sqlLoadMultiple = "SELECT object_id,target_id,module,userid,alarm,recurrence,description,folder,last_modified FROM reminder WHERE cid=? AND module=? AND userid=? AND target_id IN (";
+
 	private static final String sqlListByTargetId = "SELECT object_id, target_id, module, userid, alarm, recurrence, description, folder, last_modified FROM reminder WHERE cid = ? AND target_id = ?";
 	
 	private static final String sqlRange = "SELECT object_id, target_id, module, userid, alarm, recurrence, description, folder, last_modified FROM reminder WHERE cid = ? AND userid = ? AND alarm <= ?";
@@ -403,8 +418,93 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			throw new OXException(exc);
 		}
 	}
-	
-	public ReminderObject loadReminder( final int objectId) throws OXMandatoryFieldException, OXConflictException, OXException {
+
+    /**
+     * {@inheritDoc}
+     */
+    public ReminderObject[] loadReminder(final int[] targetIds,
+        final int userId, final int module) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (DBPoolingException e) {
+            throw new OXException(e);
+        }
+        try {
+            return loadReminder(targetIds, userId, module, con);
+        } finally {
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    /**
+     * This method loads the reminder for several target objects.
+     * @param targetIds unique identifier of several target objects.
+     * @param userId unique identifier of the user.
+     * @param module module type of target objects.
+     * @param con readable database connection.
+     * @return an array of found reminders.
+     * @throws OXException if reading the reminder fails.
+     */
+    private ReminderObject[] loadReminder(final int[] targetIds,
+        final int userId, final int module, final Connection con)
+        throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(DBUtils.getIN(sqlLoadMultiple, targetIds
+                .length));
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, module);
+            stmt.setInt(pos++, userId);
+            for (int targetId : targetIds) {
+                stmt.setInt(pos++, targetId);
+            }
+            result = stmt.executeQuery();
+            return convertResult2Reminder(result);
+        } catch (SQLException e) {
+            throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1,
+                "SQL Problem.", e);
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+    }
+
+    /**
+     * Reads the rows from the {@link ResultSet} stores the values in reminder
+     * objects an returns them as an array.
+     * @param result result with rows of reminders.
+     * @return an array of reminder objects.
+     * @throws SQLException if an error occurs.
+     */
+    private ReminderObject[] convertResult2Reminder(final ResultSet result)
+        throws SQLException {
+        final Collection<ReminderObject> retval =
+            new LinkedList<ReminderObject>();
+        while (result.next()) {
+            int pos = 1;
+            try {
+                final ReminderObject reminder = new ReminderObject();
+                reminder.setObjectId(result.getInt(pos++));
+                reminder.setTargetId(result.getString(pos++));
+                reminder.setModule(result.getInt(pos++));
+                reminder.setUser(result.getInt(pos++));
+                reminder.setDate(result.getTimestamp(pos++));
+                reminder.setRecurrenceAppointment(result.getBoolean(pos++));
+                reminder.setDescription(result.getString(pos++));
+                reminder.setFolder(result.getString(pos++));
+                reminder.setLastModified(new Date(result.getLong(pos++)));
+                retval.add(reminder);
+            } catch (SQLException e) {
+                // Nothing to do here. Missed one reminder.
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return retval.toArray(new ReminderObject[retval.size()]);
+    }
+
+    public ReminderObject loadReminder( final int objectId) throws OXMandatoryFieldException, OXConflictException, OXException {
 		Connection readCon = null;
 		
 		try {
@@ -437,7 +537,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			throw new OXException(exc);
 		}
 	}
-	
+
 	public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, final boolean closeStatements) throws SQLException, OXObjectNotFoundException {
 		try {
 			if (rs.next()) {

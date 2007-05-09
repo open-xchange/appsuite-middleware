@@ -296,6 +296,7 @@ abstract class TaskStorage {
      * set.
      * @return a TaskInternalParticipant object.
      * @throws TaskException if an error occurs.
+     * @deprecated Use ParticipantStorage.
      */
     abstract TaskInternalParticipant selectParticipant(Context ctx,
         int taskId, int userId) throws TaskException;
