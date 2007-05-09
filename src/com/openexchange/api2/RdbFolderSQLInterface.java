@@ -151,11 +151,15 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * @param sessionObj
 	 */
 	public RdbFolderSQLInterface(final SessionObject sessionObj) {
+		this(sessionObj, null);
+	}
+	
+	public RdbFolderSQLInterface(final SessionObject sessionObj, final OXFolderAccess oxfolderAccess) {
 		this.sessionObj = sessionObj;
 		this.userId = sessionObj.getUserObject().getId();
 		this.groups = sessionObj.getUserObject().getGroups();
 		this.ctx = sessionObj.getContext();
-		oxfolderAccess = new OXFolderAccess(ctx);
+		this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
 	}
 
 	/*
@@ -222,7 +226,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		}
 		final FolderObject folderobject = folderobjectArg;
 		final boolean insert = (!folderobject.containsObjectID() || folderobject.getObjectID() == -1);
-		final OXFolderManager manager = new OXFolderManagerImpl(sessionObj);
+		final OXFolderManager manager = new OXFolderManagerImpl(sessionObj, oxfolderAccess);
 		try {
 			if (insert) {
 				if (folderobject.containsParentFolderID()) {
@@ -353,7 +357,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						getUserName(sessionObj), getFolderName(folderobject), Integer.valueOf(ctx.getContextId()));
 			}
 			final long lastModified = System.currentTimeMillis();
-			new OXFolderManagerImpl(sessionObj).deleteFolder(folderobject, true, lastModified);
+			new OXFolderManagerImpl(sessionObj, oxfolderAccess).deleteFolder(folderobject, false, lastModified);
 			return folderobject.getObjectID();
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, Integer.valueOf(ctx.getContextId()));

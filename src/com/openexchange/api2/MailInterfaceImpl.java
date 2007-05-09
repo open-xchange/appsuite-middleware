@@ -3406,7 +3406,7 @@ public class MailInterfaceImpl implements MailInterface {
 	public boolean clearFolder(final String folderArg) throws OXException {
 		try {
 			init();
-			final String folder = folderArg == null ? STR_INBOX : folderArg;
+			final String folder = folderArg == null ? STR_INBOX : prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (!imapCon.isHoldsMessages()) {
@@ -3443,7 +3443,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throws OXException {
 		try {
 			init();
-			final String folder = folderArg == null ? STR_INBOX : folderArg;
+			final String folder = folderArg == null ? STR_INBOX : prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (!imapCon.isHoldsMessages()) {

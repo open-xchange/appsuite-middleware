@@ -107,4 +107,16 @@ public interface OXFolderManager {
 	 */
 	public FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
 
+	/**
+	 * Clears a folder's content so that all items located in given folder are
+	 * going to be deleted. <b>NOTE:</b> the returned instance of
+	 * <tt>FolderObject</tt> is the parameter object itself. Thus it does not
+	 * matter if you further work on this routine's return value or with
+	 * parameter value.
+	 * 
+	 * @return the cleaned instance of <tt>FolderObject</tt>
+	 */
+	public FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified)
+			throws OXException;
+
 }

@@ -1,3 +1,7 @@
+* 2007-05-09 - thorben.betten@open-xchange.com
+
+ - New method to clear folder's content
+
 * 2007-05-09 - martin.kauss@open-xchange.com
 
  - Code clean up in some calendar classes. Avoided the use of the deprecated

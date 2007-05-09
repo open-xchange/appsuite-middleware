@@ -1454,6 +1454,7 @@ public class Folder extends SessionServlet {
 			try {
 				long lastModified = 0;
 				final int arrayLength = jsonArr.length();
+				final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
 				NextId: for (int i = 0; i < arrayLength; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
@@ -1463,17 +1464,11 @@ public class Folder extends SessionServlet {
 							timestamp = checkDateParam(paramContainer, PARAMETER_TIMESTAMP, paramSrcType);
 						}
 						if (foldersqlinterface == null) {
-							foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
+							foldersqlinterface = new RdbFolderSQLInterface(sessionObj, access);
 						}
 						FolderObject delFolderObj;
 						try {
-							if (FolderCacheManager.isEnabled()) {
-								delFolderObj = FolderCacheManager.getInstance().getFolderObject(delFolderId, true,
-										sessionObj.getContext(), null);
-							} else {
-								delFolderObj = FolderObject
-										.loadFolderObjectFromDB(delFolderId, sessionObj.getContext());
-							}
+							delFolderObj = access.getFolderObject(delFolderId);
 						} catch (OXException exc) {
 							/*
 							 * Folder could not be found and therefore need not

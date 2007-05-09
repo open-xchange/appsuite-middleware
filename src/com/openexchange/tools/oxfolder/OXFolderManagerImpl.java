@@ -120,10 +120,29 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	/**
+	 * Constructor which only uses <code>SessionObject</code> and
+	 * <code>OXFolderAccess</code>. Optional connection are going to be set
+	 * to <code>null</code>.
+	 */
+	public OXFolderManagerImpl(final SessionObject session, final OXFolderAccess oxfolderAccess) {
+		this(session, oxfolderAccess, null, null);
+	}
+
+	/**
 	 * Constructor which uses <code>SessionObject</code> and also uses a
 	 * readable and a writeable <code>Connection</code>.
 	 */
 	public OXFolderManagerImpl(final SessionObject session, final Connection readCon, final Connection writeCon) {
+		this(session, null, readCon, writeCon);
+	}
+
+	/**
+	 * Constructor which uses <code>SessionObject</code>,
+	 * <code>OXFolderAccess</code> and also uses a readable and a writeable
+	 * <code>Connection</code>.
+	 */
+	public OXFolderManagerImpl(final SessionObject session, final OXFolderAccess oxfolderAccess,
+			final Connection readCon, final Connection writeCon) {
 		super();
 		this.session = session;
 		this.ctx = session.getContext();
@@ -131,6 +150,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		this.user = session.getUserObject();
 		this.readCon = readCon;
 		this.writeCon = writeCon;
+		this.oxfolderAccess = oxfolderAccess;
 	}
 
 	private final OXFolderAccess getOXFolderAccess() {
@@ -735,7 +755,89 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		}
 		return isDescendant;
 	}
-
+	
+	private static final String PREFIX_CLEANING = "Folder cleaning aborted: ";
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.oxfolder.OXFolderManager#deleteFolderContent(com.openexchange.groupware.container.FolderObject,
+	 *      boolean, long)
+	 */
+	public FolderObject clearFolder(final FolderObject fo, final boolean checkPermissions,
+			final long lastModified) throws OXException {
+		if (fo.getObjectID() <= 0) {
+			throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, PREFIX_CLEANING, getFolderName(fo));
+		}
+		if (!fo.containsParentFolderID() || fo.getParentFolderID() <= 0) {
+			/*
+			 * Incomplete, wherby its existence is checked
+			 */
+			fo.setParentFolderID(getOXFolderAccess().getParentFolderID(fo.getObjectID()));
+		} else {
+			/*
+			 * Check existence
+			 */
+			try {
+				if (!OXFolderSQL.exists(fo.getObjectID(), readCon, ctx)) {
+					throw new OXFolderNotFoundException(fo.getObjectID(), ctx.getContextId());
+				}
+			} catch (DBPoolingException e) {
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, PREFIX_CLEANING, e, true, Integer.valueOf(ctx.getContextId()));
+			} catch (SQLException e) {
+				throw new OXFolderException(FolderCode.SQL_ERROR, PREFIX_CLEANING, e, true, Integer.valueOf(ctx.getContextId()));
+			}
+		}
+		if (checkPermissions) {
+			/*
+			 * Check permissions
+			 */
+			final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(),
+					userConfig);
+			if (!p.isFolderVisible()) {
+				if (p.getUnderlyingPermission().isFolderVisible()) {
+					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, PREFIX_CLEANING, getFolderName(fo),
+							getUserName(user.getId(), ctx), Integer.valueOf(ctx.getContextId()));
+				}
+				throw new OXFolderException(FolderCode.NOT_VISIBLE, PREFIX_CLEANING, Category.USER_CONFIGURATION,
+						getFolderName(fo), getUserName(user.getId(), ctx), Integer.valueOf(ctx.getContextId()));
+			}
+		}
+		/*
+		 * Check delete permission on folder's objects
+		 */
+		if (!getOXFolderAccess().canDeleteAllObjectsInFolder(fo, session)) {
+			throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, PREFIX_CLEANING, getUserName(
+					user.getId(), ctx), getFolderName(fo.getObjectID(), ctx), Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * Finally, delete folder content
+		 */
+		final int module = fo.getModule();
+		switch (module) {
+		case FolderObject.CALENDAR:
+			deleteContainedAppointments(fo.getObjectID());
+			break;
+		case FolderObject.TASK:
+			deleteContainedTasks(fo.getObjectID());
+			break;
+		case FolderObject.CONTACT:
+			deleteContainedContacts(fo.getObjectID());
+			break;
+		case FolderObject.UNBOUND:
+			break;
+		case FolderObject.INFOSTORE:
+			deleteContainedDocuments(fo.getObjectID());
+			break;
+		case FolderObject.PROJECT:
+			// TODO: Delete all projects in project folder
+			break;
+		default:
+			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, PREFIX_CLEANING, Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
+		}
+		return fo;
+	}
+	
 	private static final String PREFIX_DELETE = "Folder deletion aborted: ";
 
 	/*
