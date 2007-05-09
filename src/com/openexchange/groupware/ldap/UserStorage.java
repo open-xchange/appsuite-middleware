@@ -47,13 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserTools.UnixCrypt;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -219,6 +218,18 @@ public abstract class UserStorage {
      */
     public abstract int[] listModifiedUser(Date modifiedSince)
         throws LdapException;
+
+    public boolean authenticate(final User user, final String password)
+        throws UserException {
+        boolean retval = false;
+        if ("{CRYPT}".equals(user.getPasswordMech())) {
+            retval = UnixCrypt.matches(user.getUserPassword(), password);
+        } else if ("{SHA}".equals(user.getPasswordMech())) {
+            retval = UserTools.hashPassword(password).equals(user
+                .getUserPassword());
+        }
+        return retval;
+    }
 
     /**
      * Creates a new instance implementing the user storage interface.

@@ -47,14 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.sessiond.LoginException;
-import com.openexchange.sessiond.LoginException.Code;
 
 /**
  * This interface defines the methods for handling the login information. E.g.
@@ -70,7 +67,7 @@ public abstract class LoginInfo {
     /**
      * Reference to the class implementing the LoginInfo.
      */
-    private static Class<? extends LoginInfo> implementingClass;
+    private static Class< ? extends LoginInfo> implementingClass;
 
     /**
      * Default constructor.
@@ -89,9 +86,11 @@ public abstract class LoginInfo {
         try {
             instance = implementingClass.newInstance();
         } catch (InstantiationException e) {
-            throw new LoginException(Code.INSTANCIATION_FAILED, e);
+            throw new LoginException(LoginException.Code.INSTANCIATION_FAILED,
+                e);
         } catch (IllegalAccessException e) {
-            throw new LoginException(Code.INSTANCIATION_FAILED, e);
+            throw new LoginException(LoginException.Code.INSTANCIATION_FAILED,
+                e);
         }
         return instance;
     }
@@ -118,16 +117,35 @@ public abstract class LoginInfo {
         }
         final String className = SystemConfig.getProperty(Property.LOGIN_INFO);
         if (null == className) {
-            throw new LoginException(Code.MISSING_SETTING,
+            throw new LoginException(LoginException.Code.MISSING_SETTING,
                 Property.LOGIN_INFO.getPropertyName());
         }
         try {
             implementingClass = Class.forName(className)
                 .asSubclass(LoginInfo.class);
         } catch (ClassNotFoundException e) {
-            throw new LoginException(Code.CLASS_NOT_FOUND, e, className);
+            throw new LoginException(LoginException.Code.CLASS_NOT_FOUND, e,
+                className);
         } catch (ClassCastException e) {
-            throw new LoginException(Code.CLASS_NOT_FOUND, e, className);
+            throw new LoginException(LoginException.Code.CLASS_NOT_FOUND, e,
+                className);
         }
+    }
+
+    /**
+     * Splits user name and context.
+     * @param loginInfo combined information seperated by an @ sign.
+     * @return a string array with context and user name (in this order).
+     * @throws LoginException if no seperator is found.
+     */
+    protected String[] split(final String loginInfo) throws LoginException {
+        final int pos = loginInfo.lastIndexOf('@');
+        if (-1 == pos) {
+            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+        }
+        final String[] splitted = new String[2];
+        splitted[1] = loginInfo.substring(0, pos);
+        splitted[0] = loginInfo.substring(pos + 1);
+        return splitted;
     }
 }

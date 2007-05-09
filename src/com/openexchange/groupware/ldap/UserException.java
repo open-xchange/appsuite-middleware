@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -166,7 +164,17 @@ public class UserException extends AbstractOXException {
          * SQL Problem: \"%s\".
          */
         SQL_ERROR("SQL Problem: \"%s\".", Category.CODE_ERROR,
-            Detail.ERROR, 7);
+            Detail.ERROR, 7),
+        /**
+         * Hash algorithm %s isn't found.
+         */
+        HASHING("Hash algorithm %s isn't found.", Category.CODE_ERROR, Detail
+            .ERROR, 8),
+        /**
+         * Encoding %s cannot be used.
+         */
+        UNSUPPORTED_ENCODING("Encoding %s cannot be used.", Category.CODE_ERROR,
+            Detail.ERROR, 9);
 
         /**
          * Message of the exception.

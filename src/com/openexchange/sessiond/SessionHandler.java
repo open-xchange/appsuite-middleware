@@ -71,7 +71,6 @@ import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.contexts.LoginInfo;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPPropertiesFactory;
-import com.openexchange.groupware.ldap.Authentication;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -202,19 +201,13 @@ public class SessionHandler extends TimerTask {
 			throw new ContextNotFoundException("Cannot find context with the given name (" + contextname + ')');
 		}
 		
-		Credentials cred = null;
+        int userId = -1;
 		User u = null;
 		
 		try {
-			final Authentication auth = Authentication.getInstance(context);
-			cred = auth.authenticate(username, password);
-			
-			if (cred != null) {
-				final UserStorage us = UserStorage.getInstance(context);
-				u = us.getUser(Integer.parseInt(cred.getValue(Credentials.USER_ID)));
-			} else {
-				throw new InvalidCredentialsException("invalid credentials!");
-			}
+		    final UserStorage us = UserStorage.getInstance(context);
+            userId = us.getUserId(username);
+            u = us.getUser(userId);
 		} catch (LdapException ex) {
 			switch (ex.getDetail()) {
 				case ERROR:
@@ -257,7 +250,7 @@ public class SessionHandler extends TimerTask {
 		final String randomId = sessionIdGenerator.createRandomId();
 		
 		final SessionObject sessionobject = new SessionObject(sessionId);
-		sessionobject.setUsername(cred.getValue(Credentials.USER_ID));
+		sessionobject.setUsername(String.valueOf(userId));
 		sessionobject.setUserlogin(username);
 		sessionobject.setLoginName(loginName);
 		sessionobject.setPassword(password);
@@ -268,7 +261,6 @@ public class SessionHandler extends TimerTask {
 		sessionobject.setTimestamp(new Date());
 		sessionobject.setLifetime(lifeTime);
 		sessionobject.setContext(context);
-		sessionobject.setCredentials(cred);
 		sessionobject.setUserObject(u);
 		
 		sessionobject.setRandomToken(randomId);

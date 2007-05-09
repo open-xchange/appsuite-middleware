@@ -68,11 +68,6 @@ public final class Names {
      */
 
     /**
-     * Implementation for the authentication.
-     */
-    public static final String AUTHENTICATION_IMPL = "AuthenticationImpl";
-
-    /**
      * Implementation for the user storage.
      */
     public static final String CONTACTSTORAGE_IMPL = "ContactStorageImpl";

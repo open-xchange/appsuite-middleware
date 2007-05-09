@@ -126,23 +126,6 @@ public class LoginLDAPAuth extends LoginInfo {
     }
 
     /**
-     * Splits user name and context.
-     * @param loginInfo combined information seperated by an @ sign.
-     * @return a string array with user name and context.
-     * @throws LoginException if no seperator is found.
-     */
-    private String[] split(final String loginInfo) throws LoginException {
-        final int pos = loginInfo.indexOf('@');
-        if (-1 == pos) {
-            throw new LoginException(Code.INVALID_CREDENTIALS);
-        }
-        final String[] splitted = new String[2];
-        splitted[1] = loginInfo.substring(0, pos);
-        splitted[0] = loginInfo.substring(pos + 1);
-        return splitted;
-    }
-
-    /**
      * Creates a new context to the ldap server.
      * @return a new context to the ldap server.
      * @throws LoginException

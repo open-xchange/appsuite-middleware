@@ -47,31 +47,59 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.sessiond.LoginException;
+
 /**
+ * This implementation authenticates the user against the database.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class RdbLoginInfo extends LoginInfo {
-	
-	public String[] handleLoginInfo(Object... loginInfo) {
-		String login_info = loginInfo[0].toString();
-		
-		String contextname = null;
-		String user_id = null;
-		
-		int pos = 0;
-		
-		if ((pos = login_info.indexOf('@')) != -1) {
-			user_id = login_info.substring(0, pos);
-			contextname = login_info.substring(pos+1, login_info.length());
-		} else {
-			contextname = "defaultcontext";
-			user_id = login_info;
-		}
-		
-		return new String[] {contextname, user_id};
-	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String[] handleLoginInfo(final Object... loginInfo)
+        throws LoginException {
+        final String password = (String) loginInfo[1];
+        if (null == password || 0 == password.length()) {
+            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+        }
+        final String[] splitted = split((String) loginInfo[0]);
+        final ContextStorage ctxStor = ContextStorage.getInstance();
+        try {
+            final int ctxId = ctxStor.getContextId(splitted[0]);
+            if (ContextStorage.NOT_FOUND == ctxId) {
+                throw new LoginException(LoginException.Code
+                    .INVALID_CREDENTIALS);
+            }
+            final Context ctx = ctxStor.getContext(ctxId);
+            final UserStorage userStor = UserStorage.getInstance(ctx);
+            final int userId;
+            try {
+                userId = userStor.getUserId(splitted[1]);
+            } catch (LdapException e) {
+                throw new LoginException(LoginException.Code
+                    .INVALID_CREDENTIALS, e);
+            }
+            final User user = userStor.getUser(userId);
+            if (!userStor.authenticate(user, password)) {
+                throw new LoginException(LoginException.Code
+                    .INVALID_CREDENTIALS);
+            }
+        } catch (ContextException e) {
+            throw new LoginException(e);
+        } catch (LdapException e) {
+            throw new LoginException(e);
+        } catch (UserException e) {
+            throw new LoginException(e);
+        }
+        return splitted;
+    }
 }
