@@ -274,7 +274,7 @@ public class Index {
 		}
 
 		public boolean accept(Index object) {
-			return object.getName().equals(name);
+			return object.getName().equalsIgnoreCase(name);
 		}
 
 	}
@@ -290,7 +290,11 @@ public class Index {
 		public boolean accept(Index object) {
 			Set<String> needed = new HashSet<String>(Arrays.asList(columns)); 
 			for(String col : object.getColumns()) {
-				needed.remove(col);
+				for(String need : new HashSet<String>(needed)) {
+					if(need.equalsIgnoreCase(col)) {
+						needed.remove(need);
+					}
+				}
 				if(needed.isEmpty()) {
 					return true;
 				}

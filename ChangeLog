@@ -1,3 +1,7 @@
+* 2007-05-09 - francisco.laguna@open-xchange.com
+
+  - Added utility class for handling indexes in update tasks.
+
 * 2007-05-09 - tobias.prinz@open-xchange.com
 
  - Fixed several conversions of Streams to strings which did rely on
