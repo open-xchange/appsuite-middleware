@@ -66,7 +66,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getOptionData()){
+        new ListDatabase(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -80,7 +80,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getOptionDataCSV()){
+        new ListDatabase(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -103,20 +103,6 @@ public class ListDatabasesTest extends AbstractTest {
         assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
     }
     
-    public static String[] getOptionData(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER, 
-                OPTION_SUPER_ADMIN_PWD
-                };
-        return tmp;
-    }
-        
     
-    public static String[] getOptionDataCSV(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER, 
-                OPTION_SUPER_ADMIN_PWD,
-                "--csv"
-                };
-        return tmp;
-    }
     
 }
