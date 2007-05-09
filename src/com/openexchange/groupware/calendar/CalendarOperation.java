@@ -610,9 +610,8 @@ public class CalendarOperation implements SearchIterator {
                                     cdao.setTitle(setString(g++, co_rs));
                                 }
                                 break;
-                            case AppointmentObject.USERS:
-                                
-                                if (ServerConfig.getBoolean(Property.PrefetchEnabled) && !cdao.containsUserParticipants()) {
+                            case AppointmentObject.USERS:                                
+                                if (!cdao.containsUserParticipants()) {
                                     final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                     cdao.setUsers(users.getUsers());
                                 }
