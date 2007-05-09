@@ -132,6 +132,8 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_IMAP_QUOTE_LINE_COLORS = "imapQuoteLineColors";
 
 	private static final String PROP_IMAP_SUPPORTS_ACL = "imapSupportsACL";
+	
+	private static final String PROP_IMAP_AUTH_ENC = "imapAuthEnc";
 
 	private static final String PROP_IMAP_PART_MODIFIER = "partModifierImpl";
 
@@ -476,6 +478,10 @@ public class IMAPPropertiesFactory {
 				IMAPProperties.setSpamEnabled(Boolean.parseBoolean(props.getProperty(PROP_SPAM_ENABLED,
 						STR_FALSE)));
 				logBuilder.append("\tSpam Enabled: ").append(IMAPProperties.isSpamEnabledInternal())
+						.append('\n');
+				
+				IMAPProperties.setImapAuthEnc(props.getProperty(PROP_IMAP_AUTH_ENC, "UTF-8"));
+				logBuilder.append("\tAuthentication Encoding: ").append(IMAPProperties.getImapAuthEncInternal())
 						.append('\n');
 				
 				IMAPProperties.setJavaMailProperties(javaMailProps);

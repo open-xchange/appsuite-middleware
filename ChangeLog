@@ -13,6 +13,12 @@
 * 2007-05-09 - thorben.betten@open-xchange.com
 
  - New method to clear folder's content
+ - Bugfix #7153: Added a property to 'imap.properties' to define the
+   character encoding that is going to be used on imap authentication
+#################### ATTENTION ! #####################
+ - CONFIG change: New property in 'imap.properties' to define the
+   character encoding that is going to be used on imap authentication
+######################################################
 
 * 2007-05-09 - martin.kauss@open-xchange.com
 

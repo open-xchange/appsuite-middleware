@@ -124,6 +124,8 @@ public class IMAPProperties {
 	
 	private static String defaultMimeCharset;
 	
+	private static String imapAuthEnc;
+	
 	private static boolean ignoreSubscription;
 	
 	private static boolean smtpEnvelopeFrom;
@@ -402,6 +404,19 @@ public class IMAPProperties {
 
 	public static void setMaxNumOfIMAPConnections(final int maxNumOfIMAPConnections) {
 		IMAPProperties.maxNumOfIMAPConnections = maxNumOfIMAPConnections;
+	}
+
+	public static String getImapAuthEnc() throws IMAPException {
+		checkGlobalImapProperties();
+		return imapAuthEnc;
+	}
+	
+	static String getImapAuthEncInternal() {
+		return imapAuthEnc;
+	}
+
+	public static void setImapAuthEnc(final String imapAuthEnc) {
+		IMAPProperties.imapAuthEnc = imapAuthEnc;
 	}
 
 	public static String getDefaultMimeCharset() throws IMAPException {

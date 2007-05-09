@@ -58,6 +58,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
+/**
+ * EffectivePermission
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ */
 public class EffectivePermission extends OCLPermission {
 
 	private static final char CHAR_AT = '@';
@@ -78,7 +84,7 @@ public class EffectivePermission extends OCLPermission {
 
 	private static final long serialVersionUID = -1303754404748836561L;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(EffectivePermission.class);
 
 	/**
@@ -98,9 +104,11 @@ public class EffectivePermission extends OCLPermission {
 	 */
 	private int folderModule = -1;
 
-	private boolean userConfigIsValid = false;
+	private boolean userConfigIsValid;
 
-	private boolean userConfigAlreadyValidated = false;
+	private boolean userConfigAlreadyValidated;
+	
+	private OCLPermission underlyingPerm;
 
 	public EffectivePermission(int entity, int fuid, int folderType, int folderModule, UserConfiguration userConfig) {
 		super(entity, fuid);
@@ -304,16 +312,18 @@ public class EffectivePermission extends OCLPermission {
 	}
 
 	public OCLPermission getUnderlyingPermission() {
-		final OCLPermission p = new OCLPermission();
-		p.setEntity(super.getEntity());
-		p.setFuid(super.getFuid());
-		p.setFolderPermission(super.getFolderPermission());
-		p.setReadObjectPermission(super.getReadPermission());
-		p.setWriteObjectPermission(super.getWritePermission());
-		p.setDeleteObjectPermission(super.getDeletePermission());
-		p.setFolderAdmin(super.isFolderAdmin());
-		p.setGroupPermission(super.isGroupPermission());
-		return p;
+		if (underlyingPerm == null) {
+			underlyingPerm = new OCLPermission();
+			underlyingPerm.setEntity(super.getEntity());
+			underlyingPerm.setFuid(super.getFuid());
+			underlyingPerm.setFolderPermission(super.getFolderPermission());
+			underlyingPerm.setReadObjectPermission(super.getReadPermission());
+			underlyingPerm.setWriteObjectPermission(super.getWritePermission());
+			underlyingPerm.setDeleteObjectPermission(super.getDeletePermission());
+			underlyingPerm.setFolderAdmin(super.isFolderAdmin());
+			underlyingPerm.setGroupPermission(super.isGroupPermission());
+		}
+		return underlyingPerm;
 	}
 
 	@Override

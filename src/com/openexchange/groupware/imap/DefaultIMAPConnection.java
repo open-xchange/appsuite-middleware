@@ -184,8 +184,10 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		String tmpPass = imapPassword;
 		if (imapPassword != null) {
 			try {
-				tmpPass = new String(imapPassword.getBytes(CHARENC_UTF8), CHARENC_ISO8859);
+				tmpPass = new String(imapPassword.getBytes(IMAPProperties.getImapAuthEnc()), CHARENC_ISO8859);
 			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (IMAPException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
