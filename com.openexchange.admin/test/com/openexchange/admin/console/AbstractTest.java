@@ -169,4 +169,14 @@ public abstract class AbstractTest {
         return  tmp;
     } 
     
+    /**
+     * 
+     * @return String[] with only oxadmin and password option and "--csv" option set.
+     */
+    public static String[] getCSVMasterOptionData(){
+        final String[] tmp = {OPTION_SUPER_ADMIN_USER, OPTION_SUPER_ADMIN_PWD,"--csv"};
+
+        return  tmp;
+    } 
+    
 }
