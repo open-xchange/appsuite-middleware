@@ -50,9 +50,9 @@
 package com.openexchange.groupware.calendar;
 
 /**
-   CalendarCommonCollection
-   @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
-*/
+ * CalendarCommonCollection
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
 
 public class RecurringResults {
     

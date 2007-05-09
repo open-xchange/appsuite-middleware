@@ -50,9 +50,9 @@
 package com.openexchange.groupware.calendar;
 
 /**
-   CalendarCommonCollection
-   @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
-*/
+ * CalendarCommonCollection
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
 
 public class RecurringResult {
     
@@ -69,7 +69,7 @@ public class RecurringResult {
         this.length_offset = length_offset;
         this.position = position;
     }
-
+    
     public long getStart() {
         return start;
     }
@@ -79,7 +79,7 @@ public class RecurringResult {
     }
     
     public long getEnd() {
-        return start+diff+(length_offset*CalendarRecurringCollection.MILLI_DAY);        
+        return start+diff+(length_offset*CalendarRecurringCollection.MILLI_DAY);
     }
     
     public long getDiff() {
@@ -92,6 +92,6 @@ public class RecurringResult {
     
     public int getPosition() {
         return position;
-    }    
+    }
     
 }

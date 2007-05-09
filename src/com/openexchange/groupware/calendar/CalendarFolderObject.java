@@ -72,7 +72,7 @@ public class CalendarFolderObject implements Serializable {
     private ArrayList<Integer> sharedfolder;
     
     private ArrayList<Integer> private_read_all;
-    private ArrayList<Integer> private_read_own;    
+    private ArrayList<Integer> private_read_own;
     private ArrayList<Integer> public_read_all;
     private ArrayList<Integer> public_read_own;
     private ArrayList<Integer> shared_read_all;
@@ -102,7 +102,7 @@ public class CalendarFolderObject implements Serializable {
     
     void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
         final Integer folderID = Integer.valueOf(folderid);
-    	if (!shared) {
+        if (!shared) {
             if (type == FolderObject.PRIVATE) {
                 if (privatefolder == null) {
                     privatefolder = new ArrayList<Integer>(4);
@@ -118,7 +118,7 @@ public class CalendarFolderObject implements Serializable {
                         private_read_own = new ArrayList<Integer>(4);
                     }
                     private_read_own.add(folderID);
-                }                    
+                }
             } else if (type == FolderObject.PUBLIC) {
                 if (publicfolder == null) {
                     publicfolder = new ArrayList<Integer>(4);
@@ -135,9 +135,9 @@ public class CalendarFolderObject implements Serializable {
                     public_read_own.add(folderID);
                 }
             } else {
-            	if (LOG.isWarnEnabled()) {
-            		LOG.warn("Got an unknown folder type :"+type+" for folderid "+folderid);
-            	}
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Got an unknown folder type :"+type+" for folderid "+folderid);
+                }
             }
         } else if (fill_shared) {
             if (sharedfolder == null) {
@@ -189,7 +189,7 @@ public class CalendarFolderObject implements Serializable {
         }
         return EMPTY;
     }
-
+    
     public final Object[] getPrivateReadableOwn() {
         if (private_read_own != null) {
             if (private_read_own_sorted == null) {
@@ -200,7 +200,7 @@ public class CalendarFolderObject implements Serializable {
         }
         return EMPTY;
     }
- 
+    
     public final Object[] getPublicReadableAll() {
         if (public_read_all != null) {
             if (public_read_all_sorted == null) {
@@ -211,7 +211,7 @@ public class CalendarFolderObject implements Serializable {
         }
         return EMPTY;
     }
-
+    
     public final Object[] getPublicReadableOwn() {
         if (public_read_own != null) {
             if (public_read_own_sorted == null) {
@@ -233,7 +233,7 @@ public class CalendarFolderObject implements Serializable {
         }
         return EMPTY;
     }
-
+    
     public final Object[] getSharedReadableOwn() {
         if (shared_read_own != null) {
             if (shared_read_own_sorted == null) {
@@ -244,15 +244,15 @@ public class CalendarFolderObject implements Serializable {
         }
         return EMPTY;
     }
-
+    
     
     @Override
-	public int hashCode() {
+    public int hashCode() {
         return uid ^ cid ^ (fill_shared ? 1 : 0);
-    }    
+    }
     
     @Override
-	public boolean equals(final Object o) {
+    public boolean equals(final Object o) {
         if ( o == null ) {
             return false;
         }
@@ -264,33 +264,33 @@ public class CalendarFolderObject implements Serializable {
         }
         final CalendarFolderObject oo = (CalendarFolderObject)o;
         return this.uid == oo.uid && this.cid == oo.cid && this.fill_shared == oo.fill_shared;
-  }
+    }
     
-  public String getObjectKey() {
-      final StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append('.');
-      key.append(uid);
-      key.append('.');
-      key.append(cid);
-      key.append('.');
-      key.append(fill_shared);
-      return key.toString();
-  }
-  
-  public String getGroupKey() {
-      final StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append('.');
-      key.append(cid);
-      return key.toString();
-  }
-  
-  public static final String createGroupKeyFromContextID(final int cid) {
-      final StringBuilder key = new StringBuilder(IDENTIFIER);
-      key.append('.');
-      key.append(cid);
-      return key.toString();      
-  }
-  
+    public String getObjectKey() {
+        final StringBuilder key = new StringBuilder(IDENTIFIER);
+        key.append('.');
+        key.append(uid);
+        key.append('.');
+        key.append(cid);
+        key.append('.');
+        key.append(fill_shared);
+        return key.toString();
+    }
+    
+    public String getGroupKey() {
+        final StringBuilder key = new StringBuilder(IDENTIFIER);
+        key.append('.');
+        key.append(cid);
+        return key.toString();
+    }
+    
+    public static final String createGroupKeyFromContextID(final int cid) {
+        final StringBuilder key = new StringBuilder(IDENTIFIER);
+        key.append('.');
+        key.append(cid);
+        return key.toString();
+    }
+    
     
     
 }

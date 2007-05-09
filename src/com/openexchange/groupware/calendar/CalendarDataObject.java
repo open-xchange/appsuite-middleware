@@ -81,7 +81,7 @@ public class CalendarDataObject extends AppointmentObject {
     
     
     @Override
-	public final void setUntil(Date until) {
+    public final void setUntil(Date until) {
         if (until != null) {
             final long mod = until.getTime()%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {
@@ -255,7 +255,7 @@ public class CalendarDataObject extends AppointmentObject {
     }
     
     @Override
-	public final Date getUntil() {
+    public final Date getUntil() {
         if (!containsUntil()) {
             if (getRecurrenceType() != CalendarObject.YEARLY) {
                 return new Date(CalendarRecurringCollection.normalizeLong(getStartDate().getTime() + (CalendarRecurringCollection.MILLI_YEAR * CalendarRecurringCollection.getMAX_END_YEARS())));
@@ -317,7 +317,7 @@ public class CalendarDataObject extends AppointmentObject {
     
     
     @Override
-	public Object clone() {
+    public Object clone() {
         final CalendarDataObject clone = new CalendarDataObject();
         clone.setContext(getContext());
         if (containsTitle()) {
@@ -373,10 +373,10 @@ public class CalendarDataObject extends AppointmentObject {
         }
         if (containsInterval()) {
             clone.setInterval(getInterval());
-        } 
+        }
         if (containsMonth()) {
             clone.setMonth(getMonth());
-        } 
+        }
         if (containsDays()) {
             clone.setDays(getDays());
         }
@@ -388,10 +388,10 @@ public class CalendarDataObject extends AppointmentObject {
         }
         if (containsOccurrence()) {
             clone.setOccurrence(getOccurrence());
-        }        
+        }
         clone.setIgnoreConflicts(ignoreConflicts);
         clone.setUsers(getUsers());
-        clone.setParticipants(getParticipants());        
+        clone.setParticipants(getParticipants());
         clone.setRecurrenceCalculator(getRecurrenceCalculator());
         clone.setRecurrence(getRecurrence());
         clone.setFolderType(getFolderType());
@@ -414,7 +414,7 @@ public class CalendarDataObject extends AppointmentObject {
     private static final String STR_DELIM = " - ";
     
     @Override
-	public String toString() {
+    public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName());
         sb.append('@');
@@ -460,6 +460,6 @@ public class CalendarDataObject extends AppointmentObject {
         sb.append(STR_DELIM);
         sb.append(getDayInMonth());
         return sb.toString();
-    }    
+    }
     
 }

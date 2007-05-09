@@ -161,7 +161,7 @@ public class FreeBusyResults implements SearchIterator {
     public final Object mynext() throws SearchIteratorException, OXException {
         CalendarDataObject cdao = null;
         if (seq > 0) {
-        	final RecurringResult rr = rrs.getRecurringResult(seq);
+            final RecurringResult rr = rrs.getRecurringResult(seq);
             return recurringDAO(rr);
         }
         try {
@@ -237,15 +237,15 @@ public class FreeBusyResults implements SearchIterator {
             cdao.setRecurrencePosition(rr.getPosition());
             cdao.setObjectID(oid);
             if (show_details && checkPermissions()) {
-            	cdao.setTitle(title);
+                cdao.setTitle(title);
                 final Participants ret = resolveConflictingUserParticipants();
                 cdao.setParticipants(ret.getList());
             }
             seq--;
             return cdao;
         }
-            rsNext();
-            return null;
+        rsNext();
+        return null;
     }
     
     public boolean hasNext() {
@@ -330,7 +330,7 @@ public class FreeBusyResults implements SearchIterator {
                     } else if (Arrays.binarySearch(cfo.getSharedReadableOwn(), p) >= 0 && o == uid) {
                         perm = true;
                         break;
-                    }                    
+                    }
                 }
             }
             return perm;
@@ -358,16 +358,16 @@ public class FreeBusyResults implements SearchIterator {
     }
     
     private final Participants resolveConflictingUserParticipants() throws OXException {
-    	final Participants p = new Participants();
+        final Participants p = new Participants();
         int counter = 0;
         if (conflict_objects instanceof UserParticipant[]) {
             try {
-            	final CalendarDataObject temp = new CalendarDataObject();
+                final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
                 final UserParticipant op[] = CalendarSql.getCalendarSqlImplementation().getUserParticipants(temp, con, uid).getUsers();
                 if (op != null && op.length > 1) {
-                	final  UserParticipant up[] = (UserParticipant[])conflict_objects;
+                    final  UserParticipant up[] = (UserParticipant[])conflict_objects;
                     for (int a = 0; a < up.length; a++) {
                         for (int b = 0; b < op.length; b++) {
                             if (up[a].getIdentifier() == op[b].getIdentifier()) {
@@ -385,7 +385,7 @@ public class FreeBusyResults implements SearchIterator {
             }
         } else {
             try {
-            	final CalendarDataObject temp = new CalendarDataObject();
+                final CalendarDataObject temp = new CalendarDataObject();
                 temp.setContext(c);
                 temp.setObjectID(oid);
                 final Participant op[] = CalendarSql.getCalendarSqlImplementation().getParticipants(temp, con).getList();
@@ -421,7 +421,7 @@ public class FreeBusyResults implements SearchIterator {
                 pfid = rs.getInt(2);
                 uid = rs.getInt(3);
                 if (!rs.wasNull()) {
-                	final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
+                    final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
                     private_folder_array.add(pfio);
                 }
             }

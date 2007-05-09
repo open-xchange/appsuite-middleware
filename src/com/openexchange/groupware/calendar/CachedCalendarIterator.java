@@ -70,7 +70,7 @@ public class CachedCalendarIterator implements SearchIterator {
     
     public CachedCalendarIterator(SearchIterator non_cached_iterator) throws SearchIteratorException, OXException {
         list = new ArrayList<CalendarDataObject>(16);
-        this.non_cached_iterator = non_cached_iterator;        
+        this.non_cached_iterator = non_cached_iterator;
         cache = ServerConfig.getBoolean(Property.PrefetchEnabled);
         if (cache) {
             fillCachedResultSet();

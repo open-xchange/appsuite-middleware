@@ -146,10 +146,10 @@ public class CalendarAdministration implements DeleteListener {
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 } catch (OXException ex) {
-                   throw new DeleteFailedException(ex);
+                    throw new DeleteFailedException(ex);
                 } catch (DBPoolingException ex) {
                     throw new DeleteFailedException(ex);
-                } 
+                }
                 rs.deleteRow();
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
             }
@@ -249,10 +249,10 @@ public class CalendarAdministration implements DeleteListener {
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 } catch (OXException ex) {
-                   throw new DeleteFailedException(ex);
+                    throw new DeleteFailedException(ex);
                 } catch (DBPoolingException ex) {
                     throw new DeleteFailedException(ex);
-                }                   
+                }
             }
             update.executeBatch();
             update.close();
@@ -306,7 +306,7 @@ public class CalendarAdministration implements DeleteListener {
             delete_participant_members.append(deleteEvent.getId());
             pst5 = writecon.prepareStatement(delete_participant_members.toString());
             pst5.addBatch();
-            pst5.executeBatch();            
+            pst5.executeBatch();
             
             StringBuilder delete_participant_rights = new StringBuilder(128);
             delete_participant_rights.append("delete from prg_date_rights WHERE cid = ");
@@ -317,7 +317,7 @@ public class CalendarAdministration implements DeleteListener {
             delete_participant_rights.append(Participant.USER);
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
-            pst6.executeBatch();            
+            pst6.executeBatch();
             
         } finally {
             if (rs != null) {
@@ -346,10 +346,10 @@ public class CalendarAdministration implements DeleteListener {
             }
             if (pst4 != null) {
                 CalendarCommonCollection.closePreparedStatement(pst4);
-        }
+            }
             if (pst5 != null) {
                 CalendarCommonCollection.closePreparedStatement(pst5);
-    }
+            }
             if (pst6 != null) {
                 CalendarCommonCollection.closePreparedStatement(pst6);
             }
@@ -408,5 +408,5 @@ public class CalendarAdministration implements DeleteListener {
             CalendarCommonCollection.closePreparedStatement(prep);
         }
     }
- 
+    
 }

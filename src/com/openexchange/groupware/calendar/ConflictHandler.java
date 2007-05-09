@@ -92,23 +92,23 @@ public class ConflictHandler {
     
     public CalendarDataObject[] getConflicts() throws OXException {
         if (cdao.getShownAs() == CalendarDataObject.FREE) {
-            return NO_CONFLICTS; // According to bug #5267    
+            return NO_CONFLICTS; // According to bug #5267
         } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
-        	if (LOG.isDebugEnabled()) {
-        		LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
-        	}
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
+            }
             return NO_CONFLICTS;
         } else if (cdao.containsEndDate() && CalendarCommonCollection.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past apps should never conflict
         } else if (!action && !cdao.containsShownAs() && (cdao.getShownAs() == CalendarDataObject.FREE)) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
-                return NO_CONFLICTS; // According to bug #5267                
+            return NO_CONFLICTS; // According to bug #5267
             //}
         }
         if (!containsResources()) {
             if (!cdao.getIgnoreConflicts()) {
                 if (cdao.getRecurrenceType() == 0) {
-                    return prepareResolving(true); 
+                    return prepareResolving(true);
                 }
                 return NO_CONFLICTS;
             }
@@ -133,7 +133,7 @@ public class ConflictHandler {
                     return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
                 }
                 return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
-            } 
+            }
             if (request_participants) {
                 return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
             }
@@ -160,7 +160,7 @@ public class ConflictHandler {
     }
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
-    	final String sql_in = CalendarCommonCollection.getSQLInStringForParticipants(cdao.getUsers());
+        final String sql_in = CalendarCommonCollection.getSQLInStringForParticipants(cdao.getUsers());
         if (sql_in == null) {
             return NO_CONFLICTS;
         }
@@ -179,7 +179,7 @@ public class ConflictHandler {
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
-            	final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
+                final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
                 if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
                     if (li == null) {
                         li = new ArrayList<CalendarDataObject>();
@@ -239,7 +239,7 @@ public class ConflictHandler {
     }
     
     private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end) throws OXException {
-    	final String sql_in = CalendarCommonCollection.getSQLInStringForResources(cdao.getParticipants());
+        final String sql_in = CalendarCommonCollection.getSQLInStringForResources(cdao.getParticipants());
         if (sql_in == null) {
             return NO_CONFLICTS;
         }
@@ -258,7 +258,7 @@ public class ConflictHandler {
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getParticipants(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
-            	final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
+                final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
                 if (conflict_dao != null && conflict_dao.containsStartDate() && conflict_dao.containsEndDate()) {
                     if (li == null) {
                         li = new ArrayList<CalendarDataObject>();

@@ -50,9 +50,9 @@
 package com.openexchange.groupware.calendar;
 
 /**
-   CalendarSqlImp
-   @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
-*/
+ * CalendarSqlImp
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
 public class PrivateFolderInformationObject {
     
     private int object_id;

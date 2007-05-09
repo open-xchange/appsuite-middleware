@@ -66,23 +66,23 @@ import com.openexchange.groupware.contexts.Context;
 
 
 /**
-   CalendarSqlImp
-   @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
-*/
+ * CalendarSqlImp
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ */
 
 public interface CalendarSqlImp {
-
+    
     public PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, java.util.Date d1, java.util.Date d2, String select, Connection readcon, Date since, int orderBy, String orderDir) throws OXException, SQLException;
     
     public PreparedStatement getConflicts(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException;
-
+    
     public PreparedStatement getResourceConflicts(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String resource_sql_in) throws SQLException;
-
-    public PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String resource_sql_in) throws SQLException;    
+    
+    public PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, java.util.Date d1, java.util.Date d2, Connection readcon, String resource_sql_in) throws SQLException;
     
     public PreparedStatement getFreeBusy(int uid, Context c, Date d1, Date d2, Connection readcon) throws SQLException ;
     
-    public PreparedStatement getResourceFreeBusy(int uid, Context c, Date d1, Date d2, Connection readcon) throws SQLException ;    
+    public PreparedStatement getResourceFreeBusy(int uid, Context c, Date d1, Date d2, Connection readcon) throws SQLException ;
     
     public boolean[] getUserActiveAppointmentsRangeSQL(Context c, int uid, int groups[], UserConfiguration uc, Date d1, Date d2, Connection readcon) throws SQLException, OXException;
     
@@ -96,7 +96,7 @@ public interface CalendarSqlImp {
     
     public PreparedStatement getPrivateFolderObjects(int fid, Context c, Connection readcon) throws SQLException ;
     
-    public PreparedStatement getPublicFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2) throws SQLException; 
+    public PreparedStatement getPublicFolderModifiedSinceSQL(Context c, int uid, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2) throws SQLException;
     
     public PreparedStatement getPrivateFolderDeletedSinceSQL(Context c, int uid, int fid, Date d1, String select, Connection readcon) throws SQLException;
     
@@ -121,7 +121,7 @@ public interface CalendarSqlImp {
     public CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, SessionObject so, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
     public void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, SessionObject so, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
-
+    
     public void deleteAppointmentsInFolder(SessionObject so, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
     
     public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, SessionObject so) throws OXException;
@@ -131,7 +131,7 @@ public interface CalendarSqlImp {
     public boolean checkIfFolderIsEmpty(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
     
     public PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, String orderDir) throws SQLException;
-
+    
     public PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2) throws SQLException;
     
     public PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, Date d1, String select, Connection readcon) throws SQLException;

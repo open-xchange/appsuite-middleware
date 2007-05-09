@@ -93,15 +93,15 @@ public class CalendarCache {
         }
         return instance;
     }
-      
+    
     public synchronized void add(final Object key, final String groupKey, final Object o) throws CacheException {
         jcs.putInGroup(key, groupKey, o);
-    }    
+    }
     
     public Object get(final Object key, final String groupKey) throws CacheException {
         return jcs.getFromGroup(key, groupKey);
-    }    
- 
+    }
+    
     public synchronized void clear() throws CacheException {
         jcs.clear();
     }

@@ -60,11 +60,11 @@ import com.openexchange.tools.conf.AbstractConfig;
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CalendarConfig extends AbstractConfig {
-
+    
     private static final Property KEY = Property.CALENDAR;
     
     private static CalendarConfig singleton;
-
+    
     /**
      * {@inheritDoc}
      */
@@ -73,11 +73,11 @@ public class CalendarConfig extends AbstractConfig {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,
-                KEY.getPropertyName());
+                    KEY.getPropertyName());
         }
         return filename;
     }
-
+    
     public static String getProperty(final String key) {
         return singleton.getPropertyInternal(key);
     }
@@ -87,7 +87,7 @@ public class CalendarConfig extends AbstractConfig {
             reinit();
         }
     }
-
+    
     public static void reinit() throws ConfigurationException {
         singleton = new CalendarConfig();
         singleton.loadPropertiesInternal();

@@ -61,13 +61,13 @@ import com.openexchange.groupware.Component;
 public class OXCalendarException extends OXException {
     
     public OXCalendarException(final Code code, Object... messageArgs) {
-         this(code, null, messageArgs);         
-    }    
+        this(code, null, messageArgs);
+    }
     
     public OXCalendarException(final Code code, Throwable throwable, Object... messageArgs) {
-         super(Component.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
-         super.setMessageArgs(messageArgs);
-    }      
+        super(Component.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
+        super.setMessageArgs(messageArgs);
+    }
     
     public enum Code {
         CFO_NOT_INITIALIZIED("FATAL: CalendarFolderObject not initialized!", 1, AbstractOXException.Category.CODE_ERROR),
@@ -135,24 +135,24 @@ public class OXCalendarException extends OXException {
         LOAD_PERMISSION_EXCEPTION_6("You do not have the appropriate permissions to create an object", 62, AbstractOXException.Category.PERMISSION),
         RECURRING_MISSING_YEARLY_MONTH("Fatal error. (YEARLY) Missing or wrong value month : %d", 63, AbstractOXException.Category.USER_INPUT),
         RECURRING_ALREADY_EXCEPTION("Fatal error. You are trying to create a new recurring from an exception!", 64, AbstractOXException.Category.USER_INPUT),
-        RECURRING_EXCEPTION_MOVE_EXCEPTION("You can not move one element of a recurring appointment into another folder.", 65, AbstractOXException.Category.USER_INPUT),        
+        RECURRING_EXCEPTION_MOVE_EXCEPTION("You can not move one element of a recurring appointment into another folder.", 65, AbstractOXException.Category.USER_INPUT),
         ;
         
         /**
          * Message of the exception.
          */
         private final String message;
-
+        
         /**
          * Category of the exception.
          */
         private final Category category;
-
+        
         /**
          * Detail number of the exception.
          */
         private final int detailNumber;
-
+        
         /**
          * Default constructor.
          * @param message message.
@@ -160,28 +160,28 @@ public class OXCalendarException extends OXException {
          * @param detailNumber detail number.
          */
         private Code(final String message,
-            final int detailNumber,
-            final Category category)  {
+                final int detailNumber,
+                final Category category)  {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
         }
-
-		public Category getCategory() {
-			return category;
-		}
-
-		public int getDetailNumber() {
-			return detailNumber;
-		}
-
-		public String getMessage() {
-			return message;
-		}        
+        
+        public Category getCategory() {
+            return category;
+        }
+        
+        public int getDetailNumber() {
+            return detailNumber;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
         
         
-    }    
+    }
     
-   
+    
     
 }

@@ -70,7 +70,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class CalendarAttachments implements  AttachmentListener, AttachmentAuthorization {
     
-    private static final Log LOG = LogFactory.getLog(CalendarAttachments.class);    
+    private static final Log LOG = LogFactory.getLog(CalendarAttachments.class);
     
     public long attached(AttachmentEvent e) throws Exception {
         CalendarSql csql = new CalendarSql(null);
@@ -92,7 +92,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             if (LOG.isErrorEnabled()) {
                 LOG.error(StringCollection.convertArraytoString(new Object[] { "checkMayAttach failed. The object does not exists (cid:oid) : ",ctx.getContextId(),":",objectId } ));
             }
-            throw oxonfe;            
+            throw oxonfe;
         } catch(Exception e) {
             throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, 14);
         }
