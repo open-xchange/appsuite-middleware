@@ -171,7 +171,7 @@ public class CalendarTest extends TestCase {
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             CalendarDataObject cdao = (CalendarDataObject)si.next();
-        testDelete(cdao);
+            testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);                
