@@ -142,6 +142,15 @@ public abstract class AbstractTest {
     
     /**
      * 
+     * @return String[] with only wrong oxadminmaster and wrong password option 
+     */
+    public static String[] getWrongMasterCredentialsOptionData(){
+        final String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzf00bar", OPTION_SUPER_ADMIN_PWD+"_xyzfoobar"};
+
+        return  tmp;
+    } 
+    /**
+     * 
      * @return String[] with only oxadmin and password option and "--csv" option set.
      */
     public static String[] getCSVOptionData(){
