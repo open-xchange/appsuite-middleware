@@ -111,25 +111,25 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	public static final int OK_STATUS = 1200;
 	
-	public static final String MODIFICATION_EXCEPTION = '[' + MODIFICATION_STATUS + "] This object was modified on the server";
+	public static final String MODIFICATION_EXCEPTION = "[" + MODIFICATION_STATUS + "] This object was modified on the server";
 	
-	public static final String OBJECT_NOT_FOUND_EXCEPTION = '[' + OBJECT_NOT_FOUND_STATUS + "] Object not found";
+	public static final String OBJECT_NOT_FOUND_EXCEPTION = "[" + OBJECT_NOT_FOUND_STATUS + "] Object not found";
 	
-	public static final String PERMISSION_EXCEPTION = '[' + PERMISSION_STATUS + "] No permission";
+	public static final String PERMISSION_EXCEPTION = "[" + PERMISSION_STATUS + "] No permission";
 	
-	public static final String CONFLICT_EXCEPTION = '[' + CONFLICT_STATUS + "] Conflict";
+	public static final String CONFLICT_EXCEPTION = "[" + CONFLICT_STATUS + "] Conflict";
 	
-	public static final String USER_INPUT_EXCEPTION = '[' + USER_INPUT_STATUS + "] invalid user input";
+	public static final String USER_INPUT_EXCEPTION = "[" + USER_INPUT_STATUS + "] invalid user input";
 	
-	public static final String APPOINTMENT_CONFLICT_EXCEPTION = '[' + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
+	public static final String APPOINTMENT_CONFLICT_EXCEPTION = "[" + APPOINTMENT_CONFLICT_STATUS + "] Appointments Conflicted";
 	
-	public static final String MANDATORY_FIELD_EXCEPTION = '[' + MANDATORY_FIELD_STATUS + "] Missing field";
+	public static final String MANDATORY_FIELD_EXCEPTION = "[" + MANDATORY_FIELD_STATUS + "] Missing field";
 	
-	public static final String BAD_REQUEST_EXCEPTION = '[' + BAD_REQUEST_STATUS + "] bad xml request";
+	public static final String BAD_REQUEST_EXCEPTION = "[" + BAD_REQUEST_STATUS + "] bad xml request";
 	
-	public static final String SERVER_ERROR_EXCEPTION = '[' + SERVER_ERROR_STATUS + "] Server Error - ";
+	public static final String SERVER_ERROR_EXCEPTION = "[" + SERVER_ERROR_STATUS + "] Server Error - ";
 	
-	public static final String OK = '[' + OK_STATUS + "] OK";
+	public static final String OK = "[" + OK_STATUS + "] OK";
 	
 	public static final String _contentType = "text/xml; charset=UTF-8";
 	
