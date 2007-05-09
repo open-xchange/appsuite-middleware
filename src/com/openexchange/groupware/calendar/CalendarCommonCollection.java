@@ -794,12 +794,6 @@ public class CalendarCommonCollection {
             final Object private_read_own[] = cfo.getPrivateReadableOwn();
             final Object public_read_all[] = cfo.getPublicReadableAll();
             final Object public_read_own[] = cfo.getPublicReadableOwn();
-            /*
-            private_read_all = new Object[] { new Integer(60) } ;
-            private_read_own = new Object[] { new Integer(61) } ;
-            public_read_all = new Object[] { new Integer(62) } ;
-            public_read_own = new Object[] { new Integer(63) } ;
-             */
             
             boolean private_query = false;
             boolean public_query = false;
@@ -1229,11 +1223,9 @@ public class CalendarCommonCollection {
         }
         if (!cdao.containsCreatedBy()) {
             cdao.setCreatedBy(edao.getCreatedBy());
-        }
-        
+        }        
     }
-    
-    
+
     public static final CalendarDataObject getDAOFromList(ArrayList al, int oid) {
         CalendarDataObject cdao = null;
         for (int a = 0; a < al.size(); a++) {
@@ -1243,5 +1235,6 @@ public class CalendarCommonCollection {
             }
         }
         return null;
-    }        
+    }   
+    
 }
