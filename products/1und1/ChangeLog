@@ -1,0 +1,4 @@
+* 2007-05-09 - marcus.klein@open-xchange.com
+
+  - Bugfix #7121: Changed database authentication mechanism to prevent security
+    holes.
