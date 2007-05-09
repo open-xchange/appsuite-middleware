@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,8 +84,6 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderTools;
-
 
 /**
  * CalendarCommonCollection
@@ -719,7 +718,7 @@ public class CalendarCommonCollection {
         if (o != null) {
             cfo = (CalendarFolderObject)o;
         } else {
-            final SearchIterator si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
+            final SearchIterator si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
             EffectivePermission oclp = null;
             FolderObject fo = null;
             try {
@@ -758,7 +757,7 @@ public class CalendarCommonCollection {
         if (o != null) {
             cfo = (CalendarFolderObject)o;
         } else {
-            final SearchIterator si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
+            final SearchIterator si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(uid, groups, uc.getAccessibleModules(), FolderObject.CALENDAR, c);
             EffectivePermission oclp = null;
             FolderObject fo = null;
             try {

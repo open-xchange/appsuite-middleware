@@ -60,6 +60,7 @@ import java.util.ArrayList;
  * CachedCalendarIterator
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
+
 public class CachedCalendarIterator implements SearchIterator {
     
     private final ArrayList<CalendarDataObject> list;

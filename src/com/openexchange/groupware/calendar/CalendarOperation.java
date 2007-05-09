@@ -79,8 +79,9 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
-
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * CalendarOperation
@@ -387,7 +388,8 @@ public class CalendarOperation implements SearchIterator {
         boolean action = true;
         if (cdao.getContext() != null) {
             
-            if (OXFolderTools.getFolderModule(inFolder, cdao.getContext()) == FolderObject.CALENDAR) {
+            OXFolderAccess ofa = new OXFolderAccess(cdao.getContext());
+            if (ofa.getFolderModule(inFolder) == FolderObject.CALENDAR) {
                 
                 
                 if (cdao.containsObjectID()) {
@@ -413,7 +415,7 @@ public class CalendarOperation implements SearchIterator {
                     cdao.setCreatedBy(uid);
                     cdao.setModifiedBy(uid);
                     checkInsertMandatoryFields(cdao);
-                    cdao.setFolderType(OXFolderTools.getFolderType(inFolder, uid, cdao.getContext()));
+                    cdao.setFolderType(ofa.getFolderType(inFolder, uid));
                     
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         cdao.setPrivateFolderID(inFolder);
@@ -422,12 +424,11 @@ public class CalendarOperation implements SearchIterator {
                     
                 } else {
                     if (cdao.containsParentFolderID()) {
-                        cdao.setFolderType(OXFolderTools.getFolderType(cdao.getParentFolderID(), uid, cdao.getContext()));
+                        cdao.setFolderType(ofa.getFolderType(cdao.getParentFolderID(), uid));
                     } else {
-                        cdao.setFolderType(OXFolderTools.getFolderType(inFolder, uid, cdao.getContext()));
+                        cdao.setFolderType(ofa.getFolderType(inFolder, uid));
                     }
-                }
-                
+                }                
                 
                 if (cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (action || cdao.containsParticipants()) {
@@ -437,25 +438,11 @@ public class CalendarOperation implements SearchIterator {
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
                 } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                    Connection rc = null;
-                    try {
-                        rc  = DBPool.pickup(cdao.getContext());
                         if (cdao.containsParentFolderID()) {
-                            cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(cdao.getParentFolderID(), cdao.getContext(), rc));
+                            cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
                         } else {
-                            cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), rc));
+                            cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
                         }
-                    } catch(DBPoolingException dbpe) {
-                        throw new OXException(dbpe);
-                    } finally {
-                        if (rc != null) {
-                            try {
-                                DBPool.push(cdao.getContext(), rc);
-                            } catch (DBPoolingException dbpe) {
-                                LOG.error("DBPoolingException:prepareUpdateAction (push)", dbpe);
-                            }
-                        }
-                    }
                     if (action || cdao.containsParticipants()) {
                         UserParticipant up = new UserParticipant();
                         up.setIdentifier(cdao.getSharedFolderOwner());
@@ -471,21 +458,7 @@ public class CalendarOperation implements SearchIterator {
                 
                 Participant p = new UserParticipant();
                 if (cdao.getFolderType() == FolderObject.SHARED) {
-                    Connection rc = null;
-                    try {
-                        rc  = DBPool.pickup(cdao.getContext());
                         p.setIdentifier(cdao.getSharedFolderOwner());
-                    } catch(DBPoolingException dbpe) {
-                        throw new OXException(dbpe);
-                    } finally {
-                        if (rc != null) {
-                            try {
-                                DBPool.push(cdao.getContext(), rc);
-                            } catch (DBPoolingException dbpe) {
-                                LOG.error("DBPoolingException:prepareUpdateAction (push)", dbpe);
-                            }
-                        }
-                    }
                 } else {
                     p.setIdentifier(uid);
                 }
@@ -638,7 +611,8 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 break;
                             case AppointmentObject.USERS:
-                                if (!cdao.containsUserParticipants()) {
+                                
+                                if (ServerConfig.getBoolean(Property.PrefetchEnabled) && !cdao.containsUserParticipants()) {
                                     final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                     cdao.setUsers(users.getUsers());
                                 }
