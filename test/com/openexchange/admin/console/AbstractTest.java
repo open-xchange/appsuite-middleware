@@ -148,6 +148,16 @@ public abstract class AbstractTest {
         final String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzf00bar", OPTION_SUPER_ADMIN_PWD+"_xyzfoobar"};
 
         return  tmp;
+    }
+    
+    /**
+     * 
+     * @return String[] with only  oxadminmaster and  password option ,usefull for list tools!
+     */
+    public static String[] getMasterCredentialsOptionData(){
+        final String[] tmp = {OPTION_SUPER_ADMIN_USER, OPTION_SUPER_ADMIN_PWD};
+
+        return  tmp;
     } 
     /**
      * 
