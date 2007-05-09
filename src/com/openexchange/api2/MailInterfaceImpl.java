@@ -301,7 +301,9 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String STR_CHARSET = "charset";
 
-	private static final String STR_UTF8 = "UTF-8";
+	private static final String CHARENC_UTF8 = "UTF-8";
+	
+	private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
 	private static final String STR_TRUE = "true";
 
@@ -2223,7 +2225,7 @@ public class MailInterfaceImpl implements MailInterface {
 				final ContentType contentTypeObj = new ContentType(versitPart.getContentType());
 				final VersitDefinition def = Versit.getDefinition(contentTypeObj.getBaseType());
 				final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), contentTypeObj
-						.containsParameter(STR_CHARSET) ? STR_UTF8 : contentTypeObj.getParameter(STR_CHARSET));
+						.containsParameter(STR_CHARSET) ? CHARENC_UTF8 : contentTypeObj.getParameter(STR_CHARSET));
 				/*
 				 * Ok, convert versit object to corresponding data object and
 				 * save this object via its interface
@@ -2305,7 +2307,7 @@ public class MailInterfaceImpl implements MailInterface {
 				final ContentType contentTypeObj = new ContentType(versitPart.getContentType());
 				final VersitDefinition def = Versit.getDefinition(contentTypeObj.getBaseType());
 				final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), contentTypeObj
-						.containsParameter(STR_CHARSET) ? STR_UTF8 : contentTypeObj.getParameter(STR_CHARSET));
+						.containsParameter(STR_CHARSET) ? CHARENC_UTF8 : contentTypeObj.getParameter(STR_CHARSET));
 				/*
 				 * Ok, convert versit object to contact object and save this
 				 * object via its interface
@@ -2999,7 +3001,7 @@ public class MailInterfaceImpl implements MailInterface {
 			transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
 			if (IMAPProperties.isSmtpAuth()) {
 				transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-						.getImapLogin(), sessionObj.getIMAPProperties().getImapPassword());
+						.getImapLogin(), encodePassword(sessionObj.getIMAPProperties().getImapPassword()));
 			} else {
 				transport.connect();
 			}
@@ -3271,8 +3273,8 @@ public class MailInterfaceImpl implements MailInterface {
 						transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
 						if (IMAPProperties.isSmtpAuth()) {
 							transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
-									.getIMAPProperties().getImapLogin(), sessionObj.getIMAPProperties()
-									.getImapPassword());
+									.getIMAPProperties().getImapLogin(), encodePassword(sessionObj.getIMAPProperties()
+									.getImapPassword()));
 						} else {
 							transport.connect();
 						}
@@ -4789,6 +4791,20 @@ public class MailInterfaceImpl implements MailInterface {
 			return folderStringArg.substring(8);
 		}
 		return folderStringArg;
+	}
+	
+	public final static String encodePassword(final String password) {
+		String tmpPass = password;
+		if (password != null) {
+			try {
+				tmpPass = new String(password.getBytes(IMAPProperties.getImapAuthEnc()), CHARENC_ISO_8859_1);
+			} catch (UnsupportedEncodingException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (IMAPException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+		return tmpPass;
 	}
 
 }

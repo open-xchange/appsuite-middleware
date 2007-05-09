@@ -247,7 +247,7 @@ public class MailObject {
 				final long start = System.currentTimeMillis();
 				if (IMAPProperties.isSmtpAuth()) {
 					transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-							.getImapLogin(), sessionObj.getIMAPProperties().getImapPassword());
+							.getImapLogin(), MailInterfaceImpl.encodePassword(sessionObj.getIMAPProperties().getImapPassword()));
 				} else {
 					transport.connect();
 				}
