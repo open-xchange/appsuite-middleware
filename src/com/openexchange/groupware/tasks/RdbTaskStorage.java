@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
