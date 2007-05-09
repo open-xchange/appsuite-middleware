@@ -65,7 +65,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getOptionData()){
+        new ListFilestore(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -79,7 +79,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getOptionDataCSV()){
+        new ListFilestore(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -116,19 +116,6 @@ public class ListFilestoreTest extends AbstractTest {
         assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
     }
     
-    public static String[] getOptionData(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER, 
-                OPTION_SUPER_ADMIN_PWD
-                };
-        return tmp;
-    }
     
-    public static String[] getOptionDataCSV(){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER, 
-                OPTION_SUPER_ADMIN_PWD,
-                "--csv"
-                };
-        return tmp;
-    }
 
 }
