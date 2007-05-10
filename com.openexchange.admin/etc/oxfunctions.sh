@@ -168,3 +168,74 @@ die() {
     exit 1
 }
 
+# checks if admindaemon is running
+ox_isrunning() {
+    local pidfile=/var/run/open-xchange-admin.pid
+    if [ ! -f $pidfile ]; then
+        # not running
+        return 1
+    fi
+    read PID < $pidfile
+    running=$(ps $PID | grep $PID)
+    if [ -n "$running" ]; then
+        # running
+        return 0
+    else
+        # not running
+        return 1
+    fi
+}
+
+ox_register_plugin() {
+    local plugin=$1
+    local osgicf=$2
+    local plugpath=$3
+
+    test -z "$plugin" && die \
+	"ox_unregister_plugin: missing plugin argument (arg 1)"
+    test -z "$osgicf" && die \
+	"ox_unregister_plugin: missing osgicf argument (arg 2)"
+    test -z "$plugpath" && die \
+	"ox_unregister_plugin: missing plugpath argument (arg 3)"
+
+    if grep $plugin $osgicf >/dev/null; then
+	echo "plugin $plugin already registered"
+    else
+	echo "registering plugin $plugin"
+
+	local osgicftmp=${osgicf}.$$
+	sed -e "s;\(^osgi.bundles=.*\)$;\1,reference\\:file\\:${plugpath}/${plugin}@2\\:start;" \
+	    < $osgicf > $osgicftmp
+	mv $osgicftmp $osgicf
+    fi
+}
+
+ox_unregister_plugin() {
+    local plugin=$1
+    local osgicf=$2
+
+    test -z "$plugin" && die \
+	"ox_unregister_plugin: missing plugin argument (arg 1)"
+    test -z "$osgicf" && die \
+	"ox_unregister_plugin: missing osgicf argument (arg 2)"
+
+    if grep $plugin $osgicf >/dev/null; then
+	echo "unregistering plugin $plugin"
+
+	local osgicftmp=${osgicf}.$$
+	local ALLPLUGS=$(sed -e 's;,; ;g' -n -e 's;^osgi.bundles=\(.*\);\1;p' $osgicf)
+	local NEWPLUGS=$(
+	    for plug in $ALLPLUGS; do
+		if ! echo $plug | grep $plugin >/dev/null; then
+		    echo -n "$plug,"
+		fi
+	    done)
+	NEWPLUGS=${NEWPLUGS:0:( ${#NEWPLUGS} -1 )}
+
+	sed -e "s;^osgi.bundles=.*;osgi.bundles=$NEWPLUGS;" \
+	    < $osgicf > $osgicftmp
+	mv $osgicftmp $osgicf
+    else
+	echo "plugin $plugin not registered"
+    fi
+}
