@@ -97,12 +97,12 @@ public class Activator implements BundleActivator {
         // The listener which is called if a new plugin is registered
         ServiceListener sl = new ServiceListener() {
             public void serviceChanged(ServiceEvent ev) {
-                System.out.println("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
+                log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
 
                 switch (ev.getType()) {
                     case ServiceEvent.REGISTERED: {
                         // At first we call our own methods inside the new registered plugin...
-                        System.out.println(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
+                        log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
                         // Code which is executed if a new plugin is registered
 //                        TestClass test = (TestClass) context.getService(sr);
 //                        test.testmethod();
