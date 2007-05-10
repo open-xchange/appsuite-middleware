@@ -117,7 +117,7 @@ public class OXUser2IMAPLogin {
 	 * @return current user's IMAP login
 	 */
 	public static String getLocalIMAPLogin(final SessionObject session, final boolean lookUpIMAPLogin) {
-		String imapLogin = lookUpIMAPLogin ? null : session.getUserObject().getImapLogin();
+		String imapLogin = lookUpIMAPLogin ? session.getUserObject().getImapLogin() : null;
 		if (imapLogin == null || imapLogin.length() == 0) {
 			imapLogin = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
 					: session.getUsername();
