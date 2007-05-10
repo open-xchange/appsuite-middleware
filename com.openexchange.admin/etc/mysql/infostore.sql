@@ -79,7 +79,7 @@ CREATE TABLE `infostore_property` (
   `namespace` varchar(128) NOT NULL,
   `value` varchar(255) ,
   `language` varchar(128) ,
-  `xml` tinyint(1) ,
+  `xml` boolean,
   PRIMARY KEY  (`cid`,`id`,`name`,`namespace`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -93,14 +93,14 @@ CREATE TABLE `infostore_lock` (
   `scope` tinyint unsigned NOT NULL,
   `ownerDesc` varchar(128) ,
   PRIMARY KEY  (`cid`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `lock_null` (
   `cid` int4 unsigned NOT NULL,
   `id` int4 unsigned NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY  (`cid`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 CREATE TABLE `lock_null_lock` (
@@ -113,5 +113,5 @@ CREATE TABLE `lock_null_lock` (
   `scope` tinyint unsigned ,
   `ownerDesc` varchar(128) ,
   PRIMARY KEY  (`cid`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
