@@ -47,32 +47,19 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.contact.mappers;
 
-/**
- * A list of classes throwing ImportExportExceptions
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- * @author <a href="mailto:">Sebastian Kauss</a>
- *
- */
-public class ImportExportExceptionClasses {
-	public static final int IMPORTEXPORTEXCEPTIONFACTORY = 0;
-	public static final int CSVCONTACTEXPORTER = 1;
-	public static final int ICALEXPORTER = 2;
-	public static final int VCARDEXPORTER = 3;
+import java.util.Collection;
+
+import com.openexchange.groupware.contact.helpers.ContactField;
+
+public interface ContactFieldMapper {
+
+	public abstract ContactField getFieldByName(String name);
+
+	public abstract String getNameOfField(ContactField field);
+
+	public abstract Collection<String> getNamesOfFields();
 	
-	public static final int ICALIMPORTER = 5;
-	public static final int VCARDIMPORTER = 6;
-	
-	public static final int CSVCONTACTIMPORTER = 8;
-	public static final int CSVLIBRARY = 9;
-	public static final int CSVPARSER = 10;
-	public static final int IMPORTEREXPORTER = 11;
-	
-	public static final int MODULETYPETRANSLATOR = 12;
-	
-	public static final int IMPORTSERVLET = 13;
-	public static final int EXPORTSERVLET = 14;
-	public static final int OUTLOOKCSVCONTACTIMPORTER = 15;
+	public abstract Collection<ContactField> getSupportedFields();
 }

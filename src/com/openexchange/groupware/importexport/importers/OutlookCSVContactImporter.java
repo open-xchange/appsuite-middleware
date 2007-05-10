@@ -54,21 +54,34 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
+import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
+import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
+import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
+import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 
+@OXExceptionSource(
+		classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
+		component=Component.IMPORT_EXPORT)
 /**
- * Imports the CSV format of Outlook
+ * Imports the CSV format of Outlook, regardless of the file being written with an English, 
+ * French or German version of Outlook.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
-
+	protected ContactFieldMapper fieldMapper;
+	
 	@Override
 	protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSQLInterface contactsql, final ContactSwitcher conSet, final int lineNumber){
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
@@ -81,7 +94,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 
 	@Override
 	protected ContactField getRelevantField(final String name) {
-		return ContactField.getByOutlookName(name);
+		return fieldMapper.getFieldByName(name);
 	}
 
 	@Override
@@ -94,6 +107,38 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	@Override
 	protected Format getResponsibleFor() {
 		return Format.OUTLOOK_CSV;
+	}
+
+	@Override
+	/**
+	 * Opposed to the basic CSV importer, this method probes different
+	 * language mappers and sets the correct ContactFieldMapper for this
+	 * class.
+	 */
+	protected boolean checkFields(List<String> fields) {
+		int de = 0, fr = 0, en = 0;
+		final ContactFieldMapper 	deMap = new GermanOutlookMapper(), 
+									frMap = new FrenchOutlookMapper(), 
+									enMap = new EnglishOutlookMapper();
+		for(final String name: fields){
+			if(deMap.getFieldByName(name) != null){
+				de++;
+			}
+			if(enMap.getFieldByName(name) != null){
+				en++;
+			}
+			if(frMap.getFieldByName(name) != null){
+				fr++;
+			}
+		}
+		fieldMapper = enMap;
+		if(de > en){
+			fieldMapper = deMap;
+		}
+		if(fr > de){
+			fieldMapper = frMap;
+		}
+		return de > 0 || fr > 0 || en > 0;
 	}
 	
 	

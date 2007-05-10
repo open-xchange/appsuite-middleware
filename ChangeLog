@@ -1,12 +1,18 @@
+* 2007-05-10 - tobias.prinz@open-xchange.com
+
+ - Fixed bug #7105, part 2: Outlook CSV files may now be in English,
+   German or French. I consider #7105 completely fixed now.
+ - Added some new classes to help with translating fields of
+   Contacts to Outlook names and vice versa.
+
 * 2007-05-09 - francisco.laguna@open-xchange.com
 
-  - Added utility class for handling indexes in update tasks.
+ - Added utility class for handling indexes in update tasks.
 
 * 2007-05-09 - tobias.prinz@open-xchange.com
 
- - Fixed several conversions of Streams to strings which did rely on
-   UTF-8 as encoding. Should fix #7106, but that needs more tests for 
-   confirmation.
+ - Fixed bug #7106: Several conversions of Streams to strings which 
+   did rely on UTF-8 as default encoding. Changed to explizit usage.
  - Fixed bug in OutlookImporter that made the importer not act on getting 
    an Outlook CSV file.
 
