@@ -160,7 +160,7 @@ public class CachedCalendarIterator implements SearchIterator {
                     }
                     
                     int mn = pre_fetch + MAX_PRE_FETCH;
-                    if (mn > list.size()) {
+                    if (mn >= list.size()) {
                         mn = list.size() - pre_fetch;
                     }
                     int arr[] = new int[mn];
