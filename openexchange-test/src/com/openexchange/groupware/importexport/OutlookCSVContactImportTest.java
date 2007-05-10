@@ -50,31 +50,35 @@
 package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
 
+import org.junit.Test;
+
+import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
-public class OutlookCSVContactImportTest extends CSVContactImportTest{
-
+public class OutlookCSVContactImportTest extends AbstractCSVContactTest{
+	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
+	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";
+
 	public OutlookCSVContactImportTest(){
 		super();
-		doDebugging = false;
+		defaultFormat = Format.OUTLOOK_CSV;
 		imp = new OutlookCSVContactImporter();
-		IMPORT_ONE = ContactField.GIVEN_NAME.getOutlookENName()+","+ContactField.EMAIL1.getOutlookENName()+","+ContactField.BIRTHDAY.getOutlookENName()+"\n"+NAME1+", "+EMAIL1+", "+DATE1;
-		IMPORT_MULTIPLE = IMPORT_ONE + "\nLaguna, francisco.laguna@open-xchange.com, 3/3/1981\n";
-		IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, 3/3/1981\n";
 	}
 	
 	//workaround for JUnit 3 runner
@@ -82,7 +86,6 @@ public class OutlookCSVContactImportTest extends CSVContactImportTest{
 		return new JUnit4TestAdapter(OutlookCSVContactImportTest.class);
 	}
 
-	@Override
 	protected void checkFirstResult(int objectID ) throws OXException{
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
@@ -98,6 +101,47 @@ public class OutlookCSVContactImportTest extends CSVContactImportTest{
 		assertDateEquals(compDate, co.getBirthday());
 	}
 	
+	@Test
+	public void importOneContact() throws NumberFormatException, Exception {
+		List<ImportResult> results = importStuff(IMPORT_ONE); 
+		assertEquals("One result?" , results.size(), 1);
+		ImportResult res = results.get(0);
+		if(res.hasError()){
+			res.getException().printStackTrace();
+		}
+		assertTrue( res.isCorrect() );
+
+		//basic check: 1 entry in folder
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		assertEquals("One contact in folder?", 1, contactSql.getNumberOfContacts(folderId));
+
+		//detailed check:
+		checkFirstResult(
+			Integer.parseInt(
+				res.getObjectId()));
+		
+		//cleaning up
+		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+	}
+	
+	@Test
+	public void bug7105() throws NumberFormatException, Exception {
+		List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
+		assertEquals("Two results?" , results.size(), 2);
+		ImportResult res = results.get(1);
+		if(res.hasError()){
+			res.getException().printStackTrace();
+		}
+		assertTrue("Second import correct?" ,  res.isCorrect() );
+
+		//basic check: 2 entries in folder
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		assertEquals("One contact in folder?", 2, contactSql.getNumberOfContacts(folderId));
+
+		//cleaning up
+		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+	}
+
 	public void assertDateEquals(Date date1 , Date date2){
 		Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
 		c1.setTime(date1);

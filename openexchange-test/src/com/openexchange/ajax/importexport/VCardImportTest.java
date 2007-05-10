@@ -54,7 +54,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		boolean found = false;
 		
 		for (int a = 0; a < contactArray.length; a++) {
-			System.out.println("surname: " + contactArray[a].getSurName() + " == " + contactObj.getSurName());
+			//System.out.println("surname: " + contactArray[a].getSurName() + " == " + contactObj.getSurName());
 			if (contactArray[a].getSurName().equals(contactObj.getSurName())) {
 				contactObj.setParentFolderID(contactFolderId);
 				ContactTest.compareObject(contactObj, contactArray[a]);
@@ -121,7 +121,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	}
 	
 	public void test6962followup() throws TestException, IOException, SAXException, JSONException, Exception{
-		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nEND:VCARD\nBEGIN:VCARD\nVERSION:666\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nEND:VCARD";
+		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:673730\nEND:VCARD\nBEGIN:VCARD\nVERSION:666\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nEND:VCARD";
 		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertTrue("Two import attempts" , importResult.length == 2);
@@ -132,5 +132,17 @@ public class VCardImportTest extends AbstractVCardTest {
 		//following line was removed since test environment cannot relay correct error messages from server
 		//assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());
 		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
+	}
+	
+	public void test7106() throws TestException, IOException, SAXException, JSONException, Exception{
+		final String vcard ="BEGIN:VCARD\nVERSION:3.0\nN:;Hübört;;;\nFN:Hübört Sönderzeichön\nTEL;type=CELL;type=pref:6670373\nEND:VCARD\n";
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		
+		assertFalse("Worked?", importResult[0].hasError());
+		int contactId = Integer.parseInt(importResult[0].getObjectId());
+		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getSurName());
+	
+		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 }

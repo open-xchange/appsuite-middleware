@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware.importexport;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -67,6 +71,8 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
@@ -198,6 +204,12 @@ public class AbstractCSVContactTest {
 	public static int userId;
 	public static int contextId;
 	public static int folderId;
+	public String NAME1 = "Prinz";
+	public String EMAIL1 = "tobias.prinz@open-xchange.com";
+	public String NAME2 = "Laguna";
+	public String EMAIL2 = "francisco.laguna@open-xchange.com";
+	public Importer imp;
+	public Format defaultFormat;
 
 	public static int createTestFolder(int type, SessionObject sessObj, String folderTitle) throws DBPoolingException, SQLException  {
 		final User user = sessObj.getUserObject();
@@ -275,6 +287,12 @@ public class AbstractCSVContactTest {
 
 	public AbstractCSVContactTest() {
 		super();
+	}
+
+	protected List<ImportResult> importStuff(String csv) throws ImportExportException, UnsupportedEncodingException{
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
+		return imp.importData(sessObj, defaultFormat, is, folders, null);
 	}
 
 }

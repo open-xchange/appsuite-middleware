@@ -77,26 +77,31 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
  *
  */
 public class CSVContactImportTest extends AbstractCSVContactTest {
-	protected Importer imp = new CSVContactImporter();
-	public static String NAME1 = "Prinz";
-	public static String EMAIL1 = "tobias.prinz@open-xchange.com";
-	public static String NAME2 = "Laguna";
-	public static String EMAIL2 = "francisco.laguna@open-xchange.com";
-	public static String IMPORT_ONE = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\n"+NAME1+", "+EMAIL1;
-	public static String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+"\n";
-	public static String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com\n";
+	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\n";
+	public String IMPORT_ONE = IMPORT_HEADERS +NAME1+", "+EMAIL1;
+	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+"\n";
+	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com\n";
 	public boolean doDebugging = false;
+	
+	public String notASingleImport = "I_E-0804";
+	public String malformedCSV = "I_E-1000";
 	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(CSVContactImportTest.class);
 	}
 	
+	public CSVContactImportTest(){
+		super();
+		imp = new CSVContactImporter();
+		defaultFormat = Format.CSV;
+	}
+	
 	@Test public void canImport() throws ImportExportException{
 		List <String> folders = new LinkedList<String>();
 		folders.add(Integer.toString(folderId));
 		//normal case
-		assertTrue("Can import?", imp.canImport(sessObj, Format.CSV, folders, null));
+		assertTrue("Can import?", imp.canImport(sessObj, defaultFormat, folders, null));
 		
 		//too many
 		folders.add("blaFolder");
@@ -161,25 +166,25 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	
 	@Test public void importBullshit(){
 		List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		InputStream is = new ByteArrayInputStream( "Bla\nbla,bla".getBytes() );
+		InputStream is = new ByteArrayInputStream( "Bla\nbla\nbla".getBytes() );
 
 		try {
-			imp.importData(sessObj, Format.CSV, is, folders, null);
+			imp.importData(sessObj, defaultFormat, is, folders, null);
 		} catch (ImportExportException e) {
-			assertEquals("I_E-1000", e.getErrorCode());
+			assertEquals("Checking correct file with wrong header" , notASingleImport, e.getErrorCode());
 			return;
 		}
 		fail("Should throw exception");
 	}
-
+	
 	@Test public void importBullshit2(){
 		List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		InputStream is = new ByteArrayInputStream( "Bla\nbla\nbla".getBytes() );
+		InputStream is = new ByteArrayInputStream( "Bla\nbla,bla".getBytes() );
 
 		try {
-			imp.importData(sessObj, Format.CSV, is, folders, null);
+			imp.importData(sessObj, defaultFormat, is, folders, null);
 		} catch (ImportExportException e) {
-			assertEquals("I_E-0804", e.getErrorCode());
+			assertEquals("Checking malformed file with wrong header" , malformedCSV, e.getErrorCode());
 			return;
 		}
 		fail("Should throw exception");
@@ -190,7 +195,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	 */
 	@Test public void importOfDuplicates() throws NumberFormatException, Exception{
 		List<ImportResult> results = importStuff(IMPORT_DUPLICATE); 
-		assertEquals("Three results?" , results.size(), 3);
+		assertEquals("Three results?" , 3, results.size());
 		for(ImportResult res : results){
 			if(res.hasError()){
 				res.getException().printStackTrace();
@@ -199,7 +204,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		}
 
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertEquals("Three contacts in folder?", contactSql.getNumberOfContacts(folderId) , 3);
+		assertEquals("Three contacts in folder?", 3, contactSql.getNumberOfContacts(folderId));
 		
 		//cleaning up
 		for(ImportResult res : results){
@@ -207,37 +212,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		}
 	}
 	
-	protected List<ImportResult> importStuff(String csv) throws ImportExportException{
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		InputStream is = new ByteArrayInputStream( debug(csv).getBytes() );
-		return debug(imp.importData(sessObj, Format.CSV, is, folders, null));
 
-	}
-
-	protected String debug(String str){
-		if(doDebugging){
-			System.out.println(str);
-		}
-		return str;
-	}
-	
-	protected List<ImportResult> debug(List<ImportResult> results){
-		if(doDebugging){
-			System.out.println("Result---BEGIN");
-			for(ImportResult res: results){
-				if(res.hasError()){
-					System.out.println("Error: BEGIN---");
-					res.getException().printStackTrace();
-					System.out.println("---END");
-				} else {
-					System.out.println("Worked: id = " + res.getObjectId());
-				}
-			}
-			System.out.println("Result---END\n");
-		}
-		return results;
-	}
-	
 	protected void checkFirstResult(int objectID ) throws OXException{
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());

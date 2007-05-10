@@ -47,68 +47,35 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractCSVContactTest;
-import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.server.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.webdav.xml.FolderTest;
-
 
 /**
- * Test of the ImporterExporter servlet. 
- * 
+ * Tests the CSV imports and exports by using the servlets.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ImportExportServletTest extends AbstractAJAXTest {
-	//private SessionObject sessObj;
-	public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
-	public String IMPORTED_CSV = CSVContactImportTest.IMPORT_MULTIPLE;
-	public String EXPORT_SERVLET = "export";
-	public String IMPORT_SERVLET = "import";
-	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
-	public String[] IMPORT_VCARD_AWAITED_ELEMENTS = "PRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com".split("\n");
+public class CSVImportExportServletTest extends AbstractImportExportServletTest {
+
 	
-	public ImportExportServletTest(String name){
+	public CSVImportExportServletTest(String name) {
 		super(name);
 	}
-	
-	public void setUp() throws Exception{
-		super.setUp();
-		Init.initDB();
-		ContactConfig.init();
-	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
-	}
-	
-	public void tearDown() throws Exception{
-		super.tearDown();
-	}
-	
+
 	public void testCSVRoundtrip() throws Exception{
 		//preparations
 		final String insertedCSV = IMPORTED_CSV;
@@ -138,41 +105,6 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 			CSVParser parser1 = new CSVParser(insertedCSV);
 			CSVParser parser2 = new CSVParser(resultingCSV);
 			assertEquals("input == output ?" , parser1.parse() , parser2.parse());
-		} finally {
-			//clean up
-			removeFolder(folderId);
-		}
-	}
-
-	public void testVCardRoundtrip() throws Exception{
-		//preparations
-		final String insertedCSV = IMPORT_VCARD;
-		final Format format = Format.VCARD;
-		final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		
-		try {
-			//test: import
-			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-			WebConversation webconv = getWebConversation();
-			WebRequest req = new PostMethodWebRequest(
-					getUrl(IMPORT_SERVLET, folderId, format)
-					);
-			((PostMethodWebRequest)req).setMimeEncoded(true);
-			req.selectFile("file", "contact.vcf", is, format.getMimeType());
-			WebResponse webRes = webconv.getResource(req);
-			
-			JSONObject response = extractFromCallback( webRes.getText() );
-			
-			//test: export
-			webconv =  getWebConversation();
-			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
-			webRes = webconv.sendRequest(req);
-			is = webRes.getInputStream();
-			String resultingVCard = AbstractCSVContactTest.readStreamAsString(is);
-			//finally: checking
-			for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
-				assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
-			}
 		} finally {
 			//clean up
 			removeFolder(folderId);
@@ -242,97 +174,4 @@ public class ImportExportServletTest extends AbstractAJAXTest {
 			removeFolder(folderId);
 		}
 	}
-	
-	public void testIcalMessage() throws Exception{
-		InputStream is = new ByteArrayInputStream("BEGIN:VCALENDAR".getBytes());
-		WebConversation webconv = getWebConversation();
-		final Format format = Format.ICAL;
-		final int folderId = createFolder("ical-empty-file-" + System.currentTimeMillis(),FolderObject.CONTACT);
-		try {
-			WebRequest req = new PostMethodWebRequest(
-					getCSVColumnUrl(IMPORT_SERVLET, folderId, format));
-			((PostMethodWebRequest)req).setMimeEncoded(true);
-			req.selectFile("file", "empty.ics", is, format.getMimeType());
-			WebResponse webRes = webconv.getResource(req);
-			JSONObject response = extractFromCallback( webRes.getText() );
-			assertEquals("Must contain error ", "I_E-1303", response.optString("code"));
-		} finally {
-			removeFolder(folderId);
-		}
-	}
-	
-	
-	
-	
-	
-	
-	
-	private int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {
-		final FolderObject folderObj = com.openexchange.ajax.FolderTest
-		.getStandardCalendarFolder(getWebConversation(),
-		getHostName(), getSessionId());
-
-		return folderObj.getCreatedBy();
-	}
-
-	public String getUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
-		StringBuilder bob = new StringBuilder("http://");
-		bob.append(getHostName());
-		bob.append("/ajax/");
-		bob.append(servlet);
-		bob.append("?session=");
-		bob.append(getSessionId());
-		addParam(bob, ImportExport.PARAMETER_FOLDERID, folderId ) ;
-		addParam(bob, ImportExport.PARAMETER_ACTION, format.getConstantName());
-		return bob.toString();
-	}
-	
-	public String getCSVColumnUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
-		StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
-		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
-		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
-		return bob.toString();		
-	}
-	
-	private void addParam(StringBuilder bob, String param, String value){
-		bob.append("&");
-		bob.append(param);
-		bob.append("=");
-		bob.append(value);
-	}
-	
-	private void addParam(StringBuilder bob, String param, int value){
-		addParam(bob, param, Integer.toString(value));
-	}
-	
-	private int createFolder(String title, int folderObjectModuleID) throws Exception{
-		FolderObject folderObj = new FolderObject();
-		folderObj.setFolderName(title);
-		folderObj.setParentFolderID(FolderObject.PRIVATE);
-		folderObj.setModule(folderObjectModuleID);
-		folderObj.setType(FolderObject.PRIVATE);
-		
-		OCLPermission[] permission = new OCLPermission[] {
-			FolderTest.createPermission( getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-		};
-		
-		folderObj.setPermissionsAsArray( permission );
-		try{
-			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword());
-		} catch(OXFolderException e){
-			return -1;
-		}
-	}
-	
-	private void removeFolder( int folderId) throws OXException, Exception{
-		if(folderId == -1){
-			return;
-		}
-		FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword());
-	}
-	
-
-	
-	
-	
 }
