@@ -320,13 +320,13 @@ public class IMAPPropertiesFactory {
 			imapProps.setSmtpPort(smtpPort);
 			if (credSrc == null || credSrc.equalsIgnoreCase(CREDSRC_SESSION)) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
 			} else if (credSrc.equalsIgnoreCase(CREDSRC_OTHER)) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
 			} else if (credSrc.equalsIgnoreCase(CREDSRC_USER_IMAP_LOGIN)) {
 				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
+				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
 			} else {
 				throw new IMAPException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
 						+ credSrc);
