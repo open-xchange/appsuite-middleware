@@ -1,5 +1,5 @@
 osgi.noShutdown=true
-osgi.bundles=reference\:file\:@oxlibpath@/ox_admindaemon.jar@1\:start,reference\:file\:@oxlibpath@/ox_admin_plugin_imap.jar@2\:start
+osgi.bundles=reference\:file\:@oxlibpath@/ox_admindaemon.jar@1\:start
 osgi.bundles.defaultStartLevel=4
 osgi.framework=file\:@libpath@/org.eclipse.osgi_3.2.1.R32x_v20060919.jar
 osgi.configuration.cascaded=false
