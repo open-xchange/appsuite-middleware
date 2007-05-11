@@ -62,19 +62,19 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  *
  */
 public class FrenchOutlookMapper implements ContactFieldMapper {
-	
-	protected final HashMap<String,ContactField> french2field = new HashMap<String, ContactField>();
-	protected final HashMap<ContactField, String> field2french = new HashMap<ContactField, String>();
-	
-	public FrenchOutlookMapper(){
+
+        protected final HashMap<String,ContactField> french2field = new HashMap<String, ContactField>();
+        protected final HashMap<ContactField, String> field2french = new HashMap<ContactField, String>();
+
+        public FrenchOutlookMapper(){
         french2field.put("Titre" , ContactField.TITLE);
         field2french.put(ContactField.TITLE , "Titre");
 
-        french2field.put("Prénom" , ContactField.GIVEN_NAME);
-        field2french.put(ContactField.GIVEN_NAME , "Prénom");
+        french2field.put("Pr\u00e9nom" , ContactField.GIVEN_NAME);
+        field2french.put(ContactField.GIVEN_NAME , "Pr\u00e9nom");
 
-        french2field.put("Deuxième prénom" , ContactField.MIDDLE_NAME);
-        field2french.put(ContactField.MIDDLE_NAME , "Deuxième prénom");
+        french2field.put("Deuxi\u00e8me pr\u00e9nom" , ContactField.MIDDLE_NAME);
+        field2french.put(ContactField.MIDDLE_NAME , "Deuxi\u00e8me pr\u00e9nom");
 
         french2field.put("Nom" , ContactField.SUR_NAME);
         field2french.put(ContactField.SUR_NAME , "Nom");
@@ -82,8 +82,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Suffixe" , ContactField.SUFFIX);
         field2french.put(ContactField.SUFFIX , "Suffixe");
 
-        french2field.put("Société " , ContactField.COMPANY);
-        field2french.put(ContactField.COMPANY , "Société ");
+        french2field.put("Soci\u00e9t\u00e9 " , ContactField.COMPANY);
+        field2french.put(ContactField.COMPANY , "Soci\u00e9t\u00e9 ");
 
         french2field.put("Service " , ContactField.DEPARTMENT);
         field2french.put(ContactField.DEPARTMENT , "Service ");
@@ -103,8 +103,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Ville (bureau)" , ContactField.CITY_BUSINESS);
         field2french.put(ContactField.CITY_BUSINESS , "Ville (bureau)");
 
-        french2field.put("Dép/Région (bureau)" , ContactField.STATE_BUSINESS);
-        field2french.put(ContactField.STATE_BUSINESS , "Dép/Région (bureau)");
+        french2field.put("D\u00e9p/R\u00e9gion (bureau)" , ContactField.STATE_BUSINESS);
+        field2french.put(ContactField.STATE_BUSINESS , "D\u00e9p/R\u00e9gion (bureau)");
 
         french2field.put("Code postal (bureau)" , ContactField.POSTAL_CODE_BUSINESS);
         field2french.put(ContactField.POSTAL_CODE_BUSINESS , "Code postal (bureau)");
@@ -124,8 +124,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Ville (domicile)" , ContactField.CITY_HOME);
         field2french.put(ContactField.CITY_HOME , "Ville (domicile)");
 
-        french2field.put("Dép/Région (domicile)" , ContactField.STATE_HOME);
-        field2french.put(ContactField.STATE_HOME , "Dép/Région (domicile)");
+        french2field.put("D\u00e9p/R\u00e9gion (domicile)" , ContactField.STATE_HOME);
+        field2french.put(ContactField.STATE_HOME , "D\u00e9p/R\u00e9gion (domicile)");
 
         french2field.put("Code postal (domicile)" , ContactField.POSTAL_CODE_HOME);
         field2french.put(ContactField.POSTAL_CODE_HOME , "Code postal (domicile)");
@@ -145,8 +145,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Ville (autre)" , ContactField.CITY_OTHER);
         field2french.put(ContactField.CITY_OTHER , "Ville (autre)");
 
-        french2field.put("Dép/Région (autre)" , ContactField.STATE_OTHER);
-        field2french.put(ContactField.STATE_OTHER , "Dép/Région (autre)");
+        french2field.put("D\u00e9p/R\u00e9gion (autre)" , ContactField.STATE_OTHER);
+        field2french.put(ContactField.STATE_OTHER , "D\u00e9p/R\u00e9gion (autre)");
 
         french2field.put("Code postal (autre)" , ContactField.POSTAL_CODE_OTHER);
         field2french.put(ContactField.POSTAL_CODE_OTHER , "Code postal (autre)");
@@ -154,62 +154,62 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Pays (autre)" , ContactField.COUNTRY_OTHER);
         field2french.put(ContactField.COUNTRY_OTHER , "Pays (autre)");
 
-        french2field.put("Téléphone de l'assistant(e)" , ContactField.TELEPHONE_ASSISTANT);
-        field2french.put(ContactField.TELEPHONE_ASSISTANT , "Téléphone de l'assistant(e)");
+        french2field.put("T\u00e9l\u00e9phone de l'assistant(e)" , ContactField.TELEPHONE_ASSISTANT);
+        field2french.put(ContactField.TELEPHONE_ASSISTANT , "T\u00e9l\u00e9phone de l'assistant(e)");
 
-        french2field.put("Télécopie (bureau)" , ContactField.FAX_BUSINESS);
-        field2french.put(ContactField.FAX_BUSINESS , "Télécopie (bureau)");
+        french2field.put("T\u00e9l\u00e9copie (bureau)" , ContactField.FAX_BUSINESS);
+        field2french.put(ContactField.FAX_BUSINESS , "T\u00e9l\u00e9copie (bureau)");
 
-        french2field.put("Téléphone (bureau)" , ContactField.TELEPHONE_BUSINESS1);
-        field2french.put(ContactField.TELEPHONE_BUSINESS1 , "Téléphone (bureau)");
+        french2field.put("T\u00e9l\u00e9phone (bureau)" , ContactField.TELEPHONE_BUSINESS1);
+        field2french.put(ContactField.TELEPHONE_BUSINESS1 , "T\u00e9l\u00e9phone (bureau)");
 
-        french2field.put("Téléphone 2 (bureau)" , ContactField.TELEPHONE_BUSINESS2);
-        field2french.put(ContactField.TELEPHONE_BUSINESS2 , "Téléphone 2 (bureau)");
+        french2field.put("T\u00e9l\u00e9phone 2 (bureau)" , ContactField.TELEPHONE_BUSINESS2);
+        field2french.put(ContactField.TELEPHONE_BUSINESS2 , "T\u00e9l\u00e9phone 2 (bureau)");
 
         french2field.put("Rappel" , ContactField.TELEPHONE_CALLBACK);
         field2french.put(ContactField.TELEPHONE_CALLBACK , "Rappel");
 
-        french2field.put("Téléphone (voiture)" , ContactField.TELEPHONE_CAR);
-        field2french.put(ContactField.TELEPHONE_CAR , "Téléphone (voiture)");
+        french2field.put("T\u00e9l\u00e9phone (voiture)" , ContactField.TELEPHONE_CAR);
+        field2french.put(ContactField.TELEPHONE_CAR , "T\u00e9l\u00e9phone (voiture)");
 
-        french2field.put("Téléphone société" , ContactField.TELEPHONE_COMPANY);
-        field2french.put(ContactField.TELEPHONE_COMPANY , "Téléphone société");
+        french2field.put("T\u00e9l\u00e9phone soci\u00e9t\u00e9" , ContactField.TELEPHONE_COMPANY);
+        field2french.put(ContactField.TELEPHONE_COMPANY , "T\u00e9l\u00e9phone soci\u00e9t\u00e9");
 
-        french2field.put("Télécopie (domicile)" , ContactField.FAX_HOME);
-        field2french.put(ContactField.FAX_HOME , "Télécopie (domicile)");
+        french2field.put("T\u00e9l\u00e9copie (domicile)" , ContactField.FAX_HOME);
+        field2french.put(ContactField.FAX_HOME , "T\u00e9l\u00e9copie (domicile)");
 
-        french2field.put("Téléphone (domicile)" , ContactField.TELEPHONE_HOME1);
-        field2french.put(ContactField.TELEPHONE_HOME1 , "Téléphone (domicile)");
+        french2field.put("T\u00e9l\u00e9phone (domicile)" , ContactField.TELEPHONE_HOME1);
+        field2french.put(ContactField.TELEPHONE_HOME1 , "T\u00e9l\u00e9phone (domicile)");
 
-        french2field.put("Téléphone 2 (domicile)" , ContactField.TELEPHONE_HOME2);
-        field2french.put(ContactField.TELEPHONE_HOME2 , "Téléphone 2 (domicile)");
+        french2field.put("T\u00e9l\u00e9phone 2 (domicile)" , ContactField.TELEPHONE_HOME2);
+        field2french.put(ContactField.TELEPHONE_HOME2 , "T\u00e9l\u00e9phone 2 (domicile)");
 
         french2field.put("RNIS" , ContactField.TELEPHONE_ISDN);
         field2french.put(ContactField.TELEPHONE_ISDN , "RNIS");
 
-        french2field.put("Tél. mobile" , ContactField.CELLULAR_TELEPHONE1); 
-        field2french.put(ContactField.CELLULAR_TELEPHONE1 , "Tél. mobile"); 
+        french2field.put("T\u00e9l. mobile" , ContactField.CELLULAR_TELEPHONE1); 
+        field2french.put(ContactField.CELLULAR_TELEPHONE1 , "T\u00e9l. mobile"); 
 
-        french2field.put("Télécopie (autre)" , ContactField.FAX_OTHER);
-        field2french.put(ContactField.FAX_OTHER , "Télécopie (autre)");
+        french2field.put("T\u00e9l\u00e9copie (autre)" , ContactField.FAX_OTHER);
+        field2french.put(ContactField.FAX_OTHER , "T\u00e9l\u00e9copie (autre)");
 
-        french2field.put("Téléphone (autre)" , ContactField.TELEPHONE_OTHER);
-        field2french.put(ContactField.TELEPHONE_OTHER , "Téléphone (autre)");
+        french2field.put("T\u00e9l\u00e9phone (autre)" , ContactField.TELEPHONE_OTHER);
+        field2french.put(ContactField.TELEPHONE_OTHER , "T\u00e9l\u00e9phone (autre)");
 
-        french2field.put("Récepteur de radiomessagerie" , ContactField.TELEPHONE_PAGER);
-        field2french.put(ContactField.TELEPHONE_PAGER , "Récepteur de radiomessagerie");
+        french2field.put("R\u00e9cepteur de radiomessagerie" , ContactField.TELEPHONE_PAGER);
+        field2french.put(ContactField.TELEPHONE_PAGER , "R\u00e9cepteur de radiomessagerie");
 
-        french2field.put("Téléphone principal" , ContactField.TELEPHONE_PRIMARY);
-        field2french.put(ContactField.TELEPHONE_PRIMARY , "Téléphone principal");
+        french2field.put("T\u00e9l\u00e9phone principal" , ContactField.TELEPHONE_PRIMARY);
+        field2french.put(ContactField.TELEPHONE_PRIMARY , "T\u00e9l\u00e9phone principal");
 
-        french2field.put("Radio téléphone" , ContactField.TELEPHONE_RADIO);
-        field2french.put(ContactField.TELEPHONE_RADIO , "Radio téléphone");
+        french2field.put("Radio t\u00e9l\u00e9phone" , ContactField.TELEPHONE_RADIO);
+        field2french.put(ContactField.TELEPHONE_RADIO , "Radio t\u00e9l\u00e9phone");
 
-        french2field.put("Téléphone TDD/TTY" , ContactField.TELEPHONE_TTYTDD);
-        field2french.put(ContactField.TELEPHONE_TTYTDD , "Téléphone TDD/TTY");
+        french2field.put("T\u00e9l\u00e9phone TDD/TTY" , ContactField.TELEPHONE_TTYTDD);
+        field2french.put(ContactField.TELEPHONE_TTYTDD , "T\u00e9l\u00e9phone TDD/TTY");
 
-        french2field.put("Télex" , ContactField.TELEPHONE_TELEX);
-        field2french.put(ContactField.TELEPHONE_TELEX , "Télex");
+        french2field.put("T\u00e9lex" , ContactField.TELEPHONE_TELEX);
+        field2french.put(ContactField.TELEPHONE_TELEX , "T\u00e9lex");
 
         french2field.put("Adresse de messagerie" , ContactField.EMAIL1);
         field2french.put(ContactField.EMAIL1 , "Adresse de messagerie");
@@ -241,23 +241,23 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Anniversaire" , ContactField.BIRTHDAY);
         field2french.put(ContactField.BIRTHDAY , "Anniversaire");
 
-        french2field.put("Anniversaire de mariage ou fête" , ContactField.ANNIVERSARY);
-        field2french.put(ContactField.ANNIVERSARY , "Anniversaire de mariage ou fête");
+        french2field.put("Anniversaire de mariage ou f\u00eate" , ContactField.ANNIVERSARY);
+        field2french.put(ContactField.ANNIVERSARY , "Anniversaire de mariage ou f\u00eate");
 
-        //french2field.put("Autre boîte postale" , ContactField.);
-        //field2french.put(ContactField. , "Autre boîte postale");
+        //french2field.put("Autre bo\u00eete postale" , ContactField.);
+        //field2french.put(ContactField. , "Autre bo\u00eete postale");
 
         //french2field.put("B.P. professionnelle" , ContactField.);
         //field2french.put(ContactField. , "B.P. professionnelle");
 
-        //french2field.put("Boîte postale du domicile" , ContactField.);
-        //field2french.put(ContactField. , "Boîte postale du domicile");
+        //french2field.put("Bo\u00eete postale du domicile" , ContactField.);
+        //field2french.put(ContactField. , "Bo\u00eete postale du domicile");
 
         //french2field.put("Bureau" , ContactField.);
         //field2french.put(ContactField. , "Bureau");
 
-        french2field.put("Catégories" , ContactField.CATEGORIES);
-        field2french.put(ContactField.CATEGORIES , "Catégories");
+        french2field.put("Cat\u00e9gories" , ContactField.CATEGORIES);
+        field2french.put(ContactField.CATEGORIES , "Cat\u00e9gories");
 
         //french2field.put("Code gouvernement" , ContactField.);
         //field2french.put(ContactField. , "Code gouvernement");
@@ -268,11 +268,11 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Conjoint(e)" , ContactField.SPOUSE_NAME);
         field2french.put(ContactField.SPOUSE_NAME , "Conjoint(e)");
 
-        //french2field.put("Critère de diffusion" , ContactField.); //=sensitivity
-        //field2french.put(ContactField. , "Critère de diffusion"); //=sensitivity
+        //french2field.put("Crit\u00e8re de diffusion" , ContactField.); //=sensitivity
+        //field2french.put(ContactField. , "Crit\u00e8re de diffusion"); //=sensitivity
 
-        //french2field.put("Disponibilité Internet" , ContactField.); //=internet free/busy
-        //field2french.put(ContactField. , "Disponibilité Internet"); //=internet free/busy
+        //french2field.put("Disponibilit\u00e9 Internet" , ContactField.); //=internet free/busy
+        //field2french.put(ContactField. , "Disponibilit\u00e9 Internet"); //=internet free/busy
 
         //french2field.put("Emplacement" , ContactField.); //= location
         //field2french.put(ContactField. , "Emplacement"); //= location
@@ -286,14 +286,14 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         //french2field.put("Initiales" , ContactField.); // = initials
         //field2french.put(ContactField. , "Initiales"); // = initials
 
-        //french2field.put("Kilométrage" , ContactField.); //= mileage
-        //field2french.put(ContactField. , "Kilométrage"); //= mileage
+        //french2field.put("Kilom\u00e9trage" , ContactField.); //= mileage
+        //field2french.put(ContactField. , "Kilom\u00e9trage"); //= mileage
 
         //french2field.put("Langue" , ContactField.); // = language
         //field2french.put(ContactField. , "Langue"); // = language
 
-        //french2field.put("Mots clés" , ContactField.); // = keywords
-        //field2french.put(ContactField. , "Mots clés"); // = keywords
+        //french2field.put("Mots cl\u00e9s" , ContactField.); // = keywords
+        //field2french.put(ContactField. , "Mots cl\u00e9s"); // = keywords
 
         french2field.put("Nom de l'assistant(e)" , ContactField.ASSISTANT_NAME);
         field2french.put(ContactField.ASSISTANT_NAME , "Nom de l'assistant(e)");
@@ -301,8 +301,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Notes" , ContactField.NOTE);
         field2french.put(ContactField.NOTE , "Notes");
 
-        french2field.put("Numéro d'identification de l'organisation" , ContactField.COMMERCIAL_REGISTER); //guessed
-        field2french.put(ContactField.COMMERCIAL_REGISTER , "Numéro d'identification de l'organisation"); //guessed
+        french2field.put("Num\u00e9ro d'identification de l'organisation" , ContactField.COMMERCIAL_REGISTER); //guessed
+        field2french.put(ContactField.COMMERCIAL_REGISTER , "Num\u00e9ro d'identification de l'organisation"); //guessed
 
         french2field.put("Page Web" , ContactField.URL); //guessed
         field2french.put(ContactField.URL , "Page Web"); //guessed
@@ -310,17 +310,17 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         //french2field.put("Passe-temps" , ContactField.); //= hobby
         //field2french.put(ContactField. , "Passe-temps"); //= hobby
 
-        //french2field.put("Priorité" , ContactField.); //= priority
-        //field2french.put(ContactField. , "Priorité"); //= priority
+        //french2field.put("Priorit\u00e9" , ContactField.); //= priority
+        //field2french.put(ContactField. , "Priorit\u00e9"); //= priority
 
-        //french2field.put("Privé" , ContactField.); // = private
-        //field2french.put(ContactField. , "Privé"); // = private
+        //french2field.put("Priv\u00e9" , ContactField.); // = private
+        //field2french.put(ContactField. , "Priv\u00e9"); // = private
 
         french2field.put("Profession" , ContactField.PROFESSION);
         field2french.put(ContactField.PROFESSION , "Profession");
 
-        //french2field.put("Recommandé par" , ContactField.); // = referred by
-        //field2french.put(ContactField. , "Recommandé par"); // = referred by
+        //french2field.put("Recommand\u00e9 par" , ContactField.); // = referred by
+        //field2french.put(ContactField. , "Recommand\u00e9 par"); // = referred by
 
         french2field.put("Responsable" , ContactField.MANAGER_NAME); //guessed (by Antje)
         field2french.put(ContactField.MANAGER_NAME , "Responsable"); //guessed (by Antje)
@@ -344,21 +344,21 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         //field2french.put(ContactField. , "Utilisateur 4");
 
 
-	}
-	
-	public ContactField getFieldByName(String name){
-		return french2field.get(name);
-	}
-	
-	public String getNameOfField(ContactField field){
-		return field2french.get(field);
-	}
-	
-	public Collection<String> getNamesOfFields(){
-		return field2french.values();
-	}
-	
+        }
+
+        public ContactField getFieldByName(String name){
+                return french2field.get(name);
+        }
+
+        public String getNameOfField(ContactField field){
+                return field2french.get(field);
+        }
+
+        public Collection<String> getNamesOfFields(){
+                return field2french.values();
+        }
+
     public Collection<ContactField> getSupportedFields(){
-    	return french2field.values(); 
+        return french2field.values(); 
     }
 }

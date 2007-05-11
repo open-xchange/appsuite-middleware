@@ -1,3 +1,6 @@
+* 2007-05-10 - tobias.prinz@open-xchange.com
+ - Removed special chars and used Unicode \u??? style
+
 * 2007-05-11 - thorben.betten@open-xchange.com
 
  - Added preparations to distinguish between imap login and user name when
