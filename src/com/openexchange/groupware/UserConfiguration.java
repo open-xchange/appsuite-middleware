@@ -354,7 +354,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		if (accessibleModulesComputed) {
 			return cloneAccessibleModules();
 		}
-		final SmartIntArray array = new SmartIntArray(6);
+		final SmartIntArray array = new SmartIntArray(7);
 		if (hasTask()) {
 			array.append(FolderObject.TASK);
 		}
