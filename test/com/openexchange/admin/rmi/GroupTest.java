@@ -145,7 +145,6 @@ public class GroupTest extends AbstractTest {
         assertEquals("displayname id not equal", addgroup.getDisplayname(), srv_group.getDisplayname());
         assertEquals("id not equals", addgroup.getId(), srv_group.getId());
         assertEquals("identifier not equal",addgroup.getName(), srv_group.getName());
-        assertEquals("email not equal", addgroup.getEmail(), srv_group.getEmail());
     }
 
     @Test
@@ -246,7 +245,6 @@ public class GroupTest extends AbstractTest {
         assertEquals("displayname id not equal", addgroup.getDisplayname(), srv_response.getDisplayname());
         assertEquals("id not equals", addgroup.getId(), srv_response.getId());
         assertEquals("identifier not equal", addgroup.getName(), srv_response.getName());
-        assertEquals("email not equal", addgroup.getEmail(),srv_response.getEmail());       
 
         // change the data of the group local
         createChangeGroupData(addgroup);
@@ -261,7 +259,6 @@ public class GroupTest extends AbstractTest {
         assertEquals("displayname id not equal", addgroup.getDisplayname(), remote_grp.getDisplayname());
         assertEquals("id not equals", addgroup.getId(), remote_grp.getId());
         assertEquals("identifier not equal", addgroup.getName(), remote_grp.getName());
-        assertEquals("email not equal", addgroup.getEmail(),remote_grp.getEmail());  
     }
 
     @Test
@@ -361,7 +358,6 @@ public class GroupTest extends AbstractTest {
         System.out.println("GROUPB" + b.toString());
         
         assertEquals("displayname not equal", a.getDisplayname(), b.getDisplayname());
-        assertEquals("email not equal", a.getEmail(), b.getEmail());
         assertEquals("name not equal", a.getName(), b.getName());
         assertEquals("members not equal", a.getMembers(), b.getMembers());
         assertEquals("id not equal", a.getId(), b.getId());
