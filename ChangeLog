@@ -7,6 +7,7 @@
  - Added preparations to distinguish between imap login and user name when
    trying to determine the user ID on ACL operations
  - Bugfix #7107: More tolerant parsing of VCard's N element
+ - Bugfix #7132 again: Hopefully counting now works correct
 
 * 2007-05-11 - marcus.klein@open-xchange.com
 

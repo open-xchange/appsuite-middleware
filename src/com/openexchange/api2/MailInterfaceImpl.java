@@ -1067,7 +1067,6 @@ public class MailInterfaceImpl implements MailInterface {
 				} catch (MessagingException e) {
 					LOG.error(e.getMessage(), e);
 				} finally {
-					mailInterfaceMonitor.changeNumActive(false);
 					imapCon.resetImapFolder();
 				}
 			}
@@ -4471,31 +4470,27 @@ public class MailInterfaceImpl implements MailInterface {
 			newFolder.open(Folder.READ_WRITE);
 			mailInterfaceMonitor.changeNumActive(true);
 			newFolder.setSubscribed(toMove.isSubscribed());
-		} catch (ReadOnlyFolderException e) {
-			throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), newFolder.getFullName());
-		} finally {
 			newFolder.close(false);
 			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+		} catch (ReadOnlyFolderException e) {
+			throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(), newFolder.getFullName());
 		}
 		if ((toMoveType & Folder.HOLDS_MESSAGES) > 0) {
 			/*
 			 * Copy messages
 			 */
-			try {
-				if (!toMove.isOpen()) {
-					toMove.open(Folder.READ_ONLY);
-					mailInterfaceMonitor.changeNumActive(true);
-				}
-				final long start = System.currentTimeMillis();
-				try {
-					toMove.copyMessages(toMove.getMessages(), newFolder);
-				} finally {
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				}
-			} finally {
-				toMove.close(false);
-				mailInterfaceMonitor.changeNumActive(false);
+			if (!toMove.isOpen()) {
+				toMove.open(Folder.READ_ONLY);
+				mailInterfaceMonitor.changeNumActive(true);
 			}
+			final long start = System.currentTimeMillis();
+			try {
+				toMove.copyMessages(toMove.getMessages(), newFolder);
+			} finally {
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
+			toMove.close(false);
+			mailInterfaceMonitor.changeNumActive(false);
 		}
 		/*
 		 * Iterate subfolders
