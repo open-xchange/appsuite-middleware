@@ -256,8 +256,9 @@ public class EffectivePermission extends OCLPermission {
 		if (userConfig.getUserId() == getEntity()) {
 			userConfigIsValid = true;
 		} else {
-			for (int i = 0; i < userConfig.getGroups().length && !userConfigIsValid; i++) {
-				userConfigIsValid = (userConfig.getGroups()[i] == getEntity());
+			final int[] groups = userConfig.getGroups();
+			for (int i = 0; i < groups.length && !userConfigIsValid; i++) {
+				userConfigIsValid = (groups[i] == getEntity());
 			}
 		}
 		return userConfigIsValid;

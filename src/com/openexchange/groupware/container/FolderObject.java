@@ -835,9 +835,10 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				getModule(), userConfig);
 		maxPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
 				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-		final int[] idArr = new int[userConfig.getGroups().length + 1];
+		final int[] groups = userConfig.getGroups();
+		final int[] idArr = new int[groups.length + 1];
 		idArr[0] = userId;
-		System.arraycopy(userConfig.getGroups(), 0, idArr, 1, userConfig.getGroups().length);
+		System.arraycopy(groups, 0, idArr, 1, groups.length);
 		Arrays.sort(idArr);
 		if (!containsPermissions()) {
 			setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));

@@ -8,6 +8,7 @@
    trying to determine the user ID on ACL operations
  - Bugfix #7107: More tolerant parsing of VCard's N element
  - Bugfix #7132 again: Hopefully counting now works correct
+ - Remember user's groups when accessing through user configuration
 
 * 2007-05-11 - marcus.klein@open-xchange.com
 
