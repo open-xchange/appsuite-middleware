@@ -77,18 +77,36 @@ import com.openexchange.sessiond.SessionObject;
  * 
  */
 public class IMAPPropertiesFactory {
-
-	private static final String LOGINTYPE_GLOBAL = "global";
-
-	private static final String LOGINTYPE_ANONYMOUS = "anonymous";
-
-	private static final String LOGINTYPE_USER = "user";
-
-	private static final String CREDSRC_USER_IMAP_LOGIN = "user.imapLogin";
-
-	private static final String CREDSRC_OTHER = "other";
-
-	private static final String CREDSRC_SESSION = "session";
+	
+	public static enum IMAPCredSrc {
+		SESSION("session"), USER_IMAPLOGIN("user.imapLogin"), OTHER("other");
+		
+		private final String str;
+		
+		private IMAPCredSrc(final String str) {
+			this.str = str;
+		}
+		
+		@Override
+		public String toString() {
+			return str;
+		}
+	}
+	
+	public static enum IMAPLoginType {
+		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous");
+		
+		private final String str;
+		
+		private IMAPLoginType(final String str) {
+			this.str = str;
+		}
+		
+		@Override
+		public String toString() {
+			return str;
+		}
+	}
 
 	private static Properties props;
 	
@@ -254,14 +272,16 @@ public class IMAPPropertiesFactory {
 	public static IMAPProperties getImapProperties(final SessionObject sessionObj)
 			throws IMAPException {
 		checkImapPropFile();
-		final String loginType = props.getProperty(PROP_LOGINTYPE);
-		if (loginType == null) {
-			throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE)
-					.append(STR_NOTSETIN).append(PROP_FILE).toString());
-		}
+		/*
+		 * Load global IMAP properties if not done, yet
+		 */
+		loadGlobalImapProperties(false);
+		/*
+		 * Fetch user object and create its IMAP properties
+		 */
 		final User userObj = sessionObj.getUserObject();
 		final IMAPProperties imapProps = new IMAPProperties(sessionObj.getUserObject().getId(), sessionObj.getContext());
-		if (loginType.equalsIgnoreCase(LOGINTYPE_GLOBAL)) {
+		if (IMAPLoginType.GLOBAL.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = props.getProperty(PROP_IMAPSERVER);
 			if (imapServer == null) {
 				throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_IMAPSERVER).append(
@@ -298,8 +318,7 @@ public class IMAPPropertiesFactory {
 			 * Set login to user's email address
 			 */
 			imapProps.setImapLogin(userObj.getMail());
-		} else if (loginType.equalsIgnoreCase(LOGINTYPE_USER)) {
-			final String credSrc = props.getProperty(PROP_CREDSRC);
+		} else if (IMAPLoginType.USER.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = userObj.getImapServer();
 			int imapPort = 143;
 			int pos = imapServer.indexOf(':');
@@ -318,20 +337,18 @@ public class IMAPPropertiesFactory {
 			imapProps.setImapPort(imapPort);
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
-			if (credSrc == null || credSrc.equalsIgnoreCase(CREDSRC_SESSION)) {
+			if (IMAPProperties.getImapCredSrcInternal() == null
+					|| IMAPCredSrc.SESSION.equals(IMAPProperties.getImapCredSrcInternal())) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
-			} else if (credSrc.equalsIgnoreCase(CREDSRC_OTHER)) {
+			} else if (IMAPCredSrc.OTHER.equals(IMAPProperties.getImapCredSrcInternal())) {
 				imapProps.setImapPassword(TEST_PW);
 				imapProps.setImapLogin(getRandomTestLogin());
-			} else if (credSrc.equalsIgnoreCase(CREDSRC_USER_IMAP_LOGIN)) {
+			} else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrcInternal())) {
 				imapProps.setImapPassword(sessionObj.getPassword());
 				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
-			} else {
-				throw new IMAPException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
-						+ credSrc);
 			}
-		} else if (loginType.equalsIgnoreCase(LOGINTYPE_ANONYMOUS)) {
+		} else if (IMAPLoginType.ANONYMOUS.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = userObj.getImapServer();
 			int imapPort = 143;
 			int pos = imapServer.indexOf(':');
@@ -346,20 +363,13 @@ public class IMAPPropertiesFactory {
 				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
 				smtpServer = smtpServer.substring(0, pos);
 			}
-			imapProps.setImapLogin(LOGINTYPE_ANONYMOUS);
+			imapProps.setImapLogin(IMAPLoginType.ANONYMOUS.toString());
 			imapProps.setImapPassword("");
 			imapProps.setImapServer(imapServer);
 			imapProps.setImapPort(imapPort);
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
-		} else {
-			throw new IMAPException("Unknown value in property " + PROP_LOGINTYPE + " set in " + PROP_FILE + ": "
-					+ loginType);
 		}
-		/*
-		 * Load global IMAP properties if not done, yet
-		 */
-		loadGlobalImapProperties(false);
 		return imapProps;
 	}
 
@@ -399,6 +409,38 @@ public class IMAPPropertiesFactory {
 
 				IMAPProperties.setImapSearch(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSEARCH)));
 				logBuilder.append("\tIMAP-Search: ").append(IMAPProperties.isImapSearchInternal()).append('\n');
+				
+				final String loginType = props.getProperty(PROP_LOGINTYPE);
+				if (loginType == null) {
+					throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE)
+							.append(STR_NOTSETIN).append(PROP_FILE).toString());
+				}
+				if (IMAPLoginType.GLOBAL.toString().equalsIgnoreCase(loginType)) {
+					IMAPProperties.setImapLoginType(IMAPLoginType.GLOBAL);
+				} else if (IMAPLoginType.USER.toString().equalsIgnoreCase(loginType)) {
+					IMAPProperties.setImapLoginType(IMAPLoginType.USER);
+				} else if (IMAPLoginType.ANONYMOUS.toString().equalsIgnoreCase(loginType)) {
+					IMAPProperties.setImapLoginType(IMAPLoginType.ANONYMOUS);
+				} else {
+					throw new IMAPException("Unknown value in property " + PROP_LOGINTYPE + " set in " + PROP_FILE
+							+ ": " + loginType);
+				}
+				logBuilder.append("\tIMAP Login Type: ").append(IMAPProperties.getImapLoginTypeInternal().toString())
+						.append('\n');
+
+				final String credSrc = props.getProperty(PROP_CREDSRC);
+				if (credSrc == null || credSrc.equalsIgnoreCase(IMAPCredSrc.SESSION.toString())) {
+					IMAPProperties.setImapCredSrc(IMAPCredSrc.SESSION);
+				} else if (credSrc.equalsIgnoreCase(IMAPCredSrc.OTHER.toString())) {
+					IMAPProperties.setImapCredSrc(IMAPCredSrc.OTHER);
+				} else if (credSrc.equalsIgnoreCase(IMAPCredSrc.USER_IMAPLOGIN.toString())) {
+					IMAPProperties.setImapCredSrc(IMAPCredSrc.USER_IMAPLOGIN);
+				} else {
+					throw new IMAPException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
+							+ credSrc);
+				}
+				logBuilder.append("\tIMAP Credentials Source: ").append(
+						IMAPProperties.getImapCredSrcInternal().toString()).append('\n');
 
 				IMAPProperties.setMessageFetchLimit(Integer.parseInt(props.getProperty(PROP_IMAP_MESSAGE_FETCH_LIMIT,
 						"1000")));

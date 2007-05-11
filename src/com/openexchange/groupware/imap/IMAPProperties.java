@@ -133,6 +133,10 @@ public class IMAPProperties {
 	private static Properties javaMailProperties;
 	
 	private static boolean spamEnabled;
+	
+	private static IMAPPropertiesFactory.IMAPCredSrc imapCredSrc;
+	
+	private static IMAPPropertiesFactory.IMAPLoginType imapLoginType;
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -541,6 +545,32 @@ public class IMAPProperties {
 
 	public static void setSpamEnabled(final boolean spamEnabled) {
 		IMAPProperties.spamEnabled = spamEnabled;
+	}
+
+	public static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrc() throws IMAPException {
+		checkGlobalImapProperties();
+		return imapCredSrc;
+	}
+	
+	static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrcInternal() {
+		return imapCredSrc;
+	}
+
+	public static void setImapCredSrc(final IMAPPropertiesFactory.IMAPCredSrc imapCredSrc) {
+		IMAPProperties.imapCredSrc = imapCredSrc;
+	}
+
+	public static IMAPPropertiesFactory.IMAPLoginType getImapLoginType() throws IMAPException {
+		checkGlobalImapProperties();
+		return imapLoginType;
+	}
+	
+	static IMAPPropertiesFactory.IMAPLoginType getImapLoginTypeInternal() {
+		return imapLoginType;
+	}
+
+	public static void setImapLoginType(final IMAPPropertiesFactory.IMAPLoginType imapLoginType) {
+		IMAPProperties.imapLoginType = imapLoginType;
 	}
 
 	public static Properties getJavaMailProperties() throws IMAPException {

@@ -146,31 +146,80 @@ public class OXUser2IMAPLogin {
 		final UserStorage us = UserStorage.getInstance(ctx);
 		return us.getUserId(imapLogin);
 	}
-	
+
 	private static final String AUTH_ID_ANYONE = "anyone";
 
 	/**
-	 * Determines the user ID whose IMAP login mtaches given
+	 * Determines the user ID whose user name matches given
+	 * <code>userName</code>. <b>NOTE:</b> this routine returns
+	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
+	 * if ACLs are disabled per config file (imap.properties).
+	 * 
+	 * @param userName -
+	 *            the user name
+	 * @param userStorage -
+	 *            the associated user storage implementation
+	 * @return the user ID whose IMAP login matches given <code>userName</code>
+	 * @throws IMAPException
+	 * @throws LdapException
+	 */
+	public static int getUserIDByName(final String userName, final UserStorage userStorage) throws IMAPException,
+			LdapException {
+		return getUserID(userName, userStorage, false);
+	}
+
+	/**
+	 * Determines the user ID whose IMAP login matches given
 	 * <code>imapLogin</code>. <b>NOTE:</b> this routine returns
 	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
 	 * if ACLs are disabled per config file (imap.properties).
 	 * 
 	 * @param imapLogin -
-	 *            the IMAP login
+	 *            the user name
 	 * @param userStorage -
 	 *            the associated user storage implementation
-	 * @return the user ID whose IMAP login mtaches given <code>imapLogin</code>
+	 * @return the user ID whose IMAP login matches given <code>imapLogin</code>
 	 * @throws IMAPException
 	 * @throws LdapException
 	 */
-	public static int getUserID(final String imapLogin, final UserStorage userStorage) throws IMAPException,
+	public static int getUserIDByIMAPLogin(final String imapLogin, final UserStorage userStorage) throws IMAPException,
 			LdapException {
+		return getUserID(imapLogin, userStorage, true);
+	}
+
+	/**
+	 * Determines the user ID whose either IMAP login or user name matches given
+	 * <code>pattern</code>. <b>NOTE:</b> this routine returns
+	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
+	 * if ACLs are disabled per config file (imap.properties).
+	 * 
+	 * @param pattern -
+	 *            the pattern for either IMAP login or user name
+	 * @param userStorage -
+	 *            the associated user storage implementation
+	 * @param isIMAPLogin -
+	 *            <code>true</code> to indicate pattern to be the IMAP login
+	 *            or <code>false</code> for user name
+	 * @return the user ID whose IMAP login matches given <code>pattern</code>
+	 * @throws IMAPException
+	 * @throws LdapException
+	 */
+	public static int getUserID(final String pattern, final UserStorage userStorage, final boolean isIMAPLogin)
+			throws IMAPException, LdapException {
 		if (!IMAPProperties.isSupportsACLs()) {
 			return -1;
-		} else if (AUTH_ID_ANYONE.equalsIgnoreCase(imapLogin)) {
+		} else if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
+		} else if (isIMAPLogin) {
+			/*
+			 * Find user name by user's imap login
+			 */
+			// TODO: Additional method to get user name from imap login
 		}
-		return userStorage.getUserId(imapLogin);
+		/*
+		 * Find by name
+		 */
+		return userStorage.getUserId(pattern);
 	}
 
 }

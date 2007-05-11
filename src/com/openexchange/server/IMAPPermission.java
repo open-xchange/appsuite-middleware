@@ -425,7 +425,7 @@ public class IMAPPermission extends OCLPermission {
 	 */
 	public final void parseACL(final ACL acl) throws IMAPException, LdapException {
 		this.acl = acl;
-		setEntity(OXUser2IMAPLogin.getUserID(acl.getName(), getUserStorage()));
+		setEntity(OXUser2IMAPLogin.getUserIDByName(acl.getName(), getUserStorage()));
 		parseRights(acl.getRights());
 	}
 

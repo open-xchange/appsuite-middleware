@@ -1,3 +1,8 @@
+* 2007-05-11 - thorben.betten@open-xchange.com
+
+ - Added preparations to distinguish between imap login and user name when
+   trying to determine the user ID on ACL operations
+
 * 2007-05-11 - marcus.klein@open-xchange.com
 
   - Bugfix #7217: Removing first slash from href of webdav xml now works again
