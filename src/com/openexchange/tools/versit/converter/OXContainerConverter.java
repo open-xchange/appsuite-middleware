@@ -96,6 +96,8 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
  */
 public class OXContainerConverter {
 
+	private static final String STR_EMPTY = "";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXContainerConverter.class);
 
@@ -723,14 +725,11 @@ public class OXContainerConverter {
 		Property property = object.getProperty("N");
 		if (property != null) {
 			final ArrayList N = (ArrayList) property.getValue();
-			if (N.size() != 5) {
-				throw new ConverterException("Invalid property N");
-			}
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.MIDDLE_NAME), N.get(2), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.TITLE), N.get(3), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUFFIX), N.get(4), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0) == null ? STR_EMPTY : N.get(0), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1) == null ? STR_EMPTY : N.get(1), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.MIDDLE_NAME), N.get(2) == null ? STR_EMPTY : N.get(2), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.TITLE), N.get(3) == null ? STR_EMPTY : N.get(3), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUFFIX), N.get(4) == null ? STR_EMPTY : N.get(4), " ");
 		}
 		// NICKNAME
 		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(ContactObject.NICKNAME));
