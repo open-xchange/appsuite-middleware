@@ -259,14 +259,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
                 for (final String elem : alias) {
-                    stmt = write_ox_con
+                    if(elem!=null && elem.trim().length()>0){
+                        stmt = write_ox_con
                             .prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                    stmt.setInt(1, context_id);
-                    stmt.setInt(2, user_id);
-                    stmt.setString(3, "alias");
-                    stmt.setString(4, elem);
-                    stmt.executeUpdate();
-                    stmt.close();
+                        stmt.setInt(1, context_id);
+                        stmt.setInt(2, user_id);
+                        stmt.setString(3, "alias");
+                        stmt.setString(4, elem);
+                        stmt.executeUpdate();
+                        stmt.close();
+                    }
                 }
             }
 
