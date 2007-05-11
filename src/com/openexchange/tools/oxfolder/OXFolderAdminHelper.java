@@ -169,7 +169,7 @@ public class OXFolderAdminHelper {
 				}
 			}
 			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
 		}
 	}
@@ -468,7 +468,7 @@ public class OXFolderAdminHelper {
 					writeCon.setAutoCommit(true);
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -540,7 +540,7 @@ public class OXFolderAdminHelper {
 			 */
 			try {
 				SystemConfig.init();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				/*
 				 * Propfile could NOT be loaded
 				 */
@@ -647,9 +647,9 @@ public class OXFolderAdminHelper {
 				LOG.info(new StringBuilder("User ").append(userId).append(" successfully created").append(
 						" in context ").append(cid).toString());
 			}
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(cid));
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
 		}
 	}
