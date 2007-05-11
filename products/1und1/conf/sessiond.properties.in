@@ -24,7 +24,7 @@ com.openexchange.sessiond.sessionContainerTimeout:4200000
 com.openexchange.sessiond.numberOfSessionContainers:8
 
 # max sessions in sessiond
-com.openexchange.sessiond.maxSession:5000
+com.openexchange.sessiond.maxSession:0
 
 # accept only sockets from this address
 com.openexchange.sessiond.serverBindAddress:localhost
