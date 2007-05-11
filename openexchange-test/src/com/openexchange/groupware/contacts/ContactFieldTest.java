@@ -54,13 +54,13 @@ import junit.framework.TestCase;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 public class ContactFieldTest extends TestCase {
-	
+
 	public static void testFrenchOutlook(){
 		assertEquals("Checking title in French," , ContactField.TITLE, ContactField.getByFrenchOutlookName("Titre"));
-		assertEquals("Checking middle name in French," , ContactField.MIDDLE_NAME, ContactField.getByFrenchOutlookName("Deuxième prénom"));
+		assertEquals("Checking middle name in French," , ContactField.MIDDLE_NAME, ContactField.getByFrenchOutlookName("Deuxi\u00e8me pr\u00e9nom"));
 
 		assertEquals("Checking field of Titre," , "Titre" , ContactField.TITLE.getFrenchOutlookName());
-		assertEquals("Checking field of Deuxième prénom," , "Deuxième prénom" , ContactField.MIDDLE_NAME.getFrenchOutlookName());
+		assertEquals("Checking field of Deuxi\u00e8me pr\u00e9nom," , "Deuxi\u00e8me pr\u00e9nom" , ContactField.MIDDLE_NAME.getFrenchOutlookName());
 	}
 
 	public static void testGermanOutlook(){
@@ -70,7 +70,7 @@ public class ContactFieldTest extends TestCase {
 		assertEquals("Checking field of Anrede," , "Anrede" , ContactField.TITLE.getGermanOutlookName());
 		assertEquals("Checking field of Weitere Vornamen," , "Weitere Vornamen" , ContactField.MIDDLE_NAME.getGermanOutlookName());
 	}
-	
+
 	public static void testEnglishOutlook(){
 		assertEquals("Checking title in English," , ContactField.TITLE, ContactField.getByEnglishOutlookName("Title"));
 		assertEquals("Checking middle name in English," , ContactField.MIDDLE_NAME, ContactField.getByEnglishOutlookName("Middle Name"));
@@ -79,3 +79,4 @@ public class ContactFieldTest extends TestCase {
 		assertEquals("Checking field of Middle Name," , "Middle Name" , ContactField.MIDDLE_NAME.getEnglishOutlookName());
 	}
 }
+
