@@ -118,10 +118,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 	
-	
 	public Element marshalHREF(String uri) {
 		final Element href = new Element("href", DAV_NS);
-		if(uri.charAt(0) == '/') {
+		if (uri.length() > 0 && uri.charAt(0) == '/') {
 			uri = uri.substring(1);
 		}
 		

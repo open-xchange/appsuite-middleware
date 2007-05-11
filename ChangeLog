@@ -1,3 +1,8 @@
+* 2007-05-11 - marcus.klein@open-xchange.com
+
+  - Bugfix #7217: Removing first slash from href of webdav xml now works again
+    for root folder.
+
 * 2007-05-10 - tobias.prinz@open-xchange.com
 
  - Fixed bug #7105, part 2: Outlook CSV files may now be in English,
