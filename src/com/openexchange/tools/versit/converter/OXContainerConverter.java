@@ -96,8 +96,6 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
  */
 public class OXContainerConverter {
 
-	private static final String STR_EMPTY = "";
-
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXContainerConverter.class);
 
@@ -143,7 +141,7 @@ public class OXContainerConverter {
 	private static Method getSetMethod(final Class containerObjClass, final String methodName, final Class typeClass) {
 		try {
 			return containerObjClass.getMethod(methodName, new Class[] { typeClass });
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			LOG.error(e);
 			return null;
 		}
@@ -436,7 +434,7 @@ public class OXContainerConverter {
 		String domain = "localhost";
 		try {
 			domain = InetAddress.getLocalHost().getCanonicalHostName();
-		} catch (final UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		atdomain = new StringBuilder().append('@').append(domain).toString();
@@ -455,14 +453,14 @@ public class OXContainerConverter {
 
 	private boolean sendFloating;
 
-	public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
+	public OXContainerConverter(TimeZone timezone, String organizerMailAddress) {
 		super();
 		this.timezone = timezone;
 		this.organizerMailAddress = organizerMailAddress;
 		session = null;
 	}
 
-	public OXContainerConverter(final SessionObject session) {
+	public OXContainerConverter(SessionObject session) {
 		super();
 		this.session = session;
 		this.timezone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
@@ -588,7 +586,7 @@ public class OXContainerConverter {
 			// VALARM
 			AddAlarms(taskContainer, object);
 			return taskContainer;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}
@@ -703,7 +701,7 @@ public class OXContainerConverter {
 			appContainer.setCategories(cats.toString());
 		}
 		if (exdates.size() != 0) {
-			final Date[] dates = new Date[exdates.size()];
+			Date[] dates = new Date[exdates.size()];
 			for (int i = 0; i < dates.length; i++) {
 				dates[i] = ((DateTimeValue) exdates.get(i)).calendar.getTime();
 			}
@@ -725,11 +723,14 @@ public class OXContainerConverter {
 		Property property = object.getProperty("N");
 		if (property != null) {
 			final ArrayList N = (ArrayList) property.getValue();
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0) == null ? STR_EMPTY : N.get(0), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1) == null ? STR_EMPTY : N.get(1), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.MIDDLE_NAME), N.get(2) == null ? STR_EMPTY : N.get(2), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.TITLE), N.get(3) == null ? STR_EMPTY : N.get(3), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUFFIX), N.get(4) == null ? STR_EMPTY : N.get(4), " ");
+			if (N.size() != 5) {
+				throw new ConverterException("Invalid property N");
+			}
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.MIDDLE_NAME), N.get(2), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.TITLE), N.get(3), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUFFIX), N.get(4), " ");
 		}
 		// NICKNAME
 		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(ContactObject.NICKNAME));
@@ -740,7 +741,7 @@ public class OXContainerConverter {
 			if (property.getValue() instanceof byte[]) {
 				try {
 					value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), "ISO-8859-1"));
-				} catch (final IOException e) {
+				} catch (IOException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
@@ -750,7 +751,7 @@ public class OXContainerConverter {
 			}
 			try {
 				contactContainer.setImage1(value.getBytes("ISO-8859-1"));
-			} catch (final UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				LOG.error("Image could not be set", e);
 			}
 		}
@@ -858,7 +859,7 @@ public class OXContainerConverter {
 				if (type != null) {
 					isWork = false;
 					for (int j = 0; j < type.getValueCount(); j++) {
-						final String value = type.getValue(j).getText();
+						String value = type.getValue(j).getText();
 						isHome |= value.equalsIgnoreCase("home");
 						isWork |= value.equalsIgnoreCase("work");
 					}
@@ -892,7 +893,7 @@ public class OXContainerConverter {
 				final Parameter type = property.getParameter("TYPE");
 				if (type != null) {
 					for (int j = 0; j < type.getValueCount(); j++) {
-						final String value = type.getValue(j).getText();
+						String value = type.getValue(j).getText();
 						if (idx == WORK) {
 							if (value.equalsIgnoreCase("work")) {
 								idx = WORK;
@@ -918,7 +919,7 @@ public class OXContainerConverter {
 				if (!isVoice && !isFax) {
 					isVoice = true;
 				}
-				final Object value = property.getValue();
+				Object value = property.getValue();
 				if (isVoice) {
 					ComplexProperty(contactContainer, phones[idx][VOICE], index[idx][VOICE], value);
 				}
@@ -928,7 +929,7 @@ public class OXContainerConverter {
 			}
 			// EMAIL
 			else if (property.name.equals("EMAIL")) {
-				final String value = property.getValue().toString();
+				String value = property.getValue().toString();
 				if (value != null && value.length() > 0) {
 					ComplexProperty(contactContainer, emails, emailIndex, value);
 				}
@@ -957,7 +958,7 @@ public class OXContainerConverter {
 				return true;
 			}
 			return false;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -972,7 +973,7 @@ public class OXContainerConverter {
 			final Object[] args = { property.getValue().toString() };
 			setStringMethod.invoke(containerObj, args);
 			return true;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -993,7 +994,7 @@ public class OXContainerConverter {
 			final Object[] args = { date.calendar.getTime() };
 			setDateMethod.invoke(containerObj, args);
 			return true;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1019,7 +1020,7 @@ public class OXContainerConverter {
 			final Object[] args = { cal.getTime() };
 			setDateMethod.invoke(containerObj, args);
 			return true;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1033,7 +1034,7 @@ public class OXContainerConverter {
 			calContainerObj.addParticipant(userParticipant);
 			// TODO: Look up users which matches found email address. If found
 			// USER participant else EXTERNAL participant
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1177,7 +1178,7 @@ public class OXContainerConverter {
 			}
 			final Object[] args = { sb.toString() };
 			setMethod.invoke(containerObj, args);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1190,7 +1191,7 @@ public class OXContainerConverter {
 			}
 			final Object[] args = { value };
 			phones[index[0]++].invoke(containerObj, args);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1422,7 +1423,7 @@ public class OXContainerConverter {
 		if (contact.getImage1() != null) {
 			try {
 				s = new String(contact.getImage1(), "ISO-8859-1");
-			} catch (final UnsupportedEncodingException e2) {
+			} catch (UnsupportedEncodingException e2) {
 				LOG.error(e2);
 				throw new ConverterException(e2);
 			}
@@ -1430,13 +1431,13 @@ public class OXContainerConverter {
 		if (s != null) {
 			try {
 				addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(s));
-			} catch (final URISyntaxException e) {
+			} catch (URISyntaxException e) {
 				try {
 					final Parameter type = new Parameter("TYPE");
 					type.addValue(new ParameterValue("JPEG"));
 					addProperty(object, "PHOTO", "ENCODING", new String[] { "B" },
 							(new BASE64Encoding()).decode(s).getBytes("ISO-8859-1")).addParameter(type);
-				} catch (final IOException e1) {
+				} catch (IOException e1) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e1);
 					throw ce;
@@ -1531,7 +1532,7 @@ public class OXContainerConverter {
 			adr.add(makeList(getPostalCode(postalCode, contactContainer)));
 			adr.add(makeList(getCountry(country, contactContainer)));
 			addProperty(object, "ADR", "TYPE", type, adr);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1614,8 +1615,8 @@ public class OXContainerConverter {
 
 		private final Object array;
 
-		public ArrayIterator(final Object array) {
-			final Class type = array.getClass();
+		public ArrayIterator(Object array) {
+			Class type = array.getClass();
 			if (!type.isArray()) {
 				throw new IllegalArgumentException("MailInterface.ArrayIterator:\tInvalid type: " + type);
 			}
@@ -1732,14 +1733,14 @@ public class OXContainerConverter {
 			if (address != null) {
 				try {
 					property.setValue(new URI("mailto:" + address));
-				} catch (final URISyntaxException e) {
+				} catch (URISyntaxException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
 				}
 				object.addProperty(property);
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}
@@ -1757,14 +1758,14 @@ public class OXContainerConverter {
 			if (address != null) {
 				try {
 					property.setValue(new URI("mailto:" + address));
-				} catch (final URISyntaxException e) {
+				} catch (URISyntaxException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
 				}
 				object.addProperty(property);
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}
