@@ -928,14 +928,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         && usrdata.getAliases().size() > 0) {
                     final Iterator itr = usrdata.getAliases().iterator();
                     while (itr.hasNext()) {
-                        stmt = write_ox_con
+                       String tmp_mail = itr.next().toString().trim();
+                       if(tmp_mail.length()>0){
+                           stmt = write_ox_con
                                 .prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                        stmt.setInt(1, ctx.getIdAsInt());
-                        stmt.setInt(2, internal_user_id);
-                        stmt.setString(3, "alias");
-                        stmt.setString(4, itr.next().toString());
-                        stmt.executeUpdate();
-                        stmt.close();
+                           stmt.setInt(1, ctx.getIdAsInt());
+                           stmt.setInt(2, internal_user_id);
+                           stmt.setString(3, "alias");
+                           stmt.setString(4, tmp_mail);
+                           stmt.executeUpdate();
+                           stmt.close();
+                       }
                     }
                 }
 
