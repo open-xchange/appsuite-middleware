@@ -69,24 +69,22 @@ public abstract class DataServlet extends PermissionServlet {
 		if (containsParameter(httpServletRequest, name)) {
 			try {
 				return Integer.parseInt(httpServletRequest.getParameter(name));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(_invalidParameter + name, exc);
 			}
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 	
 	public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
 		if (containsParameter(httpServletRequest, name)) {
 			try {
 				return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(_invalidParameter + name, exc);
 			}
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
 	public static String parseStringParameter(final HttpServletRequest httpServletRequest, final String name) {
@@ -96,17 +94,15 @@ public abstract class DataServlet extends PermissionServlet {
 	public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseStringParameter(httpServletRequest, name);
-		} else {
-			throw new OXMandatoryFieldException(_missingField + name);
 		}
+		throw new OXMandatoryFieldException(_missingField + name);
 	}
 	
 	public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseIntParameter(httpServletRequest, name);
-		} else {
-			throw new OXMandatoryFieldException(_missingField + name);
 		}
+		throw new OXMandatoryFieldException(_missingField + name);
 	}
 	
 	public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
@@ -120,18 +116,16 @@ public abstract class DataServlet extends PermissionServlet {
 			}
 			
 			return i;
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
 	public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			final String[] s = httpServletRequest.getParameterValues(name);
 			return s;
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
 	public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
@@ -145,23 +139,21 @@ public abstract class DataServlet extends PermissionServlet {
 			}
 			
 			return i;
-		} else {
-			throw new OXMandatoryFieldException(_missingField + name);
 		}
+		throw new OXMandatoryFieldException(_missingField + name);
 	}
 	
 	public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
 		if (containsParameter(httpServletRequest, name)) {
 			return parseDateParameter(httpServletRequest, name);
-		} else {
-			throw new OXMandatoryFieldException(_missingField + name);
 		}
+		throw new OXMandatoryFieldException(_missingField + name);
 	}
 
 	protected JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final Enumeration e = httpServletRequest.getParameterNames();
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		while (e.hasMoreElements()) {
 			final String name = e.nextElement().toString();
 			final String value = httpServletRequest.getParameter(name);

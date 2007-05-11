@@ -242,30 +242,30 @@ public class AppointmentWriter extends CalendarWriter {
 			if (ao.containsDeleteExceptions()) {
 				final Date[] deleteExceptions = ao.getDeleteException();
 				if (deleteExceptions != null) {
-					final StringBuffer stringBuffer = new StringBuffer();
+					final StringBuilder stringBuilder = new StringBuilder();
 					for (int a = 0; a < deleteExceptions.length; a++) {
 						if (a > 0) {
-							stringBuffer.append(',');
+							stringBuilder.append(',');
 						}
 						
-						stringBuffer.append(deleteExceptions[a].getTime());
+						stringBuilder.append(deleteExceptions[a].getTime());
 					}
-					addElement(CalendarFields.DELETE_EXCEPTIONS, stringBuffer.toString(), e_prop);
+					addElement(CalendarFields.DELETE_EXCEPTIONS, stringBuilder.toString(), e_prop);
 				}
 			}
 			
 			if (ao.containsChangeExceptions()) {
 				final Date[] changeException = ao.getChangeException();
 				if (changeException != null) {
-					final StringBuffer stringBuffer = new StringBuffer();
+					final StringBuilder stringBuilder = new StringBuilder();
 					for (int a = 0; a < changeException.length; a++) {
 						if (a > 0) {
-							stringBuffer.append(',');
+							stringBuilder.append(',');
 						}
 						
-						stringBuffer.append(changeException[a].getTime());
+						stringBuilder.append(changeException[a].getTime());
 					}
-					addElement(CalendarFields.CHANGE_EXCEPTIONS, stringBuffer.toString(), e_prop);
+					addElement(CalendarFields.CHANGE_EXCEPTIONS, stringBuilder.toString(), e_prop);
 				}
 			}
 			

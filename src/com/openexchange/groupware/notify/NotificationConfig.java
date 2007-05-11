@@ -24,7 +24,7 @@ public class NotificationConfig extends AbstractConfig {
 		
 		private String name;
 		
-		private NotificationProperty(String name){
+		private NotificationProperty(final String name){
 			this.name = name;
 		}
 		
@@ -46,25 +46,27 @@ public class NotificationConfig extends AbstractConfig {
         return filename;
 	}
 	
-	public static String getProperty(NotificationProperty prop, String def) {
+	public static String getProperty(final NotificationProperty prop, final String def) {
 		if(!INSTANCE.isPropertiesLoadInternal()) {
 			try {
 				INSTANCE.loadPropertiesInternal();
-			} catch (ConfigurationException e) {
+			} catch (final ConfigurationException e) {
 				LOG.error(e);
 				return def;
 			}
 		}
-		if(!INSTANCE.isPropertiesLoadInternal())
+		if(!INSTANCE.isPropertiesLoadInternal()) {
 			return def;
+		}
 		return INSTANCE.getPropertyInternal(prop.getName(), def);
 	}
 	
-	public static boolean getPropertyAsBoolean(NotificationProperty prop, boolean def) {
-		String boolVal = getProperty(prop,null);
-		if(boolVal == null)
+	public static boolean getPropertyAsBoolean(final NotificationProperty prop, final boolean def) {
+		final String boolVal = getProperty(prop,null);
+		if(boolVal == null) {
 			return def;
-		return Boolean.valueOf(boolVal);
+		}
+		return Boolean.parseBoolean(boolVal);
 	}
 
 }

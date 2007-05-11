@@ -831,10 +831,14 @@ class RemoteCacheServer extends UnicastRemoteObject implements IRemoteCacheServi
 
 		final int remoteType = ircl.getRemoteType();
 		if (remoteType == IRemoteCacheAttributes.CLUSTER) {
-			log.debug("adding cluster listener, listenerAddress [" + listenerAddress + ']');
+			if (log.isDebugEnabled()) {
+				log.debug("adding cluster listener, listenerAddress [" + listenerAddress + ']');
+			}
 			cacheDesc = getClusterListeners(cacheName);
 		} else {
-			log.debug("adding normal listener, listenerAddress [" + listenerAddress + ']');
+			if (log.isDebugEnabled()) {
+				log.debug("adding normal listener, listenerAddress [" + listenerAddress + ']');
+			}
 			cacheDesc = getCacheListeners(cacheName);
 		}
 		final Map eventQMap = cacheDesc.eventQMap;

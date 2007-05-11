@@ -84,19 +84,19 @@ public class Index {
 	 * @throws SQLException
 	 */
 	
-	public static List<Index> findAllIndexes(Connection con, String tableName) throws SQLException {
+	public static List<Index> findAllIndexes(final Connection con, final String tableName) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = con.prepareStatement("SHOW INDEX FROM `"+tableName+"`");
+			stmt = con.prepareStatement("SHOW INDEX FROM `"+tableName+'`');
 			rs = stmt.executeQuery();
 			
-			List<Index> retval = new ArrayList<Index>();
-			Map<String, Index> indexes = new HashMap<String, Index>();
+			final List<Index> retval = new ArrayList<Index>();
+			final Map<String, Index> indexes = new HashMap<String, Index>();
 			
 			while(rs.next()) {
 				Index id;
-				String name = rs.getString("Key_name");
+				final String name = rs.getString("Key_name");
 				if(indexes.containsKey(name)) {
 					id = indexes.get(name); 
 				} else {
@@ -112,10 +112,12 @@ public class Index {
 			}
 			return retval;
 		} finally {
-			if(stmt != null)
+			if(stmt != null) {
 				stmt.close();
-			if(rs != null)
+			}
+			if(rs != null) {
 				rs.close();
+			}
 		}
 	}
 	
@@ -123,9 +125,9 @@ public class Index {
 	 * Tries to find an index with a certain name on a table. If no index with the given name can be found, 
 	 * this query will throw an IndexNotFoundException
 	 */
-	public static Index findByName(Connection con, String tableName, String indexName) throws IndexNotFoundException, SQLException {
-		List<Index> allIndexes = findAllIndexes(con, tableName);
-		Index id = Collections.findFirst(allIndexes, new NameFilter(indexName));
+	public static Index findByName(final Connection con, final String tableName, final String indexName) throws IndexNotFoundException, SQLException {
+		final List<Index> allIndexes = findAllIndexes(con, tableName);
+		final Index id = Collections.findFirst(allIndexes, new NameFilter(indexName));
 		if(id == null) {
 			throw new IndexNotFoundException("Couldn't find index with name "+indexName);
 		}
@@ -141,9 +143,9 @@ public class Index {
 	 * will be returned by this method. If you need a more restrictive search (give me all indexes matching exactly some columns) 
 	 * use #findWithColumns instead.
 	 */
-	public static List<Index> findContainingColumns(Connection con, String tableName, String...columns) throws SQLException {
-		List<Index> allIndexes = findAllIndexes(con, tableName);
-		List<Index> retval = new ArrayList<Index>();
+	public static List<Index> findContainingColumns(final Connection con, final String tableName, final String...columns) throws SQLException {
+		final List<Index> allIndexes = findAllIndexes(con, tableName);
+		final List<Index> retval = new ArrayList<Index>();
 		Collections.collect(allIndexes, new ContainsColumnFilter(columns), retval);
 		return retval;
 	}
@@ -157,9 +159,9 @@ public class Index {
 	 * will be returned by this method. If you need a less restrictive search (give me all indexes containing some columns) 
 	 * use #findContainingColumns instead.
 	 */
-	public static List<Index> findWithColumns(Connection con,String tableName, String...columns) throws SQLException  {
-		List<Index> allIndexes = findAllIndexes(con, tableName);
-		List<Index> retval = new ArrayList<Index>();
+	public static List<Index> findWithColumns(final Connection con,final String tableName, final String...columns) throws SQLException  {
+		final List<Index> allIndexes = findAllIndexes(con, tableName);
+		final List<Index> retval = new ArrayList<Index>();
 		Collections.collect(allIndexes, new ExactColumnFilter(columns), retval);
 		return retval;
 	}
@@ -177,11 +179,11 @@ public class Index {
 		return columns;
 	}
 	
-	public void setColumns(String...columns) {
+	public void setColumns(final String...columns) {
 		setColumns(Arrays.asList(columns));
 	}
 	
-	public void setColumns(List<String> columns) {
+	public void setColumns(final List<String> columns) {
 		this.columns = columns;
 	}
 	
@@ -189,7 +191,7 @@ public class Index {
 		return name;
 	}
 	
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 	
@@ -198,10 +200,10 @@ public class Index {
 	 * @param con
 	 * @throws SQLException
 	 */
-	public void drop(Connection con) throws SQLException {
+	public void drop(final Connection con) throws SQLException {
 		PreparedStatement stmt = null;
 		try {
-			stmt = con.prepareStatement("DROP INDEX `"+name+"` ON `"+table+"`");
+			stmt = con.prepareStatement("DROP INDEX `"+name+"` ON `"+table+'`');
 			stmt.executeUpdate();
 		} finally {
 			if(stmt != null) {
@@ -215,13 +217,13 @@ public class Index {
 	 * @param con
 	 * @throws SQLException
 	 */
-	public void create(Connection con) throws SQLException {
+	public void create(final Connection con) throws SQLException {
 		if(name == null || table == null || columns.size() == 0) {
 			throw new IllegalStateException("You must set name and table to create an index. Also the index must span at least one column");
 		}
 		PreparedStatement stmt = null;
 		try {
-			stmt = con.prepareStatement("CREATE INDEX `"+name+"` ON `"+table+"` ("+_join_cols()+")");
+			stmt = con.prepareStatement("CREATE INDEX `"+name+"` ON `"+table+"` ("+_join_cols()+')');
 			stmt.executeUpdate();
 		} finally {
 			if(stmt != null) {
@@ -234,33 +236,33 @@ public class Index {
 		return table;
 	}
 
-	public void setTable(String table) {
+	public void setTable(final String table) {
 		this.table = table;
 	}
 	
-	public void _setColumnAt(int index, String column) {
+	public void _setColumnAt(final int index, final String column) {
 		_ensureSize(index+1);
 		columns.set(index, column);
 	}
 	
-	public void _ensureSize(int size) {
+	public void _ensureSize(final int size) {
 		while(size > columns.size()) {
 			columns.add(null);
 		}
 	}
 	
 	public String _join_cols(){
-		StringBuffer b = new StringBuffer();
-		for(String col : columns) { b.append(col).append(","); }
+		final StringBuilder b = new StringBuilder();
+		for(final String col : columns) { b.append(col).append(','); }
 		b.setLength(b.length()-1);
 		return b.toString();
 	}
 	
 	@Override
 	public String toString() {
-		StringBuffer b = new StringBuffer("Index ");
+		final StringBuilder b = new StringBuilder(50).append("Index ");
 		b.append(name);
-		b.append(" (").append(table).append(") with Columns: ").append(_join_cols()).append(")");
+		b.append(" (").append(table).append(") with Columns: ").append(_join_cols()).append(')');
 		
 		return b.toString();
 	}
@@ -269,11 +271,11 @@ public class Index {
 		
 		private String name;
 		
-		public NameFilter(String name) {
+		public NameFilter(final String name) {
 			this.name = name;
 		}
 
-		public boolean accept(Index object) {
+		public boolean accept(final Index object) {
 			return object.getName().equalsIgnoreCase(name);
 		}
 
@@ -283,14 +285,14 @@ public class Index {
 		
 		private String[] columns;
 		
-		public ContainsColumnFilter(String...columns) {
+		public ContainsColumnFilter(final String...columns) {
 			this.columns = columns;
 		}
 
-		public boolean accept(Index object) {
-			Set<String> needed = new HashSet<String>(Arrays.asList(columns)); 
-			for(String col : object.getColumns()) {
-				for(String need : new HashSet<String>(needed)) {
+		public boolean accept(final Index object) {
+			final Set<String> needed = new HashSet<String>(Arrays.asList(columns)); 
+			for(final String col : object.getColumns()) {
+				for(final String need : new HashSet<String>(needed)) {
 					if(need.equalsIgnoreCase(col)) {
 						needed.remove(need);
 					}
@@ -308,15 +310,15 @@ public class Index {
 		
 		private String[] columns;
 		
-		public ExactColumnFilter(String...columns) {
+		public ExactColumnFilter(final String...columns) {
 			this.columns = columns;
 		}
 
-		public boolean accept(Index object) {
+		public boolean accept(final Index object) {
 			if(columns.length != object.getColumns().size()){
 				return false;
 			}
-			List<String> colObject = object.getColumns();
+			final List<String> colObject = object.getColumns();
 			for(int i = 0; i < columns.length; i++) {
 				if(!columns[i].equalsIgnoreCase(colObject.get(i))) {
 					return false;

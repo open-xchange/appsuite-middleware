@@ -49,13 +49,10 @@
 
 package com.openexchange.groupware.attach.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.tx.Undoable;
-import com.openexchange.tools.iterator.SearchIterator;
 
 public class AttachmentQueryCatalog {
 
@@ -75,20 +72,20 @@ public class AttachmentQueryCatalog {
 	
 	private static final String REMEMBER_DEL = "INSERT INTO del_attachment (id, del_date, cid, attached, module) VALUES (?,?,?,?,?)";
 	
-	private static String INSERT = null;
-	private static String UPDATE = null;
-	private static String FIELDS = null;
-	private static String SELECT_BY_ID = null;
-	private static String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
+	private static String INSERT;
+	private static String UPDATE;
+	private static String FIELDS;
+	private static String SELECT_BY_ID;
+	private static final String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
 	
 	static {
-		StringBuilder updateBuffer = new StringBuilder("UPDATE prg_attachment SET ");
-		StringBuilder insertBuffer = new StringBuilder("INSERT INTO prg_attachment (");
-		StringBuilder questionMarks = new StringBuilder();
-		StringBuilder fieldsBuffer = new StringBuilder();
-		StringBuilder selectByIdBuffer = new StringBuilder("SELECT ");
+		final StringBuilder updateBuffer = new StringBuilder("UPDATE prg_attachment SET ");
+		final StringBuilder insertBuffer = new StringBuilder("INSERT INTO prg_attachment (");
+		final StringBuilder questionMarks = new StringBuilder();
+		final StringBuilder fieldsBuffer = new StringBuilder();
+		final StringBuilder selectByIdBuffer = new StringBuilder("SELECT ");
 		
-		for(AttachmentField field : DB_FIELDS) {
+		for(final AttachmentField field : DB_FIELDS) {
 			fieldsBuffer.append(field.getName());
 			fieldsBuffer.append(", ");
 			
@@ -98,13 +95,13 @@ public class AttachmentQueryCatalog {
 		}
 		updateBuffer.setLength(updateBuffer.length()-2);
 		fieldsBuffer.append("cid");
-		questionMarks.append("?");
+		questionMarks.append('?');
 		updateBuffer.append("WHERE cid = ? AND id = ?");
 		
 		insertBuffer.append(fieldsBuffer);
 		insertBuffer.append(") VALUES ( ");
 		insertBuffer.append(questionMarks); 
-		insertBuffer.append(")");
+		insertBuffer.append(')');
 		
 		
 		INSERT = insertBuffer.toString();
@@ -125,10 +122,10 @@ public class AttachmentQueryCatalog {
 		return INSERT;
 	}
 
-	public String getDelete(String tablename, List<AttachmentMetadata> attachments) {
-		StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
-		for(AttachmentMetadata m : attachments) {
-			builder.append(m.getId()).append(",");
+	public String getDelete(final String tablename, final List<AttachmentMetadata> attachments) {
+		final StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
+		for(final AttachmentMetadata m : attachments) {
+			builder.append(m.getId()).append(',');
 		}
 		builder.setLength(builder.length()-1);
 		builder.append(") and cid = ?");
@@ -147,10 +144,10 @@ public class AttachmentQueryCatalog {
 		return SELECT_FILE_ID;
 	}
 
-	public void appendColumnList(StringBuilder select, AttachmentField[] columns) {
-		for(AttachmentField field : columns ) {
+	public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
+		for(final AttachmentField field : columns ) {
 			select.append(field.getName());
-			select.append(",");
+			select.append(',');
 		}
 		select.setLength(select.length()-1);
 	}

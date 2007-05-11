@@ -83,7 +83,7 @@ public class Starter {
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
-	public Starter(String args[]) {
+	public Starter(final String args[]) {
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Open-Xchange 6.0");
@@ -91,27 +91,27 @@ public class Starter {
 		}
 
 		try {
-			Properties p = System.getProperties();
+			final Properties p = System.getProperties();
 			if (LOG.isInfoEnabled()) {
-				LOG.info(p.getProperty("os.name") + " " + p.getProperty("os.arch") + " " + p.getProperty("os.version"));
+				LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
 			}
 			path = p.getProperty("user.dir");
 			if (LOG.isInfoEnabled()) {
 				LOG.info(p.getProperty("java.runtime.version"));
 			}
-			long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+			final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
 			if (LOG.isInfoEnabled()) {
 				LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
 			}
-			long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+			final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
 			if (LOG.isInfoEnabled()) {
 				LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
 			}
-			long usedMemory = totalMemory - freeMemory;
+			final long usedMemory = totalMemory - freeMemory;
 			if (LOG.isInfoEnabled()) {
 				LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
 			}
-		} catch (Exception gee) {
+		} catch (final Exception gee) {
 			LOG.error(gee.getMessage(), gee);
 		}
 
@@ -124,7 +124,7 @@ public class Starter {
         ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
             ConfigurationInit.init();
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error("Initializing the configuration failed.", e);
             System.exit(1);
         }
@@ -134,9 +134,9 @@ public class Starter {
 				LOG.info("DEBUG: CLL -> " + ComfireConfig.properties.getProperty("InitWorker"));
 			}
 			Class.forName(ComfireConfig.properties.getProperty("InitWorker"));
-			ComfireInitWorker worker = ComfireInitWorker.getWorker();
+			final ComfireInitWorker worker = ComfireInitWorker.getWorker();
 			worker.doInit();
-		} catch (ClassNotFoundException e1) {
+		} catch (final ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
 
@@ -145,7 +145,7 @@ public class Starter {
         		LOG.info("Server name: " + Server.getServerName());
         	}
             DatabaseInit.init();
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
             System.exit(1);
         }
@@ -159,7 +159,7 @@ public class Starter {
         // New server startup.
 		try {
             GroupwareInit.init();
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error("Initializing the groupware server failed.", e);
             System.exit(1);
         }
@@ -169,7 +169,7 @@ public class Starter {
         
         try {
         	BackendServicesInit.init();
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error("Initializing the backend services failed.", e);
             System.exit(1);
         }
@@ -191,7 +191,7 @@ public class Starter {
             synchronized (Starter.class) {
                 Starter.class.wait();
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
 	}

@@ -88,19 +88,19 @@ public class OldQuotedPrintable implements OldEncoding {
 				s.read();
 				if (s.peek >= '0' && s.peek <= '9' || s.peek >= 'A'
 						&& s.peek <= 'F' || s.peek >= 'a' && s.peek <= 'f') {
-					al.add(new Byte(
+					al.add(Byte.valueOf(
 							(byte) ((getHexDigit(s) << 4) + getHexDigit(s))));
 					len = al.size();
 				} else if (s.peek == -2) {
 					s.read();
 				} else {
-					al.add(new Byte((byte) '='));
+					al.add(Byte.valueOf((byte) '='));
 				}
 			} else if (s.peek >= 33 && s.peek <= 126) {
-				al.add(new Byte((byte) s.read()));
+				al.add(Byte.valueOf((byte) s.read()));
 				len = al.size();
 			} else if (s.peek == 9 || s.peek == 32) {
-				al.add(new Byte((byte) s.read()));
+				al.add(Byte.valueOf((byte) s.read()));
 			} else {
 				throw new VersitException(s,
 						"Invalid character in Quoted-Printable encoding");

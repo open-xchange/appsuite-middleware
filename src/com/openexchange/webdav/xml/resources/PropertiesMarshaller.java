@@ -150,7 +150,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		final Element status = new Element("status",DAV_NS);
 		final StringBuilder content = new StringBuilder("HTTP/1.1 ");
 		content.append(s);
-		content.append(" ");
+		content.append(' ');
 		content.append(Utils.getStatusString(s));
 		status.setText(content.toString());
 		return status;

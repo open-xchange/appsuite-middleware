@@ -57,28 +57,29 @@ import java.util.Map;
 
 public class IfHeader {
 
-	private List<IfHeaderList> lists = new ArrayList<IfHeaderList>();
-	private List<IfHeaderList> untagged = new ArrayList<IfHeaderList>();
-	private Map<String, List<IfHeaderList>> tagged = new HashMap<String, List<IfHeaderList>>();
+	private final List<IfHeaderList> lists = new ArrayList<IfHeaderList>();
+	private final List<IfHeaderList> untagged = new ArrayList<IfHeaderList>();
+	private final Map<String, List<IfHeaderList>> tagged = new HashMap<String, List<IfHeaderList>>();
 	
 	public List<IfHeaderList> getLists() {
 		return Collections.unmodifiableList(lists );
 	}
 
-	public List<IfHeaderList> getRelevant(String url) {
-		List<IfHeaderList> retval = new ArrayList<IfHeaderList>(untagged);
-		if(tagged.containsKey(url))
+	public List<IfHeaderList> getRelevant(final String url) {
+		final List<IfHeaderList> retval = new ArrayList<IfHeaderList>(untagged);
+		if(tagged.containsKey(url)) {
 			retval.addAll(tagged.get(url));
+		}
 		return retval;
 	}
 	
-	public IfHeaderList getList(int i) {
+	public IfHeaderList getList(final int i) {
 		return lists.get(i);
 	}
 
-	public void addList(IfHeaderList list) {
+	public void addList(final IfHeaderList list) {
 		if(list.isTagged()) {
-			String tag = list.getTag();
+			final String tag = list.getTag();
 			List<IfHeaderList> taggedList = tagged.get(tag);
 			if(null == taggedList) {
 				taggedList = new ArrayList<IfHeaderList>();

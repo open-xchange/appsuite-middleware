@@ -47,68 +47,65 @@
  *
  */
 
-
-
 package com.openexchange.ssl;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 /*
- * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com
- * date: Fri Jul 23 14:36:51 GMT 2004
+ * author: Leonardo Di Lella, leonardo.dilella@open-xchange.com date: Fri Jul 23
+ * 14:36:51 GMT 2004
  */
 
-public class SSLOutputStream  extends OutputStream
-{
+public class SSLOutputStream extends OutputStream {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SSLOutputStream.class);
+	
 	private SSLSocket socket;
+
 	private OutputStream os;
 
 	private native byte[] nativeWriteArray(long ssl, byte b[], int off, int len) throws SSLException;
 
-   	public SSLOutputStream(SSLSocket sslsock, OutputStream os) throws IOException
-	{
-       	this.socket = sslsock;
+	public SSLOutputStream(final SSLSocket sslsock, final OutputStream os) {
+		this.socket = sslsock;
 		this.os = os;
-   	}
+	}
 
-	public void write(int b) throws IOException
-   	{
-  		byte[] in = new byte[1];
+	@Override
+	public void write(final int b) throws IOException {
+		final byte[] in = new byte[1];
+		in[0] = (byte) b;
+		write(in);
+	}
 
-	   	in[0] = (byte)b;
-	   	write(in);
-   	}
+	@Override
+	public void write(final byte b[]) throws IOException {
+		write(b, 0, b.length);
+	}
 
-   	public void write(byte b[]) throws IOException
-	{
-    	write(b, 0, b.length);
-   	}
-
-   	public void write(byte b[], int off, int len) throws IOException
-	{
-		int left, n, i;
+	@Override
+	public void write(final byte b[], final int off, final int len) throws IOException {
 		byte[] out;
-
-		try 
-		{
+		try {
 			out = nativeWriteArray(socket.getSSL(), b, off, len);
-			if(out != null) 
+			if (out != null) {
 				os.write(out);
-		} catch(SSLException e) 
-		{
-			e.printStackTrace();
+			}
+		} catch (final SSLException e) {
+			LOG.error(e.getMessage(), e);
 			throw new IOException();
 		}
-   	}
+	}
 
-   	public void flush() throws IOException
-	{
-       	os.flush();
-   	}
+	@Override
+	public void flush() throws IOException {
+		os.flush();
+	}
 
-  	public void close() throws IOException
-  	{
-   		os.close();
-  	}
+	@Override
+	public void close() throws IOException {
+		os.close();
+	}
 }

@@ -71,15 +71,19 @@ import com.openexchange.sessiond.SessionObject;
 
 public class DataParser {
 	
-	protected boolean parseAll = false;
+	private static final String STR_VALUE = "' value '";
+
+	private static final String STR_INVALID_VALUE_IN_ATTRIBUTE = "invalid value in attribute '";
+
+	protected boolean parseAll;
 	
-	protected TimeZone timeZone = null;
+	protected TimeZone timeZone;
 	
 	private static final String NULL = "null";
 	
 	private static final String _missingField = "missing field: ";
 	
-	protected SessionObject sessionObj = null;
+	protected SessionObject sessionObj;
 	
 	protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException {
 		if (jsonobject.has(DataFields.ID)) {
@@ -128,7 +132,7 @@ public class DataParser {
 		try {
 			return Integer.parseInt(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -153,7 +157,7 @@ public class DataParser {
 		try {
 			return Float.parseFloat(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -170,7 +174,7 @@ public class DataParser {
 		try {
 			return Long.parseLong(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -214,7 +218,7 @@ public class DataParser {
         try {
             return Integer.parseInt(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
         }
 	}
 	
@@ -235,7 +239,7 @@ public class DataParser {
 		try {
 			return Float.parseFloat(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -248,7 +252,7 @@ public class DataParser {
 		try {
 			return new Date(Long.parseLong(tmp));
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -263,7 +267,7 @@ public class DataParser {
 			d.setTime(d.getTime()-offset);
 			return d;
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -301,7 +305,7 @@ public class DataParser {
 		
 			return i;
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -341,7 +345,7 @@ public class DataParser {
 		
 			return d;
 		} catch (NumberFormatException exc) {
-			throw new JSONException("invalid value in attribute '" + name + "' value '" + tmp + "'");
+			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	

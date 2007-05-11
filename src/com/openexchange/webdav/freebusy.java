@@ -196,7 +196,7 @@ public class freebusy extends HttpServlet {
 		printWriter.println("VERSION:2.0");
 		printWriter.println("METHOD:PUBLISH");
 		printWriter.println("BEGIN:VFREEBUSY");
-		printWriter.println("ORGANIZER:"+mailPrefix+'@'+mailSuffix);
+		printWriter.println(new StringBuilder("ORGANIZER:").append(mailPrefix).append('@').append(mailSuffix).toString());
 		
 		try {
 			final Context context = new ContextImpl(contextId);
