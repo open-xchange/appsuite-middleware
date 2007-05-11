@@ -95,7 +95,7 @@ public class WebdavLogAction extends AbstractAction {
 		try {
 			yield(req,res);
 			b = new StringBuilder();
-			b.append("DONE URL: "); b.append(req.getUrl()); b.append(" "); b.append(res.getStatus()); b.append('\n');
+			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
 				
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString());
@@ -107,7 +107,7 @@ public class WebdavLogAction extends AbstractAction {
 			
 		} catch (WebdavException x) {
 			b = new StringBuilder();
-			b.append("Status: "); b.append(x.getMessage()); b.append(" "); b.append(x.getStatus()); b.append('\n');
+			b.append("Status: "); b.append(x.getMessage()); b.append(' '); b.append(x.getStatus()); b.append('\n');
 			b.append("WebdavException: ");
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);

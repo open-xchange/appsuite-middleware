@@ -92,7 +92,7 @@ public abstract class AbstractOXExceptionFactory<T> {
 
         private String idList(final int[] is) {
         	final StringBuilder b = new StringBuilder();
-            for(int i : is) { b.append(i).append(","); }
+            for(int i : is) { b.append(i).append(','); }
             b.setLength(b.length()-1);
             return b.toString();
         }

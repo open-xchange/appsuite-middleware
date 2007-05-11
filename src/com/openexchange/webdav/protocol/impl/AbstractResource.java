@@ -82,7 +82,7 @@ public abstract class AbstractResource implements WebdavResource {
 		final StringBuilder path = new StringBuilder();
 		
 		for(int i = 1; i < comps.length-1; i++) {
-			path.append("/");
+			path.append('/');
 			path.append(comps[i]);
 			final WebdavResource res = getFactory().resolveResource(path.toString());
 			if(!res.exists() || !res.isCollection()) {
@@ -219,7 +219,7 @@ public abstract class AbstractResource implements WebdavResource {
 		final StringBuilder path = new StringBuilder();
 		
 		for(int i = 1; i < comps.length-1; i++) {
-			path.append("/");
+			path.append('/');
 			path.append(comps[i]);
 			final WebdavCollection res = getFactory().resolveCollection(path.toString());
 			parents.add(res);

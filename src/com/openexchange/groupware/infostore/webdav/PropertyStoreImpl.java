@@ -119,7 +119,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			join(entities, builder);
 			builder.append(") AND (");
 			addOr(builder,properties);
-			builder.append(")");
+			builder.append(')');
 			
 			readCon = getReadConnection(ctx);
 			stmt = readCon.prepareStatement(builder.toString());
@@ -174,7 +174,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			builder.append(entity);
 			builder.append(" AND (");
 			addOr(builder,properties);
-			builder.append(")");
+			builder.append(')');
 			
 			readCon = getReadConnection(ctx);
 			stmt = readCon.prepareStatement(builder.toString());
@@ -280,7 +280,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			builder.append(tablename);
 			builder.append(" WHERE CID = ? AND id IN (");
 			join(entities, builder);
-			builder.append(")");
+			builder.append(')');
 			
 			readCon = getReadConnection(ctx);
 			stmt = readCon.prepareStatement(builder.toString());
@@ -322,7 +322,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			b.append(ctx.getContextId());
 			b.append(" AND id IN (");
 			join(entities,b);
-			b.append(")");
+			b.append(')');
 			writeCon = getWriteConnection(ctx);
 			stmt = writeCon.prepareStatement(b.toString());
 			stmt.executeUpdate();
@@ -337,7 +337,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 	private final void join(List<Integer> entities, StringBuilder b) {
 		for(int entity : entities) {
 			b.append(entity);
-			b.append(",");
+			b.append(',');
 		}
 		b.setLength(b.length()-1);
 	}
@@ -370,7 +370,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 		builder.append(tablename);
 		builder.append(" WHERE cid = ? AND id = ? AND (");
 		addOr(builder,properties);
-		builder.append(")");
+		builder.append(')');
 		try {
 			stmt = writeCon.prepareStatement(builder.toString());
 			stmt.setInt(1, ctx.getContextId());

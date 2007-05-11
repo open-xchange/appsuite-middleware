@@ -79,7 +79,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		this.req = req;
 		StringBuilder builder = new StringBuilder();
 		builder.append(req.getServletPath());
-		builder.append("/");
+		builder.append('/');
 		this.urlPrefix = builder.toString();
 		this.url = req.getRequestURI().substring(req.getServletPath().length());
 		if(!this.url.equals("/") && this.url.endsWith("/"))
