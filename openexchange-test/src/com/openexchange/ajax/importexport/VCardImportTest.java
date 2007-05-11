@@ -145,4 +145,51 @@ public class VCardImportTest extends AbstractVCardTest {
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
+	
+	/**
+	 * Deals with N and ADR properties and different amount of semicola used. 
+	 *
+	 */
+	public void test7248() throws TestException, IOException, SAXException, JSONException, Exception{
+		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN:Colombara;Robert\nFN:Robert Colombara\nADR;WORK:;;;;;;DE\nADR;HOME:;;;;;- / -\nEND:VCARD";
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		assertTrue("Only one import?", importResult.length == 1 );
+		assertFalse("Import worked?", importResult[0].hasError());
+		
+		int contactId = Integer.parseInt(importResult[0].getObjectId());
+		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		assertEquals("Checking surname:" , "Colombara" , myImport.getSurName());
+	
+		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+	}
+	
+	/**
+	 * Deals with broken E-Mail adresses as encountered in Resources in the example file
+	 */
+	public void test7249() throws TestException, IOException, SAXException, JSONException, Exception{
+		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nFN:Conference_Room_Olpe\nEMAIL;PREF;INTERNET:Conference_Room_Olpe\nEND:VCARD";
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		
+		assertFalse("Worked?", importResult[0].hasError());
+		int contactId = Integer.parseInt(importResult[0].getObjectId());
+		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getSurName());
+	
+		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+	}
+	
+	/**
+	 * Deals with umlauts
+	 */
+	public void test7250() throws TestException, IOException, SAXException, JSONException, Exception{
+		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN;CHARSET=Windows-1252:Börnig;Anke;;;\nFN;CHARSET=Windows-1252:Anke  Börnig\nEND:VCARD";
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		
+		assertFalse("Worked?", importResult[0].hasError());
+		int contactId = Integer.parseInt(importResult[0].getObjectId());
+		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+		assertEquals("Checking surname:" , "Börnig" , myImport.getSurName());
+	
+		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+	}
 }
