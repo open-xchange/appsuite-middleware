@@ -136,6 +136,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException();            
         }        
         
+        Locale langus = OXUser.getLanguage(usr); 
+        if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
+            log.debug("Client sent wrong locale data("+langus+") in users language!");
+            throw new InvalidDataException("The specified language is invalid!");
+        }
+        
         doAuthentication(auth,ctx);
         
         log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
@@ -664,7 +670,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 }
             }
         }
-
+        log.debug("Response data "+Arrays.toString(retusers));
         return retusers;
     }
 
