@@ -112,16 +112,16 @@ public class FolderCacheManager {
 			ConfigurationInit.init();
 			Configuration.load();
 			folderCache = JCS.getInstance(FOLDER_CACHE_REGION_NAME);
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
 		}
@@ -262,7 +262,7 @@ public class FolderCacheManager {
 				 */
 				folderCache.put(key, folderObj, attribs);
 			}
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(Code.FAILED_PUT, e, new Object[0]);
 		} finally {
 			modLock.unlock();
@@ -379,7 +379,7 @@ public class FolderCacheManager {
 					modLock.unlock();
 				}
 			}
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(Code.FAILED_PUT, e, new Object[0]);
 		}
 	}
@@ -407,7 +407,7 @@ public class FolderCacheManager {
 					modLock.unlock();
 				}
 			}
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(Code.FAILED_REMOVE, e, new Object[0]);
 		}
 	}
@@ -448,7 +448,7 @@ public class FolderCacheManager {
 			 * Returns a copy NOT a reference
 			 */
 			return folderCache.getDefaultElementAttributes();
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(Code.FAILED_ATTRIBUTE_RETRIEVAL, e, new Object[0]);
 		}
 	}

@@ -295,11 +295,11 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		super();
 	}
 
-	public FolderObject(int objectId) {
+	public FolderObject(final int objectId) {
 		setObjectID(objectId);
 	}
 
-	public FolderObject(String folderName, int objectId, int module, int type, int creator) {
+	public FolderObject(final String folderName, final int objectId, final int module, final int type, final int creator) {
 		this.folderName = folderName;
 		b_folderName = true;
 		this.module = module;
@@ -748,7 +748,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		if (other.containsSubfolderIds()) {
 			try {
 				setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
-			} catch (OXFolderException e) {
+			} catch (final OXFolderException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -771,9 +771,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		if (containsObjectID()) {
 			try {
 				return OXFolderSQL.exists(getObjectID(), null, ctx);
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
 			}
 		} else if (containsParentFolderID() && containsFolderName() && containsModule()) {
@@ -784,9 +784,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				}
 				this.setObjectID(fuid);
 				return true;
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
 			}
 		}
@@ -928,7 +928,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 						sb.append('|');
 					}
 				}
-			} catch (OXFolderException e) {
+			} catch (final OXFolderException e) {
 				sb.append("");
 			}
 		}
@@ -990,7 +990,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				clone.setType(this.type);
 			}
 			return clone;
-		} catch (CloneNotSupportedException exc) {
+		} catch (final CloneNotSupportedException exc) {
 			return null;
 		}
 	}
@@ -1081,9 +1081,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			} finally {
 				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
 		}
 	}
@@ -1094,7 +1094,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		}
 		try {
 			return Integer.parseInt(str);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			if (str.equalsIgnoreCase("system")) {
 				return ctx.getMailadmin();
 			}
