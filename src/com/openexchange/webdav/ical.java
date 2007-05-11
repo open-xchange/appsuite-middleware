@@ -410,7 +410,7 @@ public final class ical extends PermissionServlet {
 			final Iterator iterator = entries.keySet().iterator();
 			while (iterator.hasNext()) {
 				final String client_id = iterator.next().toString();
-				final String s_object_id = entries.get(client_id).toString();
+				final String s_object_id = entries.get(client_id);
 				
 				if (!entries_db.containsKey(client_id)) {
 					if (entries_module.containsKey(s_object_id)) {
@@ -687,7 +687,7 @@ public final class ical extends PermissionServlet {
 				final String tmp = it.next().toString();
 				if (!entries.contains(tmp)) {
 					final int object_id = Integer.parseInt(entries_db.get(tmp).toString());
-					final int i_module = Integer.parseInt(entries_module.get(String.valueOf(object_id)).toString());
+					final int i_module = Integer.parseInt(entries_module.get(String.valueOf(object_id)));
 					
 					deleteEntry(context, principal_id, object_id);
 					

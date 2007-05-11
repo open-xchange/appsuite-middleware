@@ -304,10 +304,10 @@ public class XmlPullParserFactory {
             catch (final Exception e) {
                 throw new XmlPullParserException (null, null, e);
             }
-            classNamesLocation = "resource "+RESOURCE_NAME+" that contained '"+classNames+"'";
+            classNamesLocation = "resource "+RESOURCE_NAME+" that contained '"+classNames+'\'';
         } else {
             classNamesLocation =
-                "parameter classNames to newInstance() that contained '"+classNames+"'";
+                "parameter classNames to newInstance() that contained '"+classNames+'\'';
         }
 
         XmlPullParserFactory factory = null;

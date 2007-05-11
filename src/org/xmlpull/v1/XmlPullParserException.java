@@ -16,7 +16,7 @@ public class XmlPullParserException extends Exception {
     /*    public XmlPullParserException() {
           }*/
 
-    public XmlPullParserException(String s) {
+    public XmlPullParserException(final String s) {
         super(s);
     }
 
@@ -33,8 +33,8 @@ public class XmlPullParserException extends Exception {
     }
     */
 
-    public XmlPullParserException(String msg, XmlPullParser parser, Throwable chain) {
-        super ((msg == null ? "" : msg+" ")
+    public XmlPullParserException(final String msg, final XmlPullParser parser, final Throwable chain) {
+        super ((msg == null ? "" : msg+' ')
                + (parser == null ? "" : "(position:"+parser.getPositionDescription()+") ")
                + (chain == null ? "" : "caused by: "+chain));
 

@@ -94,7 +94,7 @@ public abstract class AbstractAction implements WebdavAction {
 	@Override
 	public String toString(){
 		if(null != next) {
-			return getClass().getSimpleName()+" "+next.toString();
+			return getClass().getSimpleName()+' '+next.toString();
 		}
 		return getClass().getSimpleName();
 	}

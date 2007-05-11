@@ -73,7 +73,7 @@ public class DummyResourceManager implements WebdavFactory {
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
-		} catch (WebdavException e) {
+		} catch (final WebdavException e) {
 			LOG.error("Can't resolve root", e);
 		}
 		
@@ -81,14 +81,14 @@ public class DummyResourceManager implements WebdavFactory {
 	
 	private static final Protocol PROTOCOL = new Protocol();
 	
-	private Map<String,WebdavResource> resources = new HashMap<String,WebdavResource>();
-	private Map<String,DummyLockNull> lockNullResources = new HashMap<String,DummyLockNull>();
+	private final Map<String,WebdavResource> resources = new HashMap<String,WebdavResource>();
+	private final Map<String,DummyLockNull> lockNullResources = new HashMap<String,DummyLockNull>();
 	
 	
-	public WebdavResource resolveResource(String url) {
+	public WebdavResource resolveResource(final String url) {
 		if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
-				DummyLockNull lockNull = lockNullResources.get(url);
+				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyResource(this,url)); // FIXME Multithreading?
 				return lockNull;
 			}
@@ -97,10 +97,10 @@ public class DummyResourceManager implements WebdavFactory {
 		return resources.get(url);
 	}
 
-	public WebdavCollection resolveCollection(String url) {
+	public WebdavCollection resolveCollection(final String url) {
 		if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
-				DummyLockNull lockNull = lockNullResources.get(url);
+				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyCollection(this,url)); // FIXME Multithreading?
 				return lockNull;
 			}
@@ -109,22 +109,23 @@ public class DummyResourceManager implements WebdavFactory {
 		return (WebdavCollection) resources.get(url);
 	}
 
-	public synchronized void save(String url, DummyResource res) {
+	public synchronized void save(String url, final DummyResource res) {
 		url = normalize(url);
 		getParent(url).addChild(res);
 		resources.put(url,res);
 	}
 
-	public void remove(String url, DummyResource res) {
+	public void remove(String url, final DummyResource res) {
 		url = normalize(url);
 		getParent(url).removeChild(res);
 		resources.remove(url);
 	}
 
-	private DummyCollection getParent(String url) {
-		String parentUrl = url.substring(0,url.lastIndexOf("/"));
-		if("".equals(parentUrl))
+	private DummyCollection getParent(final String url) {
+		String parentUrl = url.substring(0,url.lastIndexOf('/'));
+		if("".equals(parentUrl)) {
 			parentUrl = "/";
+		}
 		return (DummyCollection) resolveCollection(parentUrl);
 	}
 
@@ -139,14 +140,14 @@ public class DummyResourceManager implements WebdavFactory {
 		return PROTOCOL;
 	}
 
-	public WebdavResource addLockNullResource(DummyResource resource) {
-		DummyLockNull lockNull = new DummyLockNull(this, resource.getUrl());
+	public WebdavResource addLockNullResource(final DummyResource resource) {
+		final DummyLockNull lockNull = new DummyLockNull(this, resource.getUrl());
 		lockNull.setExists(true);
 		lockNullResources.put(lockNull.getUrl(), lockNull);
 		return lockNull;
 	}
 
-	public void removeLockNull(String url) {
+	public void removeLockNull(final String url) {
 		lockNullResources.remove(url);
 	}
 
@@ -155,7 +156,7 @@ public class DummyResourceManager implements WebdavFactory {
 		
 	}
 
-	public void endRequest(int status) {
+	public void endRequest(final int status) {
 		// TODO Auto-generated method stub
 		
 	}

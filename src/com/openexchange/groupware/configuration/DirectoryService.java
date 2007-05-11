@@ -281,7 +281,7 @@ public final class DirectoryService {
                } else {
                   uri = "ldap://" + confValues[1];
                   if (null != confValues[2]) {
-                     uri += ":" + confValues[2];
+                     uri += ':' + confValues[2];
                   }
                }
             }
