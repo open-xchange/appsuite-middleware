@@ -159,14 +159,7 @@ public class OXFolderAdminHelper {
 				}
 				contextMalAdmin = rs.getInt(1);
 			} finally {
-				if (rs != null) {
-					rs.close();
-					rs = null;
-				}
-				if (stmt != null) {
-					stmt.close();
-					stmt = null;
-				}
+				closeSQLStuff(rs, stmt);
 			}
 			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
 		} catch (final SQLException e) {
