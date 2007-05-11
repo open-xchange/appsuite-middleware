@@ -468,7 +468,7 @@ public class Attachment extends PermissionServlet {
 				String s = upload.getFileName();
 				// Try guessing the filename separator
 				if(s.contains("\\")){
-					s = s.substring(s.lastIndexOf("\\")+1);
+					s = s.substring(s.lastIndexOf('\\')+1);
 				} else if (s.contains("/")){
 					s = s.substring(s.lastIndexOf('/')+1);
 				}

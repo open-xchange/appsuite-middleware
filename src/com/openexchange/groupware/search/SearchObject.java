@@ -79,8 +79,8 @@ public abstract class SearchObject {
 
 	private String catgories = NO_CATEGORIES;
 	
-	private boolean subfolderSearch = false;
-	private boolean allfoldersSearch = false;
+	private boolean subfolderSearch;
+	private boolean allfoldersSearch;
 	
 	protected SearchObject() {
 		super();
@@ -90,7 +90,7 @@ public abstract class SearchObject {
 		return catgories;
 	}
 
-	public void setCatgories(String catgories) {
+	public void setCatgories(final String catgories) {
 		this.catgories = catgories;
 	}
 
@@ -98,7 +98,7 @@ public abstract class SearchObject {
 		return folder;
 	}
 
-	public void setFolder(int folder) {
+	public void setFolder(final int folder) {
 		this.folder = folder;
 	}
 
@@ -106,7 +106,7 @@ public abstract class SearchObject {
 		return subfolderSearch;
 	}
 
-	public void setSubfolderSearch(boolean subfolderSearch) {
+	public void setSubfolderSearch(final boolean subfolderSearch) {
 		this.subfolderSearch = subfolderSearch;
 	}
 
@@ -114,11 +114,11 @@ public abstract class SearchObject {
 		return allfoldersSearch;
 	}
 
-	public void setAllFolders(boolean allfolderSearch) {
+	public void setAllFolders(final boolean allfolderSearch) {
 		this.allfoldersSearch = allfolderSearch;
 	}
 
-	public void setPattern(String pattern) {
+	public void setPattern(final String pattern) {
 		this.pattern = pattern;
 	}
 
