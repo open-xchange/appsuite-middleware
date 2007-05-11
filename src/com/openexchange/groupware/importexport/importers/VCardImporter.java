@@ -50,6 +50,7 @@
 package com.openexchange.groupware.importexport.importers;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -228,7 +229,8 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		} catch (UnsupportedEncodingException e){
 			LOG.fatal(e);
 			throw importExportExceptionFactory.create(6);
-		} catch (Exception exc) {
+		} catch (IOException e) {
+			LOG.error(e);
 			throw importExportExceptionFactory.create(4, contactFolderId);
 		} finally {
 			oxContainerConverter.close();

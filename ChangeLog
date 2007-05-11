@@ -1,6 +1,7 @@
-* 2007-05-10 - tobias.prinz@open-xchange.com
+* 2007-05-11 - tobias.prinz@open-xchange.com
 
- - Removed special chars and used Unicode \u??? style
+ - Removed special chars and used Unicode \u??? style in ContactFieldMappers
+ - Bugfix #7248 / #7107: Changed parsing of 
 
 * 2007-05-11 - thorben.betten@open-xchange.com
 

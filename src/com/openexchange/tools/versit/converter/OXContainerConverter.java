@@ -91,7 +91,8 @@ import com.openexchange.tools.versit.values.DurationValue;
 import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfix: 7248)
  * 
  */
 public class OXContainerConverter {
@@ -723,8 +724,15 @@ public class OXContainerConverter {
 		Property property = object.getProperty("N");
 		if (property != null) {
 			final ArrayList N = (ArrayList) property.getValue();
+			//fix for 7248
+			if(N != null){
+				for(int i = N.size(); i < 5; i++){
+					N.add(null);
+				}
+			}
+			//fix:end
 			if (N.size() != 5) {
-				throw new ConverterException("Invalid property N");
+				throw new ConverterException("Invalid property N, has " + N.size() + " elements, not 5.");
 			}
 			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0), " ");
 			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1), " ");
@@ -865,6 +873,13 @@ public class OXContainerConverter {
 					}
 				}
 				final ArrayList A = (ArrayList) property.getValue();
+				//fix for 7248
+				if(A != null){
+					for(int j = A.size(); j < 7; j++){
+						A.add(null);
+					}
+				}
+				//fix:end
 				if (A == null || A.size() != 7) {
 					throw new ConverterException("Invalid property ADR");
 				}
