@@ -138,8 +138,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         Locale langus = OXUser.getLanguage(usr); 
         if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
-            log.debug("Client sent wrong locale data("+langus+") in users language!");
-            throw new InvalidDataException("The specified language is invalid!");
+            log.debug("Client sent invalid locale data("+langus+") in users language!");
+            throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
         }
         
         doAuthentication(auth,ctx);
