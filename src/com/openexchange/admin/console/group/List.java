@@ -231,12 +231,6 @@ public class List extends GroupAbstraction {
         } else {
             grp_data.add(null); // displayname
         }
-        final String email = group.getEmail();
-        if (email != null && email.trim().length() > 0) {
-            grp_data.add(email);
-        } else {
-            grp_data.add(null); // email
-        }
         final StringBuilder sb = new StringBuilder();
         if (null != members) {
             for (final int id : members) {
