@@ -66,6 +66,7 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 
 	private static final DecimalFormat Format = new DecimalFormat("00");
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		int sign = 1;
@@ -86,6 +87,7 @@ public class UTCOffsetValueDefinition extends ValueDefinition {
 		return Integer.valueOf(sign * offset);
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final int offset = ((Integer) value).intValue();
 		return (offset >= 0 ? '+' : '-') + Format.format(offset / 3600000)

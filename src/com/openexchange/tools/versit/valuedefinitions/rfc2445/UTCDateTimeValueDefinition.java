@@ -66,6 +66,7 @@ public class UTCDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new UTCDateTimeValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DateTimeValue retval = (DateTimeValue) super.createValue(s, property);
@@ -75,6 +76,7 @@ public class UTCDateTimeValueDefinition extends DateTimeValueDefinition {
 		return retval;
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final DateTimeValue date = (DateTimeValue) value;
 		date.isUTC = true;

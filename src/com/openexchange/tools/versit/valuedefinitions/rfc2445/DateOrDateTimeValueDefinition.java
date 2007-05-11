@@ -65,6 +65,7 @@ public class DateOrDateTimeValueDefinition extends DateTimeValueDefinition {
 
 	public static final ValueDefinition Default = new DateOrDateTimeValueDefinition();
 
+	@Override
 	public Object createValue(final StringScanner s, final Property property)
 			throws IOException {
 		final DateTimeValue date = new DateTimeValue();
@@ -78,6 +79,7 @@ public class DateOrDateTimeValueDefinition extends DateTimeValueDefinition {
 		return date;
 	}
 
+	@Override
 	public String writeValue(final Object value) {
 		final DateTimeValue date = (DateTimeValue) value;
 		if (date.hasTime) {
