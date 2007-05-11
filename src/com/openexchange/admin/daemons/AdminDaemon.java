@@ -49,10 +49,12 @@
 package com.openexchange.admin.daemons;
 
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.OXAdminCoreInterface;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
@@ -89,6 +91,7 @@ public class AdminDaemon {
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
+    private static OXAdminCoreImpl oxadmincore = null;
 
     public void registerBundleListener(final BundleContext context) {
         BundleListener bl = new BundleListener() {
@@ -150,7 +153,9 @@ public class AdminDaemon {
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             OXLoginInterface oxlogin_stub_v2 = (OXLoginInterface)UnicastRemoteObject.exportObject(oxlogin_v2, 0);
             
-
+            oxadmincore = new OXAdminCoreImpl(context);
+            OXAdminCoreInterface oxadmincore_stub_v2 = (OXAdminCoreInterface)UnicastRemoteObject.exportObject(oxadmincore, 0);
+            
             // END of NEW export
 
             // bind all NEW Objects to registry
@@ -158,6 +163,7 @@ public class AdminDaemon {
     	    registry.bind(OXGroupInterface.RMI_NAME, oxgrp_stub_v2);
     	    registry.bind(OXResourceInterface.RMI_NAME, oxres_stub_v2);
     	    registry.bind(OXLoginInterface.RMI_NAME, oxlogin_stub_v2);
+    	    registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub_v2);
 
     	} catch (RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
@@ -172,6 +178,7 @@ public class AdminDaemon {
             registry.unbind(OXGroupInterface.RMI_NAME);
             registry.unbind(OXResourceInterface.RMI_NAME);
             registry.unbind(OXLoginInterface.RMI_NAME);
+            registry.unbind(OXAdminCoreInterface.RMI_NAME);
             
         } catch (AccessException e) {
             log.error("Error unregistering RMI", e);
