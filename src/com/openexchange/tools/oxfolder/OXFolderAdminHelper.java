@@ -83,7 +83,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class OXFolderAdminHelper {
+public final class OXFolderAdminHelper {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderAdminHelper.class);
@@ -346,7 +346,7 @@ public class OXFolderAdminHelper {
 		}
 	}
 
-	private final void createSingleUserPermission(final int fuid, final int userId, final int[] allPerms,
+	private void createSingleUserPermission(final int fuid, final int userId, final int[] allPerms,
 			final boolean isFolderAdmin, final int cid, final Connection writeCon) throws SQLException {
 		PreparedStatement stmt = null;
 		try {
@@ -474,7 +474,7 @@ public class OXFolderAdminHelper {
 	 * Propagates that a group has been modified throughout affected folders by
 	 * touching folder's last-modified timestamp.
 	 */
-	public static final void propagateGroupModification(final int group, final Connection readCon,
+	public static void propagateGroupModification(final int group, final Connection readCon,
 			final Connection writeCon, final int cid) throws SQLException {
 		final long lastModified = System.currentTimeMillis();
 		PreparedStatement stmt = null;
