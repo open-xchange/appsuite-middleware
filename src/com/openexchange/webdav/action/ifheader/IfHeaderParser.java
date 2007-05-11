@@ -55,18 +55,18 @@ import java.util.List;
 // Not Thread Safe!
 public class IfHeaderParser {
 
-	private int i = 0;
+	private int i;
 	
-	public IfHeader parse(String string) throws IfHeaderParseException {
+	public IfHeader parse(final String string) throws IfHeaderParseException {
 		i = 0;
 		return ifHeader(string.toCharArray());
 	}
 
-	private IfHeader ifHeader(char[] cs) throws IfHeaderParseException {
-		IfHeader ifHeader = new IfHeader();
+	private IfHeader ifHeader(final char[] cs) throws IfHeaderParseException {
+		final IfHeader ifHeader = new IfHeader();
 		String tag = null;
 		while(i < cs.length) {
-			char c = cs[i++];
+			final char c = cs[i++];
 			switch(c) {
 			case '(' : ifHeader.addList(list(tag, cs)); tag = null; break;
 			case '<' : tag = tag(cs); break;
@@ -77,11 +77,11 @@ public class IfHeaderParser {
 		return ifHeader;
 	}
 
-	private String tag(char[] cs) throws IfHeaderParseException {
-		StringBuffer tag = new StringBuffer();
-		int start = i;
+	private String tag(final char[] cs) throws IfHeaderParseException {
+		final StringBuffer tag = new StringBuffer();
+		final int start = i;
 		while(i < cs.length) {
-			char c = cs[i++];
+			final char c = cs[i++];
 			switch(c) {
 			case '>' : return tag.toString();
 			case ' ' : break;
@@ -91,12 +91,12 @@ public class IfHeaderParser {
 		throw new IfHeaderParseException("Unfinished Tag", start+1);
 	}
 
-	private IfHeaderList list(String tag, char[] cs) throws IfHeaderParseException {
-		List<IfHeaderEntity> list = new ArrayList<IfHeaderEntity>();
+	private IfHeaderList list(final String tag, final char[] cs) throws IfHeaderParseException {
+		final List<IfHeaderEntity> list = new ArrayList<IfHeaderEntity>();
 		boolean matches = true;
-		int start = i;
+		final int start = i;
 		while(i < cs.length) {
-			char c = cs[i++];
+			final char c = cs[i++];
 			switch(c) {
 			case '<' : list.add(lockToken(matches, cs)); matches = true; break; 
 			case '[' : list.add(etag(matches, cs)); matches = true; break; 
@@ -110,34 +110,36 @@ public class IfHeaderParser {
 		throw new IfHeaderParseException("Unfinished List", start+1);
 	}
 
-	private void not(char[] cs) throws IfHeaderParseException {
+	private void not(final char[] cs) throws IfHeaderParseException {
 		char c = cs[i++];
-		if(c != 'o' && c != 'O')
+		if(c != 'o' && c != 'O') {
 			throw new IfHeaderParseException("Illegal character "+c+" in list",i+1);
+		}
 		c = cs[i++];
-		if(c != 't' && c != 'T')
+		if(c != 't' && c != 'T') {
 			throw new IfHeaderParseException("Illegal character "+c+" in list",i+1);
+		}
 		
 	}
 
-	private IfHeaderEntity lockToken(boolean matches, char[] cs) throws IfHeaderParseException {
+	private IfHeaderEntity lockToken(final boolean matches, final char[] cs) throws IfHeaderParseException {
 		try {
-			IfHeaderEntity entity =  new IfHeaderEntity.LockToken(tag(cs));
+			final IfHeaderEntity entity =  new IfHeaderEntity.LockToken(tag(cs));
 			entity.setMatches(matches);
 			return entity;
-		} catch (IfHeaderParseException x) {
+		} catch (final IfHeaderParseException x) {
 			throw new IfHeaderParseException("Unfinished LockToken", x.getColumn());
 		}
 		
 	}
 
-	private IfHeaderEntity etag(boolean matches, char[] cs) throws IfHeaderParseException {
-		StringBuilder etag = new StringBuilder();
-		int start = i;
+	private IfHeaderEntity etag(final boolean matches, final char[] cs) throws IfHeaderParseException {
+		final StringBuilder etag = new StringBuilder();
+		final int start = i;
 		while(i < cs.length) {
-			char c = cs[i++];
+			final char c = cs[i++];
 			switch(c) {
-			case ']' : IfHeaderEntity entity = new IfHeaderEntity.ETag(etag.toString()); entity.setMatches(matches); return entity;
+			case ']' : final IfHeaderEntity entity = new IfHeaderEntity.ETag(etag.toString()); entity.setMatches(matches); return entity;
 			case ' ' : break;
 			default : etag.append(c);
 			}

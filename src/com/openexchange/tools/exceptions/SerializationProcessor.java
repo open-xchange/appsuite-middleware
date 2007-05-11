@@ -62,49 +62,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerializationProcessor implements OXErrorCodeProcessor {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SerializationProcessor.class);
 
-	private List<OXErrorCode> codes = new ArrayList<OXErrorCode>();	
+	private final List<OXErrorCode> codes = new ArrayList<OXErrorCode>();	
 	public void done() {
-		String filename = System.getProperty("com.openexchange.tools.exceptions.SerializationProcessor.file", "codes.ser");
+		final String filename = System.getProperty("com.openexchange.tools.exceptions.SerializationProcessor.file", "codes.ser");
 		ObjectOutputStream out = null;
 		try {
 			out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(filename))));
 			out.writeInt(codes.size());
-			for(OXErrorCode code : codes) {
+			for(final OXErrorCode code : codes) {
 				out.writeObject(code);
 			}
 			out.flush();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (final FileNotFoundException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (final IOException e) {
+			LOG.error(e.getMessage(), e);
 		} finally {
-			if(out!=null)
+			if(out!=null) {
 				try {
 					out.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (final IOException e) {
+					LOG.error(e.getMessage(), e);
 				}
+			}
 		}
 	}
 
-	public void process(OXErrorCode errorCode) {
+	public void process(final OXErrorCode errorCode) {
 		codes.add(errorCode);
 	}
 	
-	public static List<OXErrorCode> load(String filename) throws IOException, ClassNotFoundException{
+	public static List<OXErrorCode> load(final String filename) throws IOException, ClassNotFoundException{
 		ObjectInputStream in = null;
 		try {
 			in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(filename))));
-			int size = in.readInt();
-			List<OXErrorCode> retval = new ArrayList<OXErrorCode>(size);
+			final int size = in.readInt();
+			final List<OXErrorCode> retval = new ArrayList<OXErrorCode>(size);
 			for(int i = 0; i < size; i++) {
 				retval.add((OXErrorCode)in.readObject());
 			}
 			return retval;
 		} finally {
-			if(in != null)
+			if(in != null) {
 				in.close();
+			}
 		}
 	}
 

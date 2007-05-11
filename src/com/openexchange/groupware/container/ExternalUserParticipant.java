@@ -56,21 +56,20 @@ package com.openexchange.groupware.container;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class ExternalUserParticipant implements Participant, Comparable
 {
 
-	private int id = 0;
+	private int id;
 	
-	private String displayName = null;
+	private String displayName;
 	
-	private String emailaddress = null;
+	private String emailaddress;
 	
-	private boolean b_id = false;
+	private boolean b_id;
 	
-	private boolean b_displayName = false;
+	private boolean b_displayName;
 	
-	private boolean b_emailaddress = false;
+	private boolean b_emailaddress;
 	
 	public void setIdentifier( final int id ) {
 		this.id = id;
@@ -129,10 +128,12 @@ public class ExternalUserParticipant implements Participant, Comparable
 		return EXTERNAL_USER;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getHashString(getIdentifier(), getType(), getDisplayName(), getEmailAddress()).hashCode();
 	}
 	
+	@Override
 	public boolean equals(final Object o) {
 		return (hashCode() == o.hashCode());
 	}
@@ -144,7 +145,7 @@ public class ExternalUserParticipant implements Participant, Comparable
 		return s1.compareTo(s2);
 	}
 	
-	private String getHashString(final int id, final int type, String displayName, String emailaddress) {
+	private String getHashString(final int id, final int type, final String displayName, final String emailaddress) {
 		final StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append('I');
 		stringBuilder.append(id);
