@@ -1,3 +1,4 @@
 * 2007-05-11 - manuel.kraft@open-xchange.com
 
   -  Bugfix ID#7186 Fixed property in foldercache.properties that a user can edit his own personal data via groupware interface!
+  -	 Fixed invalid alias creation when client sends an alias array with "" data entries.
