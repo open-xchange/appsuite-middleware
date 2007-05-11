@@ -85,13 +85,15 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+//import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -210,14 +212,17 @@ public final class ical extends PermissionServlet {
 			taskfolder_id = getTaskFolderID(req);
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);
+				final OXFolderAccess oAccess = new OXFolderAccess(context);
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
 			
 			HashMap entries_db = new HashMap();
 			HashMap entries_db_reverse = new HashMap();
 			HashMap entries_module = new HashMap();
-			final HashMap entries = new HashMap();
+			final HashMap<String, String> entries = new HashMap<String, String>();
 			
 			Connection readCon = null;
 			
@@ -465,8 +470,11 @@ public final class ical extends PermissionServlet {
 			taskfolder_id = getTaskFolderID(req);
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);
+				final OXFolderAccess oAccess = new OXFolderAccess(context);
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
 			
 			if (content_type == null) {
@@ -483,15 +491,18 @@ public final class ical extends PermissionServlet {
 			taskfolder_id = getTaskFolderID(req);
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
-				calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
-				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);
+				final OXFolderAccess oAccess = new OXFolderAccess(context);
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
+				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
 			
 			final boolean enabledelete = getEnableDelete(req);
 			
 			HashMap entries_db = new HashMap();
-			HashMap entries_module = new HashMap();
-			final HashSet entries = new HashSet();
+			HashMap<String, String> entries_module = new HashMap<String, String>();
+			final HashSet<String> entries = new HashSet<String>();
 			
 			Connection readCon = null;
 			PreparedStatement ps = null;
@@ -520,7 +531,7 @@ public final class ical extends PermissionServlet {
 						throw new OXConflictException("no principal found for the given folders: " + principal);
 					}
 					
-					final HashMap[] h = loadDBEntries(context, principal_id);
+					final HashMap<String, String>[] h = loadDBEntries(context, principal_id);
 					entries_db = h[0];
 					entries_module = h[1];
 				} else {
@@ -738,7 +749,7 @@ public final class ical extends PermissionServlet {
 		while (e.hasMoreElements()) {
 			final String tmp = e.nextElement().toString().toLowerCase();
 			if ("user-agent".equals(tmp)) {
-				return req.getHeader("user-agent").toString();
+				return req.getHeader("user-agent");
 			}
 		}
 		
@@ -796,7 +807,9 @@ public final class ical extends PermissionServlet {
 			ps.executeUpdate();
 			writeCon.commit();
 		} catch (SQLException exc) {
-			writeCon.rollback();
+			if (writeCon != null) {
+				writeCon.rollback();
+			}
 			throw exc;
 		} finally {
 			if (ps != null) {
@@ -834,11 +847,11 @@ public final class ical extends PermissionServlet {
 		}
 	}
 	
-	private HashMap[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
-		final HashMap[] h = new HashMap[3];
-		final HashMap entries_db = new HashMap();
-		final HashMap entries_db_reverse = new HashMap();
-		final HashMap entries_module = new HashMap();
+	private HashMap<String, String>[] loadDBEntries(final Context context, final int principal_object_id) throws Exception {
+		final HashMap<String, String>[] h = new HashMap[3];
+		final HashMap<String, String> entries_db = new HashMap<String, String>();
+		final HashMap<String, String> entries_db_reverse = new HashMap<String, String>();
+		final HashMap<String, String> entries_module = new HashMap<String, String>();
 		
 		Connection readCon = null;
 		PreparedStatement ps = null;
@@ -885,6 +898,7 @@ public final class ical extends PermissionServlet {
 		return h;
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
 		return (sessionObj.getUserConfiguration().hasICal() && sessionObj.getUserConfiguration().hasCalendar() && sessionObj.getUserConfiguration().hasTask());
 	}
