@@ -682,8 +682,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 Locale langus = OXUser.getLanguage(usrdata);
-                String lang = langus.getLanguage().toLowerCase() + "_"
-                        + langus.getCountry().toUpperCase();
+                String lang = "en_US"; // fallback when client sent INVALID locale
+                if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
+                    // ok , wrong language/country set , language/country cannot contain "_"
+                    log.error("Client sent wrong locale data("+langus+") in users language!Using fallback en_US");                    
+                }else{
+                    lang = langus.getLanguage().toLowerCase() + "_"
+                    + langus.getCountry().toUpperCase();
+                }
+                
                 stmt.setString(8, lang);
 
                 // mailenabled
