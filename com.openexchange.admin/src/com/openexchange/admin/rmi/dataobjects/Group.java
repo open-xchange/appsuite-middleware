@@ -69,8 +69,6 @@ public class Group implements Serializable {
 
     private Integer[] members;
 
-    private String email;
-
     private ArrayList<OXGroupExtensionInterface> extensions = null;
 
     /**
@@ -110,7 +108,6 @@ public class Group implements Serializable {
         this.name = null;
         this.displayname = null;
         this.members = null;
-        this.email = null;
     }
 
     public Integer getId() {
@@ -143,14 +140,6 @@ public class Group implements Serializable {
 
     public void setMembers(Integer[] val) {
         this.members = val;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String val) {
-        this.email = val;
     }
 
     public boolean attributesforcreateset() {
