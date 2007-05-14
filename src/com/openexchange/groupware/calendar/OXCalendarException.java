@@ -136,6 +136,7 @@ public class OXCalendarException extends OXException {
         RECURRING_MISSING_YEARLY_MONTH("Fatal error. (YEARLY) Missing or wrong value month : %d", 63, AbstractOXException.Category.USER_INPUT),
         RECURRING_ALREADY_EXCEPTION("Fatal error. You are trying to create a new recurring from an exception!", 64, AbstractOXException.Category.USER_INPUT),
         RECURRING_EXCEPTION_MOVE_EXCEPTION("You can not move one element of a recurring appointment into another folder.", 65, AbstractOXException.Category.USER_INPUT),
+        UPDATE_EXCEPTION("Fatal error. An database update exception occurred.", 66, AbstractOXException.Category.INTERNAL_ERROR),
         ;
         
         /**

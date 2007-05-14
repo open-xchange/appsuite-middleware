@@ -1025,7 +1025,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void closeStatement(final Statement stmt) {
+    public static final void closeStatement(final Statement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
