@@ -115,7 +115,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 edited_the_resource++;
             } catch (final SQLException exp) {
                 if (log.isDebugEnabled()) {
-                log.debug("Error in data (available)", exp);
+                    log.debug("Error in data (available)", exp);
                 }
             }
 
@@ -172,27 +172,19 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
             con.commit();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -201,16 +193,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     editres.close();
                 }
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing PreparedStatement", ex);
-                }
             }
             try {
                 cache.pushOXDBWrite(context_id, con);
             } catch (final PoolException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox write connection to pool!", e);
-                }
             }
 
         }
@@ -279,27 +267,19 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.commit();
             return resID;
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException exp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error processing rollback of ox connection!", exp);
-                }
             }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException exp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error processing rollback of ox connection!", exp);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -308,17 +288,13 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     prep_insert.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statemtent!", e);
-                }
             }
 
             try {
                 cache.pushOXDBWrite(context_ID, con);
             } catch (final PoolException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox write connection to pool!", e);
-                }
             }
         }
     }
@@ -345,75 +321,51 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
 
             con.commit();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final ContextException e) {
-            if (log.isErrorEnabled()) {
             log.error("Context Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final LdapException e) {
-            if (log.isErrorEnabled()) {
             log.error("LDAP Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final DBPoolingException e) {
-            if (log.isErrorEnabled()) {
             log.error("DBPooling Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final DeleteFailedException e) {
-            if (log.isErrorEnabled()) {
             log.error("Delete Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -422,17 +374,13 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     prep_del.close();
                 }
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing  PreparedStatement", ex);
-                }
             }
             try {
 
                 cache.pushOXDBWrite(context_id, con);
             } catch (final PoolException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox write connection to pool!", e);
-                }
             }
 
         }
@@ -489,27 +437,19 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
             
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -518,17 +458,13 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     prep_list.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
 
             try {
                 cache.pushOXDBRead(context_id, con);
             } catch (final PoolException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox read connection to pool!", e);
-                }
             }
         }
     }
@@ -588,14 +524,10 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
             return retval;
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
-            log.error("Pool Error", e);
-            }
+            log.error("Pool Error", e);         
             throw new StorageException(e);
         } finally {
             try {
@@ -603,9 +535,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     rs.close();
                 }
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing ResultSet", ex);
-                }
             }
 
             try {
@@ -613,16 +543,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     prep_list.close();
                 }
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing PreparedStatement", ex);
-                }
             }
             try {
                 cache.pushOXDBRead(context_id, con);
             } catch (final PoolException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox read connection to pool!", e);
-                }
             }
         }
     }
@@ -639,24 +565,18 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_edit_user.executeUpdate();
             prep_edit_user.close();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
             try {
                 prep_edit_user.close();
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statement!", e);
-                }
             }
         }
     }
@@ -700,15 +620,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.setInt(8, available);
             del_st.executeUpdate();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -717,9 +633,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
 
@@ -736,15 +650,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.setInt(1, context_id);
             del_st.executeUpdate();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -753,9 +663,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
     }
@@ -772,15 +680,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.setInt(2, context_id);
             del_st.executeUpdate();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -789,9 +693,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
     }
