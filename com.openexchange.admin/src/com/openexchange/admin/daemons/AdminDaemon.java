@@ -56,6 +56,9 @@ import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -63,6 +66,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
+import java.rmi.server.RMIServerSocketFactory;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.Permission;
 import java.util.ArrayList;
@@ -76,7 +81,6 @@ import org.osgi.framework.BundleListener;
 
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-
 
 public class AdminDaemon {
 
@@ -92,6 +96,18 @@ public class AdminDaemon {
     private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
     private static OXAdminCoreImpl oxadmincore = null;
+
+    public class LocalServerFactory implements RMIServerSocketFactory {
+        
+        public ServerSocket createServerSocket(int port) throws IOException {
+            final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
+            if (hostname_property.equalsIgnoreCase("0")) {
+                return new ServerSocket(port, 0, null);
+            } else {
+                return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
+            }
+        }
+    }
 
     public void registerBundleListener(final BundleContext context) {
         BundleListener bl = new BundleListener() {
@@ -134,7 +150,9 @@ public class AdminDaemon {
             
             int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
             try {
-                registry = LocateRegistry.createRegistry(rmi_port);
+//                registry = LocateRegistry.createRegistry(rmi_port);
+                // Use SslRMIServerSocketFactory for SSL here
+                registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
             } catch (ExportException e) {
                 // if a registry has be already created in this osgi framework
                 // we just need to get it from the port (normally this happens
@@ -189,6 +207,10 @@ public class AdminDaemon {
         } catch (NotBoundException e) {
             log.error("Error unregistering RMI", e);
         }
+    }
+
+    public static final Registry getRegistry() {
+        return registry;
     }
 
     public static PropertyHandler getProp() {
