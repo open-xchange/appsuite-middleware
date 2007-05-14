@@ -82,6 +82,7 @@ import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.sessiond.SessionObject;
@@ -90,6 +91,7 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Tools;
 
 public class Multiple extends SessionServlet {
 
@@ -130,10 +132,11 @@ public class Multiple extends SessionServlet {
 		try {
 			jsonArray = new JSONArray(data);
 		} catch (JSONException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e.getCause(), e
-					.getMessage()));
-			jsonArray = new JSONArray();
+            final AbstractOXException exc = new OXJSONException(OXJSONException
+                .Code.JSON_READ_ERROR, e.getCause(), e.getMessage());
+            LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
+            response.setException(exc);
+            jsonArray = new JSONArray();
 		}
 
 		

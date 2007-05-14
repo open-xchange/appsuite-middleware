@@ -53,11 +53,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -183,6 +185,55 @@ public final class Tools {
 			DATEFORMAT_LOCK.unlock();
 		}
 	}
+
+    /**
+     * HTTP header name containing the user agent.
+     */
+    public static final String HEADER_AGENT = "User-Agent";
+
+    /**
+     * HTTP header name containing the content type of the body.
+     */
+    public static final String HEADER_TYPE = "Content-Type";
+
+    /**
+     * HTTP header name containing the site that caused the request.
+     */
+    public static final String HEADER_REFERER = "Referer";
+
+    /**
+     * HTTP header name containing the length of the body.
+     */
+    public static final String HEADER_LENGTH = "Content-Length";
+
+    /**
+     * This method integrates interesting HTTP header values into a string for
+     * logging purposes. This is usefull if a client sent an illegal request for
+     * discovering the cause of the illegal request.
+     * @param req the servlet request.
+     * @return a string containing interesting HTTP headers.
+     */
+    public static String logHeaderForError(final HttpServletRequest req) {
+        final StringBuilder message = new StringBuilder();
+        message.append("|\n");
+        message.append(HEADER_AGENT);
+        message.append(": ");
+        message.append(req.getHeader(HEADER_AGENT));
+        message.append('\n');
+        message.append(HEADER_TYPE);
+        message.append(": ");
+        message.append(req.getHeader(HEADER_TYPE));
+        message.append('\n');
+        message.append(HEADER_REFERER);
+        message.append(": ");
+        message.append(req.getHeader(HEADER_REFERER));
+        message.append('\n');
+        message.append(HEADER_LENGTH);
+        message.append(": ");
+        message.append(req.getHeader(HEADER_LENGTH));
+        message.append('\n');
+        return message.toString();
+    }
 
     static {
         HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale
