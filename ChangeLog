@@ -3,6 +3,15 @@
  - Database changes (alter field length) to fix bug #6514. The mail address 
    can now contain 286 chars. 
 
+ - Build in some configuration paramater to disable the fast pre fetch and to
+   set the max. pre fetch block size.
+   To disable the fast pre-fetch feature:
+   CACHED_ITERATOR_FAST_FETCH=FALSE
+   The default is TRUE
+   To set the max. pre fetch size:
+   MAX_PRE_FETCH=10
+   The default is 20
+
 * 2007-05-11 - tobias.prinz@open-xchange.com
 
  - Removed special chars and used Unicode \u??? style in ContactFieldMappers
