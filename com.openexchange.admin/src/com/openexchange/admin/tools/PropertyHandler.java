@@ -69,7 +69,7 @@ public class PropertyHandler {
     protected Hashtable       groupPropValues     = null;
     private Hashtable       resPropValues       = null;
     private Hashtable       rmiPropValues       = null;
-    private Log log = LogFactory.getLog(this.getClass());
+    private final static Log log = LogFactory.getLog(PropertyHandler.class);
     
     private String configdirname;
     private Properties sysprops = null;
@@ -88,12 +88,14 @@ public class PropertyHandler {
     
     
     public PropertyHandler(final Properties sysprops) {
-        allPropValues = new Hashtable<String, Object>();
+        this.allPropValues = new Hashtable<String, Object>();
         this.sysprops = sysprops;
         try {
             loadProps(sysprops);
-        } catch ( Exception e ) {
-            log.fatal("Error loading properties!",e);
+        } catch (final FileNotFoundException e) {
+            log.error(e);
+        } catch (final IOException e) {
+            log.error(e);
         }
     }
     
@@ -104,15 +106,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getProp( String key, String fallBack ) {
+    public String getProp( final String key, final String fallBack ) {
         String retString = fallBack;
         
-        if ( allPropValues.containsKey( key ) ) {
-            retString = allPropValues.get( key ).toString(); 
+        if ( this.allPropValues.containsKey( key ) ) {
+            retString = this.allPropValues.get( key ).toString(); 
         } else {
-            if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + configdirname +"! Using fallback :" + fallBack );
-            }
+            log.error("Property '" + key + "' not found in file " + this.configdirname +"! Using fallback :" + fallBack );
         }
         
         return retString; 
@@ -126,14 +126,14 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getSysProp( String key, String fallBack ) {
+    public String getSysProp( final String key, final String fallBack ) {
         String retString = fallBack;
-        Properties syprops     = new Properties( this.sysprops );
+        final Properties syprops = new Properties( this.sysprops );
         retString = syprops.getProperty( key );
         
         if ( retString == null ) {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in the run script! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in the run script! Using fallback :" + fallBack );
             }
             retString = fallBack;
         }
@@ -141,24 +141,24 @@ public class PropertyHandler {
         return retString; 
     }
     
-    public String getGroupProp( String key, String fallBack ) {
+    public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
-        if ( groupPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
+        if ( this.groupPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
+                this.groupPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
-            retBool =  groupPropValues.get( key ).toString();
+        if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
+            retBool =  this.groupPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
@@ -171,24 +171,24 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public boolean getGroupProp( String key, boolean fallBack ) {
+    public boolean getGroupProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( groupPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
+        if ( this.groupPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
+                this.groupPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( groupPropValues.get( key ).toString() ); 
+        if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
+            retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+                log.debug("Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
@@ -201,25 +201,25 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public boolean getUserProp( String key, boolean fallBack ) {
+    public boolean getUserProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( userPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
-                userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
+        if ( this.userPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
+                this.userPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( userPropValues != null && userPropValues.containsKey( key ) ) {
-            String val = userPropValues.get( key ).toString();
+        if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
+            final String val = this.userPropValues.get( key ).toString();
             retBool = Boolean.parseBoolean( val ); 
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
@@ -232,24 +232,24 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getUserProp( String key, String fallBack ) {
+    public String getUserProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
-        if ( userPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
-                userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
+        if ( this.userPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
+                this.userPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( userPropValues != null && userPropValues.containsKey( key ) ) {
-            retBool =  userPropValues.get( key ).toString();
+        if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
+            retBool =  this.userPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
@@ -265,24 +265,24 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public boolean getResourceProp( String key, boolean fallBack ) {
+    public boolean getResourceProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
-        if ( resPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
+        if ( this.resPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
+                this.resPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( resPropValues != null && resPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( resPropValues.get( key ).toString() ); 
+        if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
+            retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
@@ -296,39 +296,39 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
-    public int getRmiProp( String key, int fallBack ) {
+    public int getRmiProp( final String key, final int fallBack ) {
         int retInt = fallBack;
         
-        if ( rmiPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_RMI ) ) {
-                rmiPropValues = (Hashtable)allPropValues.get( PROPERTIES_RMI );
+        if ( this.rmiPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_RMI ) ) {
+                this.rmiPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RMI );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( rmiPropValues != null && rmiPropValues.containsKey( key ) ) {
-            retInt = Integer.parseInt( rmiPropValues.get( key ).toString() ); 
+        if ( this.rmiPropValues != null && this.rmiPropValues.containsKey( key ) ) {
+            retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() ); 
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RMI_FILE ) +"! Using fallback :" + fallBack );
+                log.debug( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RMI_FILE ) +"! Using fallback :" + fallBack );
             }
         }
         
         return retInt; 
     }
     
-    private void loadProps(final Properties sysprops) throws Exception {
-        allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
+    private void loadProps(final Properties sysprops) throws FileNotFoundException, IOException {
+        this.allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
         
         if ( sysprops.getProperty( "configdir" ) != null ) {
-            configdirname = sysprops.getProperty("configdir");
-            addpropsfromfile(configdirname + File.separatorChar + "AdminDaemon.properties");
+            this.configdirname = sysprops.getProperty("configdir");
+            addpropsfromfile(this.configdirname + File.separatorChar + "AdminDaemon.properties");
         } else {
-            log.fatal( "Parameter '-Dconfigdir' not given in system properties!" );
-            log.fatal( "Now, using default parameter!" );
+            log.error( "Parameter '-Dconfigdir' not given in system properties!" );
+            log.error( "Now, using default parameter!" );
         }
     }
     
@@ -336,7 +336,7 @@ public class PropertyHandler {
         final Properties configprops  = new Properties();
         configprops.load( new FileInputStream(file) );
         
-        Enumeration enumi = configprops.propertyNames();
+        final Enumeration enumi = configprops.propertyNames();
         while ( enumi.hasMoreElements() ) {
             final String param = (String)enumi.nextElement();
             String value = configprops.getProperty( param );
@@ -347,47 +347,41 @@ public class PropertyHandler {
                 value = stringReplacer( value, "$PWD", new File( "" ).getAbsolutePath() );
             }
             
-            allPropValues.put( param, value );
+            this.allPropValues.put( param, value );
             
             if ( param.toLowerCase().endsWith( "_prop" ) ) {
-                try {
-                    Properties customprops = new Properties();
-                    customprops.load( new FileInputStream( value ) );
-                    Enumeration enuma = customprops.propertyNames();
-                    Hashtable<String, String> custconfig = new Hashtable<String, String>();
-                    if ( allPropValues.containsKey( param + "_CONFIG" ) ) {
-                        custconfig = (Hashtable)allPropValues.get( param + "_CONFIG" );
-                    }
-                    while ( enuma.hasMoreElements() ){
-                        String param_ = (String)enuma.nextElement();
-                        String value_ = customprops.getProperty( param_ );
-                        if ( value_.startsWith( "$PWD" ) ) {
-                            value_ = stringReplacer( value_, "$PWD", new File( "" ).getAbsolutePath() );
-                        }
-                        if ( value_.startsWith( "\"" ) ) {
-                            value_ = value_.substring( 1 );
-                        }
-                        if ( value_.endsWith( "\"" ) ) {
-                            value_ = value_.substring( 0 , value_.length() - 1 );
-                            
-                        }
-                        custconfig.put( param_, value_ );
-                    }
-                    allPropValues.put( param + "_CONFIG", custconfig );
-                } catch ( Exception e ) {
-                    if(log.isDebugEnabled()){
-                    log.debug( "File not found. Use default values for the file: " + value, e );
-                    }
+                final Properties customprops = new Properties();
+                customprops.load( new FileInputStream( value ) );
+                final Enumeration enuma = customprops.propertyNames();
+                Hashtable<String, String> custconfig = new Hashtable<String, String>();
+                if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {
+                    custconfig = (Hashtable)this.allPropValues.get( param + "_CONFIG" );
                 }
+                while ( enuma.hasMoreElements() ){
+                    final String param_ = (String)enuma.nextElement();
+                    String value_ = customprops.getProperty( param_ );
+                    if ( value_.startsWith( "$PWD" ) ) {
+                        value_ = stringReplacer( value_, "$PWD", new File( "" ).getAbsolutePath() );
+                    }
+                    if ( value_.startsWith( "\"" ) ) {
+                        value_ = value_.substring( 1 );
+                    }
+                    if ( value_.endsWith( "\"" ) ) {
+                        value_ = value_.substring( 0 , value_.length() - 1 );
+                        
+                    }
+                    custconfig.put( param_, value_ );
+                }
+                this.allPropValues.put( param + "_CONFIG", custconfig );
             }
         }
     }
     
-    private String stringReplacer( String source, String find, String replacement ) {
+    private String stringReplacer( String source, final String find, final String replacement ) {
         int i = 0;
         int j;
-        int k = find.length();
-        int m = replacement.length();
+        final int k = find.length();
+        final int m = replacement.length();
         
         while ( i < source.length() ) {
             j = source.indexOf( find, i );
@@ -409,23 +403,23 @@ public class PropertyHandler {
         return source;
     }
 
-    public String getResourceProp(String key, String fallback) {
+    public String getResourceProp(final String key, final String fallback) {
         String retval = fallback;
-        if ( resPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
+        if ( this.resPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
+                this.resPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
+                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
                 }
             }
         }
         
-        if ( resPropValues != null && resPropValues.containsKey( key ) ) {
-            retval = resPropValues.get( key ).toString(); 
+        if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
+            retval = this.resPropValues.get( key ).toString(); 
         } else {
             if(log.isDebugEnabled()){
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallback );
+                log.debug("Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallback );
             }
         }
         return retval;
