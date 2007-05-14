@@ -110,7 +110,9 @@ public class PropertyHandler {
         if ( allPropValues.containsKey( key ) ) {
             retString = allPropValues.get( key ).toString(); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + configdirname +"! Using fallback :" + fallBack );
+            }
         }
         
         return retString; 
@@ -130,7 +132,9 @@ public class PropertyHandler {
         retString = syprops.getProperty( key );
         
         if ( retString == null ) {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in the run script! Using fallback :" + fallBack );
+            }
             retString = fallBack;
         }
         
@@ -144,14 +148,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
                 groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
             retBool =  groupPropValues.get( key ).toString();
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retBool; 
@@ -170,14 +178,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
                 groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( groupPropValues.get( key ).toString() ); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retBool; 
@@ -196,7 +208,9 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
                 userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
@@ -204,7 +218,9 @@ public class PropertyHandler {
             String val = userPropValues.get( key ).toString();
             retBool = Boolean.parseBoolean( val ); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retBool; 
@@ -223,14 +239,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_USER ) ) {
                 userPropValues = (Hashtable)allPropValues.get( PROPERTIES_USER );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( userPropValues != null && userPropValues.containsKey( key ) ) {
             retBool =  userPropValues.get( key ).toString();
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_USER_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retBool; 
@@ -252,14 +272,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
                 resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( resPropValues != null && resPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( resPropValues.get( key ).toString() ); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retBool; 
@@ -279,14 +303,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RMI ) ) {
                 rmiPropValues = (Hashtable)allPropValues.get( PROPERTIES_RMI );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( rmiPropValues != null && rmiPropValues.containsKey( key ) ) {
             retInt = Integer.parseInt( rmiPropValues.get( key ).toString() ); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RMI_FILE ) +"! Using fallback :" + fallBack );
+            }
         }
         
         return retInt; 
@@ -347,7 +375,9 @@ public class PropertyHandler {
                     }
                     allPropValues.put( param + "_CONFIG", custconfig );
                 } catch ( Exception e ) {
+                    if(log.isDebugEnabled()){
                     log.debug( "File not found. Use default values for the file: " + value, e );
+                    }
                 }
             }
         }
@@ -385,14 +415,18 @@ public class PropertyHandler {
             if ( allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
                 resPropValues = (Hashtable)allPropValues.get( PROPERTIES_RESOURCE );
             } else {
+                if(log.isDebugEnabled()){
                 log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + configdirname ) );
+                }
             }
         }
         
         if ( resPropValues != null && resPropValues.containsKey( key ) ) {
             retval = resPropValues.get( key ).toString(); 
         } else {
+            if(log.isDebugEnabled()){
             log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_RESOURCE_FILE ) +"! Using fallback :" + fallback );
+            }
         }
         return retval;
     }
