@@ -231,7 +231,6 @@ public final class Tools {
         message.append(HEADER_LENGTH);
         message.append(": ");
         message.append(req.getHeader(HEADER_LENGTH));
-        message.append('\n');
         return message.toString();
     }
 

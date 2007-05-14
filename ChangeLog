@@ -1,3 +1,8 @@
+* 2007-05-14 - marcus.klein@open-xchange.com
+
+  - Bugfix #6302: Empty multiple request can't be sent by GUI. Added logging for
+    some HTTP header in error case to be able to eliminate self build requests.
+
 * 2007-05-14 - martin.kauss@open-xchange.com
 
  - Database changes (alter field length) to fix bug #6514. The mail address 

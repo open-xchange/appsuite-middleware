@@ -133,7 +133,7 @@ public class Multiple extends SessionServlet {
 			jsonArray = new JSONArray(data);
 		} catch (JSONException e) {
             final AbstractOXException exc = new OXJSONException(OXJSONException
-                .Code.JSON_READ_ERROR, e.getCause(), e.getMessage());
+                .Code.JSON_READ_ERROR, e, e.getMessage());
             LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
             response.setException(exc);
             jsonArray = new JSONArray();
