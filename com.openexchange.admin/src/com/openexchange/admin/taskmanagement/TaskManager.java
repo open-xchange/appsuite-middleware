@@ -49,7 +49,9 @@ public class TaskManager {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
-        log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
+        if (log.isInfoEnabled()) {
+            log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
+        }
         this.executor = Executors.newFixedThreadPool(threadCount);
     }
 
@@ -60,7 +62,9 @@ public class TaskManager {
     public int addJob(final Callable jobcall, final String typeofjob, final String furtherinformation) {
         final Extended job = new Extended(jobcall, typeofjob, furtherinformation);
         this.jobs.put(++this.lastID, job);
+        if (log.isDebugEnabled()) {
         log.debug("Adding job number " + lastID);
+        }
         runningjobs++;
         this.executor.execute(job);
         return lastID;
