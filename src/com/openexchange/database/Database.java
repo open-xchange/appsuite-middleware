@@ -153,20 +153,33 @@ public final class Database {
         return get(poolId, assign.schema);
     }
 
+    /**
+     * Fetches a connection from the given pool and sets the database schema.
+     * @param poolId unique identifier of the pool
+     * @param schema schema name.
+     * @return a fetched connection that is directed to the schema.
+     * @throws DBPoolingException if fetching a connection fails.
+     */
     public static Connection get(final int poolId, final String schema)
         throws DBPoolingException {
         final Connection con;
         try {
             con = Pools.getPool(poolId).get();
         } catch (PoolingException e) {
-            throw new DBPoolingException(Code.NO_CONNECTION, e, Integer.valueOf(poolId));
+            throw new DBPoolingException(Code.NO_CONNECTION, e, Integer.valueOf(
+                poolId));
         }
         try {
             final String oldSchema = con.getCatalog();
             if (!oldSchema.equals(schema)) {
-	            con.setCatalog(schema);
+                con.setCatalog(schema);
             }
         } catch (SQLException e) {
+            try {
+                Pools.getPool(poolId).back(con);
+            } catch (PoolingException e1) {
+                LOG.error(e1.getMessage(), e1);
+            }
             throw new DBPoolingException(Code.SCHEMA_FAILED, e);
         }
         return con;
@@ -220,13 +233,12 @@ public final class Database {
         back(poolId, con);
     }
 
+    /**
+     * Returns the given connection to a pool.
+     * @param poolId unique identifier of the pool
+     * @param con connection to return.
+     */
     public static void back(final int poolId, final Connection con) {
-        // TODO remove null check to produce more error messages
-        if (null == con) {
-            LOG.error("Got null connection back to pool.",
-                new Exception("Got null connection back to pool."));
-            return;
-        }
         try {
             Pools.getPool(poolId).back(con);
         } catch (PoolingException e) {
