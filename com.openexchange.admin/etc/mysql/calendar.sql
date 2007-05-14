@@ -218,14 +218,14 @@ alter table prg_date_rights change column object_id object_id integer unsigned n
 alter table prg_date_rights change column cid cid integer unsigned not null;
 alter table prg_date_rights change column id id integer not null;
 alter table prg_date_rights change column type type integer unsigned not null;
-alter table prg_date_rights change column ma ma VARCHAR(64);
+alter table prg_date_rights change column ma ma VARCHAR(286);
 alter table prg_date_rights change column dn dn VARCHAR(64);
 
 alter table del_date_rights change column object_id object_id integer unsigned not null;
 alter table del_date_rights change column cid cid integer unsigned not null;
 alter table del_date_rights change column id id integer not null;
 alter table del_date_rights change column type type integer unsigned not null;
-alter table del_date_rights change column ma ma VARCHAR(64);
+alter table del_date_rights change column ma ma VARCHAR(286);
 alter table del_date_rights change column dn dn VARCHAR(64);
 
 
