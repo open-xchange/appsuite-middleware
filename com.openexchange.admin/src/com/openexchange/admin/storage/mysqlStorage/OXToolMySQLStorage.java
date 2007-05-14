@@ -99,17 +99,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 // throw USER_EXCEPTIONS.create(0,primary_mail,context_id);
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
 
@@ -118,13 +124,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db write connection to pool!", e);
+                }
             }
 
         }
@@ -187,17 +197,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 }
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -205,7 +221,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -213,7 +231,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -247,17 +267,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 }
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -265,7 +291,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -273,7 +301,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -304,29 +334,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 retBool = false;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             try {
                 rs.close();
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing resultset", e);
+                }
             }
             try {
                 if (prep_check != null) {
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db write connection to pool!", e);
+                }
             }
 
         }
@@ -361,17 +401,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             prep.close();
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -379,14 +425,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
+                }
             }
             try {
                 if (con != null) {
                     cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                 }
             } catch (PoolException ecp) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db write connection to pool!", ecp);
+                }
             }
         }
         return ret;
@@ -438,17 +488,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 return false;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -456,7 +512,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -464,7 +522,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -496,17 +556,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 return false;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);            
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -514,7 +580,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -522,7 +590,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -598,7 +668,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                  return retval;              
            
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("SQL Error",e);
+                }
                 throw new StorageException(e);
             } finally {
                 if (null != rs) {
@@ -607,7 +679,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                             rs.close();
                         }
                     } catch (SQLException e) {
+                        if (log.isErrorEnabled()) {
                         log.error("Error closing resultset", e);
+                        }
                     }
                 }
                 try {
@@ -615,7 +689,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         prep_check.close();
                     }
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing prepared statement!", e);
+                    }
                 }
             }
             
@@ -635,7 +711,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
             return existsContextLoginMappings(ctx,con); 
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         }finally{
             try {
@@ -643,7 +721,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                 }
              } catch (PoolException e) {
+                 if (log.isErrorEnabled()) {
                  log.error("Error pushing configdb write connection to pool!", e);
+                 }
              }
         }
         
@@ -673,17 +753,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 return false;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -691,7 +777,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -699,7 +787,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -729,17 +819,23 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 return false;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -747,7 +843,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -755,7 +853,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }      
@@ -801,10 +901,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 ret = true;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             try {
@@ -812,14 +916,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     prep.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
+                }
             }
 
             if (null != con) {
                 try {
                     cache.pushOXDBWrite(ctx.getIdAsInt(), con);
                 } catch (PoolException ecp) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
+                    }
                 }
             }
         }
@@ -846,14 +954,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new SQLException("UNABLE TO GET MAILADMIN ID FOR CONTEXT " + ctx.getIdAsInt());
             }
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -861,7 +973,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     stmt.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
         }
 
@@ -883,7 +997,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             rs.close();
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             try {
@@ -891,14 +1007,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     rs.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing resultset!", e);
+                }
             }
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
         }
 
@@ -924,20 +1044,26 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 throw new SQLException("UNABLE TO GET DEFAULT GROUP FOR CONTEXT " + ctx.getIdAsInt());
             }
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             try {
                 rs.close();
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing resultset!", e);
+                }
             }
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
         }
 
@@ -960,7 +1086,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 isadmin = true;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } finally {
             try {
@@ -968,7 +1096,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     cache.pushOXDBRead(ctx.getIdAsInt(), con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing oxdb read connection to pool!", e);
+                }
             }
         }
         return isadmin;
@@ -995,17 +1125,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             }
 
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (Exception e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1013,13 +1149,17 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushConfigDBWrite(con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
         }
 
@@ -1089,17 +1229,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 retBool = true;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1107,7 +1253,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -1117,7 +1265,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     cache.pushConfigDBWrite(con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -1157,17 +1307,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 retBool = true;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1175,7 +1331,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -1185,7 +1343,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     cache.pushConfigDBWrite(con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -1234,17 +1394,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 retBool = true;
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1252,7 +1418,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
@@ -1262,7 +1430,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     cache.pushConfigDBWrite(con);
                 }
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing configdb write connection to pool!", e);
+                }
             }
 
         }
@@ -1288,17 +1458,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 throw new StorageException("No such user "+username+" in context "+ctx.getIdAsInt().intValue()+"");
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
 
@@ -1307,13 +1483,17 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushOXDBRead(ctx.getIdAsInt(), con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db read connection to pool!", e);
+                }
             }
 
         }
@@ -1337,17 +1517,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 throw new StorageException("No such user "+user_id+" in context "+ctx.getIdAsInt().intValue()+"");
             }
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
 
@@ -1356,13 +1542,17 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     prep_check.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushOXDBRead(ctx.getIdAsInt(), con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db read connection to pool!", e);
+                }
             }
 
         }
@@ -1388,17 +1578,23 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
 
             return schemaBeingLockedOrNeedsUpdate(writePoolId, schema);
         } catch (PoolException e) {
+            if (log.isErrorEnabled()) {
             log.error("Pool Error",e);
+            }
             throw new StorageException(e);
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (null != rs) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
 
@@ -1407,13 +1603,17 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     ps.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
 
             try {
                 cache.pushConfigDBWrite(con);
             } catch (PoolException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error pushing ox db read connection to pool!", e);
+                }
             }
 
         }
@@ -1426,7 +1626,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             updater = Updater.getInstance();
             return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
         } catch (UpdateException e) {
+            if (log.isErrorEnabled()) {
             log.error("UpdateCheck Error",e);
+            }
             throw new StorageException(e);
         }
     }
@@ -1450,14 +1652,18 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 throw new SQLException("Unable to get features from bitfield for User: " + user.getId() + ", Context: " + ctx.getIdAsInt());
             }
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1465,7 +1671,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     stmt.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
         }
     }
@@ -1493,14 +1701,18 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 throw new SQLException("Unable to set features from bitfield for User: " + user.getId() + ", Context: " + ctx.getIdAsInt());
             }
         } catch (SQLException e) {
+            if (log.isErrorEnabled()) {
             log.error("SQL Error",e);
+            }
             throw new StorageException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    if (log.isErrorEnabled()) {
                     log.error("Error closing resultset", e);
+                    }
                 }
             }
             try {
@@ -1508,7 +1720,9 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                     stmt.close();
                 }
             } catch (SQLException e) {
+                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
+                }
             }
         }
     }
