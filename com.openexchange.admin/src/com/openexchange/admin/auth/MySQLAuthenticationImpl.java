@@ -111,9 +111,11 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , admin user not found in context
+                    if(log.isDebugEnabled()){
                     log.debug("Admin user \"" + authdata.getLogin()
                             + "\" not found in context \"" + ctx.getIdAsInt()
                             + "\"!");
+                    }
                     return false;
                 } else {
                     // now check via our crypt mech the password
@@ -121,8 +123,10 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                             authdata.getPassword())) {
                         return true;
                     } else {
+                        if(log.isDebugEnabled()){
                         log.debug("Password for admin user \""
                                 + authdata.getLogin() + "\" did not match!");
+                        }
                         return false;
                     }
                 }
@@ -193,9 +197,11 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , user not found in context
+                    if(log.isDebugEnabled()){
                     log.debug("User \"" + authdata.getLogin()
                             + "\" not found in context \"" + ctx.getIdAsInt()
                             + "\"!");
+                    }
                     return false;
                 } else {
                     // now check via our crypt mech the password
@@ -204,8 +210,10 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         // here add the isUser flag to the credentials
                         return true;
                     } else {
+                        if(log.isDebugEnabled()){
                         log.debug("Password for ser \""
                                 + authdata.getLogin() + "\" did not match!");
+                        }
                         return false;
                     }
                 }

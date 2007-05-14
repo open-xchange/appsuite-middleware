@@ -101,7 +101,9 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
+                if(log.isInfoEnabled()){
                 log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
+                }
             }
         };
         context.addBundleListener(bl);
