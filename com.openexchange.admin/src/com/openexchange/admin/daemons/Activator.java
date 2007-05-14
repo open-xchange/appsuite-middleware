@@ -89,20 +89,26 @@ public class Activator implements BundleActivator {
         this.daemon.initCache(context);
 
         this.daemon.initRMI(this.getClass().getClassLoader(), context);
+        if(log.isInfoEnabled()){
         log.info("Version: " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH);
         log.info("Name: " + Version.NAME);
         log.info("Build: " + Version.BUILD);
+        }
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered
         ServiceListener sl = new ServiceListener() {
             public void serviceChanged(ServiceEvent ev) {
+                if(log.isInfoEnabled()){
                 log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
+                }
 
                 switch (ev.getType()) {
                     case ServiceEvent.REGISTERED: {
                         // At first we call our own methods inside the new registered plugin...
+                        if(log.isInfoEnabled()){
                         log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
+                        }
                         // Code which is executed if a new plugin is registered
 //                        TestClass test = (TestClass) context.getService(sr);
 //                        test.testmethod();
