@@ -586,4 +586,62 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 	        return oxGroup.getGroupsForUser(ctx, usr);
 	        
 	}
+
+
+    public Group[] getData(Context ctx, Group[] groups, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
+        if(ctx==null){
+            throw new InvalidDataException();
+        }
+        
+        doAuthentication(auth,ctx);
+        
+        
+        if (log.isDebugEnabled()) {
+            log.debug(""+ctx.toString()+" - "+groups+" - "+auth.toString());
+        }       
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException();
+            
+        }
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+        
+        if (!tool.existsGroup(ctx, groups)) {
+            throw new NoSuchGroupException("No such group(s)");            
+        }
+        
+        ArrayList<Group> retval = new ArrayList<Group>();
+        
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        for (Group group : groups) {
+            retval.add(oxGroup.get(ctx, group));
+        }
+       
+
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context.getService(servicereference);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling get for plugin: " + bundlename);
+                            }
+                            for (Group group : retval) {
+                                group = oxgroupplugin.get(ctx, group, auth);
+                            }                            
+                        }
+                    }
+                }
+            }
+        }
+        return (Group[])retval.toArray(new Group[retval.size()]);
+        
+    }
 }
