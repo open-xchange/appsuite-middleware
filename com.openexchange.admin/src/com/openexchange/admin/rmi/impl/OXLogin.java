@@ -82,7 +82,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
     public OXLogin(final BundleContext context) throws RemoteException {
         super();
         this.context = context;
-        log.info("Class loaded: " + this.getClass().getName());
+        if (log.isInfoEnabled()) {
+            log.info("Class loaded: " + this.getClass().getName());
+        }
         
     }
 
@@ -136,7 +138,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            log.info("Calling getData for plugin: " + bundlename);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling getData for plugin: " + bundlename);
+                            }
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
