@@ -3,6 +3,7 @@
  */
 package com.openexchange.ajax.task;
 
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
@@ -66,19 +67,23 @@ public final class AllTest extends AbstractTaskTest2 {
             task.setParentFolderID(getPrivateTaskFolder());
             inserts[i] = new TaskInsertRequest(task, timeZone);
         }
-        final MultipleResponse response = (MultipleResponse) AJAXClient.execute(
+        final MultipleResponse mInsert = (MultipleResponse) AJAXClient.execute(
             getSession(), new MultipleRequest(inserts));
         for (int i = 0; i < inserts.length; i++) {
-            final TaskInsertResponse ins = (TaskInsertResponse) response
+            final TaskInsertResponse ins = (TaskInsertResponse) mInsert
                 .getResponse(i);
             LOG.info(ins.getId());
         }
+        // Get for timestamp
         // List
 
-//        TaskDelete[] deletes = new TaskDelete[inserts.length];
-//        for (int i = 0; i < inserts.length; i++) {
-//            deletes[i] = new TaskDelete(folderId, responses[i].getId());
-//        }
+        final TaskDeleteRequest[] deletes = new TaskDeleteRequest[inserts.length];
+        for (int i = 0; i < inserts.length; i++) {
+            deletes[i] = new TaskDeleteRequest(getPrivateTaskFolder(),
+                ((TaskInsertResponse) mInsert.getResponse(i)).getId(),
+                new Date());
+        }
+        final MultipleResponse mDelete = (MultipleResponse) AJAXClient.execute(
+            getSession(), new MultipleRequest(deletes)); 
     }
-
 }
