@@ -52,19 +52,16 @@ import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.Permission;
-//import java.util.Hashtable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-//import org.osgi.framework.ServiceRegistration;
 
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-//import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.AdminJobExecutorInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -103,8 +100,7 @@ public class PluginStarter {
                 });
             }
             initCache();
-            int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
-            registry = LocateRegistry.getRegistry(rmi_port);
+            registry = AdminDaemon.getRegistry();
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext();
