@@ -1,3 +1,8 @@
+* 2007-05-14 - martin.kauss@open-xchange.com
+
+ - Database changes (alter field length) to fix bug #6514. The mail address 
+   can now contain 286 chars. 
+
 * 2007-05-11 - tobias.prinz@open-xchange.com
 
  - Removed special chars and used Unicode \u??? style in ContactFieldMappers
