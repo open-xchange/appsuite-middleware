@@ -98,7 +98,7 @@ public class Tasks extends DataServlet {
 				 jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -128,6 +128,9 @@ public class Tasks extends DataServlet {
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
+        } catch (OXJSONException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (OXFolderNotFoundException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -172,7 +175,7 @@ public class Tasks extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (JSONException e) {
 					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}
@@ -225,6 +228,9 @@ public class Tasks extends DataServlet {
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
+        } catch (OXJSONException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);

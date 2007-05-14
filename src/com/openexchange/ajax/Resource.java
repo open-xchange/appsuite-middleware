@@ -88,7 +88,7 @@ public class Resource extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);	
 			} catch (JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -133,13 +133,22 @@ public class Resource extends DataServlet {
 			final String data = getBody(httpServletRequest);
 			if (data.charAt(0) == '[') {
 				JSONArray jData = null;
+                try {
+                    jData = new JSONArray(data);
+                } catch (JSONException e) {
+                    final OXJSONException exc = new OXJSONException(
+                        OXJSONException.Code.JSON_READ_ERROR, e, data);
+                    response.setException(exc);
+                    writeResponse(response, httpServletResponse);
+                    LOG.error(exc.getMessage(), exc);
+                    return;
+                }
 				JSONObject jsonObj = null;
 				try {
-					jData = new JSONArray(data);
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (JSONException e) {
 					LOG.error(_doGet, e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}

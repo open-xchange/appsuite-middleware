@@ -133,7 +133,7 @@ public class Multiple extends SessionServlet {
 			jsonArray = new JSONArray(data);
 		} catch (JSONException e) {
             final AbstractOXException exc = new OXJSONException(OXJSONException
-                .Code.JSON_READ_ERROR, e, e.getMessage());
+                .Code.JSON_READ_ERROR, e, data);
             LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
             response.setException(exc);
             jsonArray = new JSONArray();
@@ -316,6 +316,9 @@ public class Multiple extends SessionServlet {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
+            } catch (OXJSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(e);
 			}
 		} else if (module.equals(MODULE_CONTACT)) {
 			final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
@@ -489,6 +492,9 @@ public class Multiple extends SessionServlet {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
+            } catch (OXJSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(e);
 			}
 		} else if (module.equals(MODULE_INFOSTORE)) {
 			final InfostoreRequest infoRequest = new InfostoreRequest(sessionObj, sw);

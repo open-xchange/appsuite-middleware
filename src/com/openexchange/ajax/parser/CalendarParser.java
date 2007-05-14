@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * CalendarParser
@@ -78,7 +79,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class CalendarParser extends CommonParser {
 	
-	protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException {
+	protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
 		if (jsonobject.has(CalendarFields.TITLE)) {
 			calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
 		}
@@ -156,13 +157,19 @@ public class CalendarParser extends CommonParser {
 		parseElementCommon(calendarobject, jsonobject);
 	}
 	
-	public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException {
+	public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXJSONException {
 		final JSONArray jparticipants = jsonObj.getJSONArray(CalendarFields.PARTICIPANTS);
 		final Participant[] participant = new Participant[jparticipants.length()];
 		for (int i = 0; i < jparticipants.length(); i++) {
 			final JSONObject jparticipant = jparticipants.getJSONObject(i);
 			final int type = jparticipant.getInt(ParticipantsFields.TYPE);
-			final int id = jparticipant.getInt(ParticipantsFields.ID);
+			final int id;
+            try {
+                id = jparticipant.getInt(ParticipantsFields.ID);
+            } catch (JSONException e) {
+                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR,
+                    e, jparticipant.get(ParticipantsFields.ID));
+            }
 			Participant p = null;
 			switch (type) {
 				case Participant.USER:

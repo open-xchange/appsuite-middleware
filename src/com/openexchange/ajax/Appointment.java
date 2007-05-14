@@ -90,7 +90,7 @@ public class Appointment extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -128,7 +128,10 @@ public class Appointment extends DataServlet {
                 .JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		}
+		} catch (OXJSONException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        }
 		
 		writeResponse(response, httpServletResponse);
 	}
@@ -150,7 +153,7 @@ public class Appointment extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);					
 				} catch (JSONException e) {
 					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}
@@ -218,6 +221,9 @@ public class Appointment extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (OXJSONException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);

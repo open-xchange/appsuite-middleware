@@ -5,6 +5,7 @@
   - Bugfix #5629: Checking empty values before authenticating agains ldap to get
     invalid credentials if some login value is missing.
   - Bugfix #6303: Return a connection to the pool if setting the schema fails.
+  - Bugfix #6345: Improved exception handling if JSON is malformed.
 
 * 2007-05-14 - martin.kauss@open-xchange.com
 

@@ -92,7 +92,7 @@ public class Link extends DataServlet {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
@@ -147,7 +147,7 @@ public class Link extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (JSONException e) {
 					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}
