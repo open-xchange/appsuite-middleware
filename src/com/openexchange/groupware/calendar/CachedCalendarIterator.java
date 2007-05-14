@@ -80,13 +80,13 @@ public class CachedCalendarIterator implements SearchIterator {
     private Context c;
     private int uid;
     
-    public static boolean cached_iterator_fast_fetch = true; // TODO: Make this configurable
-    public static final int MAX_PRE_FETCH = 20; // TODO: Make this configurable
-    private int pre_fetch = 0;
+    public static boolean CACHED_ITERATOR_FAST_FETCH = true; 
+    public static int MAX_PRE_FETCH = 20; 
+    private int pre_fetch = 0;   
     
     private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
     
-    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
+    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {     
         list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
         this.c = c;
@@ -149,7 +149,7 @@ public class CachedCalendarIterator implements SearchIterator {
         CalendarDataObject temp;
         try {
             cdao = (CalendarDataObject)list.get(counter++);
-            if (cached_iterator_fast_fetch) {
+            if (CACHED_ITERATOR_FAST_FETCH) {
                 if (pre_fetch < counter) {
                     if (readcon == null && (cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID() && cdao.containsParentFolderID()))) {
                         try {

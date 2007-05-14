@@ -611,7 +611,7 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 break;
                             case AppointmentObject.USERS:                                
-                                if (!cdao.containsUserParticipants() && !CachedCalendarIterator.cached_iterator_fast_fetch) {
+                                if (!cdao.containsUserParticipants() && !CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
                                     final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                     cdao.setUsers(users.getUsers());
                                     bbs = true;
@@ -620,7 +620,7 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 break;
                             case AppointmentObject.PARTICIPANTS:
-                                if (!CachedCalendarIterator.cached_iterator_fast_fetch) {
+                                if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
                                     final Participants participants = cimp.getParticipants(cdao, readcon);
                                     cdao.setParticipants(participants.getList());
                                 } else {
@@ -640,7 +640,7 @@ public class CalendarOperation implements SearchIterator {
                                             } else {
                                                 if (bbs) {
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                                } else if (!CachedCalendarIterator.cached_iterator_fast_fetch) {
+                                                } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
                                                     Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                                     cdao.setUsers(users.getUsers());
                                                     cdao.setGlobalFolderID(cdao.getEffectiveFolderId());

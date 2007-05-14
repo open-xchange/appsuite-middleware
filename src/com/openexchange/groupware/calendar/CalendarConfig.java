@@ -55,6 +55,9 @@ import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.tools.conf.AbstractConfig;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Configuration class for calendar options.
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -64,6 +67,8 @@ public class CalendarConfig extends AbstractConfig {
     private static final Property KEY = Property.CALENDAR;
     
     private static CalendarConfig singleton;
+    
+    private static final Log LOG = LogFactory.getLog(CalendarConfig.class);
     
     /**
      * {@inheritDoc}
@@ -91,5 +96,25 @@ public class CalendarConfig extends AbstractConfig {
     public static void reinit() throws ConfigurationException {
         singleton = new CalendarConfig();
         singleton.loadPropertiesInternal();
+        String check_cached_iterator_fast_fetch = CalendarConfig.getProperty("CACHED_ITERATOR_FAST_FETCH");
+        if (check_cached_iterator_fast_fetch != null) {
+            check_cached_iterator_fast_fetch = check_cached_iterator_fast_fetch.trim();
+            if (check_cached_iterator_fast_fetch.equalsIgnoreCase("FALSE") || check_cached_iterator_fast_fetch.equalsIgnoreCase("0")) {
+                CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH = false;
+            }
+        }
+        String check_max_pre_fetch_size = CalendarConfig.getProperty("MAX_PRE_FETCH");
+        if (check_max_pre_fetch_size != null){
+            check_max_pre_fetch_size = check_max_pre_fetch_size.trim();
+            try {
+                int mfs = Integer.valueOf(check_max_pre_fetch_size);
+                if (mfs > 1 && mfs < 1000) {
+                    CachedCalendarIterator.MAX_PRE_FETCH = mfs;
+                }
+            } catch(NumberFormatException nfe) {
+                LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
+            }
+        }
+        
     }
 }
