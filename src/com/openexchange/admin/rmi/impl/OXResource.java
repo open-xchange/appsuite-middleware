@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.11 2007/05/08 16:57:53 choeger Exp $
+ * $Id: OXResource.java,v 1.12 2007/05/14 09:49:34 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -100,8 +100,10 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         super();
         this.context = context;
         cache = ClientAdminThread.cache;
-        prop = cache.getProperties();        
-        log.info("Class loaded: " + this.getClass().getName());
+        prop = cache.getProperties();     
+        if (log.isInfoEnabled()) {
+            log.info("Class loaded: " + this.getClass().getName());
+        }
         
     }
     
@@ -113,9 +115,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         doAuthentication(auth,ctx);
-        
-        log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString()); 
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString()); 
+        }
         //try {
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
@@ -168,23 +170,33 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                         if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
                             final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling create for plugin: " + bundlename);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling create for plugin: " + bundlename);
+                                }
                                 oxresource.create(ctx, res, auth);
                                 interfacelist.add(oxresource);
                             } catch (final PluginException e) {
-                                log.error("Error while calling create for plugin: " + bundlename, e);
-                                log.info("Now doing rollback for everything until now...");
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling create for plugin: " + bundlename, e);
+                                }
+                                if (log.isErrorEnabled()) {
+                                    log.error("Now doing rollback for everything until now...");
+                                }
                                 for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
                                     try {
                                         oxresourceinterface.delete(ctx, res, auth);
                                     } catch (final PluginException e1) {
-                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                        if (log.isErrorEnabled()) {
+                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                        }
                                     }
                                 }
                                 try {
                                     oxRes.delete(ctx, retval);
                                 } catch (final StorageException e1) {
-                                    log.error("Error doing rollback for creating resource in database", e1);
+                                    if (log.isErrorEnabled()) {
+                                        log.error("Error doing rollback for creating resource in database", e1);
+                                    }
                                 }
                                 throw new StorageException(e);
                             }
@@ -207,9 +219,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         doAuthentication(auth,ctx);
-        
-        log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString());
-                
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString());
+        }
         final int resource_ID = res.getId();        
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -255,10 +267,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                         if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
                             final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling change for plugin: " + bundlename);
+                                if (log.isInfoEnabled()) {
+                                    log.info("Calling change for plugin: " + bundlename);
+                                }
                                 oxresource.change(ctx, res, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling change for plugin: " + bundlename, e);
+                                }
                                 throw new StorageException(e);
                             }
                         }
@@ -279,8 +295,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         doAuthentication(auth,ctx);
         final int resource_id = res.getId();
-        log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
+        }
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
@@ -315,11 +332,15 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                         if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
                             final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling delete for plugin: " + bundlename);
+                                if (log.isInfoEnabled()) {
+                                    log.info("Calling delete for plugin: " + bundlename);
+                                }
                                 oxresource.delete(ctx, res, auth);
                                 interfacelist.add(oxresource);
                             } catch (final PluginException e) {
-                                log.error("Error while calling delete for plugin: " + bundlename, e);
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling delete for plugin: " + bundlename, e);
+                                }
                                 throw new StorageException(e);
                             }
                         }
@@ -342,8 +363,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         doAuthentication(auth,ctx);
         final int resource_id = res.getId();
-        log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
+        }
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();           
@@ -375,7 +397,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
                             final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            log.info("Calling getData for plugin: " + bundlename);
+                            if (log.isInfoEnabled()) {
+                                log.info("Calling getData for plugin: " + bundlename);
+                            }
                             retres = oxresourceplugin.get(ctx, retres, auth);
                         }
                     }
@@ -395,9 +419,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         doAuthentication(auth,ctx);
-        
-        log.debug(ctx.toString() + " - " + pattern+" - "+auth.toString());
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + pattern+" - "+auth.toString());
+        }
         if(pattern==null || pattern.length()==0){
             throw new InvalidDataException("Invalid pattern!");
         }

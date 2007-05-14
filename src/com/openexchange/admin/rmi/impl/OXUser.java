@@ -119,7 +119,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
-        log.info("Class loaded: " + this.getClass().getName());
+        if (log.isInfoEnabled()) {
+            log.info("Class loaded: " + this.getClass().getName());
+        }
     }
     
     public static Locale getLanguage(final User usr){
@@ -138,14 +140,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         Locale langus = OXUser.getLanguage(usr); 
         if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
-            log.debug("Client sent invalid locale data("+langus+") in users language!");
+            if (log.isDebugEnabled()) {
+                log.debug("Client sent invalid locale data("+langus+") in users language!");
+            }
             throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
         }
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
+        }
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
@@ -178,7 +183,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if( this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) &&
                 ! tools.isContextAdmin(ctx, usr.getId()) ) {
             if( ! new File(homedir).mkdir() ) {
-                log.error("unable to create directory: " + homedir);
+                if (log.isErrorEnabled()) {
+                    log.error("unable to create directory: " + homedir);
+                }
             }
             final String CHOWN = "/bin/chown";
             Process p;
@@ -189,21 +196,33 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                 homedir});
                 p.waitFor();
                 if( p.exitValue() != 0 ) {
-                    log.error(CHOWN + " exited abnormally");
+                    if (log.isErrorEnabled()) {
+                        log.error(CHOWN + " exited abnormally");
+                    }
                     final BufferedReader prerr = new BufferedReader(new InputStreamReader(
                             p.getErrorStream()));
                     String line = null;
                     while( (line = prerr.readLine()) != null ) {
                         log.error(line);
                     }
-                    log.error("Unable to chown homedirectory: " + homedir);
+                    if (log.isErrorEnabled()) {
+                        log.error("Unable to chown homedirectory: " + homedir);
+                    }
                 }
             } catch (final IOException e) {
-                log.error("Unable to chown homedirectory: " + homedir);
-                log.error(e);
+                if (log.isErrorEnabled()) {
+                    log.error("Unable to chown homedirectory: " + homedir);
+                }
+                if (log.isErrorEnabled()) {
+                    log.error(e);
+                }
             } catch (final InterruptedException e) {
-                log.error("Unable to chown homedirectory: " + homedir);
-                log.error(e);
+                if (log.isErrorEnabled()) {
+                    log.error("Unable to chown homedirectory: " + homedir);
+                }
+                if (log.isErrorEnabled()) {
+                    log.error(e);
+                }
             }
 
         }
@@ -219,23 +238,31 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling create for plugin: " + bundlename);
+                                log.debug("Calling create for plugin: " + bundlename);
                                 oxuser.create(ctx, usr, access, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                log.error("Error while calling create for plugin: " + bundlename, e);
-                                log.info("Now doing rollback for everything until now...");
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling create for plugin: " + bundlename, e);
+                                }
+                                if (log.isErrorEnabled()) {
+                                    log.error("Now doing rollback for everything until now...");
+                                }
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new User[]{usr}, auth);
                                     } catch (final PluginException e1) {
-                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                        if (log.isErrorEnabled()) {
+                                            log.error("Error doing rollback for plugin: "+ bundlename, e1);
+                                        }                                        
                                     }
                                 }
                                 try {
                                     oxu.delete(ctx, new int[]{usr.getId()});
                                 } catch (final StorageException e1) {
-                                    log.error("Error doing rollback for creating user in database", e1);
+                                    if (log.isErrorEnabled()) {
+                                        log.error("Error doing rollback for creating user in database", e1);
+                                    }                                    
                                 }
                                 throw new StorageException(e);
                             }
@@ -294,8 +321,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException();
         }
         
-        log.debug(ctx.toString()+" - "+usrdata.toString()+" - "+auth.toString());
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ auth.toString());
+        }        
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
@@ -341,10 +369,14 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling change for plugin: " + bundlename);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling change for plugin: "+ bundlename);
+                                }                                
                                 oxuser.change(ctx, usrdata, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling change for plugin: "+ bundlename, e);
+                                }                                
                                 throw new StorageException(e);
                             }
                         }
@@ -369,8 +401,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString() + " - " + Arrays.toString(users)+" - "+auth.toString());
-
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "+ auth.toString());
+        }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
@@ -414,11 +447,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.info("Calling delete for plugin: " + bundlename);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling delete for plugin: "+ bundlename);
+                                }                                
                                 oxuser.delete(ctx, retusers, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                log.error("Error while calling delete for plugin: " + bundlename, e);
+                                if (log.isErrorEnabled()) {
+                                    log.error("Error while calling delete for plugin: "+ bundlename, e);
+                                }                                
                             }
                         }
                     }
@@ -436,7 +473,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 try {
                     FileUtils.deleteDirectory(new File(homedir));
                 } catch (final IOException e) {
-                    log.error("Could not delete homedir for user: " + usr);
+                    if (log.isErrorEnabled()) {
+                        log.error("Could not delete homedir for user: " + usr);
+                    }                    
                 }
             }
         }
@@ -462,8 +501,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString()+ " - " + user_id+" - "+auth.toString());
-
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - "+ auth.toString());
+        }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -493,8 +533,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString() + " - " + user_id + " - " + moduleAccess.toString()+" - "+auth.toString());
-
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
+        }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
         if (!tools.existsContext(ctx)) {
@@ -525,8 +566,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
        
         doAuthentication(auth,ctx);
         
-        log.debug(ctx.toString()+" - "+auth.toString());
-
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + auth.toString());
+        }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -601,11 +643,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if(users[0].getUsername()!=null){
                             final int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
                             if(check_user_id!=auth_user_id){
-                                log.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                if (log.isDebugEnabled()) {
+                                    log.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                }                                
                                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
                             }
                         }else{
-                            log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                            if (log.isDebugEnabled()) {
+                                log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                            }                            
                             throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
                         }
                     }                    
@@ -615,9 +661,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         
         
-        log.debug(ctx.toString()+" - "+Arrays.toString(users)+" - "+auth.toString());
-                
-        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "
+                    + auth.toString());
+        }        
         if (!tools.existsContext(ctx)) {
             throw new NoSuchContextException();            
         }
@@ -663,14 +710,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            log.info("Calling getData for plugin: " + bundlename);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling getData for plugin: "
+                                        + bundlename);
+                            }                            
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
                 }
             }
         }
-        log.debug("Response data "+Arrays.toString(retusers));
+        log.debug(Arrays.toString(retusers));
         return retusers;
     }
 
