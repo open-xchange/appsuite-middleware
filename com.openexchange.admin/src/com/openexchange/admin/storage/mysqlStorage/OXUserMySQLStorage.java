@@ -107,25 +107,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
          * @param method
          * @param name
          */
-        public MethodAndNames(Method method, String name) {
+        public MethodAndNames(final Method method, final String name) {
             super();
             this.method = method;
             this.name = name;
         }
 
         public Method getMethod() {
-            return method;
+            return this.method;
         }
 
-        public void setMethod(Method method) {
+        public void setMethod(final Method method) {
             this.method = method;
         }
 
         public String getName() {
-            return name;
+            return this.name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -375,7 +375,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setString(db, result);
                         } else {
                             final Method methodbool = getMethodforbooleanparameter(method);
-                            boolean test = (Boolean) methodbool.invoke(usrdata,
+                            final boolean test = (Boolean) methodbool.invoke(usrdata,
                                     (Object[]) null);
                             if (test) {
                                 stmt.setNull(db, java.sql.Types.VARCHAR);
@@ -388,7 +388,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.setInt(db, result);
                         } else {
                             final Method methodbool = getMethodforbooleanparameter(method);
-                            boolean test = (Boolean) methodbool.invoke(usrdata,
+                            final boolean test = (Boolean) methodbool.invoke(usrdata,
                                     (Object[]) null);
                             if (test) {
                                 stmt.setNull(db, java.sql.Types.INTEGER);
@@ -406,7 +406,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                                     new java.sql.Date(result.getTime()));
                         } else {
                             final Method methodbool = getMethodforbooleanparameter(method);
-                            boolean test = (Boolean) methodbool.invoke(usrdata,
+                            final boolean test = (Boolean) methodbool.invoke(usrdata,
                                     (Object[]) null);
                             if (test) {
                                 stmt.setNull(db, java.sql.Types.DATE);
@@ -558,7 +558,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -566,7 +566,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -574,7 +574,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             log.error("Error", e);
             try {
                 write_ox_con.rollback();
@@ -615,7 +615,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @throws StorageException
      * @throws NoSuchAlgorithmException
      */
-    private String password2crypt(User user) throws StorageException,
+    private String password2crypt(final User user) throws StorageException,
             NoSuchAlgorithmException {
         String passwd = null;
         if (user.getPasswordMech() == null) {
@@ -683,7 +683,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setString(7, DEFAULT_TIMEZONE_CREATE);
                 }
 
-                Locale langus = OXUser.getLanguage(usrdata);
+                final Locale langus = OXUser.getLanguage(usrdata);
                 String lang = "en_US"; // fallback when client sent INVALID locale
                 if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
                     // ok , wrong language/country set , language/country cannot contain "_"
@@ -737,7 +737,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // if yes, update user table to correct gidnumber of users
                 // default group
                 if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                    int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
+                    final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
                     stmt.setInt(15,gid_number);
                 } else {
                     stmt.setInt(15,NOGROUP);
@@ -771,7 +771,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final StringBuilder questionmarks = new StringBuilder();
 
-                ArrayList<Method> methodlist2 = new ArrayList<Method>();
+                final ArrayList<Method> methodlist2 = new ArrayList<Method>();
 
                 for (final MethodAndNames methodandname : methodlist) {
                     // First we have to check which return value we have. We
@@ -930,7 +930,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         && usrdata.getAliases().size() > 0) {
                     final Iterator itr = usrdata.getAliases().iterator();
                     while (itr.hasNext()) {
-                       String tmp_mail = itr.next().toString().trim();
+                       final String tmp_mail = itr.next().toString().trim();
                        if(tmp_mail.length()>0){
                            stmt = write_ox_con
                                 .prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
@@ -1214,7 +1214,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public User[] getData(final Context ctx, User[] users)
+    public User[] getData(final Context ctx, final User[] users)
             throws StorageException {
         final int context_id = ctx.getIdAsInt();
         final Class c = User.class;
@@ -1366,7 +1366,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     newuser.setMail_folder_trash_name(rs3.getString("std_trash"));
                     newuser.setMail_folder_confirmed_ham_name(rs3.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs3.getString("confirmed_spam"));
-                    int bits = rs3.getInt("bits");
+                    final int bits = rs3.getInt("bits");
                     if( (bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED ) {
                         newuser.set_GUI_Spam_filter_capabilities_enabled(true);
                     } else {
@@ -1976,7 +1976,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
 
         // Define the returntypes we search for
-        HashSet<String> returntypes = new HashSet<String>(4);
+        final HashSet<String> returntypes = new HashSet<String>(4);
         returntypes.add("java.lang.String");
         returntypes.add("java.lang.Integer");
         returntypes.add("java.lang.Boolean");
