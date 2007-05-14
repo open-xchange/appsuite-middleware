@@ -2,6 +2,8 @@
 
   - Bugfix #6302: Empty multiple request can't be sent by GUI. Added logging for
     some HTTP header in error case to be able to eliminate self build requests.
+  - Bugfix #5629: Checking empty values before authenticating agains ldap to get
+    invalid credentials if some login value is missing.
 
 * 2007-05-14 - martin.kauss@open-xchange.com
 

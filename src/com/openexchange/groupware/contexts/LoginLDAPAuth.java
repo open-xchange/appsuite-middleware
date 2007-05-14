@@ -60,6 +60,7 @@ import java.util.Properties;
 
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
+import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
@@ -99,15 +100,20 @@ public class LoginLDAPAuth extends LoginInfo {
             throw new LoginException(Code.MISSING_ATTRIBUTES, loginInfo.length);
         }
         final String[] splitted = split((String) loginInfo[0]);
+        final String uid = splitted[1];
         final String password = (String) loginInfo[1];
+        if ("".equals(uid) || "".equals(password)) {
+            throw new LoginException(Code.INVALID_CREDENTIALS);
+        }
         LdapContext context = null;
         try {
             context = createContext();
-            context.addToEnvironment(Context.SECURITY_PRINCIPAL, "uid="
-                + splitted[1]
+            context.addToEnvironment(Context.SECURITY_PRINCIPAL, "uid=" + uid
                 + ",ou=Users,ou=OxObjects,dc=open-xchange,dc=com");
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
+        } catch (InvalidNameException e) {
+            throw new LoginException(Code.INVALID_CREDENTIALS, e);
         } catch (AuthenticationException e) {
             throw new LoginException(Code.INVALID_CREDENTIALS, e);
         } catch (NamingException e) {
