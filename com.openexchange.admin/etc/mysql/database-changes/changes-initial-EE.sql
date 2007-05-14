@@ -1,3 +1,6 @@
+# 2007-05-14, Martin Kauss, alter field length according to bug #6514
+alter table del_date_rights change column ma ma VARCHAR(286);
+alter table prg_date_rights change column ma ma VARCHAR(286);
 
 # 2007-05-08, Carsten Hoeger, added version table
 CREATE TABLE version (
