@@ -519,99 +519,67 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // fire up
             write_ox_con.commit();
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (SecurityException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (NoSuchMethodException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } catch (NoSuchAlgorithmException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException e2) {
-                if (log.isErrorEnabled()) {
                 log.error("Error doing rollback", e2);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -620,18 +588,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     folder_update.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("SQL Error closing statement", e);
-                }
             }
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("SQL Error closing statement", e);
-                }
             }
 
             try {
@@ -639,10 +603,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(context_id, write_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
                 log.error("Pool Error pushing ox write connection to pool!",
                         exp);
-                }
             }
         }
     }
@@ -725,9 +687,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 String lang = "en_US"; // fallback when client sent INVALID locale
                 if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
                     // ok , wrong language/country set , language/country cannot contain "_"
-                    if (log.isErrorEnabled()) {
                     log.error("Client sent wrong locale data("+langus+") in users language!Using fallback en_US");
-                    }
                 }else{
                     lang = langus.getLanguage().toLowerCase() + "_"
                     + langus.getCountry().toUpperCase();
@@ -1057,9 +1017,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         stmt.close();
                     }
                 } catch (final SQLException e) {
-                    if (log.isErrorEnabled()) {
                     log.error("Error closing statement", e);
-                    }
                 }
             }
 
@@ -1080,33 +1038,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return id_for_client;
 
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
-            try {
-                write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
-                log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
-                log.error("Error rollback ox db write connection", ecp);
-                }
-            }
-            throw new StorageException(e);
-        } catch (final OXException e) {
-            if (log.isErrorEnabled()) {
-            log.error("OX Error", e);
-            }
             try {
                 write_ox_con.rollback();
                 if (log.isDebugEnabled()) {
                     log.debug("Rollback successfull for ox db write connection");
                 }
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
-                    log.error("Error rollback ox db write connection", ecp);
-                }
+                log.error("Error rollback ox db write connection", ecp);
+            }
+            throw new StorageException(e);
+        } catch (final OXException e) {
+            log.error("OX Error", e);
+            try {
+                write_ox_con.rollback();
+                log.debug("Rollback successfull for ox db write connection");
+            } catch (final SQLException ecp) {
+                log.error("Error rollback ox db write connection", ecp);
             }
             throw new StorageException(e);
         } catch (final NoSuchAlgorithmException e) {
@@ -1115,48 +1063,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // no database activity has happened
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            if (log.isErrorEnabled()) {
-                log.error("IllegalArgument Error", e);
-            }
+            log.error("IllegalArgument Error", e);
             try {
                 write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
-                    log.debug("Rollback successfull for ox db write connection");
-                }
+                log.debug("Rollback successfull for ox db write connection");
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ecp);
-                }
             }
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            if (log.isErrorEnabled()) {
             log.error("IllegalAccess Error", e);
-            }
             try {
                 write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
                 log.debug("Rollback successfull for ox db write connection");
-                }
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ecp);
-                }
             }
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            if (log.isErrorEnabled()) {
             log.error("InvocationTarget Error", e);
-            }
             try {
                 write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
                 log.debug("Rollback successfull for ox db write connection");
-                }
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ecp);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -1165,20 +1095,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     return_db_id.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
-                }
             }
             try {
                 if (ps != null) {
                     ps.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
-                }
             }
-
         }
     }
 
@@ -1210,35 +1135,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return create(ctx, usrdata, moduleAccess, write_ox_con,
                     internal_user_id, contact_id, uid_number);
         } catch (final SQLException sql) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", sql);
-            }
             // rollback operations on ox db connection
             try {
                 write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
                 log.debug("Rollback successfull for ox db write connection");
-                }
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ecp);
-                }
             }
             throw new StorageException(sql);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             // rollback operations on ox db connection
             try {
                 write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
-                    log.debug("Rollback successfull for ox db write connection");
-                }
+                log.debug("Rollback successfull for ox db write connection");
             } catch (final SQLException ecp) {
-                if (log.isErrorEnabled()) {
                 log.error("SQL Error rollback ox db write connection", ecp);
-                }
             }
             throw new StorageException(e);
         } finally {
@@ -1247,9 +1160,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(context_id, write_ox_con);
                 }
             } catch (final PoolException ex) {
-                if (log.isErrorEnabled()) {
-                    log.error( "Pool Error pushing ox write connection to pool!", ex);
-                }
+                log.error("Pool Error pushing ox write connection to pool!", ex);
             }
         }
     }
@@ -1279,14 +1190,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             return retval;
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             throw new StorageException(e);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             throw new StorageException(e);
         } finally {
             try {
@@ -1294,18 +1201,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("SQL Error closing statement!", e);
-                }
             }
             try {
                 if (read_ox_con != null) {
                     cache.pushOXDBRead(context_id, read_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
-                    log.error("Pool Error pushing ox read connection to pool!",exp);
-                }
+                log.error("Pool Error pushing ox read connection to pool!",exp);
             }
         }
     }
@@ -1478,34 +1381,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             return userlist.toArray(new User[userlist.size()]);
         } catch (final PoolException e) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", e);
-            }
             throw new StorageException(e);
         } catch (final SQLException e) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", e);
-            }
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             throw new StorageException(e);
         } catch (final CloneNotSupportedException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error", e);
-            }
             throw new StorageException(e);
         } finally {
             try {
@@ -1513,18 +1404,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
-                }
             }
             try {
                 if (read_ox_con != null) {
                     cache.pushOXDBRead(context_id, read_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
                 log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
             }
         }
     }
@@ -1537,10 +1424,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // delete all users
             for (final int user_id : user_ids) {
                 if (log.isDebugEnabled()) {
-                log.debug("Start delete user " + user_id + " in context "+ ctx.getIdAsInt());
-                }
-                if (log.isDebugEnabled()) {
-                log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") via OX API...");
+                    log.debug("Start delete user " + user_id + " in context "+ ctx.getIdAsInt());
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") via OX API...");
                 }
                 final DeleteEvent delev = new DeleteEvent(this, user_id,
                         DeleteEvent.TYPE_USER, ctx.getIdAsInt());
@@ -1565,7 +1450,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from user attribute ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from user attribute ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
@@ -1574,8 +1459,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()
-                        + ") from user mail setting...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user mail setting...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
@@ -1599,8 +1483,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // when table ready, enable this
                 createRecoveryData(ctx, user_id, write_ox_con);
                 if (log.isDebugEnabled()) {
-                log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()
-                        + ") from user ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
@@ -1609,8 +1492,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()
-                        + ") from contacts ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from contacts ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
@@ -1621,29 +1503,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             }
         } catch (final DBPoolingException dbex) {
-            if (log.isErrorEnabled()) {
             log.error("DBPooling Error", dbex);
-            }
             throw new StorageException(dbex);
         } catch (final LdapException ldex) {
-            if (log.isErrorEnabled()) {
             log.error("LDAP Error", ldex);
-            }
             throw new StorageException(ldex);
         } catch (final DeleteFailedException dex) {
-            if (log.isErrorEnabled()) {
             log.error("Delete Error", dex);
-            }
             throw new StorageException(dex);
         } catch (final ContextException cte) {
-            if (log.isErrorEnabled()) {
             log.error("Context Error", cte);
-            }
             throw new StorageException(cte);
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -1651,9 +1523,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("SQL Error closing statement on ox write connection!", e);
-                }
             }
         }
     }
@@ -1672,39 +1542,27 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             write_ox_con.commit();
         } catch (final StorageException st) {
-            if (log.isErrorEnabled()) {
-                log.error("Storage Error", st);
-            }
+            log.error("Storage Error", st);
             try {
                 write_ox_con.rollback();
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ex);
-                }
             }
             throw st;
         } catch (final PoolException pep) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", pep);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ex);
-                }
             }
             throw new StorageException(pep);
         } catch (final SQLException sql) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", sql);
-            }
             try {
                 write_ox_con.rollback();
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
                 log.error("Error rollback ox db write connection", ex);
-                }
             }
             throw new StorageException(sql);
         } finally {
@@ -1713,9 +1571,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
                 }
             } catch (final PoolException aexp) {
-                if (log.isErrorEnabled()) {
                 log.error("Pool Error pushing ox write connection to pool!", aexp);
-                }
             }
         }
 
@@ -1738,14 +1594,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             myChangeInsertModuleAccess(ctx, user_id, moduleAccess, false,
                     read_ox_con, write_ox_con, all_groups);
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", sqle);
-            }
             throw new StorageException(sqle);
         } catch (final PoolException pole) {
-            if (log.isErrorEnabled()) {
             log.error("Pool Error", pole);
-            }
             throw new StorageException(pole);
         } finally {
             try {
@@ -1753,18 +1605,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
                 log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
             }
             try {
                 if (write_ox_con != null) {
                     cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
-                    log.error("Pool Error pushing ox write connection to pool!", exp);
-                }
+                log.error("Pool Error pushing ox write connection to pool!", exp);
             }
         }
     }
@@ -1804,19 +1652,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             return acc;
         } catch (final DBPoolingException dbpol) {
-            if (log.isErrorEnabled()) {
             log.error("DBPooling error", dbpol);
-            }
             throw new StorageException(dbpol);
         } catch (final PoolException polex) {
-            if (log.isErrorEnabled()) {
             log.error("Pool error", polex);
-            }
             throw new StorageException(polex);
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error ", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -1824,9 +1666,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
                 }
             } catch (final PoolException exp) {
-                if (log.isErrorEnabled()) {
-                    log.error("Pool Error pushing ox read connection to pool!", exp);
-                }
+                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
 
@@ -1843,9 +1683,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             prep_edit_user.setInt(3, user_id);
             prep_edit_user.executeUpdate();
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error ", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -1853,9 +1691,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     prep_edit_user.close();
                 }
             } catch (final SQLException ex) {
-                if (log.isErrorEnabled()) {
-                    log.error("Error closing statement!", ex);
-                }
+                log.error("Error closing statement!", ex);
             }
         }
     }
@@ -1960,9 +1796,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error ", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -1970,9 +1804,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
     }
@@ -1986,9 +1818,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.setInt(1, ctx.getIdAsInt());
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error ", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -1996,9 +1826,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
     }
@@ -2014,9 +1842,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.setInt(2, ctx.getIdAsInt());
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error ", sqle);
-            }
             throw new StorageException(sqle);
         } finally {
             try {
@@ -2024,9 +1850,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     del_st.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing prepared statement!", e);
-                }
             }
         }
     }
@@ -2080,9 +1904,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     prep.close();
                 }
             } catch (final SQLException e) {
-                if (log.isErrorEnabled()) {
                 log.error("Error closing statement", e);
-                }
             }
         }
     }
@@ -2120,14 +1942,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             UserConfiguration.saveUserConfiguration(user, insert_or_update,
                     write_ox_con);
         } catch (final DBPoolingException pole) {
-            if (log.isErrorEnabled()) {
             log.error("DBPooling Error", pole);
-            }
             throw new StorageException(pole);
         } catch (final SQLException sqle) {
-            if (log.isErrorEnabled()) {
             log.error("SQL Error", sqle);
-            }
             throw new StorageException(sqle);
         }
     }
@@ -2144,10 +1962,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             md.update(raw.getBytes("UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            if (log.isErrorEnabled()) {
             log.error("Error Encoding Password", e);
-            }
-
         }
         md.update(salt);
 
@@ -2155,7 +1970,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final String ret = (new sun.misc.BASE64Encoder().encode(pwhash));
 
         return ret;
-
     }
 
     private ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
