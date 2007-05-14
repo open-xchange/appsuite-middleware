@@ -750,6 +750,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // show error.
         // cause he must set which adress is primarymail and email2 from the new
         // aliases
+        if(OXUser.getLanguage(usrdata)!=null){
+            Locale langus = OXUser.getLanguage(usrdata); 
+            if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
+                if (log.isDebugEnabled()) {
+                    log.debug("Client sent invalid locale data("+langus+") in users language!");
+                }
+                throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
+            }
+        }
     
         if (usrdata.getAliases() != null) {
             if (usrdata.getPrimaryEmail() == null || usrdata.getPrimaryEmail().length() < 1) {
