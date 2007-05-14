@@ -74,7 +74,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try{
             con =  DBPool.pickup();
         }catch(DBPoolingException ep){
+            if (log.isErrorEnabled()) {
             log.error("Error pickup configdb database read connection from ox pool!",ep);
+            }
             throw new PoolException(""+ep.getMessage());
         }
         return con;
@@ -86,7 +88,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try{
             con =  DBPool.pickup(ctx);
         }catch(DBPoolingException ep){
+            if (log.isErrorEnabled()) {
             log.error("Error pickup oxdb database read connection from ox pool!",ep);
+            }
             throw new PoolException(""+ep.getMessage());
         }
         return con;
@@ -97,7 +101,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try{
             con =  DBPool.pickupWriteable();
         }catch(DBPoolingException ep){
+            if (log.isErrorEnabled()) {
             log.error("Error pickup configdb database write connection from ox pool!",ep);
+            }
             throw new PoolException(""+ep.getMessage());
         }
         return con;
@@ -109,7 +115,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try{
             con =  DBPool.pickupWriteable(ctx);
         }catch(DBPoolingException ep){
+            if (log.isErrorEnabled()) {
             log.error("Error pickup oxdb database write connection from ox pool!",ep);
+            }
             throw new PoolException(""+ep.getMessage());
         }
         return con;
@@ -124,7 +132,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             }
             ret = DBPool.push(con);
         } catch (Exception e) {
+            if (log.isErrorEnabled()) {
             log.error("Error pushing configdb read connection to pool!",e);
+            }
             throw new PoolException(""+e.getMessage());
         }
         return ret;
@@ -139,7 +149,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             }
             ret = DBPool.pushWrite(con);
         } catch (Exception e) {
+            if (log.isErrorEnabled()) {
             log.error("Error pushing configdb write connection to pool!",e);
+            }
             throw new PoolException(""+e.getMessage());
         }
         return ret;
@@ -155,7 +167,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             }
             ret = DBPool.push(ctx,con);
         } catch (Exception e) {
+            if (log.isErrorEnabled()) {
             log.error("Error pushing ox db read connection to pool!",e);
+            }
             throw new PoolException(""+e.getMessage());
         }
         return ret;
@@ -171,7 +185,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             }
             ret = DBPool.pushWrite(ctx,con);
         } catch (Exception e) {
+            if (log.isErrorEnabled()) {
             log.error("Error pushing ox db write connection to pool!",e);
+            }
             throw new PoolException(""+e.getMessage());
         }
         return ret;
