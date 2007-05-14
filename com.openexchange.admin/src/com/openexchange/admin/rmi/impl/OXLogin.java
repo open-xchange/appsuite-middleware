@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.3 2007/04/25 11:30:32 cutmasta Exp $
+ * $Id: OXLogin.java,v 1.4 2007/05/14 09:49:34 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -82,7 +82,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
     public OXLogin(final BundleContext context) throws RemoteException {
         super();
         this.context = context;
-        log.info("Class loaded: " + this.getClass().getName());
+        if (log.isInfoEnabled()) {
+            log.info("Class loaded: " + this.getClass().getName());
+        }
         
     }
 
@@ -136,7 +138,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            log.info("Calling getData for plugin: " + bundlename);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Calling getData for plugin: " + bundlename);
+                            }
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
