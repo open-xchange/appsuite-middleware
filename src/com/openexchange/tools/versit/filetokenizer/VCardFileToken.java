@@ -53,6 +53,7 @@ import com.openexchange.tools.versit.VersitDefinition;
 
 /**
  * This class is a tuple containing a VCard/VCalendar/ICal
+ * (stored as byte array to be independent of the encoding used)
  * and a related VersitDefinition, which means the information
  * what kind of version it is.
  * 
@@ -62,14 +63,13 @@ import com.openexchange.tools.versit.VersitDefinition;
 public class VCardFileToken {
 	
 	protected VersitDefinition versitDefinition;
+	protected byte[] content;
 	
-	protected String content;
 	
-	
-	public String getContent() {
+	public byte[] getContent() {
 		return content;
 	}
-	public void setContent(String content) {
+	public void setContent(byte[] content) {
 		this.content = content;
 	}
 	public VersitDefinition getVersitDefinition() {

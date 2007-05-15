@@ -3,6 +3,9 @@
   - Bugfix (reported by Suphi): Sending a Outlook CSV file as normal CSV 
     file caused ClassCastException because of different date formats. 
     Catching it now, refactored the CSV importers to make that easier.
+  - Bugfix #7250 / #7107: Changed VCardTokenizer to work on ByteArrays
+    instead of Strings to be independend of encoding.
+  - Bugfix #7248: Added better testcase to make sure it is gone.
 
 * 2007-05-15 - marcus.klein@open-xchange.com
 

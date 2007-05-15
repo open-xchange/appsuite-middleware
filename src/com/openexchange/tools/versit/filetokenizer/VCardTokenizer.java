@@ -49,9 +49,8 @@
 
 package com.openexchange.tools.versit.filetokenizer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,14 +71,17 @@ import com.openexchange.tools.versit.old.VCard21;
  *
  */
 public class VCardTokenizer {
-	public static final String VCARD_V3 = "3.0";
+	public static final String VCARD_V3  = "3.0";
 	public static final String VCARD_V21 = "2.1";
 	public static final String VCALENDAR = "1.0";
 	public static final String ICALENDAR = "2.0";
+	public static final String ASCII_ENC = "ASCII";
 	
-	private String vcard;
+	private final InputStream vcard;
 	private int entriesFound = 0;
 	private int entriesRecognized = 0;
+	private List<Byte> streamAsBytes;
+	private boolean streamEnded = false;
 	
 	/**
 	 * Creates a new instance that reads the content to be parsed
@@ -88,42 +90,21 @@ public class VCardTokenizer {
 	 * @param reader: Reader of the content of a VCard file. Reader will be closed.
 	 * @throws IOException
 	 */
-	public VCardTokenizer(Reader reader) throws IOException{
-		StringBuilder bob = new StringBuilder();
-		BufferedReader br = new BufferedReader(reader);
-		String line;
-		while( (line = br.readLine()) != null){
-			bob.append(line);
-			bob.append('\n');
-		}
-		vcard = bob.toString();
-		reader.close();
+	public VCardTokenizer(InputStream is) throws IOException{
+		streamAsBytes = new LinkedList<Byte>();
+		vcard = is;
 	}
 	
-	/**
-	 * Creates a new instance that reads the content to be parsed
-	 * from a string.
-	 * 
-	 * @param vcard: Content of a VCard file (lines separated by either <code>\r\n</code> or only <code>\n</code>).
-	 */
 
-	public VCardTokenizer(String vcard){
-		this.vcard = vcard;
-	}
-	
-	public List<VCardFileToken> split(){
+	public List<VCardFileToken> split() throws IOException{
 		final List<VCardFileToken> chunks = new LinkedList<VCardFileToken>();
-		String[] vcards = vcard.split("(\r)?\n");
 		
-		StringBuilder currVCard = new StringBuilder();
 		VCardFileToken currentChunk = new VCardFileToken();
 		boolean potentialCalendar = false;
 		boolean potentialCard = false;
-
-		for(String currLine : vcards){
+		String currLine;
+		while( (currLine = _readLine()) != null){
 			String compLine = currLine.trim().toUpperCase();
-			currVCard.append(currLine);
-			currVCard.append('\n');
 			
 			if( compLine.startsWith("VERSION") ){
 				if(potentialCard && currLine.trim().endsWith(VCARD_V3)){
@@ -147,7 +128,8 @@ public class VCardTokenizer {
 			} else
 			if( compLine.startsWith("END") &&
 				(compLine.endsWith("VCARD") || compLine.endsWith("VCALENDAR"))){
-				currentChunk.setContent(currVCard.toString());
+				currentChunk.setContent(_toByteArray(streamAsBytes));
+				streamAsBytes = new LinkedList<Byte>();
 				chunks.add(currentChunk);
 				entriesFound++;
 				potentialCalendar = false;
@@ -155,16 +137,53 @@ public class VCardTokenizer {
 				if(currentChunk.getVersitDefinition() != null){
 					entriesRecognized++;
 				}
-				currVCard = new StringBuilder();
 				currentChunk = new VCardFileToken();
 			}
 		}
 		return chunks;
 	}
+	
 	public int getNumberOfEntriesFound(){
 		return entriesFound;
 	}
+	
 	public int getNumberOfEntriesRecognized(){
 		return entriesRecognized;
+	}
+	
+	protected String _readLine() throws IOException{
+		if(streamEnded){
+			return null;
+		}
+		List<Byte> bytez = new LinkedList<Byte>();
+		byte b[] = new byte[1];
+		while( vcard.read(b) != -1){
+			bytez.add( new Byte(b[0]) );
+			if('\n' == b[0] ){
+				byte[] ret = _toByteArray(bytez);
+				streamAsBytes.addAll(bytez);
+				bytez = new LinkedList<Byte>();
+				return new String (ret, ASCII_ENC);
+			} 
+		}
+		streamEnded = true;
+		
+		//cleaning up
+		if(bytez.size() != 0){
+			bytez.add( new Integer('\n').byteValue() ); //add final newline
+			byte[] ret = _toByteArray(bytez);
+			streamAsBytes.addAll(bytez);
+			bytez = new LinkedList<Byte>();
+			return new String (ret, ASCII_ENC);
+		}
+		return null;
+	}
+	
+	protected byte[] _toByteArray(List<Byte> list){
+		byte[] returnValues = new byte[list.size()];
+		for(int i = 0; i < list.size() ; i++){
+			returnValues[i] = list.get(i).byteValue();
+		}
+		return returnValues;
 	}
 }

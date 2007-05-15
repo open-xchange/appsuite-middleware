@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport.importers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -188,7 +187,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			VCardTokenizer tokenizer = new VCardTokenizer(new InputStreamReader(is, "UTF-8"));
+			VCardTokenizer tokenizer = new VCardTokenizer(is);
 			List<VCardFileToken> chunks = tokenizer.split();
 			for(VCardFileToken chunk: chunks){
 				VersitDefinition def = chunk.getVersitDefinition();
@@ -196,7 +195,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 				
 				if(def != null){
 					final VersitDefinition.Reader versitReader = def.getReader(
-							new ByteArrayInputStream(chunk.getContent().getBytes("UTF-8")), "UTF-8");
+							new ByteArrayInputStream(chunk.getContent()), "UTF-8");
 					try {
 						VersitObject versitObject = def.parse(versitReader);
 						
