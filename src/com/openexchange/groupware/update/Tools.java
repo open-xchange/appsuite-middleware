@@ -47,24 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.tasks;
+package com.openexchange.groupware.update;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * Defines the types of participants.
+ * This class contains some tools to ease update of database.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum StorageType {
+public final class Tools {
+
     /**
-     * Currently active objects.
+     * Prevent instanciation.
      */
-    ACTIVE,
-    /**
-     * Removed objects. This can only be used for participants. This type is
-     * used to remember participants folder and confirmation.
-     */
-    REMOVED,
-    /**
-     * Deleted objects.
-     */
-    DELETED
+    private Tools() {
+        super();
+    }
+
+    public static boolean isNullable(final Connection con, final String table,
+        final String column) throws SQLException {
+        final DatabaseMetaData meta = con.getMetaData();
+        ResultSet result = null;
+        boolean retval = false;
+        try {
+            result = meta.getColumns(null, null, table, column);
+            retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
+        } finally {
+            DBUtils.closeSQLStuff(result);
+        }
+        return retval;
+    }
+
+    private static final int NULLABLE = 11;
 }

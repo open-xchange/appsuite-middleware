@@ -63,7 +63,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
  * This class contains methods for building the sql query for searches.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-final class SQL {
+public final class SQL {
 
     /**
      * SQL statement selecting all fields for a task.
@@ -73,7 +73,7 @@ final class SQL {
     /**
      * Tables for tasks.
      */
-    static final Map<StorageType, String> TASK_TABLES =
+    public static final Map<StorageType, String> TASK_TABLES =
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**

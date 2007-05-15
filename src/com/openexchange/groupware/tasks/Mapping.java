@@ -79,7 +79,7 @@ public final class Mapping {
      * This interface will be used to map object attributes to database columns.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    interface Mapper {
+    public interface Mapper {
 
         /**
          * @return the unique identifier of the field.
@@ -1013,7 +1013,7 @@ public final class Mapping {
      * @param attributeId identifier of the attribute.
      * @return the mapper implementation for the given attribute.
      */
-    static Mapper getMapping(final int attributeId) {
+    public static Mapper getMapping(final int attributeId) {
         return ID_MAPPING.get(attributeId);
     }
 
