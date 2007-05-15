@@ -70,6 +70,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
+import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Format;
@@ -176,7 +177,7 @@ public class CSVContactImporter implements Importer {
 		
 		//reading entries...
 		final List<ImportResult> results = new LinkedList<ImportResult>();
-		final ContactSetter conSet = new ContactSetter();
+		final ContactSwitcher conSet = getContactSwitcher();
 		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
 		int lineNumber = 1;
 		while(iter.hasNext()){
@@ -264,15 +265,6 @@ public class CSVContactImporter implements Importer {
 	 */
 	protected void addErrorInformation(final ImportResult result, final int lineNumber, final List<String> entry){
 		result.setEntryNumber(lineNumber);
-		final StringBuilder bob = new StringBuilder();
-		for(int i = 0; i < entry.size(); i++){
-			bob.append("\"");
-			bob.append(entry.get(i));
-			bob.append("\"");
-			if( (i + 1) < entry.size() ){
-				bob.append(" , ");
-			}
-		}
 	}
 	
 	/**
@@ -282,5 +274,11 @@ public class CSVContactImporter implements Importer {
 	 */
 	protected ContactField getRelevantField(final String name){
 		return ContactField.getByDisplayName(name);
+	}
+	
+	protected ContactSwitcher getContactSwitcher(){
+		final ContactSwitcherForTimestamp conSwitch  = new ContactSwitcherForTimestamp();
+		conSwitch.setDelegate(new ContactSetter());
+		return conSwitch;
 	}
 }

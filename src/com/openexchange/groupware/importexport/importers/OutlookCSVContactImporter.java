@@ -57,6 +57,7 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
@@ -82,16 +83,6 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
 	protected ContactFieldMapper fieldMapper;
 	
-	@Override
-	protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSQLInterface contactsql, final ContactSwitcher conSet, final int lineNumber){
-		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
-		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		switcher.setDateFormat(sdf);
-		switcher.setDelegate(conSet);
-		return super.writeEntry(fields, entry, folder, contactsql, switcher, lineNumber);
-	}
-
 	@Override
 	protected ContactField getRelevantField(final String name) {
 		return fieldMapper.getFieldByName(name);
@@ -140,6 +131,18 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 		}
 		return de > 0 || fr > 0 || en > 0;
 	}
+
+	@Override
+	protected ContactSwitcher getContactSwitcher() {
+		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		switcher.setDateFormat(sdf);
+		switcher.setDelegate(new ContactSetter());
+		return switcher;
+	}
+	
+	
 	
 	
 }

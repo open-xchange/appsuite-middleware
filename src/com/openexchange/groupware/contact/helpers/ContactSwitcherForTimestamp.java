@@ -68,7 +68,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 	desc={""}, 
 	exceptionId={0}, 
 	msg={
-		"Could not convert given String %s to a date using given pattern %s when setting %s."
+		"Could not convert given object %s to a date when setting %s."
 	})
 /**
  * This switcher is able to convert a given String into a date by
@@ -101,7 +101,9 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		try {
 			return delegate.creationdate( makeDate(objects) );
 		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] , objects[2] ,  "CreationDate", e);
+			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
+		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
 		}
 	}
 
@@ -109,7 +111,9 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		try {
 			return delegate.anniversary( makeDate(objects) );
 		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] , objects[2] ,  "Anniversary", e);
+			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
+		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
 		}
 	}
 
@@ -117,7 +121,9 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		try {
 			return delegate.birthday( makeDate(objects) );
 		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] , objects[2] ,  "Birthday", e);
+			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
+		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
 		}
 	}
 
@@ -125,7 +131,9 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		try {
 			return delegate.imagelastmodified( makeDate(objects) );
 		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] , objects[2] ,  "ImageLastModified", e);
+			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
+		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
 		}
 	}
 
@@ -133,7 +141,9 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		try {
 			return delegate.lastmodified( makeDate(objects) );
 		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] , objects[2] ,  "LastModified", e);
+			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
+		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
 		}
 	}
 	
