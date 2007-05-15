@@ -600,17 +600,35 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             log.debug(""+ctx.toString()+" - "+groups+" - "+auth.toString());
         }       
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        
         if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            
+            throw new NoSuchContextException();            
         }
         if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
         
-        if (!tool.existsGroup(ctx, groups)) {
-            throw new NoSuchGroupException("No such group(s)");            
+        // resolv group id/username 
+        for(Group group: groups){
+            if(group.getId()!=null && !tool.existsGroup(ctx, group.getId().intValue())){
+                throw new NoSuchGroupException("No such group "+group.getId().intValue());
+            }
+            if(group.getName()!=null && !tool.existsGroup(ctx, group.getName())){
+                throw new NoSuchGroupException("No such group "+group.getName());
+            }
+            if(group.getName()==null && group.getId()==null){
+                throw new InvalidDataException("Groupname and groupid missing!Cannot resolve group data");  
+            }else{
+                if(group.getName()==null){
+                    // resolv name by id
+                    group.setName(tool.getGroupnameByGroupID(ctx, group.getId().intValue()));
+                }
+                if(group.getId()==null){
+                    group.setId(tool.getGroupIDByGroupname(ctx, group.getName()));
+                }
+            }
         }
+        
         
         ArrayList<Group> retval = new ArrayList<Group>();
         
