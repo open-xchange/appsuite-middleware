@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.tools.update;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

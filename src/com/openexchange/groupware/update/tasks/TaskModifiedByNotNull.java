@@ -64,10 +64,10 @@ import com.openexchange.groupware.tasks.StorageType;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.Tools;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a database update task that sets the modified by
