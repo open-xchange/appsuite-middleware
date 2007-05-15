@@ -48,18 +48,18 @@
  */
 package com.openexchange.admin.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 
 /**
  * This interface defines the Open-Xchange API Version 2 for creating and
@@ -162,5 +162,24 @@ public interface OXResourceInterface extends Remote {
      */
     public Resource[] list(Context ctx, String pattern, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    
+    /**
+     * Fetch specified resources from server. Can be used to fetch resource data including extensions.
+     * Resources will be identified by id or by name.
+     * @param ctx
+     * @param resources
+     * @param auth
+     * @return Resources including extension data if requested!
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchResourceException
+     * @throws DatabaseUpdateException
+     */
+    public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException;
+
 
 }

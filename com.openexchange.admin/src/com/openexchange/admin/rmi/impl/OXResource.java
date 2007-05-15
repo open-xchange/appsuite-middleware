@@ -53,6 +53,7 @@ package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -448,5 +449,83 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if( illegal.length() > 0 ) {
             throw new OXResourceException( OXResourceException.ILLEGAL_CHARS + ": \""+illegal+"\"");
         }
+    }
+
+    public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+        if(ctx==null||resources==null){
+            throw new InvalidDataException();
+        }
+        
+        doAuthentication(auth,ctx);
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " +Arrays.toString(resources)+" - "+auth.toString());
+        }
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException();           
+        }
+
+        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        }
+
+       // check if all resources exists
+        for (Resource resource : resources) {
+            if(resource.getId()!=null && !tool.existsResource(ctx, resource.getId().intValue())){
+                throw new NoSuchResourceException("No such resource "+resource.getId().intValue());
+            }
+            if(resource.getName()!=null && !tool.existsResource(ctx, resource.getName())){
+                throw new NoSuchResourceException("No such resource "+resource.getName());
+            }
+            if(resource.getName()==null && resource.getId()==null){
+                throw new InvalidDataException("Resourcename and resourceid missing!Cannot resolve resource data");  
+            }else{
+                if(resource.getName()==null){
+                    // resolv name by id
+                    resource.setName(tool.getResourcenameByResourceID(ctx, resource.getId().intValue()));
+                }
+                if(resource.getId()==null){
+                    resource.setId(tool.getResourceIDByResourcename(ctx, resource.getName()));
+                }
+            }
+        }
+        
+        
+        ArrayList<Resource> retval = new ArrayList<Resource>();
+        
+        final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
+        
+        for (Resource resource : resources) {
+//          TODO: this code is superflous as soon as get takes resource as arg:
+            for(OXResourceExtensionInterface or : resource.getExtensions() ) {
+                resource.addExtension(or);
+            }
+            retval.add(oxRes.get(ctx, resource.getId().intValue()));
+        }
+            
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
+                            final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
+                            if (log.isInfoEnabled()) {
+                                log.info("Calling get for plugin: " + bundlename);
+                            }
+                            for (Resource resource : retval) {
+                                resource = oxresourceplugin.get(ctx, resource, auth);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return (Resource[])retval.toArray(new Resource[retval.size()]);
+       
     }
 }
