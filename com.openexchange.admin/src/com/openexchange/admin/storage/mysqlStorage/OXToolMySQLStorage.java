@@ -1514,4 +1514,200 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             }
         }
     }
+
+    @Override
+    public int getGroupIDByGroupname(Context ctx, String groupname) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT id from groups where cid = ? and identifier = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setString(2, groupname);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getInt("identifier");
+            }else{
+                throw new StorageException("No such group "+groupname+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public String getGroupnameByGroupID(Context ctx, int group_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT identifier from groups where cid = ? and id = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setInt(2, group_id);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getString("identifier");
+            }else{
+                throw new StorageException("No such group "+group_id+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public int getResourceIDByResourcename(Context ctx, String resourcename) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT id from resource where cid = ? and identifier = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setString(2, resourcename);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getInt("identifier");
+            }else{
+                throw new StorageException("No such resource "+resourcename+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public String getResourcenameByResourceID(Context ctx, int resource_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT identifier from resource where cid = ? and id = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setInt(2, resource_id);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getString("identifier");
+            }else{
+                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
 }
