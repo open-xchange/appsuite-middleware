@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.15 2007/05/15 13:43:59 cutmasta Exp $
+ * $Id: OXResource.java,v 1.16 2007/05/15 16:44:57 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -118,7 +118,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString()); 
+            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
         }
       
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -220,7 +220,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + res.toString()+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
         }
         
         final int resource_ID = res.getId();        
@@ -294,7 +294,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final int resource_id = res.getId();
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
         }
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -359,7 +359,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final int resource_id = res.getId();
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + resource_id+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
         }
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
@@ -409,7 +409,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + pattern+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + pattern + " - " + auth.toString());
         }
         if(pattern==null || pattern.length()==0){
             throw new InvalidDataException("Invalid pattern!");
@@ -444,7 +444,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " +Arrays.toString(resources)+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + Arrays.toString(resources) + " - " + auth.toString());
         }
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
