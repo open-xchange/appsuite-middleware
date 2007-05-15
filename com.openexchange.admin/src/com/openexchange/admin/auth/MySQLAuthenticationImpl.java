@@ -71,14 +71,13 @@ import com.openexchange.admin.tools.UnixCrypt;
  */
 public class MySQLAuthenticationImpl implements AuthenticationInterface {
 
-    private final static Log log = LogFactory
-            .getLog(MySQLAuthenticationImpl.class);
+    private final static Log log = LogFactory.getLog(MySQLAuthenticationImpl.class);
 
     /** */
     public MySQLAuthenticationImpl() {
     }
 
-    public boolean authenticate(Credentials authdata) {
+    public boolean authenticate(final Credentials authdata) {
         return false;
     }
 
@@ -87,7 +86,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
      * Authenticates the admin user of the system within context.
      * 
      */
-    public boolean authenticate(Credentials authdata, Context ctx)
+    public boolean authenticate(final Credentials authdata, final Context ctx)
             throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null
@@ -112,9 +111,9 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 if (!rs.next()) {
                     // auth failed , admin user not found in context
                     if(log.isDebugEnabled()){
-                    log.debug("Admin user \"" + authdata.getLogin()
-                            + "\" not found in context \"" + ctx.getIdAsInt()
-                            + "\"!");
+                        log.debug("Admin user \"" + authdata.getLogin()
+                                + "\" not found in context \"" + ctx.getIdAsInt()
+                                + "\"!");
                     }
                     return false;
                 } else {
@@ -124,23 +123,22 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         return true;
                     } else {
                         if(log.isDebugEnabled()){
-                        log.debug("Password for admin user \""
-                                + authdata.getLogin() + "\" did not match!");
+                            log.debug("Password for admin user \""
+                                    + authdata.getLogin() + "\" did not match!");
                         }
                         return false;
                     }
                 }
-            } catch (SQLException sql) {
+            } catch (final SQLException sql) {
                 throw new StorageException(sql);
-            } catch (PoolException ex) {
+            } catch (final PoolException ex) {
                 throw new StorageException(ex);
             } finally {
-
                 try {
                     if (rs != null) {
                         rs.close();
                     }
-                } catch (Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error closing resultset");
                 }
 
@@ -148,14 +146,14 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     if (prep != null) {
                         prep.close();
                     }
-                } catch (Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error closing statement");
                 }
 
                 try {
                     ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(),
                             sql_con);
-                } catch (PoolException ecp) {
+                } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }
             }
@@ -164,7 +162,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
         }
     }
 
-    public boolean authenticateUser(Credentials authdata, Context ctx)
+    public boolean authenticateUser(final Credentials authdata, final Context ctx)
             throws StorageException {
         
         if (authdata != null && authdata.getLogin() != null
@@ -198,9 +196,9 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 if (!rs.next()) {
                     // auth failed , user not found in context
                     if(log.isDebugEnabled()){
-                    log.debug("User \"" + authdata.getLogin()
-                            + "\" not found in context \"" + ctx.getIdAsInt()
-                            + "\"!");
+                        log.debug("User \"" + authdata.getLogin()
+                                + "\" not found in context \"" + ctx.getIdAsInt()
+                                + "\"!");
                     }
                     return false;
                 } else {
@@ -211,15 +209,15 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         return true;
                     } else {
                         if(log.isDebugEnabled()){
-                        log.debug("Password for ser \""
-                                + authdata.getLogin() + "\" did not match!");
+                            log.debug("Password for ser \""
+                                    + authdata.getLogin() + "\" did not match!");
                         }
                         return false;
                     }
                 }
-            } catch (SQLException sql) {
+            } catch (final SQLException sql) {
                 throw new StorageException(sql);
-            } catch (PoolException ex) {
+            } catch (final PoolException ex) {
                 throw new StorageException(ex);
             } finally {
 
@@ -227,7 +225,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     if (rs != null) {
                         rs.close();
                     }
-                } catch (Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error closing resultset");
                 }
 
@@ -235,14 +233,14 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     if (prep != null) {
                         prep.close();
                     }
-                } catch (Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error closing statement");
                 }
 
                 try {
                     ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(),
                             sql_con);
-                } catch (PoolException ecp) {
+                } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }
             }
