@@ -228,8 +228,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + pattern + " - "
-                    + auth.toString());
+            log.debug("" + ctx.toString() + " - " + pattern + " - " + auth.toString());
         }
 
         if (pattern == null) {
@@ -590,9 +589,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final int grp_id = grp.getId();
 
         if (log.isDebugEnabled()) {
-            log
-                    .debug(ctx.toString() + " - " + grp_id + " - "
-                            + auth.toString());
+            log.debug(ctx.toString() + " - " + grp_id + " - " + auth.toString());
         }
 
         final OXToolStorageInterface tool = OXToolStorageInterface

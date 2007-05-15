@@ -142,15 +142,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         Locale langus = OXUser.getLanguage(usr); 
         if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
             if (log.isDebugEnabled()) {
-                log.debug("Client sent invalid locale data("+langus+") in users language!");
+                log.debug("Client sent invalid locale data(" + langus + ") in users language!");
             }
-            throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
+            throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
         }
         
         
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
+            log.debug(ctx.toString() + " - " + usr.toString() + " - " + access.toString() + " - " + auth.toString());
         }
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
@@ -239,31 +239,25 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
-                                log.debug("Calling create for plugin: " + bundlename);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Calling create for plugin: " + bundlename);
+                                }                                
                                 oxuser.create(ctx, usr, access, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                if (log.isErrorEnabled()) {
-                                    log.error("Error while calling create for plugin: " + bundlename, e);
-                                }
-                                if (log.isErrorEnabled()) {
-                                    log.error("Now doing rollback for everything until now...");
-                                }
+                                log.error("Error while calling create for plugin: " + bundlename, e);
+                                log.error("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new User[]{usr}, auth);
                                     } catch (final PluginException e1) {
-                                        if (log.isErrorEnabled()) {
-                                            log.error("Error doing rollback for plugin: "+ bundlename, e1);
-                                        }                                        
+                                        log.error("Error doing rollback for plugin: "+ bundlename, e1);
                                     }
                                 }
                                 try {
                                     oxu.delete(ctx, new int[]{usr.getId()});
                                 } catch (final StorageException e1) {
-                                    if (log.isErrorEnabled()) {
-                                        log.error("Error doing rollback for creating user in database", e1);
-                                    }                                    
+                                    log.error("Error doing rollback for creating user in database", e1);
                                 }
                                 throw new StorageException(e);
                             }
@@ -323,7 +317,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
         }        
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
@@ -366,7 +360,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling change for plugin: "+ bundlename);
+                                    log.debug("Calling change for plugin: " + bundlename);
                                 }                                
                                 oxuser.change(ctx, usrdata, auth);
                             } catch (final PluginException e) {
@@ -398,7 +392,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
         }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
 
@@ -440,14 +434,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling delete for plugin: "+ bundlename);
+                                    log.debug("Calling delete for plugin: " + bundlename);
                                 }                                
                                 oxuser.delete(ctx, retusers, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                if (log.isErrorEnabled()) {
-                                    log.error("Error while calling delete for plugin: "+ bundlename, e);
-                                }                                
+                                log.error("Error while calling delete for plugin: "+ bundlename, e);
                             }
                         }
                     }
@@ -490,7 +482,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user_id + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
         }        
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
@@ -620,15 +612,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if(users[0].getUsername()!=null){
                             final int check_user_id = tools.getUserIDByUsername(ctx,users[0].getUsername());
                             if(check_user_id!=auth_user_id){
-                                if (log.isDebugEnabled()) {
-                                    log.debug("user[0].getId() does not match id from Credentials.getLogin()");
-                                }                                
+                                log.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
                             }
                         }else{
-                            if (log.isDebugEnabled()) {
-                                log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
-                            }                            
+                            log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
                             throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
                         }
                     }                    
@@ -639,8 +627,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "
-                    + auth.toString());
+            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
         }       
        
 
@@ -686,8 +673,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: "
-                                        + bundlename);
+                                log.debug("Calling getData for plugin: " + bundlename);
                             }                            
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
@@ -729,9 +715,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             Locale langus = OXUser.getLanguage(usrdata); 
             if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
                 if (log.isDebugEnabled()) {
-                    log.debug("Client sent invalid locale data("+langus+") in users language!");
+                    log.debug("Client sent invalid locale data(" + langus + ") in users language!");
                 }
-                throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
+                throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
             }
         }
     
