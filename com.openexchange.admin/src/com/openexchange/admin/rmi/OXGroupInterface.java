@@ -260,4 +260,23 @@ public interface OXGroupInterface extends Remote {
     public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
     
+    /**
+     * Fetch specified groups from server. Can be used to fetch group data including extensions.
+     * 
+     * @param ctx
+     * @param users
+     * @param auth
+     * @return Groups including extension data if requested!
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchGroupException
+     * @throws DatabaseUpdateException
+     */
+    public Group[] getData(Context ctx, Group[] grps, Credentials auth) 
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException;
+
+    
 }
