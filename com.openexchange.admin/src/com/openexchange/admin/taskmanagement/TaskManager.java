@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.taskmanagement;
 
-import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.Callable;
@@ -143,7 +142,7 @@ public class TaskManager {
         this.executor.shutdown();
     }
 
-    public ExtendedFutureTask<?> getTask(final int jid) throws RemoteException {
+    public ExtendedFutureTask<?> getTask(final int jid) {
         synchronized (this.jobs) {
             return this.jobs.get(jid);
         }
@@ -152,7 +151,7 @@ public class TaskManager {
     /**
      * flushing all jobs in DONE or FAILED state
      */
-    public void flush() throws RemoteException {
+    public void flush() {
         synchronized (this.jobs) {
             final Enumeration<Integer> jids = this.jobs.keys();
 
@@ -166,7 +165,7 @@ public class TaskManager {
         }
     }
 
-    public String getJobList() throws RemoteException {
+    public String getJobList() {
         final StringBuffer buf = new StringBuffer();
         final Enumeration<Integer> jids = this.jobs.keys();
     
@@ -198,4 +197,5 @@ public class TaskManager {
             return "Waiting";
         }
     }
+    
 }
