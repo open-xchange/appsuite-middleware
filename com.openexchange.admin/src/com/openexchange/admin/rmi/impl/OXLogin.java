@@ -74,65 +74,52 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
-public class OXLogin extends BasicAuthenticator implements OXLoginInterface{ 
-    
+/**
+ * 
+ * @author d7
+ * @author cutmasta
+ */
+public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
+
     private BundleContext context = null;
-    private final Log log = LogFactory.getLog(this.getClass());    
-    
+
+    private final static Log log = LogFactory.getLog(OXLogin.class);
+
     public OXLogin(final BundleContext context) throws RemoteException {
         super();
         this.context = context;
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
-        
     }
 
-
-    public void login(Context ctx, Credentials auth) 
-        throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
-        if(auth ==null){
-            throw new InvalidDataException();
-        }
-        
+    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
         doUserAuthentication(auth, ctx);
-        
     }
 
-
-    public void login(Credentials auth) 
-        throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        if(auth ==null){
+    public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        if (auth == null) {
             throw new InvalidDataException();
         }
-        
-        
-        
     }
 
-
-    public User login2User(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
-        
-        if(auth ==null){
-            throw new InvalidDataException();
-        }
+    public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
         doUserAuthentication(auth, ctx);
-        
+
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+        final int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
         tools.isContextAdmin(ctx, user_id);
-        User retval = new User(user_id);
+        final User retval = new User(user_id);
         retval.setUsername(auth.getLogin());
-        
+
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        
-        User[] retusers = oxu.getData(ctx, new User[]{retval});        
-        
+
+        User[] retusers = oxu.getData(ctx, new User[] { retval });
+
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
+            if (Bundle.ACTIVE == bundle.getState()) {
                 final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
@@ -148,9 +135,8 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface{
                 }
             }
         }
-        
+
         return retusers[0];
-        
     }
-    
+
 }

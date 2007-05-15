@@ -86,7 +86,6 @@ import com.openexchange.admin.tools.PropertyHandler;
 
 public class OXResource extends BasicAuthenticator implements OXResourceInterface{
     
-    
     private static final long serialVersionUID = -7012370962672596682L;
     
     private AdminCache cache = null;
@@ -95,7 +94,6 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     private final Log log = LogFactory.getLog(this.getClass());    
     private BundleContext context = null;
-    
     
     public OXResource(final BundleContext context) throws RemoteException {
         super();
@@ -110,114 +108,104 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
    public int create(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+       doAuthentication(auth,ctx);
         
-        if(res==null){
-            throw new InvalidDataException();
-        }
+       if(res==null){
+           throw new InvalidDataException();
+       }
         
-        doAuthentication(auth,ctx);
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
-        }
-      
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        
+       if (log.isDebugEnabled()) {
+           log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
+       }
 
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+       final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
-        if (tool.existsResource(ctx, res.getName())) {
-            throw new InvalidDataException("Resource with this name already exist");
-           
-        }
-        
-        if (!res.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields not set");
-            // TODO: cutmasta look here
-           
-        }
-        
-        if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
-            final String uid = res.getName().toLowerCase();
-            res.setName(uid);
-        }
-        
-        if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
-            try {
-                validateResourceName(res.getName());
-            } catch (final OXResourceException oxres) {
-                throw new InvalidDataException("Invalid resource name");
-               
-            }
-        }
-        
-        final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
-        final int retval = oxRes.create(ctx, res);
-        res.setId(retval);
-        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                            final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            try {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling create for plugin: " + bundlename);
-                                }
-                                oxresource.create(ctx, res, auth);
-                                interfacelist.add(oxresource);
-                            } catch (final PluginException e) {
-                                if (log.isErrorEnabled()) {
-                                    log.error("Error while calling create for plugin: " + bundlename, e);
-                                }
-                                if (log.isErrorEnabled()) {
-                                    log.error("Now doing rollback for everything until now...");
-                                }
-                                for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
-                                    try {
-                                        oxresourceinterface.delete(ctx, res, auth);
-                                    } catch (final PluginException e1) {
-                                        if (log.isErrorEnabled()) {
-                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
-                                        }
-                                    }
-                                }
-                                try {
-                                    oxRes.delete(ctx, retval);
-                                } catch (final StorageException e1) {
-                                    if (log.isErrorEnabled()) {
-                                        log.error("Error doing rollback for creating resource in database", e1);
-                                    }
-                                }
-                                throw new StorageException(e);
-                            }
-                        }
-                    }
-                    
-                }
-            }
-        }
+       if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+           throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+       }
 
-        return retval;
+       if (tool.existsResource(ctx, res.getName())) {
+           throw new InvalidDataException("Resource with this name already exist");
+
+       }
+
+       if (!res.attributesforcreateset()) {
+           throw new InvalidDataException("Mandatory fields not set");
+           // TODO: cutmasta look here
+
+       }
+
+       if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+           final String uid = res.getName().toLowerCase();
+           res.setName(uid);
+       }
+
+       if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
+           try {
+               validateResourceName(res.getName());
+           } catch (final OXResourceException oxres) {
+               throw new InvalidDataException("Invalid resource name");
+
+           }
+       }
+
+       final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
+       final int retval = oxRes.create(ctx, res);
+       res.setId(retval);
+       final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+
+       final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+       for (final Bundle bundle : bundles) {
+           final String bundlename = bundle.getSymbolicName();
+           if (Bundle.ACTIVE==bundle.getState()) {
+               final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+               if (null != servicereferences) {
+                   for (final ServiceReference servicereference : servicereferences) {
+                       final Object property = servicereference.getProperty("name");
+                       if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
+                           final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
+                           try {
+                               if (log.isDebugEnabled()) {
+                                   log.debug("Calling create for plugin: " + bundlename);
+                               }
+                               oxresource.create(ctx, res, auth);
+                               interfacelist.add(oxresource);
+                           } catch (final PluginException e) {
+                               log.error("Error while calling create for plugin: " + bundlename, e);
+                               log.error("Now doing rollback for everything until now...");
+                               for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
+                                   try {
+                                       oxresourceinterface.delete(ctx, res, auth);
+                                   } catch (final PluginException e1) {
+                                       log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                   }
+                               }
+                               try {
+                                   oxRes.delete(ctx, retval);
+                               } catch (final StorageException e1) {
+                                   log.error("Error doing rollback for creating resource in database", e1);
+                               }
+                               throw new StorageException(e);
+                           }
+                       }
+                   }
+
+               }
+           }
+       }
+
+       return retval;
     }
     
     
     public void change(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        doAuthentication(auth,ctx);
                 
         if(res==null || res.getId()==null){
             throw new InvalidDataException();
         }
-        
-        doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
@@ -269,9 +257,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                                 }
                                 oxresource.change(ctx, res, auth);
                             } catch (final PluginException e) {
-                                if (log.isErrorEnabled()) {
-                                    log.error("Error while calling change for plugin: " + bundlename, e);
-                                }
+                                log.error("Error while calling change for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
@@ -284,13 +270,13 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
     public void delete(final Context ctx, final Resource res, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        doAuthentication(auth,ctx);
         
         if(res==null||res.getId()==null){
             throw new InvalidDataException();
         }
         
-        doAuthentication(auth,ctx);
         
         final int resource_id = res.getId();
         if (log.isDebugEnabled()) {
@@ -332,9 +318,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                                 oxresource.delete(ctx, res, auth);
                                 interfacelist.add(oxresource);
                             } catch (final PluginException e) {
-                                if (log.isErrorEnabled()) {
-                                    log.error("Error while calling delete for plugin: " + bundlename, e);
-                                }
+                                log.error("Error while calling delete for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
@@ -350,12 +334,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public Resource get(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        doAuthentication(auth,ctx);
         
         if(res==null||res.getId()==null){
             throw new InvalidDataException();
         }
-        
-        doAuthentication(auth,ctx);
         
         final int resource_id = res.getId();
         if (log.isDebugEnabled()) {
@@ -405,7 +388,6 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-               
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
