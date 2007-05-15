@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.13 2007/05/15 10:30:22 cutmasta Exp $
+ * $Id: OXResource.java,v 1.14 2007/05/15 10:50:46 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -497,12 +497,13 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         
         for (Resource resource : resources) {
-//          TODO: this code is superflous as soon as get takes resource as arg:
+            // not nice, but works ;)
+            Resource tmp = oxRes.get(ctx, resource.getId().intValue());
             for(OXResourceExtensionInterface or : resource.getExtensions() ) {
-                resource.addExtension(or);
+                tmp.addExtension(or);
             }
-            retval.add(oxRes.get(ctx, resource.getId().intValue()));
-        }
+            retval.add(tmp);
+        }        
             
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
