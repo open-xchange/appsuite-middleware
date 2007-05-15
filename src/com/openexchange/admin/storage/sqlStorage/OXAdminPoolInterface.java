@@ -52,9 +52,7 @@ package com.openexchange.admin.storage.sqlStorage;
 import com.openexchange.admin.exceptions.PoolException;
 import java.sql.Connection;
 
-/**
- *
- */
+
 public interface OXAdminPoolInterface {
     
     public Connection getREADConnectionForCONFIGDB() throws PoolException;
