@@ -48,37 +48,13 @@
  */
 package com.openexchange.admin.rmi.impl;
 
-import com.openexchange.admin.daemons.AdminDaemon;
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.BasicAuthenticator;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
-import java.util.Arrays;
-import com.openexchange.admin.exceptions.OXUserException;
-import com.openexchange.admin.plugins.OXUserPluginInterface;
-import com.openexchange.admin.plugins.PluginException;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.PropertyHandler;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 
@@ -88,6 +64,29 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.exceptions.OXUserException;
+import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.plugins.PluginException;
+import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.rmi.BasicAuthenticator;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.PropertyHandler;
 /**
  * @author cutmasta
  */
@@ -134,9 +133,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
 
-        if(ctx==null || usr==null || access==null){
+        if(access==null){
             throw new InvalidDataException();            
         }        
+        
+        doAuthentication(auth,ctx);
         
         Locale langus = OXUser.getLanguage(usr); 
         if(langus.getLanguage().indexOf('_')!=-1 || langus.getCountry().indexOf('_')!=-1){
@@ -146,7 +147,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("The specified locale data (Language:"+langus.getLanguage()+" - Country:"+langus.getCountry()+") for users language is invalid!");
         }
         
-        doAuthentication(auth,ctx);
+        
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString()+" - "+usr.toString()+" - "+access.toString()+" - "+auth.toString());
@@ -316,7 +317,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public void change(final Context ctx, final User usrdata, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
-        if(ctx==null || usrdata==null|| usrdata.getId()==null
+        if(usrdata==null|| usrdata.getId()==null
                 ||auth==null|| auth.getLogin()==null||auth.getPassword()==null){
             throw new InvalidDataException();
         }
@@ -338,12 +339,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             if(usrdata.getId().intValue()!=auth_user_id){
                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
             }
-        }
-       
-
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-        }
+        }     
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or is currently beeing updated");
@@ -395,7 +391,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public void delete(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
 
-        if(ctx==null || users ==null){
+        if(users ==null){
             throw new InvalidDataException();            
         }
         
@@ -404,12 +400,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "+ auth.toString());
         }        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
 
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            
-        }
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
@@ -494,21 +486,14 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-
-        if(ctx==null){
-            throw new InvalidDataException();            
-        }
         
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user_id + " - "+ auth.toString());
         }        
+        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            
-        }
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
@@ -527,7 +512,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
     
-        if(ctx==null || moduleAccess ==null){
+        if(moduleAccess ==null){
             throw new InvalidDataException();            
         }
         
@@ -538,10 +523,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-           
-        }
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
@@ -559,21 +540,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public int[] getAll(final Context ctx, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-
-        if(ctx==null){
-            throw new InvalidDataException();            
-        }
+        
        
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
-        }        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
-           
         }
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
@@ -591,7 +566,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         
-        if (ctx==null||user_ids==null) {
+        if (user_ids==null) {
             throw new InvalidDataException();
         }
         
@@ -611,8 +586,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
-      
-        if (ctx==null || ctx.getIdAsInt()==null || users ==null|| auth==null || auth.getLogin()==null) {
+        
+        contextcheck(ctx);
+        
+        if (ctx.getIdAsInt()==null || users ==null|| auth==null || auth.getLogin()==null) {
             throw new InvalidDataException(); 
         }
         
@@ -664,10 +641,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - "
                     + auth.toString());
-        }        
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();            
-        }
+        }       
+       
 
         if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
