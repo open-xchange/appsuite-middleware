@@ -119,8 +119,11 @@ public class PluginStarter {
             registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
             startJMX();
-            log.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-            log.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+                log.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+            }            
         } catch (RemoteException e) {
             log.error(e);
             throw e;
