@@ -10,6 +10,7 @@
 * 2007-05-15 - marcus.klein@open-xchange.com
 
   - Bugfix #6942: Now every new task will contain the attribute modified by.
+  - Bugfix #7269: Now random timeout of session is done correctly.
 
 * 2007-05-14 - marcus.klein@open-xchange.com
 

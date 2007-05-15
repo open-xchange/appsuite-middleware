@@ -410,7 +410,7 @@ public class SessionHandler extends TimerTask {
 				
 				final long now = System.currentTimeMillis();
 				
-				if (sessionObj.getCreationtime().getTime() + randomTokenTimeout < now) {
+				if (sessionObj.getCreationtime().getTime() + randomTokenTimeout >= now) {
 					sessionObj.setRandomToken(null);
 					random.remove(randomToken);
 					return sessionObj;

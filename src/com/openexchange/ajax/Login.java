@@ -259,15 +259,14 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			try {
-				final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
-				final SessionObject sessionObj = sessiondConnector.getSessionByRandomToken(randomToken);
+			final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
+			final SessionObject sessionObj = sessiondConnector.getSessionByRandomToken(randomToken);
+            if (null == sessionObj) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            } else {
 				writeCookie(resp, sessionObj);
 				resp.sendRedirect(_redirectUrl + sessionObj.getSecret());
-			} catch (Exception exc) {
-				LOG.error(_doGet , exc);
-                writeError(resp, exc.getMessage());
-			}
+            }
 		} else if (action.equals(ACTION_AUTOLOGIN)) {
 			final Cookie[] cookie = req.getCookies();
             final Response response = new Response();
