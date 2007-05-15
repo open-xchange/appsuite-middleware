@@ -264,7 +264,7 @@ public interface OXGroupInterface extends Remote {
      * Fetch specified groups from server. Can be used to fetch group data including extensions.
      * Groups will be identified by id or by name.
      * @param ctx
-     * @param users
+     * @param grps
      * @param auth
      * @return Groups including extension data if requested!
      * @throws RemoteException
