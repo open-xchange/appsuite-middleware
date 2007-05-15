@@ -212,6 +212,15 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		}
 	}
 	
+	@Test public void importIllegalDate() throws NumberFormatException, Exception{
+		List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01"); 
+		assertEquals("One result?" , results.size(), 1);
+		ImportResult res = results.get(0);
+		assertTrue("Got bug?" , res.hasError() );
+
+		assertEquals("Caught class cast exception", "CON-0600" , res.getException().getErrorCode() );
+	}
+	
 
 	protected void checkFirstResult(int objectID ) throws OXException{
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
