@@ -360,6 +360,9 @@ public final class TaskLogic {
         if (!task.containsCreatedBy()) {
             task.setCreatedBy(userId);
         }
+        if (!task.containsModifiedBy()) {
+            task.setModifiedBy(userId);
+        }
         if (!task.containsPrivateFlag()) {
             task.setPrivateFlag(false);
         }
