@@ -1,3 +1,9 @@
+# 2007-05-15, Marcus Klein, Changed field changed_from to NOT NULL according to bug #6942.
+UPDATE task SET changed_from=created_from WHERE changed_from IS NULL;
+UPDATE del_task SET changed_from=created_from WHERE changed_from IS NULL;
+ALTER TABLE task MODIFY changed_from INT4 UNSIGNED NOT NULL;
+ALTER TABLE del_task MODIFY changed_from INT4 UNSIGNED NOT NULL;
+
 # 2007-05-14, Martin Kauss, alter field length according to bug #6514
 alter table del_date_rights change column ma ma VARCHAR(286);
 alter table prg_date_rights change column ma ma VARCHAR(286);
