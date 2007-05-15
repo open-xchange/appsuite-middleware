@@ -28,7 +28,6 @@ public class LoginRequest extends AbstractRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public AJAXResponseParser getParser() {
         return new LoginResponseParser();
     }

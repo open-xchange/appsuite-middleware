@@ -3,8 +3,6 @@
  */
 package com.openexchange.ajax.session;
 
-import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXResponse;
 
@@ -17,6 +15,8 @@ public class LoginResponse extends AJAXResponse {
     private String sessionId;
 
     private String random;
+
+    private String jvmRoute;
 
     /**
      * @param response
@@ -42,15 +42,29 @@ public class LoginResponse extends AJAXResponse {
     /**
      * @param random the random to set
      */
-    public void setRandom(String random) {
+    public void setRandom(final String random) {
         this.random = random;
     }
 
     /**
      * @param sessionId the sessionId to set
      */
-    public void setSessionId(String sessionId) {
+    public void setSessionId(final String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    /**
+     * @return the jvmRoute
+     */
+    public String getJvmRoute() {
+        return jvmRoute;
+    }
+
+    /**
+     * @param jvmRoute the jvmRoute to set
+     */
+    public void setJvmRoute(final String jvmRoute) {
+        this.jvmRoute = jvmRoute;
     }
 
 }

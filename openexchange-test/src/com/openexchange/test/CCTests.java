@@ -60,7 +60,8 @@ public class CCTests
 			
 		TestSuite tests = new TestSuite();
 
-        tests.addTestSuite(com.openexchange.ajax.LoginTest.class);
+        tests.addTestSuite(com.openexchange.ajax.session.LoginTest.class);
+        tests.addTestSuite(com.openexchange.ajax.session.RedirectTest.class);
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
         tests.addTest(ReminderAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());

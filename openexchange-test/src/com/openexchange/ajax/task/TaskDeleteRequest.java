@@ -28,6 +28,7 @@ public class TaskDeleteRequest extends AbstractTaskRequest {
      */
     public TaskDeleteRequest(final int folderId, final int taskId,
         final Date lastModified) {
+        super();
         this.folderId = folderId;
         this.taskId = taskId;
         this.lastModified = lastModified;
@@ -36,7 +37,6 @@ public class TaskDeleteRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put(AJAXServlet.PARAMETER_ID, taskId);
@@ -47,7 +47,6 @@ public class TaskDeleteRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -55,7 +54,6 @@ public class TaskDeleteRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -68,7 +66,6 @@ public class TaskDeleteRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public AJAXResponseParser getParser() {
         return new TaskDeleteDeleteResponseParser();
     }

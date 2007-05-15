@@ -70,10 +70,9 @@ public class AJAXClient extends Assert {
                 .getMethod().name());
         }
         final WebResponse resp = session.getConversation().getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        return request.getParser().parse(body);
+        final AJAXResponseParser parser = request.getParser();
+        parser.checkResponse(resp);
+        return parser.parse(resp.getText());
     }
 
     private static void addParameter(final WebRequest req,

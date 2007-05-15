@@ -11,6 +11,10 @@ import com.openexchange.tools.servlet.AjaxException;
 
 public class LoginTools {
 
+    private LoginTools() {
+        super();
+    }
+    
     public static LoginResponse login(final AJAXSession session,
         final LoginRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -21,5 +25,11 @@ public class LoginTools {
         final LogoutRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (LogoutResponse) AJAXClient.execute(session, request);
+    }
+
+    public static RedirectResponse redirect(final AJAXSession session,
+        final RedirectRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (RedirectResponse) AJAXClient.execute(session, request);
     }
 }

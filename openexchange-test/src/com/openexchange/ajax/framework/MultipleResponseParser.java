@@ -22,7 +22,7 @@ public class MultipleResponseParser extends AJAXResponseParser {
      */
     public MultipleResponseParser(AJAXRequest[] requests) {
         super();
-        this.requests = requests;
+        this.requests = requests.clone();
     }
 
     /**

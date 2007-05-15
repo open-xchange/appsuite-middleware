@@ -6,9 +6,9 @@ package com.openexchange.ajax.session;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXResponse;
 import com.openexchange.ajax.framework.AJAXResponseParser;
 
 /**
@@ -17,15 +17,40 @@ import com.openexchange.ajax.framework.AJAXResponseParser;
  */
 public class LoginResponseParser extends AJAXResponseParser {
 
+    private String jvmRoute;
+    
     /**
      * Default constructor.
      */
-    public LoginResponseParser() {
+    LoginResponseParser() {
         super();
     }
 
     /**
      * {@inheritDoc}
+     */
+    @Override
+    public void checkResponse(final WebResponse resp) {
+        super.checkResponse(resp);
+        final String[] newCookies = resp.getNewCookieNames();
+        boolean oxCookieFound = false;
+        for (String newCookie : newCookies) {
+            if (newCookie.startsWith(Login.cookiePrefix)) {
+                oxCookieFound = true;
+                break;
+            }
+        }
+        assertTrue("Session cookie is missing.", oxCookieFound);
+        final String jsessionId = resp.getNewCookieValue("JSESSIONID");
+        assertNotNull("JSESSIONID cookie is missing.", jsessionId);
+        final int dotPos = jsessionId.lastIndexOf('.');
+        assertTrue("jvmRoute is missing.", dotPos > 0);
+        jvmRoute = jsessionId.substring(dotPos + 1);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws IOException 
      */
     @Override
     public LoginResponse parse(final String body) throws JSONException {
@@ -45,6 +70,7 @@ public class LoginResponseParser extends AJAXResponseParser {
         if (json.has("error")) {
             retval = new LoginResponse(Response.parse(json.toString()));
         } else {
+            retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
             retval.setRandom(json.getString(Login._random));
         }

@@ -6,7 +6,7 @@ public class MultipleResponse extends AJAXResponse {
 
     public MultipleResponse(final AJAXResponse[] responses) {
         super(null);
-        this.responses = responses;
+        this.responses = responses.clone();
     }
 
     public AJAXResponse getResponse(final int pos) {

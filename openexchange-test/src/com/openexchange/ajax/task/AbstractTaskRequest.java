@@ -9,7 +9,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest extends AJAXRequest {
+public abstract class AbstractTaskRequest implements AJAXRequest {
 
     /**
      * URL of the tasks AJAX interface.
@@ -19,14 +19,13 @@ public abstract class AbstractTaskRequest extends AJAXRequest {
     /**
      * 
      */
-    public AbstractTaskRequest() {
+    protected AbstractTaskRequest() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
     public String getServletPath() {
         return TASKS_URL;
     }

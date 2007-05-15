@@ -11,7 +11,7 @@ import com.openexchange.configuration.AJAXConfig;
 
 public abstract class AbstractAJAXSession extends TestCase {
 
-    private AJAXSession session;
+    private final AJAXSession session = new AJAXSession();
 
     protected AbstractAJAXSession(final String name) {
         super(name);
@@ -24,7 +24,6 @@ public abstract class AbstractAJAXSession extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
-        session = new AJAXSession();
         final String login = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
         final String password = AJAXConfig.getProperty(AJAXConfig.Property
             .PASSWORD);
@@ -39,8 +38,11 @@ public abstract class AbstractAJAXSession extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        LoginTools.logout(session, new LogoutRequest(session.getId()));
-        session = null;
+        if (null != session.getId()) {
+            LoginTools.logout(session, new LogoutRequest(session.getId()));
+            session.setId(null);
+        }
+        session.getConversation().clearContents();
     }
     
     public static class AJAXSession {

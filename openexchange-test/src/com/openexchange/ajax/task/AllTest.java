@@ -16,8 +16,6 @@ import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.tasks.Task;
 
-import junit.framework.TestCase;
-
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -74,8 +72,8 @@ public final class AllTest extends AbstractTaskTest2 {
                 .getResponse(i);
             LOG.info(ins.getId());
         }
-        // Get for timestamp
-        // List
+        // TODO Get for timestamp
+        // TODO List
 
         final TaskDeleteRequest[] deletes = new TaskDeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {

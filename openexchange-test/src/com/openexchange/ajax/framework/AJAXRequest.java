@@ -3,31 +3,25 @@
  */
 package com.openexchange.ajax.framework;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AJAXRequest {
+public interface AJAXRequest {
 
-    public abstract Method getMethod();
-
-    public enum Method {
+    enum Method {
         GET,
         POST,
         PUT
     }
 
-    public abstract String getServletPath();
+    Method getMethod();
 
-    public abstract Parameter[] getParameters();
+    String getServletPath();
 
-    public static class Parameter {
+    class Parameter {
         private final String name;
         private final String value;
         public Parameter(final String name, final String value) {
@@ -48,7 +42,9 @@ public abstract class AJAXRequest {
         }
     }
 
-    public abstract AJAXResponseParser getParser();
+    Parameter[] getParameters();
 
-    public abstract Object getBody() throws JSONException;
+    AJAXResponseParser getParser();
+
+    Object getBody() throws JSONException;
 }

@@ -27,7 +27,6 @@ public class LogoutRequest extends AbstractRequest {
     /**
      * {@inheritDoc}
      */
-   @Override
     public AJAXResponseParser getParser() {
         return new LogoutParser();
     }

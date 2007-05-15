@@ -91,17 +91,6 @@ public class LoginTest extends AbstractAJAXTest {
     }
 
     /**
-     * Tests the login.
-     * @throws Throwable if an error occurs.
-     */
-    public void testLogin() throws Throwable {
-        final String sessionId = getSessionId();
-        assertNotNull("Got no sessionId", sessionId);
-        assertTrue("Length of session identifier is zero.",
-            sessionId.length() > 0);
-    }
-
-    /**
      * This method mades a login and returns the complete login object.
      * @param conversation WebConversation.
      * @param hostname hostname of the server running the server.

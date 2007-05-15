@@ -19,7 +19,7 @@ public class TaskInsertResponseParser extends AJAXResponseParser {
     /**
      * Default constructor.
      */
-    public TaskInsertResponseParser() {
+    TaskInsertResponseParser() {
         super();
     }
 

@@ -24,14 +24,14 @@ public class TaskInsertResponse extends AJAXResponse {
     /**
      * @return the id
      */
-    protected int getId() {
+    public int getId() {
         return id;
     }
 
     /**
      * @param id the id to set
      */
-    protected void setId(int id) {
+    void setId(final int id) {
         this.id = id;
     }
 

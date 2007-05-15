@@ -3,7 +3,6 @@
  */
 package com.openexchange.ajax.task;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.TimeZone;
@@ -27,6 +26,7 @@ public class TaskInsertRequest extends AbstractTaskRequest {
     private final TimeZone timeZone;
 
     public TaskInsertRequest(final Task task, final TimeZone timeZone) {
+        super();
         this.task = task;
         this.timeZone = timeZone;
     }
@@ -34,7 +34,6 @@ public class TaskInsertRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Object getBody() throws JSONException {
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
@@ -47,7 +46,6 @@ public class TaskInsertRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -55,7 +53,6 @@ public class TaskInsertRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
@@ -67,7 +64,6 @@ public class TaskInsertRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    @Override
     public AJAXResponseParser getParser() {
         return new TaskInsertResponseParser();
     }

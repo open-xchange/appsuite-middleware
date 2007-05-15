@@ -18,7 +18,7 @@ public class LogoutParser extends AJAXResponseParser {
     /**
      * Default constructor.
      */
-    public LogoutParser() {
+    LogoutParser() {
         super();
     }
 

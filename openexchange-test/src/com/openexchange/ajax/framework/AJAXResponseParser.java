@@ -3,10 +3,13 @@
  */
 package com.openexchange.ajax.framework;
 
+import javax.servlet.http.HttpServletResponse;
+
 import junit.framework.Assert;
 
 import org.json.JSONException;
 
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 
 /**
@@ -15,7 +18,7 @@ import com.openexchange.ajax.container.Response;
  */
 public abstract class AJAXResponseParser extends Assert {
 
-    public AJAXResponseParser() {
+    protected AJAXResponseParser() {
         super();
     }
 
@@ -23,6 +26,11 @@ public abstract class AJAXResponseParser extends Assert {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
+    }
+
+    public void checkResponse(final WebResponse resp) {
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
     }
 
     public AJAXResponse parse(final String body) throws JSONException {
