@@ -14,7 +14,7 @@ import com.openexchange.admin.properties.AdminProperties;
 
 public class PropertyHandlerExtended extends PropertyHandler {
     
-    private Log log = LogFactory.getLog(this.getClass());
+    private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
     
     private Hashtable       sqlPropValues       = null;
 
@@ -38,10 +38,10 @@ public class PropertyHandlerExtended extends PropertyHandler {
         configfile.append("hosting.properties");
         try {
             addpropsfromfile(configfile.toString());
-        } catch (FileNotFoundException e) {
-            log.fatal("Unable to read file: " + configfile);
-        } catch (IOException e) {
-            log.fatal("Problems reading file: " + configfile);
+        } catch (final FileNotFoundException e) {
+            log.error("Unable to read file: " + configfile);
+        } catch (final IOException e) {
+            log.error("Problems reading file: " + configfile);
         }
     }
     
@@ -51,21 +51,21 @@ public class PropertyHandlerExtended extends PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getSqlProp( String key, String fallBack ) {
+    public String getSqlProp( final String key, final String fallBack ) {
         String retString = fallBack;
         
-        if ( sqlPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_SQL ) ) {
-                sqlPropValues = (Hashtable)allPropValues.get( PROPERTIES_SQL );
+        if ( this.sqlPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_SQL ) ) {
+                this.sqlPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_SQL );
             } else {
                 log.error( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_SQL + "' not found.") );
             }
         }
         
-        if ( sqlPropValues != null && sqlPropValues.containsKey( key ) ) {
-            retString = sqlPropValues.get( key ).toString(); 
+        if ( this.sqlPropValues != null && this.sqlPropValues.containsKey( key ) ) {
+            retString = this.sqlPropValues.get( key ).toString(); 
         } else {
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_SQL_FILE ) +"! Using fallback :" + fallBack );
+            log.error( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_SQL_FILE ) +"! Using fallback :" + fallBack );
         }
         
         return retString; 
@@ -77,21 +77,22 @@ public class PropertyHandlerExtended extends PropertyHandler {
      * @param fallBack
      * @return
      */
-    public String getGroupProp( String key, String fallBack ) {
+    @Override
+    public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
-        if ( groupPropValues == null ) {
-            if ( allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                groupPropValues = (Hashtable)allPropValues.get( PROPERTIES_GROUP );
+        if ( this.groupPropValues == null ) {
+            if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
+                this.groupPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
-                log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found. ") );
+                log.error( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found. ") );
             }
         }
         
-        if ( groupPropValues != null && groupPropValues.containsKey( key ) ) {
-            retBool =  groupPropValues.get( key ).toString(); 
+        if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
+            retBool =  this.groupPropValues.get( key ).toString(); 
         } else {
-            log.debug( "Property '" + key + "' not found in file " + allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
+            log.error( "Property '" + key + "' not found in file " + this.allPropValues.get( AdminProperties.Prop.PROPERTIES_GROUP_FILE ) +"! Using fallback :" + fallBack );
         }
         
         return retBool; 
