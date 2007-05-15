@@ -94,12 +94,15 @@ public class BasicAuthenticator {
     /**
      * 
      * Authenticates ONLY the context admin!
+     * This method also validates the Context object data!
      * @param authdata
      * @param ctx
      * @throws InvalidCredentialsException
      * @throws StorageException
+     * @throws InvalidDataException 
      */
-    public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
+    public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+        contextcheck(ctx);
         if(!sqlAuth.authenticate(authdata,ctx)){
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
             log.error("Admin authentication: ", invalidCredentialsException);
@@ -109,12 +112,15 @@ public class BasicAuthenticator {
     
     /**
      * Authenticates all users within a context!
+     * This method also validates the Context object data!
      * @param authdata
      * @param ctx
      * @throws InvalidCredentialsException
      * @throws StorageException
+     * @throws InvalidDataException 
      */
-    public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException{
+    public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+        contextcheck(ctx);
         if(!sqlAuth.authenticateUser(authdata,ctx)){
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
             log.error("User authentication: ", invalidCredentialsException);
@@ -124,7 +130,7 @@ public class BasicAuthenticator {
 
     protected final void contextcheck(final Context ctx) throws InvalidDataException {
         if (null == ctx || null == ctx.getIdAsInt()) {
-            throw new InvalidDataException("The context object is has invalid data");
+            throw new InvalidDataException("The context object has invalid data");
         }
     }
     
