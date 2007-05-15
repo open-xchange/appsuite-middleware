@@ -76,7 +76,13 @@ public final class Tools {
         boolean retval = false;
         try {
             result = meta.getColumns(null, null, table, column);
-            retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
+            if (result.next()) {
+                retval = DatabaseMetaData.typeNullable == result
+                    .getInt(NULLABLE);
+            } else {
+                throw new SQLException("Can't get information for column "
+                    + column + " in table " + table + '.');
+            }
         } finally {
             DBUtils.closeSQLStuff(result);
         }

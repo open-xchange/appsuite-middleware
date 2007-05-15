@@ -75,18 +75,18 @@ import com.openexchange.tools.sql.DBUtils;
  * attribute.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TaskModfiedByNotNull implements UpdateTask {
+public class TaskModifiedByNotNull implements UpdateTask {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TaskModfiedByNotNull
+    private static final Log LOG = LogFactory.getLog(TaskModifiedByNotNull
         .class);
 
     /**
      * Default constructor.
      */
-    public TaskModfiedByNotNull() {
+    public TaskModifiedByNotNull() {
         super();
     }
 
@@ -112,7 +112,7 @@ public class TaskModfiedByNotNull implements UpdateTask {
         LOG.info("Performing update task TaskModifiedByNotNull.");
         Connection con = null;
         try {
-            Database.get(contextId, true);
+            con = Database.get(contextId, true);
         } catch (DBPoolingException e) {
             throw new TaskException(TaskException.Code.NO_CONNECTION, e);
         }
@@ -121,7 +121,7 @@ public class TaskModfiedByNotNull implements UpdateTask {
                 setModifiedBy(con, task_table);
                 alterModifiedBy(con, task_table);
             }
-            if (Tools.isNullable(con, task_table, changed_from)) {
+            if (Tools.isNullable(con, del_task_table, changed_from)) {
                 setModifiedBy(con, del_task_table);
                 alterModifiedBy(con, del_task_table);
             }
@@ -156,7 +156,7 @@ public class TaskModfiedByNotNull implements UpdateTask {
             stmt.execute("ALTER TABLE " + table + " MODIFY " + changed_from
                 + " INT4 UNSIGNED NOT NULL");
             LOG.info("Altered table " + table + " changed " + changed_from
-                + "to NOT NULL.");
+                + " to NOT NULL.");
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
