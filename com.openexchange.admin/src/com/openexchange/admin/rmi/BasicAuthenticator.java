@@ -57,6 +57,7 @@ import com.openexchange.admin.auth.AuthenticationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
@@ -118,6 +119,12 @@ public class BasicAuthenticator {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
             log.error("User authentication: ", invalidCredentialsException);
             throw invalidCredentialsException;
+        }
+    }
+
+    protected final void contextcheck(final Context ctx) throws InvalidDataException {
+        if (null == ctx || null == ctx.getIdAsInt()) {
+            throw new InvalidDataException("The context object is has invalid data");
         }
     }
     
