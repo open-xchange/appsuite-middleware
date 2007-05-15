@@ -1,19 +1,20 @@
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.test.TestException;
-import com.openexchange.webdav.xml.ContactTest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.ContactTest;
 
 public class VCardImportTest extends AbstractVCardTest {
 	
@@ -103,7 +104,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
+		//ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
 		
 		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
@@ -148,7 +149,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	
 	/**
 	 * Deals with N and ADR properties and different amount of semicola used. 
-	 *
+	 * Also tests an input stream with no terminating newline
 	 */
 	public void test7248() throws TestException, IOException, SAXException, JSONException, Exception{
 		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN:Colombara;Robert\nFN:Robert Colombara\nADR;WORK:;;;;;;DE\nADR;HOME:;;;;;- / -\nEND:VCARD";
@@ -183,7 +184,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	 */
 	public void test7250() throws TestException, IOException, SAXException, JSONException, Exception{
 		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nN;CHARSET=Windows-1252:Börnig;Anke;;;\nFN;CHARSET=Windows-1252:Anke  Börnig\nEND:VCARD";
-		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
+		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes("Cp1252")), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		int contactId = Integer.parseInt(importResult[0].getObjectId());
