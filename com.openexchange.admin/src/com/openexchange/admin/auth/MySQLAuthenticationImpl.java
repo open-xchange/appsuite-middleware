@@ -86,23 +86,16 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
      * Authenticates the admin user of the system within context.
      * 
      */
-    public boolean authenticate(final Credentials authdata, final Context ctx)
-            throws StorageException {
+    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
 
-        if (authdata != null && authdata.getLogin() != null
-                && authdata.getPassword() != null) {
+        if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
             Connection sql_con = null;
             PreparedStatement prep = null;
             ResultSet rs = null;
             try {
 
-                sql_con = ClientAdminThread.cache
-                        .getREADConnectionForContext(ctx.getIdAsInt());
-                prep = sql_con
-                        .prepareStatement("select u.userPassword,u.passwordMech from user u "
-                                + "JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id "
-                                + "AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user "
-                                + "WHERE u.cid = ? AND l.uid = ?");
+                sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
 
                 prep.setInt(1, ctx.getIdAsInt());
                 prep.setString(2, authdata.getLogin());
@@ -110,21 +103,17 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , admin user not found in context
-                    if(log.isDebugEnabled()){
-                        log.debug("Admin user \"" + authdata.getLogin()
-                                + "\" not found in context \"" + ctx.getIdAsInt()
-                                + "\"!");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
                     }
                     return false;
                 } else {
                     // now check via our crypt mech the password
-                    if (UnixCrypt.matches(rs.getString("userPassword"),
-                            authdata.getPassword())) {
+                    if (UnixCrypt.matches(rs.getString("userPassword"), authdata.getPassword())) {
                         return true;
                     } else {
-                        if(log.isDebugEnabled()){
-                            log.debug("Password for admin user \""
-                                    + authdata.getLogin() + "\" did not match!");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
                         }
                         return false;
                     }
@@ -151,8 +140,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 }
 
                 try {
-                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(),
-                            sql_con);
+                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
                 } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }
@@ -162,32 +150,16 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
         }
     }
 
-    public boolean authenticateUser(final Credentials authdata, final Context ctx)
-            throws StorageException {
-        
-        if (authdata != null && authdata.getLogin() != null
-                && authdata.getPassword() != null) {
+    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
+
+        if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
             Connection sql_con = null;
             PreparedStatement prep = null;
             ResultSet rs = null;
             try {
 
-                sql_con = ClientAdminThread.cache
-                        .getREADConnectionForContext(ctx.getIdAsInt());
-                prep = sql_con.prepareStatement("SELECT " +
-                                "u.userPassword,u.passwordMech " +
-                                "FROM " +
-                                "user u " +
-                                "JOIN " +
-                                "login2user l " +
-                                "ON " +
-                                "u.id = l.id " +
-                                "AND " +
-                                "u.cid = l.cid " +
-                                "WHERE " +
-                                "u.cid = ? " +
-                                "AND " +
-                                "l.uid = ?");
+                sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                prep = sql_con.prepareStatement("SELECT u.userPassword,u.passwordMech FROM user u JOIN login2user l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? AND l.uid = ?");
 
                 prep.setInt(1, ctx.getIdAsInt());
                 prep.setString(2, authdata.getLogin());
@@ -195,22 +167,18 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , user not found in context
-                    if(log.isDebugEnabled()){
-                        log.debug("User \"" + authdata.getLogin()
-                                + "\" not found in context \"" + ctx.getIdAsInt()
-                                + "\"!");
+                    if (log.isDebugEnabled()) {
+                        log.debug("User \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
                     }
                     return false;
                 } else {
                     // now check via our crypt mech the password
-                    if (UnixCrypt.matches(rs.getString("userPassword"),
-                            authdata.getPassword())) {
+                    if (UnixCrypt.matches(rs.getString("userPassword"), authdata.getPassword())) {
                         // here add the isUser flag to the credentials
                         return true;
                     } else {
-                        if(log.isDebugEnabled()){
-                            log.debug("Password for ser \""
-                                    + authdata.getLogin() + "\" did not match!");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Password for ser \"" + authdata.getLogin() + "\" did not match!");
                         }
                         return false;
                     }
@@ -238,8 +206,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                 }
 
                 try {
-                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(),
-                            sql_con);
+                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
                 } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }
