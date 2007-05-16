@@ -125,7 +125,7 @@ public class ContextException extends AbstractOXException {
         /**
          * Your database is currently updated.
          */
-        UPDATE("Your database is currently updated.", Category
+        UPDATE("Your database is currently updated. Try again later.", Category
             .TRY_AGAIN, 7),
         /**
          * Problem initializing the cache.

@@ -336,7 +336,7 @@ msgstr ""
 msgid "Cannot remove lock file."
 msgstr ""
 
-msgid "Cannot remove object %s from cache"
+msgid "Cannot remove object %s from cache."
 msgstr ""
 
 msgid "Cannot resolve mailadmin for context %d."
@@ -1877,7 +1877,7 @@ msgstr ""
 msgid "You need write permissions to unlock a document."
 msgstr ""
 
-msgid "Your database is currently updated."
+msgid "Your database is currently updated. Try again later."
 msgstr ""
 
 msgid "Your session %s expired. Please start a new browser session."
