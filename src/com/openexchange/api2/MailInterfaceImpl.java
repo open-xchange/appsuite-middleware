@@ -2572,6 +2572,7 @@ public class MailInterfaceImpl implements MailInterface {
 		return retval;
 	}
 
+    // TODO iterating over both lists has complexity of O(n*m). Using a HashSet would eliminate this complexity completely.
 	private final InternetAddress[] eliminateDuplicates(final List<InternetAddress> l, final InternetAddress[] arr) {
 		if (arr == null) {
 			return null;
@@ -2586,7 +2587,9 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Search in list for current address
 			 */
 			int j = 0;
-			while (j < listSize) {
+            // Fixed double remove without calling next() causing
+            // IllegalStateException. by adding '&& !found'.
+			while (j < listSize && !found) {
 				if (l.get(j).equals(intAddr)) {
 					/*
 					 * Address found, so remove it from address array

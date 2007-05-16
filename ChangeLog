@@ -12,6 +12,7 @@
 
   - Bugfix #6902: Improved search pattern for group searching.
   - Bugfix #7275: Removed encapsulating of LoginException into SessionException.
+  - Bugfix #7332: Fixed coding issue causing IllegalStateException.
 
 * 2007-05-16 - martin.kauss@open-xchange.com
 
