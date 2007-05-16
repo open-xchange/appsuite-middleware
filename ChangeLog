@@ -1,3 +1,10 @@
+* 2007-05-16 - martin.kauss@open-xchange.com
+
+ - An error message was rewritten like mentioned in bug #7292
+
+ - Fixe bug #7281. The private folder id was used from the first participant
+   when an appointment was updated. This has been fixed. 
+
 * 2007-05-15 - tobias.prinz@open-xchange.com
 
   - Bugfix (reported by Suphi): Sending a Outlook CSV file as normal CSV 
