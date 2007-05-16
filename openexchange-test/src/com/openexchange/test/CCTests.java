@@ -109,6 +109,8 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
 		tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
 		
+		tests.addTestSuite(com.openexchange.tools.io.SizeAwareInputStreamTest.class);
+		
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.attach.actions.RemoveAttachmentsActionTest.class);

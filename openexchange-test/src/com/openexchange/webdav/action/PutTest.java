@@ -59,6 +59,35 @@ public class PutTest extends ActionTestCase {
 		assertEquals(content, getContent(INDEX23_HTML_URL));
 	}
 	
+	// Bug 6104
+	public void testTooLarge() throws Exception {
+		final String INDEX23_HTML_URL = testCollection+"/index23.html";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl(INDEX23_HTML_URL);
+		
+		String content = "<html><head /><body>The New, Better Index</body></html>";
+		req.setBodyAsString(content);
+		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-type", "text/html");
+		
+		WebdavAction action = new WebdavPutAction() {
+			@Override
+			public long getMaxSize(){
+				return 1;
+			}
+		};
+		
+		try {
+			action.perform(req,res);
+			assertFalse("Could upload", true);
+		} catch (WebdavException x) {
+			assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
+		}
+	}
+	
 	public void testInvalidParent() throws Exception {
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");

@@ -23,7 +23,7 @@ public class ActionTestSuite {
 		tests.addTestSuite(IfTest.class);
 		tests.addTestSuite(DefaultHeaderTest.class);
 		tests.addTestSuite(NotExistTest.class);
-		
+		tests.addTestSuite(MaxUploadSizeActionTest.class);
 		return tests;
 	}
 }
