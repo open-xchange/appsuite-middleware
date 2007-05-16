@@ -143,14 +143,28 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
     
-    protected static String RMI_HOSTNAME ="rmi://localhost";
+    protected static String RMI_HOSTNAME ="rmi://localhost/";
     
     protected Option contextOption = null;
     protected Option adminUserOption = null;
     protected Option adminPassOption = null;
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
-    
+
+    /**
+     * 
+     */
+    public BasicCommandlineOptions() {
+        super();
+        final String property = System.getProperties().getProperty("RMI_HOSTNAME");
+        final String env = System.getenv("RMI_HOSTNAME");
+        if (null != property) {
+            setRMI_HOSTNAME(property);
+        } else if (null != env) {
+            setRMI_HOSTNAME(env);
+        }
+    }
+
     protected final static void printServerResponse(final String msg){
         System.err.println("Server response:\n "+msg);    
     }
@@ -166,7 +180,6 @@ public abstract class BasicCommandlineOptions {
     protected final static void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
-    
     
     /**
      * Prints out the given data as csv output.
