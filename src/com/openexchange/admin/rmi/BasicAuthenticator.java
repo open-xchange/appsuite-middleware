@@ -134,4 +134,13 @@ public class BasicAuthenticator {
         }
     }
     
+    public final static void doNullCheck(Object...objects ) throws InvalidDataException
+    {
+        for (Object object : objects) {
+            if(object==null){
+                throw new InvalidDataException();
+            }
+        }
+    }
+    
 }
