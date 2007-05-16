@@ -104,6 +104,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
     }
 
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        
+        doNullCheck(ctx,auth);
+        
         doUserAuthentication(auth, ctx);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();

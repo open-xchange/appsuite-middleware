@@ -108,11 +108,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
    public int create(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
-       doAuthentication(auth,ctx);
-        
-       if(res==null){
-           throw new InvalidDataException();
-       }
+       
+       doNullCheck(ctx,res,auth);
+       
+       doAuthentication(auth,ctx);    
+      
         
        if (log.isDebugEnabled()) {
            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
@@ -201,11 +201,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public void change(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        doAuthentication(auth,ctx);
-                
-        if(res==null || res.getId()==null){
+        
+        doNullCheck(ctx,res,auth);
+        
+        if(res.getId()==null){
             throw new InvalidDataException();
         }
+        
+        doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
@@ -271,12 +274,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public void delete(final Context ctx, final Resource res, final Credentials auth)
         throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        doAuthentication(auth,ctx);
         
-        if(res==null||res.getId()==null){
+        doNullCheck(ctx,res,auth);
+        
+        if(res.getId()==null){
             throw new InvalidDataException();
         }
         
+        doAuthentication(auth,ctx);        
         
         final int resource_id = res.getId();
         if (log.isDebugEnabled()) {
@@ -334,16 +339,21 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public Resource get(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        doAuthentication(auth,ctx);
         
-        if(res==null||res.getId()==null){
+        doNullCheck(ctx,res,auth);
+        
+        if(res.getId()==null){
             throw new InvalidDataException();
         }
         
+        doAuthentication(auth,ctx);        
+        
         final int resource_id = res.getId();
+        
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
         }
+        
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
         if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
@@ -388,13 +398,17 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        
+        doNullCheck(ctx,pattern,auth);
+        
+        if(pattern.length()==0){
+            throw new InvalidDataException("Invalid pattern!");
+        }        
+        
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + pattern + " - " + auth.toString());
-        }
-        if(pattern==null || pattern.length()==0){
-            throw new InvalidDataException("Invalid pattern!");
         }
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -419,9 +433,8 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
 
     public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
-        if(resources==null){
-            throw new InvalidDataException();
-        }
+        
+        doNullCheck(ctx,resources,auth);
         
         doAuthentication(auth,ctx);
         

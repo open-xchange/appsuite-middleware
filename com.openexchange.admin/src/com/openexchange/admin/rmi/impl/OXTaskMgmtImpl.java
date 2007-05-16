@@ -16,6 +16,7 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInterface {
     
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
+        doNullCheck(ctx,cred);
         contextcheck(ctx);
         doAuthentication(cred, ctx);
         final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
@@ -27,6 +28,7 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
     }
 
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
+        doNullCheck(ctx,cred);
         contextcheck(ctx);
         doAuthentication(cred, ctx);
         return TaskManager.getInstance().getJobList();
