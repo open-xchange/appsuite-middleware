@@ -104,8 +104,14 @@ public class AdminDaemon {
         public ServerSocket createServerSocket(final int port) throws IOException {
             final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
             if (hostname_property.equalsIgnoreCase("0")) {
+                if(log.isInfoEnabled()){
+                    log.info("Admindaemon will listen on all network devices!");
+                }
                 return new ServerSocket(port, 0, null);
             } else {
+                if(log.isInfoEnabled()){
+                    log.info("Admindaemon will listen on "+hostname_property+"!");
+                }
                 return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
             }
         }
