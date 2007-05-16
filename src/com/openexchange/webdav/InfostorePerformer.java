@@ -71,6 +71,8 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.action.AbstractAction;
+import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
+import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.ServletWebdavRequest;
 import com.openexchange.webdav.action.ServletWebdavResponse;
 import com.openexchange.webdav.action.WebdavAction;
@@ -169,7 +171,14 @@ public class InfostorePerformer implements SessionHolder {
 		delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0,true,false));
 		get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0,false,false));
 		head = prepare(new WebdavHeadAction(),true, true, new WebdavExistsAction(), new WebdavIfAction(0,false,false));
-		put = prepare(new WebdavPutAction(), false, true, new WebdavIfAction(0,true,false));
+		
+		OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
+		oxWebdavPut.setSessionHolder(this); 
+		
+		OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
+		oxWebdavMaxUploadSize.setSessionHolder(this);
+		
+		put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0,true,false),oxWebdavMaxUploadSize);
 		trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0,false,false));
 		
 		actions.put(Action.UNLOCK, unlock);
@@ -232,6 +241,8 @@ public class InfostorePerformer implements SessionHolder {
 			actions.get(action).perform(new ServletWebdavRequest(factory, req), new ServletWebdavResponse(resp));
 		} catch (WebdavException x) {
 			resp.setStatus(x.getStatus());
+		} catch (NullPointerException x) {
+			x.printStackTrace();
 		} finally {
 			session.set(null);
 		}

@@ -88,6 +88,7 @@ import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
+import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBPoolProvider;
@@ -300,14 +301,7 @@ public class Infostore extends PermissionServlet {
 	}
 
 	private void checkSize(final long size, final UserConfiguration userConfig) throws UploadException {
-		if(maxUploadSize == -1) {
-			maxUploadSize = InfostoreConfig.getMaxUploadSize();
-		}
-		
-		long maxSize = 0;
-		maxSize = userConfig.getUserSettingMail().getUploadQuota();
-		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
-		
+		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userConfig);
 		if(maxSize == 0) {
 			return;
 		}

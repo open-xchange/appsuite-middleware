@@ -47,83 +47,74 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.tools.io;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletResponse;
+/**
+ * The SizeAwareInputStream is a utility class that can be used if file size has to be checked
+ * while someone reads the stream. The method #size(long) is called whenever someone reads from the
+ * stream. This method is provided with the length of the stream up until the time the method is called.
+ * 
+ * The SizeAwareInputStream can be used to find out about the total length of a stream or to monitor
+ * certain upload quotas (if a quota is exceeded the size method may simply throw an IOException). 
+ * 
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
+ */
+public class SizeAwareInputStream extends FilterInputStream {
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.tools.io.SizeAwareInputStream;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavResource;
-
-public class WebdavPutAction extends AbstractAction {
-
-	private static final Log LOG = LogFactory.getLog(WebdavPutAction.class);
+	private long read = 0;
 	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
-		final WebdavResource resource = req.getResource();
-		if(null != req.getHeader("content-length")) {
-			resource.setLength(new Long(req.getHeader("content-length")));
-		}
-		resource.setContentType(req.getHeader("content-type"));
-		
-		SizeExceededInputStream in = null;
-		try {
-			InputStream data = null;
-			if(-1 != getMaxSize()) {
-				data = in = new SizeExceededInputStream(req.getBody(), getMaxSize());
-			} else {
-				data = req.getBody();
-			}
-				
-			resource.putBodyAndGuessLength(data);
-			if(resource.exists()) {
-				resource.save();
-			} else {
-				resource.create();
-			}
-			res.setStatus(HttpServletResponse.SC_CREATED);
-		} catch (final IOException e) {
-			LOG.debug("Client Gone?", e);
-		} catch (WebdavException x) {
-			if(in != null && in.hasExceeded()) {
-				throw new WebdavException(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-			} else {
-				throw x;
-			}
-		}
-		
+	public SizeAwareInputStream(InputStream delegate) {
+		super(delegate);
 	}
 
-	// Override for specific upload quota handling
-	public long getMaxSize() {
-		return -1; 
+	
+	@Override
+	public int read() throws IOException {
+		int r = in.read();
+		if(r != -1) {
+			read++;
+			size(read);
+		}
+		return r;
+	}
+
+	@Override
+	public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+		int r =  in.read(arg0, arg1, arg2);
+		if(r > 0) {
+			read += r;
+			size(read);
+		}
+		return r;
+	}
+
+	@Override
+	public int read(byte[] arg0) throws IOException {
+		int r = in.read(arg0);
+		if(r > 0) {
+			read += r;
+			size(read);			
+		}
+		return r;
+	}
+
+	@Override
+	public boolean markSupported(){
+		return false;
 	}
 	
-	public static final class SizeExceededInputStream extends SizeAwareInputStream {
-		private boolean exceeded;
-		private long maxSize;
-
-		public SizeExceededInputStream(InputStream delegate, long maxSize) {
-			super(delegate);
-			this.maxSize = maxSize;
-		}
-		
-		@Override
-		public void size(long size) throws IOException {
-			if(size > maxSize) {
-				exceeded = true;
-				throw new IOException("Exceeded max upload size of "+maxSize);
-			}
-		}
-		
-		public boolean hasExceeded(){
-			return exceeded;
-		}
+	@Override
+	public long skip(long arg0) throws IOException {
+		return in.skip(arg0);
 	}
+
+	public void size(long size) throws IOException {
+		//Override me
+	}
+
 }

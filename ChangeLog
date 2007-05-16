@@ -1,3 +1,7 @@
+* 2007-05-16 - francisco.laguna@open-xchange.com
+
+  - Bugfix #6104: Upload file size is checked against quota as set in config files and user_setting_mail table.
+
 * 2007-05-16 - tobias.prinz@open-xchange.com
 
   - Bugfix #7249: Validating e-mail before inserting e-mail 
