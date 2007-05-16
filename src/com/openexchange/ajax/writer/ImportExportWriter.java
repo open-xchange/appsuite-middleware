@@ -91,11 +91,12 @@ public class ImportExportWriter extends DataWriter {
 			OXException exception = importResult.getException();
 			writeParameter("error", exception.getOrigMessage());
 	        if (exception.getMessageArgs() != null) {
-	        	final JSONArray array = new JSONArray();
+	        	jsonwriter.key("error_params");
+	        	jsonwriter.array();
 	            for (Object tmp : exception.getMessageArgs()) {
-	            	array.put(tmp);
+	            	jsonwriter.value(tmp);
 	            }
-	            writeParameter("error_params", array.toString());
+	            jsonwriter.endArray();
 	        }
 	        writeParameter("category", exception.getCategory().getCode());
 	        writeParameter("code", exception.getErrorCode());
