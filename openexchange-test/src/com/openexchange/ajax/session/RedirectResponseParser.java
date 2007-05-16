@@ -33,8 +33,8 @@ public class RedirectResponseParser extends AJAXResponseParser {
      */
     @Override
     public void checkResponse(final WebResponse resp) {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_FOUND,
-            resp.getResponseCode());
+        assertEquals("Response code is not okay.", HttpServletResponse
+            .SC_MOVED_TEMPORARILY, resp.getResponseCode());
         location = resp.getHeaderField("Location");
         assertNotNull("Location for redirect is missing.", location);
         final String[] newCookies = resp.getNewCookieNames();
