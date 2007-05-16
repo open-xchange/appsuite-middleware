@@ -168,13 +168,16 @@ public class VCardImportTest extends AbstractVCardTest {
 	 * Deals with broken E-Mail adresses as encountered in Resources in the example file
 	 */
 	public void test7249() throws TestException, IOException, SAXException, JSONException, Exception{
-		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nFN:Conference_Room_Olpe\nEMAIL;PREF;INTERNET:Conference_Room_Olpe\nEND:VCARD";
+		final String vcard ="BEGIN:VCARD\nVERSION:2.1\nFN:Conference_Room_Olpe\nEMAIL;PREF;INTERNET:Conference_Room_Olpe_EMAIL\nEND:VCARD";
 		ImportResult[] importResult = importVCard(getWebConversation(), new ByteArrayInputStream(vcard.getBytes()), contactFolderId, timeZone, emailaddress, getHostName(), getSessionId());
 		
 		assertFalse("Worked?", importResult[0].hasError());
 		int contactId = Integer.parseInt(importResult[0].getObjectId());
 		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
-		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getSurName());
+		assertEquals("Checking surname:" , "Conference_Room_Olpe" , myImport.getSurName());
+		assertEquals("Checking email1 (must be null):" , null , myImport.getEmail1());
+		assertEquals("Checking email2 (must be null):" , null , myImport.getEmail2());
+		assertEquals("Checking email3 (must be null):" , null , myImport.getEmail3());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
