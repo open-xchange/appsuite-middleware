@@ -131,11 +131,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        doAuthentication(auth,ctx);
-
-        if(access==null){
-            throw new InvalidDataException();            
-        }        
+        
+        doNullCheck(ctx,usr,access,auth);        
+        
+        doAuthentication(auth,ctx);        
         
         Locale langus = OXUser.getLanguage(usr);
         if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
@@ -282,6 +281,14 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        
+        doNullCheck(ctx,usrdata,auth);
+        
+        if(usrdata.getId()==null|| auth.getLogin()==null||auth.getPassword()==null){
+            throw new InvalidDataException();
+        }
+        
+        
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
@@ -297,12 +304,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             if (usrdata.getId().intValue() != auth_user_id) {
                 throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
             }
-        }     
-
-        if(usrdata==null|| usrdata.getId()==null
-                ||auth==null|| auth.getLogin()==null||auth.getPassword()==null){
-            throw new InvalidDataException();
-        }
+        } 
+        
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
@@ -354,11 +357,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        doAuthentication(auth,ctx);
-
-        if(users ==null){
-            throw new InvalidDataException();            
-        }
+        
+        doNullCheck(ctx,users,auth);
+        
+        doAuthentication(auth,ctx);       
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
@@ -443,6 +445,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        
+        doNullCheck(ctx,auth);
+        
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
@@ -467,11 +472,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
     
-        if(moduleAccess ==null){
-            throw new InvalidDataException();            
-        }
-        
-        doAuthentication(auth,ctx);
+       doNullCheck(ctx,moduleAccess,auth);
+       
+       doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
@@ -494,6 +497,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        
+        doNullCheck(ctx,auth);
+        
         doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
@@ -533,6 +539,21 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
+        
+        doNullCheck(ctx,users,auth);
+        
+        if (ctx.getIdAsInt() == null|| auth.getLogin() == null) {
+            throw new InvalidDataException();
+        }
+        
+        if (users.length <= 0) {
+            throw new InvalidDataException();
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
+        }
+        
         // ok here its possible that a user wants to get his own data
         //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
@@ -569,20 +590,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         } else {
             doAuthentication(auth, ctx);
         }
-        
-        if (ctx.getIdAsInt() == null || users == null || auth == null || auth.getLogin() == null) {
-            throw new InvalidDataException();
-        }
-        
-        if (users.length <= 0) {
-            throw new InvalidDataException();
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
-        }       
+         
+              
        
-
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
             throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
         }
