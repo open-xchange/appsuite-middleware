@@ -68,6 +68,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -92,7 +95,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfix: 7248)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfix: 7248, 7249)
  * 
  */
 public class OXContainerConverter {
@@ -945,7 +948,18 @@ public class OXContainerConverter {
 			// EMAIL
 			else if (property.name.equals("EMAIL")) {
 				String value = property.getValue().toString();
-				if (value != null && value.length() > 0) {
+				//fix for: 7249
+				boolean isProperEmailAddress = value != null && value.length() > 0;
+				if(isProperEmailAddress){
+					try {
+						InternetAddress  ia = new InternetAddress(value);
+						ia.validate();
+					} catch (AddressException e) {
+						isProperEmailAddress = false;
+					}
+				}
+				//fix: end
+				if (isProperEmailAddress) {
 					ComplexProperty(contactContainer, emails, emailIndex, value);
 				}
 			}

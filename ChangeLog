@@ -1,3 +1,8 @@
+* 2007-05-16 - tobias.prinz@open-xchange.com
+
+  - Bugfix #7249: Validating e-mail before inserting e-mail 
+    address from uploaded VCard...
+
 * 2007-05-16 - marcus.klein@open-xchange.com
 
   - Bugfix #6902: Improved search pattern for group searching.
