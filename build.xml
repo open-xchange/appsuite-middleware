@@ -267,6 +267,7 @@
             <classpath>
                 <pathelement location="lib/ox_server.jar" />
                 <path refid="project.classpath" />
+                <pathelement location="${java.class.path}"/>
             </classpath>
             <sysproperty key="com.openexchange.tools.exceptions.SerializationProcessor.file" value="${i18n.dir}/codes.ser" />
             <arg value="lib/ox_server.jar" />
@@ -276,9 +277,14 @@
 
     <target name="create-annotations-ser" depends="check-i18n-executables,jar" if="exists_apt" >
         <echo message="Creating ${i18n.dir}/codesAnnotation.ser" />
+        <path id="apt.classpath">
+            <path refid="project.classpath" />
+            <pathelement location="${lib.dir}/ox_server.jar"/>
+            <pathelement location="${java.class.path}" />
+        </path>
         <apply executable="${java_apt}" dir="${basedir}" parallel="true" verbose="true" relative="false">
             <arg value="-classpath" />
-            <arg value="lib/ox_server.jar" />
+            <arg pathref="apt.classpath" />
             <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
             <arg value="-factory" />
             <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />

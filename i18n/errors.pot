@@ -566,7 +566,13 @@ msgid ""
 "Folder_Type = %d:%d"
 msgstr ""
 
+msgid "Exception while building JSON."
+msgstr ""
+
 msgid "Exception while parsing JSON."
+msgstr ""
+
+msgid "Exception while parsing JSON: \"%s\"."
 msgstr ""
 
 msgid "Exception while writing JSON."
@@ -614,6 +620,9 @@ msgid "Fatal error. (YEARLY2) Missing or wrong interval : %d"
 msgstr ""
 
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
+msgstr ""
+
+msgid "Fatal error. An database update exception occurred."
 msgstr ""
 
 msgid ""
@@ -1020,7 +1029,7 @@ msgid ""
 "folder %s"
 msgstr ""
 
-msgid "Moving a private flag to a public folder is not allowed!"
+msgid "Moving appointment to a public folder flaged as private is not allowed!"
 msgstr ""
 
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
@@ -1165,6 +1174,9 @@ msgid "Problem while communicating with external authorization."
 msgstr ""
 
 msgid "Problem with URI when creating context specific filestore location."
+msgstr ""
+
+msgid "Problem with a thread."
 msgstr ""
 
 msgid "Problem with executing SQL: %s"
