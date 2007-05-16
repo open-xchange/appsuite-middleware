@@ -35,7 +35,7 @@ public class Delete extends ContextAbtraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             oxres.delete(ctx, auth);
 

@@ -92,7 +92,7 @@ public class Delete extends UserAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXUserInterface oxres = (OXUserInterface) Naming.lookup(OXUserInterface.RMI_NAME);
+            final OXUserInterface oxres = (OXUserInterface) Naming.lookup(RMI_HOSTNAME +OXUserInterface.RMI_NAME);
 
             final int id = Integer.valueOf((String) parser.getOptionValue(this.idOption));
 

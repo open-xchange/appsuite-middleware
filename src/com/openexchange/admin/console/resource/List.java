@@ -100,7 +100,7 @@ public class List extends ResourceAbstraction {
                 pattern = "*";
             }
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME +OXResourceInterface.RMI_NAME);
 
             final Resource[] allres = oxres.list(ctx, pattern, auth);
 

@@ -91,7 +91,7 @@ public class Create extends ResourceAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME +OXResourceInterface.RMI_NAME);
             final Resource res = new Resource();
 
             res.setAvailable(Boolean.parseBoolean((String) parser.getOptionValue(this.resourceAvailableOption)));

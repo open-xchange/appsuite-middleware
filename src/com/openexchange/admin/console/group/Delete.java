@@ -98,7 +98,7 @@ public class Delete extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
 
             final int groupid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
 

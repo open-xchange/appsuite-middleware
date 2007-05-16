@@ -94,7 +94,7 @@ public class Change extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
             final Group grp = new Group();
 
             grp.setId(Integer.valueOf((String) parser.getOptionValue(this.IdOption)));

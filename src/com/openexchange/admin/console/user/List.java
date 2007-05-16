@@ -102,7 +102,7 @@ public class List extends UserAbstraction {
             
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXUserInterface oxu = (OXUserInterface) Naming.lookup(OXUserInterface.RMI_NAME);
+            final OXUserInterface oxu = (OXUserInterface) Naming.lookup(RMI_HOSTNAME +OXUserInterface.RMI_NAME);
 
             final int[] allusers = oxu.getAll(ctx, auth);
             

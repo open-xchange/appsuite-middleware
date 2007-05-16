@@ -36,7 +36,7 @@ public class ListDatabase extends UtilAbstraction {
             final Credentials auth = new Credentials((String)parser.getOptionValue(this.adminUserOption),(String)parser.getOptionValue(this.adminPassOption));
             
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
             
             String searchpattern = "*";
             if(parser.getOptionValue(this.searchOption)!=null){

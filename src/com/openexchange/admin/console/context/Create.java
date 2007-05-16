@@ -34,7 +34,7 @@ public class Create extends ContextAbtraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(OXContextInterface.RMI_NAME);
+            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             // create user obj
             final User usr = new User();
