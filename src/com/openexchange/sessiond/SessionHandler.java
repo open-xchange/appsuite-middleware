@@ -167,20 +167,7 @@ public class SessionHandler extends TimerTask {
 		}
 		
 		final LoginInfo li = LoginInfo.getInstance();
-		String[] login_infos = null;
-		try {
-			login_infos = li.handleLoginInfo(loginName, password);
-		} catch (LoginException e) {
-			switch (e.getCategory()) {
-				case SUBSYSTEM_OR_SERVICE_DOWN:
-				case CODE_ERROR:
-				case SETUP_ERROR:
-				case SOCKET_CONNECTION:
-					throw new SessiondException(e);
-				default:
-					throw e;
-			}
-		}
+		final String[] login_infos = li.handleLoginInfo(loginName, password);
 		
 		final String contextname = login_infos[0];
 		final String username = login_infos[1];

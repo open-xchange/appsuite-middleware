@@ -1,6 +1,7 @@
 * 2007-05-16 - marcus.klein@open-xchange.com
 
   - Bugfix #6902: Improved search pattern for group searching.
+  - Bugfix #7275: Removed encapsulating of LoginException into SessionException.
 
 * 2007-05-16 - martin.kauss@open-xchange.com
 
