@@ -38,7 +38,7 @@ public class UnregisterFilestore extends UtilAbstraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
     
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
             oxutil.unregisterFilestore(Integer.parseInt((String) parser.getOptionValue(this.filestoreIdOption)), auth);
             sysexit(0);

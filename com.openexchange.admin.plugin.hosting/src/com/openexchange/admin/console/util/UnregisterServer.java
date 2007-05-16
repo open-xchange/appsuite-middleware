@@ -42,7 +42,7 @@ public class UnregisterServer extends UtilAbstraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
             oxutil.unregisterServer(Integer.parseInt((String) parser.getOptionValue(serverIdOption)), auth);
             
