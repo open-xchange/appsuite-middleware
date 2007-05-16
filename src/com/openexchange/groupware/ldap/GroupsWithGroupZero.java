@@ -142,7 +142,8 @@ public final class GroupsWithGroupZero extends GroupStorage {
      */
     @Override
     public Group[] searchGroups(final String pattern) throws LdapException {
-        final Pattern pat = Pattern.compile(pattern.replace("*", ".*"));
+        final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern
+            .CASE_INSENSITIVE);
         final Group zero;
         try {
             zero = GroupTools.getGroupZero(ctx);
