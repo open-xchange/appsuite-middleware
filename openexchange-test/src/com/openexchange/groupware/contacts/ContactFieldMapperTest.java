@@ -53,7 +53,14 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 
-public class ContactFieldTest extends TestCase {
+/**
+ * Tests the translations of several mappers (currently Outlook)
+ * which map names for ContactFields from Outlook and back.
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ *
+ */
+public class ContactFieldMapperTest extends TestCase {
 
 	public static void testFrenchOutlook(){
 		assertEquals("Checking title in French," , ContactField.TITLE, ContactField.getByFrenchOutlookName("Titre"));

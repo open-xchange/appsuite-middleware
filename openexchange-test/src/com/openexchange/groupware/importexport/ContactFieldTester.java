@@ -49,20 +49,37 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactSetter;
-import com.openexchange.groupware.container.ContactObject;
 
 import junit.framework.TestCase;
 
 public class ContactFieldTester extends TestCase {
+	public void testNumbers(){
+		assertEquals(517, ContactField.ANNIVERSARY.getNumber());
+		assertEquals(ContactField.ANNIVERSARY, ContactField.getByValue(517));
+	}
 	
-	public void testBla() throws ContactException{
-		ContactObject conObj = new ContactObject();
-		ContactField field = ContactField.GIVEN_NAME;
-		String value = "Prinz";
-		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
-		assertEquals("" , conObj.getGivenName(), value);
+	public void testAjax(){
+		String value = "anniversary";
+		assertEquals(value, ContactField.ANNIVERSARY.getAjaxName());
+		assertEquals(ContactField.ANNIVERSARY, ContactField.getByAjaxName(value));
+	}
+	
+	public void testDatabase(){
+		String value = "ANNIVERSARY";
+		assertEquals(value, ContactField.ANNIVERSARY.getDBName());
+		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDBFieldName(value));
+	}
+	
+	public void testReadableName(){
+		String value = "Anniversay";
+		assertEquals(value, ContactField.ANNIVERSARY.getReadableName());
+		assertEquals(ContactField.ANNIVERSARY, ContactField.getByDisplayName(value));
+	}
+	
+	public void testFieldName(){
+		String value = "timestampfield02";
+		assertEquals(value, ContactField.ANNIVERSARY.getFieldName());
+		assertEquals(ContactField.ANNIVERSARY, ContactField.getByFieldName(value));
 	}
 }
