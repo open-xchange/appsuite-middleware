@@ -47,13 +47,10 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.sessiond.LoginException.Source;
 
 /**
  * This exception will be thrown if error occur in the storage classes for the
@@ -92,10 +89,8 @@ public class ContextException extends AbstractOXException {
      */
     public ContextException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.CONTEXT, null == code.message ? cause.getMessage()
-            : code.message, cause);
-        setCategory(code.category);
-        setDetailNumber(code.number);
+        super(Component.CONTEXT, code.category, code.number, code.message,
+            cause);
         setMessageArgs(messageArgs);
     }
 
@@ -131,15 +126,16 @@ public class ContextException extends AbstractOXException {
          * Your database is currently updated.
          */
         UPDATE("Your database is currently updated.", Category
-            .SUBSYSTEM_OR_SERVICE_DOWN, 7),
+            .TRY_AGAIN, 7),
         /**
          * Problem initializing the cache.
          */
         CACHE_INIT("Problem initializing the cache.", Category.SETUP_ERROR, 8),
         /**
-         * Cannot remove object %s from cache
+         * Cannot remove object %s from cache.
          */
-        CACHE_REMOVE("Cannot remove object %s from cache", Category.INTERNAL_ERROR, 9);
+        CACHE_REMOVE("Cannot remove object %s from cache.", Category
+            .INTERNAL_ERROR, 9);
 
         /**
          * Message of the exception.
