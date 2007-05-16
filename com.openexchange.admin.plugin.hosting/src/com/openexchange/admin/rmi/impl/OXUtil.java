@@ -95,7 +95,11 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public int registerFilestore (Filestore fstore,Credentials auth) 
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException{
-        doAuthentication(auth);
+        
+        doNullCheck(fstore,auth);        
+        
+        doAuthentication(auth);      
+                
         
         log.debug (fstore.getUrl () + " - " + fstore.getSize ());
         
@@ -151,6 +155,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void changeFilestore (Filestore fstore, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(fstore,auth);
+        
         doAuthentication(auth);
         
         log.debug ( fstore.getUrl ()+" "+fstore.getMaxContexts ()+" "+fstore.getSize ()+" "+fstore.getId () );
@@ -179,11 +185,13 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public Filestore[] listFilestores (String search_pattern, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException{
         
+        doNullCheck(search_pattern,auth);
+        
         doAuthentication(auth);
         
         log.debug (search_pattern);
         
-        if(search_pattern==null || search_pattern.trim ().length ()==0){
+        if(search_pattern.trim ().length ()==0){
             throw new InvalidDataException ("Invalid search pattern");
             //throw UTIL_EXCEPTIONS.create (7,"Invalid pattern \""+search_pattern+"\"" );
         }
@@ -200,6 +208,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public void unregisterFilestore (int store_id,Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException{
+        
+        doNullCheck(auth);
         
         doAuthentication(auth);
         
@@ -228,6 +238,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public int addMaintenanceReason (MaintenanceReason reason, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
+        
+        doNullCheck(reason,auth);
         
         doAuthentication(auth);
         
@@ -259,6 +271,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void deleteMaintenanceReason (MaintenanceReason reason, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(reason,auth);
+        
         doAuthentication(auth);
         
         log.debug (reason);
@@ -286,6 +300,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public MaintenanceReason[] getMaintenanceReasons (int reason_ids[], Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(reason_ids,auth);
+        
         doAuthentication(auth);
         
         log.debug (reason_ids);
@@ -312,6 +328,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public MaintenanceReason[] getAllMaintenanceReasons (Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException{
+       
         
         doAuthentication(auth);
         
@@ -328,6 +345,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public void createDatabase (Database db, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
+        
+        doNullCheck(db,auth);
         
         doAuthentication(auth);
         
@@ -351,6 +370,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void deleteDatabase (Database db, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(db,auth);
+        
         doAuthentication(auth);
         
         log.debug (db.toString());
@@ -373,6 +394,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public int registerDatabase (Database db, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
+        
+        doNullCheck(db,auth);
         
         doAuthentication(auth);
         
@@ -409,6 +432,9 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public int registerServer (Server srv, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(srv,auth);
+        
+        
         doAuthentication(auth);
         
         log.debug (srv.getName ());
@@ -440,6 +466,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void unregisterDatabase (int database_id, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException{
         
+        doNullCheck(auth);
+        
         doAuthentication(auth);
         
         log.debug (database_id);
@@ -469,6 +497,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 //    )
     public void unregisterServer (int server_id, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
+        
+        doNullCheck(auth);
         
         doAuthentication(auth);
         
@@ -501,11 +531,13 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public Database[] searchForDatabase (String search_pattern, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException{
         
+        doNullCheck(search_pattern,auth);
+        
         doAuthentication(auth);
         
         log.debug (search_pattern);
         
-        if(search_pattern==null || search_pattern.length()==0){
+        if(search_pattern.length()==0){
             throw new InvalidDataException("Invalid search pattern");
         }
         
@@ -524,11 +556,13 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public Server[] searchForServer (String search_pattern,Credentials auth) 
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(search_pattern,auth);
+        
         doAuthentication(auth);
         
         log.debug (search_pattern);
         
-        if(search_pattern==null || search_pattern.length()==0){
+        if(search_pattern.length()==0){
             throw new InvalidDataException("Invalid search pattern");
         }
         
@@ -547,10 +581,11 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void changeDatabase (Database db, Credentials auth)
     throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(db,auth);
+        
         doAuthentication(auth);
         
-         log.debug (db.toString());
-        
+         log.debug (db.toString());        
         
         OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         
@@ -585,6 +620,8 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     public void deleteMaintenanceReason(int[] reason_ids, Credentials auth) 
         throws RemoteException,StorageException,InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(auth);
+        
         doAuthentication(auth);
         
         log.debug(Arrays.toString(reason_ids));
@@ -603,7 +640,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
     
     public int[] getAllMaintenanceReasonIds (Credentials auth) 
-        throws RemoteException,StorageException,InvalidCredentialsException{
+        throws RemoteException,StorageException,InvalidCredentialsException{        
         
         doAuthentication(auth);
         

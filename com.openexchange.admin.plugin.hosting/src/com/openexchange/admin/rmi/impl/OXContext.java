@@ -123,6 +123,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public Context[] searchByDatabase(final Database db, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
         
+        doNullCheck(db,auth);
+        
         doAuthentication(auth);
         
         final String db_host_url = db.getUrl();
@@ -153,7 +155,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, "Invalid data sent by client" }, exceptionId = { 2, 3 }, msg = { MSG_SQL_OPERATION_ERROR, "Invalid data sent-%s" })
     public Context[] searchByFilestore(final Filestore filestore, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
-    
+                
+        doNullCheck(filestore,auth);
+        
         doAuthentication(auth);
         
         final String filestore_url = filestore.getUrl();
@@ -184,6 +188,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " " }, exceptionId = { 4, 5 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s" })
     public void changeDatabase(final Context ctx, final Database db_handle, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
+        
+        doNullCheck(ctx,db_handle,auth);
         
         doAuthentication(auth);
         
@@ -226,6 +232,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public void changeStorageData(final Context ctx, final Filestore filestore, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
         
+        doNullCheck(ctx,filestore,auth);
+        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
@@ -264,6 +272,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " ", "not implemented", " ", " ", " ", " ", " ", " ", " ", " ", " " }, exceptionId = { 9, 10, 11, 40, 41, 42, 43, 44, 45, 46, 47, 49 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s", "Not implemented", OXUtilException.NO_SUCH_STORE + " %s", OXUtilException.NO_SUCH_REASON + " %s", OXContextException.CONTEXT_DISABLED + " %s", "Unable to disable Context %s", "Unable to get Context data %s", "Unable to get filestore directory %s", "Unable to list filestores", "Unable to move filestore", "Src and dst store id is the same: %s" })
     public String moveContextFilestore(final Context ctx, final Filestore dst_filestore_id, final MaintenanceReason reason, final Credentials auth)
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
+        
+        doNullCheck(ctx,dst_filestore_id,reason,auth);
         
         doAuthentication(auth);
         
@@ -404,6 +414,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public String moveContextDatabase(final Context ctx, final Database database_id, final MaintenanceReason reason, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException, DatabaseUpdateException {
         
+        doNullCheck(ctx,database_id,reason,auth);
+        
         doAuthentication(auth);
         
         final String retval = null;
@@ -462,6 +474,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { MSG_SQL_QUERY_FAILED }, exceptionId = { 15 }, msg = { MSG_SQL_OPERATION_ERROR })
     public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
         
+        
+        
         doAuthentication(auth);
         
         log.debug("");
@@ -483,6 +497,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, "Invalid data" }, exceptionId = { 16, 17 }, msg = { MSG_SQL_OPERATION_ERROR, OXUtilException.NO_SUCH_REASON + " %s" })
     public void disableAll(final MaintenanceReason reason, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
+        
+        doNullCheck(reason,auth);
         
         doAuthentication(auth);
         
@@ -517,6 +533,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public void delete(final Context ctx, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException {
         
+       
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
@@ -581,10 +598,12 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public Context[] search(final String search_pattern, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
     
+        doNullCheck(search_pattern,auth);
+        
         doAuthentication(auth);
         
         log.debug("" + search_pattern);
-        if (null != search_pattern) {
+        
             // try{
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.searchContext(search_pattern);
@@ -598,12 +617,11 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             // retValue.add (RESPONSE_ERROR);
             // retValue.add (""+popx.getMessage ());
             // }
-        } else {
-            throw new InvalidDataException("Invalid search pattern");
+        
             // retValue.add (RESPONSE_ERROR);
             // retValue.add (""+CONTEXT_EXCEPTIONS.create
             // (24,search_pattern).getMessage ());
-        }
+        
         // log.debug(LOG_RESPONSE + retval);
 
     }
@@ -611,6 +629,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT }, desc = { " ", MSG_SQL_QUERY_FAILED, "Invalid data", "context is disabled" }, exceptionId = { 26, 27, 28, 29 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR, OXUtilException.NO_SUCH_REASON + " %s", "Context %s is already disabled" })
     public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
+        
+        doNullCheck(ctx,reason,auth);
         
         doAuthentication(auth);
         
@@ -655,6 +675,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED }, exceptionId = { 30, 31 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR })
     public void enable(final Context ctx, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException {
+        
+        
         
         doAuthentication(auth);
         
@@ -724,6 +746,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public void changeQuota(final Context ctx, final long quota_max, final Credentials auth) 
     throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
         
+        doNullCheck(ctx,auth);
+        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
@@ -757,6 +781,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "invalid data", MSG_SQL_QUERY_FAILED }, exceptionId = { 24, 25 }, msg = { "Invalid data sent-%s", MSG_SQL_OPERATION_ERROR })
     public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
+        
+        doNullCheck(ctx,admin_user,auth);
         
         doAuthentication(auth);
         
