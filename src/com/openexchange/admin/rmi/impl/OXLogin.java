@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.6 2007/05/15 17:27:41 dennis Exp $
+ * $Id: OXLogin.java,v 1.7 2007/05/16 08:59:07 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -104,6 +104,9 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
     }
 
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        
+        doNullCheck(ctx,auth);
+        
         doUserAuthentication(auth, ctx);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
