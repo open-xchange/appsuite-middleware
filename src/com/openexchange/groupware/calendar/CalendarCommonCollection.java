@@ -376,12 +376,12 @@ public class CalendarCommonCollection {
                 check[f].setIsModified(true);
                 if (o >= 0 && o < orig.length) {
                     if (!check[f].containsConfirm()) {
-                        check[f].setConfirm(orig[0].getConfirm());
+                        check[f].setConfirm(orig[o].getConfirm());
                     }
                     if (!check[f].containsConfirmMessage()) {
-                        check[f].setConfirmMessage(orig[0].getConfirmMessage());
+                        check[f].setConfirmMessage(orig[o].getConfirmMessage());
                     }
-                    check[f].setPersonalFolderId(orig[0].getPersonalFolderId());
+                    check[f].setPersonalFolderId(orig[o].getPersonalFolderId());
                 }
                 
                 return check;
@@ -1035,7 +1035,11 @@ public class CalendarCommonCollection {
         }
     }
     
-    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao) {
+    static CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, boolean action) {
+        if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
+            return cdao;
+        }
+        
         final CalendarDataObject clone = (CalendarDataObject)cdao.clone();
         if (!clone.containsShownAs()) {
             clone.setShownAs(edao.getShownAs());
