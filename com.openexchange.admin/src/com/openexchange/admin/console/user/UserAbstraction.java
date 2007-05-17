@@ -542,7 +542,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
                     final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "booleanvalue", methodandnames.getName(), true, false, true);
+                    final Option option = setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "booleanvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
                     final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true);
