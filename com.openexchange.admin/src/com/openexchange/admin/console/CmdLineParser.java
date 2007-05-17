@@ -244,6 +244,14 @@ public class CmdLineParser {
             public BooleanOption( String longForm ) {
                 super(longForm, false);
             }
+            
+            protected Object parseValue(String arg, Locale locale) {
+            	if(arg == null || arg.trim().equals("") || arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("YES")) {
+            		return Boolean.TRUE;
+            	} else {
+            		return Boolean.FALSE;
+            	}
+            }
         }
 
         /**
