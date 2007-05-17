@@ -5,6 +5,7 @@ import java.sql.Connection;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -15,12 +16,14 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 public class InfostoreDeleteTest extends TestCase {
 	
 	SessionObject session = null;
 	DBProvider provider = new DBPoolProvider();
 	InfostoreFacade database;
+	int myFolder = 0;
 	
 	public void setUp() throws Exception {
 		Init.initDB();
@@ -28,6 +31,9 @@ public class InfostoreDeleteTest extends TestCase {
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId("francisco"), ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
+		
+		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
+		myFolder = oxfa.getDefaultFolder(session.getUserObject().getId(), FolderObject.INFOSTORE).getObjectID();
 	}
 	
 	public void tearDown() throws Exception {
@@ -53,7 +59,7 @@ public class InfostoreDeleteTest extends TestCase {
 	private DocumentMetadataImpl createMetadata() throws Exception {
 		DocumentMetadataImpl metadata = new DocumentMetadataImpl();
 		metadata.setTitle("Nice Infoitem");
-		metadata.setFolderId(136); // FIXME
+		metadata.setFolderId(myFolder); // FIXME
 		database.startTransaction();
 		try {
 			database.saveDocumentMetadata(metadata, Long.MAX_VALUE, session);
