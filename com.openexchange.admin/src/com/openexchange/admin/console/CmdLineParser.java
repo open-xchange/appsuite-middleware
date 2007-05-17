@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Vector;
 
+
 /**
  * Largely GNU-compatible command-line options parser. Has short (-v) and
  * long-form (--verbose) option support, and also allows options with
@@ -61,7 +62,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see jargs.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -245,7 +246,19 @@ public class CmdLineParser {
                 super(longForm, false);
             }
             
-            protected Object parseValue(String arg, Locale locale) {
+        }
+        
+        
+        public static class SettableBooleanOption extends Option {
+        	public SettableBooleanOption(char shortForm, String longForm) {
+        		super(shortForm, longForm, true);
+        	}
+        	
+        	public SettableBooleanOption(String longForm) {
+        		super(longForm, true);
+        	}
+        	
+        	protected Object parseValue(String arg, Locale locale) {
             	if(arg == null || arg.trim().equals("") || arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("YES")) {
             		return Boolean.TRUE;
             	} else {
@@ -359,6 +372,14 @@ public class CmdLineParser {
      */
     public final Option addStringOption( String longForm ) {
         return addOption(new Option.StringOption(longForm));
+    }
+
+    /**
+     * Convenience method for adding a settable boolean option.
+     * @return the new Option
+     */
+    public final Option addSettableBooleanOption( String longForm ) {
+        return addOption(new Option.SettableBooleanOption(longForm));
     }
 
     /**

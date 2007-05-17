@@ -267,6 +267,20 @@ public class AdminParser extends CmdLineParser {
         }
 
     }
+    
+    public final Option addSettableBooleanOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+
+        if (hasarg) {
+            final Option retval = this.addSettableBooleanOption(longForm);
+            this.optinfolist.add(new OptionInfo(needed, retval, longForm, longFormParameterDescription, description, extended));
+            return retval;
+        } else {
+            final Option retval = this.addBooleanOption(longForm);
+            this.optinfolist.add(new OptionInfo(false, retval, longForm, description, extended));
+            return retval;
+        }
+
+    }
 
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
