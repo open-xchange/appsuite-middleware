@@ -23,6 +23,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
@@ -95,24 +96,8 @@ public class PathResolverTest extends TestCase {
 	}
 
 	private void findRoot() throws Exception {
-		/*Connection con = null;
-		try {
-			con = provider.getReadConnection(ctx);
-			for(int i : FolderObject.getSubfolderIds(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, ctx, con)) {
-				FolderObject f = FolderCacheManager.getInstance().getFolderObject(i, ctx);
-				if(f == null)
-					f = FolderCacheManager.getInstance().loadFolderObject(i, ctx, con);
-				System.out.println(f.getFolderName());
-				if(f.getFolderName().toLowerCase().contains(getUsername().toLowerCase())) {
-					root = f.getObjectID();
-					return;
-				}
-			}
-			throw new IllegalStateException("Can't find users infostore folder!");
-		} finally {
-			provider.releaseReadConnection(ctx, con);
-		}*/
-		root = 136;
+		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
+		root = oxfa.getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
 	}
 
 	private String getUsername() {
