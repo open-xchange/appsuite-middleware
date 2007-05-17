@@ -10,6 +10,7 @@
   <property name="build.compiler" value="modern"/>
   <path id="project.classpath"> 
   		<pathelement location="${lib}/ox_server.jar" />
+  		<pathelement location="${lib}/ox_languages.jar" />
 		<pathelement location="${lib}/junit-4.1.jar"/>
 		<pathelement location="${lib}/commons-httpclient-2.0.2.jar"/>
 		<pathelement location="${lib}/logging.jar"/>
@@ -73,7 +74,7 @@
   <target name="cc-test" depends="jar"> 
 	<delete dir="${test.xml.dir}"/> 
 	<mkdir dir="${test.xml.dir}"/> 
-	<junit errorProperty="test.failed" failureProperty="test.failed"> 
+	<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes"> 
 		<classpath>
 			<path refid="project.classpath" />
 			<pathelement location="${lib}/mysql-connector-java-3.1.13-bin.jar" />
