@@ -61,7 +61,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see jargs.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -243,6 +243,14 @@ public class CmdLineParser {
             }
             public BooleanOption( String longForm ) {
                 super(longForm, false);
+            }
+            
+            protected Object parseValue(String arg, Locale locale) {
+            	if(arg == null || arg.trim().equals("") || arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("YES")) {
+            		return Boolean.TRUE;
+            	} else {
+            		return Boolean.FALSE;
+            	}
             }
         }
 
