@@ -56,6 +56,8 @@ import static org.junit.Assert.fail;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -198,7 +200,7 @@ public class ResourceTest extends AbstractTest{
         try{
             srv_res = oxres.get(ctx,res,DummyCredentials());   
             fail("Expected that the resource was deleted!");
-        }catch(InvalidDataException idv){  }
+        }catch(NoSuchResourceException nsr){  }
         
     }
     
