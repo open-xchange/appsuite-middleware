@@ -79,7 +79,17 @@ import com.openexchange.ajax.TaskSearchJSONWriter;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession.AJAXSession;
 import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.ajax.task.actions.AbstractTaskRequest;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.DeleteResponse;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.UpdateRequest;
+import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -87,6 +97,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Utility class that contains all methods for making task requests to the
@@ -143,6 +154,7 @@ public final class TaskTools extends Assert {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
+     * @deprecated use {@link #insert(AJAXSession, TaskInsertRequest)}
      */
     public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
@@ -176,6 +188,15 @@ public final class TaskTools extends Assert {
         return Response.parse(body);
     }
 
+    public static InsertResponse insert(final AJAXSession session,
+        final AbstractTaskRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (InsertResponse) AJAXClient.execute(session, request);
+    }
+    
+    /**
+     * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
+     */
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId,
@@ -207,6 +228,9 @@ public final class TaskTools extends Assert {
         return Response.parse(body);
     }
 
+    /**
+     * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
+     */
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
@@ -223,12 +247,21 @@ public final class TaskTools extends Assert {
             lastModified);
     }
 
+    public static UpdateResponse update(final AJAXSession session,
+        final UpdateRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (UpdateResponse) AJAXClient.execute(session, request);
+    }
+    
     public static TimeZone getUserTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
         SAXException, JSONException {
         return ConfigTools.getTimeZone(conversation, hostName, sessionId);
     }
 
+    /**
+     * @deprecated use {@link #get(AJAXSession, GetRequest)}
+     */
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId) throws IOException, SAXException, JSONException,
@@ -256,12 +289,19 @@ public final class TaskTools extends Assert {
         return response;
     }
 
+    public static GetResponse get(final AJAXSession session,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (GetResponse) AJAXClient.execute(session, request);
+    }
+
     /**
      * @param folderAndTaskId Contains the folder identifier with the index
      * <code>0</code> and the task identifier with the index <code>1</code>.
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
+     * @deprecated use {@link #delete(AJAXSession, DeleteRequest)}
      */
     public static void deleteTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
@@ -289,6 +329,12 @@ public final class TaskTools extends Assert {
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
+    public static DeleteResponse delete(final AJAXSession session,
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (DeleteResponse) AJAXClient.execute(session, request);
+    }
+    
     public static int countTasks(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId)
         throws IOException, SAXException, JSONException {

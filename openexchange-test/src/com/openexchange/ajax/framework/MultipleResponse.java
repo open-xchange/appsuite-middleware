@@ -1,15 +1,15 @@
 package com.openexchange.ajax.framework;
 
-public class MultipleResponse extends AJAXResponse {
+public class MultipleResponse extends AbstractAJAXResponse {
 
-    private final AJAXResponse[] responses;
+    private final AbstractAJAXResponse[] responses;
 
-    public MultipleResponse(final AJAXResponse[] responses) {
+    public MultipleResponse(final AbstractAJAXResponse[] responses) {
         super(null);
         this.responses = responses.clone();
     }
 
-    public AJAXResponse getResponse(final int pos) {
+    public AbstractAJAXResponse getResponse(final int pos) {
         return responses[pos];
     }
 }

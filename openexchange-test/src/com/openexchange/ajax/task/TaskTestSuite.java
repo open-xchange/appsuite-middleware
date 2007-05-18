@@ -74,6 +74,7 @@ public final class TaskTestSuite {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(Bug7380Test.class);
         tests.addTestSuite(TruncationTest.class);
         tests.addTestSuite(TasksTest.class);
         return tests;

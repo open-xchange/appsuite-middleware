@@ -47,65 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.task.actions;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+import org.json.JSONException;
 
-import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * @author marcus
- *
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class GetRequest extends AbstractTaskRequest {
 
     /**
-     * Logger.
+     * Task is requested through this folder.
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
+    private final int folderId;
+
+    /**
+     * Unique identifier of the task.
+     */
+    private final int taskId;
+
     /**
      * Default constructor.
-     * @param name Name of the test.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    public GetRequest(final int folderId, final int taskId) {
+        super();
+        this.folderId = folderId;
+        this.taskId = taskId;
+    }
+
+    public GetRequest(final int folderId, final InsertResponse insert) {
+        this(folderId, insert.getId());
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * {@inheritDoc}
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(
+                folderId)),
+            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId))
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AbstractAJAXParser getParser() {
+        return new GetParser();
     }
 }

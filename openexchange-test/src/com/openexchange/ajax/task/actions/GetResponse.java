@@ -47,65 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.task;
-
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+package com.openexchange.ajax.task.actions;
 
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class GetResponse extends AbstractAJAXResponse {
+
+    private Task task;
 
     /**
-     * Logger.
+     * @param response
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public TruncationTest(final String name) {
-        super(name);
+    GetResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * @return the task
+     * @throws OXException parsing the task out of the response fails.
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
+    public Task getTask(final TimeZone timeZone) throws OXException {
+        if (null == task) {
+            final Task parsed = new Task();
+            new TaskParser(timeZone).parse(parsed, (JSONObject) getResponse()
+                .getData());
+            this.task = parsed;
         }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+        return task;
+    }
+
+    /**
+     * @param task the task to set
+     */
+    public void setTask(final Task task) {
+        this.task = task;
     }
 }

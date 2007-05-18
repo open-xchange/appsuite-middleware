@@ -4,7 +4,7 @@
 package com.openexchange.ajax.session;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXResponseParser;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
@@ -27,7 +27,7 @@ public class LogoutRequest extends AbstractRequest {
     /**
      * {@inheritDoc}
      */
-    public AJAXResponseParser getParser() {
+    public AbstractAJAXParser getParser() {
         return new LogoutParser();
     }
 }

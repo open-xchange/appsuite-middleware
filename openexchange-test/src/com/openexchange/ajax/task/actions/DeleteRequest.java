@@ -47,65 +47,78 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.task.actions;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+import java.util.Date;
 
-import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * Stores parameters for the delete request.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class DeleteRequest extends AbstractTaskRequest {
+
+    private final int folderId;
+
+    private final int taskId;
+
+    private final Date lastModified;
 
     /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
-    /**
      * Default constructor.
-     * @param name Name of the test.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    public DeleteRequest(final int folderId, final int taskId,
+        final Date lastModified) {
+        super();
+        this.folderId = folderId;
+        this.taskId = taskId;
+        this.lastModified = lastModified;
+    }
+
+    public DeleteRequest(final Task task) {
+        this(task.getParentFolderID(), task.getObjectID(),
+            task.getLastModified());
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * {@inheritDoc}
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    public Object getBody() throws JSONException {
+        final JSONObject json = new JSONObject();
+        json.put(AJAXServlet.PARAMETER_ID, taskId);
+        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+        return json;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+                .ACTION_DELETE),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
+                String.valueOf(lastModified.getTime()))
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AbstractAJAXParser getParser() {
+        return new DeleteParser();
     }
 }

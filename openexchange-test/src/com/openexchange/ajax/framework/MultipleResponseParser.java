@@ -12,7 +12,7 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MultipleResponseParser extends AJAXResponseParser {
+public class MultipleResponseParser extends AbstractAJAXParser {
 
     private final AJAXRequest[] requests;
 
@@ -29,7 +29,7 @@ public class MultipleResponseParser extends AJAXResponseParser {
      * {@inheritDoc}
      */
     @Override
-    public AJAXResponse parse(final String body) throws JSONException {
+    public AbstractAJAXResponse parse(final String body) throws JSONException {
         final Response response = new Response();
         response.setData(new JSONArray(body));
         return createResponse(response);
@@ -41,7 +41,7 @@ public class MultipleResponseParser extends AJAXResponseParser {
         final JSONArray array = (JSONArray) response.getData();
         assertEquals("Multiple response array has different size.",
             requests.length, array.length());
-        final AJAXResponse[] responses = new AJAXResponse[requests.length];
+        final AbstractAJAXResponse[] responses = new AbstractAJAXResponse[requests.length];
         for (int i = 0; i < requests.length; i++) {
             responses[i] = requests[i].getParser().parse(array.getString(i));
         }

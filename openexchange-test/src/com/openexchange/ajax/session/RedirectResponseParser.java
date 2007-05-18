@@ -10,14 +10,14 @@ import org.json.JSONException;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXResponse;
-import com.openexchange.ajax.framework.AJAXResponseParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class RedirectResponseParser extends AJAXResponseParser {
+public class RedirectResponseParser extends AbstractAJAXParser {
 
     private String location;
     
@@ -54,7 +54,7 @@ public class RedirectResponseParser extends AJAXResponseParser {
      * {@inheritDoc}
      */
     @Override
-    public AJAXResponse parse(final String body) throws JSONException {
+    public AbstractAJAXResponse parse(final String body) throws JSONException {
         return createResponse(null);
     }
 

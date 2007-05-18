@@ -47,65 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.task.actions;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
-
-import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
+import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * @author marcus
- *
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class InsertParser extends AbstractAJAXParser {
 
     /**
-     * Logger.
+     * Remembers if this parser bails out with an error.
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
+    private final boolean failOnError;
+
     /**
      * Default constructor.
-     * @param name Name of the test.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    InsertParser(final boolean failOnError) {
+        super(failOnError);
+        this.failOnError = failOnError;
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * {@inheritDoc}
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
+    @Override
+    protected InsertResponse createResponse(final Response response)
+        throws JSONException {
+        final InsertResponse retval = new InsertResponse(response);
+        final JSONObject data = (JSONObject) response.getData();
+        if (failOnError) {
+            if (data.has(TaskFields.ID)) {
+                final int taskId = data.getInt(TaskFields.ID);
+                assertTrue("Problem while inserting task", taskId > 0);
+                retval.setId(taskId);
+            } else {
+                fail(response.getErrorMessage());
+            }
         }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+        return retval;
     }
 }

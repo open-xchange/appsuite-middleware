@@ -44,7 +44,7 @@ public interface AJAXRequest {
 
     Parameter[] getParameters();
 
-    AJAXResponseParser getParser();
+    AbstractAJAXParser getParser();
 
     Object getBody() throws JSONException;
 }

@@ -60,7 +60,7 @@ public class MultipleRequest implements AJAXRequest {
     /**
      * {@inheritDoc}
      */
-    public AJAXResponseParser getParser() {
+    public AbstractAJAXParser getParser() {
         return new MultipleResponseParser(requests);
     }
 }

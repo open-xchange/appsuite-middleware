@@ -47,65 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.framework;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+import java.util.Date;
 
-import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import junit.framework.Assert;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * This class implements inheritable methods for AJAX responses.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public abstract class AbstractAJAXResponse extends Assert {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public TruncationTest(final String name) {
-        super(name);
+    private final Response response;
+
+    protected AbstractAJAXResponse(final Response response) {
+        super();
+        this.response = response;
     }
 
-    /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
-     */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    public Response getResponse() {
+        return response;
+    }
+
+    public Date getTimestamp() {
+        return response.getTimestamp();
+    }
+
+    public boolean hasError() {
+        return response.hasError();
+    }
+
+    public int[] getTruncatedIds() {
+        return response.getException().getTruncatedIds();
     }
 }

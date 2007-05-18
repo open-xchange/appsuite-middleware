@@ -47,65 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.framework;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+import javax.servlet.http.HttpServletResponse;
 
-import java.util.TimeZone;
+import junit.framework.Assert;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * Abstract implementation of an AJAX response parser. This parser also does
+ * some standard check of the response that can be overwritten, if the server
+ * does not provide a standard response.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public abstract class AbstractAJAXParser extends Assert {
 
     /**
-     * Logger.
+     * Should this parser fail if the response contains an error.
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
+    final boolean failOnError;
     
     /**
      * Default constructor.
-     * @param name Name of the test.
+     * @param failOnError <code>true</code> and this parser checks the server
+     * response for containing error messages and lets the test fail.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    protected AbstractAJAXParser(final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * If the parser is created with this constructor the server response is
+     * checked for containing error messages.
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    protected AbstractAJAXParser() {
+        this(true);
     }
+
+    protected Response getResponse(final String body) throws JSONException {
+        final Response response = Response.parse(body);
+        assertFalse(response.getErrorMessage(), failOnError && response
+            .hasError());
+        return response;
+    }
+
+    public void checkResponse(final WebResponse resp) {
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
+            resp.getResponseCode());
+    }
+
+    public AbstractAJAXResponse parse(final String body) throws JSONException {
+        return createResponse(getResponse(body));
+    }
+
+    protected abstract AbstractAJAXResponse createResponse(final Response response)
+        throws JSONException;
 }

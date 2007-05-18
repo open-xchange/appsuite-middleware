@@ -47,65 +47,90 @@
  *
  */
 
-package com.openexchange.ajax.task;
-
-import static com.openexchange.ajax.task.TaskTools.insertTask;
+package com.openexchange.ajax.task.actions;
 
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * Stores the parameters for inserting the task.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class InsertRequest extends AbstractTaskRequest {
 
     /**
-     * Logger.
+     * Task to insert.
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
+    final Task task;
+
     /**
-     * Default constructor.
-     * @param name Name of the test.
+     * Time zone of the user.
      */
-    public TruncationTest(final String name) {
-        super(name);
+    final TimeZone timeZone;
+
+    /**
+     * Should the parser fail on error in server response.
+     */
+    final boolean failOnError;
+
+    /**
+     * More detailed constructor.
+     * @param task task to insert.
+     * @param timeZone time zone of the user.
+     * @param failOnError <code>true</code> to check the response for error
+     * messages.
+     */
+    public InsertRequest(final Task task, final TimeZone timeZone,
+        final boolean failOnError) {
+        super();
+        this.task = task;
+        this.timeZone = timeZone;
+        this.failOnError = failOnError;
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * Default constructor.
+     * @param task task to insert.
+     * @param timeZone time zone of the user.
      */
-    public void testTruncation() throws Throwable {
-        final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+    public InsertRequest(final Task task, final TimeZone timeZone) {
+        this(task, timeZone, true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() throws JSONException {
+        return convert(task, timeZone);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
+            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
+                .getParentFolderID()))
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AbstractAJAXParser getParser() {
+        return new InsertParser(failOnError);
     }
 }

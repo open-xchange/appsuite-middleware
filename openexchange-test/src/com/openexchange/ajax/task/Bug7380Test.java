@@ -49,63 +49,60 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.insertTask;
-
+import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.TasksTest;
+import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.UpdateRequest;
+import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
 
 /**
- * @author marcus
- *
+ * Tests problem described in bug #7380.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class Bug7380Test extends AbstractTaskTest2 {
 
     /**
-     * Logger.
+     * @param name
      */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public TruncationTest(final String name) {
+    public Bug7380Test(final String name) {
         super(name);
     }
 
     /**
-     * Creates a task with a to long title and checks if the data truncation
-     * is detected.
-     * @throws Throwable if an error occurs.
+     * Tests if bug #7380 appears again.
+     * @throws Throwable if this test fails.
      */
-    public void testTruncation() throws Throwable {
+    public void testBug() throws Throwable {
         final Task task = new Task();
-        // Title length in database is 128.
-        task.setTitle(RandomString.generateFixLetter(200));
-        // Trip meter length in database is 255.
-        task.setTripMeter(RandomString.generateFixLetter(300));
+        task.setTitle("Test bug #7380");
         task.setParentFolderID(getPrivateTaskFolder());
-        final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
-        assertTrue("Server did not detect truncated data.", response
-            .hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getTruncatedIds().length > 0);
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Truncated attribute identifier: [");
-        for (int i : response.getTruncatedIds()) {
-            sb.append(i);
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+        final AJAXSession session = getSession();
+        final List<Participant> participants = TasksTest.getParticipants(session
+            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
+            .HOSTNAME), session.getId(), 1, true, ConfigTools.getUserId(session
+            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
+            .HOSTNAME), session.getId()));
+        task.setParticipants(participants);
+        final InsertResponse iResponse = TaskTools.insert(session,
+            new InsertRequest(task, getTimeZone()));
+        task.setObjectID(iResponse.getId());
+        final GetResponse gResponse = TaskTools.get(session,
+            new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
+        task.setLastModified(gResponse.getTimestamp());
+        task.setParticipants((Participant[]) null);
+        final UpdateResponse uResponse = TaskTools.update(session,
+            new UpdateRequest(task, getTimeZone()));
+        task.setLastModified(uResponse.getTimestamp());
+        TaskTools.delete(session, new DeleteRequest(task));
     }
 }

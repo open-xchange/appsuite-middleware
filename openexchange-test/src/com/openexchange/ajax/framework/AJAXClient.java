@@ -43,7 +43,7 @@ public class AJAXClient extends Assert {
      */
     private static final String ENCODING = "UTF-8";
 
-    public static AJAXResponse execute(final AJAXSession session,
+    public static AbstractAJAXResponse execute(final AJAXSession session,
         final AJAXRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         LOG.trace("Logging in.");
@@ -70,7 +70,7 @@ public class AJAXClient extends Assert {
                 .getMethod().name());
         }
         final WebResponse resp = session.getConversation().getResponse(req);
-        final AJAXResponseParser parser = request.getParser();
+        final AbstractAJAXParser parser = request.getParser();
         parser.checkResponse(resp);
         return parser.parse(resp.getText());
     }

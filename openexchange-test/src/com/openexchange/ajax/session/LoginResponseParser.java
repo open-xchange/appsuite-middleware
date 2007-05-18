@@ -9,13 +9,13 @@ import org.json.JSONObject;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXResponseParser;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginResponseParser extends AJAXResponseParser {
+public class LoginResponseParser extends AbstractAJAXParser {
 
     private String jvmRoute;
     
