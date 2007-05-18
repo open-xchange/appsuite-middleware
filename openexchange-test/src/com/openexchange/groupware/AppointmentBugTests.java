@@ -1437,7 +1437,7 @@ public class AppointmentBugTests extends TestCase {
                 fail("Test failed. An exception can not be moved into a different folder.");
             } catch(OXCalendarException e) {
                 // Must fail
-                assertEquals("Check correct error message", 65, e.getDetailNumber());
+                assertEquals("Check correct error message", 66, e.getDetailNumber());
             }
             
                         
