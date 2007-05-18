@@ -1117,8 +1117,9 @@ public class RdbTaskStorage extends TaskStorage {
     private void deleteParticipants(final Context ctx, final Connection con,
         final int taskId) throws SQLException, TaskException {
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
-        final Set<TaskInternalParticipant> participants = partStor
-            .selectInternal(ctx, con, taskId, StorageType.ACTIVE);
+        final Set<TaskInternalParticipant> participants =
+            new HashSet<TaskInternalParticipant>(partStor.selectInternal(ctx,
+            con, taskId, StorageType.ACTIVE));
         deleteInternals(ctx, con, taskId, participants, StorageType.ACTIVE,
             true);
         final Set<TaskInternalParticipant> removed = partStor

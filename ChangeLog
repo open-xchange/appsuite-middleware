@@ -1,6 +1,7 @@
 * 2007-05-18 - marcus.klein@open-xchange.com
 
   - Bugfix #7374: Selecting deleted resources since a last sync time is fixed.
+  - Bugfix #7380: Tasks with removed participants can now be deleted.
 
 * 2007-05-16 - francisco.laguna@open-xchange.com
 
