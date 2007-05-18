@@ -11,8 +11,8 @@
   - Bugfix #7249: Validating e-mail before inserting e-mail 
     address from uploaded VCard...
   - Fixed response of ImportExportWriter in case of exception.
-  - Added yet another translation possibility for ContactField. Now it
-    supports the names used by Sebstian in ContactFields.
+  - Added yet another translation possibility for ContactField: 
+    Constants used in AJAX/Servlet part are now understood.
 
 * 2007-05-16 - marcus.klein@open-xchange.com
 
