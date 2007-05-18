@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.7 2007/05/16 08:59:07 cutmasta Exp $
+ * $Id: OXLogin.java,v 1.8 2007/05/18 09:13:25 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -67,12 +67,17 @@ import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * 
@@ -93,21 +98,24 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
         }
     }
 
-    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
+        doNullCheck(ctx,auth);
         doUserAuthentication(auth, ctx);
+        triggerUpdateProcess(ctx);
     }
 
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        if (auth == null) {
-            throw new InvalidDataException();
-        }
+        doNullCheck(auth);
+        doAuthentication(auth);
     }
 
-    public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         
         doNullCheck(ctx,auth);
         
         doUserAuthentication(auth, ctx);
+        
+        triggerUpdateProcess(ctx);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         final int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
@@ -140,6 +148,23 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
         }
 
         return retusers[0];
+    }
+    
+    private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
+        // Check for update.
+        try {
+            com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getIdAsInt().intValue());
+            final Updater updater = Updater.getInstance();
+            if (updater.toUpdate(ctxas)){
+                updater.startUpdate(ctxas);
+                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+            }
+            if (updater.isLocked(ctxas)) {
+                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+            }
+        } catch (UpdateException e) {
+            throw new DatabaseUpdateException(e);
+        }
     }
 
 }
