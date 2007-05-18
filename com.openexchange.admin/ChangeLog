@@ -1,3 +1,7 @@
+* 2007-05-18 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#7345 After update, login as admin not possible
+
 * 2007-05-14 - manuel.kraft@open-xchange.com
 
   -  Fixed check for invalid locate data in users language in user.Change()
