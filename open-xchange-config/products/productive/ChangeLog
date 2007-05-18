@@ -1,3 +1,7 @@
+* 2007-05-18 - marcus.klein@open-xchange.com
+
+  - Changed logging levels.
+
 * 2007-05-14 - marcus.klein@open-xchange.com
 
   - Fixed property in ldaplogin.properties to be conform to property file
