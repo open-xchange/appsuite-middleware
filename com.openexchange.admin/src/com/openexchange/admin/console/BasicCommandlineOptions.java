@@ -158,9 +158,9 @@ public abstract class BasicCommandlineOptions {
         super();
         final String property = System.getProperties().getProperty("RMI_HOSTNAME");
         final String env = System.getenv("RMI_HOSTNAME");
-        if (null != property) {
+        if (null != property && property.trim().length()>0) {
             setRMI_HOSTNAME(property);
-        } else if (null != env) {
+        } else if (null != env && env.trim().length()>0) {
             setRMI_HOSTNAME(env);
         }
     }
