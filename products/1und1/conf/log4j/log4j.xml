@@ -16,7 +16,7 @@
     <param name="SyslogHost" value="localhost"/>
     <param name="Facility" value="local2"/>
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d %-5p [%c] %m%n"/>
+      <param name="ConversionPattern" value="%d openxchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
     </layout>
   </appender>
 
