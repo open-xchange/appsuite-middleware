@@ -58,7 +58,9 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
+import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
@@ -71,41 +73,45 @@ import com.openexchange.groupware.container.ContactObject;
  */
 public class ContactSwitcherTester extends TestCase {
 	
-	public void testStringValue() throws ContactException{
+	public void testSetStringValue() throws ContactException{
 		ContactObject conObj = new ContactObject();
 		ContactField field = ContactField.GIVEN_NAME;
 		String value = "Prinz";
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		
 		assertEquals("Setting of String value does work" , conObj.getGivenName(), value);
 	}
 	
-	public void testMailValue() throws ContactException{
+	public void testSetMailValue() throws ContactException{
 		ContactObject conObj = new ContactObject();
 		ContactField field = ContactField.EMAIL1;
 		String value = "prinz@example.invalid";
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		
 		assertEquals("Setting of e-mail does work" , conObj.getEmail1(), value);
 	}
 	
-	public void testDateValue() throws ContactException{
+	public void testSetDateValue() throws ContactException{
 		ContactObject conObj = new ContactObject();
 		ContactField field = ContactField.BIRTHDAY;
 		Date value = new Date(System.currentTimeMillis());
 		conObj = (ContactObject) field.doSwitch(new ContactSetter(), conObj, value);
+		
 		assertEquals("Setting of Date value does work" , conObj.getBirthday(), value);
 	}
 	
-	public void testDateValueViaTimestamp() throws ContactException{
+	public void testSetDateValueViaTimestamp() throws ContactException{
 		ContactObject conObj = new ContactObject();
 		ContactField field = ContactField.BIRTHDAY;
 		long value = System.currentTimeMillis();
 		ContactSwitcherForTimestamp switcher = new ContactSwitcherForTimestamp();
 		switcher.setDelegate(new ContactSetter());
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		
 		assertEquals("Setting of date via timestamp does work" , conObj.getBirthday(), new Date(value));
 	}
 	
-	public void testDateValueViaSimpleDate() throws ContactException, ParseException{
+	public void testSetDateValueViaSimpleDate() throws ContactException, ParseException{
 		ContactObject conObj = new ContactObject();
 		ContactField field = ContactField.BIRTHDAY;
 		String value = "1981/03/05";
@@ -118,6 +124,23 @@ public class ContactSwitcherTester extends TestCase {
 		switcher.setDateFormat(sdf);
 		
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), sdf.parse(value));
+	}
+	
+	public void testGetDateAndName() throws ContactException{
+		ContactObject conObj = new ContactObject();
+		Date date = new Date(System.currentTimeMillis());
+		String nickname = "Tierlieb";
+		ContactSwitcher switcher = new ContactGetter(); 
+		
+		conObj.setBirthday(date);
+		conObj.setNickname(nickname);
+		
+		Date compareDate = (Date) ContactField.BIRTHDAY.doSwitch(switcher, conObj, "");
+		String compareNickname = (String) ContactField.NICKNAME.doSwitch(switcher, conObj, "");
+		
+		assertEquals("Checking date", date, compareDate);
+		assertEquals("Checking nickname", nickname, compareNickname);
 	}
 }
