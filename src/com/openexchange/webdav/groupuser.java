@@ -97,7 +97,7 @@ public final class groupuser extends PermissionServlet {
 	
 	private static String DELETED_GROUP_SQL = "SELECT id, lastmodified FROM del_groups WHERE cid=? AND lastmodified > ?";
 	
-	private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
+	private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified >= ?";
 	
 	private static transient final Log LOG = LogFactory.getLog(groupuser.class);
 	
@@ -323,7 +323,7 @@ public final class groupuser extends PermissionServlet {
 				readCon = DBPool.pickup(sessionObj.getContext());
 				ps = readCon.prepareStatement(DELETED_RESOURCE_SQL);
 				ps.setInt(1, sessionObj.getContext().getContextId());
-				ps.setTimestamp(2, new Timestamp(lastsync.getTime()));
+				ps.setLong(2, lastsync.getTime());
 				
 				final ResultSet rs = ps.executeQuery();
 				

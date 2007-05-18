@@ -1,3 +1,7 @@
+* 2007-05-18 - marcus.klein@open-xchange.com
+
+  - Bugfix #7374: Selecting deleted resources since a last sync time is fixed.
+
 * 2007-05-16 - francisco.laguna@open-xchange.com
 
   - Bugfix #6104: Upload file size is checked against quota as set in config files and user_setting_mail table.
