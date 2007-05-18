@@ -496,6 +496,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
         // _-+.%$@
+        if(groupName==null || groupName.trim().length()==0){
+            throw new OXGroupException("Invalid group name");
+        }
         String group_check_regexp = prop.getGroupProp("CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");
         final String illegal = groupName.replaceAll(group_check_regexp, "");
         if (illegal.length() > 0) {

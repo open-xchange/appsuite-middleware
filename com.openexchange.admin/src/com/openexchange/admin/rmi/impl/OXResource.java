@@ -63,6 +63,7 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.exceptions.OXGroupException;
 import com.openexchange.admin.exceptions.OXResourceException;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -423,6 +424,9 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     }
     
     private void validateResourceName( String resName ) throws OXResourceException {
+        if(resName==null || resName.trim().length()==0){
+            throw new OXResourceException("Invalid resource name");
+        }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
         String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
