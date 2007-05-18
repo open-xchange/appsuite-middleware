@@ -1,3 +1,8 @@
+* 2007-05-18 - tobias.prinz@open-xchange.com
+
+  - Bugfix #7386: Forgot to add exception to exception list when 
+    encountering major parsing error in ICalImporter.
+
 * 2007-05-18 - marcus.klein@open-xchange.com
 
   - Bugfix #7374: Selecting deleted resources since a last sync time is fixed.

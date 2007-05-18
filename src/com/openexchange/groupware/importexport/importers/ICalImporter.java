@@ -49,9 +49,6 @@
 
 package com.openexchange.groupware.importexport.importers;
 
-import com.openexchange.tools.versit.converter.ConverterException;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -85,10 +82,10 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.versit.ICalendar;
-import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
@@ -110,7 +107,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"User input Error %s",
 		"Programming Error",
 		"Could not load folder %s",
-		"Broken file uploaded"})
+		"Broken file uploaded: %s"})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -218,8 +215,10 @@ public class ICalImporter implements Importer {
 					try {
 						versitObject=  def.parseChild(versitReader, rootVersitObject);
 					} catch (VersitException ve){
-						importResult.setException(importExportExceptionFactory.create(5));
+						LOG.info("Trying to import ICAL file, but:\n" + ve);
+						importResult.setException(importExportExceptionFactory.create(5, ve.getLocalizedMessage()));
 						importResult.setDate(new Date(System.currentTimeMillis()));
+						list.add(importResult);
 						hasMoreObjects = false;
 						break;
 					}
