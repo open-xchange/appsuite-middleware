@@ -21,7 +21,7 @@
   </appender>
 
   <root>
-    <level value="DEBUG"/>
+    <level value="INFO"/>
     <appender-ref ref="SERVER_LOG"/>
   </root>
 
