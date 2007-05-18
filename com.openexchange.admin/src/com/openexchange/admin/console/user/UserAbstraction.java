@@ -444,31 +444,45 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
      * @param usr User object which will be changed
      */
     protected final void setMandatoryOptionsinUser(final AdminParser parser, final User usr) {
-        final String optionValue = (String) parser.getOptionValue(this.userNameOption);
-        if (null != optionValue) {
-            usr.setUsername(optionValue);
-        }        
-        final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
-        if (null != optionValue2) {
-            usr.setDisplay_name(optionValue2);
-        }        
-        final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
-        if (null != optionValue3) {
-            usr.setGiven_name(optionValue3);
-        }        
-        final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
-        if (null != optionValue4) {
-            usr.setSur_name(optionValue4);
-        }        
-        final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
-        if (null != optionValue5) {
-            usr.setPassword(optionValue5);
-        }        
+        if(parser.getOptionValue(this.userNameOption)!=null){
+            final String optionValue = (String) parser.getOptionValue(this.userNameOption);
+            if (null != optionValue) {
+                usr.setUsername(optionValue);
+            }        
+        }
+        if(parser.getOptionValue(this.displayNameOption)!=null){
+            final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
+            if (null != optionValue2) {
+                usr.setDisplay_name(optionValue2);
+            }        
+        }
+        
+        if(parser.getOptionValue(this.givenNameOption)!=null){
+            final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
+            if (null != optionValue3) {
+                usr.setGiven_name(optionValue3);
+            }
+        }
+        
+        if(parser.getOptionValue(this.surNameOption)!=null){
+            final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
+            if (null != optionValue4) {
+                usr.setSur_name(optionValue4);
+            }        
+        }
+        if(parser.getOptionValue(this.passwordOption)!=null){
+            final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
+            if (null != optionValue5) {
+                usr.setPassword(optionValue5);
+            }   
+        }
+        if(parser.getOptionValue(this.primaryMailOption)!=null){
         final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
         if (null != optionValue6) {
             usr.setPrimaryEmail(optionValue6);
             usr.setEmail1(optionValue6);
         }        
+        }
     }
 
     /**
