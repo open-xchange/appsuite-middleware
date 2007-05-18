@@ -72,7 +72,7 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
         try {
             parser.ownparse(args2);
 
-            final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(OXAdminCoreInterface.RMI_NAME);
+            final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
 
             if (oxadmincore.allPluginsLoaded()) {
                 sysexit(0);
