@@ -76,4 +76,5 @@ CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
 # ERROR=1, WARN=3, INFO=5 (DEFAULT), DEBUG=10
 LOGLEVEL:5
+
 SERVER_NAME=1und1

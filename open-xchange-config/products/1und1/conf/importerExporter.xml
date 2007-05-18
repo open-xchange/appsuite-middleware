@@ -57,6 +57,7 @@
          		<ref bean="iCalImporter" />
          		<ref bean="vCardImporter" />
          		<ref bean="csvContactImporter" />
+         		<ref bean="outlookCSVImporter" />
          	</list>
          </property>
          
@@ -73,6 +74,7 @@
 	<bean id="iCalImporter" 		class="com.openexchange.groupware.importexport.importers.ICalImporter" />
 	<bean id="vCardImporter" 		class="com.openexchange.groupware.importexport.importers.VCardImporter" />
 	<bean id="csvContactImporter" 	class="com.openexchange.groupware.importexport.importers.CSVContactImporter" />
+	<bean id="outlookCSVImporter" 	class="com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter" />
 	<bean id="iCalExporter" 		class="com.openexchange.groupware.importexport.exporters.ICalExporter" />
 	<bean id="vCardExporter" 		class="com.openexchange.groupware.importexport.exporters.VCardExporter" />
 	<bean id="csvContactExporter" 	class="com.openexchange.groupware.importexport.exporters.CSVContactExporter" />
