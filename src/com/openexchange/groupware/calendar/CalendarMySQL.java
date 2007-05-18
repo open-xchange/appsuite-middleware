@@ -2091,8 +2091,20 @@ class CalendarMySQL implements CalendarSqlImp {
                     pd.setInt(1, cdao.getObjectID());
                     pd.setInt(2, cid);
                     pd.setInt(3, deleted_userparticipants[a].getIdentifier());
-                    pd.addBatch();
-                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new Date(cdao.getStartDate().getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
+                    pd.addBatch();          
+                    java.util.Date calc_date = null;
+                    java.util.Date end_date = null;
+                    if (cdao.containsStartDate()) {
+                        calc_date = cdao.getStartDate();
+                    } else {
+                        calc_date = edao.getStartDate();
+                    }
+                    if (cdao.containsEndDate()) {
+                        end_date = cdao.getEndDate();
+                    } else {
+                        end_date = edao.getEndDate();
+                    }                    
+                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
                     new_deleted.add(deleted_userparticipants[a]);
                 }
                 pd.executeBatch();
